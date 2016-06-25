@@ -1,0 +1,223 @@
+=============================================
+DESIGN PLAN
+
+XMLStringToken
+	name
+	string
+	start column/row/byte-offset
+	end "
+	raw-string?  or flags?
+
+XMLStringCursor
+	readS
+		returns a series of characters up to EOF or a non-whitespace
+	readToMarkup
+		reads characters until encountering < or &
+	readMarkup
+		returns <, </ <!name(two or more tokens) <![name[ <?name (two or more tokens) <!-- /> > ]]> --> or &name;
+	readWord
+		returns characters up to whitespace, or some markup, or =
+	readQuotedString
+		returns everything in quotes. May return multiple tokens if reference in there
+	readToken
+		will read any of the others here and return. May also just return a single character
+	peekToken
+
+XMLStream: essentially produces a stream of xml chunks
+	StreamNode
+		type
+		textTokens <-- include  reference to entity they came from. and may have reference to entityReference it came from
+		other (e.g. in case of elementstart)
+			name -> ref to textTokens
+			attributes
+				name = value  <-- references to textTokens
+			---
+			dtd
+				entity declaration (ref to token range)
+			
+	has a list of entities involved.
+		can set a flag to expand or not expand entity refs. note that we kinda have to expand the parameter entities in the dvd or may not actually be able to parse it.
+	getPiece: returns
+		elementStart
+		elementStartEnd
+			name, attributes, some kind of whitespace indicators
+		elementEnd
+			name
+		processingInstruction
+		cData
+		charData
+		comment
+		include
+		exclude
+		entityReference
+		entityTextDecl
+		doctype (includes dtd, it seems)
+			-- delivering this so it can be reconstructed is very hard
+		syntaxError
+
+	xmlstream starts off: white space reading, and then readToMarkup. if this is strict, all that is ignored, but we will have a soft non-strict flag which is to allow whitespace (or other junk, even) before start 
+
+I think we can now map this to a SAX style api, or the like.
+
+layer 3
+	does validation and wellformedness
+	Maybe these produce the same api as 2, so that you can stack these. So really we have layer 3/passthrough and layer 3/not-passthrough
+	These have the whole document in memory
+	output of this is probably a normalized document?
+
+layer 4
+	these are things like json converters, or the like
+
+=============================================
+In theory done: 1(1-3), 2.5, 2.6
+=============================================
+SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
+	XL=10, L=5, M=3, S=1
+---------------------------------------------
+
+
+
+=============================================
+CLEANUP
+
+RESEARCH
+- high order unicode
+- remind me can I do regex from an offset?
+- do performance test jsperf of regex vs hand parsing
+
+BUILD
+36:M:silence the build except for report
+37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
+39:M:Investigate getting node testing into build process
+38:L Rethink checkin process
+	Commit should do a test run and add report to comment.
+	git hooks should validate checkin comment has bug number and is the right format.
+40:S:git aliases?
+41:XL:Investigate Gulp
+
+PROJECT
+7:M: StringCursor cleanup
+	- review testing of all routines (through getMarkup)
+		- including doc them and test at non-start of string
+44:M: Minor features
+	- getSpace should return text and origText
+	- Resolve what to do with CR in terminator and match, and read to markup
+8:S: review xmltokenstream for testing and code logic: SMALL
+9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
+10:M: prove links between things like version="1.1" and the underlying tokens.
+11:M: Provide some kind of internationalizable string catalog
+12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+13:M: Decide where this level of syntax checking should go (we're doing balance checking in XmlTokenStream, so maybe this should be too)
+	- first token must be an xmldecl, otherwise syntax error
+	- once xmldecl, then just comments or pi or space until element
+		- anything else is syntax error
+14:M: How to check high plane unicode chars in javascript?
+	 // (char >= '\u010000' && char <= '\u0EFFFF');
+15:M: Put a limit on how much read in in one chunk (pass in as option). 
+
+16:XL read attributes
+17:XL Read Content (char data)
+18:XL READ CDATA [2.7]
+19:XL Read doctype
+20:XL Read element declaration
+21:XL Read element content structure
+22:XL read attribute declaration
+23:XL read entity declaration
+24:XL read conditional sections
+25:XL read external entities
+	including header
+26:XL Deal with parameter entities
+27:XL Read in entities (see issues, below)
+28:XL Deal with validity (errors, which must be reported by validating xml processors)
+29:XL Deal with wfc (failures here are fatal errors)
+	- note. you can keep processing after the fatal error, including passing some content back and report more errors. but, it must not continue normal processing
+30:S: For compatibility (things to maintain compatibility with SGML)
+	-- in comment
+31:XL Deal with interoperability (mainly to help some sgml processors)
+	interoperability: empty element should only be used for elements which are declared EMPTY
+32:XL Run through standard test cases
+44:M:Enforce 1.0 vs 1.1 line ending changes
+45:S:Review various 1.0 standards with respect to Name (and Char definitions)
+	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
+46:S:Improve handling of 1.0 vs. 1.1 control chars
+	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+
+6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints
+
+---- Extra (not part of MVC)
+33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
+34:M:Cope with junk before xmldeclaration
+35:M:Deal with xmldecl not actually being an xmldecl
+42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
+43:M:deal with references within comments and PI
+	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
+
+
+- xml token probably shouldn't have the data property
+
+ISSUES
+--------
+* ISSUE: Need to figure out what to do with xml decl not being an xml decl
+The stuff below ultimately requires more "look ahead" than we do at the moment. the main problem is if we say "skip junk until xmldecl found", what happens if we find <?xml junkjunkjunk?> ? That, then, is still junk.  We could indeed detect that when getXmlDecl reports tons of errors.  in which case we could continue with "junkjunkjunk" in some way  But then we need to put the token(s) back into the string cursor, briefly. Either that, or we consider that something we can't cope with.
+And if we want to allow a non-xmldeclaration document, and want to skip over junk, do we go to the first <name?
+And, what if the xmldecl is found after the start of markup?  do we want to be able to start reading an <?xml and then find it is something else and turn it into an ordinary processing instruction in some way?
+***Maybe that's the solution to the above. The skip junk looks for <[^ ] pair of characters via peek. if it finds that, and it is <name or <? or <! then we go ahead and do what we should.  We also modify the getXmlDecl to decide it is having just too many problems and turn itself into a processing instruction.  And still maybe the skipping should go until we actually find an xml declaration.***
+
+* ISSUE: how to skip over junk until you get to xml decl
+- provide a "skip junk until xmldecl flag  (skip until markup?)
+- fail if xmldecl is found after markup seen (how can you tell?)
+- fail if no xmldecl found (this is higher level than the xmltokenstream)
+	provide to ignore this
+Add state to reader: SMALL
+	- Found markup
+		- set at xmldecl, and after comments, pi's elements doctype. Once set, no more xmldecl looked for
+	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
+
+* ISSUE: How to return references?
+But, we certainly need a way to be reporting this kind of data in the tokens.  Somehow do what I'd been thinking before:
+		reftoken
+		valuetok valuetok
+xmltoken valtk valtk    valtk
+that is, have some way to get from the xml token, to the expansion of the reference, to the reference
+Some of this might also imply readUntilTerminator might return an array of string tokens, with expanded character references in the middle.
+
+ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
+
+Notes
+- violations of any must, required, must not, shall and shall not is an error, which means you may decide and report, and may try to recover.   overall, the results are undefined by the standard.
+
+==============================================================================
+==============================================================================
+==============================================================================
+FINISHED SPRINTS
+SPRINT2:
+√ 1:S: Read start tag without attributes
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 2:S: Read end tag
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 4:S: Empty element
+√ 3:S: Syntax error if Start and end don't balance
+	(but will allow if it lax)
+√ 5:S: Read simple CharData
+	Needs string cursor support (read to markup)
+	Ignore newline issues
+(nice to have)
+√ 6:M: StringCursor cleanup
+	√ Make a constructor for xmlStringToken that will automatically add it to the this._tokens? and the closing offset
+	√ test getChar
+	x getChar should feed off of peekChar
+	√ test getMarkup for <? and <!-- and < for that matter.
+	√ test getWord on word terminators (space, ? and =)
+       Some test cleanup
+Cleanup:
+√ maybe merge start and end tag parsing?  They're almost the same
+√ More string cursor cleanup
+Build
+√ Fix build directory! In particular, get eslint a bit better organized
+
+

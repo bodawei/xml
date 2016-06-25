@@ -1,0 +1,424 @@
+/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+
+'use strict';
+
+const XmlToken = require('./XmlToken.js');
+const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlStringToken = require('./XmlStringToken.js');
+
+class XmlTokenStream {
+
+   constructor(cursor, options) {
+      this._cursor = cursor;
+      this._pendingTokens = [];
+      this._elementNameStack = [];
+
+      this._options = {
+         lax: false
+      };
+
+      for (const name in options) {
+         if (this._options[name] === undefined) {
+            throw new Error('"' + name + '" is not a supported option name.');
+         }
+         this._options[name] = options[name];
+      }
+   }
+
+   _nextToken() {
+      const type = this._cursor.peekType();
+
+      switch (type) {
+         case XmlStringToken.MARKUP:
+            const markupToken = this._cursor.getMarkup();
+
+            switch (markupToken.text) {
+               case '<':
+                  this._getTag(true);
+                  break;
+               case '</':
+                  this._getTag(false);
+                  break;
+               case '<?':
+                  this._getProcessingInstruction();
+                  break;
+               case '<!--':
+                  this._getComment();
+                  break;
+            }
+            break;
+         case XmlStringToken.SPACE:
+            this._getS();
+            break;
+         case XmlStringToken.STRING:
+            this._getContent();
+            break;
+      }
+
+      return this._pendingTokens.shift();
+   }
+
+   _getS() {
+      const space = this._cursor.getSpace();
+
+      if (space.type !== XmlStringToken.SPACE) {
+         throw new Error('Internal error');
+      }
+
+      const xtoken = new XmlToken(XmlToken.SPACE, space.text);
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      this._pendingTokens.push(xtoken);
+   }
+
+   /*
+    *   [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
+    */
+   _getContent() {
+      const content = this._cursor.getToMarkup();
+
+      if (content.type !== XmlStringToken.STRING || content.text === '') {
+         throw new Error('Internal error');
+      }
+
+      const xtoken = new XmlToken(XmlToken.CHARDATA, content.text);
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      this._pendingTokens.push(xtoken);
+   }
+
+   /*
+    * Parse any comment
+    *   [15] Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
+    * PARAMS: The first token (currently not used)
+    */
+   _getComment() {
+      this._cursor.getMarkup();
+      const content = this._cursor.getToTerminator('-->');
+
+      if (!content) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_MISSING_END);
+      } else {
+         this._cursor.getMatch('-->');
+
+         if (content.text[content.text.length - 1] === '-') {
+            this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN);
+         }
+      }
+
+      const xtoken = new XmlToken(XmlToken.COMMENT, content.text);
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      this._pendingTokens.push(xtoken);
+   }
+
+   /*
+    * Parse Any processing instruction
+    *   [16] PI       ::= '<?' PITarget (S (Char* - (Char* '?>' Char*)))? '?>'
+    *   [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
+    * This assumes that something that calls this has already peeked and
+    * noticed the <?.
+    *
+    * PARAMS None. however, this assumes that the first token has already
+    *        been read
+    * RETURN None.  Does queue an XMLToken of type XmlToken.XMLDECL or
+    *        XmlToken.PI and possibly syntax error tokens.
+    */
+   _getProcessingInstruction() {
+      const firstMarkup = this._cursor.getMarkup();
+      const space = this._cursor.getSpace();
+      const target = this._cursor.getWord();
+
+      if (space) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
+            'Space found before processing intruction target.');
+      }
+
+      if (!target.couldBeName) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.PI_TARGET_NOT_NAME,
+            'The target name does not match the syntax for names. Found: "' + target.text + '".');
+      }
+
+      if (target.text.toLocaleLowerCase() === 'xml') {
+         if (target.text !== 'xml') {
+            this._reportSyntaxError(XmlErrorToken.ERROR.XML_NOT_LOWERCASE,
+               'The xml target name was not all lower case (' + target.text + ').');
+         }
+         this._getXmlDecl(firstMarkup, target);
+      } else {
+         this._cursor.getSpace();   // optional whitespace
+         const content = this._cursor.getToTerminator('?>');
+
+         // If we found no ?> (thus, really, end of file) report an error.
+         if (!content) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.PI_NO_TERMINATOR);
+         } else {
+            this._cursor.getMatch('?>');
+         }
+
+         const xtoken = new XmlToken(XmlToken.PI, target.text);
+         if (content) {
+            xtoken.content = content.text;
+         }
+         xtoken.tokens = this._cursor.getRecentTokens();
+
+         this._pendingTokens.push(xtoken);
+      }
+   }
+
+   /*
+    * Parse the XML Declaration which ha the following format:
+    *   [23] XMLDecl	    ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
+    *   [24] VersionInfo ::= S 'version' Eq ("'" VersionNum "'" |
+    *                        '"' VersionNum '"')
+    *   [25] Eq	       ::= S? '=' S?
+    *   [26] VersionNum  ::= '1.1' | '1.0'
+    *   [27] Misc	       ::= Comment | PI | S
+    *   [80] EncodingDecl::= S 'encoding' Eq ('"' EncName '"' |
+    *                        "'" EncName "'" )
+    *   [32] SDDecl	    ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
+    *                        ('"' ('yes' | 'no') '"'))
+    *   [81] EncName	    ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+    *
+    * PARAMS This expects two string tokens '<?' and 'xml'
+    * RETURN None.  however, this does add an XMLToken and possibly various
+    *        syntax error tokens to the pending queue. The XMLToken is of type
+    *        XmlToken.XMLDECL, with a params property, which is an array of
+    *        objects corresponding to the "attributes" of the xml declaration
+    *        in the order they were found, each object has a name and a value.
+    */
+   _getXmlDecl(start, target) {
+      let lastSpace = this._cursor.getSpace();
+      const params = [];
+
+      let key = this._cursor.getWord();
+      while (key) {
+         if (!lastSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
+         }
+
+         this._cursor.getSpace();    // optional
+         const equal = this._cursor.getMatch('=');     // =
+
+         if (!equal) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_EQUAL);
+            break;
+         }
+
+         this._cursor.getSpace();    // optional
+         const quote = this._cursor.peekChar(); // quote
+         let content;
+
+         if (quote.text === '"' || quote.text === '\'') {
+            this._cursor.getChar();     // quote
+            content = this._cursor.getToTerminator(quote.text);
+            this._cursor.getChar();     // quote
+         } else {
+            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_QUOTE);
+            content = this._cursor.getWord();
+         }
+
+         lastSpace = this._cursor.getSpace();    // optional
+
+         const pair = {
+            name: key.text,
+            value: content.text
+         };
+
+         key = this._cursor.getWord();
+
+         params.push(pair);
+      }
+
+      const close = this._cursor.getMatch('?>');
+
+      if (!close) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.MISSING_XMLDECL_CLOSE);
+      }
+
+      if (params.length === 0) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.NO_ATTRIBUTES);
+      }
+
+      // check that the parameters are in the right order and have the right values
+      for (let index = 0; index < params.length; index++) {
+         const param = params[index];
+         const lcName = param.name.toLocaleLowerCase();
+
+         switch (lcName) {
+            case 'version':
+               if (index !== 0) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTR_WRONG_ORDER,
+                     '"version" attribute should be at position #0 but was at #' + index + '.');
+               }
+               if (param.name !== lcName) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+               }
+               if (param.value !== '1.1' && param.value !== '1.0') {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_VERSION,
+                        '"version" must be "1.0" or "1.1" but found "' + param.value + '".');
+               }
+               break;
+            case 'encoding':
+               if (index !== 1) {
+                  this._reportSyntaxError(XmlErrorToken.ATTR_WRONG_ORDER,
+                        'encoding attribute in the wrong position. Should be after version, but was #' +
+                        index + '.');
+               }
+               if (param.name !== lcName) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+               }
+               if (!param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/)) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_ENCODING,
+                        '"encoding" must be alphanumerics, but found "' + param.value + '".');
+               }
+               break;
+            case 'standalone':
+               const lcValue = param.value.toLocaleLowerCase();
+
+               if (index !== 1 && index !== 2) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTR_WRONG_ORDER,
+                        'standalone attribute in the wrong position. Should be #1 or #2, but was #' +
+                        index + '.');
+               }
+               if (param.name !== lcName) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+               }
+               if (param.value !== lcValue) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE,
+                        '"' + lcValue + '" must be lower case, but found "' + param.value + '".');
+               }
+               if (param.value !== 'no' && param.value !== 'yes') {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_STANDALONE,
+                        '"standalone" must be "yes" or "no" but found "' + param.value + '".');
+               }
+               break;
+            default:
+               this._reportSyntaxError(XmlErrorToken.ERROR.UNKNOWN_ATTR,
+                  'Unknown XML Declaration parameter "' + param.name + '".');
+
+         }
+      }
+
+      const xtoken = new XmlToken(XmlToken.XMLDECL, target.text);
+      xtoken.params = params;
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      this._pendingTokens.push(xtoken);
+   }
+
+   /*
+    * Parse the XML start or end tag, and queues the return token and/or any
+    * errors found
+    *  [40] STag ::= '<' Name (S Attribute)* S? '>'
+    *  [42] ETag ::= '</' Name S? '>'
+    *  [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'
+    * PARAMS isStartOrEmpty: true if this is a start or empty tag, or false
+    *        if an end tag
+    * RETURN none
+    */
+   _getTag(isStartOrEmpty) {
+      const leadingSpace = this._cursor.getSpace();
+      const name = this._cursor.getWord();
+      this._cursor.getSpace();
+      let close = this._cursor.getMatch('>');
+      let isEmpty = false;
+
+      if (!close) {
+         close = this._cursor.getMatch('/>');
+
+         if (close) {
+            if (isStartOrEmpty) {
+               isEmpty = true;
+            } else {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE); // @@@ test
+            }
+         }
+      }
+
+      if (leadingSpace) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
+      }
+
+      if (!name) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+      } else if (!name.couldBeName) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_BAD_NAME,
+            'The element name does not match the syntax for names. Found: "' +
+            name.text + '".');
+      }
+
+      if (!close) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+      }
+
+      const startType = isEmpty ? XmlToken.ELEMENT_EMPTY : XmlToken.ELEMENT_START;
+      const xtoken = new XmlToken(isStartOrEmpty ? startType : XmlToken.ELEMENT_END);
+      xtoken.name = name ? name.text : '';
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      if (isStartOrEmpty) {
+         if (!isEmpty) {
+            this._elementNameStack.push(xtoken.name);
+         }
+      } else {
+         const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
+
+         if (lastElement === xtoken.name) {
+            this._elementNameStack.pop();
+         } else {
+            this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_UNBALANCED,
+               'Element end tag does not match. Expected "' + lastElement + '" but found "' + xtoken.name + '".');
+
+         }
+      }
+
+      this._pendingTokens.push(xtoken);
+   }
+
+   getNext() {
+      if (this._pendingTokens.length > 0) {
+         return this._pendingTokens.shift();
+      }
+
+      const token = this._nextToken();
+
+      return token;
+   }
+
+   hasNext() {
+      if (this._pendingTokens.length > 0) {
+         return true;
+      }
+
+      const token = this._nextToken();
+
+      if (token) {
+         this._pendingTokens.push(token);
+      }
+
+      return this._pendingTokens.length > 0;
+   }
+
+   _reportSyntaxError(code, message) {
+      if (typeof message !== 'string') {
+         message = XmlErrorToken.STRING[code];
+      }
+      const error = new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message);
+      if (this._options.lax) {
+         this._pendingTokens.push(error);
+         return;
+      }
+
+      const e = new Error(message);
+      e.details = error;
+
+      throw e;
+   }
+
+}
+
+module.exports = XmlTokenStream;
