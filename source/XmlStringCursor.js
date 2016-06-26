@@ -11,11 +11,12 @@ const Offset = require('./Offset.js');
  */
 class XmlStringCursor {
 
-   /*
-    * Constructs an instance with the specified source string.
-    * PARAM
-    * The string that this cursor should use.
-    */
+   /* \
+    Constructs an instance with the specified source string.
+
+    PARAM
+    The string that this cursor should use.
+   \*/
    constructor(source) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
@@ -26,14 +27,14 @@ class XmlStringCursor {
       this._tokens = [];
    }
 
-   /*
-    * Returns the most likely type for the next token in the cursor. In some
-    * cases, the next token is ambiguous (e.g. is it a CHAR or a WORD or a
-    * STRING?). In those cases, this assumes STRING.
-    *
-    * RETURN
-    * One of the XmlStringToken constants: MARKUP, SPACE, or STRING.
-    */
+   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+    Returns the most likely type for the next token in the cursor. In some
+    cases, the next token is ambiguous (e.g. is it a CHAR or a WORD or a
+    STRING?). In those cases, this assumes STRING.
+
+    RETURN
+    One of the XmlStringToken constants: MARKUP, SPACE, or STRING.
+   \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
    peekType() {
       const nextChar = this._source[this._offset.index];
 
@@ -50,11 +51,11 @@ class XmlStringCursor {
       }
    }
 
-   /*
-    * Returns the next character from the string, no matter what it is.
-    * RETURN
-    * The next character in the cursor as a CHAR token.
-    */
+   /* ---------------------------------------------------------------------*\
+    Returns the next character from the string, no matter what it is.
+    RETURN
+    The next character in the cursor as a CHAR token.
+   \*----------------------------------------------------------------------*/
    peekChar() {
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
@@ -81,13 +82,13 @@ class XmlStringCursor {
       return new XmlStringToken(nextChar, XmlStringToken.CHAR, startOffset, endOffset);
    }
 
-   /*
-    * Returns the next S in the input.  That is, the next series of spaces,
-    * tabs, and newlines. As per the standard, any \r's or \r\n's are
-    * converted into single \n's.
-    *
-    *   [3] S ::= (#x20 | #x9 | #xD | #xA)+
-    */
+   /* *******************************************************************\
+    Returns the next S in the input.  That is, the next series of spaces,
+    tabs, and newlines. As per the standard, any \r's or \r\n's are
+    converted into single \n's.
+
+        [3] S ::= (#x20 | #x9 | #xD | #xA)+
+   \**********************************************************************/
    getSpace() {
       let fixString = false;
       const startOffset = this._offset.clone();

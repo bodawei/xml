@@ -9,81 +9,100 @@ XMLStringToken
 	raw-string?  or flags?
 
 XMLStringCursor
-	readS
-		returns a series of characters up to EOF or a non-whitespace
-	readToMarkup
-		reads characters until encountering < or &
-	readMarkup
-		returns <, </ <!name(two or more tokens) <![name[ <?name (two or more tokens) <!-- /> > ]]> --> or &name;
-	readWord
-		returns characters up to whitespace, or some markup, or =
-	readQuotedString
-		returns everything in quotes. May return multiple tokens if reference in there
-	readToken
-		will read any of the others here and return. May also just return a single character
-	peekToken
+ readS: returns a series of characters up to EOF or a non-whitespace
+readToMarkup: reads characters until encountering < or &
+readMarkup: returns <, </ <!name(two or more tokens) <![name[ <?name (two or more tokens) <!-- /> > ]]> --> or &name;
+readWord: returns characters up to whitespace, or some markup, or =
+readQuotedString: returns everything in quotes. May return multiple tokens if reference in there
+readToken: will read any of the others here and return. May also just return a single character
+peekToken
 
 XMLStream: essentially produces a stream of xml chunks
-	StreamNode
-		type
-		textTokens <-- include  reference to entity they came from. and may have reference to entityReference it came from
-		other (e.g. in case of elementstart)
-			name -> ref to textTokens
-			attributes
-				name = value  <-- references to textTokens
-			---
-			dtd
-				entity declaration (ref to token range)
-			
-	has a list of entities involved.
-		can set a flag to expand or not expand entity refs. note that we kinda have to expand the parameter entities in the dvd or may not actually be able to parse it.
-	getPiece: returns
-		elementStart
-		elementStartEnd
-			name, attributes, some kind of whitespace indicators
-		elementEnd
-			name
-		processingInstruction
-		cData
-		charData
-		comment
-		include
-		exclude
-		entityReference
-		entityTextDecl
-		doctype (includes dtd, it seems)
-			-- delivering this so it can be reconstructed is very hard
-		syntaxError
-
-	xmlstream starts off: white space reading, and then readToMarkup. if this is strict, all that is ignored, but we will have a soft non-strict flag which is to allow whitespace (or other junk, even) before start 
-
+StreamNode
+	type
+	textTokens <-- include  reference to entity they came from. and may have reference to entityReference it came from
+	other (e.g. in case of elementstart)
+		name -> ref to textTokens
+		attributes
+			name = value  <-- references to textTokens			
+has a list of entities involved, can set a flag to expand or not expand entity refs. note that we kinda have to expand the parameter entities in the dvd or may not actually be able to parse it.
+getPiece: returns
+	elementStart, elementStartEnd
+		name, attributes, some kind of whitespace indicators
+	elementEnd
+	processingInstruction
+	cData
+	charData
+	comment
+	include
+	exclude
+	entityReference
+	entityTextDecl
+	doctype (includes dtd, it seems)
+		-- delivering this so it can be reconstructed is very hard
+	syntaxError
+xmlstream starts off: white space reading, and then readToMarkup. if this is strict, all that is ignored, but we will have a soft non-strict flag which is to allow whitespace (or other junk, even) before start 
 I think we can now map this to a SAX style api, or the like.
 
 layer 3
-	does validation and wellformedness
-	Maybe these produce the same api as 2, so that you can stack these. So really we have layer 3/passthrough and layer 3/not-passthrough
-	These have the whole document in memory
-	output of this is probably a normalized document?
+does validation and wellformedness
+Maybe these produce the same api as 2, so that you can stack these. So really we have layer 3/passthrough and layer 3/not-passthrough
+These have the whole document in memory
+output of this is probably a normalized document?
 
 layer 4
-	these are things like json converters, or the like
+these are things like json converters, or the like
 
 =============================================
 In theory done: 1(1-3), 2.5, 2.6
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
+6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints. ACTUAL: 8
+6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints
 ---------------------------------------------
 
+x 16:XL read attributes
+x 17:XL Read Content (char data)
+x 18:XL READ CDATA [2.7]
+√48:S: Read syntactically valid attribute, while ignoring references
+	[41]
+	nameS?=S?value  value can be "" or ''
 
+
+49:S: Cope with syntax errors in attribute
+	< in value
+	name not a name	
+50:M: Cope with major syntax errors in attribute
+	add a getToSpaceOrTerminator('>') in string cursor.
+	other
+		name="value"	<-- good
+		name=value	<-- syntax error. recovery: read a word as value (stops at space or >)
+		name "value"	<- syntax error = missing (we notice the quote)
+		name value	<- syntax error, read a word (stops at space or >)
+		name= >		<-- syntax error, no value
+		name name	<-- this will look like name value
+		name junk	<-- This will also look like name value,
+		(no-name) junk	<-- Here, we've gone quite astray. We can't proceed, as we get no name. Likely something is very very messed up. I'd suggest creating an invalid attribute name, e.g. -yaxt="<baz". The point is absorb all to the >, wherever that is, and   continue.
+					<elem name=foo <baz></baz>
+51:S:syntax error if ]]> found in char data
+	modify readtoMarkup to stop at ]]>
+		Thus, readToMarkup may or may not actually stop at markup.
+		it is up to the caller to decide to abort or just consider it more char data (thus "foo]]>asdf" might return three chardata tokens, as well as a syntax error)
+	the get char data token should cope with this.
+7:M: StringCursor cleanup
+	- review testing of all routines (through getMarkup)
+		- including doc them and test at non-start of string
 
 =============================================
 CLEANUP
+- Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
 
-RESEARCH
+RESEARCH (when have net)
 - high order unicode
 - remind me can I do regex from an offset?
 - do performance test jsperf of regex vs hand parsing
+	- see also the stuff in 52, below
 
 BUILD
 36:M:silence the build except for report
@@ -96,10 +115,14 @@ BUILD
 41:XL:Investigate Gulp
 
 PROJECT
-7:M: StringCursor cleanup
-	- review testing of all routines (through getMarkup)
-		- including doc them and test at non-start of string
-44:M: Minor features
+--- technical debt
+52:S: StringCursorSpeedup
+	Note:
+		getToMarkup: currently <, soon < and & and possibly < & and ]]>
+		soon: getToSpaceOrTerminator  any space or >
+		getToTerminator  -->, ?> ]]>, ", ' and >
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
+47:M: Minor StringCursor features
 	- getSpace should return text and origText
 	- Resolve what to do with CR in terminator and match, and read to markup
 8:S: review xmltokenstream for testing and code logic: SMALL
@@ -107,17 +130,35 @@ PROJECT
 10:M: prove links between things like version="1.1" and the underlying tokens.
 11:M: Provide some kind of internationalizable string catalog
 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
-13:M: Decide where this level of syntax checking should go (we're doing balance checking in XmlTokenStream, so maybe this should be too)
-	- first token must be an xmldecl, otherwise syntax error
-	- once xmldecl, then just comments or pi or space until element
-		- anything else is syntax error
-14:M: How to check high plane unicode chars in javascript?
-	 // (char >= '\u010000' && char <= '\u0EFFFF');
-15:M: Put a limit on how much read in in one chunk (pass in as option). 
+13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
+	- xmldecl, misc, element misc
+14:M: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+44:M:Enforce 1.0 vs 1.1 line ending changes
+45:S:Review various 1.0 standards with respect to Name (and Char definitions)
+	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
+46:S:Improve handling of 1.0 vs. 1.1 control chars
+	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 
-16:XL read attributes
-17:XL Read Content (char data)
-18:XL READ CDATA [2.7]
+--- Basic processing
+52:M: Read CDATA
+	syntactically correct
+	allows spaces in the [ CDATA [ part
+	I think we have to require ]]> not have spaces. otherwise will see terminators we shouldn't.
+	Note that this is a "two level" thing. We need to return a CHARDATA token, but it should have a reference to the fact that it is also a CDATA element.  See entity info below
+27:XL Read in entities (see issues, below)
+	character entities
+	identify references in attributes and charData
+	provide infrastructure for recursive processing these.
+	Need the answer for how to feedback both the content and the fact that there was a reference here.
+		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
+			Parent may not have all children at the point of first being returned. for streaming purposes.
+			Parent may, itself, have parent.
+		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
+		This may impact parts of stringCursor which need to become reference aware.
+		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
+		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+--- DTD
 19:XL Read doctype
 20:XL Read element declaration
 21:XL Read element content structure
@@ -127,7 +168,8 @@ PROJECT
 25:XL read external entities
 	including header
 26:XL Deal with parameter entities
-27:XL Read in entities (see issues, below)
+
+--- Validity
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
 29:XL Deal with wfc (failures here are fatal errors)
 	- note. you can keep processing after the fatal error, including passing some content back and report more errors. but, it must not continue normal processing
@@ -136,24 +178,15 @@ PROJECT
 31:XL Deal with interoperability (mainly to help some sgml processors)
 	interoperability: empty element should only be used for elements which are declared EMPTY
 32:XL Run through standard test cases
-44:M:Enforce 1.0 vs 1.1 line ending changes
-45:S:Review various 1.0 standards with respect to Name (and Char definitions)
-	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
-46:S:Improve handling of 1.0 vs. 1.1 control chars
-	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
-	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-
-6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints
 
 ---- Extra (not part of MVC)
+15:M: Put a limit on how much read in in one chunk (pass in as option). 
 33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
 34:M:Cope with junk before xmldeclaration
 35:M:Deal with xmldecl not actually being an xmldecl
 42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
 43:M:deal with references within comments and PI
 	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
-
-
 - xml token probably shouldn't have the data property
 
 ISSUES
@@ -174,14 +207,6 @@ Add state to reader: SMALL
 		- set at xmldecl, and after comments, pi's elements doctype. Once set, no more xmldecl looked for
 	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
 
-* ISSUE: How to return references?
-But, we certainly need a way to be reporting this kind of data in the tokens.  Somehow do what I'd been thinking before:
-		reftoken
-		valuetok valuetok
-xmltoken valtk valtk    valtk
-that is, have some way to get from the xml token, to the expansion of the reference, to the reference
-Some of this might also imply readUntilTerminator might return an array of string tokens, with expanded character references in the middle.
-
 ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
 
 Notes
@@ -191,7 +216,7 @@ Notes
 ==============================================================================
 ==============================================================================
 FINISHED SPRINTS
-SPRINT2:
+SPRINT1:
 √ 1:S: Read start tag without attributes
 	syntax error if not a name or no name
 	syntax error if space before name

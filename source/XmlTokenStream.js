@@ -321,9 +321,15 @@ class XmlTokenStream {
     * RETURN none
     */
    _getTag(isStartOrEmpty) {
+      let attributes = [];
+
       const leadingSpace = this._cursor.getSpace();
       const name = this._cursor.getWord();
-      this._cursor.getSpace();
+      if (isStartOrEmpty) {
+         attributes = this._getAttributes();
+      } else {
+         this._cursor.getSpace();
+      }
       let close = this._cursor.getMatch('>');
       let isEmpty = false;
 
@@ -358,6 +364,7 @@ class XmlTokenStream {
       const startType = isEmpty ? XmlToken.ELEMENT_EMPTY : XmlToken.ELEMENT_START;
       const xtoken = new XmlToken(isStartOrEmpty ? startType : XmlToken.ELEMENT_END);
       xtoken.name = name ? name.text : '';
+      xtoken.attributes = attributes;
       xtoken.tokens = this._cursor.getRecentTokens();
 
       if (isStartOrEmpty) {
@@ -377,6 +384,56 @@ class XmlTokenStream {
       }
 
       this._pendingTokens.push(xtoken);
+   }
+
+   _getAttributes() {
+      const attributes = [];
+   // @@ duplicates what is above. Note, I was originally going to put lastSpace at end of while loop. OK?
+      let lastSpace = this._cursor.getSpace();
+      let name = this._cursor.getWord();
+
+      while (name) {
+         if (!lastSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
+         }
+
+         this._cursor.getSpace();    // optional
+         const equal = this._cursor.getMatch('=');     // =
+
+         if (!equal) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_EQUAL);
+            break;
+         }
+
+         this._cursor.getSpace();    // optional
+         const quote = this._cursor.peekChar(); // quote
+         let content;
+
+         if (quote.text === '"' || quote.text === '\'') {
+            this._cursor.getChar();     // quote
+            content = this._cursor.getToTerminator(quote.text);
+            this._cursor.getChar();     // quote
+         } else {
+            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_QUOTE);
+            content = this._cursor.getWord();
+         }
+
+         lastSpace = this._cursor.getSpace();    // optional
+
+         const pair = {
+            name: name.text,
+            value: content.text,
+            nameToken: name,
+            valueToken: content,
+            quoteType: quote.text
+         };
+
+         name = this._cursor.getWord();
+
+         attributes.push(pair);
+      }
+
+      return attributes;
    }
 
    getNext() {

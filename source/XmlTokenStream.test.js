@@ -19,7 +19,7 @@ describe('XmlTokenStream', () => {
       for (let index = 0; index < values.length; index++) {
          const length = values[index].text.length;
          const stringToken = new XmlStringToken(values[index].text, values[index].type,
-         new Offset(0, offset, offset), new Offset(0, offset + length, offset + length));
+            new Offset(0, offset, offset), new Offset(0, offset + length, offset + length));
          if (values[index].type === XmlStringToken.WORD) {
             stringToken.couldBeName = true;
          }
@@ -747,7 +747,8 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
       });
 
-      it('throws an error if > is missing', () => {
+      // can this be tested?
+      xit('throws an error if > is missing', () => {
          const s = makeStream('<name  <');
 
          expect(() => {
@@ -777,6 +778,70 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+      });
+
+      describe('with attributes', () => {
+
+         it('can parse basic attributes', () => {
+            const s = makeStream('<elemName attr1="one" attr2="two">', { lax: true });
+
+            const t = s.getNext();
+
+            const name1 = new XmlStringToken('attr1', XmlStringToken.WORD,
+                  new Offset(0, 10, 10), new Offset(0, 15, 15));
+            name1.couldBeName = true;
+            const name2 = new XmlStringToken('attr2', XmlStringToken.WORD,
+                     new Offset(0, 22, 22), new Offset(0, 27, 27));
+            name2.couldBeName = true;
+
+            expect(t.attributes).toEqual([ {
+                  name: 'attr1',
+                  value: 'one',
+                  nameToken: name1,
+                  valueToken: new XmlStringToken('one', XmlStringToken.STRING,
+                     new Offset(0, 17, 17), new Offset(0, 20, 20)),
+                  quoteType: '"'
+               }, {
+                  name: 'attr2',
+                  value: 'two',
+                  nameToken: name2,
+                  valueToken: new XmlStringToken('two', XmlStringToken.STRING,
+                     new Offset(0, 29, 29), new Offset(0, 32, 32)),
+                  quoteType: '"'
+               }
+            ]);
+         });
+
+         it('can parse attributes using single quotes', () => {
+            const s = makeStream('<elemName attr1=\'one\' attr2=\'two\'>', { lax: true });
+
+            const t = s.getNext();
+
+            const name1 = new XmlStringToken('attr1', XmlStringToken.WORD,
+                  new Offset(0, 10, 10), new Offset(0, 15, 15));
+            name1.couldBeName = true;
+            const name2 = new XmlStringToken('attr2', XmlStringToken.WORD,
+                     new Offset(0, 22, 22), new Offset(0, 27, 27));
+            name2.couldBeName = true;
+
+            expect(t.attributes).toEqual([ {
+                  name: 'attr1',
+                  value: 'one',
+                  nameToken: name1,
+                  valueToken: new XmlStringToken('one', XmlStringToken.STRING,
+                     new Offset(0, 17, 17), new Offset(0, 20, 20)),
+                  quoteType: '\''
+               }, {
+                  name: 'attr2',
+                  value: 'two',
+                  nameToken: name2,
+                  valueToken: new XmlStringToken('two', XmlStringToken.STRING,
+                     new Offset(0, 29, 29), new Offset(0, 32, 32)),
+                  quoteType: '\''
+               }
+            ]);
+         });
+
       });
 
       it('retrieves the expected tokens', () => {
