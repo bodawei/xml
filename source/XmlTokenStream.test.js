@@ -410,7 +410,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('There must be a space before an XML Declaration attribute.');
+         }).toThrowError('There must be a space before an attribute name.');
       });
 
       it('throws an error if no parameters are included', () => {
@@ -747,15 +747,6 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
       });
 
-      // can this be tested?
-      xit('throws an error if > is missing', () => {
-         const s = makeStream('<name  <');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Missing closing of element tag.');
-      });
-
       it('generates an error token if > is missing', () => {
          const s = makeStream('<name', { lax: true });
 
@@ -795,21 +786,20 @@ describe('XmlTokenStream', () => {
             name2.couldBeName = true;
 
             expect(t.attributes).toEqual([ {
-                  name: 'attr1',
-                  value: 'one',
-                  nameToken: name1,
-                  valueToken: new XmlStringToken('one', XmlStringToken.STRING,
-                     new Offset(0, 17, 17), new Offset(0, 20, 20)),
-                  quoteType: '"'
-               }, {
-                  name: 'attr2',
-                  value: 'two',
-                  nameToken: name2,
-                  valueToken: new XmlStringToken('two', XmlStringToken.STRING,
-                     new Offset(0, 29, 29), new Offset(0, 32, 32)),
-                  quoteType: '"'
-               }
-            ]);
+               name: 'attr1',
+               value: 'one',
+               nameToken: name1,
+               valueToken: new XmlStringToken('one', XmlStringToken.STRING,
+                  new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               quoteType: '"'
+            }, {
+               name: 'attr2',
+               value: 'two',
+               nameToken: name2,
+               valueToken: new XmlStringToken('two', XmlStringToken.STRING,
+                  new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               quoteType: '"'
+            } ]);
          });
 
          it('can parse attributes using single quotes', () => {
@@ -825,21 +815,97 @@ describe('XmlTokenStream', () => {
             name2.couldBeName = true;
 
             expect(t.attributes).toEqual([ {
-                  name: 'attr1',
-                  value: 'one',
-                  nameToken: name1,
-                  valueToken: new XmlStringToken('one', XmlStringToken.STRING,
-                     new Offset(0, 17, 17), new Offset(0, 20, 20)),
-                  quoteType: '\''
-               }, {
-                  name: 'attr2',
-                  value: 'two',
-                  nameToken: name2,
-                  valueToken: new XmlStringToken('two', XmlStringToken.STRING,
-                     new Offset(0, 29, 29), new Offset(0, 32, 32)),
-                  quoteType: '\''
-               }
-            ]);
+               name: 'attr1',
+               value: 'one',
+               nameToken: name1,
+               valueToken: new XmlStringToken('one', XmlStringToken.STRING,
+                  new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               quoteType: '\''
+            }, {
+               name: 'attr2',
+               value: 'two',
+               nameToken: name2,
+               valueToken: new XmlStringToken('two', XmlStringToken.STRING,
+                  new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               quoteType: '\''
+            } ]);
+         });
+
+         it('can parse attributes with whitespace around the equals', () => {
+            const s = makeStream('<elemName\n\tattr1\t\n=   \'one\' attr2   =\r\n\t \'two\'>', { lax: true });
+
+            const t = s.getNext();
+
+            const name1 = new XmlStringToken('attr1', XmlStringToken.WORD,
+                  new Offset(1, 1, 11), new Offset(1, 6, 16));
+            name1.couldBeName = true;
+            const name2 = new XmlStringToken('attr2', XmlStringToken.WORD,
+                     new Offset(2, 10, 28), new Offset(2, 15, 33));
+            name2.couldBeName = true;
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: 'one',
+               nameToken: name1,
+               valueToken: new XmlStringToken('one', XmlStringToken.STRING,
+                  new Offset(2, 5, 23), new Offset(2, 8, 26)),
+               quoteType: '\''
+            }, {
+               name: 'attr2',
+               value: 'two',
+               nameToken: name2,
+               valueToken: new XmlStringToken('two', XmlStringToken.STRING,
+                  new Offset(3, 3, 42), new Offset(3, 6, 45)),
+               quoteType: '\''
+            } ]);
+         });
+
+         it('throws an error if there is a < in the attribute value', () => {
+            const s = makeStream('<elementName attr1="value<">');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('An "<" was found in the value for attribute "attr1".');
+         });
+
+         it('generates an error token if name is missing', () => {
+            const s = makeStream('<elementName attr1="value<">', { lax: true });
+
+            const t = s.getNext();
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
+         });
+
+         it('throws an error if the attribute name is not a legal XML name', () => {
+            const s = makeStream('<elementName 1attr="value">');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('The attribute name does not match the syntax for names. Found: "1attr".');
+         });
+
+         it('generates an error token if name is missing', () => {
+            const s = makeStream('<elementName 1attr="value">', { lax: true });
+
+            const t = s.getNext();
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+         });
+
+         it('throws an error if there is no space between attributes', () => {
+            const s = makeStream('<elementName attr1="value"attr2="value2">');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('There must be a space before an attribute name.');
+         });
+
+         it('generates an error token if there is no space between attributes', () => {
+            const s = makeStream('<elementName attr1="value"attr2="value2">', { lax: true });
+
+            const t = s.getNext();
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
          });
 
       });

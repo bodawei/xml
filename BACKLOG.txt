@@ -68,11 +68,10 @@ x 18:XL READ CDATA [2.7]
 √48:S: Read syntactically valid attribute, while ignoring references
 	[41]
 	nameS?=S?value  value can be "" or ''
-
-
-49:S: Cope with syntax errors in attribute
+√ 49:S: Cope with basic syntax errors in attribute
 	< in value
 	name not a name	
+
 50:M: Cope with major syntax errors in attribute
 	add a getToSpaceOrTerminator('>') in string cursor.
 	other
@@ -130,6 +129,7 @@ PROJECT
 10:M: prove links between things like version="1.1" and the underlying tokens.
 11:M: Provide some kind of internationalizable string catalog
 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
 13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
 	- xmldecl, misc, element misc
 14:M: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');

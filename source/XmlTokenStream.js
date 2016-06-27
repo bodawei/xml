@@ -327,6 +327,19 @@ class XmlTokenStream {
       const name = this._cursor.getWord();
       if (isStartOrEmpty) {
          attributes = this._getAttributes();
+
+         for (let index = 0; index < attributes.length; index++) {
+            if (attributes[index].value.indexOf('<') !== -1) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+                  'An "<" was found in the value for attribute "' + attributes[index].name + '".');
+            }
+
+            if (!attributes[index].nameToken.couldBeName) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME,
+                  'The attribute name does not match the syntax for names. Found: "' +
+                     attributes[index].name + '".');
+            }
+         }
       } else {
          this._cursor.getSpace();
       }
@@ -386,9 +399,13 @@ class XmlTokenStream {
       this._pendingTokens.push(xtoken);
    }
 
+   /*
+    *   [41] Attribute ::= Name Eq AttValue
+    *   [10] AttValue ::= '"' ([^<&"] | Reference)* '"' |
+    *                     "'" ([^<&'] | Reference)* "'"
+    */
    _getAttributes() {
       const attributes = [];
-   // @@ duplicates what is above. Note, I was originally going to put lastSpace at end of while loop. OK?
       let lastSpace = this._cursor.getSpace();
       let name = this._cursor.getWord();
 
@@ -398,12 +415,7 @@ class XmlTokenStream {
          }
 
          this._cursor.getSpace();    // optional
-         const equal = this._cursor.getMatch('=');     // =
-
-         if (!equal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_EQUAL);
-            break;
-         }
+         this._cursor.getMatch('=');     // =
 
          this._cursor.getSpace();    // optional
          const quote = this._cursor.peekChar(); // quote

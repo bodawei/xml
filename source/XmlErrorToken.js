@@ -39,7 +39,9 @@ XmlErrorToken.ERROR = {
    ELEMENT_MISSING_NAME: 'ELEMENT_MISSING_NAME',
    ELEMENT_BAD_NAME: 'ELEMENT_BAD_NAME',
    ELEMENT_MISSING_CLOSE: 'ELEMENT_MISSING_CLOSE',
-   ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE'
+   ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
+   ATTRIBUTE_BAD_NAME: 'ATTRIBUTE_BAD_NAME',
+   ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE'
 };
 
 XmlErrorToken.STRING = {};
@@ -47,7 +49,7 @@ XmlErrorToken.STRING = {};
 const err = XmlErrorToken.ERROR;
 const str = XmlErrorToken.STRING;
 
-str[err.NO_SPACE_BEFORE_ATTR] = 'There must be a space before an XML Declaration attribute.';
+str[err.NO_SPACE_BEFORE_ATTR] = 'There must be a space before an attribute name.';
 str[err.NO_ATTRIBUTES] = 'There must be at least a version specified for an XML Declaration.';
 str[err.MISSING_XMLDECL_CLOSE] = 'Missing closing ?> on XML Declaration.';
 str[err.XMLDECL_ATTR_MISSING_EQUAL] = 'No equal sign found in XML Declaration "attribute".';
