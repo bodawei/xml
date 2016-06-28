@@ -333,7 +333,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('No equal sign found in XML Declaration "attribute".');
+            }).toThrowError('No equal sign found for an attribute.');
          });
 
          it('accepts the lack of an equal sign in lax mode', () => {
@@ -379,7 +379,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('No quote found for an XML Declaration "attribute".');
+            }).toThrowError('No quote found for an attribute.');
          });
 
          it('throws no error in lax mode', () => {
@@ -387,7 +387,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.code).toEqual(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_QUOTE);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
          });
 
          it('makes the best guess for the attr value if no quotes', () => {
@@ -906,6 +906,69 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
             expect(t.code).toEqual(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
+         });
+
+         it('throws an error if there is no quote around the attribute value', () => {
+            const s = makeStream('<elementName attr1=value>');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('No quote found for an attribute.');
+         });
+
+         it('generates an error token if there is no space between attributes', () => {
+            const s = makeStream('<elementName attr1=value>', { lax: true });
+
+            const t = s.getNext();
+
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+         });
+
+         it('reads a single word if there is no quote', () => {
+            const s = makeStream('<elementName attr1= value>', { lax: true });
+
+            s.getNext(); // swallow the error
+            const t = s.getNext();
+
+            expect(t.attributes[0].value).toEqual('value');
+         });
+
+         it('throws an error if there is no equal sign', () => {
+            const s = makeStream('<elementName attr1 "value">');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('No equal sign found for an attribute.');
+         });
+
+         it('generates an error token if there is no equal sign', () => {
+            const s = makeStream('<elementName attr1 "value">', { lax: true });
+
+            const t = s.getNext();
+
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+         });
+
+         it('infers an equal sign and reads the value if in lax mode and equal missing', () => {
+            const s = makeStream('<elementName attr1 "value one">', { lax: true });
+
+            s.getNext(); // swallow the error
+            const t = s.getNext();
+
+            expect(t.attributes[0].value).toEqual('value one');
+         });
+
+         it('reads a single word value when there is neither equal or quote', () => {
+            const s = makeStream('<elementName attr1  value one>', { lax: true });
+
+            let x = s.getNext(); // swallow error
+            x = s.getNext(); // swallow error
+            x = s.getNext(); // swallow error
+            const t = s.getNext();
+
+            expect(t.attributes.length).toEqual(3);
          });
 
       });

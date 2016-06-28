@@ -201,7 +201,7 @@ class XmlTokenStream {
          const equal = this._cursor.getMatch('=');     // =
 
          if (!equal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_EQUAL);
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             break;
          }
 
@@ -214,7 +214,7 @@ class XmlTokenStream {
             content = this._cursor.getToTerminator(quote.text);
             this._cursor.getChar();     // quote
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_QUOTE);
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             content = this._cursor.getWord();
          }
 
@@ -329,7 +329,8 @@ class XmlTokenStream {
          attributes = this._getAttributes();
 
          for (let index = 0; index < attributes.length; index++) {
-            if (attributes[index].value.indexOf('<') !== -1) {
+            const value = attributes[index].value;
+            if (value && value.indexOf('<') !== -1) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
                   'An "<" was found in the value for attribute "' + attributes[index].name + '".');
             }
@@ -403,6 +404,8 @@ class XmlTokenStream {
     *   [41] Attribute ::= Name Eq AttValue
     *   [10] AttValue ::= '"' ([^<&"] | Reference)* '"' |
     *                     "'" ([^<&'] | Reference)* "'"
+    *
+    * Explain error reporting wrt = and quotes
     */
    _getAttributes() {
       const attributes = [];
@@ -415,18 +418,37 @@ class XmlTokenStream {
          }
 
          this._cursor.getSpace();    // optional
-         this._cursor.getMatch('=');     // =
-
+         const equal = this._cursor.getMatch('=');     // =
          this._cursor.getSpace();    // optional
          const quote = this._cursor.peekChar(); // quote
+         const isQuote = quote.text === '"' || quote.text === '\'';
+
+         if (!equal) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            if (!isQuote) {
+               // ick
+               const pair = {
+                  name: name.text,
+                  value: undefined,
+                  nameToken: name,
+                  valueToken: undefined
+               };
+
+               name = this._cursor.getWord();
+
+               attributes.push(pair);
+               continue;
+            }
+         }
+
          let content;
 
-         if (quote.text === '"' || quote.text === '\'') {
+         if (isQuote) {
             this._cursor.getChar();     // quote
             content = this._cursor.getToTerminator(quote.text);
             this._cursor.getChar();     // quote
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_MISSING_QUOTE);
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             content = this._cursor.getWord();
          }
 

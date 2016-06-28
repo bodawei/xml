@@ -60,6 +60,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
 6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints. ACTUAL: 8
 6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints
+-- next: 55
 ---------------------------------------------
 
 x 16:XL read attributes
@@ -71,19 +72,76 @@ x 18:XL READ CDATA [2.7]
 √ 49:S: Cope with basic syntax errors in attribute
 	< in value
 	name not a name	
+50: 1 day
 
 50:M: Cope with major syntax errors in attribute
 	add a getToSpaceOrTerminator('>') in string cursor.
 	other
 		name="value"	<-- good
-		name=value	<-- syntax error. recovery: read a word as value (stops at space or >)
-		name "value"	<- syntax error = missing (we notice the quote)
+		√ name=value	<-- syntax error. recovery: read a word as value (stops at space or >)
+		√ name "value"	<- syntax error = missing (we notice the quote)
 		name value	<- syntax error, read a word (stops at space or >)
 		name= >		<-- syntax error, no value
 		name name	<-- this will look like name value
 		name junk	<-- This will also look like name value,
 		(no-name) junk	<-- Here, we've gone quite astray. We can't proceed, as we get no name. Likely something is very very messed up. I'd suggest creating an invalid attribute name, e.g. -yaxt="<baz". The point is absorb all to the >, wherever that is, and   continue.
 					<elem name=foo <baz></baz>
+		<foo bar baz another="value">
+			Assume value after name:  we get bar/baz and another/value
+			Assume if no equal is a valueless name: bar/, baz/ another/value
+			Assume if no quote must be name: bar/, baz/, another/value
+			Assume everything after non-equal is value until >: bar/'bar another="value"'
+		<foo bar baz another=value>
+			same as above
+		<foo bar baz another value>
+			Assume value after name:  we get bar/baz and another/, value/
+			Assume if no equal is a valueless name: bar/, baz/ another/, value
+			Assume if no quote must be name: bar/, baz/, another/, value
+			Assume everything after non-equal is value until >: bar/'bar another value'
+		<foo bar "baz">
+		<foo bar>
+		<foo bar ?> > <-- that is, something in the value which can't be a name, or at least which could terminate the element
+		Given random content in the element
+			can try to force name/value
+				- don't know when to stop. if you have name a b c d>
+					that is name/a, b/c d/?  Fundamentally this puts you in the following category
+				- or aggressive name/"a b c d"
+					which is ok, but really messy
+			can try name/value or fall back to name only
+				this works fine until you get token which can't be a name, but we'll allow that. The issue is to notice the end of the element tag.  Actually, we're parsing words, so words have some characters they can't be.  So, we can get into a dead-end.
+
+		Note: we should probably stop parsing values if < found in them, and consider that the end of the element tag
+			We have a general problem. What if any of the Words we get start with a stop character? our parsing goes to hell.
+		element names, PI targets, attribute names. That is what if you have
+			<?/fooname ?>
+			This is the root of your problem.
+		So, getting a word should have the set of terminators. S or any one of /> or > or ?> or = or multiple
+			if we do this, we can still end up with no name, but this is an easier case.
+				in particular, in our attribute case, we can just get a bizarre sequence of names and values, but we'll never actually stop until we hit something that looks like a terminator. = or > or /> or " or '. = " and ' just introduce an attribute, so this just degenerates until we hit > or />.   but getWord needs to have a set of terminators in addition to space.
+			PI: ?>
+			attribute names: =, > and />  (and maybe ' and " if you want)  This seems to fix all these 
+			degenerate attribute value: > and />
+		REVISED 50
+			modify getWord to take an array of terminators
+			Modify existing uses
+				test getPI with <??> and <?/bogus?>   -- terminates with ?>
+				test getTag with </>, < ?/>	terminates with > or />
+			getAttribute tries the following
+				name="blah" OK
+				name=blah   OK (see below)
+				name "blah" assumes equal
+				name"blah"  assumes name is 'name"blah"' -- safer than trying to make it a value, since name"v would cause potentially whole doc to be read in as the value
+				name blah   this becomes two names (no real reason, except that html allows valueless attrs)
+				-- name terminates with = or /> or >
+				-- degenerate value terminates with /> or >
+				? If we detect a < in a value do we keep trying to get a value, or terminate the element start tag?
+					if the latter, the getToTerminator there needs to include < as a possible terminator too
+				in short: read a name, if we can get ="value" or =1wordvalue or ' "value"' all if good. Otherwise, we assume no value and just repeat. a name in this case is a space separated string that doesn't include /> or > or = in it
+				need to test this with the above also
+					<foo name /name >
+					<foo name random-xml-markup-content>
+			Document all this in the comments
+
 51:S:syntax error if ]]> found in char data
 	modify readtoMarkup to stop at ]]>
 		Thus, readToMarkup may or may not actually stop at markup.
@@ -93,6 +151,7 @@ x 18:XL READ CDATA [2.7]
 	- review testing of all routines (through getMarkup)
 		- including doc them and test at non-start of string
 
+10mg every day. wmf 12.5  july 6th.
 =============================================
 CLEANUP
 - Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
@@ -133,12 +192,14 @@ PROJECT
 13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
 	- xmldecl, misc, element misc
 14:M: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+54:M:use xml decl version to change processing
 44:M:Enforce 1.0 vs 1.1 line ending changes
 45:S:Review various 1.0 standards with respect to Name (and Char definitions)
 	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+53:M:use xml decl encoding to change input if needed
 
 --- Basic processing
 52:M: Read CDATA

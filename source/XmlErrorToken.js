@@ -27,8 +27,6 @@ XmlErrorToken.ERROR = {
    MISSING_XMLDECL_CLOSE: 'MISSING_XMLDECL_CLOSE',
    XMLDECL_ATTR_WRONG_CASE: 'XMLDECL_ATTR_WRONG_CASE',
    XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
-   XMLDECL_ATTR_MISSING_EQUAL: 'XMLDECL_ATTR_MISSING_EQUAL',
-   XMLDECL_ATTR_MISSING_QUOTE: 'XMLDECL_ATTR_MISSING_QUOTE',
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
    PI_NO_TERMINATOR: 'PI_NO_TERMINATOR',
@@ -41,6 +39,8 @@ XmlErrorToken.ERROR = {
    ELEMENT_MISSING_CLOSE: 'ELEMENT_MISSING_CLOSE',
    ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
    ATTRIBUTE_BAD_NAME: 'ATTRIBUTE_BAD_NAME',
+   ATTRIBUTE_MISSING_QUOTE: 'ATTRIBUTE_MISSING_QUOTE',
+   ATTRIBUTE_MISSING_EQUAL: 'ATTRIBUTE_MISSING_EQUAL',
    ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE'
 };
 
@@ -52,8 +52,6 @@ const str = XmlErrorToken.STRING;
 str[err.NO_SPACE_BEFORE_ATTR] = 'There must be a space before an attribute name.';
 str[err.NO_ATTRIBUTES] = 'There must be at least a version specified for an XML Declaration.';
 str[err.MISSING_XMLDECL_CLOSE] = 'Missing closing ?> on XML Declaration.';
-str[err.XMLDECL_ATTR_MISSING_EQUAL] = 'No equal sign found in XML Declaration "attribute".';
-str[err.XMLDECL_ATTR_MISSING_QUOTE] = 'No quote found for an XML Declaration "attribute".';
 str[err.PI_NO_TERMINATOR] = 'Closing ?> not found for processing instruction.';
 str[err.COMMENT_MISSING_END] = 'Closing --> not found for comment.';
 str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Comment should not end with a hyphen.';
@@ -61,5 +59,7 @@ str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';
 str[err.ELEMENT_MISSING_NAME] = 'Name missing in element tag.';
 str[err.ELEMENT_MISSING_CLOSE] = 'Missing closing of element tag.';
 str[err.ELEMENT_END_BAD_CLOSE] = 'Got the wrong close of an end element tag.';
+str[err.ATTRIBUTE_MISSING_QUOTE] = 'No quote found for an attribute.';
+str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
 
 module.exports = XmlErrorToken;
