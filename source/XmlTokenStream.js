@@ -6,6 +6,11 @@ const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStringToken = require('./XmlStringToken.js');
 
+const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
+const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
+const ATTRIBUTE_VALUE_TERMINATORS = [ '>', '/>' ];
+
 class XmlTokenStream {
 
    constructor(cursor, options) {
@@ -127,19 +132,23 @@ class XmlTokenStream {
    _getProcessingInstruction() {
       const firstMarkup = this._cursor.getMarkup();
       const space = this._cursor.getSpace();
-      const target = this._cursor.getWord();
+      const target = this._cursor.getWord([ '?>' ]);
 
       if (space) {
          this._reportSyntaxError(XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
             'Space found before processing intruction target.');
       }
 
-      if (!target.couldBeName) {
+      if (!target) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.PI_NO_TARGET);
+      }
+
+      if (target && !target.couldBeName) {
          this._reportSyntaxError(XmlErrorToken.ERROR.PI_TARGET_NOT_NAME,
             'The target name does not match the syntax for names. Found: "' + target.text + '".');
       }
 
-      if (target.text.toLocaleLowerCase() === 'xml') {
+      if (target && target.text.toLocaleLowerCase() === 'xml') {
          if (target.text !== 'xml') {
             this._reportSyntaxError(XmlErrorToken.ERROR.XML_NOT_LOWERCASE,
                'The xml target name was not all lower case (' + target.text + ').');
@@ -156,7 +165,7 @@ class XmlTokenStream {
             this._cursor.getMatch('?>');
          }
 
-         const xtoken = new XmlToken(XmlToken.PI, target.text);
+         const xtoken = new XmlToken(XmlToken.PI, target ? target.text : '');
          if (content) {
             xtoken.content = content.text;
          }
@@ -191,7 +200,7 @@ class XmlTokenStream {
       let lastSpace = this._cursor.getSpace();
       const params = [];
 
-      let key = this._cursor.getWord();
+      let key = this._cursor.getWord(XMLDECL_NAME_TERMINATORS);
       while (key) {
          if (!lastSpace) {
             this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
@@ -215,7 +224,7 @@ class XmlTokenStream {
             this._cursor.getChar();     // quote
          } else {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            content = this._cursor.getWord();
+            content = this._cursor.getWord(XMLDECL_VALUE_TERMINATORS);
          }
 
          lastSpace = this._cursor.getSpace();    // optional
@@ -225,7 +234,7 @@ class XmlTokenStream {
             value: content.text
          };
 
-         key = this._cursor.getWord();
+         key = this._cursor.getWord(XMLDECL_NAME_TERMINATORS);
 
          params.push(pair);
       }
@@ -324,7 +333,7 @@ class XmlTokenStream {
       let attributes = [];
 
       const leadingSpace = this._cursor.getSpace();
-      const name = this._cursor.getWord();
+      const name = this._cursor.getWord([ '>', '/>' ]); // @@@ test.e.g name with / in it
       if (isStartOrEmpty) {
          attributes = this._getAttributes();
 
@@ -405,12 +414,45 @@ class XmlTokenStream {
     *   [10] AttValue ::= '"' ([^<&"] | Reference)* '"' |
     *                     "'" ([^<&'] | Reference)* "'"
     *
-    * Explain error reporting wrt = and quotes
+    * While syntactically valid attributes are easy to parse, part of the goal
+    * of this class is to try to cope reasonably with syntactically invalide
+    * so processing can continue. There are some cases where parsing
+    * attributes that this gets ugly, and there are some cases where the
+    * decision of what to do with the case is not "obvious".  These are the
+    * general rules used:
+    *    1) If a value's quote is missing, read the next space-terminated
+    *       token (within the tag) as the value
+    *            name=value
+    *    2) If an equal is missing, if the following string starts with a
+    *       quote, just read that as a value. Otherwise, consider this as
+    *       a valueless attribute.
+    *            name "value"
+    *            name name
+    *    3) If a quote is found within an attribute name, consider it part
+    *       of a name that doesn't match the syntax for xml names.
+    *            name"name"
+    * In truly degenerate cases, of course, this will produce a messy set of
+    * attributes. And it is still possible to have a mis-balanced quote on
+    * an attribute and so consider a substantial chunk of the remainder of the
+    * document part of the attribute. Ignoring that case, though, the damage
+    * here should be confined cleanly to the set of attributes, with just
+    * a variety of presumably invalid-name attributes.
+    *
+    * Two final notes: We could legitimately consider the case of a missing
+    * equal and quote  (the second case of 2, above) to produce a name and
+    * value, rather than two names. This seemed an arbitrary decision, and
+    * since HTML allows valueless attributes, that seemed a fine way to go.
+    * We could also consider finding a quote within a name as the start of
+    * the name's value. The main argument against this is just that a single
+    * quote within a name would tend to risk reading in past the end of the
+    * tag as part of the attribute. In terms of recovery from errors, it
+    * seemed safer to be biased towards the case that would consume less
+    * (all of these, after all, are syntax errors to start with).
     */
    _getAttributes() {
       const attributes = [];
       let lastSpace = this._cursor.getSpace();
-      let name = this._cursor.getWord();
+      let name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
 
       while (name) {
          if (!lastSpace) {
@@ -434,7 +476,7 @@ class XmlTokenStream {
                   valueToken: undefined
                };
 
-               name = this._cursor.getWord();
+               name = this._cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS);
 
                attributes.push(pair);
                continue;
@@ -449,7 +491,7 @@ class XmlTokenStream {
             this._cursor.getChar();     // quote
          } else {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            content = this._cursor.getWord();
+            content = this._cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS);
          }
 
          lastSpace = this._cursor.getSpace();    // optional
@@ -462,7 +504,7 @@ class XmlTokenStream {
             quoteType: quote.text
          };
 
-         name = this._cursor.getWord();
+         name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
 
          attributes.push(pair);
       }

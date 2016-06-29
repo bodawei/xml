@@ -60,7 +60,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
 6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints. ACTUAL: 8
 6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints
--- next: 55
+-- next: 56
 ---------------------------------------------
 
 x 16:XL read attributes
@@ -72,7 +72,7 @@ x 18:XL READ CDATA [2.7]
 √ 49:S: Cope with basic syntax errors in attribute
 	< in value
 	name not a name	
-50: 1 day
+50: 3 day
 
 50:M: Cope with major syntax errors in attribute
 	add a getToSpaceOrTerminator('>') in string cursor.
@@ -122,8 +122,8 @@ x 18:XL READ CDATA [2.7]
 			attribute names: =, > and />  (and maybe ' and " if you want)  This seems to fix all these 
 			degenerate attribute value: > and />
 		REVISED 50
-			modify getWord to take an array of terminators
-			Modify existing uses
+			√ modify getWord to take an array of terminators
+			√ Modify existing uses
 				test getPI with <??> and <?/bogus?>   -- terminates with ?>
 				test getTag with </>, < ?/>	terminates with > or />
 			getAttribute tries the following
@@ -134,13 +134,19 @@ x 18:XL READ CDATA [2.7]
 				name blah   this becomes two names (no real reason, except that html allows valueless attrs)
 				-- name terminates with = or /> or >
 				-- degenerate value terminates with /> or >
+
+				-- this will need some testing of the bad cases in xmldecl ultimately.
 				? If we detect a < in a value do we keep trying to get a value, or terminate the element start tag?
 					if the latter, the getToTerminator there needs to include < as a possible terminator too
 				in short: read a name, if we can get ="value" or =1wordvalue or ' "value"' all if good. Otherwise, we assume no value and just repeat. a name in this case is a space separated string that doesn't include /> or > or = in it
 				need to test this with the above also
 					<foo name /name >
 					<foo name random-xml-markup-content>
-			Document all this in the comments
+			√ Document all this in the comments
+			Fix handling of <
+				Recovery is ambiguous. do we terminate the tag (probably safer) or include this in the attribute
+					Probably good to have a flag
+			Generate test cases around the bad contents
 
 51:S:syntax error if ]]> found in char data
 	modify readtoMarkup to stop at ]]>
@@ -150,8 +156,6 @@ x 18:XL READ CDATA [2.7]
 7:M: StringCursor cleanup
 	- review testing of all routines (through getMarkup)
 		- including doc them and test at non-start of string
-
-10mg every day. wmf 12.5  july 6th.
 =============================================
 CLEANUP
 - Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
@@ -179,6 +183,7 @@ PROJECT
 		getToMarkup: currently <, soon < and & and possibly < & and ]]>
 		soon: getToSpaceOrTerminator  any space or >
 		getToTerminator  -->, ?> ]]>, ", ' and >
+		getWord takes a variable set of terminators
 	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
 47:M: Minor StringCursor features
 	- getSpace should return text and origText
@@ -219,6 +224,9 @@ PROJECT
 		This may impact parts of stringCursor which need to become reference aware.
 		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
 		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+55:s:
+	Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
+
 --- DTD
 19:XL Read doctype
 20:XL Read element declaration

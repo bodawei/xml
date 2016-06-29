@@ -30,6 +30,7 @@ XmlErrorToken.ERROR = {
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
    PI_NO_TERMINATOR: 'PI_NO_TERMINATOR',
+   PI_NO_TARGET: 'PI_NO_TARGET',
    COMMENT_MISSING_END: 'COMMENT_MISSING_END',
    COMMENT_ENDS_WITH_HYPHEN: 'COMMENT_ENDS_WITH_HYPHEN',
    ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
@@ -53,6 +54,7 @@ str[err.NO_SPACE_BEFORE_ATTR] = 'There must be a space before an attribute name.
 str[err.NO_ATTRIBUTES] = 'There must be at least a version specified for an XML Declaration.';
 str[err.MISSING_XMLDECL_CLOSE] = 'Missing closing ?> on XML Declaration.';
 str[err.PI_NO_TERMINATOR] = 'Closing ?> not found for processing instruction.';
+str[err.PI_NO_TARGET] = 'Missing target name in processing instruction.';
 str[err.COMMENT_MISSING_END] = 'Closing --> not found for comment.';
 str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Comment should not end with a hyphen.';
 str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';

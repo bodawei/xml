@@ -247,6 +247,22 @@ describe('XmlTokenStream', () => {
          }).toThrowError('The target name does not match the syntax for names. Found: "frog$".');
       });
 
+      it('throws an error if there is no target', () => {
+         const s = makeStream('<??>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Missing target name in processing instruction.');
+      });
+
+      it('generates an error token if a there is no target', () => {
+         const s = makeStream('<??>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.PI_NO_TARGET);
+      });
+
    });
 
    describe('parsing XML Declaration', () => {
@@ -963,9 +979,9 @@ describe('XmlTokenStream', () => {
          it('reads a single word value when there is neither equal or quote', () => {
             const s = makeStream('<elementName attr1  value one>', { lax: true });
 
-            let x = s.getNext(); // swallow error
-            x = s.getNext(); // swallow error
-            x = s.getNext(); // swallow error
+            s.getNext(); // swallow error
+            s.getNext(); // swallow error
+            s.getNext(); // swallow error
             const t = s.getNext();
 
             expect(t.attributes.length).toEqual(3);
@@ -1050,7 +1066,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if /> is missing', () => {
-         const s = makeStream('<name  /<');
+         const s = makeStream('<name  ');
 
          expect(() => {
             s.getNext();

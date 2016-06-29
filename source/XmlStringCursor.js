@@ -130,29 +130,38 @@ class XmlStringCursor {
 
    /*
     * Returns the next delimited substring from the current position in
-    * the cursor. The definition of what terminates a word is not
-    * necessarily a-priori logical. It is the maximal set of characters as
-    * dictated by what is necessary to bound word-like things in XML.
+    * the cursor. The substring is considered to be terminated by any
+    * Space (see getSpace()) or any of the strings in the terminators
+    * array.
     *
     * Note that the WORD token has an added property:
     *       couldBeName
     * It is set to true if the word adheres to the XML rules for names.
     *
+    * PARAM
+    * terminators: an array of strings
     * RETURN
     * The next word in the cursor as a WORD token.
     */
-   getWord() {
+   getWord(terminators) {
       const startOffset = this._offset.clone();
       let nextChar = this._source[this._offset.index];
+      let maxLen = 0;
+      for (let index = 0; index < terminators.length; index++) {
+         const len = terminators[index].length;
+         if (maxLen < len) {
+            maxLen = len;
+         }
+      }
 
-      if (!nextChar || this._isWordTerminator(nextChar)) {
+      if (!nextChar || this._atTerminator(terminators, maxLen)) {
          return;
       }
 
       let couldBeName = this._isNameStartChar(nextChar);
       let index = this._offset.index + 1;
 
-      while (nextChar && !this._isWordTerminator(nextChar)) {
+      while (nextChar && !this._atTerminator(terminators, maxLen)) {
          couldBeName = couldBeName && this._isNameChar(nextChar); // first time through is redundant
          this._offset.index ++;
          this._offset.column ++;
@@ -303,6 +312,30 @@ class XmlStringCursor {
          char === '/' ||
          char === '=' ||
          char === '?';
+   }
+
+   /*
+    * PARAM
+    * terminators: An array of strings that could be considered terminators
+    * maxTerminatorLength: The longest of the strings in terminators (this
+    *    is just for performance, so we do not need to calculate this on
+    *    every call)
+    * RETURN
+    * true if, at the current position in the cursor, we can find any of
+    * the terminators or S
+    */
+   _atTerminator(terminators, maxTerminatorLength) {
+      if (this._isSpace(this._source[this._offset.index])) {
+         return true;
+      }
+
+      const nextSeg = this._source.substr(this._offset.index, maxTerminatorLength);
+
+      for (let index = 0; index < terminators.length; index++) {
+         if (nextSeg.indexOf(terminators[index]) === 0) {
+            return true;
+         }
+      }
    }
 
    /*

@@ -160,7 +160,7 @@ describe('XmlStringCursor', () => {
 
       it('reads a space string from the middle of an overall string', () => {
          const c = new XmlStringCursor('one twp');
-         c.getWord();
+         c.getWord([]);
 
          expect(c.getSpace()).toEqual(new XmlStringToken(' ', XmlStringToken.SPACE,
              new Offset(0, 3, 3), new Offset(0, 4, 4)));
@@ -170,12 +170,12 @@ describe('XmlStringCursor', () => {
 
    describe('getWord()', () => {
 
-      it('returns the next word', () => {
+      it('returns the next space-terminated word', () => {
          const c = new XmlStringCursor('one two');
 
          const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
          expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
+         expect(c.getWord([])).toEqual(expected);
       });
 
       it('returns the next word, even if a single letter', () => {
@@ -183,67 +183,66 @@ describe('XmlStringCursor', () => {
 
          const expected = new XmlStringToken('o', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 1, 1));
          expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
+         expect(c.getWord([])).toEqual(expected);
       });
 
       it('can get multiple words in a row', () => {
          const c = new XmlStringCursor('one two');
-         c.getWord();
+         c.getWord([]);
          c.getSpace();
 
          const expected = new XmlStringToken('two', XmlStringToken.WORD, new Offset(0, 4, 4), new Offset(0, 7, 7));
          expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
+         expect(c.getWord([])).toEqual(expected);
+      });
+
+      it('considers the word terminated at the specified terminator', () => {
+         const c = new XmlStringCursor('oneX');
+
+         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         expected.couldBeName = true;
+         expect(c.getWord([ 'X' ])).toEqual(expected);
+      });
+
+      it('considers the word terminated at any of the specified terminators', () => {
+         const c1 = new XmlStringCursor('oneX');
+         const c2 = new XmlStringCursor('one?');
+         const c3 = new XmlStringCursor('one/]]>');
+
+         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         expected.couldBeName = true;
+         expect(c1.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
+         expect(c2.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
+         expect(c3.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
+      });
+
+      it('identifies a word even if not at the start of the cursor', () => {
+         const c = new XmlStringCursor('one> twoX');
+         c.getWord([ '>', 'X' ]);
+         c.getChar();
+         c.getSpace();
+
+         const expected = new XmlStringToken('two', XmlStringToken.WORD, new Offset(0, 5, 5), new Offset(0, 8, 8));
+         expected.couldBeName = true;
+         expect(c.getWord([ '>', 'X' ])).toEqual(expected);
       });
 
       it('returns undefined if there is a space at the cursor', () => {
          const c = new XmlStringCursor(' one two');
 
-         expect(c.getWord()).toBeUndefined();
+         expect(c.getWord([])).toBeUndefined();
       });
 
       it('returns undefined if there is another word terminator at the cursor', () => {
          const c = new XmlStringCursor('?>one two');
 
-         expect(c.getWord()).toBeUndefined();
+         expect(c.getWord([ '?>' ])).toBeUndefined();
       });
 
       it('returns undefined if cursor is at the end of the input', () => {
          const c = new XmlStringCursor('');
 
-         expect(c.getWord()).toBeUndefined();
-      });
-
-      it('considers > to be a word terminator', () => {
-         const c = new XmlStringCursor('one>');
-
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
-      });
-
-      it('considers / to be a word terminator', () => {
-         const c = new XmlStringCursor('one/>');
-
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
-      });
-
-      it('considers = to be a word terminator', () => {
-         const c = new XmlStringCursor('one=5');
-
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
-      });
-
-      it('considers ? to be a word terminator', () => {
-         const c = new XmlStringCursor('one?>');
-
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         expected.couldBeName = true;
-         expect(c.getWord()).toEqual(expected);
+         expect(c.getWord([])).toBeUndefined();
       });
 
       describe('couldBeName flag', () => {
@@ -255,7 +254,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = true;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a possible name if it has a hyphen, period or digit in it', () => {
@@ -265,7 +264,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 5, 5));
             firstWord.couldBeName = true;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a possible name if it has the allowable chars above ascii in it', () => {
@@ -275,7 +274,7 @@ describe('XmlStringCursor', () => {
                 XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 5, 5));
             firstWord.couldBeName = true;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a possible name if it has a bunch of the name chars in it', () => {
@@ -287,7 +286,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, word.length, word.length));
             firstWord.couldBeName = true;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a possible name if it has a uFDF1 in it', () => {
@@ -297,7 +296,7 @@ describe('XmlStringCursor', () => {
                 XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
             firstWord.couldBeName = true;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it has a $ in it', () => {
@@ -307,7 +306,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             expected.couldBeName = false;
 
-            expect(c.getWord()).toEqual(expected);
+            expect(c.getWord([])).toEqual(expected);
          });
 
          it('marks a word as a non-name if it starts with a digit', () => {
@@ -317,7 +316,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it starts with a hyphen', () => {
@@ -327,7 +326,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it starts with a period', () => {
@@ -337,7 +336,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it starts with a u00B7', () => {
@@ -347,7 +346,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it starts with a u0320', () => {
@@ -357,7 +356,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
          it('marks a word as a non-name if it starts with a u2040', () => {
@@ -367,7 +366,7 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
-            expect(c.getWord()).toEqual(firstWord);
+            expect(c.getWord([])).toEqual(firstWord);
          });
 
       });
@@ -586,9 +585,9 @@ describe('XmlStringCursor', () => {
 
       it('returns the three tokens most recently returned', () => {
          const c = new XmlStringCursor('one two');
-         c.getWord();
+         c.getWord([]);
          c.getSpace();
-         c.getWord();
+         c.getWord([]);
 
          const firstWord = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
          firstWord.couldBeName = true;
@@ -604,9 +603,9 @@ describe('XmlStringCursor', () => {
 
       it('returns an empty array of tokens once it has already been called', () => {
          const c = new XmlStringCursor('one two');
-         c.getWord();
+         c.getWord([]);
          c.getSpace();
-         c.getWord();
+         c.getWord([]);
          c.getRecentTokens();
 
          expect(c.getRecentTokens()).toEqual([]);
