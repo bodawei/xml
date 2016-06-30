@@ -34,6 +34,16 @@ describe('XmlTokenStream', () => {
       return new XmlTokenStream(new XmlStringCursor(str), options);
    }
 
+   function ignoreError(stream, errorCode) {
+      const token = stream.getNext();
+      expect(token.code).toEqual(errorCode);
+   }
+
+   function ignoreToken(stream, tokenType) {
+      const token = stream.getNext();
+      expect(token.type).toEqual(tokenType);
+   }
+
    describe('construction', () => {
 
       it('can be constructed with a cursor', () => {
@@ -719,7 +729,7 @@ describe('XmlTokenStream', () => {
       it('retrieves an empty name if there is no name in the start tag', () => {
          const s = makeStream('<>', { lax: true });
 
-         s.getNext(); // swallow the error
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
          const t = s.getNext();
          expect(t.name).toEqual('');
       });
@@ -848,7 +858,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with whitespace around the equals', () => {
-            const s = makeStream('<elemName\n\tattr1\t\n=   \'one\' attr2   =\r\n\t \'two\'>', { lax: true });
+            const s = makeStream('<elemName\n\tattr1\t\n=   \'one\' attr2   =\r\n\t "two">', { lax: true });
 
             const t = s.getNext();
 
@@ -872,7 +882,7 @@ describe('XmlTokenStream', () => {
                nameToken: name2,
                valueToken: new XmlStringToken('two', XmlStringToken.STRING,
                   new Offset(3, 3, 42), new Offset(3, 6, 45)),
-               quoteType: '\''
+               quoteType: '"'
             } ]);
          });
 
@@ -884,7 +894,7 @@ describe('XmlTokenStream', () => {
             }).toThrowError('An "<" was found in the value for attribute "attr1".');
          });
 
-         it('generates an error token if name is missing', () => {
+         it('generates an error token if there is a < in the attribute value', () => {
             const s = makeStream('<elementName attr1="value<">', { lax: true });
 
             const t = s.getNext();
@@ -944,7 +954,7 @@ describe('XmlTokenStream', () => {
          it('reads a single word if there is no quote', () => {
             const s = makeStream('<elementName attr1= value>', { lax: true });
 
-            s.getNext(); // swallow the error
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             const t = s.getNext();
 
             expect(t.attributes[0].value).toEqual('value');
@@ -967,26 +977,145 @@ describe('XmlTokenStream', () => {
             expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
          });
 
+         it('throws an error if there is no value', () => {
+            const s = makeStream('<elementName attr1= >');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('Missing value for an attribute.');
+         });
+
+         it('generates an error token if there is no equal sign', () => {
+            const s = makeStream('<elementName attr1= >', { lax: true });
+
+            const t = s.getNext();
+
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+         });
+
          it('infers an equal sign and reads the value if in lax mode and equal missing', () => {
             const s = makeStream('<elementName attr1 "value one">', { lax: true });
 
-            s.getNext(); // swallow the error
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             const t = s.getNext();
 
             expect(t.attributes[0].value).toEqual('value one');
          });
 
-         it('reads a single word value when there is neither equal or quote', () => {
+         it('reads a new name if both equal and quote are missing', () => {
             const s = makeStream('<elementName attr1  value one>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
 
-            s.getNext(); // swallow error
-            s.getNext(); // swallow error
-            s.getNext(); // swallow error
             const t = s.getNext();
 
-            expect(t.attributes.length).toEqual(3);
+            expect(t.attributes[0].name).toEqual('attr1');
+            expect(t.attributes[1].name).toEqual('value');
+            expect(t.attributes[2].name).toEqual('one');
          });
 
+         it('returns undefined for values when they are not present', () => {
+            const s = makeStream('<elementName attr1  value>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].value).toBeUndefined();
+            expect(t.attributes[1].value).toBeUndefined();
+         });
+
+         it('considers quotes in a name to be part of the name', () => {
+            const s = makeStream('<elementName attr1"boo"  two=value>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('attr1"boo"');
+            expect(t.attributes[1].name).toEqual('two');
+         });
+
+         it('does not consider a close angle bracket to be part of the name', () => {
+            const s = makeStream('<elementName one>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('one');
+         });
+
+         it('does not consider a close angle bracket to be part of the value in a bad value', () => {
+            const s = makeStream('<elementName one=two>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].value).toEqual('two');
+         });
+
+         it('does not consider a close angle bracket to be part of the value when no equal', () => {
+            const s = makeStream('<elementName one >', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].value).toBeUndefined();
+         });
+
+         it('considers quotes at the start of the name to be part of the name', () => {
+            const s = makeStream('<elementName "one="vone"  \'two=vtwo>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('"one');
+            expect(t.attributes[1].name).toEqual('\'two');
+         });
+
+         it('handles eof in middle of name', () => {
+            const s = makeStream('<elementName nam', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('nam');
+         });
+
+         it('handles eof after equal', () => {
+            const s = makeStream('<elementName name=', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+         });
+
+         xit('handles eof in value', () => {
+            const s = makeStream('<elementName name="one', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one');
+         });
       });
 
       it('retrieves the expected tokens', () => {
@@ -1115,51 +1244,51 @@ describe('XmlTokenStream', () => {
 
       it('retrieves a token of type ELEMENT_END', () => {
          const s = makeStream('<name></name>');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow start tag
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ELEMENT_END);
       });
 
       it('retrieves the name of the element', () => {
          const s = makeStream('<name></name>');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow start tag
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('retrieves an empty name if there is no name in the end tag', () => {
          const s = makeStream('<name></>', { lax: true });
+         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
 
-         s.getNext(); // swallow start tag
-         s.getNext(); // swallow the mismatch-name error
-         s.getNext(); // swallow the bad name error
          const t = s.getNext();
          expect(t.name).toEqual('');
       });
 
       it('allows S after the name', () => {
          const s = makeStream('<name></name     >');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow start tag
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('throws an error if a space is found after the </', () => {
          const s = makeStream('<name></ name>');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
          expect(() => {
-            s.getNext(); // swallow start tag
             s.getNext();
          }).toThrowError('Space found after opening of an element tag.');
       });
 
       it('generates an error token if a space is found after the </', () => {
          const s = makeStream('<name></ name>', { lax: true });
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow start tag
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
@@ -1167,17 +1296,17 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if a it finds the wrong close', () => {
          const s = makeStream('<name></name/>');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
          expect(() => {
-            s.getNext(); // swallow start tag
             s.getNext();
          }).toThrowError('Got the wrong close of an end element tag.');
       });
 
       it('generates an error token if it finds the wrong close', () => {
          const s = makeStream('<name></name/>', { lax: true });
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow start tag
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE);
@@ -1275,8 +1404,8 @@ describe('XmlTokenStream', () => {
 
       it('retrieves the expected tokens', () => {
          const s = makeStream('<one></one >');
+         ignoreToken(s, XmlToken.ELEMENT_START);
 
-         s.getNext(); // swallow the open tag
          const t = s.getNext();
          expect(t.tokens).toEqual(makeStringTokenArray([ {
             text: '</',

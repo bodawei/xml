@@ -463,12 +463,13 @@ class XmlTokenStream {
          const equal = this._cursor.getMatch('=');     // =
          this._cursor.getSpace();    // optional
          const quote = this._cursor.peekChar(); // quote
-         const isQuote = quote.text === '"' || quote.text === '\'';
+         const isQuote = quote && (quote.text === '"' || quote.text === '\'');
 
          if (!equal) {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+
             if (!isQuote) {
-               // ick
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
                const pair = {
                   name: name.text,
                   value: undefined,
@@ -476,7 +477,7 @@ class XmlTokenStream {
                   valueToken: undefined
                };
 
-               name = this._cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS);
+               name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
 
                attributes.push(pair);
                continue;
@@ -488,20 +489,29 @@ class XmlTokenStream {
          if (isQuote) {
             this._cursor.getChar();     // quote
             content = this._cursor.getToTerminator(quote.text);
-            this._cursor.getChar();     // quote
+            if (!content) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);   // TEST
+               content = { text: 'NEED TO GET TO EOF' };
+            } else {
+               this._cursor.getChar();     // quote
+            }
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             content = this._cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS);
+            if (!content) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            } else {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            }
          }
 
          lastSpace = this._cursor.getSpace();    // optional
 
          const pair = {
             name: name.text,
-            value: content.text,
+            value: content ? content.text : undefined,
             nameToken: name,
             valueToken: content,
-            quoteType: quote.text
+            quoteType: quote ? quote.text : undefined
          };
 
          name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);

@@ -72,7 +72,7 @@ x 18:XL READ CDATA [2.7]
 √ 49:S: Cope with basic syntax errors in attribute
 	< in value
 	name not a name	
-50: 3 day
+50: 3 day!
 
 50:M: Cope with major syntax errors in attribute
 	add a getToSpaceOrTerminator('>') in string cursor.
@@ -143,10 +143,12 @@ x 18:XL READ CDATA [2.7]
 					<foo name /name >
 					<foo name random-xml-markup-content>
 			√ Document all this in the comments
+			√ Generate test cases around the bad contents
+			Fix: getToTerminator needs to return an object, with the token, and an indication of what terminator it found. that can be undefined.
+				- all callers need to be modified and tested
 			Fix handling of <
 				Recovery is ambiguous. do we terminate the tag (probably safer) or include this in the attribute
 					Probably good to have a flag
-			Generate test cases around the bad contents
 
 51:S:syntax error if ]]> found in char data
 	modify readtoMarkup to stop at ]]>
@@ -159,6 +161,9 @@ x 18:XL READ CDATA [2.7]
 =============================================
 CLEANUP
 - Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
+- duplicate code even in getAttributes (in the !equal section)
+- if no value or name, do we do undefined or ''? (be consistent, and make part of definition)
+- getAttributes is getting ugly.
 
 RESEARCH (when have net)
 - high order unicode

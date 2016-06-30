@@ -41,8 +41,10 @@ XmlErrorToken.ERROR = {
    ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
    ATTRIBUTE_BAD_NAME: 'ATTRIBUTE_BAD_NAME',
    ATTRIBUTE_MISSING_QUOTE: 'ATTRIBUTE_MISSING_QUOTE',
+   ATTRIBUTE_MISSING_CLOSE_QUOTE: 'ATTRIBUTE_MISSING_CLOSE_QUOTE',
    ATTRIBUTE_MISSING_EQUAL: 'ATTRIBUTE_MISSING_EQUAL',
-   ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE'
+   ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE',
+   ATTRIBUTE_MISSING_VALUE: 'ATTRIBUTE_MISSING_VALUE'
 };
 
 XmlErrorToken.STRING = {};
@@ -62,6 +64,8 @@ str[err.ELEMENT_MISSING_NAME] = 'Name missing in element tag.';
 str[err.ELEMENT_MISSING_CLOSE] = 'Missing closing of element tag.';
 str[err.ELEMENT_END_BAD_CLOSE] = 'Got the wrong close of an end element tag.';
 str[err.ATTRIBUTE_MISSING_QUOTE] = 'No quote found for an attribute.';
+str[err.ATTRIBUTE_MISSING_CLOSE_QUOTE] = 'No closing quote for an attribute.';
 str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
+str[err.ATTRIBUTE_MISSING_VALUE] = 'Missing value for an attribute.';
 
 module.exports = XmlErrorToken;
