@@ -99,19 +99,19 @@ class XmlTokenStream {
     */
    _getComment() {
       this._cursor.getMarkup();
-      const content = this._cursor.getToTerminator('-->');
+      const results = this._cursor.getToTerminator([ '-->' ]);
 
-      if (!content) {
+      if (!results.terminator) {
          this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_MISSING_END);
       } else {
          this._cursor.getMatch('-->');
 
-         if (content.text[content.text.length - 1] === '-') {
+         if (results.token && results.token.text[results.token.text.length - 1] === '-') {
             this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN);
          }
       }
 
-      const xtoken = new XmlToken(XmlToken.COMMENT, content.text);
+      const xtoken = new XmlToken(XmlToken.COMMENT, results.token ? results.token.text : undefined);
       xtoken.tokens = this._cursor.getRecentTokens();
 
       this._pendingTokens.push(xtoken);
@@ -156,19 +156,17 @@ class XmlTokenStream {
          this._getXmlDecl(firstMarkup, target);
       } else {
          this._cursor.getSpace();   // optional whitespace
-         const content = this._cursor.getToTerminator('?>');
+         const results = this._cursor.getToTerminator([ '?>' ]);
 
          // If we found no ?> (thus, really, end of file) report an error.
-         if (!content) {
+         if (!results.terminator) {
             this._reportSyntaxError(XmlErrorToken.ERROR.PI_NO_TERMINATOR);
          } else {
             this._cursor.getMatch('?>');
          }
 
          const xtoken = new XmlToken(XmlToken.PI, target ? target.text : '');
-         if (content) {
-            xtoken.content = content.text;
-         }
+         xtoken.content = results.token ? results.token.text : undefined;
          xtoken.tokens = this._cursor.getRecentTokens();
 
          this._pendingTokens.push(xtoken);
@@ -220,7 +218,8 @@ class XmlTokenStream {
 
          if (quote.text === '"' || quote.text === '\'') {
             this._cursor.getChar();     // quote
-            content = this._cursor.getToTerminator(quote.text);
+            const results = this._cursor.getToTerminator([ quote.text ]);
+            content = results.token;
             this._cursor.getChar();     // quote
          } else {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
@@ -488,11 +487,12 @@ class XmlTokenStream {
 
          if (isQuote) {
             this._cursor.getChar();     // quote
-            content = this._cursor.getToTerminator(quote.text);
-            if (!content) {
+            const result = this._cursor.getToTerminator([ quote.text ]);
+            if (!result.terminator) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);   // TEST
-               content = { text: 'NEED TO GET TO EOF' };
+               content = result.token;
             } else {
+               content = result.token;
                this._cursor.getChar();     // quote
             }
          } else {

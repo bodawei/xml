@@ -123,6 +123,12 @@ describe('XmlStringCursor', () => {
              new Offset(0, 0, 0), new Offset(0, 4, 4)));
       });
 
+      it('returns undefined if the first available character is ot a space', () => {
+         const c = new XmlStringCursor('hi');
+
+         expect(c.getSpace()).toBeUndefined();
+      });
+
       it('returns the a mixture of tabs and spaces', () => {
          const c = new XmlStringCursor(' \t \t hi');
 
@@ -447,6 +453,13 @@ describe('XmlStringCursor', () => {
              new Offset(0, 2, 2)));
       });
 
+      it('returns a markup token if the next is <!--', () => {
+         const c = new XmlStringCursor('<!--frog');
+
+         expect(c.getMarkup()).toEqual(new XmlStringToken('<!--', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+             new Offset(0, 4, 4)));
+      });
+
       it('returns a markup token if the next is <?', () => {
          const c = new XmlStringCursor('<?frog');
 
@@ -485,35 +498,54 @@ describe('XmlStringCursor', () => {
 
          expect(() => {
             c.getToTerminator();
-         }).toThrowError('Must pass a non-empty string to getToTerminator().');
+         }).toThrowError('Must pass a non-empty array of terminators to getToTerminator().');
       });
 
       it('throws an error if passed an empty string', () => {
          const c = new XmlStringCursor('');
 
          expect(() => {
-            c.getToTerminator('');
-         }).toThrowError('Must pass a non-empty string to getToTerminator().');
+            c.getToTerminator([]);
+         }).toThrowError('Must pass a non-empty array of terminators to getToTerminator().');
       });
 
       it('returns the string up to the specified terminator', () => {
          const c = new XmlStringCursor('frogD');
 
-         expect(c.getToTerminator('D')).toEqual(new XmlStringToken('frog', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 4, 4)));
+         expect(c.getToTerminator([ 'D' ])).toEqual({
+            token: new XmlStringToken('frog', XmlStringToken.STRING,
+               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            terminator: 'D'
+         });
       });
 
-      it('returns a nothing if the terminator is not found', () => {
+      it('returns nothing if already at the terminator', () => {
+         const c = new XmlStringCursor('D');
+
+         expect(c.getToTerminator([ 'D' ])).toEqual({
+            token: undefined,
+            terminator: 'D'
+         });
+      });
+
+      it('returns everything to EOF if terminator not found', () => {
          const c = new XmlStringCursor('frog');
 
-         expect(c.getToTerminator('D')).toBeUndefined();
+         expect(c.getToTerminator([ 'D' ])).toEqual({
+            token: new XmlStringToken('frog', XmlStringToken.STRING,
+               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            terminator: undefined
+         });
       });
 
       it('returns the string up to the first terminator when there are multiple', () => {
          const c = new XmlStringCursor('frogDandD');
 
-         expect(c.getToTerminator('D')).toEqual(new XmlStringToken('frog', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 4, 4)));
+         expect(c.getToTerminator([ 'D' ])).toEqual({
+            token: new XmlStringToken('frog', XmlStringToken.STRING,
+               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            terminator: 'D'
+         });
       });
 
    });

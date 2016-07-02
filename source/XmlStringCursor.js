@@ -11,12 +11,12 @@ const Offset = require('./Offset.js');
  */
 class XmlStringCursor {
 
-   /* \
+   /* *******************************************************************\
     Constructs an instance with the specified source string.
 
     PARAM
     The string that this cursor should use.
-   \*/
+   \**********************************************************************/
    constructor(source) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
@@ -154,14 +154,14 @@ class XmlStringCursor {
          }
       }
 
-      if (!nextChar || this._atTerminator(terminators, maxLen)) {
+      if (!nextChar || this._atTerminator(terminators, maxLen, true)) {
          return;
       }
 
       let couldBeName = this._isNameStartChar(nextChar);
       let index = this._offset.index + 1;
 
-      while (nextChar && !this._atTerminator(terminators, maxLen)) {
+      while (nextChar && !this._atTerminator(terminators, maxLen, true)) {
          couldBeName = couldBeName && this._isNameChar(nextChar); // first time through is redundant
          this._offset.index ++;
          this._offset.column ++;
@@ -254,42 +254,55 @@ class XmlStringCursor {
    }
 
    // probably need to deal with line endings
-   getToTerminator(terminator) {
-      if (!terminator || terminator === '') {
-         throw new Error('Must pass a non-empty string to getToTerminator().');
+   getToTerminator(terminators) {
+      if (!terminators || terminators.length === 0) {
+         throw new Error('Must pass a non-empty array of terminators to getToTerminator().');
       }
-      const location = this._source.indexOf(terminator, this._offset.index);
 
       const startOffset = this._offset.clone();
+      let nextChar = this._source[this._offset.index];
+      let maxLen = 0;
+      let terminator;
 
-      if (location === -1) {
-         return;
+      for (let index = 0; index < terminators.length; index++) {
+         const len = terminators[index].length;
+         if (maxLen < len) {
+            maxLen = len;
+         }
       }
 
-      const rawString = this._source.substring(startOffset.index, location);
-      this._offset.index += rawString.length;
-      this._offset.column += rawString.length;
+      terminator = this._atTerminator(terminators, maxLen);
+      if (!nextChar || terminator) {
+         return {
+            token: undefined,
+            terminator: terminator
+         };
+      }
 
-      return this._makeToken(rawString, XmlStringToken.STRING, startOffset);
+      let index = this._offset.index + 1;
+
+      while (nextChar && !terminator) {
+         this._offset.index ++;
+         this._offset.column ++;
+
+         nextChar = this._source[index];
+         terminator = this._atTerminator(terminators, maxLen);
+         index++;
+      }
+
+      const rawString = this._source.substring(startOffset.index, this._offset.index);
+      const token = this._makeToken(rawString, XmlStringToken.STRING, startOffset);
+
+      return {
+         token: token,
+         terminator: terminator
+      };
    }
 
    // probably need to deal with line endings
-   // also looks like should stop at ]]>
+   // also looks like should stop at ]]>. note that this does return undefined.
    getToMarkup() {
-      const charData = this.getToTerminator('<');
-
-      // no markup terminator. just read to the end
-      if (charData) {
-         return charData;
-      } else {
-         const startOffset = this._offset.clone();
-         const rawString = this._source.substring(startOffset.index);
-         this._offset.index += rawString.length;
-         this._offset.column += rawString.length;
-
-         return this._makeToken(rawString, XmlStringToken.STRING, startOffset);
-      }
-
+      return this.getToTerminator('<').token;
    }
 
    getRecentTokens() {
@@ -304,36 +317,26 @@ class XmlStringCursor {
       return char === ' ' || char === '\t' || char === '\n' || char === '\r';
    }
 
-   _isWordTerminator() {
-      const char = this._source[this._offset.index];
-
-      return this._isSpace(char) ||
-         char === '>' ||
-         char === '/' ||
-         char === '=' ||
-         char === '?';
-   }
-
    /*
     * PARAM
     * terminators: An array of strings that could be considered terminators
     * maxTerminatorLength: The longest of the strings in terminators (this
     *    is just for performance, so we do not need to calculate this on
     *    every call)
+    * checkSpace: true if we should also check for whitespace as terminator
     * RETURN
-    * true if, at the current position in the cursor, we can find any of
-    * the terminators or S
+    * The terminator that was matched at the current position in the cursor
     */
-   _atTerminator(terminators, maxTerminatorLength) {
-      if (this._isSpace(this._source[this._offset.index])) {
-         return true;
+   _atTerminator(terminators, maxTerminatorLength, checkSpace) {
+      if (checkSpace && this._isSpace(this._source[this._offset.index])) {
+         return this._source[this._offset.index];
       }
 
       const nextSeg = this._source.substr(this._offset.index, maxTerminatorLength);
 
       for (let index = 0; index < terminators.length; index++) {
          if (nextSeg.indexOf(terminators[index]) === 0) {
-            return true;
+            return terminators[index];
          }
       }
    }

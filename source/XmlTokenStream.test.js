@@ -20,9 +20,11 @@ describe('XmlTokenStream', () => {
          const length = values[index].text.length;
          const stringToken = new XmlStringToken(values[index].text, values[index].type,
             new Offset(0, offset, offset), new Offset(0, offset + length, offset + length));
+
          if (values[index].type === XmlStringToken.WORD) {
             stringToken.couldBeName = true;
          }
+
          results.push(stringToken);
          offset += length;
       }
@@ -162,12 +164,31 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.COMMENT);
       });
 
+      it('retrieves the content of the comment', () => {
+         const s = makeStream('<!-- one -->');
+
+         expect(s.getNext().data).toEqual(' one ');
+      });
+
+      it('retrieves undefined as the value for an empty comment', () => {
+         const s = makeStream('<!---->');
+
+         expect(s.getNext().data).toBeUndefined();
+      });
+
       it('throws an error if no --> found', () => {
          const s = makeStream('<!--junk comment');
 
          expect(() => {
             s.getNext();
          }).toThrowError('Closing --> not found for comment.');
+      });
+
+      it('returns the content up to eof if eof in middle of comment', () => {
+         const s = makeStream('<!--junk comment', { lax: true });
+
+         ignoreError(s, XmlErrorToken.ERROR.COMMENT_MISSING_END);
+         expect(s.getNext().data).toEqual('junk comment');
       });
 
       it('throws an error if comment ends with a -', () => {
@@ -223,14 +244,14 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<?foo?>');
 
          const t = s.getNext();
-         expect(t.content).toEqual('');
+         expect(t.content).toBeUndefined();
       });
 
       it('allows whitespace but no content', () => {
          const s = makeStream('<?foo    ?>');
 
          const t = s.getNext();
-         expect(t.content).toEqual('');
+         expect(t.content).toBeUndefined();
       });
 
       it('throws an error if no ?> found', () => {
@@ -239,6 +260,13 @@ describe('XmlTokenStream', () => {
          expect(() => {
             s.getNext();
          }).toThrowError('Closing ?> not found for processing instruction.');
+      });
+
+      it('returns the content up to EOF if no ?> found in lax mode', () => {
+         const s = makeStream('<?foo glorky', { lax: true });
+         ignoreError(s, XmlErrorToken.ERROR.PI_NO_TERMINATOR);
+
+         expect(s.getNext().content).toEqual('glorky');
       });
 
       it('throws an error if a space is between the <? and the target', () => {
@@ -1107,15 +1135,28 @@ describe('XmlTokenStream', () => {
             expect(t.attributes[0].name).toEqual('name');
          });
 
-         xit('handles eof in value', () => {
+         it('handles eof in value', () => {
             const s = makeStream('<elementName name="one', { lax: true });
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
             const t = s.getNext();
 
             expect(t.attributes[0].name).toEqual('name');
             expect(t.attributes[0].value).toEqual('one');
          });
+
+         it('handles eof at start of value', () => {
+            const s = makeStream('<elementName name="', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toBeUndefined();
+         });
+
       });
 
       it('retrieves the expected tokens', () => {
