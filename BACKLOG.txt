@@ -72,9 +72,7 @@ x 18:XL READ CDATA [2.7]
 √ 49:S: Cope with basic syntax errors in attribute
 	< in value
 	name not a name	
-50: 4 day!
-
-50:M: Cope with major syntax errors in attribute
+√ 50:M: Cope with major syntax errors in attribute
 	add a getToSpaceOrTerminator('>') in string cursor.
 	other
 		name="value"	<-- good
@@ -149,32 +147,6 @@ x 18:XL READ CDATA [2.7]
 			Fix handling of <
 				Recovery is ambiguous. do we terminate the tag (probably safer) or include this in the attribute
 					Probably good to have a flag
-			---
-
-Problems
-
-Should slow down more when your fix to a break breaks more
-
-Did an API change which really had impact across class but didn't think about it enough
-    Class has unclear semantics for return values.  No eof
-    Inconsistency with return values     undefined or not and field names is bad
-
-Root of much of this is string cursor has grown and needs more design
-
-Work from bottom up and when introducing something new think more about edge cases
-When changing something like.comment with a missing case better to think if there others
-
-Should remove data prop on token
-String cursor returns token or undefined d for gerX or an object with terminator for getto.  
-Maybe should have eof for future use?
-
-
-1 name anything ending in space equal or angle brackets
-Followed by equal maybe
-if that by quote
-     Anthing wnding with ooen angle or quote
-else
-    Anything ending in space or close brackets
 
 51:S:syntax error if ]]> found in char data
 	modify readtoMarkup to stop at ]]>
@@ -196,6 +168,11 @@ CLEANUP
 - getxmldecl isn't dealing with failure to find terminator for value
 - optimize getToTerminator for single terminator case
 - self improvement: Need to slow down a bit when making some of these changes.
+- Should remove data prop on token
+- String cursor returns token or undefined d for gerX or an object with terminator for getto.  
+- Maybe should have eof for future use?
+- horrific duplication in getAttribute
+- getWord has terminators, but we don't know what they are
 
 RESEARCH (when have net)
 - high order unicode

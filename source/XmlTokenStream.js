@@ -9,7 +9,8 @@ const XmlStringToken = require('./XmlStringToken.js');
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
 const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
-const ATTRIBUTE_VALUE_TERMINATORS = [ '>', '/>' ];
+const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
+const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
 class XmlTokenStream {
 
@@ -19,7 +20,8 @@ class XmlTokenStream {
       this._elementNameStack = [];
 
       this._options = {
-         lax: false
+         lax: false,
+         'lax:allowOpenAngleBracketsInAttributeValues': false
       };
 
       for (const name in options) {
@@ -155,7 +157,7 @@ class XmlTokenStream {
          }
          this._getXmlDecl(firstMarkup, target);
       } else {
-         this._cursor.getSpace();   // optional whitespace
+         this._cursor.getSpace();   // optional space
          const results = this._cursor.getToTerminator([ '?>' ]);
 
          // If we found no ?> (thus, really, end of file) report an error.
@@ -332,17 +334,12 @@ class XmlTokenStream {
       let attributes = [];
 
       const leadingSpace = this._cursor.getSpace();
-      const name = this._cursor.getWord([ '>', '/>' ]); // @@@ test.e.g name with / in it
+      const name = this._cursor.getWord([ '>', '/>' ]);
+
       if (isStartOrEmpty) {
          attributes = this._getAttributes();
 
          for (let index = 0; index < attributes.length; index++) {
-            const value = attributes[index].value;
-            if (value && value.indexOf('<') !== -1) {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
-                  'An "<" was found in the value for attribute "' + attributes[index].name + '".');
-            }
-
             if (!attributes[index].nameToken.couldBeName) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME,
                   'The attribute name does not match the syntax for names. Found: "' +
@@ -352,6 +349,7 @@ class XmlTokenStream {
       } else {
          this._cursor.getSpace();
       }
+
       let close = this._cursor.getMatch('>');
       let isEmpty = false;
 
@@ -437,6 +435,12 @@ class XmlTokenStream {
     * here should be confined cleanly to the set of attributes, with just
     * a variety of presumably invalid-name attributes.
     *
+    * Put another way, when parsing attributes in lax mode, a name is any
+    * sequence of characters terminated by space or equal, the equal may or
+    * may not exist. If an attribute value doesn't start with a quote, then
+    * the value is anything that is terminated by <, space, or the tag close,
+    * otherwise the value terminates by <, the close quote, or tag close.
+    *
     * Two final notes: We could legitimately consider the case of a missing
     * equal and quote  (the second case of 2, above) to produce a name and
     * value, rather than two names. This seemed an arbitrary decision, and
@@ -486,21 +490,59 @@ class XmlTokenStream {
          let content;
 
          if (isQuote) {
+            const terminators = [ quote.text ];
+
+            if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+               terminators.push('<');
+            }
+
             this._cursor.getChar();     // quote
-            const result = this._cursor.getToTerminator([ quote.text ]);
+            const result = this._cursor.getToTerminator(terminators);
             if (!result.terminator) {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);   // TEST
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
                content = result.token;
-            } else {
+            } else if (result.terminator === quote.text) {
                content = result.token;
                this._cursor.getChar();     // quote
+            } else {
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+                  'An "<" was found in the value for attribute "' + name.text + '".');
+               const pair = {
+                  name: name.text,
+                  value: result.token.text,
+                  nameToken: name,
+                  valueToken: result.token
+               };
+               attributes.push(pair);
+               break;
             }
          } else {
-            content = this._cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS);
+            let terminators = ATTRIBUTE_VALUE_TERMINATORS;
+
+            if (this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+               terminators = ATTRIBUTE_VALUE_TERMINATORS_LAX;
+            }
+
+            content = this._cursor.getWord(terminators);
             if (!content) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             } else {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+
+               const peek = this._cursor.peekChar();
+
+               if (peek.text === '<') {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+                     'An "<" was found in the value for attribute "' + name.text + '".');
+                  const pair = {
+                     name: name.text,
+                     value: content.text,
+                     nameToken: name,
+                     valueToken: content
+                  };
+                  attributes.push(pair);
+                  break;
+               }
             }
          }
 

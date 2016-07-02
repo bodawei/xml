@@ -57,13 +57,16 @@ describe('XmlTokenStream', () => {
       it('if passed no options, the defaults are used (whitebox)', () => {
          const s = new XmlTokenStream(new XmlStringCursor('hi'));
 
-         expect(s._options).toEqual({ lax: false });
+         expect(s._options).toEqual({
+            lax: false,
+            'lax:allowOpenAngleBracketsInAttributeValues': false
+         });
       });
 
       it('stores the option if passed an option', () => {
          const s = new XmlTokenStream(new XmlStringCursor('hi'), { lax: true });
 
-         expect(s._options).toEqual({ lax: true });
+         expect(s._options.lax).toEqual(true);
 
       });
 
@@ -754,6 +757,14 @@ describe('XmlTokenStream', () => {
          expect(t.name).toEqual('name');
       });
 
+      it('retrieves the name with a slash in it in lax mode', () => {
+         const s = makeStream('<n/ame>', { lax: true });
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+
+         const t = s.getNext();
+         expect(t.name).toEqual('n/ame');
+      });
+
       it('retrieves an empty name if there is no name in the start tag', () => {
          const s = makeStream('<>', { lax: true });
 
@@ -1013,13 +1024,30 @@ describe('XmlTokenStream', () => {
             }).toThrowError('Missing value for an attribute.');
          });
 
-         it('generates an error token if there is no equal sign', () => {
+         it('generates an error token if there is no value', () => {
             const s = makeStream('<elementName attr1= >', { lax: true });
 
             const t = s.getNext();
 
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
             expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+         });
+
+         it('throws an error if there is no closing quote', () => {
+            const s = makeStream('<elementName attr1="one>');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('No closing quote for an attribute.');
+         });
+
+         it('generates an error token if there is no closing quote', () => {
+            const s = makeStream('<elementName attr1="one>', { lax: true });
+
+            const t = s.getNext();
+
+            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
          });
 
          it('infers an equal sign and reads the value if in lax mode and equal missing', () => {
@@ -1157,6 +1185,70 @@ describe('XmlTokenStream', () => {
             expect(t.attributes[0].value).toBeUndefined();
          });
 
+         it('throws an error if a < is found in an attribute', () => {
+            const s = makeStream('<elementName name="myvalue<one">');
+
+            expect(() => {
+               s.getNext();
+            }).toThrowError('An "<" was found in the value for attribute "name".');
+         });
+
+         it('terminates start tag and continues processing if an < in an attribute value in lax mode', () => {
+            const s = makeStream('<elementName name="one<two">', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            let t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one');
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+
+            t = s.getNext();
+            expect(t.name).toEqual('two"');
+         });
+
+         it('considers < part of attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
+            const s = makeStream('<elementName name="one<two">', {
+               lax: true,
+               'lax:allowOpenAngleBracketsInAttributeValues': true
+            });
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one<two');
+         });
+
+         it('terminates start tag if an < in an quoteless attribute value in lax mode', () => {
+            const s = makeStream('<elementName name=one<two">', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            let t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one');
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+
+            t = s.getNext();
+            expect(t.name).toEqual('two"');
+         });
+
+         it('considers < part of quoteless attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
+            const s = makeStream('<elementName name=one<two">', {
+               lax: true,
+               'lax:allowOpenAngleBracketsInAttributeValues': true
+            });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one<two"');
+         });
+
       });
 
       it('retrieves the expected tokens', () => {
@@ -1201,6 +1293,12 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
+      });
+
+      it('retrieves attributes, if present', () => {
+         const s = makeStream('<name attr="one">');
+
+         expect(s.getNext().attributes[0].name).toEqual('attr');
       });
 
       it('throws an error if a space is found after the <', () => {
@@ -1315,6 +1413,15 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
+      });
+
+      it('throws an error if attributs found in the tag', () => {
+         const s = makeStream('<name></name attr1="one">');
+         ignoreToken(s, XmlToken.ELEMENT_START);
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Missing closing of element tag.');
       });
 
       it('throws an error if a space is found after the </', () => {
