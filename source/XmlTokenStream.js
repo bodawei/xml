@@ -12,6 +12,16 @@ const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
+function makePair(nameToken, valueToken, quoteToken) {
+   return {
+      name: nameToken.text,
+      value: valueToken ? valueToken.text : undefined,
+      nameToken: nameToken,
+      valueToken: valueToken,
+      quoteType: quoteToken ? quoteToken.text : undefined
+   };
+}
+
 class XmlTokenStream {
 
    constructor(cursor, options) {
@@ -197,48 +207,7 @@ class XmlTokenStream {
     *        in the order they were found, each object has a name and a value.
     */
    _getXmlDecl(start, target) {
-      let lastSpace = this._cursor.getSpace();
-      const params = [];
-
-      let key = this._cursor.getWord(XMLDECL_NAME_TERMINATORS);
-      while (key) {
-         if (!lastSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
-         }
-
-         this._cursor.getSpace();    // optional
-         const equal = this._cursor.getMatch('=');     // =
-
-         if (!equal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            break;
-         }
-
-         this._cursor.getSpace();    // optional
-         const quote = this._cursor.peekChar(); // quote
-         let content;
-
-         if (quote.text === '"' || quote.text === '\'') {
-            this._cursor.getChar();     // quote
-            const results = this._cursor.getToTerminator([ quote.text ]);
-            content = results.token;
-            this._cursor.getChar();     // quote
-         } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            content = this._cursor.getWord(XMLDECL_VALUE_TERMINATORS);
-         }
-
-         lastSpace = this._cursor.getSpace();    // optional
-
-         const pair = {
-            name: key.text,
-            value: content.text
-         };
-
-         key = this._cursor.getWord(XMLDECL_NAME_TERMINATORS);
-
-         params.push(pair);
-      }
+      const params = this._getAttributes(false);
 
       const close = this._cursor.getMatch('?>');
 
@@ -337,7 +306,7 @@ class XmlTokenStream {
       const name = this._cursor.getWord([ '>', '/>' ]);
 
       if (isStartOrEmpty) {
-         attributes = this._getAttributes();
+         attributes = this._getAttributes(true);
 
          for (let index = 0; index < attributes.length; index++) {
             if (!attributes[index].nameToken.couldBeName) {
@@ -360,7 +329,7 @@ class XmlTokenStream {
             if (isStartOrEmpty) {
                isEmpty = true;
             } else {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE); // @@@ test
+               this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE);
             }
          }
       }
@@ -407,6 +376,9 @@ class XmlTokenStream {
    }
 
    /*
+    * Retrieve attributes either for a start/empty tag or for an XML
+    * Declaration.
+    * For an element start or empty tag:
     *   [41] Attribute ::= Name Eq AttValue
     *   [10] AttValue ::= '"' ([^<&"] | Reference)* '"' |
     *                     "'" ([^<&'] | Reference)* "'"
@@ -451,11 +423,15 @@ class XmlTokenStream {
     * tag as part of the attribute. In terms of recovery from errors, it
     * seemed safer to be biased towards the case that would consume less
     * (all of these, after all, are syntax errors to start with).
+    *
+    * PARAM
+    * elementAttribute: true if these are attributes for an element, and
+    * false if for an XMLDecl.
     */
-   _getAttributes() {
+   _getAttributes(elementAttribute) {
       const attributes = [];
       let lastSpace = this._cursor.getSpace();
-      let name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
+      let name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
 
       while (name) {
          if (!lastSpace) {
@@ -466,99 +442,69 @@ class XmlTokenStream {
          const equal = this._cursor.getMatch('=');     // =
          this._cursor.getSpace();    // optional
          const quote = this._cursor.peekChar(); // quote
-         const isQuote = quote && (quote.text === '"' || quote.text === '\'');
+         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
+         let value;
 
          if (!equal) {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-
-            if (!isQuote) {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-               const pair = {
-                  name: name.text,
-                  value: undefined,
-                  nameToken: name,
-                  valueToken: undefined
-               };
-
-               name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
-
-               attributes.push(pair);
-               continue;
-            }
          }
 
-         let content;
-
-         if (isQuote) {
+         if (gotQuote) {
             const terminators = [ quote.text ];
 
-            if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+            if (elementAttribute && !this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
                terminators.push('<');
             }
 
             this._cursor.getChar();     // quote
             const result = this._cursor.getToTerminator(terminators);
+            value = result.token;
+
             if (!result.terminator) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
-               content = result.token;
             } else if (result.terminator === quote.text) {
-               content = result.token;
                this._cursor.getChar();     // quote
             } else {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
                   'An "<" was found in the value for attribute "' + name.text + '".');
-               const pair = {
-                  name: name.text,
-                  value: result.token.text,
-                  nameToken: name,
-                  valueToken: result.token
-               };
-               attributes.push(pair);
-               break;
+               attributes.push(makePair(name, value, quote));
+               break;   // Stop processing of attributes
             }
-         } else {
-            let terminators = ATTRIBUTE_VALUE_TERMINATORS;
+         } else if (!equal) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            attributes.push(makePair(name, undefined, undefined));
 
-            if (this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+            name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+            continue;   // without a quote, we assume there is no value and treat any following as a name
+         } else {
+
+            let terminators = elementAttribute ? ATTRIBUTE_VALUE_TERMINATORS : XMLDECL_VALUE_TERMINATORS;
+
+            if (elementAttribute && this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
                terminators = ATTRIBUTE_VALUE_TERMINATORS_LAX;
             }
 
-            content = this._cursor.getWord(terminators);
-            if (!content) {
+            value = this._cursor.getWord(terminators);
+            const terminator = this._cursor.peekChar();
+
+            if (!value) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             } else {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
-               const peek = this._cursor.peekChar();
-
-               if (peek.text === '<') {
+               if (terminator && terminator.text === '<') {
                   this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
                      'An "<" was found in the value for attribute "' + name.text + '".');
-                  const pair = {
-                     name: name.text,
-                     value: content.text,
-                     nameToken: name,
-                     valueToken: content
-                  };
-                  attributes.push(pair);
-                  break;
+                  attributes.push(makePair(name, value, undefined));
+                  break;   // Stop processing of attributes
                }
             }
          }
 
-         lastSpace = this._cursor.getSpace();    // optional
+         attributes.push(makePair(name, value, quote));
 
-         const pair = {
-            name: name.text,
-            value: content ? content.text : undefined,
-            nameToken: name,
-            valueToken: content,
-            quoteType: quote ? quote.text : undefined
-         };
-
-         name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
-
-         attributes.push(pair);
+         lastSpace = this._cursor.getSpace();
+         name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
       }
 
       return attributes;

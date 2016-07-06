@@ -46,6 +46,11 @@ describe('XmlTokenStream', () => {
       expect(token.type).toEqual(tokenType);
    }
 
+   function compareAttribute(attr, name, value) {
+      expect(attr.name).toEqual(name);
+      expect(attr.value).toEqual(value);
+   }
+
    describe('construction', () => {
 
       it('can be constructed with a cursor', () => {
@@ -326,16 +331,9 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
-         expect(t.params).toEqual([ {
-            name: 'version',
-            value: '1.1'
-         }, {
-            name: 'encoding',
-            value: 'usascii'
-         }, {
-            name: 'standalone',
-            value: 'yes'
-         } ]);
+         compareAttribute(t.params[0], 'version', '1.1');
+         compareAttribute(t.params[1], 'encoding', 'usascii');
+         compareAttribute(t.params[2], 'standalone', 'yes');
       });
 
       it('allows a space between the <? and the target if in lax mode', () => {
@@ -372,17 +370,22 @@ describe('XmlTokenStream', () => {
          }).toThrowError('The xml target name was not all lower case (XmL).');
       });
 
+      it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
+         const s = makeStream('<?xml version="1.1" encoding="frog<"?>', {
+            lax: true,
+            'lax:allowOpenAngleBracketsInAttributeValues': false
+         });
+
+         expect(s.getNext().code).toEqual(XmlErrorToken.ERROR.BAD_ENCODING);
+      });
+
       describe('"attribute" equal signs', () => {
 
          it('accepts spaces around the equal signs, as per the spec', () => {
             const s = makeStream('<?xml version =         "1.1"?>');
 
             const t = s.getNext();
-
-            expect(t.params).toEqual([ {
-               name: 'version',
-               value: '1.1'
-            } ]);
+            compareAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no equal sign', () => {
@@ -395,14 +398,10 @@ describe('XmlTokenStream', () => {
 
          it('accepts the lack of an equal sign in lax mode', () => {
             const s = makeStream('<?xml version "1.1"?>', { lax: true });
-
-            s.getNext(); // absorb the missing equal error
-            s.getNext(); // absorb the missing ?> error
-            s.getNext(); // absorb the missing version number error
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
 
             const t = s.getNext();
-
-            expect(t.params).toEqual([]);
+            compareAttribute(t.params[0], 'version', '1.1');
          });
 
       });
@@ -413,22 +412,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version =\'1.1\'?>');
 
             const t = s.getNext();
-
-            expect(t.params).toEqual([ {
-               name: 'version',
-               value: '1.1'
-            } ]);
+            compareAttribute(t.params[0], 'version', '1.1');
          });
 
          it('accepts double quotes', () => {
             const s = makeStream('<?xml version ="1.1"?>');
 
             const t = s.getNext();
-
-            expect(t.params).toEqual([ {
-               name: 'version',
-               value: '1.1'
-            } ]);
+            compareAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no quote', () => {
@@ -449,15 +440,31 @@ describe('XmlTokenStream', () => {
 
          it('makes the best guess for the attr value if no quotes', () => {
             const s = makeStream('<?xml version=1.1 ?>', { lax: true });
-
-            s.getNext(); // absorb the error
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
+            compareAttribute(t.params[0], 'version', '1.1');
+         });
 
-            expect(t.params).toEqual([ {
-               name: 'version',
-               value: '1.1'
-            } ]);
+         it('stops at processing instruction boundary even when no quotes', () => {
+            const s = makeStream('<?xml version=1.1?>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+
+            const t = s.getNext();
+            compareAttribute(t.params[0], 'version', '1.1');
+         });
+
+         it('stops at processing instruction boundary even when no equal and noquotes', () => {
+            const s = makeStream('<?xml version 1.1?>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.BAD_VERSION);
+            ignoreError(s, XmlErrorToken.ERROR.UNKNOWN_ATTR);
+
+            const t = s.getNext();
+            compareAttribute(t.params[0], 'version', undefined);
          });
 
       });
@@ -562,20 +569,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.0"?>');
 
             const t = s.getNext();
-            expect(t.params[0]).toEqual({
-               name: 'version',
-               value: '1.0'
-            });
+            compareAttribute(t.params[0], 'version', '1.0');
          });
 
          it('accepts a value of "1.1"', () => {
             const s = makeStream('<?xml version="1.1"?>');
 
             const t = s.getNext();
-            expect(t.params[0]).toEqual({
-               name: 'version',
-               value: '1.1'
-            });
+            compareAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws a syntax error if version is not a supported value', () => {
@@ -619,10 +620,7 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.1"   encoding="usascii0"?>');
 
             const t = s.getNext();
-            expect(t.params[1]).toEqual({
-               name: 'encoding',
-               value: 'usascii0'
-            });
+            compareAttribute(t.params[1], 'encoding', 'usascii0');
          });
 
          it('throws a syntax error if encoding is not rightly encoded', () => {
@@ -673,20 +671,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.1" standalone="no"?>');
 
             const t = s.getNext();
-            expect(t.params[1]).toEqual({
-               name: 'standalone',
-               value: 'no'
-            });
+            compareAttribute(t.params[1], 'standalone', 'no');
          });
 
          it('accepts a value of "yes"', () => {
             const s = makeStream('<?xml version="1.1" standalone="yes"?>');
 
             const t = s.getNext();
-            expect(t.params[1]).toEqual({
-               name: 'standalone',
-               value: 'yes'
-            });
+            compareAttribute(t.params[1], 'standalone', 'yes');
          });
 
          it('throws an error if standalone in the wrong position', () => {
@@ -1234,6 +1226,17 @@ describe('XmlTokenStream', () => {
 
             t = s.getNext();
             expect(t.name).toEqual('two"');
+         });
+
+         it('terminates gracefully even when EOF at end of quoteless attribute value', () => {
+            const s = makeStream('<elementName name=one', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+
+            const t = s.getNext();
+
+            expect(t.attributes[0].name).toEqual('name');
+            expect(t.attributes[0].value).toEqual('one');
          });
 
          it('considers < part of quoteless attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {

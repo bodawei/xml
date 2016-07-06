@@ -147,6 +147,12 @@ x 18:XL READ CDATA [2.7]
 			Fix handling of <
 				Recovery is ambiguous. do we terminate the tag (probably safer) or include this in the attribute
 					Probably good to have a flag
+CLEANUP:
+	- Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
+		- getxmldecl isn't dealing with failure to find terminator for value
+	- duplicate code in getAttributes
+	- getAttributes is getting ugly.
+
 
 51:S:syntax error if ]]> found in char data
 	modify readtoMarkup to stop at ]]>
@@ -158,21 +164,15 @@ x 18:XL READ CDATA [2.7]
 		- including doc them and test at non-start of string
 =============================================
 CLEANUP
-- Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
-- duplicate code even in getAttributes (in the !equal section)
-- if no value or name, do we do undefined or ''? (be consistent, and make part of definition)
-- getAttributes is getting ugly.
-- pi puts content in content, not data.  Fine, but odd
-- consistency: undefined or empty string when no comment, no pi, no text to terminator no value.
-- doc that undefined terminator from tetToTerminator is eof
-- getxmldecl isn't dealing with failure to find terminator for value
-- optimize getToTerminator for single terminator case
-- self improvement: Need to slow down a bit when making some of these changes.
+- getAttributes still feels too tangled. How to untangle?
+consistency:
+	- if no value or name, do we do undefined or ''? (be consistent, and make part of definition) (in both string cursor, and in pi, comment etc tokens)
+	- String cursor returns token or undefined d for gerX or an object with terminator for getto.  
 - Should remove data prop on token
-- String cursor returns token or undefined d for gerX or an object with terminator for getto.  
+- optimize getToTerminator for single terminator case
 - Maybe should have eof for future use?
-- horrific duplication in getAttribute
 - getWord has terminators, but we don't know what they are
+- any reason at all for string tokens to report that they are string or word or markup?  Right now the attribute processing is such that we have no way to predict which type we'll get in some cases. so is it even useful?
 
 RESEARCH (when have net)
 - high order unicode

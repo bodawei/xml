@@ -254,6 +254,7 @@ class XmlStringCursor {
    }
 
    // probably need to deal with line endings
+   // doc return structure, especially undefined terminator
    getToTerminator(terminators) {
       if (!terminators || terminators.length === 0) {
          throw new Error('Must pass a non-empty array of terminators to getToTerminator().');
