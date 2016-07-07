@@ -82,26 +82,33 @@ class XmlTokenStream {
          throw new Error('Internal error');
       }
 
-      const xtoken = new XmlToken(XmlToken.SPACE, space.text);
-      xtoken.tokens = this._cursor.getRecentTokens();
-
-      this._pendingTokens.push(xtoken);
+      this._pushToken(XmlToken.SPACE, space.text);
    }
 
    /*
     *   [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
     */
    _getContent() {
-      const content = this._cursor.getToMarkup();
+      let content;
 
-      if (content.type !== XmlStringToken.STRING || content.text === '') {
-         throw new Error('Internal error');
-      }
+      do {
+         content = this._cursor.getToTerminator([ '<', ']]>' ]);
 
-      const xtoken = new XmlToken(XmlToken.CHARDATA, content.text);
-      xtoken.tokens = this._cursor.getRecentTokens();
+         if (content.terminator === ']]>') {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
 
-      this._pendingTokens.push(xtoken);
+            this._pushToken(XmlToken.CHARDATA, content.token.text);
+
+            content = {
+               token: this._cursor.getMatch(']]>')
+            };
+
+         } else if (!content.token || content.token.text === '') {
+            return;
+         }
+
+         this._pushToken(XmlToken.CHARDATA, content.token.text);
+      } while (content.terminator !== '>');
    }
 
    /*
@@ -123,10 +130,7 @@ class XmlTokenStream {
          }
       }
 
-      const xtoken = new XmlToken(XmlToken.COMMENT, results.token ? results.token.text : undefined);
-      xtoken.tokens = this._cursor.getRecentTokens();
-
-      this._pendingTokens.push(xtoken);
+      this._pushToken(XmlToken.COMMENT, results.token ? results.token.text : undefined);
    }
 
    /*
@@ -177,11 +181,8 @@ class XmlTokenStream {
             this._cursor.getMatch('?>');
          }
 
-         const xtoken = new XmlToken(XmlToken.PI, target ? target.text : '');
+         const xtoken = this._pushToken(XmlToken.PI, target ? target.text : '');
          xtoken.content = results.token ? results.token.text : undefined;
-         xtoken.tokens = this._cursor.getRecentTokens();
-
-         this._pendingTokens.push(xtoken);
       }
    }
 
@@ -282,11 +283,8 @@ class XmlTokenStream {
          }
       }
 
-      const xtoken = new XmlToken(XmlToken.XMLDECL, target.text);
+      const xtoken = this._pushToken(XmlToken.XMLDECL, target.text);
       xtoken.params = params;
-      xtoken.tokens = this._cursor.getRecentTokens();
-
-      this._pendingTokens.push(xtoken);
    }
 
    /*
@@ -371,7 +369,6 @@ class XmlTokenStream {
 
          }
       }
-
       this._pendingTokens.push(xtoken);
    }
 
@@ -548,6 +545,15 @@ class XmlTokenStream {
       e.details = error;
 
       throw e;
+   }
+
+   _pushToken(type, data) {
+      const xtoken = new XmlToken(type, data);
+      xtoken.tokens = this._cursor.getRecentTokens();
+
+      this._pendingTokens.push(xtoken);
+
+      return xtoken;
    }
 
 }

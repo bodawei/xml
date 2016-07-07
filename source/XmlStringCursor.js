@@ -300,12 +300,6 @@ class XmlStringCursor {
       };
    }
 
-   // probably need to deal with line endings
-   // also looks like should stop at ]]>. note that this does return undefined.
-   getToMarkup() {
-      return this.getToTerminator('<').token;
-   }
-
    getRecentTokens() {
       const temp = this._tokens;
       this._tokens = [];

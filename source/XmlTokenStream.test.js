@@ -151,6 +151,39 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('wow ');
       });
 
+      it('throws an error if there is a ]]> in the CharData', () => {
+         const s = makeStream('blah blah ]]> blah');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Found unexpected "]]>" in chardata.');
+      });
+
+      it('generates an error token if there is a ]]> in the CharData', () => {
+         const s = makeStream('testing testing ]]> testing', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
+      });
+
+      it('includes the "]]>" as char dat ain lax mode', () => {
+         const s = makeStream('testing testing ]]>testing', { lax: true });
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
+
+         expect(s.getNext().data).toEqual('testing testing ');
+         expect(s.getNext().data).toEqual(']]>');
+         expect(s.getNext().data).toEqual('testing');
+      });
+
+      it('can read CharData not at the beginning of the cursor', () => {
+         const s = makeStream('<start>testing testing </start>');
+         s.getNext();
+
+         const t = s.getNext();
+         expect(t.data).toEqual('testing testing ');
+      });
+
       it('retrieves the expected tokens', () => {
          const s = makeStream('wow zowie ');
 

@@ -44,7 +44,8 @@ XmlErrorToken.ERROR = {
    ATTRIBUTE_MISSING_CLOSE_QUOTE: 'ATTRIBUTE_MISSING_CLOSE_QUOTE',
    ATTRIBUTE_MISSING_EQUAL: 'ATTRIBUTE_MISSING_EQUAL',
    ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE',
-   ATTRIBUTE_MISSING_VALUE: 'ATTRIBUTE_MISSING_VALUE'
+   ATTRIBUTE_MISSING_VALUE: 'ATTRIBUTE_MISSING_VALUE',
+   CHARDATA_BAD_DATA: 'CHARDATA_BAD_DATA'
 };
 
 XmlErrorToken.STRING = {};
@@ -67,5 +68,6 @@ str[err.ATTRIBUTE_MISSING_QUOTE] = 'No quote found for an attribute.';
 str[err.ATTRIBUTE_MISSING_CLOSE_QUOTE] = 'No closing quote for an attribute.';
 str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
 str[err.ATTRIBUTE_MISSING_VALUE] = 'Missing value for an attribute.';
+str[err.CHARDATA_BAD_DATA] = 'Found unexpected "]]>" in chardata.';
 
 module.exports = XmlErrorToken;

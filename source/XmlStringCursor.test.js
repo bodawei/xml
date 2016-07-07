@@ -550,24 +550,6 @@ describe('XmlStringCursor', () => {
 
    });
 
-   describe('getToMarkup()', () => {
-
-      it('returns the string up to the specified terminator', () => {
-         const c = new XmlStringCursor('one two <three>');
-
-         expect(c.getToMarkup()).toEqual(new XmlStringToken('one two ', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 8, 8)));
-      });
-
-      it('returns the remainder of the string if no markup is found', () => {
-         const c = new XmlStringCursor('frog');
-
-         expect(c.getToMarkup()).toEqual(new XmlStringToken('frog', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 4, 4)));
-      });
-
-   });
-
    describe('getMatch()', () => {
 
       it('throws an error if called without a parameter', () => {

@@ -1,4 +1,170 @@
 =============================================
+In theory done: 1(1-3), 2.5, 2.6
+=============================================
+SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
+	XL=10, L=5, M=3, S=1
+6/16 Start of sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
+6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
+7/6  Start of sprint 3: 171story points. Average: 7 per sprint = 27 sprints.
+-- next: 62
+---------------------------------------------
+√ 51:S:syntax error if ]]> found in char data
+	modify getToMarkup to stop at ]]>
+		_getContent() now may read multiple chunks and produce multiple tokens in lax mode
+
+52:M: Read CDATA
+	syntactically correct
+	Deal with cases: EOF in middle, empty
+	allows spaces in the [ CDATA [ part   (note, can't have spaces in ]]>, or risk misunderstanding)
+		- remember we'll want to do the same for all the <![ x [ things. the others allow spaces.
+	For the moment this should just return a CDATA token, which is basically the same as a CHARDATA one.  We may want to do a two level thing when we get to entities though
+
+7:M: StringCursor cleanup
+	- review testing of all routines (through getMarkup)
+		- including doc them and test at non-start of string
+		- document that getX returns undefined or a token, but getToX always returns something.
+
+=============================================
+CLEANUP
+- Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
+
+RESEARCH (when have net)
+- do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
+- Need other 4 versions of xml 1.0
+- need doc for writing reporters for karma
+- Keep doing background checking for 37
+
+BUILD
+37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
+	- Continue with isolation work that is going on in "Working on code coverage numbers".
+	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
+	- Keep a better log of what you are doing since this may take several sprints.
+60:XL Improve build output
+	- Goal: on a good build we don't need to show anything of the build
+		- But should include: style passed, which browsers and platform tested, and total coverage summaries
+		- The reports should be terse enough to even be able to be put in a commit checkin
+	- On a failing build, should dump the whole grunt output. that can have more verbose testing reports and coverage reports
+		- non-100% coverage should actually be a failure.
+	61:M: Build a reporter for coverage which just reports the final summaries
+	59:M: Build a reporter for karma which dumps testing results to a file
+		- this is in prep for adding this info to the checkin
+	36:M:silence the build except for report
+39:M:Investigate getting node testing into build process
+38:L Rethink checkin process
+	Commit should do a test run and add report to comment.
+	git hooks should validate checkin comment has bug number and is the right format.
+40:S:git aliases?
+41:XL:Investigate Gulp
+58: Build infrastructure for running xmlconf tests.
+
+PROJECT
+--- technical debt
+14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+52:S: StringCursorSpeedup
+	Note:
+		getToMarkup: currently <, soon < and & and possibly < & and ]]>
+		soon: getToSpaceOrTerminator  any space or >
+		getToTerminator  -->, ?> ]]>, ", ' and >
+		getWord takes a variable set of terminators
+	optimize getToTerminator for single terminator case
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
+		Note: Can't do regex from an offset without doing a substr. sigh.
+47:M: Minor StringCursor features
+	- getSpace should return text and origText
+	- Resolve what to do with CR in terminator and match, and read to markup
+	- remove the type returned on string tokens (not being used, and is unpredictable from the outside)
+	- getWord has multiple terminators, but doesn't inform you of which it hit
+8:S: review xmltokenstream for testing and code logic: SMALL
+	- Should return '' rather than undefined for things like comments and pi's etc.
+58:S: Remove data prop on token, and make all token types more explicit
+9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
+11:M: Provide some kind of internationalizable string catalog
+12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
+13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
+	- xmldecl, misc, element misc
+54:M:use xml decl version to change processing
+44:M:Enforce 1.0 vs 1.1 line ending changes
+45:S:Review various 1.0 standards with respect to Name (and Char definitions)
+	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
+46:S:Improve handling of 1.0 vs. 1.1 control chars
+	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+53:M: use xml decl encoding to change input if needed
+56:S: Reorganize getAttributes, as it seems too tangled
+57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
+
+--- Basic processing  [1XL 1S]
+27:XL Read in entities (see issues, below)
+	character entities
+	identify references in attributes and charData
+	provide infrastructure for recursive processing these.
+	Need the answer for how to feedback both the content and the fact that there was a reference here.
+		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
+			Parent may not have all children at the point of first being returned. for streaming purposes.
+			Parent may, itself, have parent.
+		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
+		This may impact parts of stringCursor which need to become reference aware.
+		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
+		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+55:s:
+	Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
+
+--- DTD [12XL 1S]
+19:XL Read doctype
+20:XL Read element declaration
+21:XL Read element content structure
+22:XL read attribute declaration
+23:XL read entity declaration
+24:XL read conditional sections
+25:XL read external entities
+	including header
+26:XL Deal with parameter entities
+
+--- Validity
+28:XL Deal with validity (errors, which must be reported by validating xml processors)
+29:XL Deal with wfc (failures here are fatal errors)
+	- note. you can keep processing after the fatal error, including passing some content back and report more errors. but, it must not continue normal processing
+30:S: For compatibility (things to maintain compatibility with SGML)
+	-- in comment
+31:XL Deal with interoperability (mainly to help some sgml processors)
+	interoperability: empty element should only be used for elements which are declared EMPTY
+32:XL Run through standard test cases
+
+---- Extra (not part of MVC)
+15:M: Put a limit on how much read in in one chunk (pass in as option). 
+33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
+34:M:Cope with junk before xmldeclaration
+35:M:Deal with xmldecl not actually being an xmldecl
+42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
+43:M:deal with references within comments and PI
+	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
+
+ISSUES
+--------
+* ISSUE: Need to figure out what to do with xml decl not being an xml decl
+The stuff below ultimately requires more "look ahead" than we do at the moment. the main problem is if we say "skip junk until xmldecl found", what happens if we find <?xml junkjunkjunk?> ? That, then, is still junk.  We could indeed detect that when getXmlDecl reports tons of errors.  in which case we could continue with "junkjunkjunk" in some way  But then we need to put the token(s) back into the string cursor, briefly. Either that, or we consider that something we can't cope with.
+And if we want to allow a non-xmldeclaration document, and want to skip over junk, do we go to the first <name?
+And, what if the xmldecl is found after the start of markup?  do we want to be able to start reading an <?xml and then find it is something else and turn it into an ordinary processing instruction in some way?
+***Maybe that's the solution to the above. The skip junk looks for <[^ ] pair of characters via peek. if it finds that, and it is <name or <? or <! then we go ahead and do what we should.  We also modify the getXmlDecl to decide it is having just too many problems and turn itself into a processing instruction.  And still maybe the skipping should go until we actually find an xml declaration.***
+
+* ISSUE: how to skip over junk until you get to xml decl
+- provide a "skip junk until xmldecl flag  (skip until markup?)
+- fail if xmldecl is found after markup seen (how can you tell?)
+- fail if no xmldecl found (this is higher level than the xmltokenstream)
+	provide to ignore this
+Add state to reader: SMALL
+	- Found markup
+		- set at xmldecl, and after comments, pi's elements doctype. Once set, no more xmldecl looked for
+	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
+Notes
+- violations of any must, required, must not, shall and shall not is an error, which means you may decide and report, and may try to recover.   overall, the results are undefined by the standard.
+
+==============================================================================
+==============================================================================
+==============================================================================
+==============================================================================
+=============================================
 DESIGN PLAN
 
 XMLStringToken
@@ -53,15 +219,42 @@ output of this is probably a normalized document?
 layer 4
 these are things like json converters, or the like
 
-=============================================
-In theory done: 1(1-3), 2.5, 2.6
-=============================================
-SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
-	XL=10, L=5, M=3, S=1
-6/16 Start of sprint 1: 196story points. Assumed velocity: 7 per sprint. = 28 sprints. ACTUAL: 8
-6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints
--- next: 56
----------------------------------------------
+==============================================================================
+FINISHED SPRINTS
+SPRINT1:
+√ 1:S: Read start tag without attributes
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 2:S: Read end tag
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 4:S: Empty element
+√ 3:S: Syntax error if Start and end don't balance
+	(but will allow if it lax)
+√ 5:S: Read simple CharData
+	Needs string cursor support (read to markup)
+	Ignore newline issues
+(nice to have)
+√ 6:M: StringCursor cleanup
+	√ Make a constructor for xmlStringToken that will automatically add it to the this._tokens? and the closing offset
+	√ test getChar
+	x getChar should feed off of peekChar
+	√ test getMarkup for <? and <!-- and < for that matter.
+	√ test getWord on word terminators (space, ? and =)
+       Some test cleanup
+Cleanup:
+√ maybe merge start and end tag parsing?  They're almost the same
+√ More string cursor cleanup
+Build
+√ Fix build directory! In particular, get eslint a bit better organized
+
+SPRINT2:
+Summary: This sprint had two problems:
+	- #50 took much longer than expected. It was estimated as a M, and took closer to a L. And even then we generated a bunch of related cleanup tasks in the process.
+	- The build task wasn't particularly scoped. Have been treating build tasks as just informal thins.  But, we spent a bunch of time on looking at beginning to build the processing for the xml conformance suite, only to discover that (a) we didn't have the node docs (b) we hadn't looked at what was involved enough to realize we really should be using the xml skeleton documents to drive this, which requires the full xml processor, including DTD handling.  So, it really is unfortunately out of scope at this point.  Also, need a canonical outputter.
+The fact that #50 took so long isn't really a failure.  That happens sometimes.  However, the latter indicates we should be planning build tasks more formally.
 
 x 16:XL read attributes
 x 17:XL Read Content (char data)
@@ -152,180 +345,6 @@ CLEANUP:
 		- getxmldecl isn't dealing with failure to find terminator for value
 	- duplicate code in getAttributes
 	- getAttributes is getting ugly.
-
-
-51:S:syntax error if ]]> found in char data
-	modify readtoMarkup to stop at ]]>
-		Thus, readToMarkup may or may not actually stop at markup.
-		it is up to the caller to decide to abort or just consider it more char data (thus "foo]]>asdf" might return three chardata tokens, as well as a syntax error)
-	the get char data token should cope with this.
-7:M: StringCursor cleanup
-	- review testing of all routines (through getMarkup)
-		- including doc them and test at non-start of string
-=============================================
-CLEANUP
-- getAttributes still feels too tangled. How to untangle?
-consistency:
-	- if no value or name, do we do undefined or ''? (be consistent, and make part of definition) (in both string cursor, and in pi, comment etc tokens)
-	- String cursor returns token or undefined d for gerX or an object with terminator for getto.  
-- Should remove data prop on token
-- optimize getToTerminator for single terminator case
-- Maybe should have eof for future use?
-- getWord has terminators, but we don't know what they are
-- any reason at all for string tokens to report that they are string or word or markup?  Right now the attribute processing is such that we have no way to predict which type we'll get in some cases. so is it even useful?
-
-RESEARCH (when have net)
-- high order unicode
-- remind me can I do regex from an offset?
-- do performance test jsperf of regex vs hand parsing
-	- see also the stuff in 52, below
-
-BUILD
-36:M:silence the build except for report
-37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
-39:M:Investigate getting node testing into build process
-38:L Rethink checkin process
-	Commit should do a test run and add report to comment.
-	git hooks should validate checkin comment has bug number and is the right format.
-40:S:git aliases?
-41:XL:Investigate Gulp
-
-PROJECT
---- technical debt
-52:S: StringCursorSpeedup
-	Note:
-		getToMarkup: currently <, soon < and & and possibly < & and ]]>
-		soon: getToSpaceOrTerminator  any space or >
-		getToTerminator  -->, ?> ]]>, ", ' and >
-		getWord takes a variable set of terminators
-	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
-47:M: Minor StringCursor features
-	- getSpace should return text and origText
-	- Resolve what to do with CR in terminator and match, and read to markup
-8:S: review xmltokenstream for testing and code logic: SMALL
-9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
-10:M: prove links between things like version="1.1" and the underlying tokens.
-11:M: Provide some kind of internationalizable string catalog
-12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
-	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
-13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
-	- xmldecl, misc, element misc
-14:M: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
-54:M:use xml decl version to change processing
-44:M:Enforce 1.0 vs 1.1 line ending changes
-45:S:Review various 1.0 standards with respect to Name (and Char definitions)
-	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
-46:S:Improve handling of 1.0 vs. 1.1 control chars
-	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
-	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-53:M:use xml decl encoding to change input if needed
-
---- Basic processing
-52:M: Read CDATA
-	syntactically correct
-	allows spaces in the [ CDATA [ part
-	I think we have to require ]]> not have spaces. otherwise will see terminators we shouldn't.
-	Note that this is a "two level" thing. We need to return a CHARDATA token, but it should have a reference to the fact that it is also a CDATA element.  See entity info below
-27:XL Read in entities (see issues, below)
-	character entities
-	identify references in attributes and charData
-	provide infrastructure for recursive processing these.
-	Need the answer for how to feedback both the content and the fact that there was a reference here.
-		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
-			Parent may not have all children at the point of first being returned. for streaming purposes.
-			Parent may, itself, have parent.
-		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
-		This may impact parts of stringCursor which need to become reference aware.
-		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
-		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
-55:s:
-	Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
-
---- DTD
-19:XL Read doctype
-20:XL Read element declaration
-21:XL Read element content structure
-22:XL read attribute declaration
-23:XL read entity declaration
-24:XL read conditional sections
-25:XL read external entities
-	including header
-26:XL Deal with parameter entities
-
---- Validity
-28:XL Deal with validity (errors, which must be reported by validating xml processors)
-29:XL Deal with wfc (failures here are fatal errors)
-	- note. you can keep processing after the fatal error, including passing some content back and report more errors. but, it must not continue normal processing
-30:S: For compatibility (things to maintain compatibility with SGML)
-	-- in comment
-31:XL Deal with interoperability (mainly to help some sgml processors)
-	interoperability: empty element should only be used for elements which are declared EMPTY
-32:XL Run through standard test cases
-
----- Extra (not part of MVC)
-15:M: Put a limit on how much read in in one chunk (pass in as option). 
-33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
-34:M:Cope with junk before xmldeclaration
-35:M:Deal with xmldecl not actually being an xmldecl
-42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
-43:M:deal with references within comments and PI
-	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
-- xml token probably shouldn't have the data property
-
-ISSUES
---------
-* ISSUE: Need to figure out what to do with xml decl not being an xml decl
-The stuff below ultimately requires more "look ahead" than we do at the moment. the main problem is if we say "skip junk until xmldecl found", what happens if we find <?xml junkjunkjunk?> ? That, then, is still junk.  We could indeed detect that when getXmlDecl reports tons of errors.  in which case we could continue with "junkjunkjunk" in some way  But then we need to put the token(s) back into the string cursor, briefly. Either that, or we consider that something we can't cope with.
-And if we want to allow a non-xmldeclaration document, and want to skip over junk, do we go to the first <name?
-And, what if the xmldecl is found after the start of markup?  do we want to be able to start reading an <?xml and then find it is something else and turn it into an ordinary processing instruction in some way?
-***Maybe that's the solution to the above. The skip junk looks for <[^ ] pair of characters via peek. if it finds that, and it is <name or <? or <! then we go ahead and do what we should.  We also modify the getXmlDecl to decide it is having just too many problems and turn itself into a processing instruction.  And still maybe the skipping should go until we actually find an xml declaration.***
-
-* ISSUE: how to skip over junk until you get to xml decl
-- provide a "skip junk until xmldecl flag  (skip until markup?)
-- fail if xmldecl is found after markup seen (how can you tell?)
-- fail if no xmldecl found (this is higher level than the xmltokenstream)
-	provide to ignore this
-Add state to reader: SMALL
-	- Found markup
-		- set at xmldecl, and after comments, pi's elements doctype. Once set, no more xmldecl looked for
-	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
-
-ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
-
-Notes
-- violations of any must, required, must not, shall and shall not is an error, which means you may decide and report, and may try to recover.   overall, the results are undefined by the standard.
-
-==============================================================================
-==============================================================================
-==============================================================================
-FINISHED SPRINTS
-SPRINT1:
-√ 1:S: Read start tag without attributes
-	syntax error if not a name or no name
-	syntax error if space before name
-	syntax error if > not found
-√ 2:S: Read end tag
-	syntax error if not a name or no name
-	syntax error if space before name
-	syntax error if > not found
-√ 4:S: Empty element
-√ 3:S: Syntax error if Start and end don't balance
-	(but will allow if it lax)
-√ 5:S: Read simple CharData
-	Needs string cursor support (read to markup)
-	Ignore newline issues
-(nice to have)
-√ 6:M: StringCursor cleanup
-	√ Make a constructor for xmlStringToken that will automatically add it to the this._tokens? and the closing offset
-	√ test getChar
-	x getChar should feed off of peekChar
-	√ test getMarkup for <? and <!-- and < for that matter.
-	√ test getWord on word terminators (space, ? and =)
-       Some test cleanup
-Cleanup:
-√ maybe merge start and end tag parsing?  They're almost the same
-√ More string cursor cleanup
-Build
-√ Fix build directory! In particular, get eslint a bit better organized
-
+10:M: prove links between things like version="1.1" and the underlying tokens.   <-- auto fixed as part of 50
+Done: ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
 
