@@ -13,6 +13,7 @@ class XmlToken {
 
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.CHARDATA = 'CharData';
+XmlToken.CDATA = 'CData';
 XmlToken.COMMENT = 'Comment';
 XmlToken.XMLDECL = 'XmlDecl';
 XmlToken.PI = 'ProcessingInstruction';

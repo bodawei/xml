@@ -45,7 +45,13 @@ XmlErrorToken.ERROR = {
    ATTRIBUTE_MISSING_EQUAL: 'ATTRIBUTE_MISSING_EQUAL',
    ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE',
    ATTRIBUTE_MISSING_VALUE: 'ATTRIBUTE_MISSING_VALUE',
-   CHARDATA_BAD_DATA: 'CHARDATA_BAD_DATA'
+   CHARDATA_BAD_DATA: 'CHARDATA_BAD_DATA',
+   CDATA_MISSING_CLOSE: 'CDATA_MISSING_CLOSE',
+   CDATA_SPACE_BEFORE_NAME: 'CDATA_SPACE_BEFORE_NAME',
+   CDATA_SPACE_AFTER_NAME: 'CDATA_SPACE_AFTER_NAME',
+   CDATA_NOT_CAPITALIZED: 'CDATA_NOT_CAPITALIZED',
+   SPACE_BEFORE_SQUARE_BRACKET: 'SPACE_BEFORE_SQUARE_BRACKET',
+   BANGITEM_UNSUPPORTED: 'BANGITEM_UNSUPPORTED'
 };
 
 XmlErrorToken.STRING = {};
@@ -69,5 +75,10 @@ str[err.ATTRIBUTE_MISSING_CLOSE_QUOTE] = 'No closing quote for an attribute.';
 str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
 str[err.ATTRIBUTE_MISSING_VALUE] = 'Missing value for an attribute.';
 str[err.CHARDATA_BAD_DATA] = 'Found unexpected "]]>" in chardata.';
+str[err.CDATA_MISSING_CLOSE] = 'Closing ]]> not found for CDATA section.';
+str[err.BANGITEM_UNSUPPORTED] = 'Unsupported "<!" item.';
+str[err.SPACE_BEFORE_SQUARE_BRACKET] = 'Space found before opening "[".';
+str[err.CDATA_SPACE_BEFORE_NAME] = 'Space found before CDATA.';
+str[err.CDATA_SPACE_AFTER_NAME] = 'Space found after CDATA.';
 
 module.exports = XmlErrorToken;

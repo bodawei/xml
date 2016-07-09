@@ -196,6 +196,159 @@ describe('XmlTokenStream', () => {
 
    });
 
+   describe('parsing CDATA', () => {
+
+      it('retrieves a token of type CDATA', () => {
+         const s = makeStream('<![CDATA[ blah ]]>');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.CDATA);
+      });
+
+      it('retrieves the content of the CDATA ', () => {
+         const s = makeStream('<![CDATA[ test data ]]>');
+
+         expect(s.getNext().data).toEqual(' test data ');
+      });
+
+      it('retrieves the content of the CDATA, ignoring any embedded markup', () => {
+         const s = makeStream('<![CDATA[ test <?foo bar?> <!-- data --> <start></end> ]]>');
+
+         expect(s.getNext().data).toEqual(' test <?foo bar?> <!-- data --> <start></end> ');
+      });
+
+      it('retrieves undefined as the value for an empty CDATA block', () => {
+         const s = makeStream('<![CDATA[]]>');
+
+         expect(s.getNext().data).toBeUndefined();
+      });
+
+      it('throws an error if EOF found in middle', () => {
+         const s = makeStream('<![CDATA[junk comment');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Closing ]]> not found for CDATA section.');
+      });
+
+      it('generates an error token in lax mode if EOF found in middle', () => {
+         const s = makeStream('<![CDATA[junk comment', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+      });
+
+      it('returns the content up to eof if eof in middle of comment', () => {
+         const s = makeStream('<![CDATA[ junk cdata', { lax: true });
+         ignoreError(s, XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+
+         expect(s.getNext().data).toEqual(' junk cdata');
+      });
+
+      it('throws an error if space found before first square bracket', () => {
+         const s = makeStream('<! [CDATA[junk comment ]]>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Space found before opening "[".');
+      });
+
+      it('generates an error token in lax mode if EOF found in middle', () => {
+         const s = makeStream('<! [CDATA[junk comment ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.SPACE_BEFORE_SQUARE_BRACKET);
+      });
+
+      it('throws an error if space found before CDATA', () => {
+         const s = makeStream('<![   CDATA[junk comment ]]>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Space found before CDATA.');
+      });
+
+      it('generates an error token in lax mode if space found CDATA', () => {
+         const s = makeStream('<![ CDATA[junk comment ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_SPACE_BEFORE_NAME);
+      });
+
+      it('throws an error if space found after CDATA', () => {
+         const s = makeStream('<![CDATA    [junk comment ]]>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Space found after CDATA.');
+      });
+
+      it('generates an error token in lax mode if space found after CDATA', () => {
+         const s = makeStream('<![CDATA   [junk comment ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_SPACE_AFTER_NAME);
+      });
+
+      it('throws an error if CDATA has wrong case', () => {
+         const s = makeStream('<![cDaTa[junk comment ]]>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('"CDATA" must be all capital. found "cDaTa".');
+      });
+
+      it('generates an error token in lax mode if space found after CDATA', () => {
+         const s = makeStream('<![cdata[junk comment ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_NOT_CAPITALIZED);
+      });
+
+      it('retrieves the expected tokens', () => {
+         const s = makeStream('<![CDATA[ one ]]>');
+
+         const t = s.getNext();
+         expect(t.tokens).toEqual(makeStringTokenArray([ {
+            text: '<!',
+            type: XmlStringToken.MARKUP
+         }, {
+            text: '[',
+            type: XmlStringToken.STRING
+         }, {
+            text: 'CDATA',
+            type: XmlStringToken.WORD
+         }, {
+            text: '[',
+            type: XmlStringToken.STRING
+         }, {
+            text: ' one ',
+            type: XmlStringToken.STRING
+         }, {
+            text: ']]>',
+            type: XmlStringToken.STRING
+         } ]));
+      });
+
+   });
+
+   describe('parsing BangItem', () => {
+
+      it('Reports an error if an unknown bang item founnd', () => {
+         const s = makeStream('<!Fish');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unsupported "<!" item.');
+      });
+
+   });
+
    describe('parsing comments', () => {
 
       it('retrieves a token of type COMMENT', () => {

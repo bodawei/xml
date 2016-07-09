@@ -59,6 +59,9 @@ class XmlTokenStream {
                case '<?':
                   this._getProcessingInstruction();
                   break;
+               case '<!':
+                  this._getBangItem();
+                  break;
                case '<!--':
                   this._getComment();
                   break;
@@ -131,6 +134,59 @@ class XmlTokenStream {
       }
 
       this._pushToken(XmlToken.COMMENT, results.token ? results.token.text : undefined);
+   }
+
+   _getBangItem() {
+      this._cursor.getMarkup();
+      const leadingSpace = this._cursor.getSpace();
+      const bracket = this._cursor.getMatch('[');
+
+      if (bracket) {
+         if (leadingSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_SQUARE_BRACKET);
+         }
+
+         this._getBracketItem();
+      } else {
+         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNSUPPORTED);
+      }
+   }
+
+   _getBracketItem() {
+      const preSpace = this._cursor.getSpace();
+      const bracketItemType = this._cursor.getWord([ '[' ]);
+      const postSpace = this._cursor.getSpace();
+      this._cursor.getMatch('[');
+
+      /*
+       * Retrieve a CData section
+       *   [18] CDSect  ::=  CDStart CData CDEnd
+       *   [19] CDStart ::=  '<![CDATA['
+       *   [20] CData   ::=  (Char* - (Char* ']]>' Char*))
+       *   [21] CDEnd   ::=  ']]>'
+       */
+      if (bracketItemType.text.toLocaleLowerCase() === 'cdata') {
+         if (preSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_SPACE_BEFORE_NAME);
+         }
+         if (bracketItemType.text !== 'CDATA') {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_NOT_CAPITALIZED,
+               '"CDATA" must be all capital. found "' + bracketItemType.text + '".');
+         }
+         if (postSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_SPACE_AFTER_NAME);
+         }
+
+         const results = this._cursor.getToTerminator([ ']]>' ]);
+
+         if (!results.terminator) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+         } else {
+            this._cursor.getMatch(']]>');
+         }
+
+         this._pushToken(XmlToken.CDATA, results.token ? results.token.text : undefined);
+      }
    }
 
    /*
