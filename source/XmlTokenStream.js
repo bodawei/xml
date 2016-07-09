@@ -156,7 +156,15 @@ class XmlTokenStream {
       const preSpace = this._cursor.getSpace();
       const bracketItemType = this._cursor.getWord([ '[' ]);
       const postSpace = this._cursor.getSpace();
-      this._cursor.getMatch('[');
+      const secondBracket = this._cursor.getMatch('[');
+
+      if (!bracketItemType) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+      }
+
+      if (!secondBracket) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+      }
 
       /*
        * Retrieve a CData section
@@ -165,7 +173,7 @@ class XmlTokenStream {
        *   [20] CData   ::=  (Char* - (Char* ']]>' Char*))
        *   [21] CDEnd   ::=  ']]>'
        */
-      if (bracketItemType.text.toLocaleLowerCase() === 'cdata') {
+      if (bracketItemType && bracketItemType.text.toLocaleLowerCase() === 'cdata') {
          if (preSpace) {
             this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_SPACE_BEFORE_NAME);
          }
@@ -186,6 +194,9 @@ class XmlTokenStream {
          }
 
          this._pushToken(XmlToken.CDATA, results.token ? results.token.text : undefined);
+      } else if (bracketItemType) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME,
+            'Unknown Bang-bracket item. Found "' + bracketItemType.text + '".');
       }
    }
 

@@ -11,25 +11,30 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 √ 51:S:syntax error if ]]> found in char data
 	modify getToMarkup to stop at ]]>
 		_getContent() now may read multiple chunks and produce multiple tokens in lax mode
-
-52:M: Read CDATA
+√ 52:M: Read CDATA
 	√ syntactically correct
 	√ Deal with cases: EOF in middle, empty
 	√ allows spaces in the [ CDATA [ part   (note, can't have spaces in ]]>, or risk misunderstanding)
 		- remember we'll want to do the same for all the <![ x [ things. the others allow spaces.
 	√ For the moment this should just return a CDATA token, which is basically the same as a CHARDATA one.  We may want to do a two level thing when we get to entities though
-   check not getting the name!  or missing closing square bracket, or name isn't cdata'
-   review
+   √ check not getting the name!  or missing closing square bracket, √ or name isn't cdata'
+   √review
+   2
 
 7:M: StringCursor cleanup
 	- review testing of all routines (through getMarkup)
 		- including doc them and test at non-start of string
-		- document that getX returns undefined or a token, but getToX always returns something.
+		√ - document that getX returns undefined or a token, but getToX always returns something.
+      - Add a test for each routine that makes sure they add the right tokens to the queue
+      - Deal with gettoTerminator, in particular watch for whitespace
+      - should check terminators for all routines for whitespace?
 
 =============================================
 CLEANUP
 - Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
 - note: if EOF after <! we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
+- Bang items <! unknown > currently will lose the <! if eof happens there
+- BangBracket items also lose the token if it is an unknown item <![frog[ ....
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)

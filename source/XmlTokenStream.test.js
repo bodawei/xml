@@ -339,12 +339,76 @@ describe('XmlTokenStream', () => {
 
    describe('parsing BangItem', () => {
 
-      it('Reports an error if an unknown bang item founnd', () => {
+      it('reports an error if an unknown bang item found', () => {
          const s = makeStream('<!Fish');
 
          expect(() => {
             s.getNext();
          }).toThrowError('Unsupported "<!" item.');
+      });
+
+      it('reports an error if an unknown name appears in a <![xxx[ construction', () => {
+         const s = makeStream('<![Test[');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unknown Bang-bracket item. Found "Test".');
+      });
+
+      it('generates an error token in lax mode if an unknown name appears in a <![xxx[ construction', () => {
+         const s = makeStream('<![Testing[ ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME);
+      });
+
+      it('reports an error if there is no name provided', () => {
+         const s = makeStream('<![[');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('No target name provided in the <![name[ construction.');
+      });
+
+      it('generates an error token in lax mode if there is no name provided', () => {
+         const s = makeStream('<![[ ]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+      });
+
+      it('generates an error token in lax mode if EOF in the middle of the constructon', () => {
+         const s = makeStream('<![', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+      });
+
+      it('reports an error if there is no second square bracket', () => {
+         const s = makeStream('<![Name ]]>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Second square bracket missing.');
+      });
+
+      it('generates an error token in lax mode if there is no second square bracket', () => {
+         const s = makeStream('<![Testing]]>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+      });
+
+      it('generates an error token in lax mode if there is an EOF before the second [', () => {
+         const s = makeStream('<![Testing', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
       });
 
    });

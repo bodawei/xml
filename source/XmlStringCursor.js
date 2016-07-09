@@ -8,6 +8,17 @@ const Offset = require('./Offset.js');
 /*
  * An implementation of a cursor interface, where the source data for the
  * cursor is a plain string.
+ *
+ * All getXxx() routines return either undefined or an XmlStringToken
+ * instance. An unknown return value means either that the specified item
+ * can not be retrieved, EOF or some other catastrophic read problem where
+ * reading can not procede.
+ *
+ * peekXxx() routines look ahead in the input stream by one character, but
+ * do not alter the position of the cursor.
+ *
+ * getToXxxx() routines return a descriptor including a possibly undefined
+ * token and additional meta data.
  */
 class XmlStringCursor {
 
@@ -17,6 +28,7 @@ class XmlStringCursor {
     PARAM
     The string that this cursor should use.
    \**********************************************************************/
+
    constructor(source) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
@@ -35,6 +47,7 @@ class XmlStringCursor {
     RETURN
     One of the XmlStringToken constants: MARKUP, SPACE, or STRING.
    \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
    peekType() {
       const nextChar = this._source[this._offset.index];
 
@@ -44,7 +57,7 @@ class XmlStringCursor {
 
       if (nextChar === '<') {
          return XmlStringToken.MARKUP;
-      } else if (this._isSpace()) {
+      } else if (this._isSpace(this._source[this._offset.index])) {
          return XmlStringToken.SPACE;
       } else {
          return XmlStringToken.STRING;
@@ -56,6 +69,7 @@ class XmlStringCursor {
     RETURN
     The next character in the cursor as a CHAR token.
    \*----------------------------------------------------------------------*/
+
    peekChar() {
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
@@ -89,6 +103,7 @@ class XmlStringCursor {
 
         [3] S ::= (#x20 | #x9 | #xD | #xA)+
    \**********************************************************************/
+
    getSpace() {
       let fixString = false;
       const startOffset = this._offset.clone();
@@ -147,6 +162,7 @@ class XmlStringCursor {
       const startOffset = this._offset.clone();
       let nextChar = this._source[this._offset.index];
       let maxLen = 0;
+
       for (let index = 0; index < terminators.length; index++) {
          const len = terminators[index].length;
          if (maxLen < len) {
@@ -234,10 +250,32 @@ class XmlStringCursor {
       return this._makeToken(rawString, XmlStringToken.MARKUP, startOffset);
    }
 
-   // This also needs to deal with line endings and pending tokens
+   /*
+    * Gets a string token that contains the eact string passed in as a
+    * parameter. In this process, the cursor is advanced past this value.
+    * If this value is not at the current cursor position, this returns
+    * undefined.
+    *
+    * PARAM
+    * toMatch: The string value to match at the current position in
+    * the cursor. This may not contain any whitespace.
+    *
+    * RETURN
+    * A string token containing toMatch, or undefined
+    */
    getMatch(toMatch) {
+      let hasSpace = false;
+
       if (!toMatch || toMatch === '') {
          throw new Error('Must pass a non-empty string to getMatch().');
+      }
+
+      for (let index = 0; index < toMatch.length; index++) {
+         hasSpace = hasSpace || this._isSpace(toMatch[index]);
+      }
+
+      if (hasSpace) {
+         throw new Error('Parameter to getMatch() may not contain any whitespace characters.');
       }
 
       if (this._source.substr(this._offset.index, toMatch.length) !== toMatch) {
@@ -300,6 +338,10 @@ class XmlStringCursor {
       };
    }
 
+   /*
+    * RETURN
+    * All the tokens generated since the last time this routine was called.
+    */
    getRecentTokens() {
       const temp = this._tokens;
       this._tokens = [];
@@ -307,9 +349,15 @@ class XmlStringCursor {
       return temp;
    }
 
-   _isSpace() {
-      const char = this._source[this._offset.index];
-      return char === ' ' || char === '\t' || char === '\n' || char === '\r';
+   /*
+    * PARAM
+    * a single character string
+    *
+    * RETURN
+    * True if this character is one of the possible space characters in input.
+    */
+   _isSpace(aChar) {
+      return aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
    }
 
    /*
@@ -319,6 +367,7 @@ class XmlStringCursor {
     *    is just for performance, so we do not need to calculate this on
     *    every call)
     * checkSpace: true if we should also check for whitespace as terminator
+    *
     * RETURN
     * The terminator that was matched at the current position in the cursor
     */

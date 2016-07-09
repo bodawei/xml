@@ -491,6 +491,69 @@ describe('XmlStringCursor', () => {
 
    });
 
+   describe('getMatch()', () => {
+
+      it('throws an error if called without a parameter', () => {
+         const c = new XmlStringCursor('one two');
+
+         expect(() => {
+            c.getMatch();
+         }).toThrowError('Must pass a non-empty string to getMatch().');
+      });
+
+      it('throws an error if passed an empty string', () => {
+         const c = new XmlStringCursor('');
+
+         expect(() => {
+            c.getMatch('');
+         }).toThrowError('Must pass a non-empty string to getMatch().');
+      });
+
+      it('throws an error if called with whitespace in the parameter', () => {
+         const c = new XmlStringCursor('one two');
+
+         expect(() => {
+            c.getMatch('one two');
+         }).toThrowError('Parameter to getMatch() may not contain any whitespace characters.');
+      });
+
+      it('throws an error if called with newlines in the parameter', () => {
+         const c = new XmlStringCursor('one\ntwo');
+
+         expect(() => {
+            c.getMatch('one\ntwo');
+         }).toThrowError('Parameter to getMatch() may not contain any whitespace characters.');
+      });
+
+      it('returns the matched string', () => {
+         const c = new XmlStringCursor('frogD');
+
+         expect(c.getMatch('fro')).toEqual(new XmlStringToken('fro', XmlStringToken.STRING,
+            new Offset(0, 0, 0), new Offset(0, 3, 3)));
+      });
+
+      it('returns a nothing if the matched string is not found', () => {
+         const c = new XmlStringCursor('frog');
+
+         expect(c.getMatch('D')).toBeUndefined();
+      });
+
+      it('returns a nothing if at the end of string', () => {
+         const c = new XmlStringCursor('');
+
+         expect(c.getMatch('D')).toBeUndefined();
+      });
+
+      it('returns the expected value even when not at the start of the cursor data', () => {
+         const c = new XmlStringCursor('one');
+         c.getChar();
+
+         expect(c.getMatch('ne')).toEqual(new XmlStringToken('ne', XmlStringToken.STRING,
+            new Offset(0, 1, 1), new Offset(0, 3, 3)));
+      });
+
+   });
+
    describe('getToTerminator()', () => {
 
       it('throws an error if called without a parameter', () => {
@@ -546,45 +609,6 @@ describe('XmlStringCursor', () => {
                new Offset(0, 0, 0), new Offset(0, 4, 4)),
             terminator: 'D'
          });
-      });
-
-   });
-
-   describe('getMatch()', () => {
-
-      it('throws an error if called without a parameter', () => {
-         const c = new XmlStringCursor('one two');
-
-         expect(() => {
-            c.getMatch();
-         }).toThrowError('Must pass a non-empty string to getMatch().');
-      });
-
-      it('throws an error if passed an empty string', () => {
-         const c = new XmlStringCursor('');
-
-         expect(() => {
-            c.getMatch('');
-         }).toThrowError('Must pass a non-empty string to getMatch().');
-      });
-
-      it('returns the matched string', () => {
-         const c = new XmlStringCursor('frogD');
-
-         expect(c.getMatch('fro')).toEqual(new XmlStringToken('fro', XmlStringToken.STRING,
-            new Offset(0, 0, 0), new Offset(0, 3, 3)));
-      });
-
-      it('returns a nothing if the matched string is not found', () => {
-         const c = new XmlStringCursor('frog');
-
-         expect(c.getMatch('D')).toBeUndefined();
-      });
-
-      it('returns a nothing if at the end of string', () => {
-         const c = new XmlStringCursor('');
-
-         expect(c.getMatch('D')).toBeUndefined();
       });
 
    });
