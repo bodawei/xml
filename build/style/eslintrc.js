@@ -106,7 +106,6 @@ module.exports = {
       'space-in-parens': [ ERROR, 'never' ],
       'space-infix-ops': ERROR,
       'space-unary-ops': [ ERROR, { words: true, nonwords: false } ],
-      'spaced-comment': [ ERROR, 'always' ],
 
       // ECMAScript 6
       'arrow-spacing': ERROR,

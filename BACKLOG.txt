@@ -20,14 +20,13 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
    √ check not getting the name!  or missing closing square bracket, √ or name isn't cdata'
    √review
    2
-
-7:M: StringCursor cleanup
-	- review testing of all routines (through getMarkup)
-		- including doc them and test at non-start of string
+√ 7:M: StringCursor basic cleanup
+	√ review testing of all routines (through getMarkup)
+		√ including doc them and test at non-start of string
 		√ - document that getX returns undefined or a token, but getToX always returns something.
-      - Add a test for each routine that makes sure they add the right tokens to the queue
-      - Deal with gettoTerminator, in particular watch for whitespace
-      - should check terminators for all routines for whitespace?
+      √ - Add a test for each routine that makes sure they add the right tokens to the queue
+      √ - Deal with gettoTerminator, in particular watch for whitespace
+      √ - should check terminators for all routines for whitespace?
 
 =============================================
 CLEANUP
@@ -35,6 +34,7 @@ CLEANUP
 - note: if EOF after <! we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
 - Bang items <! unknown > currently will lose the <! if eof happens there
 - BangBracket items also lose the token if it is an unknown item <![frog[ ....
+- Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
@@ -68,22 +68,13 @@ BUILD
 PROJECT
 --- technical debt
 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
-52:S: StringCursorSpeedup
-	Note:
-		getToMarkup: currently <, soon < and & and possibly < & and ]]>
-		soon: getToSpaceOrTerminator  any space or >
-		getToTerminator  -->, ?> ]]>, ", ' and >
-		getWord takes a variable set of terminators
-	optimize getToTerminator for single terminator case
-	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
-		Note: Can't do regex from an offset without doing a substr. sigh.
+8:S: review xmltokenstream for testing and code logic: SMALL
+	- Should return '' rather than undefined for things like comments and pi's etc.
 47:M: Minor StringCursor features
 	- getSpace should return text and origText
 	- Resolve what to do with CR in terminator and match, and read to markup
 	- remove the type returned on string tokens (not being used, and is unpredictable from the outside)
 	- getWord has multiple terminators, but doesn't inform you of which it hit
-8:S: review xmltokenstream for testing and code logic: SMALL
-	- Should return '' rather than undefined for things like comments and pi's etc.
 58:S: Remove data prop on token, and make all token types more explicit
 9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
 11:M: Provide some kind of internationalizable string catalog
@@ -99,6 +90,15 @@ PROJECT
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 53:M: use xml decl encoding to change input if needed
+52:S: StringCursorSpeedup
+	Note:
+		getToMarkup: currently <, soon < and & and possibly < & and ]]>
+		soon: getToSpaceOrTerminator  any space or >
+		getToTerminator  -->, ?> ]]>, ", ' and >
+		getWord takes a variable set of terminators
+	optimize getToTerminator for single terminator case
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
+		Note: Can't do regex from an offset without doing a substr. sigh.
 56:S: Reorganize getAttributes, as it seems too tangled
 57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
 

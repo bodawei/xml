@@ -66,6 +66,13 @@ describe('XmlStringCursor', () => {
          expect(c.peekType()).toEqual(XmlStringToken.MARKUP);
       });
 
+      it('adds nothing to the recent tokens', () => {
+         const c = new XmlStringCursor('h<foo>');
+         c.peekType();
+
+         expect(c.getRecentTokens()).toEqual([]);
+      });
+
    });
 
    describe('peekChar()', () => {
@@ -110,6 +117,13 @@ describe('XmlStringCursor', () => {
 
          expect(c.peekChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
             new Offset(0, 1, 1), new Offset(1, 0, 3)));
+      });
+
+      it('adds nothing to the recent tokens', () => {
+         const c = new XmlStringCursor('h<foo>');
+         c.peekChar();
+
+         expect(c.getRecentTokens()).toEqual([]);
       });
 
    });
@@ -164,7 +178,7 @@ describe('XmlStringCursor', () => {
              new Offset(0, 0, 0), new Offset(3, 1, 8)));
       });
 
-      it('reads a space string from the middle of an overall string', () => {
+      it('reads a space string from the middle of the string', () => {
          const c = new XmlStringCursor('one twp');
          c.getWord([]);
 
@@ -172,9 +186,27 @@ describe('XmlStringCursor', () => {
              new Offset(0, 3, 3), new Offset(0, 4, 4)));
       });
 
+      it('adds the space token to the recent tokens', () => {
+         const c = new XmlStringCursor(' \t\n');
+         c.getSpace();
+
+         expect(c.getRecentTokens()).toEqual([
+            new XmlStringToken(' \t\n', XmlStringToken.SPACE,
+             new Offset(0, 0, 0), new Offset(1, 0, 3))
+         ]);
+      });
+
    });
 
    describe('getWord()', () => {
+
+      it('throws an error if passed a terminator with spaces', () => {
+         const c = new XmlStringCursor('');
+
+         expect(() => {
+            c.getWord([ '< <' ]);
+         }).toThrowError('Terminators may not have any space characters (space, tab, newline, etc).');
+      });
 
       it('returns the next space-terminated word', () => {
          const c = new XmlStringCursor('one two');
@@ -249,6 +281,16 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('');
 
          expect(c.getWord([])).toBeUndefined();
+      });
+
+      it('adds the word token to the recent tokens', () => {
+         const c = new XmlStringCursor('test ');
+         c.getWord([]);
+         const expected = new XmlStringToken('test', XmlStringToken.WORD,
+             new Offset(0, 0, 0), new Offset(0, 4, 4));
+         expected.couldBeName = true;
+
+         expect(c.getRecentTokens()).toEqual([ expected ]);
       });
 
       describe('couldBeName flag', () => {
@@ -423,6 +465,16 @@ describe('XmlStringCursor', () => {
             new Offset(0, 1, 1), new Offset(1, 0, 3)));
       });
 
+      it('adds the char token to the recent tokens', () => {
+         const c = new XmlStringCursor('test ');
+         c.getChar();
+
+         expect(c.getRecentTokens()).toEqual([
+            new XmlStringToken('t', XmlStringToken.CHAR,
+             new Offset(0, 0, 0), new Offset(0, 1, 1))
+         ]);
+      });
+
    });
 
    describe('getMarkup()', () => {
@@ -489,6 +541,16 @@ describe('XmlStringCursor', () => {
              new Offset(1, 4, 6)));
       });
 
+      it('adds the markup token to the recent tokens', () => {
+         const c = new XmlStringCursor('<test>');
+         c.getMarkup();
+
+         expect(c.getRecentTokens()).toEqual([
+            new XmlStringToken('<', XmlStringToken.MARKUP,
+             new Offset(0, 0, 0), new Offset(0, 1, 1))
+         ]);
+      });
+
    });
 
    describe('getMatch()', () => {
@@ -552,6 +614,16 @@ describe('XmlStringCursor', () => {
             new Offset(0, 1, 1), new Offset(0, 3, 3)));
       });
 
+      it('adds the matched token to the recent tokens', () => {
+         const c = new XmlStringCursor('Testing');
+         c.getMatch('Tes');
+
+         expect(c.getRecentTokens()).toEqual([
+            new XmlStringToken('Tes', XmlStringToken.STRING,
+             new Offset(0, 0, 0), new Offset(0, 3, 3))
+         ]);
+      });
+
    });
 
    describe('getToTerminator()', () => {
@@ -564,8 +636,16 @@ describe('XmlStringCursor', () => {
          }).toThrowError('Must pass a non-empty array of terminators to getToTerminator().');
       });
 
-      it('throws an error if passed an empty string', () => {
+      it('throws an error if terminators have whitespace', () => {
          const c = new XmlStringCursor('');
+
+         expect(() => {
+            c.getToTerminator([ '< <' ]);
+         }).toThrowError('Terminators may not have any space characters (space, tab, newline, etc).');
+      });
+
+      it('throws an error if passed an empty array', () => {
+         const c = new XmlStringCursor('one two');
 
          expect(() => {
             c.getToTerminator([]);
@@ -609,6 +689,37 @@ describe('XmlStringCursor', () => {
                new Offset(0, 0, 0), new Offset(0, 4, 4)),
             terminator: 'D'
          });
+      });
+
+      it('returns the string with newlines appropriately adjusted', () => {
+         const c = new XmlStringCursor('line1\nline2\rline3\r\nline4!');
+
+         expect(c.getToTerminator([ '!' ])).toEqual({
+            token: new XmlStringToken('line1\nline2\nline3\nline4', XmlStringToken.STRING,
+               new Offset(0, 0, 0), new Offset(0, 24, 24)),
+            terminator: '!'
+         });
+      });
+
+      it('returns the string even when not at the start of the cursor', () => {
+         const c = new XmlStringCursor('frogDandD');
+         c.getChar();
+
+         expect(c.getToTerminator([ 'D' ])).toEqual({
+            token: new XmlStringToken('rog', XmlStringToken.STRING,
+               new Offset(0, 1, 1), new Offset(0, 4, 4)),
+            terminator: 'D'
+         });
+      });
+
+      it('adds the returned token to the recent tokens', () => {
+         const c = new XmlStringCursor('This is a Test');
+         c.getToTerminator([ 'Tes' ]);
+
+         expect(c.getRecentTokens()).toEqual([
+            new XmlStringToken('This is a ', XmlStringToken.STRING,
+             new Offset(0, 0, 0), new Offset(0, 10, 10))
+         ]);
       });
 
    });
