@@ -6,7 +6,7 @@
 
 const Offset = require('./Offset.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
-const XmlStringToken = require('./XmlStringToken.js');
+const TextChunk = require('./TextChunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
@@ -18,14 +18,10 @@ describe('XmlTokenStream', () => {
 
       for (let index = 0; index < values.length; index++) {
          const length = values[index].text.length;
-         const stringToken = new XmlStringToken(values[index].text,
-            new Offset(0, offset, offset), new Offset(0, offset + length, offset + length));
+         values[index].startOffset = new Offset(0, offset, offset);
+         values[index].endOffset = new Offset(0, offset + length, offset + length);
 
-         if (values[index].couldBeName) {
-            stringToken.couldBeName = true;
-         }
-
-         results.push(stringToken);
+         results.push(values[index]);
          offset += length;
       }
 
@@ -120,9 +116,9 @@ describe('XmlTokenStream', () => {
          const s = makeStream(' \t ');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: ' \t '
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.WithSpaceChunk(' \t ', ' \t ')
+         ]));
       });
 
    });
@@ -187,9 +183,9 @@ describe('XmlTokenStream', () => {
          const s = makeStream('wow zowie ');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: 'wow zowie '
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.WithSpaceChunk('wow zowie ', 'wow zowie ')
+         ]));
       });
 
    });
@@ -312,20 +308,14 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<![CDATA[ one ]]>');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '<!'
-         }, {
-            text: '['
-         }, {
-            text: 'CDATA',
-            couldBeName: true
-         }, {
-            text: '['
-         }, {
-            text: ' one '
-         }, {
-            text: ']]>'
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.PlainChunk('['),
+            new TextChunk.WordChunk('CDATA', true),
+            new TextChunk.PlainChunk('['),
+            new TextChunk.WithSpaceChunk(' one ', ' one '),
+            new TextChunk.PlainChunk(']]>'),
+         ]));
       });
 
    });
@@ -454,13 +444,11 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<!-- one -->');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '<!--'
-         }, {
-            text: ' one '
-         }, {
-            text: '-->'
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!--'),
+            new TextChunk.WithSpaceChunk(' one ', ' one '),
+            new TextChunk.PlainChunk('-->')
+         ]));
       });
 
    });
@@ -752,42 +740,24 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<?xml version="1.1" encoding="usascii"  ?>');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '<?'
-         }, {
-            text: 'xml',
-            couldBeName: true
-         }, {
-            text: ' '
-         }, {
-            text: 'version',
-            couldBeName: true
-         }, {
-            text: '='
-         }, {
-            text: '"'
-         }, {
-            text: '1.1'
-         }, {
-            text: '"'
-         }, {
-            text: ' '
-         }, {
-            text: 'encoding',
-            couldBeName: true
-         }, {
-            text: '='
-         }, {
-            text: '"'
-         }, {
-            text: 'usascii'
-         }, {
-            text: '"'
-         }, {
-            text: '  '
-         }, {
-            text: '?>'
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<?'),
+            new TextChunk.WordChunk('xml', true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('version', true),
+            new TextChunk.PlainChunk('='),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('1.1', '1.1'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('encoding', true),
+            new TextChunk.PlainChunk('='),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('usascii', 'usascii'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('  ', '  '),
+            new TextChunk.PlainChunk('?>')
+         ]));
       });
 
       describe('version parameter', () => {
@@ -1062,22 +1032,20 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new XmlStringToken('attr1', new Offset(0, 10, 10), new Offset(0, 15, 15));
-            name1.couldBeName = true;
-            const name2 = new XmlStringToken('attr2', new Offset(0, 22, 22), new Offset(0, 27, 27));
-            name2.couldBeName = true;
+            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(0, 10, 10), new Offset(0, 15, 15));
+            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(0, 22, 22), new Offset(0, 27, 27));
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: 'one',
                nameToken: name1,
-               valueToken: new XmlStringToken('one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
                quoteType: '"'
             }, {
                name: 'attr2',
                value: 'two',
                nameToken: name2,
-               valueToken: new XmlStringToken('two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
                quoteType: '"'
             } ]);
          });
@@ -1087,22 +1055,20 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new XmlStringToken('attr1', new Offset(0, 10, 10), new Offset(0, 15, 15));
-            name1.couldBeName = true;
-            const name2 = new XmlStringToken('attr2', new Offset(0, 22, 22), new Offset(0, 27, 27));
-            name2.couldBeName = true;
+            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(0, 10, 10), new Offset(0, 15, 15));
+            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(0, 22, 22), new Offset(0, 27, 27));
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: 'one',
                nameToken: name1,
-               valueToken: new XmlStringToken('one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
                quoteType: '\''
             }, {
                name: 'attr2',
                value: 'two',
                nameToken: name2,
-               valueToken: new XmlStringToken('two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
                quoteType: '\''
             } ]);
          });
@@ -1112,22 +1078,20 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new XmlStringToken('attr1', new Offset(1, 1, 11), new Offset(1, 6, 16));
-            name1.couldBeName = true;
-            const name2 = new XmlStringToken('attr2', new Offset(2, 10, 28), new Offset(2, 15, 33));
-            name2.couldBeName = true;
+            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(1, 1, 11), new Offset(1, 6, 16));
+            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(2, 10, 28), new Offset(2, 15, 33));
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: 'one',
                nameToken: name1,
-               valueToken: new XmlStringToken('one', new Offset(2, 5, 23), new Offset(2, 8, 26)),
+               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(2, 5, 23), new Offset(2, 8, 26)),
                quoteType: '\''
             }, {
                name: 'attr2',
                value: 'two',
                nameToken: name2,
-               valueToken: new XmlStringToken('two', new Offset(3, 3, 42), new Offset(3, 6, 45)),
+               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(3, 3, 42), new Offset(3, 6, 45)),
                quoteType: '"'
             } ]);
          });
@@ -1473,16 +1437,12 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<one >');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '<'
-         }, {
-            text: 'one',
-            couldBeName: true
-         }, {
-            text: ' '
-         }, {
-            text: '>'
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<'),
+            new TextChunk.WordChunk('one', true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('>')
+         ]));
       });
 
    });
@@ -1577,16 +1537,12 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<one />');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '<'
-         }, {
-            text: 'one',
-            couldBeName: true
-         }, {
-            text: ' '
-         }, {
-            text: '/>'
-         } ]));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<'),
+            new TextChunk.WordChunk('one', true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('/>')
+         ]));
       });
 
    });
@@ -1767,16 +1723,12 @@ describe('XmlTokenStream', () => {
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([ {
-            text: '</'
-         }, {
-            text: 'one',
-            couldBeName: true
-         }, {
-            text: ' '
-         }, {
-            text: '>'
-         } ], 5));
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('</'),
+            new TextChunk.WordChunk('one', true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('>')
+         ], 5));
       });
 
    });

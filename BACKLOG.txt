@@ -27,6 +27,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
       √ - Add a test for each routine that makes sure they add the right tokens to the queue
       √ - Deal with gettoTerminator, in particular watch for whitespace
       √ - should check terminators for all routines for whitespace?
+47:M: Minor StringCursor features
+	√ getSpace should return text and origText
+	√ Resolve what to do with CR in terminator and match, and read to markup
+	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
+	- make one consistent stringcursortoken
+	- Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
+	- match and terminator things have check for whitespace in their params.  Could generalize
+	- change imports in XmlStringCursor to be the actual types not TextChunk.Blah
+	- rename the attribute sfrom name and value Token.  Remove token overall
+	2
 
 =============================================
 CLEANUP
@@ -34,8 +44,6 @@ CLEANUP
 - note: if EOF after <! we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
 - Bang items <! unknown > currently will lose the <! if eof happens there
 - BangBracket items also lose the token if it is an unknown item <![frog[ ....
-- Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
-- match and terminator things have check for whitespace in their params.  Could generalize
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
@@ -71,11 +79,6 @@ PROJECT
 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
-47:M: Minor StringCursor features
-	√ getSpace should return text and origText
-	- make one consistent stringcursortoken
-	√ Resolve what to do with CR in terminator and match, and read to markup
-	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
 58:S: Remove data prop on token, and make all token types more explicit
 9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
 11:M: Provide some kind of internationalizable string catalog

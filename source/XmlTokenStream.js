@@ -4,7 +4,7 @@
 
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
-const XmlStringToken = require('./XmlStringToken.js');
+const TextChunk = require('./TextChunk.js');
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -46,7 +46,7 @@ class XmlTokenStream {
       const type = this._cursor.peekType();
 
       switch (type) {
-         case XmlStringToken.MARKUP:
+         case TextChunk.TYPE.MARKUP:
             const markupToken = this._cursor.getMarkup();
 
             switch (markupToken.text) {
@@ -67,10 +67,10 @@ class XmlTokenStream {
                   break;
             }
             break;
-         case XmlStringToken.SPACE:
+         case TextChunk.TYPE.SPACE:
             this._getS();
             break;
-         case XmlStringToken.STRING:
+         case TextChunk.TYPE.STRING:
             this._getContent();
             break;
       }

@@ -2,7 +2,7 @@
 
 'use strict';
 
-const XmlStringToken = require('./XmlStringToken.js');
+const TextChunk = require('./TextChunk.js');
 const Offset = require('./Offset.js');
 
 /**********************************************************************\
@@ -56,11 +56,11 @@ class XmlStringCursor {
       }
 
       if (nextChar === '<') {
-         return XmlStringToken.MARKUP;
+         return TextChunk.TYPE.MARKUP;
       } else if (this._isSpace(this._source[this._offset.index])) {
-         return XmlStringToken.SPACE;
+         return TextChunk.TYPE.SPACE;
       } else {
-         return XmlStringToken.STRING;
+         return TextChunk.TYPE.STRING;
       }
    }
 
@@ -93,7 +93,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      return new XmlStringToken(nextChar, startOffset, endOffset);
+      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset);
    }
 
    /**********************************************************************\
@@ -141,7 +141,7 @@ class XmlStringCursor {
          rawString = rawString.replace('\r', '\n');
       }
 
-      return this._makeToken(rawString, originalString, startOffset);
+      return this._makeChunkWithSpace(rawString, originalString, startOffset);
    }
 
    /**********************************************************************\
@@ -191,8 +191,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, index - 1);
-      const token = this._makeToken(rawString, rawString, startOffset);
-      token.couldBeName = couldBeName;
+      const token = this._makeWordChunk(rawString, couldBeName, startOffset);
 
       return token;
    }
@@ -253,7 +252,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeToken(rawString, rawString, startOffset);
+      return this._makePlainChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -295,7 +294,7 @@ class XmlStringCursor {
       this._offset.index += rawString.length;
       this._offset.column += rawString.length;
 
-      return this._makeToken(rawString, rawString, startOffset);
+      return this._makePlainChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -366,7 +365,7 @@ class XmlStringCursor {
       }
 
       return {
-         token: this._makeToken(rawString, originalString, startOffset),
+         token: this._makeChunkWithSpace(rawString, originalString, startOffset),
          terminator: terminator
       };
    }
@@ -490,16 +489,45 @@ class XmlStringCursor {
 
    /**********************************************************************\
      PARAM
-     data for a token, it's type, and the start of the string's offset.
+     data for a chunk, the unmodified data, and the start offset.
 
      RETURN
-     a string token using the parameters and the current cursor offset.
-     Note this also pushes the token into the set of recent tokens.
+     a with space chunk using the parameters and the current cursor offset.
+     Note this also pushes the chunk into the set of recent chunks.
    \**********************************************************************/
 
-   _makeToken(data, originalString, startOffset) {
-      const token = new XmlStringToken(data, startOffset, this._offset.clone());
-      token.originalText = originalString;
+   _makeChunkWithSpace(data, originalString, startOffset) {
+      let token = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone());
+      this._tokens.push(token);
+      return token;
+   }
+
+   /**********************************************************************\
+     PARAM
+     data for a chunk, and the start of the string's offset.
+
+     RETURN
+     a plain chunk using the parameters and the current cursor offset.
+     Note this also pushes the chunk into the set of recent chunks.
+   \**********************************************************************/
+
+   _makePlainChunk(data, startOffset) {
+      let token = new TextChunk.PlainChunk(data, startOffset, this._offset.clone());
+      this._tokens.push(token);
+      return token;
+   }
+
+   /**********************************************************************\
+     PARAM
+     data for a word chunk, whether it could be a name, and the start offset.
+
+     RETURN
+     a word chunk using the parameters and the current cursor offset.
+     Note this also pushes the chunk into the set of recent chunks.
+   \**********************************************************************/
+
+   _makeWordChunk(data, couldBeName, startOffset) {
+      let token = new TextChunk.WordChunk(data, couldBeName, startOffset, this._offset.clone());
       this._tokens.push(token);
       return token;
    }
