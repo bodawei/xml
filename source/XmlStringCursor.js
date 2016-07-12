@@ -93,7 +93,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      return new XmlStringToken(nextChar, XmlStringToken.CHAR, startOffset, endOffset);
+      return new XmlStringToken(nextChar, startOffset, endOffset);
    }
 
    /**********************************************************************\
@@ -133,14 +133,15 @@ class XmlStringCursor {
          nextChar = this._source[this._offset.index];
       }
 
-      let rawString = this._source.substring(startOffset.index, this._offset.index);
+      const originalString = this._source.substring(startOffset.index, this._offset.index);
+      let rawString = originalString;
 
       if (fixString) {
          rawString = rawString.replace('\r\n', '\n');
          rawString = rawString.replace('\r', '\n');
       }
 
-      return this._makeToken(rawString, XmlStringToken.SPACE, startOffset);
+      return this._makeToken(rawString, originalString, startOffset);
    }
 
    /**********************************************************************\
@@ -189,8 +190,8 @@ class XmlStringCursor {
          index++;
       }
 
-      const token = this._makeToken(this._source.substring(startOffset.index, index - 1),
-         XmlStringToken.WORD, startOffset);
+      const rawString = this._source.substring(startOffset.index, index - 1);
+      const token = this._makeToken(rawString, rawString, startOffset);
       token.couldBeName = couldBeName;
 
       return token;
@@ -252,7 +253,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeToken(rawString, XmlStringToken.MARKUP, startOffset);
+      return this._makeToken(rawString, rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -294,7 +295,7 @@ class XmlStringCursor {
       this._offset.index += rawString.length;
       this._offset.column += rawString.length;
 
-      return this._makeToken(rawString, XmlStringToken.STRING, startOffset);
+      return this._makeToken(rawString, rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -356,7 +357,8 @@ class XmlStringCursor {
          index++;
       }
 
-      let rawString = this._source.substring(startOffset.index, this._offset.index);
+      const originalString = this._source.substring(startOffset.index, this._offset.index);
+      let rawString = originalString;
 
       if (rawString.indexOf('\r') !== -1) {
          rawString = rawString.replace('\r\n', '\n');
@@ -364,7 +366,7 @@ class XmlStringCursor {
       }
 
       return {
-         token: this._makeToken(rawString, XmlStringToken.STRING, startOffset),
+         token: this._makeToken(rawString, originalString, startOffset),
          terminator: terminator
       };
    }
@@ -495,8 +497,9 @@ class XmlStringCursor {
      Note this also pushes the token into the set of recent tokens.
    \**********************************************************************/
 
-   _makeToken(data, type, startOffset) {
-      const token = new XmlStringToken(data, type, startOffset, this._offset.clone());
+   _makeToken(data, originalString, startOffset) {
+      const token = new XmlStringToken(data, startOffset, this._offset.clone());
+      token.originalText = originalString;
       this._tokens.push(token);
       return token;
    }

@@ -81,10 +81,6 @@ class XmlTokenStream {
    _getS() {
       const space = this._cursor.getSpace();
 
-      if (space.type !== XmlStringToken.SPACE) {
-         throw new Error('Internal error');
-      }
-
       this._pushToken(XmlToken.SPACE, space.text);
    }
 

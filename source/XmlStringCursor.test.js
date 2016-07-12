@@ -80,8 +80,7 @@ describe('XmlStringCursor', () => {
       it('returns the next character', () => {
          const c = new XmlStringCursor('<foo>');
 
-         expect(c.peekChar()).toEqual(new XmlStringToken('<', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.peekChar()).toEqual(new XmlStringToken('<', new Offset(0, 0, 0), new Offset(0, 1, 1)));
       });
 
       it('returns undefined if there is no next character', () => {
@@ -93,30 +92,26 @@ describe('XmlStringCursor', () => {
       it('returns the next character even if it is a newline', () => {
          const c = new XmlStringCursor('\n foo');
 
-         expect(c.peekChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
       });
 
       it('returns the next character even if it is a return', () => {
          const c = new XmlStringCursor('\r foo');
 
-         expect(c.peekChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
       });
 
       it('returns the next character even if it is both a return and newline pair', () => {
          const c = new XmlStringCursor('\r\n foo');
 
-         expect(c.peekChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.peekChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 2)));
       });
 
       it('returns the next character even when the cursor has incremented past start of string', () => {
          const c = new XmlStringCursor('x\r\n foo');
          c.getChar();
 
-         expect(c.peekChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 1, 1), new Offset(1, 0, 3)));
+         expect(c.peekChar()).toEqual(new XmlStringToken('\n', new Offset(0, 1, 1), new Offset(1, 0, 3)));
       });
 
       it('adds nothing to the recent tokens', () => {
@@ -133,8 +128,7 @@ describe('XmlStringCursor', () => {
       it('returns the next run of spaces', () => {
          const c = new XmlStringCursor('    hi');
 
-         expect(c.getSpace()).toEqual(new XmlStringToken('    ', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(0, 4, 4)));
+         expect(c.getSpace()).toEqual(new XmlStringToken('    ', new Offset(0, 0, 0), new Offset(0, 4, 4)));
       });
 
       it('returns undefined if the first available character is ot a space', () => {
@@ -146,44 +140,50 @@ describe('XmlStringCursor', () => {
       it('returns the a mixture of tabs and spaces', () => {
          const c = new XmlStringCursor(' \t \t hi');
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' \t \t ', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(0, 5, 5)));
+         expect(c.getSpace()).toEqual(new XmlStringToken(' \t \t ', new Offset(0, 0, 0), new Offset(0, 5, 5)));
       });
 
       it('returns the a mixture of tabs and spaces and newlines', () => {
          const c = new XmlStringCursor(' \n \t \n hi');
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' \n \t \n ', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(2, 1, 7)));
+         expect(c.getSpace()).toEqual(new XmlStringToken(' \n \t \n ', new Offset(0, 0, 0), new Offset(2, 1, 7)));
       });
 
       it('treats a CR like a LF', () => {
          const c = new XmlStringCursor(' \rhi');
+         const expected = new XmlStringToken(' \n', new Offset(0, 0, 0), new Offset(1, 0, 2));
+         expected.originalText = ' \r';
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' \n', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a CR lf like a LF', () => {
          const c = new XmlStringCursor(' \r\nhi');
+         const expected = new XmlStringToken(' \n', new Offset(0, 0, 0), new Offset(1, 0, 3));
+         expected.originalText = ' \r\n';
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' \n', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(1, 0, 3)));
+         expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a mixture of CRLF and CR and LF as just the right set of LF', () => {
          const c = new XmlStringCursor(' \r\n \n \r hi');
+         const expected = new XmlStringToken(' \n \n \n ', new Offset(0, 0, 0), new Offset(3, 1, 8));
+         expected.originalText = ' \r\n \n \r ';
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' \n \n \n ', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(3, 1, 8)));
+         expect(c.getSpace()).toEqual(expected);
+      });
+
+      it('returns the original text, without line ending changes', () => {
+         const c = new XmlStringCursor(' \r \n \r\n \t');
+
+         expect(c.getSpace().originalText).toEqual(' \r \n \r\n \t');
       });
 
       it('reads a space string from the middle of the string', () => {
          const c = new XmlStringCursor('one twp');
          c.getWord([]);
 
-         expect(c.getSpace()).toEqual(new XmlStringToken(' ', XmlStringToken.SPACE,
-             new Offset(0, 3, 3), new Offset(0, 4, 4)));
+         expect(c.getSpace()).toEqual(new XmlStringToken(' ', new Offset(0, 3, 3), new Offset(0, 4, 4)));
       });
 
       it('adds the space token to the recent tokens', () => {
@@ -191,8 +191,7 @@ describe('XmlStringCursor', () => {
          c.getSpace();
 
          expect(c.getRecentTokens()).toEqual([
-            new XmlStringToken(' \t\n', XmlStringToken.SPACE,
-             new Offset(0, 0, 0), new Offset(1, 0, 3))
+            new XmlStringToken(' \t\n', new Offset(0, 0, 0), new Offset(1, 0, 3))
          ]);
       });
 
@@ -211,7 +210,7 @@ describe('XmlStringCursor', () => {
       it('returns the next space-terminated word', () => {
          const c = new XmlStringCursor('one two');
 
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new XmlStringToken('one', new Offset(0, 0, 0), new Offset(0, 3, 3));
          expected.couldBeName = true;
          expect(c.getWord([])).toEqual(expected);
       });
@@ -219,7 +218,7 @@ describe('XmlStringCursor', () => {
       it('returns the next word, even if a single letter', () => {
          const c = new XmlStringCursor('o two');
 
-         const expected = new XmlStringToken('o', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 1, 1));
+         const expected = new XmlStringToken('o', new Offset(0, 0, 0), new Offset(0, 1, 1));
          expected.couldBeName = true;
          expect(c.getWord([])).toEqual(expected);
       });
@@ -229,7 +228,7 @@ describe('XmlStringCursor', () => {
          c.getWord([]);
          c.getSpace();
 
-         const expected = new XmlStringToken('two', XmlStringToken.WORD, new Offset(0, 4, 4), new Offset(0, 7, 7));
+         const expected = new XmlStringToken('two', new Offset(0, 4, 4), new Offset(0, 7, 7));
          expected.couldBeName = true;
          expect(c.getWord([])).toEqual(expected);
       });
@@ -237,7 +236,7 @@ describe('XmlStringCursor', () => {
       it('considers the word terminated at the specified terminator', () => {
          const c = new XmlStringCursor('oneX');
 
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new XmlStringToken('one', new Offset(0, 0, 0), new Offset(0, 3, 3));
          expected.couldBeName = true;
          expect(c.getWord([ 'X' ])).toEqual(expected);
       });
@@ -247,7 +246,7 @@ describe('XmlStringCursor', () => {
          const c2 = new XmlStringCursor('one?');
          const c3 = new XmlStringCursor('one/]]>');
 
-         const expected = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new XmlStringToken('one', new Offset(0, 0, 0), new Offset(0, 3, 3));
          expected.couldBeName = true;
          expect(c1.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
          expect(c2.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
@@ -260,7 +259,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
          c.getSpace();
 
-         const expected = new XmlStringToken('two', XmlStringToken.WORD, new Offset(0, 5, 5), new Offset(0, 8, 8));
+         const expected = new XmlStringToken('two', new Offset(0, 5, 5), new Offset(0, 8, 8));
          expected.couldBeName = true;
          expect(c.getWord([ '>', 'X' ])).toEqual(expected);
       });
@@ -286,8 +285,7 @@ describe('XmlStringCursor', () => {
       it('adds the word token to the recent tokens', () => {
          const c = new XmlStringCursor('test ');
          c.getWord([]);
-         const expected = new XmlStringToken('test', XmlStringToken.WORD,
-             new Offset(0, 0, 0), new Offset(0, 4, 4));
+         const expected = new XmlStringToken('test', new Offset(0, 0, 0), new Offset(0, 4, 4));
          expected.couldBeName = true;
 
          expect(c.getRecentTokens()).toEqual([ expected ]);
@@ -298,7 +296,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a possible name if it is just letters', () => {
             const c = new XmlStringCursor('one two');
 
-            const firstWord = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('one', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = true;
 
@@ -308,7 +306,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a possible name if it has a hyphen, period or digit in it', () => {
             const c = new XmlStringCursor('on.-8 two');
 
-            const firstWord = new XmlStringToken('on.-8', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('on.-8', new Offset(0, 0, 0),
                new Offset(0, 5, 5));
             firstWord.couldBeName = true;
 
@@ -319,7 +317,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o\u00B7\u0310\u2040e two');
 
             const firstWord = new XmlStringToken('o\u00B7\u0310\u2040e',
-                XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 5, 5));
+                new Offset(0, 0, 0), new Offset(0, 5, 5));
             firstWord.couldBeName = true;
 
             expect(c.getWord([])).toEqual(firstWord);
@@ -330,7 +328,7 @@ describe('XmlStringCursor', () => {
                '\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1';
             const c = new XmlStringCursor(word + ' two');
 
-            const firstWord = new XmlStringToken(word, XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken(word, new Offset(0, 0, 0),
                new Offset(0, word.length, word.length));
             firstWord.couldBeName = true;
 
@@ -341,7 +339,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o\uFDF1e two');
 
             const firstWord = new XmlStringToken('o\uFDF1e',
-                XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+                new Offset(0, 0, 0), new Offset(0, 3, 3));
             firstWord.couldBeName = true;
 
             expect(c.getWord([])).toEqual(firstWord);
@@ -350,7 +348,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it has a $ in it', () => {
             const c = new XmlStringCursor('o$e two');
 
-            const expected = new XmlStringToken('o$e', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const expected = new XmlStringToken('o$e', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             expected.couldBeName = false;
 
@@ -360,7 +358,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a digit', () => {
             const c = new XmlStringCursor('9ne two');
 
-            const firstWord = new XmlStringToken('9ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('9ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -370,7 +368,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a hyphen', () => {
             const c = new XmlStringCursor('-ne two');
 
-            const firstWord = new XmlStringToken('-ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('-ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -380,7 +378,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a period', () => {
             const c = new XmlStringCursor('.ne two');
 
-            const firstWord = new XmlStringToken('.ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('.ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -390,7 +388,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a u00B7', () => {
             const c = new XmlStringCursor('\u00B7ne two');
 
-            const firstWord = new XmlStringToken('\u00B7ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('\u00B7ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -400,7 +398,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a u0320', () => {
             const c = new XmlStringCursor('\u0320ne two');
 
-            const firstWord = new XmlStringToken('\u0320ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('\u0320ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -410,7 +408,7 @@ describe('XmlStringCursor', () => {
          it('marks a word as a non-name if it starts with a u2040', () => {
             const c = new XmlStringCursor('\u2040ne two');
 
-            const firstWord = new XmlStringToken('\u2040ne', XmlStringToken.WORD, new Offset(0, 0, 0),
+            const firstWord = new XmlStringToken('\u2040ne', new Offset(0, 0, 0),
                new Offset(0, 3, 3));
             firstWord.couldBeName = false;
 
@@ -426,8 +424,7 @@ describe('XmlStringCursor', () => {
       it('returns the next character', () => {
          const c = new XmlStringCursor('<foo>');
 
-         expect(c.getChar()).toEqual(new XmlStringToken('<', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.getChar()).toEqual(new XmlStringToken('<', new Offset(0, 0, 0), new Offset(0, 1, 1)));
       });
 
       it('returns undefined if there are no more characters', () => {
@@ -439,30 +436,26 @@ describe('XmlStringCursor', () => {
       it('returns the next character even if it is a newline', () => {
          const c = new XmlStringCursor('\n foo');
 
-         expect(c.getChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.getChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
       });
 
       it('returns the next character even if it is a return', () => {
          const c = new XmlStringCursor('\r foo');
 
-         expect(c.getChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.getChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
       });
 
       it('returns the next character even if it is both a return and newline pair', () => {
          const c = new XmlStringCursor('\r\n foo');
 
-         expect(c.getChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.getChar()).toEqual(new XmlStringToken('\n', new Offset(0, 0, 0), new Offset(1, 0, 2)));
       });
 
       it('returns the next character even when the cursor is not at the beginning', () => {
          const c = new XmlStringCursor('x\r\n foo');
          c.getChar();
 
-         expect(c.getChar()).toEqual(new XmlStringToken('\n', XmlStringToken.CHAR,
-            new Offset(0, 1, 1), new Offset(1, 0, 3)));
+         expect(c.getChar()).toEqual(new XmlStringToken('\n', new Offset(0, 1, 1), new Offset(1, 0, 3)));
       });
 
       it('adds the char token to the recent tokens', () => {
@@ -470,8 +463,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
 
          expect(c.getRecentTokens()).toEqual([
-            new XmlStringToken('t', XmlStringToken.CHAR,
-             new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new XmlStringToken('t', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
       });
 
@@ -494,42 +486,42 @@ describe('XmlStringCursor', () => {
       it('returns a markup token if the next is just <', () => {
          const c = new XmlStringCursor('<frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('<', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('<', new Offset(0, 0, 0),
              new Offset(0, 1, 1)));
       });
 
       it('returns a markup token if the next is </', () => {
          const c = new XmlStringCursor('</frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('</', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('</', new Offset(0, 0, 0),
              new Offset(0, 2, 2)));
       });
 
       it('returns a markup token if the next is <!--', () => {
          const c = new XmlStringCursor('<!--frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('<!--', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('<!--', new Offset(0, 0, 0),
              new Offset(0, 4, 4)));
       });
 
       it('returns a markup token if the next is <?', () => {
          const c = new XmlStringCursor('<?frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('<?', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('<?', new Offset(0, 0, 0),
              new Offset(0, 2, 2)));
       });
 
       it('returns a markup token if the next is <!', () => {
          const c = new XmlStringCursor('<!frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('<!', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('<!', new Offset(0, 0, 0),
              new Offset(0, 2, 2)));
       });
 
       it('returns a markup token if the next is </', () => {
          const c = new XmlStringCursor('</frog');
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('</', XmlStringToken.MARKUP, new Offset(0, 0, 0),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('</', new Offset(0, 0, 0),
              new Offset(0, 2, 2)));
       });
 
@@ -537,7 +529,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor(' \r  </frog');
          c.getSpace();
 
-         expect(c.getMarkup()).toEqual(new XmlStringToken('</', XmlStringToken.MARKUP, new Offset(1, 2, 4),
+         expect(c.getMarkup()).toEqual(new XmlStringToken('</', new Offset(1, 2, 4),
              new Offset(1, 4, 6)));
       });
 
@@ -546,8 +538,7 @@ describe('XmlStringCursor', () => {
          c.getMarkup();
 
          expect(c.getRecentTokens()).toEqual([
-            new XmlStringToken('<', XmlStringToken.MARKUP,
-             new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new XmlStringToken('<', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
       });
 
@@ -590,8 +581,7 @@ describe('XmlStringCursor', () => {
       it('returns the matched string', () => {
          const c = new XmlStringCursor('frogD');
 
-         expect(c.getMatch('fro')).toEqual(new XmlStringToken('fro', XmlStringToken.STRING,
-            new Offset(0, 0, 0), new Offset(0, 3, 3)));
+         expect(c.getMatch('fro')).toEqual(new XmlStringToken('fro', new Offset(0, 0, 0), new Offset(0, 3, 3)));
       });
 
       it('returns a nothing if the matched string is not found', () => {
@@ -610,8 +600,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('one');
          c.getChar();
 
-         expect(c.getMatch('ne')).toEqual(new XmlStringToken('ne', XmlStringToken.STRING,
-            new Offset(0, 1, 1), new Offset(0, 3, 3)));
+         expect(c.getMatch('ne')).toEqual(new XmlStringToken('ne', new Offset(0, 1, 1), new Offset(0, 3, 3)));
       });
 
       it('adds the matched token to the recent tokens', () => {
@@ -619,8 +608,7 @@ describe('XmlStringCursor', () => {
          c.getMatch('Tes');
 
          expect(c.getRecentTokens()).toEqual([
-            new XmlStringToken('Tes', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 3, 3))
+            new XmlStringToken('Tes', new Offset(0, 0, 0), new Offset(0, 3, 3))
          ]);
       });
 
@@ -656,8 +644,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frogD');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            token: new XmlStringToken('frog', XmlStringToken.STRING,
-               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            token: new XmlStringToken('frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
             terminator: 'D'
          });
       });
@@ -675,8 +662,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frog');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            token: new XmlStringToken('frog', XmlStringToken.STRING,
-               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            token: new XmlStringToken('frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
             terminator: undefined
          });
       });
@@ -685,8 +671,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frogDandD');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            token: new XmlStringToken('frog', XmlStringToken.STRING,
-               new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            token: new XmlStringToken('frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
             terminator: 'D'
          });
       });
@@ -694,11 +679,18 @@ describe('XmlStringCursor', () => {
       it('returns the string with newlines appropriately adjusted', () => {
          const c = new XmlStringCursor('line1\nline2\rline3\r\nline4!');
 
+         const token = new XmlStringToken('line1\nline2\nline3\nline4', new Offset(0, 0, 0), new Offset(0, 24, 24));
+         token.originalText = 'line1\nline2\rline3\r\nline4';
          expect(c.getToTerminator([ '!' ])).toEqual({
-            token: new XmlStringToken('line1\nline2\nline3\nline4', XmlStringToken.STRING,
-               new Offset(0, 0, 0), new Offset(0, 24, 24)),
+            token: token,
             terminator: '!'
          });
+      });
+
+      it('returns the original text before newline replacement', () => {
+         const c = new XmlStringCursor('line1\nline2\rline3\r\nline4!');
+
+         expect(c.getToTerminator([ '!' ]).token.originalText).toEqual('line1\nline2\rline3\r\nline4');
       });
 
       it('returns the string even when not at the start of the cursor', () => {
@@ -706,8 +698,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            token: new XmlStringToken('rog', XmlStringToken.STRING,
-               new Offset(0, 1, 1), new Offset(0, 4, 4)),
+            token: new XmlStringToken('rog', new Offset(0, 1, 1), new Offset(0, 4, 4)),
             terminator: 'D'
          });
       });
@@ -717,8 +708,7 @@ describe('XmlStringCursor', () => {
          c.getToTerminator([ 'Tes' ]);
 
          expect(c.getRecentTokens()).toEqual([
-            new XmlStringToken('This is a ', XmlStringToken.STRING,
-             new Offset(0, 0, 0), new Offset(0, 10, 10))
+            new XmlStringToken('This is a ', new Offset(0, 0, 0), new Offset(0, 10, 10))
          ]);
       });
 
@@ -738,14 +728,14 @@ describe('XmlStringCursor', () => {
          c.getSpace();
          c.getWord([]);
 
-         const firstWord = new XmlStringToken('one', XmlStringToken.WORD, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const firstWord = new XmlStringToken('one', new Offset(0, 0, 0), new Offset(0, 3, 3));
          firstWord.couldBeName = true;
-         const secondWord = new XmlStringToken('two', XmlStringToken.WORD, new Offset(0, 4, 4), new Offset(0, 7, 7));
+         const secondWord = new XmlStringToken('two', new Offset(0, 4, 4), new Offset(0, 7, 7));
          secondWord.couldBeName = true;
 
          expect(c.getRecentTokens()).toEqual([
             firstWord,
-            new XmlStringToken(' ', XmlStringToken.SPACE, new Offset(0, 3, 3), new Offset(0, 4, 4)),
+            new XmlStringToken(' ', new Offset(0, 3, 3), new Offset(0, 4, 4)),
             secondWord
          ]);
       });

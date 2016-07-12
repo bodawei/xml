@@ -4,9 +4,9 @@
 
 class XmlStringToken {
 
-   constructor(text, type, startOffset, endOffset) {
+   constructor(text, startOffset, endOffset) {
       this.text = text;
-      this.type = type;
+      this.originalText = text;
       this.startOffset = startOffset;
       this.endOffset = endOffset;
    }
@@ -15,8 +15,6 @@ class XmlStringToken {
 
 XmlStringToken.STRING = 'STRING';
 XmlStringToken.SPACE = 'SPACE';
-XmlStringToken.CHAR = 'CHAR';
-XmlStringToken.WORD = 'WORD';
 XmlStringToken.MARKUP = 'MARKUP';
 
 module.exports = XmlStringToken;

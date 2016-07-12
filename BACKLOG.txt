@@ -35,6 +35,7 @@ CLEANUP
 - Bang items <! unknown > currently will lose the <! if eof happens there
 - BangBracket items also lose the token if it is an unknown item <![frog[ ....
 - Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
+- match and terminator things have check for whitespace in their params.  Could generalize
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
@@ -71,10 +72,10 @@ PROJECT
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 47:M: Minor StringCursor features
-	- getSpace should return text and origText
-	- Resolve what to do with CR in terminator and match, and read to markup
-	- remove the type returned on string tokens (not being used, and is unpredictable from the outside)
-	- getWord has multiple terminators, but doesn't inform you of which it hit
+	√ getSpace should return text and origText
+	- make one consistent stringcursortoken
+	√ Resolve what to do with CR in terminator and match, and read to markup
+	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
 58:S: Remove data prop on token, and make all token types more explicit
 9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
 11:M: Provide some kind of internationalizable string catalog
@@ -150,6 +151,8 @@ PROJECT
 
 ISSUES
 --------
+- getWord has multiple terminators, but doesn't inform you of which it hit
+
 * ISSUE: Need to figure out what to do with xml decl not being an xml decl
 The stuff below ultimately requires more "look ahead" than we do at the moment. the main problem is if we say "skip junk until xmldecl found", what happens if we find <?xml junkjunkjunk?> ? That, then, is still junk.  We could indeed detect that when getXmlDecl reports tons of errors.  in which case we could continue with "junkjunkjunk" in some way  But then we need to put the token(s) back into the string cursor, briefly. Either that, or we consider that something we can't cope with.
 And if we want to allow a non-xmldeclaration document, and want to skip over junk, do we go to the first <name?
