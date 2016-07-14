@@ -162,7 +162,7 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
       });
 
-      it('includes the "]]>" as char dat ain lax mode', () => {
+      it('includes the "]]>" as char data in lax mode', () => {
          const s = makeStream('testing testing ]]>testing', { lax: true });
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
 
@@ -314,7 +314,7 @@ describe('XmlTokenStream', () => {
             new TextChunk.WordChunk('CDATA', true),
             new TextChunk.PlainChunk('['),
             new TextChunk.WithSpaceChunk(' one ', ' one '),
-            new TextChunk.PlainChunk(']]>'),
+            new TextChunk.PlainChunk(']]>')
          ]));
       });
 

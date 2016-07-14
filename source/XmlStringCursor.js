@@ -36,7 +36,7 @@ class XmlStringCursor {
 
       this._source = source;
       this._offset = new Offset(0, 0, 0);
-      this._tokens = [];
+      this._chunks = [];
    }
 
    /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
@@ -97,9 +97,11 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+    RETURN
     Returns the next S in the input.  That is, the next series of spaces,
-    tabs, and newlines. As per the standard, any \r's or \r\n's are
-    converted into single \n's.
+    tabs, and newlines. As per the XML standard, any \r's or \r\n's are
+    converted into single \n's. Note that the unmodified version of the
+    string is included in the return chunk as a property named originalText.
 
         [3] S ::= (#x20 | #x9 | #xD | #xA)+
    \**********************************************************************/
@@ -150,38 +152,30 @@ class XmlStringCursor {
      Space (see getSpace()) or any of the strings in the terminators
      array.
 
-     Note that the WORD token has an added property:
-           couldBeName
-     It is set to true if the word adheres to the XML rules for names.
+     This returns a text chunk that has a couldBeName property. This will
+     be set to true if the word adheres to the XML rules for names.
 
      PARAM
      terminators: an array of strings
      RETURN
-     The next word in the cursor as a WORD token.
+     The next word in the cursor, or undefined if there is none.
    \**********************************************************************/
 
    getWord(terminators) {
-      this._assertTerminatorsHaveNoSpaces(terminators);
+      this._assertValuesHaveNoSpaces(terminators);
 
       const startOffset = this._offset.clone();
+      const atTerminator = this._makeTerminatorCheckFunction(terminators, true);
       let nextChar = this._source[this._offset.index];
-      let maxLen = 0;
 
-      for (let index = 0; index < terminators.length; index++) {
-         const len = terminators[index].length;
-         if (maxLen < len) {
-            maxLen = len;
-         }
-      }
-
-      if (!nextChar || this._atTerminator(terminators, maxLen, true)) {
+      if (!nextChar || atTerminator()) {
          return;
       }
 
       let couldBeName = this._isNameStartChar(nextChar);
       let index = this._offset.index + 1;
 
-      while (nextChar && !this._atTerminator(terminators, maxLen, true)) {
+      while (nextChar && !atTerminator()) {
          couldBeName = couldBeName && this._isNameChar(nextChar); // first time through is redundant
          this._offset.index ++;
          this._offset.column ++;
@@ -191,40 +185,35 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, index - 1);
-      const token = this._makeWordChunk(rawString, couldBeName, startOffset);
-
-      return token;
+      return this._makeWordChunk(rawString, couldBeName, startOffset);
    }
 
    /**********************************************************************\
-     Returns the next character from the input.  Like peekChar(), this
+     RETURN
+     Returns the next character from the cursor.  Like peekChar(), this
      does not care what that character is. Thus, < and any S is returned
      as readily as any other character. Note, however, that this does
      do line-ending normalization automatically.
-
-     RETURN
-     The next character in the cursor as a CHAR token.
    \**********************************************************************/
 
    getChar() {
-      const token = this.peekChar();
+      const chunk = this.peekChar();
 
-      if (!token) {
+      if (!chunk) {
          return;
       }
 
-      this._offset = token.endOffset.clone();
-      this._tokens.push(token);
+      this._offset = chunk.endOffset.clone();
+      this._chunks.push(chunk);
 
-      return token;
+      return chunk;
    }
 
    /**********************************************************************\
-     Gets a MARKUP token.
-
      RETURN
-     A markup token (<, <? <! or </) from the current cursor position or
-     undefined (if the current cursor position has no markup token)
+     A TextChunk token if the next characters in the cursor are the opening
+     of some markup (<, <? <!, </ or <!--) or undefined (if the current
+     cursor position has no markup)
    \**********************************************************************/
 
    getMarkup() {
@@ -256,33 +245,22 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
-     Gets a string token that contains the eact string passed in as a
-     parameter. In this process, the cursor is advanced past this value.
-     If this value is not at the current cursor position, this returns
-     undefined.
-
      PARAM
      toMatch: The string value to match at the current position in
      the cursor. This may not contain any whitespace.
 
      RETURN
-     A string token containing toMatch, or undefined
+     Gets a TextChunk that contains the exact string passed in as a
+     parameter. In this process, the cursor is advanced past this value.
+     If this value is not at the current cursor position, this returns
+     undefined.
    \**********************************************************************/
 
    getMatch(toMatch) {
-      let hasSpace = false;
-
       if (!toMatch || toMatch === '') {
          throw new Error('Must pass a non-empty string to getMatch().');
       }
-
-      for (let index = 0; index < toMatch.length; index++) {
-         hasSpace = hasSpace || this._isSpace(toMatch[index]);
-      }
-
-      if (hasSpace) {
-         throw new Error('Parameter to getMatch() may not contain any whitespace characters.');
-      }
+      this._assertValuesHaveNoSpaces([ toMatch ], 'Parameter to getMatch() may not contain any whitespace characters.');
 
       if (this._source.substr(this._offset.index, toMatch.length) !== toMatch) {
          return;
@@ -306,15 +284,19 @@ class XmlStringCursor {
      this will return the string "this is an example", with the terminator
      of '<'.
 
+     Any \r's in the input will be converted (see the doc for getSpace()).
+     Like that routine, this will return the unmodified original input
+     string on the chunk in a property called originalText.
+
      PARAM
      An array of 1 or more strings that could terminate the string.
 
      RETURN
-     An object with two properties. "token" includes all characters from
+     An object with two properties. "chunk" includes all characters from
      the current position in the cursor up to, but not including, the
      first termination string found in the input. If the cursor is at one
      of those terminators, this will be undefined. Similarly, if at EOF,
-     this token will also be undefined. "terminator" is whiever terminator
+     this chunk will also be undefined. "terminator" is whiever terminator
      was found to terminate the input string. This will be undefined if
      at EOF.
    \**********************************************************************/
@@ -323,24 +305,17 @@ class XmlStringCursor {
       if (!terminators || terminators.length === 0) {
          throw new Error('Must pass a non-empty array of terminators to getToTerminator().');
       }
-      this._assertTerminatorsHaveNoSpaces(terminators);
+      this._assertValuesHaveNoSpaces(terminators);
 
+      const atTerminator = this._makeTerminatorCheckFunction(terminators, false);
       const startOffset = this._offset.clone();
       let nextChar = this._source[this._offset.index];
-      let maxLen = 0;
       let terminator;
 
-      for (let index = 0; index < terminators.length; index++) {
-         const len = terminators[index].length;
-         if (maxLen < len) {
-            maxLen = len;
-         }
-      }
-
-      terminator = this._atTerminator(terminators, maxLen);
+      terminator = atTerminator();
       if (!nextChar || terminator) {
          return {
-            token: undefined,
+            chunk: undefined,
             terminator: terminator
          };
       }
@@ -352,7 +327,7 @@ class XmlStringCursor {
          this._offset.column ++;
 
          nextChar = this._source[index];
-         terminator = this._atTerminator(terminators, maxLen);
+         terminator = atTerminator();
          index++;
       }
 
@@ -365,19 +340,19 @@ class XmlStringCursor {
       }
 
       return {
-         token: this._makeChunkWithSpace(rawString, originalString, startOffset),
+         chunk: this._makeChunkWithSpace(rawString, originalString, startOffset),
          terminator: terminator
       };
    }
 
    /**********************************************************************\
      RETURN
-     All the tokens generated since the last time this routine was called.
+     All the chunks generated since the last time this routine was called.
    \**********************************************************************/
 
-   getRecentTokens() {
-      const temp = this._tokens;
-      this._tokens = [];
+   getRecentChunks() {
+      const temp = this._chunks;
+      this._chunks = [];
 
       return temp;
    }
@@ -397,27 +372,40 @@ class XmlStringCursor {
    /**********************************************************************\
      PARAM
      terminators: An array of strings that could be considered terminators
-     maxTerminatorLength: The longest of the strings in terminators (this
-        is just for performance, so we do not need to calculate this on
-        every call)
      checkSpace: true if we should also check for whitespace as terminator
 
      RETURN
-     The terminator that was matched at the current position in the cursor
+     A function that will return undefined if the cursor is not at one of
+     the specified terminators, and otherwise return the terminator that
+     the cursor is at.
+     A function is returned so that a pre-calculation to make the check
+     more efficient is done first.
    \**********************************************************************/
 
-   _atTerminator(terminators, maxTerminatorLength, checkSpace) {
-      if (checkSpace && this._isSpace(this._source[this._offset.index])) {
-         return this._source[this._offset.index];
-      }
-
-      const nextSeg = this._source.substr(this._offset.index, maxTerminatorLength);
+   _makeTerminatorCheckFunction(terminators, checkSpace) {
+      let maxLen = 0;
+      const self = this;
 
       for (let index = 0; index < terminators.length; index++) {
-         if (nextSeg.indexOf(terminators[index]) === 0) {
-            return terminators[index];
+         const len = terminators[index].length;
+         if (maxLen < len) {
+            maxLen = len;
          }
       }
+
+      return function atTerminator() {
+         if (checkSpace && self._isSpace(self._source[self._offset.index])) {
+            return self._source[self._offset.index];
+         }
+
+         const nextSeg = self._source.substr(self._offset.index, maxLen);
+
+         for (let index = 0; index < terminators.length; index++) {
+            if (nextSeg.indexOf(terminators[index]) === 0) {
+               return terminators[index];
+            }
+         }
+      };
    }
 
    /**********************************************************************\
@@ -466,7 +454,8 @@ class XmlStringCursor {
 
    /**********************************************************************\
      PARAM
-     An array of terminators
+     values: An array of values to examine
+     message: An optional message to include in error message
 
      RETURN
      none
@@ -475,13 +464,13 @@ class XmlStringCursor {
      Error if any terminators have space in them
    \**********************************************************************/
 
-   _assertTerminatorsHaveNoSpaces(terminators) {
-      for (const index in terminators) {
-         const terminator = terminators[index];
+   _assertValuesHaveNoSpaces(values, message) {
+      for (const index in values) {
+         const value = values[index];
 
-         for (let ctr = 0; ctr < terminator.length; ctr++) {
-            if (this._isSpace(terminator[ctr])) {
-               throw new Error('Terminators may not have any space characters (space, tab, newline, etc).');
+         for (let ctr = 0; ctr < value.length; ctr++) {
+            if (this._isSpace(value[ctr])) {
+               throw new Error(message || 'Terminators may not have any space characters (space, tab, newline, etc).');
             }
          }
       }
@@ -497,9 +486,9 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeChunkWithSpace(data, originalString, startOffset) {
-      let token = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone());
-      this._tokens.push(token);
-      return token;
+      const chunk = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone());
+      this._chunks.push(chunk);
+      return chunk;
    }
 
    /**********************************************************************\
@@ -512,9 +501,9 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makePlainChunk(data, startOffset) {
-      let token = new TextChunk.PlainChunk(data, startOffset, this._offset.clone());
-      this._tokens.push(token);
-      return token;
+      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone());
+      this._chunks.push(chunk);
+      return chunk;
    }
 
    /**********************************************************************\
@@ -527,9 +516,9 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeWordChunk(data, couldBeName, startOffset) {
-      let token = new TextChunk.WordChunk(data, couldBeName, startOffset, this._offset.clone());
-      this._tokens.push(token);
-      return token;
+      const chunk = new TextChunk.WordChunk(data, couldBeName, startOffset, this._offset.clone());
+      this._chunks.push(chunk);
+      return chunk;
    }
 
 }

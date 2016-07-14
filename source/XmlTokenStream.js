@@ -96,17 +96,17 @@ class XmlTokenStream {
          if (content.terminator === ']]>') {
             this._reportSyntaxError(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
 
-            this._pushToken(XmlToken.CHARDATA, content.token.text);
+            this._pushToken(XmlToken.CHARDATA, content.chunk.text);
 
             content = {
-               token: this._cursor.getMatch(']]>')
+               chunk: this._cursor.getMatch(']]>')
             };
 
-         } else if (!content.token || content.token.text === '') {
+         } else if (!content.chunk || content.chunk.text === '') {
             return;
          }
 
-         this._pushToken(XmlToken.CHARDATA, content.token.text);
+         this._pushToken(XmlToken.CHARDATA, content.chunk.text);
       } while (content.terminator !== '>');
    }
 
@@ -124,12 +124,12 @@ class XmlTokenStream {
       } else {
          this._cursor.getMatch('-->');
 
-         if (results.token && results.token.text[results.token.text.length - 1] === '-') {
+         if (results.chunk && results.chunk.text[results.chunk.text.length - 1] === '-') {
             this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN);
          }
       }
 
-      this._pushToken(XmlToken.COMMENT, results.token ? results.token.text : undefined);
+      this._pushToken(XmlToken.COMMENT, results.chunk ? results.chunk.text : undefined);
    }
 
    _getBangItem() {
@@ -189,7 +189,7 @@ class XmlTokenStream {
             this._cursor.getMatch(']]>');
          }
 
-         this._pushToken(XmlToken.CDATA, results.token ? results.token.text : undefined);
+         this._pushToken(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
          this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME,
             'Unknown Bang-bracket item. Found "' + bracketItemType.text + '".');
@@ -245,7 +245,7 @@ class XmlTokenStream {
          }
 
          const xtoken = this._pushToken(XmlToken.PI, target ? target.text : '');
-         xtoken.content = results.token ? results.token.text : undefined;
+         xtoken.content = results.chunk ? results.chunk.text : undefined;
       }
    }
 
@@ -415,7 +415,7 @@ class XmlTokenStream {
       const xtoken = new XmlToken(isStartOrEmpty ? startType : XmlToken.ELEMENT_END);
       xtoken.name = name ? name.text : '';
       xtoken.attributes = attributes;
-      xtoken.tokens = this._cursor.getRecentTokens();
+      xtoken.tokens = this._cursor.getRecentChunks();
 
       if (isStartOrEmpty) {
          if (!isEmpty) {
@@ -518,7 +518,7 @@ class XmlTokenStream {
 
             this._cursor.getChar();     // quote
             const result = this._cursor.getToTerminator(terminators);
-            value = result.token;
+            value = result.chunk;
 
             if (!result.terminator) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
@@ -612,7 +612,7 @@ class XmlTokenStream {
 
    _pushToken(type, data) {
       const xtoken = new XmlToken(type, data);
-      xtoken.tokens = this._cursor.getRecentTokens();
+      xtoken.tokens = this._cursor.getRecentChunks();
 
       this._pendingTokens.push(xtoken);
 

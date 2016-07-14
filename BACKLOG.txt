@@ -31,12 +31,12 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ getSpace should return text and origText
 	√ Resolve what to do with CR in terminator and match, and read to markup
 	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
-	- make one consistent stringcursortoken
-	- Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
-	- match and terminator things have check for whitespace in their params.  Could generalize
-	- change imports in XmlStringCursor to be the actual types not TextChunk.Blah
-	- rename the attribute sfrom name and value Token.  Remove token overall
-	2
+	√ make one consistent stringcursortoken
+	√ Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
+	√ match and terminator things have check for whitespace in their params.  Could generalize
+	√ change imports in XmlStringCursor to be the actual types not TextChunk.Blah
+	√ rename the attribute sfrom name and value Token.  Remove token overall
+	3? 4?
 
 =============================================
 CLEANUP

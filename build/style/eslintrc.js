@@ -78,7 +78,7 @@ module.exports = {
       'comma-style': [ ERROR, 'last' ],
       'computed-property-spacing': [ ERROR, 'never' ],
       'eol-last': ERROR,
-      'consistent-this': [ ERROR, 'zhege' ],
+      'consistent-this': [ ERROR, 'self' ],
       'func-names': [ ERROR ],
       'func-style': [ ERROR, 'declaration' ],
       indent: [ ERROR, 3, { SwitchCase: 1 } ],
