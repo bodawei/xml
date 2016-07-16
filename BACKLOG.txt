@@ -5,45 +5,37 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
 6/16 Start of sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
 6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
-7/6  Start of sprint 3: 171story points. Average: 7 per sprint = 27 sprints.
--- next: 62
+7/06 Start of sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
+7/15 Start of sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints.
+-- next: 73
 ---------------------------------------------
-√ 51:S:syntax error if ]]> found in char data
-	modify getToMarkup to stop at ]]>
-		_getContent() now may read multiple chunks and produce multiple tokens in lax mode
-√ 52:M: Read CDATA
-	√ syntactically correct
-	√ Deal with cases: EOF in middle, empty
-	√ allows spaces in the [ CDATA [ part   (note, can't have spaces in ]]>, or risk misunderstanding)
-		- remember we'll want to do the same for all the <![ x [ things. the others allow spaces.
-	√ For the moment this should just return a CDATA token, which is basically the same as a CHARDATA one.  We may want to do a two level thing when we get to entities though
-   √ check not getting the name!  or missing closing square bracket, √ or name isn't cdata'
-   √review
-   2
-√ 7:M: StringCursor basic cleanup
-	√ review testing of all routines (through getMarkup)
-		√ including doc them and test at non-start of string
-		√ - document that getX returns undefined or a token, but getToX always returns something.
-      √ - Add a test for each routine that makes sure they add the right tokens to the queue
-      √ - Deal with gettoTerminator, in particular watch for whitespace
-      √ - should check terminators for all routines for whitespace?
-47:M: Minor StringCursor features
-	√ getSpace should return text and origText
-	√ Resolve what to do with CR in terminator and match, and read to markup
-	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
-	√ make one consistent stringcursortoken
-	√ Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
-	√ match and terminator things have check for whitespace in their params.  Could generalize
-	√ change imports in XmlStringCursor to be the actual types not TextChunk.Blah
-	√ rename the attribute sfrom name and value Token.  Remove token overall
-	3? 4?
+
+62:S: Recognize a character entity in content
+	- add to readToMarkup
+	&#NNN;
+	&#xNNN;
+	- need a specialized cursor routine: To get a number.
+	Return a CHARREF token, which has text, and original format (hex or decimal)
+
+63:S: Error cases with char entity lookup
+	& followed by space: syntax error but ok
+	& followed by non # is a regular reference. we don't support that yet. error
+	# followed by space
+	x followed by space
+	No name found (e.g. &#; or &;: syntax error. do nothing.
+	no ; found (e.g. NNN ends with a space)
+
+64:M: Restructure attributes
+	An array of xmltokens
+	token type ATTR_TEXT: Any non-ref text
+
+65:S: Recognize char entities in attributes
+	add to array
+
 
 =============================================
 CLEANUP
-- Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
-- note: if EOF after <! we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
-- Bang items <! unknown > currently will lose the <! if eof happens there
-- BangBracket items also lose the token if it is an unknown item <![frog[ ....
+
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
@@ -56,17 +48,28 @@ BUILD
 	- Continue with isolation work that is going on in "Working on code coverage numbers".
 	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
 	- Keep a better log of what you are doing since this may take several sprints.
+	NS: Need to have documentation from the web to do this.  I look at the config file and I need the doc to know what is potentially right with browserify
+	NS: Get plain browserify to work, without coverage.
+	+ Then do coverage on top of that
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
 		- The reports should be terse enough to even be able to be put in a commit checkin
-	- On a failing build, should dump the whole grunt output. that can have more verbose testing reports and coverage reports
+	- On a failing build, should dump the whole grunt output (can then have verbose reports)
 		- non-100% coverage should actually be a failure.
 	61:M: Build a reporter for coverage which just reports the final summaries
+		- NS: Need documentation for coverage reporter plugins
 	59:M: Build a reporter for karma which dumps testing results to a file
 		- this is in prep for adding this info to the checkin
+		- NS: Need docuemntation for karma reporters
 	36:M:silence the build except for report
+		- quiet-grunt: Turns everything off in the whole node process.
+		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
 39:M:Investigate getting node testing into build process
+	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
+	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
+	+: Can we move the spec definition into build?
+	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
 	git hooks should validate checkin comment has bug number and is the right format.
@@ -75,8 +78,9 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt
+--- technical debt [7m 9s]
 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 58:S: Remove data prop on token, and make all token types more explicit
@@ -106,23 +110,19 @@ PROJECT
 56:S: Reorganize getAttributes, as it seems too tangled
 57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
 
---- Basic processing  [1XL 1S]
-27:XL Read in entities (see issues, below)
-	character entities
-	identify references in attributes and charData
-	provide infrastructure for recursive processing these.
-	Need the answer for how to feedback both the content and the fact that there was a reference here.
-		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
-			Parent may not have all children at the point of first being returned. for streaming purposes.
-			Parent may, itself, have parent.
-		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
-		This may impact parts of stringCursor which need to become reference aware.
-		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
-		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
-55:s:
-	Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
+--- Basic processing  [1M 6S]
+66:S: Build table of entities. Contains the default ones there by default
 
---- DTD [12XL 1S]
+67:S: Recognize regular entity names.  Replace with an ENTITY-START, CHARDATA etc ENTITY-END
+
+68:S Include in attributes
+
+69:S: Rework PI and Comment to be arrys of content, just like attributes
+70:S: Recognize char entities in PI and Commands
+71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure	
+55:s: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
+
+--- DTD [8XL]
 19:XL Read doctype
 20:XL Read element declaration
 21:XL Read element content structure
@@ -133,7 +133,7 @@ PROJECT
 	including header
 26:XL Deal with parameter entities
 
---- Validity
+--- Validity [4XL 1S]
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
 29:XL Deal with wfc (failures here are fatal errors)
 	- note. you can keep processing after the fatal error, including passing some content back and report more errors. but, it must not continue normal processing
@@ -173,6 +173,10 @@ Add state to reader: SMALL
 	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
 Notes
 - violations of any must, required, must not, shall and shall not is an error, which means you may decide and report, and may try to recover.   overall, the results are undefined by the standard.
+
+- note: if EOF after <!, or if unknown <![name[ items we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
+
+- Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
 
 ==============================================================================
 ==============================================================================
@@ -362,3 +366,47 @@ CLEANUP:
 10:M: prove links between things like version="1.1" and the underlying tokens.   <-- auto fixed as part of 50
 Done: ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
 
+SPRINT3
+√ 51:S:syntax error if ]]> found in char data
+	modify getToMarkup to stop at ]]>
+		_getContent() now may read multiple chunks and produce multiple tokens in lax mode
+√ 52:M: Read CDATA
+	√ syntactically correct
+	√ Deal with cases: EOF in middle, empty
+	√ allows spaces in the [ CDATA [ part   (note, can't have spaces in ]]>, or risk misunderstanding)
+		- remember we'll want to do the same for all the <![ x [ things. the others allow spaces.
+	√ For the moment this should just return a CDATA token, which is basically the same as a CHARDATA one.  We may want to do a two level thing when we get to entities though
+   √ check not getting the name!  or missing closing square bracket, √ or name isn't cdata'
+   √review
+   2
+√ 7:M: StringCursor basic cleanup
+	√ review testing of all routines (through getMarkup)
+		√ including doc them and test at non-start of string
+		√ - document that getX returns undefined or a token, but getToX always returns something.
+      √ - Add a test for each routine that makes sure they add the right tokens to the queue
+      √ - Deal with gettoTerminator, in particular watch for whitespace
+      √ - should check terminators for all routines for whitespace?
+47:M: Minor StringCursor features
+	√ getSpace should return text and origText
+	√ Resolve what to do with CR in terminator and match, and read to markup
+	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
+	√ make one consistent stringcursortoken
+	√ Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
+	√ match and terminator things have check for whitespace in their params.  Could generalize
+	√ change imports in XmlStringCursor to be the actual types not TextChunk.Blah
+	√ rename the attribute sfrom name and value Token.  Remove token overall
+	3? 4?
+
+SPRINT 4
+DECOPOSED: 27:XL Read in entities (see issues, below)
+	character entities
+	identify references in attributes and charData
+	provide infrastructure for recursive processing these.
+	Need the answer for how to feedback both the content and the fact that there was a reference here.
+		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
+			Parent may not have all children at the point of first being returned. for streaming purposes.
+			Parent may, itself, have parent.
+		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
+		This may impact parts of stringCursor which need to become reference aware.
+		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
+		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
