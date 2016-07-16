@@ -146,6 +146,13 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('wow ');
       });
 
+      it('retrieves a token with the specified data up to a reference', () => {
+         const s = makeStream('wow &amp; ');
+
+         const t = s.getNext();
+         expect(t.data).toEqual('wow ');
+      });
+
       it('throws an error if there is a ]]> in the CharData', () => {
          const s = makeStream('blah blah ]]> blah');
 
@@ -186,6 +193,24 @@ describe('XmlTokenStream', () => {
          expect(t.tokens).toEqual(makeStringTokenArray([
             new TextChunk.WithSpaceChunk('wow zowie ', 'wow zowie ')
          ]));
+      });
+
+   });
+
+   describe('parsing character entity reference', () => {
+
+      it('retrieves a token of type CHAR_ENTITY', () => {
+         const s = makeStream('&#65;');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.CHAR_ENTITY);
+      });
+
+      it('produces a token with the specified character', () => {
+         const s = makeStream('&#65;');
+
+         const t = s.getNext();
+         expect(t.data).toEqual('A');
       });
 
    });
@@ -1777,6 +1802,20 @@ describe('XmlTokenStream', () => {
          'Found a space before the xml target name.');
 
          expect(s.getNext()).toEqual(expected);
+      });
+
+   });
+
+   describe('general parsing()', () => {
+
+      it('does not generate a S token between tags', () => {
+         const s = new XmlTokenStream(new XmlStringCursor(' <one> UNO </one> '));
+
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
+         expect(s.getNext().type).toEqual(XmlToken.ELEMENT_START);
+         expect(s.getNext().type).toEqual(XmlToken.CHARDATA);
+         expect(s.getNext().type).toEqual(XmlToken.ELEMENT_END);
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
       });
 
    });

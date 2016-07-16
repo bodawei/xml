@@ -28,10 +28,19 @@ class WithSpaceChunk extends PlainChunk {
    }
 }
 
+class DigitChunk extends PlainChunk {
+
+   constructor(text, isDecimal, startOffset, endOffset) {
+      super(text, startOffset, endOffset);
+      this.isDecimal = isDecimal;
+   }
+}
+
 module.exports = {
    PlainChunk: PlainChunk,
    WordChunk: WordChunk,
    WithSpaceChunk: WithSpaceChunk,
+   DigitChunk: DigitChunk,
    TYPE: {
       STRING: 'STRING_TYPE',
       SPACE: 'SPACE_TYPE',

@@ -9,6 +9,7 @@ const Offset = require('./Offset.js');
 const PlainChunk = require('./TextChunk.js').PlainChunk;
 const WordChunk = require('./TextChunk.js').WordChunk;
 const WithSpaceChunk = require('./TextChunk.js').WithSpaceChunk;
+const DigitChunk = require('./TextChunk.js').DigitChunk;
 const TYPE = require('./TextChunk.js').TYPE;
 
 describe('XmlStringCursor', () => {
@@ -38,8 +39,14 @@ describe('XmlStringCursor', () => {
 
    describe('peekType()', () => {
 
-      it('returns MARKUP if that is what is next', () => {
+      it('returns MARKUP if there is a < next', () => {
          const c = new XmlStringCursor('<foo>');
+
+         expect(c.peekType()).toEqual(TYPE.MARKUP);
+      });
+
+      it('returns MARKUP if there is a & next', () => {
+         const c = new XmlStringCursor('&foo>');
 
          expect(c.peekType()).toEqual(TYPE.MARKUP);
       });
@@ -402,6 +409,64 @@ describe('XmlStringCursor', () => {
 
    });
 
+   describe('getDigits()', () => {
+
+      it('returns the next space-terminated set of decimal digits', () => {
+         const c = new XmlStringCursor('123 ');
+
+         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         expect(c.getDigits()).toEqual(expected);
+      });
+
+      it('returns the next space-terminated set of hex digits', () => {
+         const c = new XmlStringCursor('12AbCdE3 ');
+
+         const expected = new DigitChunk('12AbCdE3', false, new Offset(0, 0, 0), new Offset(0, 8, 8));
+         expect(c.getDigits()).toEqual(expected);
+      });
+
+      it('returns undefined if there is a space at the cursor', () => {
+         const c = new XmlStringCursor(' one two');
+
+         expect(c.getDigits([])).toBeUndefined();
+      });
+
+      it('returns undefined if cursor is at the end of the input', () => {
+         const c = new XmlStringCursor('');
+
+         expect(c.getDigits([])).toBeUndefined();
+      });
+
+      it('stops processing at a non-digit', () => {
+         const c = new XmlStringCursor('12;');
+
+         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0), new Offset(0, 2, 2)));
+      });
+
+      it('stops processing at EOF', () => {
+         const c = new XmlStringCursor('12');
+
+         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0), new Offset(0, 2, 2)));
+      });
+
+      it('returns the digits even when not at the start of the cursor', () => {
+         const c = new XmlStringCursor('foo 123');
+         c.getWord([]);
+         c.getSpace();
+
+         expect(c.getDigits()).toEqual(new DigitChunk('123', true, new Offset(0, 4, 4), new Offset(0, 7, 7)));
+      });
+
+      it('adds the digit chunk to the recent chunks', () => {
+         const c = new XmlStringCursor('123 ');
+         c.getDigits();
+         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+
+         expect(c.getRecentChunks()).toEqual([ expected ]);
+      });
+
+   });
+
    describe('getChar()', () => {
 
       it('returns the next character', () => {
@@ -460,7 +525,7 @@ describe('XmlStringCursor', () => {
          expect(c.getMarkup()).toBeUndefined();
       });
 
-      it('returns undefined if the next character is not <', () => {
+      it('returns undefined if the next character is not < or &', () => {
          const c = new XmlStringCursor('frog');
 
          expect(c.getMarkup()).toBeUndefined();
@@ -470,6 +535,13 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('<frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('<', new Offset(0, 0, 0),
+             new Offset(0, 1, 1)));
+      });
+
+      it('returns a chunk with markup if the next is just &', () => {
+         const c = new XmlStringCursor('&frog');
+
+         expect(c.getMarkup()).toEqual(new PlainChunk('&', new Offset(0, 0, 0),
              new Offset(0, 1, 1)));
       });
 
@@ -516,12 +588,21 @@ describe('XmlStringCursor', () => {
              new Offset(1, 4, 6)));
       });
 
-      it('adds the chunk with markup to the recent chunks', () => {
+      it('adds the chunk with < markup to the recent chunks', () => {
          const c = new XmlStringCursor('<test>');
          c.getMarkup();
 
          expect(c.getRecentChunks()).toEqual([
             new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1))
+         ]);
+      });
+
+      it('adds the chunk with & markup to the recent chunks', () => {
+         const c = new XmlStringCursor('&test>');
+         c.getMarkup();
+
+         expect(c.getRecentChunks()).toEqual([
+            new PlainChunk('&', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
       });
 

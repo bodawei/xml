@@ -5,6 +5,9 @@
 const TextChunk = require('./TextChunk.js');
 const Offset = require('./Offset.js');
 
+const DECIMAL = 'DECIMAL';
+const HEX = 'HEX';
+
 /**********************************************************************\
   An implementation of a cursor interface, where the source data for the
   cursor is a plain string.
@@ -55,7 +58,7 @@ class XmlStringCursor {
          return;
       }
 
-      if (nextChar === '<') {
+      if (nextChar === '<' || nextChar === '&') {
          return TextChunk.TYPE.MARKUP;
       } else if (this._isSpace(this._source[this._offset.index])) {
          return TextChunk.TYPE.SPACE;
@@ -189,6 +192,41 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+     Returns the next delimited substring from the current position in
+     the cursor. The substring is considered to be terminated by any
+     Space (see getSpace()) or any of the strings in the terminators
+     array.
+
+     This returns a text chunk that has a couldBeName property. This will
+     be set to true if the word adheres to the XML rules for names.
+
+     PARAM
+     terminators: an array of strings
+     RETURN
+     The next word in the cursor, or undefined if there is none.
+   \**********************************************************************/
+
+   getDigits() {
+      const startOffset = this._offset.clone();
+      let isDecimal = true;
+      let type = this._nextCharDigitType();
+
+      if (!type) {
+         return;
+      }
+
+      do {
+         isDecimal = isDecimal && (type === DECIMAL);
+         this._offset.index ++;
+         this._offset.column ++;
+         type = this._nextCharDigitType();
+      } while (type);
+
+      const rawString = this._source.substring(startOffset.index, this._offset.index);
+      return this._makeDigitChunk(rawString, isDecimal, startOffset);
+   }
+
+   /**********************************************************************\
      RETURN
      Returns the next character from the cursor.  Like peekChar(), this
      does not care what that character is. Thus, < and any S is returned
@@ -212,7 +250,7 @@ class XmlStringCursor {
    /**********************************************************************\
      RETURN
      A TextChunk token if the next characters in the cursor are the opening
-     of some markup (<, <? <!, </ or <!--) or undefined (if the current
+     of some markup (<, <? <!, </,  <!-- or &) or undefined (if the current
      cursor position has no markup)
    \**********************************************************************/
 
@@ -221,14 +259,14 @@ class XmlStringCursor {
       const firstChar = this._source[this._offset.index];
       const secondChar = this._source[this._offset.index + 1];
 
-      if (!firstChar || firstChar !== '<') {
+      if (!firstChar || (firstChar !== '<' && firstChar !== '&')) {
          return;
       }
 
       this._offset.index ++;
       this._offset.column ++;
 
-      if (secondChar === '?' || secondChar === '!' || secondChar === '/') {
+      if (firstChar === '<' && (secondChar === '?' || secondChar === '!' || secondChar === '/')) {
          this._offset.index ++;
          this._offset.column ++;
 
@@ -453,6 +491,42 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+     RETURN
+     DECIMAL if the next character in the cursor is 0-9, HEX if it is
+     A-Fa-f, and undefined otherwise.
+   \**********************************************************************/
+
+   _nextCharDigitType() {
+      switch (this._source[this._offset.index]) {
+         case '0':
+         case '1':
+         case '2':
+         case '3':
+         case '4':
+         case '5':
+         case '6':
+         case '7':
+         case '9':
+            return DECIMAL;
+         case 'A':
+         case 'a':
+         case 'B':
+         case 'b':
+         case 'C':
+         case 'c':
+         case 'D':
+         case 'd':
+         case 'E':
+         case 'e':
+         case 'F':
+         case 'f':
+            return HEX;
+         default:
+            return;
+      }
+   }
+
+   /**********************************************************************\
      PARAM
      values: An array of values to examine
      message: An optional message to include in error message
@@ -517,6 +591,21 @@ class XmlStringCursor {
 
    _makeWordChunk(data, couldBeName, startOffset) {
       const chunk = new TextChunk.WordChunk(data, couldBeName, startOffset, this._offset.clone());
+      this._chunks.push(chunk);
+      return chunk;
+   }
+
+   /**********************************************************************\
+     PARAM
+     data for a number chunk, whether it is decimal, and the start offset.
+
+     RETURN
+     a number chunk using the parameters and the current cursor offset.
+     Note this also pushes the chunk into the set of recent chunks.
+   \**********************************************************************/
+
+   _makeDigitChunk(data, isDecimal, startOffset) {
+      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone());
       this._chunks.push(chunk);
       return chunk;
    }

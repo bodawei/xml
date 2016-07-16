@@ -50,6 +50,9 @@ class XmlTokenStream {
             const markupToken = this._cursor.getMarkup();
 
             switch (markupToken.text) {
+               case '&':
+                  this._getReference();
+                  break;
                case '<':
                   this._getTag(true);
                   break;
@@ -68,7 +71,12 @@ class XmlTokenStream {
             }
             break;
          case TextChunk.TYPE.SPACE:
-            this._getS();
+            // only recognize spaces when we aren't between tags
+            if (this._elementNameStack.length === 0) {
+               this._getS();
+            } else {
+               this._getContent();
+            }
             break;
          case TextChunk.TYPE.STRING:
             this._getContent();
@@ -91,7 +99,7 @@ class XmlTokenStream {
       let content;
 
       do {
-         content = this._cursor.getToTerminator([ '<', ']]>' ]);
+         content = this._cursor.getToTerminator([ '<', '&', ']]>' ]);
 
          if (content.terminator === ']]>') {
             this._reportSyntaxError(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
@@ -108,6 +116,26 @@ class XmlTokenStream {
 
          this._pushToken(XmlToken.CHARDATA, content.chunk.text);
       } while (content.terminator !== '>');
+   }
+
+   _getReference() {
+      const next = this._cursor.peekChar();
+
+      if (next.text === '#') {
+         this._cursor.getChar();
+         this._getCharReference();
+      } else {
+         this._reportSyntaxError(XmlErrorToken.ERROR.NOT_SUPPORTED);
+      }
+   }
+
+   _getCharReference() {
+      const digits = this._cursor.getDigits();
+      this._cursor.getChar(); // ;
+
+      const character = String.fromCharCode(parseInt(digits.text, 10));
+
+      this._pushToken(XmlToken.CHAR_ENTITY, character);
    }
 
    /*

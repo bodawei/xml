@@ -9,15 +9,15 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/15 Start of sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints.
 -- next: 73
 ---------------------------------------------
-
-62:S: Recognize a character entity in content
+√ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
+√62:S: Recognize a character entity in content
 	- add to readToMarkup
 	&#NNN;
-	&#xNNN;
 	- need a specialized cursor routine: To get a number.
 	Return a CHARREF token, which has text, and original format (hex or decimal)
 
 63:S: Error cases with char entity lookup
+	&#xNNN;
 	& followed by space: syntax error but ok
 	& followed by non # is a regular reference. we don't support that yet. error
 	# followed by space
@@ -80,7 +80,6 @@ BUILD
 PROJECT
 --- technical debt [7m 9s]
 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
-72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 58:S: Remove data prop on token, and make all token types more explicit
