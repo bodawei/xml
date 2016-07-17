@@ -206,11 +206,186 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.CHAR_ENTITY);
       });
 
-      it('produces a token with the specified character', () => {
+      it('produces a token with the specified character using a decimal reference', () => {
          const s = makeStream('&#65;');
 
          const t = s.getNext();
          expect(t.data).toEqual('A');
+      });
+
+      it('produces a token with the specified character using a hex reference', () => {
+         const s = makeStream('&#x4E;');
+
+         const t = s.getNext();
+         expect(t.data).toEqual('N');
+      });
+
+      it('reports an error if there is a space after the &', () => {
+         const s = makeStream('& #65;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unexpected space after & in reference.');
+      });
+
+      it('generates an error token in lax mode if there is a space after the &', () => {
+         const s = makeStream('& #65;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE);
+      });
+
+      it('reports an error if there is a space after the #', () => {
+         const s = makeStream('&# 65;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unexpected space after # in character entity reference.');
+      });
+
+      it('generates an error token in lax mode if there is a space after the #', () => {
+         const s = makeStream('&# 65;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
+      });
+
+      it('reports an error if the "x" in a hex reference is the wrong case', () => {
+         const s = makeStream('&#X41;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Case of the "x" in a hexadecimal character entity reference is wrong.');
+      });
+
+      it('generates an error token in lax mode if the "x" in a hex reference is the wrong case', () => {
+         const s = makeStream('&#X41;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_CASE_WRONG);
+      });
+
+      it('reports an error if a space is found after the  "x" in a hex reference', () => {
+         const s = makeStream('&#x 41;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unexpected space before digits in a character entity reference.');
+      });
+
+      it('generates an error token in lax mode if a space is found after the  "x" in a hex reference', () => {
+         const s = makeStream('&#x 41;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
+      });
+
+      it('reports an error if no digits found in a character entity reference', () => {
+         const s = makeStream('&#;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('No digits found in a character entity reference.');
+      });
+
+      it('generates an error token in lax mode if no digits found in a character entity reference', () => {
+         const s = makeStream('&#;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_NO_DIGITS);
+      });
+
+      it('reports an error if space is found after digits in a character entity reference', () => {
+         const s = makeStream('&#12 ;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Unexpected spaces found after the digits of a character entity reference.');
+      });
+
+      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
+         const s = makeStream('&#12 ;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
+      });
+
+      it('reports an error if space is found after digits in a character entity reference', () => {
+         const s = makeStream('&#12</end>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Semicolon missing from character entity reference.');
+      });
+
+      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
+         const s = makeStream('&#12</end>', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_MISSING_SEMICOLON);
+      });
+
+      it('reports an error if hex digits found in a decimal character entity reference', () => {
+         const s = makeStream('&#4e;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('A character entity reference was specified as decimal (&#digits;) but included hex digits.');
+      });
+
+      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
+         const s = makeStream('&#4e;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+      });
+
+      it('recognizes hex digits even if specified as decimal', () => {
+         const s = makeStream('&#4e;', { lax: true });
+         ignoreError(s, XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+
+         expect(s.getNext().data).toEqual('N');
+      });
+
+      it('can read when not at the beginning of the cursor', () => {
+         const s = makeStream('<start>&#65;</start>');
+         s.getNext();
+
+         const t = s.getNext();
+         expect(t.data).toEqual('A');
+      });
+
+      it('retrieves the expected tokens', () => {
+         const s = makeStream('&#x42;');
+
+         const t = s.getNext();
+         expect(t.tokens).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('&'),
+            new TextChunk.PlainChunk('#'),
+            new TextChunk.PlainChunk('x'),
+            new TextChunk.DigitChunk('42', true),
+            new TextChunk.PlainChunk(';')
+         ]));
+      });
+
+   });
+
+   describe('parsing entity reference', () => {
+
+      it('throws an exception', () => {
+         const s = makeStream('&frog;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Not supported at this time.');
       });
 
    });

@@ -10,20 +10,23 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 -- next: 73
 ---------------------------------------------
 √ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
-√62:S: Recognize a character entity in content
+√ 62:S: Recognize a character entity in content
 	- add to readToMarkup
 	&#NNN;
 	- need a specialized cursor routine: To get a number.
 	Return a CHARREF token, which has text, and original format (hex or decimal)
 
 63:S: Error cases with char entity lookup
-	&#xNNN;
-	& followed by space: syntax error but ok
-	& followed by non # is a regular reference. we don't support that yet. error
-	# followed by space
-	x followed by space
-	No name found (e.g. &#; or &;: syntax error. do nothing.
-	no ; found (e.g. NNN ends with a space)
+	√ &#xNNN;
+	√ & followed by space: syntax error but ok
+	√ & followed by non # is a regular reference. we don't support that yet. error
+	√ # followed by space
+	√ x followed by space
+	√ case of x
+	√ No name found (e.g. &#; or &;: syntax error. do nothing.
+	√ no ; found (e.g. NNN ends with a space)
+	√ hex digits on decimal reference
+	EOF cases
 
 64:M: Restructure attributes
 	An array of xmltokens

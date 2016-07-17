@@ -54,7 +54,16 @@ XmlErrorToken.ERROR = {
    BANGITEM_UNSUPPORTED: 'BANGITEM_UNSUPPORTED',
    BANGITEM_UNKNOWN_BRACKET_NAME: 'BANGITEM_UNKNOWN_BRACKET_NAME',
    BANGITEM_MISSING_SECOND_SQUARE: 'BANGITEM_MISSING_SECOND_SQUARE',
-   BANGITEM_NO_NAME: 'BANGITEM_NO_NAME'
+   BANGITEM_NO_NAME: 'BANGITEM_NO_NAME',
+   NOT_SUPPORTED: 'NOT_SUPPORTED',
+   REFERENCE_ILLEGAL_SPACE: 'REFERENCE_ILLEGAL_SPACE',
+   CHAR_REFERENCE_ILLEGAL_SPACE: 'CHAR_REFERENCE_ILLEGAL_SPACE',
+   CHAR_REFERENCE_HEX_CASE_WRONG: 'CHAR_REFERENCE_HEX_CASE_WRONG',
+   CHAR_REFERENCE_SPACE_BEFORE_DIGITS: 'CHAR_REFERENCE_SPACE_BEFORE_DIGITS',
+   CHAR_REFERENCE_NO_DIGITS: 'CHAR_REFERENCE_NO_DIGITS',
+   CHAR_REFERENCE_SPACE_AFTER_DIGITS: 'CHAR_REFERENCE_SPACE_AFTER_DIGITS',
+   CHAR_REFERENCE_MISSING_SEMICOLON: 'CHAR_REFERENCE_MISSING_SEMICOLON',
+   CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF: 'CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF'
 };
 
 XmlErrorToken.STRING = {};
@@ -85,5 +94,16 @@ str[err.CDATA_SPACE_BEFORE_NAME] = 'Space found before CDATA.';
 str[err.CDATA_SPACE_AFTER_NAME] = 'Space found after CDATA.';
 str[err.BANGITEM_MISSING_SECOND_SQUARE] = 'Second square bracket missing.';
 str[err.BANGITEM_NO_NAME] = 'No target name provided in the <![name[ construction.';
+str[err.NOT_SUPPORTED] = 'Not supported at this time.';
+str[err.REFERENCE_ILLEGAL_SPACE] = 'Unexpected space after & in reference.';
+str[err.CHAR_REFERENCE_ILLEGAL_SPACE] = 'Unexpected space after # in character entity reference.';
+str[err.CHAR_REFERENCE_HEX_CASE_WRONG] = 'Case of the "x" in a hexadecimal character entity reference is wrong.';
+str[err.CHAR_REFERENCE_SPACE_BEFORE_DIGITS] = 'Unexpected space before digits in a character entity reference.';
+str[err.CHAR_REFERENCE_NO_DIGITS] = 'No digits found in a character entity reference.';
+str[err.CHAR_REFERENCE_SPACE_AFTER_DIGITS] =
+   'Unexpected spaces found after the digits of a character entity reference.';
+str[err.CHAR_REFERENCE_MISSING_SEMICOLON] = 'Semicolon missing from character entity reference.';
+str[err.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF] =
+   'A character entity reference was specified as decimal (&#digits;) but included hex digits.';
 
 module.exports = XmlErrorToken;

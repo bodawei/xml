@@ -119,7 +119,12 @@ class XmlTokenStream {
    }
 
    _getReference() {
+      const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
+
+      if (space) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE);
+      }
 
       if (next.text === '#') {
          this._cursor.getChar();
@@ -130,10 +135,51 @@ class XmlTokenStream {
    }
 
    _getCharReference() {
-      const digits = this._cursor.getDigits();
-      this._cursor.getChar(); // ;
+      let isHex = false;
+      let character;
+      const space = this._cursor.getSpace();
+      const nextChar = this._cursor.peekChar();
 
-      const character = String.fromCharCode(parseInt(digits.text, 10));
+      if (space) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
+      }
+
+      if (nextChar.text.toLocaleLowerCase() === 'x') {
+         if (nextChar.text !== 'x') {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_CASE_WRONG);
+         }
+
+         isHex = true;
+         this._cursor.getChar();
+      }
+
+      const afterSpace = this._cursor.getSpace();
+      const digits = this._cursor.getDigits();
+      const afterDigitsSpace = this._cursor.getSpace();
+      const semicolon = this._cursor.getMatch(';');
+
+      if (afterSpace) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
+      }
+
+      if (!digits) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_NO_DIGITS);
+      } else {
+         if (!isHex && !digits.isDecimal) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+            isHex = true;
+         }
+
+         character = String.fromCharCode(parseInt(digits.text, isHex ? 16 : 10));
+      }
+
+      if (afterDigitsSpace) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
+      }
+
+      if (!semicolon) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_MISSING_SEMICOLON);
+      }
 
       this._pushToken(XmlToken.CHAR_ENTITY, character);
    }
