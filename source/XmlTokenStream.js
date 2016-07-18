@@ -12,12 +12,23 @@ const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
-function makePair(nameToken, valueToken, quoteToken) {
+function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
+   let chunks;
+   let value;
+
+   if (elementAttribute) {
+      chunks = valueChunk ? [ valueChunk ] : [];
+      value = valueChunk ? [ new XmlToken(XmlToken.TEXT, valueChunk.text) ] : [];
+   } else {
+      chunks = valueChunk;
+      value = valueChunk ? valueChunk.text : undefined;
+   }
+
    return {
-      name: nameToken.text,
-      value: valueToken ? valueToken.text : undefined,
-      nameToken: nameToken,
-      valueToken: valueToken,
+      name: nameChunk.text,
+      value: value,
+      nameChunk: nameChunk,
+      valueChunks: chunks,
       quoteType: quoteToken ? quoteToken.text : undefined
    };
 }
@@ -374,14 +385,14 @@ class XmlTokenStream {
                }
                if (param.value !== '1.1' && param.value !== '1.0') {
                   this._reportSyntaxError(XmlErrorToken.ERROR.BAD_VERSION,
-                        '"version" must be "1.0" or "1.1" but found "' + param.value + '".');
+                     '"version" must be "1.0" or "1.1" but found "' + param.value + '".');
                }
                break;
             case 'encoding':
                if (index !== 1) {
                   this._reportSyntaxError(XmlErrorToken.ATTR_WRONG_ORDER,
-                        'encoding attribute in the wrong position. Should be after version, but was #' +
-                        index + '.');
+                     'encoding attribute in the wrong position. Should be after version, but was #' +
+                     index + '.');
                }
                if (param.name !== lcName) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
@@ -389,7 +400,7 @@ class XmlTokenStream {
                }
                if (!param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/)) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.BAD_ENCODING,
-                        '"encoding" must be alphanumerics, but found "' + param.value + '".');
+                     '"encoding" must be alphanumerics, but found "' + param.value + '".');
                }
                break;
             case 'standalone':
@@ -397,16 +408,16 @@ class XmlTokenStream {
 
                if (index !== 1 && index !== 2) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.ATTR_WRONG_ORDER,
-                        'standalone attribute in the wrong position. Should be #1 or #2, but was #' +
-                        index + '.');
+                     'standalone attribute in the wrong position. Should be #1 or #2, but was #' +
+                     index + '.');
                }
                if (param.name !== lcName) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
-                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+                     '"' + lcName + '" must be lower case, but found "' + param.name + '".');
                }
                if (param.value !== lcValue) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE,
-                        '"' + lcValue + '" must be lower case, but found "' + param.value + '".');
+                     '"' + lcValue + '" must be lower case, but found "' + param.value + '".');
                }
                if (param.value !== 'no' && param.value !== 'yes') {
                   this._reportSyntaxError(XmlErrorToken.ERROR.BAD_STANDALONE,
@@ -444,7 +455,7 @@ class XmlTokenStream {
          attributes = this._getAttributes(true);
 
          for (let index = 0; index < attributes.length; index++) {
-            if (!attributes[index].nameToken.couldBeName) {
+            if (!attributes[index].nameChunk.couldBeName) {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME,
                   'The attribute name does not match the syntax for names. Found: "' +
                      attributes[index].name + '".');
@@ -518,8 +529,8 @@ class XmlTokenStream {
     *                     "'" ([^<&'] | Reference)* "'"
     *
     * While syntactically valid attributes are easy to parse, part of the goal
-    * of this class is to try to cope reasonably with syntactically invalide
-    * so processing can continue. There are some cases where parsing
+    * of this class is to try to cope reasonably with syntactically invalid
+    * files so processing can continue. There are some cases where parsing
     * attributes that this gets ugly, and there are some cases where the
     * decision of what to do with the case is not "obvious".  These are the
     * general rules used:
@@ -601,17 +612,16 @@ class XmlTokenStream {
             } else {
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
                   'An "<" was found in the value for attribute "' + name.text + '".');
-               attributes.push(makePair(name, value, quote));
+               attributes.push(makePair(name, value, quote, elementAttribute));
                break;   // Stop processing of attributes
             }
          } else if (!equal) {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            attributes.push(makePair(name, undefined, undefined));
+            attributes.push(makePair(name, undefined, undefined, elementAttribute));
 
             name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
             continue;   // without a quote, we assume there is no value and treat any following as a name
          } else {
-
             let terminators = elementAttribute ? ATTRIBUTE_VALUE_TERMINATORS : XMLDECL_VALUE_TERMINATORS;
 
             if (elementAttribute && this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
@@ -629,13 +639,13 @@ class XmlTokenStream {
                if (terminator && terminator.text === '<') {
                   this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
                      'An "<" was found in the value for attribute "' + name.text + '".');
-                  attributes.push(makePair(name, value, undefined));
+                  attributes.push(makePair(name, value, undefined, elementAttribute));
                   break;   // Stop processing of attributes
                }
             }
          }
 
-         attributes.push(makePair(name, value, quote));
+         attributes.push(makePair(name, value, quote, elementAttribute));
 
          lastSpace = this._cursor.getSpace();
          name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);

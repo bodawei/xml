@@ -26,7 +26,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ No name found (e.g. &#; or &;: syntax error. do nothing.
 	√ no ; found (e.g. NNN ends with a space)
 	√ hex digits on decimal reference
-	EOF cases
+	√ EOF cases
 
 64:M: Restructure attributes
 	An array of xmltokens

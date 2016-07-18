@@ -42,9 +42,18 @@ describe('XmlTokenStream', () => {
       expect(token.type).toEqual(tokenType);
    }
 
+   function compareXmlDeclAttribute(attr, name, value) {
+      expect(attr.name).toEqual(name);
+      if (value) {
+         expect(attr.value).toEqual(value);
+      } else {
+         expect(attr.value).toBeUndefined();
+      }
+   }
+
    function compareAttribute(attr, name, value) {
       expect(attr.name).toEqual(name);
-      expect(attr.value).toEqual(value);
+      expect(attr.value).toEqual(value ? [ new XmlToken(XmlToken.TEXT, value) ] : []);
    }
 
    describe('construction', () => {
@@ -759,9 +768,9 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
-         compareAttribute(t.params[0], 'version', '1.1');
-         compareAttribute(t.params[1], 'encoding', 'usascii');
-         compareAttribute(t.params[2], 'standalone', 'yes');
+         compareXmlDeclAttribute(t.params[0], 'version', '1.1');
+         compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii');
+         compareXmlDeclAttribute(t.params[2], 'standalone', 'yes');
       });
 
       it('allows a space between the <? and the target if in lax mode', () => {
@@ -813,7 +822,7 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version =         "1.1"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no equal sign', () => {
@@ -829,7 +838,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
       });
@@ -840,14 +849,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version =\'1.1\'?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('accepts double quotes', () => {
             const s = makeStream('<?xml version ="1.1"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no quote', () => {
@@ -871,7 +880,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('stops at processing instruction boundary even when no quotes', () => {
@@ -879,10 +888,10 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
-         it('stops at processing instruction boundary even when no equal and noquotes', () => {
+         it('stops at processing instruction boundary even when no equal and no quotes', () => {
             const s = makeStream('<?xml version 1.1?>', { lax: true });
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
@@ -892,7 +901,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.UNKNOWN_ATTR);
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', undefined);
+            compareXmlDeclAttribute(t.params[0], 'version', undefined);
          });
 
       });
@@ -966,14 +975,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.0"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.0');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.0');
          });
 
          it('accepts a value of "1.1"', () => {
             const s = makeStream('<?xml version="1.1"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[0], 'version', '1.1');
+            compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws a syntax error if version is not a supported value', () => {
@@ -1017,7 +1026,7 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.1"   encoding="usascii0"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[1], 'encoding', 'usascii0');
+            compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii0');
          });
 
          it('throws a syntax error if encoding is not rightly encoded', () => {
@@ -1068,14 +1077,14 @@ describe('XmlTokenStream', () => {
             const s = makeStream('<?xml version="1.1" standalone="no"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[1], 'standalone', 'no');
+            compareXmlDeclAttribute(t.params[1], 'standalone', 'no');
          });
 
          it('accepts a value of "yes"', () => {
             const s = makeStream('<?xml version="1.1" standalone="yes"?>');
 
             const t = s.getNext();
-            compareAttribute(t.params[1], 'standalone', 'yes');
+            compareXmlDeclAttribute(t.params[1], 'standalone', 'yes');
          });
 
          it('throws an error if standalone in the wrong position', () => {
@@ -1237,15 +1246,17 @@ describe('XmlTokenStream', () => {
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: 'one',
-               nameToken: name1,
-               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               nameChunk: name1,
+               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
+                  new Offset(0, 17, 17), new Offset(0, 20, 20)) ],
                quoteType: '"'
             }, {
                name: 'attr2',
-               value: 'two',
-               nameToken: name2,
-               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               nameChunk: name2,
+               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
+                  new Offset(0, 29, 29), new Offset(0, 32, 32)) ],
                quoteType: '"'
             } ]);
          });
@@ -1260,15 +1271,17 @@ describe('XmlTokenStream', () => {
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: 'one',
-               nameToken: name1,
-               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(0, 17, 17), new Offset(0, 20, 20)),
+               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               nameChunk: name1,
+               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
+                  new Offset(0, 17, 17), new Offset(0, 20, 20)) ],
                quoteType: '\''
             }, {
                name: 'attr2',
-               value: 'two',
-               nameToken: name2,
-               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(0, 29, 29), new Offset(0, 32, 32)),
+               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               nameChunk: name2,
+               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
+                  new Offset(0, 29, 29), new Offset(0, 32, 32)) ],
                quoteType: '\''
             } ]);
          });
@@ -1283,15 +1296,17 @@ describe('XmlTokenStream', () => {
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: 'one',
-               nameToken: name1,
-               valueToken: new TextChunk.WithSpaceChunk('one', 'one', new Offset(2, 5, 23), new Offset(2, 8, 26)),
+               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               nameChunk: name1,
+               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
+                  new Offset(2, 5, 23), new Offset(2, 8, 26)) ],
                quoteType: '\''
             }, {
                name: 'attr2',
-               value: 'two',
-               nameToken: name2,
-               valueToken: new TextChunk.WithSpaceChunk('two', 'two', new Offset(3, 3, 42), new Offset(3, 6, 45)),
+               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               nameChunk: name2,
+               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
+                  new Offset(3, 3, 42), new Offset(3, 6, 45)) ],
                quoteType: '"'
             } ]);
          });
@@ -1367,7 +1382,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             const t = s.getNext();
 
-            expect(t.attributes[0].value).toEqual('value');
+            compareAttribute(t.attributes[0], 'attr1', 'value');
          });
 
          it('throws an error if there is no equal sign', () => {
@@ -1427,7 +1442,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             const t = s.getNext();
 
-            expect(t.attributes[0].value).toEqual('value one');
+            compareAttribute(t.attributes[0], 'attr1', 'value one');
          });
 
          it('reads a new name if both equal and quote are missing', () => {
@@ -1441,9 +1456,9 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('attr1');
-            expect(t.attributes[1].name).toEqual('value');
-            expect(t.attributes[2].name).toEqual('one');
+            compareAttribute(t.attributes[0], 'attr1', undefined);
+            compareAttribute(t.attributes[1], 'value', undefined);
+            compareAttribute(t.attributes[2], 'one', undefined);
          });
 
          it('returns undefined for values when they are not present', () => {
@@ -1455,8 +1470,8 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].value).toBeUndefined();
-            expect(t.attributes[1].value).toBeUndefined();
+            compareAttribute(t.attributes[0], 'attr1', undefined);
+            compareAttribute(t.attributes[1], 'value', undefined);
          });
 
          it('considers quotes in a name to be part of the name', () => {
@@ -1468,8 +1483,8 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('attr1"boo"');
-            expect(t.attributes[1].name).toEqual('two');
+            compareAttribute(t.attributes[0], 'attr1"boo"', undefined);
+            compareAttribute(t.attributes[1], 'two', 'value');
          });
 
          it('does not consider a close angle bracket to be part of the name', () => {
@@ -1479,7 +1494,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('one');
+            compareAttribute(t.attributes[0], 'one', undefined);
          });
 
          it('does not consider a close angle bracket to be part of the value in a bad value', () => {
@@ -1488,7 +1503,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].value).toEqual('two');
+            compareAttribute(t.attributes[0], 'one', 'two');
          });
 
          it('does not consider a close angle bracket to be part of the value when no equal', () => {
@@ -1498,7 +1513,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].value).toBeUndefined();
+            compareAttribute(t.attributes[0], 'one', undefined);
          });
 
          it('considers quotes at the start of the name to be part of the name', () => {
@@ -1509,8 +1524,8 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('"one');
-            expect(t.attributes[1].name).toEqual('\'two');
+            compareAttribute(t.attributes[0], '"one', 'vone');
+            compareAttribute(t.attributes[1], '\'two', 'vtwo');
          });
 
          it('handles eof in middle of name', () => {
@@ -1521,7 +1536,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('nam');
+            compareAttribute(t.attributes[0], 'nam', undefined);
          });
 
          it('handles eof after equal', () => {
@@ -1531,7 +1546,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
+            compareAttribute(t.attributes[0], 'name', undefined);
          });
 
          it('handles eof in value', () => {
@@ -1541,8 +1556,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one');
+            compareAttribute(t.attributes[0], 'name', 'one');
          });
 
          it('handles eof at start of value', () => {
@@ -1552,8 +1566,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toBeUndefined();
+            compareAttribute(t.attributes[0], 'name', undefined);
          });
 
          it('throws an error if a < is found in an attribute', () => {
@@ -1571,8 +1584,7 @@ describe('XmlTokenStream', () => {
 
             let t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one');
+            compareAttribute(t.attributes[0], 'name', 'one');
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
 
             t = s.getNext();
@@ -1587,11 +1599,10 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one<two');
+            compareAttribute(t.attributes[0], 'name', 'one<two');
          });
 
-         it('terminates start tag if an < in an quoteless attribute value in lax mode', () => {
+         it('terminates start tag if an < in a quoteless attribute value in lax mode', () => {
             const s = makeStream('<elementName name=one<two">', { lax: true });
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
@@ -1599,8 +1610,7 @@ describe('XmlTokenStream', () => {
 
             let t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one');
+            compareAttribute(t.attributes[0], 'name', 'one');
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
 
             t = s.getNext();
@@ -1614,8 +1624,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one');
+            compareAttribute(t.attributes[0], 'name', 'one');
          });
 
          it('considers < part of quoteless attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
@@ -1627,8 +1636,7 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.attributes[0].name).toEqual('name');
-            expect(t.attributes[0].value).toEqual('one<two"');
+            compareAttribute(t.attributes[0], 'name', 'one<two"');
          });
 
       });
