@@ -15,8 +15,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	&#NNN;
 	- need a specialized cursor routine: To get a number.
 	Return a CHARREF token, which has text, and original format (hex or decimal)
-
-63:S: Error cases with char entity lookup
+√ 63:S: Error cases with char entity lookup
 	√ &#xNNN;
 	√ & followed by space: syntax error but ok
 	√ & followed by non # is a regular reference. we don't support that yet. error
@@ -27,18 +26,20 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ no ; found (e.g. NNN ends with a space)
 	√ hex digits on decimal reference
 	√ EOF cases
-
-64:M: Restructure attributes
+√ 64:M: Restructure attributes
 	An array of xmltokens
 	token type ATTR_TEXT: Any non-ref text
-
+	2
 65:S: Recognize char entities in attributes
 	add to array
-
+	√ couldBeName on attributes is wrong place
+	√ need to rework getReference to not assume it is creating a new toplevel token
+	√ - need to rework getAttributes structure so it deals with repeated pieces
+	This took at least 3.  And a bunch of offline work.  Planning was too superficial
 
 =============================================
 CLEANUP
-
+- GetAttribute and makePair have gotten really really ugly
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)

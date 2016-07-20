@@ -1241,22 +1241,13 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(0, 10, 10), new Offset(0, 15, 15));
-            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(0, 22, 22), new Offset(0, 27, 27));
-
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'one') ],
-               nameChunk: name1,
-               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
-                  new Offset(0, 17, 17), new Offset(0, 20, 20)) ],
                quoteType: '"'
             }, {
                name: 'attr2',
                value: [ new XmlToken(XmlToken.TEXT, 'two') ],
-               nameChunk: name2,
-               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
-                  new Offset(0, 29, 29), new Offset(0, 32, 32)) ],
                quoteType: '"'
             } ]);
          });
@@ -1266,22 +1257,13 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(0, 10, 10), new Offset(0, 15, 15));
-            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(0, 22, 22), new Offset(0, 27, 27));
-
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'one') ],
-               nameChunk: name1,
-               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
-                  new Offset(0, 17, 17), new Offset(0, 20, 20)) ],
                quoteType: '\''
             }, {
                name: 'attr2',
                value: [ new XmlToken(XmlToken.TEXT, 'two') ],
-               nameChunk: name2,
-               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
-                  new Offset(0, 29, 29), new Offset(0, 32, 32)) ],
                quoteType: '\''
             } ]);
          });
@@ -1291,22 +1273,57 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            const name1 = new TextChunk.WordChunk('attr1', true, new Offset(1, 1, 11), new Offset(1, 6, 16));
-            const name2 = new TextChunk.WordChunk('attr2', true, new Offset(2, 10, 28), new Offset(2, 15, 33));
-
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'one') ],
-               nameChunk: name1,
-               valueChunks: [ new TextChunk.WithSpaceChunk('one', 'one',
-                  new Offset(2, 5, 23), new Offset(2, 8, 26)) ],
                quoteType: '\''
             }, {
                name: 'attr2',
                value: [ new XmlToken(XmlToken.TEXT, 'two') ],
-               nameChunk: name2,
-               valueChunks: [ new TextChunk.WithSpaceChunk('two', 'two',
-                  new Offset(3, 3, 42), new Offset(3, 6, 45)) ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('can parse attributes with a character reference in the value', () => {
+            const s = makeStream('<elemName attr1="tw&#x41;o">');
+
+            const t = s.getNext();
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
+                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.TEXT, 'o')
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('can parse attributes with a character reference at the start of the value', () => {
+            const s = makeStream('<elemName attr1="&#x41; test">');
+
+            const t = s.getNext();
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [
+                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.TEXT, ' test')
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('can parse attributes with a character reference at the end of the value', () => {
+            const s = makeStream('<elemName attr1="tw&#x41;">');
+
+            const t = s.getNext();
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
+                  new XmlToken(XmlToken.CHAR_ENTITY, 'A')
+               ],
                quoteType: '"'
             } ]);
          });
@@ -1476,10 +1493,10 @@ describe('XmlTokenStream', () => {
 
          it('considers quotes in a name to be part of the name', () => {
             const s = makeStream('<elementName attr1"boo"  two=value>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
 
             const t = s.getNext();
 
@@ -1518,9 +1535,9 @@ describe('XmlTokenStream', () => {
 
          it('considers quotes at the start of the name to be part of the name', () => {
             const s = makeStream('<elementName "one="vone"  \'two=vtwo>', { lax: true });
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
 
             const t = s.getNext();
 
