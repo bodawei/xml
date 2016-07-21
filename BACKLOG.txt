@@ -6,7 +6,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 6/16 Start of sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
 6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
 7/06 Start of sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
-7/15 Start of sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints.
+7/15 Start of sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. [start timebox, not session-box]
 -- next: 73
 ---------------------------------------------
 √ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
@@ -30,16 +30,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	An array of xmltokens
 	token type ATTR_TEXT: Any non-ref text
 	2
-65:S: Recognize char entities in attributes
+√ 65:S: Recognize char entities in attributes
 	add to array
 	√ couldBeName on attributes is wrong place
 	√ need to rework getReference to not assume it is creating a new toplevel token
 	√ - need to rework getAttributes structure so it deals with repeated pieces
-	This took at least 3.  And a bunch of offline work.  Planning was too superficial
+	This took 3 or 4.  And a bunch of offline work.  Planning was too superficial
+- GetAttribute has gotten really really ugly
 
 =============================================
 CLEANUP
-- GetAttribute and makePair have gotten really really ugly
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)

@@ -426,7 +426,6 @@ class XmlTokenStream {
             default:
                this._reportSyntaxError(XmlErrorToken.ERROR.UNKNOWN_ATTR,
                   'Unknown XML Declaration parameter "' + param.name + '".');
-
          }
       }
 
@@ -563,13 +562,25 @@ class XmlTokenStream {
     * PARAM
     * elementAttribute: true if these are attributes for an element, and
     * false if for an XMLDecl.
+    * RETURN
+    * An array of attributes. Each element has a name (string), a value
+    * (array of XMLTokens) and a quoteType, which is either " or ' The
+    * latter is only useful for reproducing the original quote type.
     */
    _getAttributes(elementAttribute) {
       const attributes = [];
+      let abort = false;
       let lastSpace = this._cursor.getSpace();
       let name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
 
-      while (name) {
+      while (name && !abort) {
+         this._cursor.getSpace();    // optional
+         const equal = this._cursor.getMatch('=');
+         this._cursor.getSpace();    // optional
+         const quote = this._cursor.peekChar();
+         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
+         let value = [];
+
          if (!lastSpace) {
             this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
          }
@@ -580,50 +591,13 @@ class XmlTokenStream {
                   name.text + '".');
          }
 
-         this._cursor.getSpace();    // optional
-         const equal = this._cursor.getMatch('=');     // =
-         this._cursor.getSpace();    // optional
-         const quote = this._cursor.peekChar(); // quote
-         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
-         const value = [];
-
          if (!equal) {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
          }
 
          if (gotQuote) {
-            const terminators = [ quote.text, '&' ];
-
-            if (elementAttribute && !this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
-               terminators.push('<');
-            }
-
-            this._cursor.getChar();     // quote
-
-            let done = false;
-            while (!done) {
-               const result = this._cursor.getToTerminator(terminators);
-               if (result.chunk) {
-                  value.push(new XmlToken(XmlToken.TEXT, result.chunk.text));
-               }
-
-               if (!result.terminator) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
-                  done = true;
-               } else if (result.terminator === quote.text) {
-                  this._cursor.getChar();     // quote
-                  done = true;
-               } else if (result.terminator === '&') {
-                  this._cursor.getChar(); // consume the &
-                  const token = this._getReference(true);
-                  value.push(token);
-               } else {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
-                     'An "<" was found in the value for attribute "' + name.text + '".');
-                  attributes.push(makePair(name, value, quote, elementAttribute));
-                  return attributes;
-               }
-            }
+            this._cursor.getChar();     // consume the quote
+            ({value, abort} = this._getQuotedAttributeValue(name, quote, elementAttribute));
          } else if (!equal) {
             this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             attributes.push(makePair(name, value, undefined, elementAttribute));
@@ -659,11 +633,78 @@ class XmlTokenStream {
 
          attributes.push(makePair(name, value, quote, elementAttribute));
 
-         lastSpace = this._cursor.getSpace();
-         name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+         if (!abort) {
+            lastSpace = this._cursor.getSpace();
+            name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+         }
       }
 
       return attributes;
+   }
+
+   /*
+    * _getQuotedAttributeValue consumes the next data from the cursor
+    * to extract the quoted value for an attribute.
+    *
+    * This assumes that the opening quote has already been consumed.
+    *
+    * PARAMS
+    * nameChunk is the TextChunk containing the name of the attribute
+    * quoteChunk is the TextChunk containing the quote that opened the value
+    * elementAttribute is a boolean indicating whether this is an attribute
+    *    for an element (true) or an XML Declaration (false).
+    * RETURN
+    * An object that contains the array of possibly zero XmlTokens found
+    * to make up the attribute value, and a flag named abort. If abort is
+    * true, it indicates that a "<" was found in the attribute value, and
+    * not only attribute value gathering should stop, but the whole start
+    * tag processing should stop.
+    */
+   _getQuotedAttributeValue(nameChunk, quoteChunk, elementAttribute) {
+      const result = {
+         value: [],
+         abort: false
+      };
+      let done = false;
+      const terminators = [ quoteChunk.text ];
+
+      if (elementAttribute) {
+         terminators.push('&');
+
+         if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+            terminators.push('<');
+         }
+      }
+
+      while (!done) {
+         const chunkInfo = this._cursor.getToTerminator(terminators);
+         if (chunkInfo.chunk) {
+            result.value.push(new XmlToken(XmlToken.TEXT, chunkInfo.chunk.text));
+         }
+         done = true;
+
+         switch (chunkInfo.terminator) {
+            case quoteChunk.text:
+               this._cursor.getChar(); // consume the quote
+               break;
+            case '&':
+               done = false;
+               this._cursor.getChar(); // consume the &
+               const token = this._getReference(true);
+               result.value.push(token);
+               break;
+            case '<':
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+                  'An "<" was found in the value for attribute "' + nameChunk.text + '".');
+               result.abort = true;
+               break;
+            default: // no terminator
+               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+               break;
+         }
+      }
+
+      return result;
    }
 
    getNext() {
