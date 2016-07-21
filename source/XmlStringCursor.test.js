@@ -425,6 +425,13 @@ describe('XmlStringCursor', () => {
          expect(c.getDigits()).toEqual(expected);
       });
 
+      it('returns all the possible digits', () => {
+         const c = new XmlStringCursor('0123456789AaBbCcDdEeFf');
+
+         const expected = new DigitChunk('0123456789AaBbCcDdEeFf', false, new Offset(0, 0, 0), new Offset(0, 22, 22));
+         expect(c.getDigits()).toEqual(expected);
+      });
+
       it('returns undefined if there is a space at the cursor', () => {
          const c = new XmlStringCursor(' one two');
 

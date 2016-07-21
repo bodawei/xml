@@ -506,6 +506,7 @@ class XmlStringCursor {
          case '5':
          case '6':
          case '7':
+         case '8':
          case '9':
             return DECIMAL;
          case 'A':

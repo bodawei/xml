@@ -36,7 +36,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ need to rework getReference to not assume it is creating a new toplevel token
 	√ - need to rework getAttributes structure so it deals with repeated pieces
 	This took 3 or 4.  And a bunch of offline work.  Planning was too superficial
-- GetAttribute has gotten really really ugly
+√ GetAttribute has gotten really really ugly
+√ 37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
+	- Continue with isolation work that is going on in "Working on code coverage numbers".
+	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
+	- Keep a better log of what you are doing since this may take several sprints.
+	√ NS: Get plain browserify to work, without coverage.
+	√ Then do coverage on top of that
+		- Got this working simply by upgrading the npm modules. Convenient
+		- But upgrading the main repo causes lots of errors. Probably just a misconfig
+	- Got it all working. Turns out the big problems was that the tranformation order is important and I had things wrong.
 
 =============================================
 CLEANUP
@@ -48,13 +57,6 @@ RESEARCH (when have net)
 - Keep doing background checking for 37
 
 BUILD
-37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
-	- Continue with isolation work that is going on in "Working on code coverage numbers".
-	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
-	- Keep a better log of what you are doing since this may take several sprints.
-	NS: Need to have documentation from the web to do this.  I look at the config file and I need the doc to know what is potentially right with browserify
-	NS: Get plain browserify to work, without coverage.
-	+ Then do coverage on top of that
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries

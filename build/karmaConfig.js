@@ -10,9 +10,8 @@ var isparta = require('isparta');
 var BASE_PATH = process.cwd();
 var OUT_DIR = BASE_PATH + '/temp/';
 var SOURCE_DIR = BASE_PATH + '/source/';
-var BUILD_DIR = BASE_PATH + '/build/';
 
-// http://karma-runner.github.io/0.13/config/configuration-file.html
+// http://karma-runner.github.io/1.0/config/configuration-file.html
 module.exports = function karmaConfig(config) {
    config.set({
       basePath: './',
@@ -33,11 +32,11 @@ module.exports = function karmaConfig(config) {
          debug: true,
          watch: true,
          transform: [
-            [ 'babelify', {presets: [ 'es2015' ]} ],
             [ 'browserify-istanbul', {
                ignore: '**/*.test.js',
                instrumenter: isparta
-            } ]
+            } ],
+            [ 'babelify', {presets: [ 'es2015' ]} ]
          ]
       },
       reporters: [ 'progress', 'junit', 'coverage' ],
@@ -46,13 +45,6 @@ module.exports = function karmaConfig(config) {
       },
       // https://github.com/karma-runner/karma-coverage
       coverageReporter: {
-         instrumenters: { isparta : isparta },
-         instrumenter: {
-            '**/*.js': 'isparta'
-         },
-         instrumenterOptions: {
-            isparta: { babel : { presets: [ 'es2015' ] } }
-         },
          dir : OUT_DIR + 'testCoverage/',
          reporters: [
             { type: 'html', subdir: 'report-html' },
@@ -61,9 +53,7 @@ module.exports = function karmaConfig(config) {
       }
    });
 
-   // Need to configure this "externally" for the dynamic key
-   config.preprocessors[BUILD_DIR + '*.js'] = [ 'coverage' ];
-   config.preprocessors[SOURCE_DIR + '*.js'] = [ 'coverage' ];
+   // Need to configure this "externally" for the dynamic key. note: Order matters
    config.preprocessors[SOURCE_DIR + '/**/*.js'] = [ 'browserify' ];
-   config.preprocessors[BUILD_DIR + '/jasmineSetup*'] = [ 'browserify' ];
+   config.preprocessors[SOURCE_DIR + '*.js'] = [ 'coverage' ];
 };
