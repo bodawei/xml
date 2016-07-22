@@ -3,58 +3,37 @@ In theory done: 1(1-3), 2.5, 2.6
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
-6/16 Start of sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
-6/25 Start of sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
-7/06 Start of sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
-7/15 Start of sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. [start timebox, not session-box]
+6/16 Sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
+6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
+7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
+7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
+[start timebox, not session-box in 5]
+7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints.
 -- next: 73
 ---------------------------------------------
-√ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
-√ 62:S: Recognize a character entity in content
-	- add to readToMarkup
-	&#NNN;
-	- need a specialized cursor routine: To get a number.
-	Return a CHARREF token, which has text, and original format (hex or decimal)
-√ 63:S: Error cases with char entity lookup
-	√ &#xNNN;
-	√ & followed by space: syntax error but ok
-	√ & followed by non # is a regular reference. we don't support that yet. error
-	√ # followed by space
-	√ x followed by space
-	√ case of x
-	√ No name found (e.g. &#; or &;: syntax error. do nothing.
-	√ no ; found (e.g. NNN ends with a space)
-	√ hex digits on decimal reference
-	√ EOF cases
-√ 64:M: Restructure attributes
-	An array of xmltokens
-	token type ATTR_TEXT: Any non-ref text
-	2
-√ 65:S: Recognize char entities in attributes
-	add to array
-	√ couldBeName on attributes is wrong place
-	√ need to rework getReference to not assume it is creating a new toplevel token
-	√ - need to rework getAttributes structure so it deals with repeated pieces
-	This took 3 or 4.  And a bunch of offline work.  Planning was too superficial
-√ GetAttribute has gotten really really ugly
-√ 37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
-	- Continue with isolation work that is going on in "Working on code coverage numbers".
-	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
-	- Keep a better log of what you are doing since this may take several sprints.
-	√ NS: Get plain browserify to work, without coverage.
-	√ Then do coverage on top of that
-		- Got this working simply by upgrading the npm modules. Convenient
-		- But upgrading the main repo causes lots of errors. Probably just a misconfig
-	- Got it all working. Turns out the big problems was that the tranformation order is important and I had things wrong.
+√ Need other 4 versions of xml 1.0
+√ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
+
+66:S: Build table of entities. Contains the default ones
+	Entity manager: has the default 5
+		getentity(name)
+		returns a string cursor.
+
+68:S Include in attributes
+	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
+
+67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
+	ENTITY-START has a flag whether entity manager has an entity
+	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
+		if throws error, need to pass that error on.
 
 =============================================
 CLEANUP
+- If error is thrown, we can still call getNextToken.  Should block that.
+- Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
-- Need other 4 versions of xml 1.0
-- need doc for writing reporters for karma
-- Keep doing background checking for 37
 
 BUILD
 60:XL Improve build output
@@ -84,7 +63,7 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [7m 9s]
+--- technical debt [7m 8s]
 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
@@ -104,28 +83,19 @@ PROJECT
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 53:M: use xml decl encoding to change input if needed
 52:S: StringCursorSpeedup
-	Note:
-		getToMarkup: currently <, soon < and & and possibly < & and ]]>
-		soon: getToSpaceOrTerminator  any space or >
-		getToTerminator  -->, ?> ]]>, ", ' and >
-		getWord takes a variable set of terminators
+	getToTerminator, getWord all seem like have opportuity to speed up
 	optimize getToTerminator for single terminator case
 	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
 		Note: Can't do regex from an offset without doing a substr. sigh.
 56:S: Reorganize getAttributes, as it seems too tangled
 57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
 
---- Basic processing  [1M 6S]
-66:S: Build table of entities. Contains the default ones there by default
-
-67:S: Recognize regular entity names.  Replace with an ENTITY-START, CHARDATA etc ENTITY-END
-
-68:S Include in attributes
-
-69:S: Rework PI and Comment to be arrys of content, just like attributes
+--- Basic processing  [2S]
+71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
+	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
+69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands
-71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure	
-55:s: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
+55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
 --- DTD [8XL]
 19:XL Read doctype
@@ -148,7 +118,7 @@ PROJECT
 	interoperability: empty element should only be used for elements which are declared EMPTY
 32:XL Run through standard test cases
 
----- Extra (not part of MVC)
+---- Extra (not part of MVP)
 15:M: Put a limit on how much read in in one chunk (pass in as option). 
 33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
 34:M:Cope with junk before xmldeclaration
@@ -403,7 +373,8 @@ SPRINT3
 	3? 4?
 
 SPRINT 4
-DECOPOSED: 27:XL Read in entities (see issues, below)
+=======
+BROKEN-DOWN: 27:XL Read in entities (see issues, below)
 	character entities
 	identify references in attributes and charData
 	provide infrastructure for recursive processing these.
@@ -415,3 +386,40 @@ DECOPOSED: 27:XL Read in entities (see issues, below)
 		This may impact parts of stringCursor which need to become reference aware.
 		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
 		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+√ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
+√ 62:S: Recognize a character entity in content
+	- add to readToMarkup
+	&#NNN;
+	- need a specialized cursor routine: To get a number.
+	Return a CHARREF token, which has text, and original format (hex or decimal)
+√ 63:S: Error cases with char entity lookup
+	√ &#xNNN;
+	√ & followed by space: syntax error but ok
+	√ & followed by non # is a regular reference. we don't support that yet. error
+	√ # followed by space
+	√ x followed by space
+	√ case of x
+	√ No name found (e.g. &#; or &;: syntax error. do nothing.
+	√ no ; found (e.g. NNN ends with a space)
+	√ hex digits on decimal reference
+	√ EOF cases
+√ 64:M: Restructure attributes
+	An array of xmltokens
+	token type ATTR_TEXT: Any non-ref text
+	2
+√ 65:S: Recognize char entities in attributes
+	add to array
+	√ couldBeName on attributes is wrong place
+	√ need to rework getReference to not assume it is creating a new toplevel token
+	√ - need to rework getAttributes structure so it deals with repeated pieces
+	This took 3 or 4.  And a bunch of offline work.  Planning was too superficial
+√ GetAttribute has gotten really really ugly
+√ 37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
+	- Continue with isolation work that is going on in "Working on code coverage numbers".
+	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
+	- Keep a better log of what you are doing since this may take several sprints.
+	√ NS: Get plain browserify to work, without coverage.
+	√ Then do coverage on top of that
+		- Got this working simply by upgrading the npm modules. Convenient
+		- But upgrading the main repo causes lots of errors. Probably just a misconfig
+	- Got it all working. Turns out the big problems was that the tranformation order is important and I had things wrong.
