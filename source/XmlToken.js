@@ -22,6 +22,8 @@ XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
 XmlToken.ELEMENT_END = 'ElementEndTag';
 XmlToken.CHAR_ENTITY = 'CharacterEntity';
+XmlToken.ENTITY_START = 'EntityStartMarker';
+XmlToken.ENTITY_END = 'EntityEndMarker';
 XmlToken.TEXT = 'TextPiece';
 
 module.exports = XmlToken;

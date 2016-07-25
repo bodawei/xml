@@ -14,7 +14,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 √ Need other 4 versions of xml 1.0
 √ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
 
-66:S: Build table of entities. Contains the default ones
+√ 66:S: Build table of entities. Contains the default ones
 	Entity manager: has the default 5
 		getentity(name)
 		returns a string cursor.

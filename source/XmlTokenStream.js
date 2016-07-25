@@ -5,6 +5,7 @@
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
+const XmlEntityManager = require('./XmlEntityManager.js');
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -32,6 +33,7 @@ class XmlTokenStream {
       this._cursor = cursor;
       this._pendingTokens = [];
       this._elementNameStack = [];
+      this._entityManager = new XmlEntityManager();
 
       this._options = {
          lax: false,
@@ -135,12 +137,25 @@ class XmlTokenStream {
          const character = this._getCharReference();
 
          if (inAttribute) {
-            return new XmlToken(XmlToken.CHAR_ENTITY, character);
+            return [ new XmlToken(XmlToken.CHAR_ENTITY, character) ];
          } else {
             this._pushToken(XmlToken.CHAR_ENTITY, character);
          }
       } else {
-         this._reportSyntaxError(XmlErrorToken.ERROR.NOT_SUPPORTED);
+         const name = this._cursor.getToTerminator([ ';' ]);
+         this._cursor.getMatch(';');
+
+         const entityCursor = this._entityManager.getEntity(name.chunk.text);
+
+         if (inAttribute) {
+            return [
+               new XmlToken(XmlToken.ENTITY_START, name.chunk.text),
+               new XmlToken(XmlToken.TEXT, entityCursor.getToTerminator([ 'BOGUS' ]).chunk.text),
+               new XmlToken(XmlToken.ENTITY_END, name.chunk.text)
+            ];
+         } else {
+            this._reportSyntaxError(XmlErrorToken.ERROR.NOT_SUPPORTED);
+         }
       }
    }
 
@@ -690,8 +705,10 @@ class XmlTokenStream {
             case '&':
                done = false;
                this._cursor.getChar(); // consume the &
-               const token = this._getReference(true);
-               result.value.push(token);
+               const tokens = this._getReference(true);
+               for (const index in tokens) {
+                  result.value.push(tokens[index]);
+               }
                break;
             case '<':
                this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,

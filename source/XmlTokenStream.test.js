@@ -1328,6 +1328,23 @@ describe('XmlTokenStream', () => {
             } ]);
          });
 
+         it('can parse attributes with an entity reference in the value', () => {
+            const s = makeStream('<elemName attr1="tw&quot;o">');
+
+            const t = s.getNext();
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
+                  new XmlToken(XmlToken.ENTITY_START, 'quot'),
+                  new XmlToken(XmlToken.TEXT, '"'),
+                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
+                  new XmlToken(XmlToken.TEXT, 'o')
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
          it('throws an error if there is a < in the attribute value', () => {
             const s = makeStream('<elementName attr1="value<">');
 
