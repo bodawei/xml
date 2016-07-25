@@ -39,6 +39,27 @@ describe('XmlEntityManager', () => {
 
    });
 
+   describe('addEntity', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.addEntity();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('throws an exception if called without a value', () => {
+         expect(() => {
+            manager.addEntity('fish');
+         }).toThrowError('Must call with data for an entity.');
+      });
+
+      it('returns a cursor if it is called with a legitimate entity name', () => {
+         manager.addEntity('bar', 'baz');
+         expect(manager.getEntity('bar').getToTerminator([ 'EOF' ]).chunk.text).toBe('baz');
+      });
+
+   });
+
    describe('default entities', () => {
 
       it('includes "lt"', () => {

@@ -397,6 +397,38 @@ describe('XmlTokenStream', () => {
          }).toThrowError('Not supported at this time.');
       });
 
+      it('throws an error if there is no entity name', () => {
+         const s = makeStream('&;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('No entity name found.');
+      });
+
+      it('generates an error token in lax mode if there is no entity name', () => {
+         const s = makeStream('&;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_NO_NAME);
+      });
+
+      it('throws an error if there is a space after the entity name', () => {
+         const s = makeStream('&frog ;');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('A space was found after the entity name "frog".');
+      });
+
+      it('generates an error token in lax mode if space is found after entity name', () => {
+         const s = makeStream('&frog ;', { lax: true });
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
+      });
+
    });
 
    describe('parsing CDATA', () => {
@@ -1330,15 +1362,64 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity reference in the value', () => {
             const s = makeStream('<elemName attr1="tw&quot;o">');
+            const start = new XmlToken(XmlToken.ENTITY_START, 'quot');
+            start.haveEntityData = true;
 
             const t = s.getNext();
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
+                  start,
+                  new XmlToken(XmlToken.TEXT, '"'),
+                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
+                  new XmlToken(XmlToken.TEXT, 'o')
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('can parse attributes with an entity references in entity references', () => {
+            const s = makeStream('<elemName attr1="tw&foo;o">');
+            s._entityManager.addEntity('foo', '<bar>&one;</bar>');
+            s._entityManager.addEntity('one', '&quot;&#x41;');
+            const t = s.getNext();
+            const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
+            startFoo.haveEntityData = true;
+            const startOne = new XmlToken(XmlToken.ENTITY_START, 'one');
+            startOne.haveEntityData = true;
+            const startQuot = new XmlToken(XmlToken.ENTITY_START, 'quot');
+            startQuot.haveEntityData = true;
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new XmlToken(XmlToken.ENTITY_START, 'quot'),
+                  startFoo,
+                  new XmlToken(XmlToken.TEXT, '<bar>'),
+                  startOne,
+                  startQuot,
                   new XmlToken(XmlToken.TEXT, '"'),
                   new XmlToken(XmlToken.ENTITY_END, 'quot'),
+                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.ENTITY_END, 'one'),
+                  new XmlToken(XmlToken.TEXT, '</bar>'),
+                  new XmlToken(XmlToken.ENTITY_END, 'foo'),
+                  new XmlToken(XmlToken.TEXT, 'o')
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('will accept a reference to an unknown entity', () => {
+            const s = makeStream('<elemName attr1="tw&test;o">');
+            const t = s.getNext();
+            const startTest = new XmlToken(XmlToken.ENTITY_START, 'test');
+            startTest.haveEntityData = false;
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
+                  startTest,
+                  new XmlToken(XmlToken.ENTITY_END, 'test'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'

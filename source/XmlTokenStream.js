@@ -142,19 +142,62 @@ class XmlTokenStream {
             this._pushToken(XmlToken.CHAR_ENTITY, character);
          }
       } else {
-         const name = this._cursor.getToTerminator([ ';' ]);
+         const name = this._cursor.getWord([ ';' ]);
+         const entityName = name ? name.text : '';
+         const afterSpace = this._cursor.getSpace();
          this._cursor.getMatch(';');
+         let entityCursor;
 
-         const entityCursor = this._entityManager.getEntity(name.chunk.text);
+         if (!entityName) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_NO_NAME);
+         } else {
+            entityCursor = this._entityManager.getEntity(entityName);
+         }
+
+         if (afterSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE,
+               'A space was found after the entity name "' + name.text + '".');
+         }
 
          if (inAttribute) {
-            return [
-               new XmlToken(XmlToken.ENTITY_START, name.chunk.text),
-               new XmlToken(XmlToken.TEXT, entityCursor.getToTerminator([ 'BOGUS' ]).chunk.text),
-               new XmlToken(XmlToken.ENTITY_END, name.chunk.text)
-            ];
+            const result = [];
+            const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
+            startToken.haveEntityData = !!entityCursor;
+            result.push(startToken);
+
+            if (entityCursor) {
+               this._getAttributeReference(entityCursor, result);
+            }
+
+            result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
+            return result;
          } else {
             this._reportSyntaxError(XmlErrorToken.ERROR.NOT_SUPPORTED);
+         }
+      }
+   }
+
+   _getAttributeReference(cursor, contents) {
+      let result = cursor.getToTerminator([ '&' ]);
+
+      if (result.chunk) {
+         contents.push(new XmlToken(XmlToken.TEXT, result.chunk.text));
+      }
+
+      while (result.terminator) {
+         cursor.getChar(); // swallow the &
+         const tempCursor = this._cursor;
+         this._cursor = cursor;
+         const stuff = this._getReference(true);
+         this._cursor = tempCursor;
+         for (const index in stuff) {
+            contents.push(stuff[index]);
+         }
+
+         result = cursor.getToTerminator([ '&' ]);
+
+         if (result.chunk) {
+            contents.push(new XmlToken(XmlToken.TEXT, result.chunk.text));
          }
       }
    }

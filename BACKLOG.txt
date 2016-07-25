@@ -18,8 +18,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	Entity manager: has the default 5
 		getentity(name)
 		returns a string cursor.
-
-68:S Include in attributes
+√ 68:S Include in attributes
 	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
 
 67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
@@ -29,8 +28,10 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 
 =============================================
 CLEANUP
+- Code for getting references is getting uuuuuugly
 - If error is thrown, we can still call getNextToken.  Should block that.
 - Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+- IS it an error if an entity isn't present?
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
