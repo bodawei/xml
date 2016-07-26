@@ -121,11 +121,11 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.SPACE);
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream(' \t ');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.WithSpaceChunk(' \t ', ' \t ')
          ]));
       });
@@ -195,11 +195,11 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('testing testing ');
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('wow zowie ');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.WithSpaceChunk('wow zowie ', 'wow zowie ')
          ]));
       });
@@ -372,11 +372,11 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('A');
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('&#x42;');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('&'),
             new TextChunk.PlainChunk('#'),
             new TextChunk.PlainChunk('x'),
@@ -388,14 +388,6 @@ describe('XmlTokenStream', () => {
    });
 
    describe('parsing entity reference', () => {
-
-      it('throws an exception', () => {
-         const s = makeStream('&frog;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Not supported at this time.');
-      });
 
       it('throws an error if there is no entity name', () => {
          const s = makeStream('&;');
@@ -427,6 +419,99 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
+      });
+
+      it('expands entitys', () => {
+         const s = makeStream('&quot;');
+         const startToken = new XmlToken(XmlToken.ENTITY_START, 'quot');
+         startToken.haveEntityData = true;
+
+         let token = s.getNext();
+         delete token.chunks;
+         expect(token).toEqual(startToken);
+         token = s.getNext();
+         delete token.chunks;
+         expect(token).toEqual(new XmlToken(XmlToken.CHARDATA, '"'));
+         token = s.getNext();
+         delete token.chunks;
+         expect(token).toEqual(new XmlToken(XmlToken.ENTITY_END, 'quot'));
+
+      });
+
+      it('recognizes entities within entities', () => {
+         const s = makeStream('<root>&level1;</root>');
+         s._entityManager.addEntity('level1', '<child>&level2;</child>');   // WHITE BOX
+         s._entityManager.addEntity('level2', '&quot;&#x41;');
+
+         let token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(token.name).toEqual('root');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.data).toEqual('level1');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(token.name).toEqual('child');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.data).toEqual('level2');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.data).toEqual('quot');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.CHARDATA);
+         expect(token.data).toEqual('"');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.data).toEqual('quot');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.CHAR_ENTITY);
+         expect(token.data).toEqual('A');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.data).toEqual('level2');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_END);
+         expect(token.name).toEqual('child');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.data).toEqual('level1');
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_END);
+         expect(token.name).toEqual('root');
+      });
+
+      it('retrieves the expected chunks', () => {
+         const s = makeStream('&lt;');
+
+         let t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('&'),
+            new TextChunk.WordChunk('lt', true),
+            new TextChunk.PlainChunk(';')
+         ]));
+
+         t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('&'),
+            new TextChunk.PlainChunk('#'),
+            new TextChunk.DigitChunk('60', true),
+            new TextChunk.PlainChunk(';')
+         ]));
+
+         t = s.getNext();
+         expect(t.chunks).toEqual([]);
       });
 
    });
@@ -545,11 +630,11 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_NOT_CAPITALIZED);
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<![CDATA[ one ]]>');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('['),
             new TextChunk.WordChunk('CDATA', true),
@@ -681,11 +766,11 @@ describe('XmlTokenStream', () => {
          }).toThrowError('Comment should not end with a hyphen.');
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<!-- one -->');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!--'),
             new TextChunk.WithSpaceChunk(' one ', ' one '),
             new TextChunk.PlainChunk('-->')
@@ -977,11 +1062,11 @@ describe('XmlTokenStream', () => {
          expect(token.code).toEqual(XmlErrorToken.ERROR.MISSING_XMLDECL_CLOSE);
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<?xml version="1.1" encoding="usascii"  ?>');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<?'),
             new TextChunk.WordChunk('xml', true),
             new TextChunk.WithSpaceChunk(' ', ' '),
@@ -1380,7 +1465,7 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity references in entity references', () => {
             const s = makeStream('<elemName attr1="tw&foo;o">');
-            s._entityManager.addEntity('foo', '<bar>&one;</bar>');
+            s._entityManager.addEntity('foo', '<bar>&one;</bar>');   // WHITE BOX
             s._entityManager.addEntity('one', '&quot;&#x41;');
             const t = s.getNext();
             const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
@@ -1756,11 +1841,11 @@ describe('XmlTokenStream', () => {
 
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<one >');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
             new TextChunk.WordChunk('one', true),
             new TextChunk.WithSpaceChunk(' ', ' '),
@@ -1856,11 +1941,11 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<one />');
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
             new TextChunk.WordChunk('one', true),
             new TextChunk.WithSpaceChunk(' ', ' '),
@@ -2041,12 +2126,12 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
       });
 
-      it('retrieves the expected tokens', () => {
+      it('retrieves the expected chunks', () => {
          const s = makeStream('<one></one >');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
-         expect(t.tokens).toEqual(makeStringTokenArray([
+         expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('</'),
             new TextChunk.WordChunk('one', true),
             new TextChunk.WithSpaceChunk(' ', ' '),

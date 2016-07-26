@@ -34,6 +34,7 @@ class XmlTokenStream {
       this._pendingTokens = [];
       this._elementNameStack = [];
       this._entityManager = new XmlEntityManager();
+      this._cursorContexts = [];
 
       this._options = {
          lax: false,
@@ -172,7 +173,22 @@ class XmlTokenStream {
             result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
             return result;
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.NOT_SUPPORTED);
+            const startToken = this._pushToken(XmlToken.ENTITY_START, entityName);
+            startToken.haveEntityData = !!entityCursor;
+
+            if (entityCursor) {
+               const endToken = new XmlToken(XmlToken.ENTITY_END, entityName);
+               endToken.chunks = [];
+
+               this._cursorContexts.push({
+                  cursor: this._cursor,
+                  token: endToken
+               });
+
+               this._cursor = entityCursor;
+            } else {
+               this._pushToken(XmlToken.ENTITY_END, entityName);
+            }
          }
       }
    }
@@ -548,7 +564,7 @@ class XmlTokenStream {
       const xtoken = new XmlToken(isStartOrEmpty ? startType : XmlToken.ELEMENT_END);
       xtoken.name = name ? name.text : '';
       xtoken.attributes = attributes;
-      xtoken.tokens = this._cursor.getRecentChunks();
+      xtoken.chunks = this._cursor.getRecentChunks();
 
       if (isStartOrEmpty) {
          if (!isEmpty) {
@@ -772,7 +788,13 @@ class XmlTokenStream {
          return this._pendingTokens.shift();
       }
 
-      const token = this._nextToken();
+      let token = this._nextToken();
+
+      if (!token && this._cursorContexts.length > 0) {
+         const context = this._cursorContexts.pop();
+         this._cursor = context.cursor;
+         token = context.token;
+      }
 
       return token;
    }
@@ -809,7 +831,7 @@ class XmlTokenStream {
 
    _pushToken(type, data) {
       const xtoken = new XmlToken(type, data);
-      xtoken.tokens = this._cursor.getRecentChunks();
+      xtoken.chunks = this._cursor.getRecentChunks();
 
       this._pendingTokens.push(xtoken);
 

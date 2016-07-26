@@ -20,8 +20,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 		returns a string cursor.
 √ 68:S Include in attributes
 	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
-
-67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
+√ 67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
 	ENTITY-START has a flag whether entity manager has an entity
 	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
 		if throws error, need to pass that error on.
@@ -32,6 +31,9 @@ CLEANUP
 - If error is thrown, we can still call getNextToken.  Should block that.
 - Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 - IS it an error if an entity isn't present?
+- why is the stream instantiating its own entity manager?
+- need a toEqualProps() handelr in tests for entities
+- for that matter, something that compares a stream of tokens without paying attention to the undrlying tokens would be good
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)

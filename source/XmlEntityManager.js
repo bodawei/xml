@@ -16,9 +16,9 @@ class XmlEntityManager {
 
    constructor() {
       this._defaultEntities = {
-         lt: '&60;',
+         lt: '&#60;',
          gt: '>',
-         amp: '&38;',
+         amp: '&#38;',
          apos: '\'',
          quot: '"'
       };

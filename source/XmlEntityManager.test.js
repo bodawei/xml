@@ -65,13 +65,13 @@ describe('XmlEntityManager', () => {
       it('includes "lt"', () => {
          const ltCursor = manager.getEntity('lt');
 
-         expect(ltCursor.getToTerminator([ 'gotoEOF' ]).chunk.text).toEqual('&60;');
+         expect(ltCursor.getToTerminator([ 'gotoEOF' ]).chunk.text).toEqual('&#60;');
       });
 
       it('includes "amp"', () => {
          const ampCursor = manager.getEntity('amp');
 
-         expect(ampCursor.getToTerminator([ 'gotoEOF' ]).chunk.text).toEqual('&38;');
+         expect(ampCursor.getToTerminator([ 'gotoEOF' ]).chunk.text).toEqual('&#38;');
       });
 
       it('includes "gt"', () => {
