@@ -471,7 +471,8 @@ class XmlStringCursor {
          (char >= '\u2C00' && char <= '\u2FEF') ||
          (char >= '\u3001' && char <= '\uD7FF') ||
          (char >= '\uF900' && char <= '\uFDCF') ||
-         (char >= '\uFDF0' && char <= '\uFFFD');
+         (char >= '\uFDF0' && char <= '\uFFFD') ||
+         (char.charCodeAt(0) >= 0xD800 && char.charCodeAt(0) <= 0xDFFF); // for chars in 0x010000 and 0x0EFFFF
    }
 
    /**********************************************************************\

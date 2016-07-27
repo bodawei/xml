@@ -322,6 +322,18 @@ describe('XmlStringCursor', () => {
             expect(c.getWord([])).toEqual(firstWord);
          });
 
+         it('marks a word as a possible name if it has an astral character in it (e.g. an emoji)', () => {
+            const c = new XmlStringCursor('o\uD83D\uDC04e two'); // Cow emoji 0x1F404
+
+            expect(c.getWord([]).couldBeName).toEqual(true);
+         });
+
+         it('marks a word as a possible name starts with an astral character (e.g. an emoji)', () => {
+            const c = new XmlStringCursor('\uD83D\uDC04moo two'); // Cow emoji 0x1F404
+
+            expect(c.getWord([]).couldBeName).toEqual(true);
+         });
+
          it('marks a word as a possible name if it has a bunch of the name chars in it', () => {
             const word = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_\u00CE' +
                '\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1';

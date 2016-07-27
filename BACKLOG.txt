@@ -24,6 +24,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	ENTITY-START has a flag whether entity manager has an entity
 	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
 		if throws error, need to pass that error on.
+√ 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
 
 =============================================
 CLEANUP
@@ -67,7 +68,6 @@ BUILD
 
 PROJECT
 --- technical debt [7m 8s]
-14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 58:S: Remove data prop on token, and make all token types more explicit
