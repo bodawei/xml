@@ -6,6 +6,12 @@ const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
+const CommentToken = XmlToken.CommentToken;
+const ProcessingInstructionToken = XmlToken.ProcessingInstructionToken;
+const SpaceToken = XmlToken.SpaceToken;
+const DeclarationToken = XmlToken.DeclarationToken;
+const StartTagToken = XmlToken.StartTagToken;
+const TagToken = XmlToken.TagToken;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -96,7 +102,7 @@ class XmlTokenStream {
    _getS() {
       const space = this._cursor.getSpace();
 
-      this._pushToken(XmlToken.SPACE, space.text);
+      this._pendingTokens.push(new SpaceToken(space.text, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -287,7 +293,8 @@ class XmlTokenStream {
          }
       }
 
-      this._pushToken(XmlToken.COMMENT, results.chunk ? results.chunk.text : undefined);
+      const content = results.chunk ? results.chunk.text : undefined;
+      this._pendingTokens.push(new CommentToken(content, this._cursor.getRecentChunks()));
    }
 
    _getBangItem() {
@@ -390,7 +397,7 @@ class XmlTokenStream {
             this._reportSyntaxError(XmlErrorToken.ERROR.XML_NOT_LOWERCASE,
                'The xml target name was not all lower case (' + target.text + ').');
          }
-         this._getXmlDecl(firstMarkup, target);
+         this._getXmlDecl();
       } else {
          this._cursor.getSpace();   // optional space
          const results = this._cursor.getToTerminator([ '?>' ]);
@@ -402,8 +409,9 @@ class XmlTokenStream {
             this._cursor.getMatch('?>');
          }
 
-         const xtoken = this._pushToken(XmlToken.PI, target ? target.text : '');
-         xtoken.content = results.chunk ? results.chunk.text : undefined;
+         const targetName = target ? target.text : '';
+         const content = results.chunk ? results.chunk.text : undefined;
+         this._pendingTokens.push(new ProcessingInstructionToken(targetName, content, this._cursor.getRecentChunks()));
       }
    }
 
@@ -421,14 +429,13 @@ class XmlTokenStream {
     *                        ('"' ('yes' | 'no') '"'))
     *   [81] EncName	    ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
     *
-    * PARAMS This expects two string tokens '<?' and 'xml'
     * RETURN None.  however, this does add an XMLToken and possibly various
     *        syntax error tokens to the pending queue. The XMLToken is of type
     *        XmlToken.XMLDECL, with a params property, which is an array of
     *        objects corresponding to the "attributes" of the xml declaration
     *        in the order they were found, each object has a name and a value.
     */
-   _getXmlDecl(start, target) {
+   _getXmlDecl() {
       const params = this._getAttributes(false);
 
       const close = this._cursor.getMatch('?>');
@@ -503,8 +510,7 @@ class XmlTokenStream {
          }
       }
 
-      const xtoken = this._pushToken(XmlToken.XMLDECL, target.text);
-      xtoken.params = params;
+      this._pendingTokens.push(new DeclarationToken(params, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -561,10 +567,13 @@ class XmlTokenStream {
       }
 
       const startType = isEmpty ? XmlToken.ELEMENT_EMPTY : XmlToken.ELEMENT_START;
-      const xtoken = new XmlToken(isStartOrEmpty ? startType : XmlToken.ELEMENT_END);
-      xtoken.name = name ? name.text : '';
-      xtoken.attributes = attributes;
-      xtoken.chunks = this._cursor.getRecentChunks();
+      let xtoken;
+
+      if (isStartOrEmpty) {
+         xtoken = new StartTagToken(startType, name ? name.text : '', attributes, this._cursor.getRecentChunks());
+      } else {
+         xtoken = new TagToken(XmlToken.ELEMENT_END, name ? name.text : '', this._cursor.getRecentChunks());
+      }
 
       if (isStartOrEmpty) {
          if (!isEmpty) {

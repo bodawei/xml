@@ -427,13 +427,13 @@ describe('XmlTokenStream', () => {
          startToken.haveEntityData = true;
 
          let token = s.getNext();
-         delete token.chunks;
+         token.chunks = undefined;
          expect(token).toEqual(startToken);
          token = s.getNext();
-         delete token.chunks;
+         token.chunks = undefined;
          expect(token).toEqual(new XmlToken(XmlToken.CHARDATA, '"'));
          token = s.getNext();
-         delete token.chunks;
+         token.chunks = undefined;
          expect(token).toEqual(new XmlToken(XmlToken.ENTITY_END, 'quot'));
 
       });
@@ -734,13 +734,13 @@ describe('XmlTokenStream', () => {
       it('retrieves the content of the comment', () => {
          const s = makeStream('<!-- one -->');
 
-         expect(s.getNext().data).toEqual(' one ');
+         expect(s.getNext().content).toEqual(' one ');
       });
 
       it('retrieves undefined as the value for an empty comment', () => {
          const s = makeStream('<!---->');
 
-         expect(s.getNext().data).toBeUndefined();
+         expect(s.getNext().content).toBeUndefined();
       });
 
       it('throws an error if no --> found', () => {
@@ -755,7 +755,7 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<!--junk comment', { lax: true });
 
          ignoreError(s, XmlErrorToken.ERROR.COMMENT_MISSING_END);
-         expect(s.getNext().data).toEqual('junk comment');
+         expect(s.getNext().content).toEqual('junk comment');
       });
 
       it('throws an error if comment ends with a -', () => {
@@ -792,7 +792,7 @@ describe('XmlTokenStream', () => {
          const s = makeStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
 
          const t = s.getNext();
-         expect(t.data).toEqual('foo');
+         expect(t.target).toEqual('foo');
       });
 
       it('retrieves a token with the right target content', () => {

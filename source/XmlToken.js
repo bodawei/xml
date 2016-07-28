@@ -4,26 +4,99 @@
 
 class XmlToken {
 
-   constructor(type, data) {
+   constructor(type, data, chunks) {
       this.type = type;
       this.data = data;
+      this.chunks = chunks;
+   }
+
+}
+
+class SpaceToken extends XmlToken {
+
+   constructor(text, chunks) {
+      super(XmlToken.SPACE, undefined, chunks);
+
+      this.text = text;
+   }
+
+}
+
+class CommentToken extends XmlToken {
+
+   constructor(content, chunks) {
+      super(XmlToken.COMMENT, undefined, chunks);
+
+      this.content = content;
+   }
+
+}
+
+class ProcessingInstructionToken extends XmlToken {
+
+   constructor(target, content, chunks) {
+      super(XmlToken.PI, undefined, chunks);
+
+      this.target = target;
+      this.content = content;
+   }
+
+}
+
+class DeclarationToken extends XmlToken {
+
+   constructor(params, chunks) {
+      super(XmlToken.XMLDECL, undefined, chunks);
+
+      this.params = params;
+   }
+
+}
+
+class TagToken extends XmlToken {
+
+   constructor(type, name, chunks) {
+      super(type, undefined, chunks);
+
+      this.name = name;
+   }
+
+}
+
+class StartTagToken extends TagToken {
+
+   constructor(type, name, attributes, chunks) {
+      super(type, name, chunks);
+
+      this.attributes = attributes;
    }
 
 }
 
 XmlToken.SPACE = 'WhiteSpace';
-XmlToken.CHARDATA = 'CharData';
-XmlToken.CDATA = 'CData';
 XmlToken.COMMENT = 'Comment';
-XmlToken.XMLDECL = 'XmlDecl';
 XmlToken.PI = 'ProcessingInstruction';
-XmlToken.SYNTAX_ERROR = 'SyntaxError';
+
+XmlToken.XMLDECL = 'XmlDecl';
+
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
 XmlToken.ELEMENT_END = 'ElementEndTag';
-XmlToken.CHAR_ENTITY = 'CharacterEntity';
 XmlToken.ENTITY_START = 'EntityStartMarker';
 XmlToken.ENTITY_END = 'EntityEndMarker';
+
+XmlToken.CHAR_ENTITY = 'CharacterEntity';
+XmlToken.CHARDATA = 'CharData';
+XmlToken.CDATA = 'CData';
 XmlToken.TEXT = 'TextPiece';
+
+XmlToken.SYNTAX_ERROR = 'SyntaxError';
+
+XmlToken.CommentToken = CommentToken;
+XmlToken.ProcessingInstructionToken = ProcessingInstructionToken;
+XmlToken.SpaceToken = SpaceToken;
+XmlToken.DeclarationToken = DeclarationToken;
+XmlToken.StartTagToken = StartTagToken;
+XmlToken.TagToken = TagToken;
 
 module.exports = XmlToken;
