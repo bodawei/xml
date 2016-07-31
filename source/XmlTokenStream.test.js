@@ -14,6 +14,69 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 
 describe('XmlTokenStream', () => {
 
+   beforeEach(() => {
+
+      jasmine.addMatchers({
+         toBeSyntaxError: () => {
+            return {
+               compare: (actual, expected) => {
+                  const typePass = actual.type === XmlToken.SYNTAX_ERROR;
+                  const codePass = actual.code === expected;
+                  let message;
+
+                  if (!typePass || !codePass) {
+                     message = 'Expected syntax error code ' + actual.code +
+                        ' not to match ' + expected.code;
+                  } else {
+                     message = 'Expected syntax error code ' + actual.code +
+                        ' to match ' + expected.code;
+                  }
+
+                  return {
+                     pass: typePass && codePass,
+                     message: message
+                  };
+               }
+            };
+         },
+         toEqualProps: (util, customEqualityTesters) => {
+            return {
+               compare: (actual, expected) => {
+                  const mismatchedActual = {};
+                  const mismatchedExpected = {};
+                  const actualSubset = {};
+                  let pass = true;
+                  let message;
+
+                  for (const propName in expected) {
+                     actualSubset[propName] = actual[propName];
+
+                     if (!util.equals(actual[propName], expected[propName], customEqualityTesters)) {
+                        pass = false;
+                        mismatchedActual[propName] = actual[propName];
+                        mismatchedExpected[propName] = expected[propName];
+                     }
+                  }
+
+                  if (pass) {
+                     message = 'Expected ' + JSON.stringify(actualSubset) +
+                        ' not to match ' + JSON.stringify(expected);
+                  } else {
+                     message = 'Expected ' + JSON.stringify(mismatchedActual) +
+                        ' to match ' + JSON.stringify(mismatchedExpected);
+                  }
+
+                  return {
+                     pass: pass,
+                     message: message
+                  };
+               }
+            };
+         }
+      });
+
+   });
+
    function makeStringTokenArray(values, offset = 0) {
       const results = [];
 
@@ -189,8 +252,10 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('testing testing ]]> testing');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
+         expect(t).toEqualProps({
+            type: XmlToken.SYNTAX_ERROR,
+            code: XmlErrorToken.ERROR.CHARDATA_BAD_DATA
+         });
       });
 
       it('includes the "]]>" as char data in lax mode', () => {
@@ -221,13 +286,13 @@ describe('XmlTokenStream', () => {
 
    });
 
-   describe('parsing character entity reference', () => {
+   describe('parsing character reference', () => {
 
-      it('retrieves a token of type CHAR_ENTITY', () => {
+      it('retrieves a token of type CHAR_REF', () => {
          const s = makeStrictStream('&#65;');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.CHAR_ENTITY);
+         expect(t.type).toEqual(XmlToken.CHAR_REF);
       });
 
       it('produces a token with the specified character using a decimal reference', () => {
@@ -256,8 +321,10 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('& #65;');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE);
+         expect(t).toEqualProps({
+            type: XmlToken.SYNTAX_ERROR,
+            code: XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE
+         });
       });
 
       it('reports an error if there is a space after the #', () => {
@@ -272,8 +339,7 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('&# 65;');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
+         expect(t).toBeSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
       });
 
       it('reports an error if the "x" in a hex reference is the wrong case', () => {
@@ -436,7 +502,7 @@ describe('XmlTokenStream', () => {
          expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
       });
 
-      fit('throws an error if there is no closing semicolon', () => {
+      it('throws an error if there is no closing semicolon', () => {
          const s = makeStrictStream('&frog');
 
          expect(() => {
@@ -444,7 +510,7 @@ describe('XmlTokenStream', () => {
          }).toThrowError('A reference was found without a closing semicolon.');
       });
 
-      fit('generates an error token in lax mode if there is no closing semicolon', () => {
+      it('generates an error token in lax mode if there is no closing semicolon', () => {
          const s = makeLaxStream('&frog ');
          ignoreError(s, XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
 
@@ -504,7 +570,7 @@ describe('XmlTokenStream', () => {
          expect(token.data).toEqual('quot');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.CHAR_ENTITY);
+         expect(token.type).toEqual(XmlToken.CHAR_REF);
          expect(token.data).toEqual('A');
 
          token = s.getNext();
@@ -1441,7 +1507,7 @@ describe('XmlTokenStream', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.CHAR_REF, 'A'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -1456,7 +1522,7 @@ describe('XmlTokenStream', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [
-                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.CHAR_REF, 'A'),
                   new XmlToken(XmlToken.TEXT, ' test')
                ],
                quoteType: '"'
@@ -1471,7 +1537,7 @@ describe('XmlTokenStream', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new XmlToken(XmlToken.CHAR_ENTITY, 'A')
+                  new XmlToken(XmlToken.CHAR_REF, 'A')
                ],
                quoteType: '"'
             } ]);
@@ -1516,7 +1582,7 @@ describe('XmlTokenStream', () => {
                   startQuot,
                   new XmlToken(XmlToken.TEXT, '"'),
                   new XmlToken(XmlToken.ENTITY_END, 'quot'),
-                  new XmlToken(XmlToken.CHAR_ENTITY, 'A'),
+                  new XmlToken(XmlToken.CHAR_REF, 'A'),
                   new XmlToken(XmlToken.ENTITY_END, 'one'),
                   new XmlToken(XmlToken.TEXT, '</bar>'),
                   new XmlToken(XmlToken.ENTITY_END, 'foo'),

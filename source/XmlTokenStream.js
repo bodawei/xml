@@ -147,9 +147,9 @@ class XmlTokenStream {
          const character = this._getCharReference();
 
          if (inAttribute) {
-            return [ new XmlToken(XmlToken.CHAR_ENTITY, character) ];
+            return [ new XmlToken(XmlToken.CHAR_REF, character) ];
          } else {
-            this._pushToken(XmlToken.CHAR_ENTITY, character);
+            this._pushToken(XmlToken.CHAR_REF, character);
          }
       } else {
          const name = this._cursor.getWord([ ';' ]);
@@ -381,7 +381,7 @@ class XmlTokenStream {
     *        XmlToken.PI and possibly syntax error tokens.
     */
    _getProcessingInstruction() {
-      const firstMarkup = this._cursor.getMarkup();
+      this._cursor.getMarkup();
       const space = this._cursor.getSpace();
       const target = this._cursor.getWord([ '?>' ]);
 

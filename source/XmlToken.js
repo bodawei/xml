@@ -85,7 +85,7 @@ XmlToken.ELEMENT_END = 'ElementEndTag';
 XmlToken.ENTITY_START = 'EntityStartMarker';
 XmlToken.ENTITY_END = 'EntityEndMarker';
 
-XmlToken.CHAR_ENTITY = 'CharacterEntity';
+XmlToken.CHAR_REF = 'CharacterReference';
 XmlToken.CHARDATA = 'CharData';
 XmlToken.CDATA = 'CData';
 XmlToken.TEXT = 'TextPiece';

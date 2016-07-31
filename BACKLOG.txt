@@ -9,7 +9,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
 [start timebox, not session-box in 5]
 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints.
--- next: 78
+-- next: 79
 ---------------------------------------------
 √ Need other 4 versions of xml 1.0
 √ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
@@ -25,18 +25,26 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
 		if throws error, need to pass that error on.
 √ 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
+√ 75:S: need a toEqualProps() handelr in tests for entities
 
 =============================================
 CLEANUP
-√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
+
+- Blog: assert (can we write a good one)
+- Blog: comment about the problems of flexible time and measuring
+- Blog: writing a matcher
+- Blog build process?
+=============================================
+CLEANUP
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
 	- Also look at getName
 
 BUILD
-75:S: need a toEqualProps() handelr in tests for entities
-76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying tokens would be good
+78:S: Extract handlers into a common setup area, and figure out how to test them.
+76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
