@@ -5,7 +5,6 @@
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
-const XmlEntityManager = require('./XmlEntityManager.js');
 const CommentToken = XmlToken.CommentToken;
 const ProcessingInstructionToken = XmlToken.ProcessingInstructionToken;
 const SpaceToken = XmlToken.SpaceToken;
@@ -35,11 +34,15 @@ function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
 
 class XmlTokenStream {
 
-   constructor(cursor, options) {
+   constructor(cursor, entityManager, options) {
+      if (!entityManager) {
+         throw Error('Must provide an XmlEntityManager instance.');
+      }
+
       this._cursor = cursor;
       this._pendingTokens = [];
       this._elementNameStack = [];
-      this._entityManager = new XmlEntityManager();
+      this._entityManager = entityManager;
       this._cursorContexts = [];
 
       this._options = {
@@ -152,7 +155,7 @@ class XmlTokenStream {
          const name = this._cursor.getWord([ ';' ]);
          const entityName = name ? name.text : '';
          const afterSpace = this._cursor.getSpace();
-         this._cursor.getMatch(';');
+         const closingSemicolon = this._cursor.getMatch(';');
          let entityCursor;
 
          if (!entityName) {
@@ -166,11 +169,15 @@ class XmlTokenStream {
                'A space was found after the entity name "' + name.text + '".');
          }
 
+         if (!closingSemicolon) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_NO_SEMICOLON);
+         }
+
+         const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
+         startToken.haveEntityData = !!entityCursor;
+
          if (inAttribute) {
-            const result = [];
-            const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
-            startToken.haveEntityData = !!entityCursor;
-            result.push(startToken);
+            const result = [ startToken ];
 
             if (entityCursor) {
                this._getAttributeReference(entityCursor, result);
@@ -179,8 +186,8 @@ class XmlTokenStream {
             result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
             return result;
          } else {
-            const startToken = this._pushToken(XmlToken.ENTITY_START, entityName);
-            startToken.haveEntityData = !!entityCursor;
+            startToken.chunks = this._cursor.getRecentChunks();
+            this._pendingTokens.push(startToken);
 
             if (entityCursor) {
                const endToken = new XmlToken(XmlToken.ENTITY_END, entityName);

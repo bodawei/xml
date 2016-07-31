@@ -59,6 +59,7 @@ XmlErrorToken.ERROR = {
    REFERENCE_ILLEGAL_SPACE: 'REFERENCE_ILLEGAL_SPACE',
    REFERENCE_ILLEGAL_TRAILING_SPACE: 'REFERENCE_ILLEGAL_TRAILING_SPACE',
    REFERENCE_NO_NAME: 'REFERENCE_NO_NAME',
+   REFERENCE_NO_SEMICOLON: 'REFERENCE_NO_SEMICOLON',
    CHAR_REFERENCE_ILLEGAL_SPACE: 'CHAR_REFERENCE_ILLEGAL_SPACE',
    CHAR_REFERENCE_HEX_CASE_WRONG: 'CHAR_REFERENCE_HEX_CASE_WRONG',
    CHAR_REFERENCE_SPACE_BEFORE_DIGITS: 'CHAR_REFERENCE_SPACE_BEFORE_DIGITS',
@@ -108,5 +109,6 @@ str[err.CHAR_REFERENCE_MISSING_SEMICOLON] = 'Semicolon missing from character en
 str[err.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF] =
    'A character entity reference was specified as decimal (&#digits;) but included hex digits.';
 str[err.REFERENCE_NO_NAME] = 'No entity name found.';
+str[err.REFERENCE_NO_SEMICOLON] = 'A reference was found without a closing semicolon.';
 
 module.exports = XmlErrorToken;

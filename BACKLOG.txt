@@ -9,7 +9,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
 [start timebox, not session-box in 5]
 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints.
--- next: 73
+-- next: 78
 ---------------------------------------------
 √ Need other 4 versions of xml 1.0
 √ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
@@ -28,19 +28,15 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 
 =============================================
 CLEANUP
-- Code for getting references is getting uuuuuugly
-- If error is thrown, we can still call getNextToken.  Should block that.
-- Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
-- IS it an error if an entity isn't present?
-- why is the stream instantiating its own entity manager?
-- need a toEqualProps() handelr in tests for entities
-- for that matter, something that compares a stream of tokens without paying attention to the undrlying tokens would be good
-- is getName performant?
+√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
+	- Also look at getName
 
 BUILD
+75:S: need a toEqualProps() handelr in tests for entities
+76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying tokens would be good
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
@@ -68,12 +64,14 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [7m 8s]
+--- technical debt [7m 10s]
+77:S: Code for getting references is getting uuuuuugly
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
 11:M: Provide some kind of internationalizable string catalog
+73:S: If error is thrown, we can still call getNextToken.  Should block that.
 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
 	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
 13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
@@ -121,6 +119,10 @@ PROJECT
 31:XL Deal with interoperability (mainly to help some sgml processors)
 	interoperability: empty element should only be used for elements which are declared EMPTY
 32:XL Run through standard test cases
+
+--- Misc [1s]
+74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+
 
 ---- Extra (not part of MVP)
 15:M: Put a limit on how much read in in one chunk (pass in as option). 

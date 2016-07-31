@@ -10,6 +10,7 @@ const TextChunk = require('./TextChunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlEntityManager = require('./XmlEntityManager.js');
 
 describe('XmlTokenStream', () => {
 
@@ -28,8 +29,16 @@ describe('XmlTokenStream', () => {
       return results;
    }
 
-   function makeStream(str, options) {
-      return new XmlTokenStream(new XmlStringCursor(str), options);
+   function makeLaxStream(str) {
+      return makeStream(str, new XmlEntityManager(), { lax: true });
+   }
+
+   function makeStrictStream(str) {
+      return makeStream(str, new XmlEntityManager(), {});
+   }
+
+   function makeStream(str, entityManager, options) {
+      return new XmlTokenStream(new XmlStringCursor(str), entityManager, options);
    }
 
    function ignoreError(stream, errorCode) {
@@ -60,12 +69,18 @@ describe('XmlTokenStream', () => {
 
       it('can be constructed with a cursor', () => {
          expect(() => {
-            new XmlTokenStream(new XmlStringCursor('hi'));
+            new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager());
          }).not.toThrow();
       });
 
+      it('throws an error if called with no entity manager', () => {
+         expect(() => {
+            new XmlTokenStream(new XmlStringCursor('hi'));
+         }).toThrowError('Must provide an XmlEntityManager instance.');
+      });
+
       it('if passed no options, the defaults are used (whitebox)', () => {
-         const s = new XmlTokenStream(new XmlStringCursor('hi'));
+         const s = new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager());
 
          expect(s._options).toEqual({
             lax: false,
@@ -74,7 +89,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('stores the option if passed an option', () => {
-         const s = new XmlTokenStream(new XmlStringCursor('hi'), { lax: true });
+         const s = new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager(), { lax: true });
 
          expect(s._options.lax).toEqual(true);
 
@@ -82,7 +97,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if passed an unknown option', () => {
          expect(() => {
-            new XmlTokenStream(new XmlStringCursor('hi'), { fish: true });
+            new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager(), { fish: true });
          }).toThrowError('"fish" is not a supported option name.');
 
       });
@@ -92,20 +107,20 @@ describe('XmlTokenStream', () => {
    describe('hasNext()', () => {
 
       it('returns true if there is a token', () => {
-         const s = makeStream('<?two?>');
+         const s = makeStrictStream('<?two?>');
 
          expect(s.hasNext()).toEqual(true);
       });
 
       it('can ask multiple times', () => {
-         const s = makeStream('<?two?> ');
+         const s = makeStrictStream('<?two?> ');
 
          expect(s.hasNext()).toEqual(true);
          expect(s.hasNext()).toEqual(true);
       });
 
       it('returns false if there is none', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(''));
+         const s = makeStrictStream('');
 
          expect(s.hasNext()).toEqual(false);
       });
@@ -115,14 +130,14 @@ describe('XmlTokenStream', () => {
    describe('parsing whitespace', () => {
 
       it('retrieves a token of type SPACE', () => {
-         const s = makeStream(' \n  ');
+         const s = makeStrictStream(' \n  ');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SPACE);
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream(' \t ');
+         const s = makeStrictStream(' \t ');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -135,35 +150,35 @@ describe('XmlTokenStream', () => {
    describe('parsing CharData', () => {
 
       it('retrieves a token of type CHARDATA', () => {
-         const s = makeStream('wow zowie ');
+         const s = makeStrictStream('wow zowie ');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.CHARDATA);
       });
 
       it('retrieves a token with the specified data', () => {
-         const s = makeStream('wow zowie ');
+         const s = makeStrictStream('wow zowie ');
 
          const t = s.getNext();
          expect(t.data).toEqual('wow zowie ');
       });
 
       it('retrieves a token with the specified data up to the markup', () => {
-         const s = makeStream('wow <zowie> ');
+         const s = makeStrictStream('wow <zowie> ');
 
          const t = s.getNext();
          expect(t.data).toEqual('wow ');
       });
 
       it('retrieves a token with the specified data up to a reference', () => {
-         const s = makeStream('wow &amp; ');
+         const s = makeStrictStream('wow &amp; ');
 
          const t = s.getNext();
          expect(t.data).toEqual('wow ');
       });
 
       it('throws an error if there is a ]]> in the CharData', () => {
-         const s = makeStream('blah blah ]]> blah');
+         const s = makeStrictStream('blah blah ]]> blah');
 
          expect(() => {
             s.getNext();
@@ -171,7 +186,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if there is a ]]> in the CharData', () => {
-         const s = makeStream('testing testing ]]> testing', { lax: true });
+         const s = makeLaxStream('testing testing ]]> testing');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -179,7 +194,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('includes the "]]>" as char data in lax mode', () => {
-         const s = makeStream('testing testing ]]>testing', { lax: true });
+         const s = makeLaxStream('testing testing ]]>testing');
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
 
          expect(s.getNext().data).toEqual('testing testing ');
@@ -188,7 +203,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('can read CharData not at the beginning of the cursor', () => {
-         const s = makeStream('<start>testing testing </start>');
+         const s = makeStrictStream('<start>testing testing </start>');
          s.getNext();
 
          const t = s.getNext();
@@ -196,7 +211,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('wow zowie ');
+         const s = makeStrictStream('wow zowie ');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -209,28 +224,28 @@ describe('XmlTokenStream', () => {
    describe('parsing character entity reference', () => {
 
       it('retrieves a token of type CHAR_ENTITY', () => {
-         const s = makeStream('&#65;');
+         const s = makeStrictStream('&#65;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.CHAR_ENTITY);
       });
 
       it('produces a token with the specified character using a decimal reference', () => {
-         const s = makeStream('&#65;');
+         const s = makeStrictStream('&#65;');
 
          const t = s.getNext();
          expect(t.data).toEqual('A');
       });
 
       it('produces a token with the specified character using a hex reference', () => {
-         const s = makeStream('&#x4E;');
+         const s = makeStrictStream('&#x4E;');
 
          const t = s.getNext();
          expect(t.data).toEqual('N');
       });
 
       it('reports an error if there is a space after the &', () => {
-         const s = makeStream('& #65;');
+         const s = makeStrictStream('& #65;');
 
          expect(() => {
             s.getNext();
@@ -238,7 +253,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is a space after the &', () => {
-         const s = makeStream('& #65;', { lax: true });
+         const s = makeLaxStream('& #65;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -246,7 +261,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if there is a space after the #', () => {
-         const s = makeStream('&# 65;');
+         const s = makeStrictStream('&# 65;');
 
          expect(() => {
             s.getNext();
@@ -254,7 +269,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is a space after the #', () => {
-         const s = makeStream('&# 65;', { lax: true });
+         const s = makeLaxStream('&# 65;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -262,7 +277,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if the "x" in a hex reference is the wrong case', () => {
-         const s = makeStream('&#X41;');
+         const s = makeStrictStream('&#X41;');
 
          expect(() => {
             s.getNext();
@@ -270,7 +285,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if the "x" in a hex reference is the wrong case', () => {
-         const s = makeStream('&#X41;', { lax: true });
+         const s = makeLaxStream('&#X41;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -278,7 +293,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if a space is found after the  "x" in a hex reference', () => {
-         const s = makeStream('&#x 41;');
+         const s = makeStrictStream('&#x 41;');
 
          expect(() => {
             s.getNext();
@@ -286,7 +301,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if a space is found after the  "x" in a hex reference', () => {
-         const s = makeStream('&#x 41;', { lax: true });
+         const s = makeLaxStream('&#x 41;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -294,7 +309,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if no digits found in a character entity reference', () => {
-         const s = makeStream('&#;');
+         const s = makeStrictStream('&#;');
 
          expect(() => {
             s.getNext();
@@ -302,7 +317,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if no digits found in a character entity reference', () => {
-         const s = makeStream('&#;', { lax: true });
+         const s = makeLaxStream('&#;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -310,7 +325,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if space is found after digits in a character entity reference', () => {
-         const s = makeStream('&#12 ;');
+         const s = makeStrictStream('&#12 ;');
 
          expect(() => {
             s.getNext();
@@ -318,7 +333,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeStream('&#12 ;', { lax: true });
+         const s = makeLaxStream('&#12 ;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -326,7 +341,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if space is found after digits in a character entity reference', () => {
-         const s = makeStream('&#12</end>');
+         const s = makeStrictStream('&#12</end>');
 
          expect(() => {
             s.getNext();
@@ -334,7 +349,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeStream('&#12</end>', { lax: true });
+         const s = makeLaxStream('&#12</end>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -342,7 +357,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if hex digits found in a decimal character entity reference', () => {
-         const s = makeStream('&#4e;');
+         const s = makeStrictStream('&#4e;');
 
          expect(() => {
             s.getNext();
@@ -350,7 +365,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeStream('&#4e;', { lax: true });
+         const s = makeLaxStream('&#4e;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -358,14 +373,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('recognizes hex digits even if specified as decimal', () => {
-         const s = makeStream('&#4e;', { lax: true });
+         const s = makeLaxStream('&#4e;');
          ignoreError(s, XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
 
          expect(s.getNext().data).toEqual('N');
       });
 
       it('can read when not at the beginning of the cursor', () => {
-         const s = makeStream('<start>&#65;</start>');
+         const s = makeStrictStream('<start>&#65;</start>');
          s.getNext();
 
          const t = s.getNext();
@@ -373,7 +388,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('&#x42;');
+         const s = makeStrictStream('&#x42;');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -390,7 +405,7 @@ describe('XmlTokenStream', () => {
    describe('parsing entity reference', () => {
 
       it('throws an error if there is no entity name', () => {
-         const s = makeStream('&;');
+         const s = makeStrictStream('&;');
 
          expect(() => {
             s.getNext();
@@ -398,7 +413,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is no entity name', () => {
-         const s = makeStream('&;', { lax: true });
+         const s = makeLaxStream('&;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -406,7 +421,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is a space after the entity name', () => {
-         const s = makeStream('&frog ;');
+         const s = makeStrictStream('&frog ;');
 
          expect(() => {
             s.getNext();
@@ -414,15 +429,32 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space is found after entity name', () => {
-         const s = makeStream('&frog ;', { lax: true });
+         const s = makeLaxStream('&frog ;');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
       });
 
+      fit('throws an error if there is no closing semicolon', () => {
+         const s = makeStrictStream('&frog');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('A reference was found without a closing semicolon.');
+      });
+
+      fit('generates an error token in lax mode if there is no closing semicolon', () => {
+         const s = makeLaxStream('&frog ');
+         ignoreError(s, XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_NO_SEMICOLON);
+      });
+
       it('expands entitys', () => {
-         const s = makeStream('&quot;');
+         const s = makeStrictStream('&quot;');
          const startToken = new XmlToken(XmlToken.ENTITY_START, 'quot');
          startToken.haveEntityData = true;
 
@@ -439,7 +471,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('recognizes entities within entities', () => {
-         const s = makeStream('<root>&level1;</root>');
+         const s = makeStrictStream('<root>&level1;</root>');
          s._entityManager.addEntity('level1', '<child>&level2;</child>');   // WHITE BOX
          s._entityManager.addEntity('level2', '&quot;&#x41;');
 
@@ -493,7 +525,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('&lt;');
+         const s = makeStrictStream('&lt;');
 
          let t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -519,32 +551,32 @@ describe('XmlTokenStream', () => {
    describe('parsing CDATA', () => {
 
       it('retrieves a token of type CDATA', () => {
-         const s = makeStream('<![CDATA[ blah ]]>');
+         const s = makeStrictStream('<![CDATA[ blah ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.CDATA);
       });
 
       it('retrieves the content of the CDATA ', () => {
-         const s = makeStream('<![CDATA[ test data ]]>');
+         const s = makeStrictStream('<![CDATA[ test data ]]>');
 
          expect(s.getNext().data).toEqual(' test data ');
       });
 
       it('retrieves the content of the CDATA, ignoring any embedded markup', () => {
-         const s = makeStream('<![CDATA[ test <?foo bar?> <!-- data --> <start></end> ]]>');
+         const s = makeStrictStream('<![CDATA[ test <?foo bar?> <!-- data --> <start></end> ]]>');
 
          expect(s.getNext().data).toEqual(' test <?foo bar?> <!-- data --> <start></end> ');
       });
 
       it('retrieves undefined as the value for an empty CDATA block', () => {
-         const s = makeStream('<![CDATA[]]>');
+         const s = makeStrictStream('<![CDATA[]]>');
 
          expect(s.getNext().data).toBeUndefined();
       });
 
       it('throws an error if EOF found in middle', () => {
-         const s = makeStream('<![CDATA[junk comment');
+         const s = makeStrictStream('<![CDATA[junk comment');
 
          expect(() => {
             s.getNext();
@@ -552,7 +584,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if EOF found in middle', () => {
-         const s = makeStream('<![CDATA[junk comment', { lax: true });
+         const s = makeLaxStream('<![CDATA[junk comment');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -560,14 +592,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
-         const s = makeStream('<![CDATA[ junk cdata', { lax: true });
+         const s = makeLaxStream('<![CDATA[ junk cdata');
          ignoreError(s, XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
 
          expect(s.getNext().data).toEqual(' junk cdata');
       });
 
       it('throws an error if space found before first square bracket', () => {
-         const s = makeStream('<! [CDATA[junk comment ]]>');
+         const s = makeStrictStream('<! [CDATA[junk comment ]]>');
 
          expect(() => {
             s.getNext();
@@ -575,7 +607,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if EOF found in middle', () => {
-         const s = makeStream('<! [CDATA[junk comment ]]>', { lax: true });
+         const s = makeLaxStream('<! [CDATA[junk comment ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -583,7 +615,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if space found before CDATA', () => {
-         const s = makeStream('<![   CDATA[junk comment ]]>');
+         const s = makeStrictStream('<![   CDATA[junk comment ]]>');
 
          expect(() => {
             s.getNext();
@@ -591,7 +623,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space found CDATA', () => {
-         const s = makeStream('<![ CDATA[junk comment ]]>', { lax: true });
+         const s = makeLaxStream('<![ CDATA[junk comment ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -599,7 +631,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if space found after CDATA', () => {
-         const s = makeStream('<![CDATA    [junk comment ]]>');
+         const s = makeStrictStream('<![CDATA    [junk comment ]]>');
 
          expect(() => {
             s.getNext();
@@ -607,7 +639,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space found after CDATA', () => {
-         const s = makeStream('<![CDATA   [junk comment ]]>', { lax: true });
+         const s = makeLaxStream('<![CDATA   [junk comment ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -615,7 +647,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if CDATA has wrong case', () => {
-         const s = makeStream('<![cDaTa[junk comment ]]>');
+         const s = makeStrictStream('<![cDaTa[junk comment ]]>');
 
          expect(() => {
             s.getNext();
@@ -623,7 +655,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if space found after CDATA', () => {
-         const s = makeStream('<![cdata[junk comment ]]>', { lax: true });
+         const s = makeLaxStream('<![cdata[junk comment ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -631,7 +663,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<![CDATA[ one ]]>');
+         const s = makeStrictStream('<![CDATA[ one ]]>');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -649,7 +681,7 @@ describe('XmlTokenStream', () => {
    describe('parsing BangItem', () => {
 
       it('reports an error if an unknown bang item found', () => {
-         const s = makeStream('<!Fish');
+         const s = makeStrictStream('<!Fish');
 
          expect(() => {
             s.getNext();
@@ -657,7 +689,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if an unknown name appears in a <![xxx[ construction', () => {
-         const s = makeStream('<![Test[');
+         const s = makeStrictStream('<![Test[');
 
          expect(() => {
             s.getNext();
@@ -665,7 +697,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if an unknown name appears in a <![xxx[ construction', () => {
-         const s = makeStream('<![Testing[ ]]>', { lax: true });
+         const s = makeLaxStream('<![Testing[ ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -673,7 +705,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if there is no name provided', () => {
-         const s = makeStream('<![[');
+         const s = makeStrictStream('<![[');
 
          expect(() => {
             s.getNext();
@@ -681,7 +713,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is no name provided', () => {
-         const s = makeStream('<![[ ]]>', { lax: true });
+         const s = makeLaxStream('<![[ ]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -689,7 +721,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if EOF in the middle of the constructon', () => {
-         const s = makeStream('<![', { lax: true });
+         const s = makeLaxStream('<![');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -697,7 +729,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if there is no second square bracket', () => {
-         const s = makeStream('<![Name ]]>');
+         const s = makeStrictStream('<![Name ]]>');
 
          expect(() => {
             s.getNext();
@@ -705,7 +737,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is no second square bracket', () => {
-         const s = makeStream('<![Testing]]>', { lax: true });
+         const s = makeLaxStream('<![Testing]]>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -713,7 +745,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token in lax mode if there is an EOF before the second [', () => {
-         const s = makeStream('<![Testing', { lax: true });
+         const s = makeLaxStream('<![Testing');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -725,26 +757,26 @@ describe('XmlTokenStream', () => {
    describe('parsing comments', () => {
 
       it('retrieves a token of type COMMENT', () => {
-         const s = makeStream('<!-- one -->');
+         const s = makeStrictStream('<!-- one -->');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.COMMENT);
       });
 
       it('retrieves the content of the comment', () => {
-         const s = makeStream('<!-- one -->');
+         const s = makeStrictStream('<!-- one -->');
 
          expect(s.getNext().content).toEqual(' one ');
       });
 
       it('retrieves undefined as the value for an empty comment', () => {
-         const s = makeStream('<!---->');
+         const s = makeStrictStream('<!---->');
 
          expect(s.getNext().content).toBeUndefined();
       });
 
       it('throws an error if no --> found', () => {
-         const s = makeStream('<!--junk comment');
+         const s = makeStrictStream('<!--junk comment');
 
          expect(() => {
             s.getNext();
@@ -752,14 +784,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
-         const s = makeStream('<!--junk comment', { lax: true });
+         const s = makeLaxStream('<!--junk comment');
 
          ignoreError(s, XmlErrorToken.ERROR.COMMENT_MISSING_END);
          expect(s.getNext().content).toEqual('junk comment');
       });
 
       it('throws an error if comment ends with a -', () => {
-         const s = makeStream('<!--junk comment--->');
+         const s = makeStrictStream('<!--junk comment--->');
 
          expect(() => {
             s.getNext();
@@ -767,7 +799,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<!-- one -->');
+         const s = makeStrictStream('<!-- one -->');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -782,42 +814,42 @@ describe('XmlTokenStream', () => {
    describe('parsing processing instruction', () => {
 
       it('retrieves a token of type PI', () => {
-         const s = makeStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
+         const s = makeStrictStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.PI);
       });
 
       it('retrieves a token with the right target name', () => {
-         const s = makeStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
+         const s = makeStrictStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
 
          const t = s.getNext();
          expect(t.target).toEqual('foo');
       });
 
       it('retrieves a token with the right target content', () => {
-         const s = makeStream('<?foo blah blah boo boo !@#$%^&^*()_+ ?>');
+         const s = makeStrictStream('<?foo blah blah boo boo !@#$%^&^*()_+ ?>');
 
          const t = s.getNext();
          expect(t.content).toEqual('blah blah boo boo !@#$%^&^*()_+ ');
       });
 
       it('retrieves one with no content', () => {
-         const s = makeStream('<?foo?>');
+         const s = makeStrictStream('<?foo?>');
 
          const t = s.getNext();
          expect(t.content).toBeUndefined();
       });
 
       it('allows whitespace but no content', () => {
-         const s = makeStream('<?foo    ?>');
+         const s = makeStrictStream('<?foo    ?>');
 
          const t = s.getNext();
          expect(t.content).toBeUndefined();
       });
 
       it('throws an error if no ?> found', () => {
-         const s = makeStream('<?foo glorky');
+         const s = makeStrictStream('<?foo glorky');
 
          expect(() => {
             s.getNext();
@@ -825,14 +857,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('returns the content up to EOF if no ?> found in lax mode', () => {
-         const s = makeStream('<?foo glorky', { lax: true });
+         const s = makeLaxStream('<?foo glorky');
          ignoreError(s, XmlErrorToken.ERROR.PI_NO_TERMINATOR);
 
          expect(s.getNext().content).toEqual('glorky');
       });
 
       it('throws an error if a space is between the <? and the target', () => {
-         const s = makeStream('<? foo glorky?>');
+         const s = makeStrictStream('<? foo glorky?>');
 
          expect(() => {
             s.getNext();
@@ -840,7 +872,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the name does not match the name syntax', () => {
-         const s = makeStream('<?frog$ glorky?>');
+         const s = makeStrictStream('<?frog$ glorky?>');
 
          expect(() => {
             s.getNext();
@@ -848,7 +880,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is no target', () => {
-         const s = makeStream('<??>');
+         const s = makeStrictStream('<??>');
 
          expect(() => {
             s.getNext();
@@ -856,7 +888,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if a there is no target', () => {
-         const s = makeStream('<??>', { lax: true });
+         const s = makeLaxStream('<??>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -868,21 +900,21 @@ describe('XmlTokenStream', () => {
    describe('parsing XML Declaration', () => {
 
       it('can get a syntactically correct one', () => {
-         const s = makeStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
+         const s = makeStrictStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.XMLDECL);
       });
 
       it('retrieves the number of parameters in the declaration', () => {
-         const s = makeStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
+         const s = makeStrictStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
          expect(t.params.length).toEqual(3);
       });
 
       it('retrieves parameters in order', () => {
-         const s = makeStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
+         const s = makeStrictStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
          compareXmlDeclAttribute(t.params[0], 'version', '1.1');
@@ -891,7 +923,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('allows a space between the <? and the target if in lax mode', () => {
-         const s = makeStream('<? xml version="1.1"?>', { lax: true });
+         const s = makeLaxStream('<? xml version="1.1"?>');
 
          let t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -900,7 +932,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a space is between the <? and the target if in strict mode', () => {
-         const s = makeStream('<? xml version="1.1"?>', { lax: false });
+         const s = makeStrictStream('<? xml version="1.1"?>');
 
          expect(() => {
             s.getNext();
@@ -908,7 +940,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('allows the xml after <? to be any case in lax mode', () => {
-         const s = makeStream('<?XmL version="1.1"?>', { lax: true });
+         const s = makeLaxStream('<?XmL version="1.1"?>');
 
          let t = s.getNext();
          expect(t.code).toEqual(XmlErrorToken.ERROR.XML_NOT_LOWERCASE);
@@ -917,7 +949,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
-         const s = makeStream('<?XmL version="1.1"?>', { lax: false });
+         const s = makeStrictStream('<?XmL version="1.1"?>');
 
          expect(() => {
             s.getNext();
@@ -925,7 +957,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
-         const s = makeStream('<?xml version="1.1" encoding="frog<"?>', {
+         const s = makeStream('<?xml version="1.1" encoding="frog<"?>', new XmlEntityManager(), {
             lax: true,
             'lax:allowOpenAngleBracketsInAttributeValues': false
          });
@@ -936,14 +968,14 @@ describe('XmlTokenStream', () => {
       describe('"attribute" equal signs', () => {
 
          it('accepts spaces around the equal signs, as per the spec', () => {
-            const s = makeStream('<?xml version =         "1.1"?>');
+            const s = makeStrictStream('<?xml version =         "1.1"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no equal sign', () => {
-            const s = makeStream('<?xml version "1.1"?>');
+            const s = makeStrictStream('<?xml version "1.1"?>');
 
             expect(() => {
                s.getNext();
@@ -951,7 +983,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('accepts the lack of an equal sign in lax mode', () => {
-            const s = makeStream('<?xml version "1.1"?>', { lax: true });
+            const s = makeLaxStream('<?xml version "1.1"?>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
 
             const t = s.getNext();
@@ -963,21 +995,21 @@ describe('XmlTokenStream', () => {
       describe('"attribute" quotes', () => {
 
          it('accepts single quotes', () => {
-            const s = makeStream('<?xml version =\'1.1\'?>');
+            const s = makeStrictStream('<?xml version =\'1.1\'?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('accepts double quotes', () => {
-            const s = makeStream('<?xml version ="1.1"?>');
+            const s = makeStrictStream('<?xml version ="1.1"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws an error if there is no quote', () => {
-            const s = makeStream('<?xml version=1.1 ?>');
+            const s = makeStrictStream('<?xml version=1.1 ?>');
 
             expect(() => {
                s.getNext();
@@ -985,7 +1017,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws no error in lax mode', () => {
-            const s = makeStream('<?xml version=1.1 ?>', { lax: true });
+            const s = makeLaxStream('<?xml version=1.1 ?>');
 
             const t = s.getNext();
 
@@ -993,7 +1025,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('makes the best guess for the attr value if no quotes', () => {
-            const s = makeStream('<?xml version=1.1 ?>', { lax: true });
+            const s = makeLaxStream('<?xml version=1.1 ?>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
@@ -1001,7 +1033,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('stops at processing instruction boundary even when no quotes', () => {
-            const s = makeStream('<?xml version=1.1?>', { lax: true });
+            const s = makeLaxStream('<?xml version=1.1?>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
@@ -1009,7 +1041,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('stops at processing instruction boundary even when no equal and no quotes', () => {
-            const s = makeStream('<?xml version 1.1?>', { lax: true });
+            const s = makeLaxStream('<?xml version 1.1?>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
@@ -1024,7 +1056,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is no space after a value', () => {
-         const s = makeStream('<?xml version="1.1"encoding="usascii" standalone="yes"?>');
+         const s = makeStrictStream('<?xml version="1.1"encoding="usascii" standalone="yes"?>');
 
          expect(() => {
             s.getNext();
@@ -1032,7 +1064,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no parameters are included', () => {
-         const s = makeStream('<?xml ?>');
+         const s = makeStrictStream('<?xml ?>');
 
          expect(() => {
             s.getNext();
@@ -1040,7 +1072,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if an unknown parameter is provided', () => {
-         const s = makeStream('<?xml bogus="frog"?>', { lax: false });
+         const s = makeStrictStream('<?xml bogus="frog"?>');
 
          expect(() => {
             s.getNext();
@@ -1048,7 +1080,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the close is missing and not lax', () => {
-         const s = makeStream('<?xml version="1.0"', { lax: false });
+         const s = makeStrictStream('<?xml version="1.0"');
 
          expect(() => {
             s.getNext();
@@ -1056,14 +1088,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('reports an error if the close is missing and lax', () => {
-         const s = makeStream('<?xml version="1.0"', { lax: true });
+         const s = makeLaxStream('<?xml version="1.0"');
 
          const token = s.getNext();
          expect(token.code).toEqual(XmlErrorToken.ERROR.MISSING_XMLDECL_CLOSE);
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<?xml version="1.1" encoding="usascii"  ?>');
+         const s = makeStrictStream('<?xml version="1.1" encoding="usascii"  ?>');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -1089,21 +1121,21 @@ describe('XmlTokenStream', () => {
       describe('version parameter', () => {
 
          it('accepts a value of "1.0"', () => {
-            const s = makeStream('<?xml version="1.0"?>');
+            const s = makeStrictStream('<?xml version="1.0"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.0');
          });
 
          it('accepts a value of "1.1"', () => {
-            const s = makeStream('<?xml version="1.1"?>');
+            const s = makeStrictStream('<?xml version="1.1"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
          });
 
          it('throws a syntax error if version is not a supported value', () => {
-            const s = makeStream('<?xml version="1.2" ?>');
+            const s = makeStrictStream('<?xml version="1.2" ?>');
 
             expect(() => {
                s.getNext();
@@ -1111,7 +1143,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('reports version in wrong position as second syntax error', () => {
-            const s = makeStream('<?xml encoding="usascii" version="1.1" ?>', {lax: true});
+            const s = makeLaxStream('<?xml encoding="usascii" version="1.1" ?>');
 
             s.getNext();
             const second = s.getNext();
@@ -1120,7 +1152,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if version is not the right case', () => {
-            const s = makeStream('<?xml VeRsIoN="1.1" ?>');
+            const s = makeStrictStream('<?xml VeRsIoN="1.1" ?>');
 
             expect(() => {
                s.getNext();
@@ -1128,7 +1160,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('accepts the wrong case for version if lax', () => {
-            const s = makeStream('<?xml  VERSION="1.1" ?>', {lax: true});
+            const s = makeLaxStream('<?xml  VERSION="1.1" ?>');
 
             const syntaxErrorToken = s.getNext();
 
@@ -1140,14 +1172,14 @@ describe('XmlTokenStream', () => {
       describe('encoding parameter', () => {
 
          it('accepts a value of "usascii0"', () => {
-            const s = makeStream('<?xml version="1.1"   encoding="usascii0"?>');
+            const s = makeStrictStream('<?xml version="1.1"   encoding="usascii0"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii0');
          });
 
          it('throws a syntax error if encoding is not rightly encoded', () => {
-            const s = makeStream('<?xml version="1.1" encoding="bogus$"?>');
+            const s = makeStrictStream('<?xml version="1.1" encoding="bogus$"?>');
 
             expect(() => {
                s.getNext();
@@ -1155,7 +1187,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if encoding starts with a bad character', () => {
-            const s = makeStream('<?xml version="1.1" encoding="0usascii"?>');
+            const s = makeStrictStream('<?xml version="1.1" encoding="0usascii"?>');
 
             expect(() => {
                s.getNext();
@@ -1163,7 +1195,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if encoding found in the wrong position', () => {
-            const s = makeStream('<?xml encoding="frog" version="1.1" ?>');
+            const s = makeStrictStream('<?xml encoding="frog" version="1.1" ?>');
 
             expect(() => {
                s.getNext();
@@ -1171,7 +1203,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if is not the right case', () => {
-            const s = makeStream('<?xml version="1.1" EnCoDiNG="bogys" ?>');
+            const s = makeStrictStream('<?xml version="1.1" EnCoDiNG="bogys" ?>');
 
             expect(() => {
                s.getNext();
@@ -1179,7 +1211,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('accepts the wrong case if lax', () => {
-            const s = makeStream('<?xml  version="1.1" ENCODING="usascii" ?>', {lax: true});
+            const s = makeLaxStream('<?xml  version="1.1" ENCODING="usascii" ?>');
 
             const syntaxErrorToken = s.getNext();
 
@@ -1191,21 +1223,21 @@ describe('XmlTokenStream', () => {
       describe('standalone parameter', () => {
 
          it('accepts a value of "no"', () => {
-            const s = makeStream('<?xml version="1.1" standalone="no"?>');
+            const s = makeStrictStream('<?xml version="1.1" standalone="no"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[1], 'standalone', 'no');
          });
 
          it('accepts a value of "yes"', () => {
-            const s = makeStream('<?xml version="1.1" standalone="yes"?>');
+            const s = makeStrictStream('<?xml version="1.1" standalone="yes"?>');
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[1], 'standalone', 'yes');
          });
 
          it('throws an error if standalone in the wrong position', () => {
-            const s = makeStream('<?xml standalone="frog" ?>');
+            const s = makeStrictStream('<?xml standalone="frog" ?>');
 
             expect(() => {
                s.getNext();
@@ -1213,7 +1245,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if standalone is not yes or no', () => {
-            const s = makeStream('<?xml version="1.1" standalone="bogus"?>');
+            const s = makeStrictStream('<?xml version="1.1" standalone="bogus"?>');
 
             expect(() => {
                s.getNext();
@@ -1221,7 +1253,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if is not the right case', () => {
-            const s = makeStream('<?xml version="1.1" STANDaLoNE="yes" ?>');
+            const s = makeStrictStream('<?xml version="1.1" STANDaLoNE="yes" ?>');
 
             expect(() => {
                s.getNext();
@@ -1229,7 +1261,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('accepts the wrong case if lax', () => {
-            const s = makeStream('<?xml  version="1.1" STANDALONE="no" ?>', {lax: true});
+            const s = makeLaxStream('<?xml  version="1.1" STANDALONE="no" ?>');
 
             const syntaxErrorToken = s.getNext();
 
@@ -1237,7 +1269,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('accepts the wrong case for parameter if lax', () => {
-            const s = makeStream('<?xml  version="1.1" standalone="NO" ?>', {lax: true});
+            const s = makeLaxStream('<?xml  version="1.1" standalone="NO" ?>');
 
             const syntaxErrorToken = s.getNext();
 
@@ -1245,7 +1277,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('produces a useful message if parameter is the wrong case', () => {
-            const s = makeStream('<?xml  version="1.1" standalone="yEs" ?>', {lax: true});
+            const s = makeLaxStream('<?xml  version="1.1" standalone="yEs" ?>');
 
             const syntaxErrorToken = s.getNext();
 
@@ -1259,21 +1291,21 @@ describe('XmlTokenStream', () => {
    describe('parsing start element tags', () => {
 
       it('retrieves a token of type START_ELEMENT', () => {
-         const s = makeStream('<name>');
+         const s = makeStrictStream('<name>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ELEMENT_START);
       });
 
       it('retrieves the name of the element', () => {
-         const s = makeStream('<name>');
+         const s = makeStrictStream('<name>');
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('retrieves the name with a slash in it in lax mode', () => {
-         const s = makeStream('<n/ame>', { lax: true });
+         const s = makeLaxStream('<n/ame>');
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
 
          const t = s.getNext();
@@ -1281,7 +1313,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves an empty name if there is no name in the start tag', () => {
-         const s = makeStream('<>', { lax: true });
+         const s = makeLaxStream('<>');
 
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
          const t = s.getNext();
@@ -1289,14 +1321,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('allows S after the name', () => {
-         const s = makeStream('<name     >');
+         const s = makeStrictStream('<name     >');
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('throws an error if a space is found after the <', () => {
-         const s = makeStream('< name>');
+         const s = makeStrictStream('< name>');
 
          expect(() => {
             s.getNext();
@@ -1304,7 +1336,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if a space is found after the <', () => {
-         const s = makeStream('< name>', { lax: true });
+         const s = makeLaxStream('< name>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1312,7 +1344,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the name is not a name', () => {
-         const s = makeStream('<9name>');
+         const s = makeStrictStream('<9name>');
 
          expect(() => {
             s.getNext();
@@ -1320,7 +1352,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the name is not a name', () => {
-         const s = makeStream('<9name>', { lax: true });
+         const s = makeLaxStream('<9name>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1328,7 +1360,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if > is missing', () => {
-         const s = makeStream('<name', { lax: true });
+         const s = makeLaxStream('<name');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1336,7 +1368,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if name is missing', () => {
-         const s = makeStream('<>');
+         const s = makeStrictStream('<>');
 
          expect(() => {
             s.getNext();
@@ -1344,7 +1376,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if name is missing', () => {
-         const s = makeStream('<>', { lax: true });
+         const s = makeLaxStream('<>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1354,7 +1386,7 @@ describe('XmlTokenStream', () => {
       describe('with attributes', () => {
 
          it('can parse basic attributes', () => {
-            const s = makeStream('<elemName attr1="one" attr2="two">', { lax: true });
+            const s = makeLaxStream('<elemName attr1="one" attr2="two">');
 
             const t = s.getNext();
 
@@ -1370,7 +1402,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes using single quotes', () => {
-            const s = makeStream('<elemName attr1=\'one\' attr2=\'two\'>', { lax: true });
+            const s = makeLaxStream('<elemName attr1=\'one\' attr2=\'two\'>');
 
             const t = s.getNext();
 
@@ -1386,7 +1418,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with whitespace around the equals', () => {
-            const s = makeStream('<elemName\n\tattr1\t\n=   \'one\' attr2   =\r\n\t "two">', { lax: true });
+            const s = makeLaxStream('<elemName\n\tattr1\t\n=   \'one\' attr2   =\r\n\t "two">');
 
             const t = s.getNext();
 
@@ -1402,7 +1434,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with a character reference in the value', () => {
-            const s = makeStream('<elemName attr1="tw&#x41;o">');
+            const s = makeStrictStream('<elemName attr1="tw&#x41;o">');
 
             const t = s.getNext();
 
@@ -1417,7 +1449,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with a character reference at the start of the value', () => {
-            const s = makeStream('<elemName attr1="&#x41; test">');
+            const s = makeStrictStream('<elemName attr1="&#x41; test">');
 
             const t = s.getNext();
 
@@ -1432,7 +1464,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with a character reference at the end of the value', () => {
-            const s = makeStream('<elemName attr1="tw&#x41;">');
+            const s = makeStrictStream('<elemName attr1="tw&#x41;">');
 
             const t = s.getNext();
 
@@ -1446,7 +1478,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with an entity reference in the value', () => {
-            const s = makeStream('<elemName attr1="tw&quot;o">');
+            const s = makeStrictStream('<elemName attr1="tw&quot;o">');
             const start = new XmlToken(XmlToken.ENTITY_START, 'quot');
             start.haveEntityData = true;
 
@@ -1464,7 +1496,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can parse attributes with an entity references in entity references', () => {
-            const s = makeStream('<elemName attr1="tw&foo;o">');
+            const s = makeStrictStream('<elemName attr1="tw&foo;o">');
             s._entityManager.addEntity('foo', '<bar>&one;</bar>');   // WHITE BOX
             s._entityManager.addEntity('one', '&quot;&#x41;');
             const t = s.getNext();
@@ -1495,7 +1527,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('will accept a reference to an unknown entity', () => {
-            const s = makeStream('<elemName attr1="tw&test;o">');
+            const s = makeStrictStream('<elemName attr1="tw&test;o">');
             const t = s.getNext();
             const startTest = new XmlToken(XmlToken.ENTITY_START, 'test');
             startTest.haveEntityData = false;
@@ -1512,7 +1544,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is a < in the attribute value', () => {
-            const s = makeStream('<elementName attr1="value<">');
+            const s = makeStrictStream('<elementName attr1="value<">');
 
             expect(() => {
                s.getNext();
@@ -1520,7 +1552,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is a < in the attribute value', () => {
-            const s = makeStream('<elementName attr1="value<">', { lax: true });
+            const s = makeLaxStream('<elementName attr1="value<">');
 
             const t = s.getNext();
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1528,7 +1560,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if the attribute name is not a legal XML name', () => {
-            const s = makeStream('<elementName 1attr="value">');
+            const s = makeStrictStream('<elementName 1attr="value">');
 
             expect(() => {
                s.getNext();
@@ -1536,7 +1568,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if name is missing', () => {
-            const s = makeStream('<elementName 1attr="value">', { lax: true });
+            const s = makeLaxStream('<elementName 1attr="value">');
 
             const t = s.getNext();
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1544,7 +1576,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no space between attributes', () => {
-            const s = makeStream('<elementName attr1="value"attr2="value2">');
+            const s = makeStrictStream('<elementName attr1="value"attr2="value2">');
 
             expect(() => {
                s.getNext();
@@ -1552,7 +1584,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is no space between attributes', () => {
-            const s = makeStream('<elementName attr1="value"attr2="value2">', { lax: true });
+            const s = makeLaxStream('<elementName attr1="value"attr2="value2">');
 
             const t = s.getNext();
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1560,7 +1592,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no quote around the attribute value', () => {
-            const s = makeStream('<elementName attr1=value>');
+            const s = makeStrictStream('<elementName attr1=value>');
 
             expect(() => {
                s.getNext();
@@ -1568,7 +1600,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is no space between attributes', () => {
-            const s = makeStream('<elementName attr1=value>', { lax: true });
+            const s = makeLaxStream('<elementName attr1=value>');
 
             const t = s.getNext();
 
@@ -1577,7 +1609,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('reads a single word if there is no quote', () => {
-            const s = makeStream('<elementName attr1= value>', { lax: true });
+            const s = makeLaxStream('<elementName attr1= value>');
 
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             const t = s.getNext();
@@ -1586,7 +1618,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no equal sign', () => {
-            const s = makeStream('<elementName attr1 "value">');
+            const s = makeStrictStream('<elementName attr1 "value">');
 
             expect(() => {
                s.getNext();
@@ -1594,7 +1626,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is no equal sign', () => {
-            const s = makeStream('<elementName attr1 "value">', { lax: true });
+            const s = makeLaxStream('<elementName attr1 "value">');
 
             const t = s.getNext();
 
@@ -1603,7 +1635,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no value', () => {
-            const s = makeStream('<elementName attr1= >');
+            const s = makeStrictStream('<elementName attr1= >');
 
             expect(() => {
                s.getNext();
@@ -1611,7 +1643,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is no value', () => {
-            const s = makeStream('<elementName attr1= >', { lax: true });
+            const s = makeLaxStream('<elementName attr1= >');
 
             const t = s.getNext();
 
@@ -1620,7 +1652,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no closing quote', () => {
-            const s = makeStream('<elementName attr1="one>');
+            const s = makeStrictStream('<elementName attr1="one>');
 
             expect(() => {
                s.getNext();
@@ -1628,7 +1660,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('generates an error token if there is no closing quote', () => {
-            const s = makeStream('<elementName attr1="one>', { lax: true });
+            const s = makeLaxStream('<elementName attr1="one>');
 
             const t = s.getNext();
 
@@ -1637,7 +1669,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('infers an equal sign and reads the value if in lax mode and equal missing', () => {
-            const s = makeStream('<elementName attr1 "value one">', { lax: true });
+            const s = makeLaxStream('<elementName attr1 "value one">');
 
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             const t = s.getNext();
@@ -1646,7 +1678,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('reads a new name if both equal and quote are missing', () => {
-            const s = makeStream('<elementName attr1  value one>', { lax: true });
+            const s = makeLaxStream('<elementName attr1  value one>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
@@ -1662,7 +1694,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('returns undefined for values when they are not present', () => {
-            const s = makeStream('<elementName attr1  value>', { lax: true });
+            const s = makeLaxStream('<elementName attr1  value>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
@@ -1675,7 +1707,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('considers quotes in a name to be part of the name', () => {
-            const s = makeStream('<elementName attr1"boo"  two=value>', { lax: true });
+            const s = makeLaxStream('<elementName attr1"boo"  two=value>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
@@ -1688,7 +1720,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('does not consider a close angle bracket to be part of the name', () => {
-            const s = makeStream('<elementName one>', { lax: true });
+            const s = makeLaxStream('<elementName one>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
 
@@ -1698,7 +1730,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('does not consider a close angle bracket to be part of the value in a bad value', () => {
-            const s = makeStream('<elementName one=two>', { lax: true });
+            const s = makeLaxStream('<elementName one=two>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
 
             const t = s.getNext();
@@ -1707,7 +1739,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('does not consider a close angle bracket to be part of the value when no equal', () => {
-            const s = makeStream('<elementName one >', { lax: true });
+            const s = makeLaxStream('<elementName one >');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
 
@@ -1717,7 +1749,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('considers quotes at the start of the name to be part of the name', () => {
-            const s = makeStream('<elementName "one="vone"  \'two=vtwo>', { lax: true });
+            const s = makeLaxStream('<elementName "one="vone"  \'two=vtwo>');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
@@ -1729,7 +1761,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('handles eof in middle of name', () => {
-            const s = makeStream('<elementName nam', { lax: true });
+            const s = makeLaxStream('<elementName nam');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
@@ -1740,7 +1772,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('handles eof after equal', () => {
-            const s = makeStream('<elementName name=', { lax: true });
+            const s = makeLaxStream('<elementName name=');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
@@ -1750,7 +1782,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('handles eof in value', () => {
-            const s = makeStream('<elementName name="one', { lax: true });
+            const s = makeLaxStream('<elementName name="one');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
@@ -1760,7 +1792,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('handles eof at start of value', () => {
-            const s = makeStream('<elementName name="', { lax: true });
+            const s = makeLaxStream('<elementName name="');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
@@ -1770,7 +1802,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if a < is found in an attribute', () => {
-            const s = makeStream('<elementName name="myvalue<one">');
+            const s = makeStrictStream('<elementName name="myvalue<one">');
 
             expect(() => {
                s.getNext();
@@ -1778,7 +1810,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('terminates start tag and continues processing if an < in an attribute value in lax mode', () => {
-            const s = makeStream('<elementName name="one<two">', { lax: true });
+            const s = makeLaxStream('<elementName name="one<two">');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
@@ -1792,7 +1824,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('considers < part of attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
-            const s = makeStream('<elementName name="one<two">', {
+            const s = makeStream('<elementName name="one<two">', new XmlEntityManager(), {
                lax: true,
                'lax:allowOpenAngleBracketsInAttributeValues': true
             });
@@ -1803,7 +1835,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('terminates start tag if an < in a quoteless attribute value in lax mode', () => {
-            const s = makeStream('<elementName name=one<two">', { lax: true });
+            const s = makeLaxStream('<elementName name=one<two">');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
@@ -1818,7 +1850,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('terminates gracefully even when EOF at end of quoteless attribute value', () => {
-            const s = makeStream('<elementName name=one', { lax: true });
+            const s = makeLaxStream('<elementName name=one');
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
 
@@ -1828,7 +1860,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('considers < part of quoteless attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
-            const s = makeStream('<elementName name=one<two">', {
+            const s = makeStream('<elementName name=one<two">', new XmlEntityManager(), {
                lax: true,
                'lax:allowOpenAngleBracketsInAttributeValues': true
             });
@@ -1842,7 +1874,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<one >');
+         const s = makeStrictStream('<one >');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -1858,34 +1890,34 @@ describe('XmlTokenStream', () => {
    describe('parsing empty element tags', () => {
 
       it('retrieves a token of type ELEMENT_EMPTY', () => {
-         const s = makeStream('<name/>');
+         const s = makeStrictStream('<name/>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ELEMENT_EMPTY);
       });
 
       it('retrieves the name of the element', () => {
-         const s = makeStream('<name/>');
+         const s = makeStrictStream('<name/>');
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('allows S after the name', () => {
-         const s = makeStream('<name     />');
+         const s = makeStrictStream('<name     />');
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
       });
 
       it('retrieves attributes, if present', () => {
-         const s = makeStream('<name attr="one">');
+         const s = makeStrictStream('<name attr="one">');
 
          expect(s.getNext().attributes[0].name).toEqual('attr');
       });
 
       it('throws an error if a space is found after the <', () => {
-         const s = makeStream('< name>');
+         const s = makeStrictStream('< name>');
 
          expect(() => {
             s.getNext();
@@ -1893,7 +1925,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if a space is found after the <', () => {
-         const s = makeStream('< name/>', { lax: true });
+         const s = makeLaxStream('< name/>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1901,7 +1933,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the name is not a name', () => {
-         const s = makeStream('<9name/>');
+         const s = makeStrictStream('<9name/>');
 
          expect(() => {
             s.getNext();
@@ -1909,7 +1941,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the name is not a name', () => {
-         const s = makeStream('<9name/>', { lax: true });
+         const s = makeLaxStream('<9name/>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1917,7 +1949,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if /> is missing', () => {
-         const s = makeStream('<name  ');
+         const s = makeStrictStream('<name  ');
 
          expect(() => {
             s.getNext();
@@ -1925,7 +1957,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the end /> is missing', () => {
-         const s = makeStream('<name', { lax: true });
+         const s = makeLaxStream('<name');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -1933,7 +1965,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if name is missing', () => {
-         const s = makeStream('< />', { lax: true }); // </> looks like a malformed end tag!
+         const s = makeLaxStream('< />'); // </> looks like a malformed end tag!
 
          s.getNext();
          const t = s.getNext();
@@ -1942,7 +1974,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<one />');
+         const s = makeStrictStream('<one />');
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -1958,7 +1990,7 @@ describe('XmlTokenStream', () => {
    describe('parsing end element tags', () => {
 
       it('retrieves a token of type ELEMENT_END', () => {
-         const s = makeStream('<name></name>');
+         const s = makeStrictStream('<name></name>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -1966,7 +1998,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the name of the element', () => {
-         const s = makeStream('<name></name>');
+         const s = makeStrictStream('<name></name>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -1974,7 +2006,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves an empty name if there is no name in the end tag', () => {
-         const s = makeStream('<name></>', { lax: true });
+         const s = makeLaxStream('<name></>');
          ignoreToken(s, XmlToken.ELEMENT_START);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
@@ -1984,7 +2016,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('allows S after the name', () => {
-         const s = makeStream('<name></name     >');
+         const s = makeStrictStream('<name></name     >');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -1992,7 +2024,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if attributs found in the tag', () => {
-         const s = makeStream('<name></name attr1="one">');
+         const s = makeStrictStream('<name></name attr1="one">');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          expect(() => {
@@ -2001,7 +2033,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a space is found after the </', () => {
-         const s = makeStream('<name></ name>');
+         const s = makeStrictStream('<name></ name>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          expect(() => {
@@ -2010,7 +2042,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if a space is found after the </', () => {
-         const s = makeStream('<name></ name>', { lax: true });
+         const s = makeLaxStream('<name></ name>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -2019,7 +2051,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a it finds the wrong close', () => {
-         const s = makeStream('<name></name/>');
+         const s = makeStrictStream('<name></name/>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          expect(() => {
@@ -2028,7 +2060,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if it finds the wrong close', () => {
-         const s = makeStream('<name></name/>', { lax: true });
+         const s = makeLaxStream('<name></name/>');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -2037,7 +2069,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the name is not a name', () => {
-         const s = makeStream('</9name>');
+         const s = makeStrictStream('</9name>');
 
          expect(() => {
             s.getNext();
@@ -2045,7 +2077,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the name is not a name', () => {
-         const s = makeStream('</9name>', { lax: true });
+         const s = makeLaxStream('</9name>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -2053,7 +2085,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if > is missing', () => {
-         const s = makeStream('</name  <');
+         const s = makeStrictStream('</name  <');
 
          expect(() => {
             s.getNext();
@@ -2061,7 +2093,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the name is not a name', () => {
-         const s = makeStream('</name', { lax: true });
+         const s = makeLaxStream('</name');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -2069,7 +2101,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if name is missing', () => {
-         const s = makeStream('</>');
+         const s = makeStrictStream('</>');
 
          expect(() => {
             s.getNext();
@@ -2077,7 +2109,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if name is missing', () => {
-         const s = makeStream('</>', { lax: true });
+         const s = makeLaxStream('</>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
@@ -2085,7 +2117,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws no error if the tag names match', () => {
-         const s = makeStream('<one><two></two></one>');
+         const s = makeStrictStream('<one><two></two></one>');
 
          expect(() => {
             s.getNext();
@@ -2096,7 +2128,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the end element name does not match the start', () => {
-         const s = makeStream('<one></two>');
+         const s = makeStrictStream('<one></two>');
 
          expect(() => {
             s.getNext();
@@ -2105,7 +2137,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the end element name does not match the start, even on deeper trees', () => {
-         const s = makeStream('<one><two><one></one></one></one>');
+         const s = makeStrictStream('<one><two><one></one></one></one>');
 
          expect(() => {
             s.getNext();
@@ -2118,7 +2150,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('generates an error token if the end element name does not match the start', () => {
-         const s = makeStream('<one></two>', { lax: true });
+         const s = makeLaxStream('<one></two>');
 
          s.getNext();
          const t = s.getNext();
@@ -2127,7 +2159,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStream('<one></one >');
+         const s = makeStrictStream('<one></one >');
          ignoreToken(s, XmlToken.ELEMENT_START);
 
          const t = s.getNext();
@@ -2144,7 +2176,7 @@ describe('XmlTokenStream', () => {
    describe('_reportSyntaxError()', () => {
 
       it('throws an error if in strict mode', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(''), { lax: false });
+         const s = makeStrictStream('');
 
          expect(() => {
             s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
@@ -2153,7 +2185,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('includes an error token in the error', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(''), { lax: false });
+         const s = makeStrictStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
             XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
             'Found a space before the xml target name.');
@@ -2167,7 +2199,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws no error if in lax mode', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(''), { lax: true });
+         const s = makeLaxStream('');
 
          expect(() => {
             s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
@@ -2176,7 +2208,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('queues a syntax error token if in lax mode', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(''), { lax: true });
+         const s = makeLaxStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
             XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
             'Found a space before the xml target name.');
@@ -2192,7 +2224,7 @@ describe('XmlTokenStream', () => {
    describe('general parsing()', () => {
 
       it('does not generate a S token between tags', () => {
-         const s = new XmlTokenStream(new XmlStringCursor(' <one> UNO </one> '));
+         const s = makeStrictStream(' <one> UNO </one> ');
 
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
          expect(s.getNext().type).toEqual(XmlToken.ELEMENT_START);
