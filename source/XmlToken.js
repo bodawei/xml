@@ -75,11 +75,13 @@ class StartTagToken extends TagToken {
 
 class DocTypeToken extends XmlToken {
 
-   constructor(name, internalDtd) {
+   constructor(name, systemLiteral, pubidLiteral, internalDtd) {
       super(XmlToken.DOCTYPE, name);
 
       this.name = name;
       this.internalDtd = internalDtd;
+      this.systemLiteral = systemLiteral;
+      this.pubidLiteral = pubidLiteral;
    }
 
 }

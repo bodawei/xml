@@ -891,6 +891,73 @@ describe('XmlTokenStream', () => {
 
    });
 
+   describe('parsing ExternalId', () => {
+
+      it('retrieves only a systemLiteral when SYSTEM is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(t.pubidLiteral).toBeUndefined();
+      });
+
+      it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('public');
+         expect(t.systemLiteral).toEqual('./system.xml');
+      });
+
+      it('retrieves zero length publicID and system literals', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "" "" [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('');
+         expect(t.systemLiteral).toEqual('');
+      });
+
+      it('throws an error if the public id has illegal characters', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "^" [ ] >');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('The public id had "^" which is not a legal character.');
+      });
+
+      it('throws an error if the public id has some legal and some illegal characters', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "ABCDE{" [ ] >');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('The public id had "{" which is not a legal character.');
+      });
+
+      it('returns a syntax error token in lax mode if the public id has illegal characters', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC "^" [ ] >');
+
+         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS);
+      });
+
+      it('throws no error if the public id has all legal characters', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" [ ] >');
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrowError();
+      });
+
+      it('does nothing if a bad word is used', () => {
+         const s = makeStrictStream('<!DOCTYPE testType FOO [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toBeUndefined();
+         expect(t.systemLiteral).toBeUndefined();
+      });
+
+   });
+
    describe('parsing comments', () => {
 
       it('retrieves a token of type COMMENT', () => {

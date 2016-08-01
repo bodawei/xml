@@ -19,6 +19,8 @@ const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
+const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
+
 function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    let value = valueChunk;
 
@@ -340,12 +342,15 @@ class XmlTokenStream {
                   const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
                   this._cursor.getSpace();
                   this._cursor.getMatch('[');
+                  const externalId = this._retrieveExternalId();
                   this._cursor.getSpace();
                   this._cursor.getMatch(']');
                   this._cursor.getSpace();
                   this._cursor.getMatch('>');
 
-                  this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '', []));
+                  this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '',
+                     externalId ? externalId.systemLiteral : undefined,
+                     externalId ? externalId.pubidLiteral : undefined, []));
                   return;
             }
          }
@@ -400,6 +405,76 @@ class XmlTokenStream {
          this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME,
             'Unknown Bang-bracket item. Found "' + bracketItemType.text + '".');
       }
+   }
+
+   /**********************************************************************\
+    _retrieveExternalId tries to extract an ExternalID from the current
+    position in the cursor. It assumes any leading space has already been
+    consumed.
+
+      [75] ExternalID    ::= 'SYSTEM' S SystemLiteral |
+                             'PUBLIC' S PubidLiteral S SystemLiteral
+      [11] SystemLiteral ::= ('"' [^"]* '"') | ("'" [^']* "'")
+      [12] PubidLiteral  ::= '"' PubidChar* '"' |
+                             "'" (PubidChar - "'")* "'"
+      [13] PubidChar     ::= #x20 | #xD | #xA | [a-zA-Z0-9] |
+                             [-'()+,./:=?;!*#@$_%]
+
+    RETURN
+    Either an object containing a "systemLiteral" or a "systemLiteral" and a
+    "publidLiteral" property, a TextChunk containing the word read that
+    turned out to be neither SYSTEM or PUBLIC, or undefined if nothing was
+    found.
+    Note that the system and pubid properties may be undefined if they
+    were not specified, or may be empty strings if they were specified with
+    empty strings.
+   \**********************************************************************/
+
+   _retrieveExternalId() {
+      const marker = this._cursor.getWord([ '[', '>' ]);
+
+      if (!marker) {
+         return;
+      }
+
+      const upperCaseMarker = marker.text.toLocaleUpperCase();
+      let systemText;
+      let publicText;
+
+      if (upperCaseMarker === 'PUBLIC') {
+         this._cursor.getSpace();
+         const quote = this._cursor.getChar(); // quote
+         const pubidLiteral = this._cursor.getToTerminator([ quote.text ]);
+         this._cursor.getChar(); // quote
+         publicText = pubidLiteral.chunk ? pubidLiteral.chunk.text : '';
+
+         if (publicText) {
+            const match = PUBID_CHARS.exec(publicText);
+
+            if (!match || match[0] !== publicText) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
+                  'The public id had "' + publicText[match[0].length] + '" which is not a legal character.');
+            }
+         } else {
+            publicText = '';
+         }
+      }
+
+      if (upperCaseMarker === 'SYSTEM' || upperCaseMarker === 'PUBLIC') {
+         this._cursor.getSpace();
+         const quote = this._cursor.getChar(); // quote
+         const systemLiteral = this._cursor.getToTerminator([ quote.text ]);
+         this._cursor.getChar(); // quote
+
+         systemText = systemLiteral.chunk ? systemLiteral.chunk.text : '';
+      } else {
+         return marker;
+      }
+
+      return {
+         pubidLiteral: publicText,
+         systemLiteral: systemText
+      };
    }
 
    /*

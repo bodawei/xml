@@ -19,12 +19,13 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 [13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
 
 √ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
-81:S read an external id  (separate routine since we'll use this in other places)
-	system literal
-	read a public ID
+√ 81:S read an external id  (separate routine since we'll use this in other places)
+	√ system literal
+	√ read a public ID
 80:M Problematic doctype
 	√ ERROR: space before DOCTYPE
 	√ ERROR: Case of doctype
+	ERROR: test with [ and >, with a word and no word
 	ERROR: no quote after external id word
 	ERROR: pubid has illegal character
 	ERROR: No spaces between SYSTEM and system literal
@@ -174,6 +175,9 @@ Notes
 - note: if EOF after <!, or if unknown <![name[ items we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
 
 - Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+
+ISSUE
+- Should we not be doing #xD conversion to #xA in public literals?  I assume so... I also assume no references there.
 
 ==============================================================================
 ==============================================================================
