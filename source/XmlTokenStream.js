@@ -11,6 +11,7 @@ const SpaceToken = XmlToken.SpaceToken;
 const DeclarationToken = XmlToken.DeclarationToken;
 const StartTagToken = XmlToken.StartTagToken;
 const TagToken = XmlToken.TagToken;
+const DocTypeToken = XmlToken.DocTypeToken;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -316,6 +317,39 @@ class XmlTokenStream {
 
          this._getBracketItem();
       } else {
+         const declarationName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
+         this._cursor.getSpace();
+
+         if (leadingSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_EXTRA_LEADING_SPACE);
+         }
+
+         if (!declarationName) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_TYPE);
+         } else {
+            const type = declarationName.text;
+            const upperCaseType = type.toLocaleUpperCase();
+
+            if (type !== upperCaseType) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_WRONG_CASE,
+                  'Expected to find "' + upperCaseType + '" but found "' + type + '".');
+            }
+
+            switch (upperCaseType) {
+               case 'DOCTYPE':
+                  const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
+                  this._cursor.getSpace();
+                  this._cursor.getMatch('[');
+                  this._cursor.getSpace();
+                  this._cursor.getMatch(']');
+                  this._cursor.getSpace();
+                  this._cursor.getMatch('>');
+
+                  this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '', []));
+                  return;
+            }
+         }
+
          this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNSUPPORTED);
       }
    }

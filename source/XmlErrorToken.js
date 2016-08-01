@@ -55,6 +55,9 @@ XmlErrorToken.ERROR = {
    BANGITEM_UNKNOWN_BRACKET_NAME: 'BANGITEM_UNKNOWN_BRACKET_NAME',
    BANGITEM_MISSING_SECOND_SQUARE: 'BANGITEM_MISSING_SECOND_SQUARE',
    BANGITEM_NO_NAME: 'BANGITEM_NO_NAME',
+   BANGITEM_EXTRA_LEADING_SPACE: 'BANGITEM_EXTRA_LEADING_SPACE',
+   BANGITEM_NO_TYPE: 'BANGITEM_NO_TYPE',
+   BANGITEM_WRONG_CASE: 'BANGITEM_WRONG_CASE',
    NOT_SUPPORTED: 'NOT_SUPPORTED',
    REFERENCE_ILLEGAL_SPACE: 'REFERENCE_ILLEGAL_SPACE',
    REFERENCE_ILLEGAL_TRAILING_SPACE: 'REFERENCE_ILLEGAL_TRAILING_SPACE',
@@ -91,12 +94,14 @@ str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
 str[err.ATTRIBUTE_MISSING_VALUE] = 'Missing value for an attribute.';
 str[err.CHARDATA_BAD_DATA] = 'Found unexpected "]]>" in chardata.';
 str[err.CDATA_MISSING_CLOSE] = 'Closing ]]> not found for CDATA section.';
-str[err.BANGITEM_UNSUPPORTED] = 'Unsupported "<!" item.';
 str[err.SPACE_BEFORE_SQUARE_BRACKET] = 'Space found before opening "[".';
 str[err.CDATA_SPACE_BEFORE_NAME] = 'Space found before CDATA.';
 str[err.CDATA_SPACE_AFTER_NAME] = 'Space found after CDATA.';
+str[err.BANGITEM_UNSUPPORTED] = 'Unsupported "<!" item.';
+str[err.BANGITEM_NO_TYPE] = 'No declaration found in an <!...> declaration.';
 str[err.BANGITEM_MISSING_SECOND_SQUARE] = 'Second square bracket missing.';
 str[err.BANGITEM_NO_NAME] = 'No target name provided in the <![name[ construction.';
+str[err.BANGITEM_EXTRA_LEADING_SPACE] = 'Space found before name in a <!...> declaration.';
 str[err.NOT_SUPPORTED] = 'Not supported at this time.';
 str[err.REFERENCE_ILLEGAL_SPACE] = 'Unexpected space after & in reference.';
 str[err.CHAR_REFERENCE_ILLEGAL_SPACE] = 'Unexpected space after # in character entity reference.';

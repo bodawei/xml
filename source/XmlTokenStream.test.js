@@ -747,7 +747,7 @@ describe('XmlTokenStream', () => {
    describe('parsing BangItem', () => {
 
       it('reports an error if an unknown bang item found', () => {
-         const s = makeStrictStream('<!Fish');
+         const s = makeStrictStream('<!FISH');
 
          expect(() => {
             s.getNext();
@@ -816,6 +816,77 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+      });
+
+      it('reports an error if a space is found before the name', () => {
+         const s = makeStrictStream('<! NAME>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Space found before name in a <!...> declaration.');
+      });
+
+      it('generates an error token in lax mode if there is no second square bracket', () => {
+         const s = makeLaxStream('<! NAME>');
+
+         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_EXTRA_LEADING_SPACE);
+      });
+
+      it('reports an error if there is no name for the bang item', () => {
+         const s = makeStrictStream('<!>');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('No declaration found in an <!...> declaration.');
+      });
+
+      it('generates an error token in lax mode if there is no name for the bang item', () => {
+         const s = makeLaxStream('<!>');
+
+         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_TYPE);
+      });
+
+      it('reports an error if the type name is the wrong case', () => {
+         const s = makeStrictStream('<!docType >');
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Expected to find "DOCTYPE" but found "docType".');
+      });
+
+      it('generates an error token in lax mode if the type name is the wrong case', () => {
+         const s = makeLaxStream('<!doctype>');
+
+         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_WRONG_CASE);
+      });
+
+   });
+
+   describe('parsing DOCTYPE', () => {
+
+      it('retrieves a token of type DOCTYPE', () => {
+         const s = makeStrictStream('<!DOCTYPE one >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.DOCTYPE);
+      });
+
+      it('retrieves the name of the doctype', () => {
+         const s = makeStrictStream('<!DOCTYPE testType >');
+
+         expect(s.getNext().name).toEqual('testType');
+      });
+
+      it('retrieves an empty internal subset if there is none specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType >');
+
+         expect(s.getNext().internalDtd).toEqual([]);
+      });
+
+      it('retrieves an empty internal subset if an empty one is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType [ ] >');
+
+         expect(s.getNext().internalDtd).toEqual([]);
       });
 
    });

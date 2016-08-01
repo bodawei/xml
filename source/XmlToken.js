@@ -73,11 +73,23 @@ class StartTagToken extends TagToken {
 
 }
 
+class DocTypeToken extends XmlToken {
+
+   constructor(name, internalDtd) {
+      super(XmlToken.DOCTYPE, name);
+
+      this.name = name;
+      this.internalDtd = internalDtd;
+   }
+
+}
+
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
 
 XmlToken.XMLDECL = 'XmlDecl';
+XmlToken.DOCTYPE = 'DocType';
 
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
@@ -96,6 +108,7 @@ XmlToken.CommentToken = CommentToken;
 XmlToken.ProcessingInstructionToken = ProcessingInstructionToken;
 XmlToken.SpaceToken = SpaceToken;
 XmlToken.DeclarationToken = DeclarationToken;
+XmlToken.DocTypeToken = DocTypeToken;
 XmlToken.StartTagToken = StartTagToken;
 XmlToken.TagToken = TagToken;
 

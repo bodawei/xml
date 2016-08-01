@@ -7,30 +7,39 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
 7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
-[start timebox, not session-box in 5]
-7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints.
--- next: 79
----------------------------------------------
-√ Need other 4 versions of xml 1.0
-√ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
+7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints. ACTUAL: 6
+7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 
 
-√ 66:S: Build table of entities. Contains the default ones
-	Entity manager: has the default 5
-		getentity(name)
-		returns a string cursor.
-√ 68:S Include in attributes
-	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
-√ 67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
-	ENTITY-START has a flag whether entity manager has an entity
-	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
-		if throws error, need to pass that error on.
-√ 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
-√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
-√ 75:S: need a toEqualProps() handelr in tests for entities
+-- next: 81
+---------------------------------------------
+[28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+[75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
+[11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
+[12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
+[13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
+
+√ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
+81:S read an external id  (separate routine since we'll use this in other places)
+	system literal
+	read a public ID
+80:M Problematic doctype
+	√ ERROR: space before DOCTYPE
+	√ ERROR: Case of doctype
+	ERROR: no quote after external id word
+	ERROR: pubid has illegal character
+	ERROR: No spaces between SYSTEM and system literal
+	ERROR: No spaces between PUBLIC and publid 
+	ERROR: No spaces between publid and system
+	ERROR: Case of public or system
+	ERROR: unknown word (not PUBLIC or SYSTEM)
+	ERROR: Unknown declaration name
+	ERROR: Unknown doctype type name
+	ERROR: Crap in the declaration
+		In these last two cases, suggest either ignoring until [ or > or attaching to token as junk.
+
 
 =============================================
-CLEANUP
-
+BLOG IDEAS
 - Blog: assert (can we write a good one)
 - Blog: comment about the problems of flexible time and measuring
 - Blog: writing a matcher
@@ -72,7 +81,7 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [7m 10s]
+--- technical debt [7m 9s]
 77:S: Code for getting references is getting uuuuuugly
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL
@@ -100,15 +109,15 @@ PROJECT
 56:S: Reorganize getAttributes, as it seems too tangled
 57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
 
---- Basic processing  [2S]
+--- Basic processing  [1M 3S]
 71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
 	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [8XL]
-19:XL Read doctype
+--- DTD [7XL]
+26:XL Deal with parameter entities
 20:XL Read element declaration
 21:XL Read element content structure
 22:XL read attribute declaration
@@ -116,7 +125,6 @@ PROJECT
 24:XL read conditional sections
 25:XL read external entities
 	including header
-26:XL Deal with parameter entities
 
 --- Validity [4XL 1S]
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
@@ -437,3 +445,26 @@ BROKEN-DOWN: 27:XL Read in entities (see issues, below)
 		- Got this working simply by upgrading the npm modules. Convenient
 		- But upgrading the main repo causes lots of errors. Probably just a misconfig
 	- Got it all working. Turns out the big problems was that the tranformation order is important and I had things wrong.
+
+SPRINT 5
+========
+√ Need other 4 versions of xml 1.0
+√ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
+
+√ 66:S: Build table of entities. Contains the default ones
+	Entity manager: has the default 5
+		getentity(name)
+		returns a string cursor.
+√ 68:S Include in attributes
+	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
+√ 67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
+	ENTITY-START has a flag whether entity manager has an entity
+	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
+		if throws error, need to pass that error on.
+√ 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
+√ 75:S: need a toEqualProps() handelr in tests for entities
+
+SPRINT 6
+========
+x19:XL Read doctype: Replaced with 79-81
