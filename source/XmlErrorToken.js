@@ -70,7 +70,15 @@ XmlErrorToken.ERROR = {
    CHAR_REFERENCE_SPACE_AFTER_DIGITS: 'CHAR_REFERENCE_SPACE_AFTER_DIGITS',
    CHAR_REFERENCE_MISSING_SEMICOLON: 'CHAR_REFERENCE_MISSING_SEMICOLON',
    CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF: 'CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF',
-   PUBIDLITERAL_BAD_CHARS: 'PUBIDLITERAL_BAD_CHARS'
+   DOCTYPE_PARAM_BAD_CASE: 'DOCTYPE_PARAM_BAD_CASE',
+   DOCTYPE_TYPE_NOT_NAME: 'DOCTYPE_TYPE_NOT_NAME',
+   EXTERNALID_UNKNOWN_ID: 'EXTERNALID_UNKNOWN_ID',
+   PUBLIC_NO_SPACE: 'PUBLIC_NO_SPACE',
+   PUBLIC_NO_LEADING_SPACE: 'PUBLIC_NO_LEADING_SPACE',
+   SYSTEM_NO_LEADING_SPACE: 'SYSTEM_NO_LEADING_SPACE',
+   PUBIDLITERAL_BAD_CHARS: 'PUBIDLITERAL_BAD_CHARS',
+   PUBIDLITERAL_NOQUOTE: 'PUBIDLITERAL_NOQUOTE',
+   SYSTEMLITERAL_NOQUOTE: 'SYSTEMLITERAL_NOQUOTE'
 };
 
 XmlErrorToken.STRING = {};
@@ -116,5 +124,10 @@ str[err.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF] =
    'A character entity reference was specified as decimal (&#digits;) but included hex digits.';
 str[err.REFERENCE_NO_NAME] = 'No entity name found.';
 str[err.REFERENCE_NO_SEMICOLON] = 'A reference was found without a closing semicolon.';
+str[err.PUBLIC_NO_SPACE] = 'No space was found beteen the publidLiteral and the systemLiteral.';
+str[err.PUBLIC_NO_LEADING_SPACE] = 'No space was found beteen PUBLIC and the pubidLiteral.';
+str[err.SYSTEM_NO_LEADING_SPACE] = 'No space was found beteen SYSTEM and the systemLiteral.';
+str[err.PUBIDLITERAL_NOQUOTE] = 'The pubidLiteral was not quoted.';
+str[err.SYSTEMLITERAL_NOQUOTE] = 'The systemLiteral was not quoted.';
 
 module.exports = XmlErrorToken;

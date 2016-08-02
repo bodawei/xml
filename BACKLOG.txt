@@ -14,29 +14,34 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 ---------------------------------------------
 [28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
 [75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
-[11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
-[12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
-[13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
+√ [11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
+√ [12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
+√ [13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
 
 √ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
 √ 81:S read an external id  (separate routine since we'll use this in other places)
 	√ system literal
 	√ read a public ID
+[1.5]
 80:M Problematic doctype
 	√ ERROR: space before DOCTYPE
 	√ ERROR: Case of doctype
+	√ ERROR: pubid has illegal character
+	√ ERROR: Case of public or system
+	√ ERROR: No spaces between publid and system
+	√ ERROR: No spaces between SYSTEM and system literal
+	√ ERROR: No spaces between PUBLIC and publid 
+	√ ERROR: unknown word (not PUBLIC or SYSTEM)
+	√ ERROR: names not names <-- not sure how much I care. If it is bad, in most cases it will be flagged in DTD and actual usage.
+	√ ERROR: no quote on literal
+	- Could consolidate the quote checking into a utility routine.
 	ERROR: test with [ and >, with a word and no word
-	ERROR: no quote after external id word
-	ERROR: pubid has illegal character
-	ERROR: No spaces between SYSTEM and system literal
-	ERROR: No spaces between PUBLIC and publid 
-	ERROR: No spaces between publid and system
-	ERROR: Case of public or system
-	ERROR: unknown word (not PUBLIC or SYSTEM)
-	ERROR: Unknown declaration name
-	ERROR: Unknown doctype type name
+		SYSTEM, public, any literal terminated with [ or " or >
 	ERROR: Crap in the declaration
-		In these last two cases, suggest either ignoring until [ or > or attaching to token as junk.
+		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
+	- Cleanup retrieveExternalId
+	ERROR: No name
+	ERROR: Any other doctype errors?
 
 
 =============================================
@@ -47,6 +52,7 @@ BLOG IDEAS
 - Blog build process?
 =============================================
 CLEANUP
+- could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 
 RESEARCH (when have net)
 - do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)

@@ -341,12 +341,19 @@ class XmlTokenStream {
                case 'DOCTYPE':
                   const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
                   this._cursor.getSpace();
-                  this._cursor.getMatch('[');
                   const externalId = this._retrieveExternalId();
+                  this._cursor.getSpace();
+                  this._cursor.getMatch('[');
                   this._cursor.getSpace();
                   this._cursor.getMatch(']');
                   this._cursor.getSpace();
                   this._cursor.getMatch('>');
+
+                  if (docTypeName && !docTypeName.couldBeName) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_TYPE_NOT_NAME,
+                        'The name of the DOCTYPE does not match the syntax for names. Found: "' +
+                           docTypeName.text + '".');
+                  }
 
                   this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '',
                      externalId ? externalId.systemLiteral : undefined,
@@ -431,44 +438,78 @@ class XmlTokenStream {
    \**********************************************************************/
 
    _retrieveExternalId() {
-      const marker = this._cursor.getWord([ '[', '>' ]);
+      const marker = this._cursor.getWord([ '[', '>', '"', '\'' ]);
 
       if (!marker) {
          return;
       }
 
       const upperCaseMarker = marker.text.toLocaleUpperCase();
-      let systemText;
       let publicText;
 
+      if (upperCaseMarker !== 'SYSTEM' && upperCaseMarker !== 'PUBLIC') {
+         this._reportSyntaxError(XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID,
+            'The ExternalID on a DOCTYPE had an unknown source type ("' + marker.text + '").');
+
+         return marker;
+      }
+
+      if (upperCaseMarker !== marker.text) {
+         this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
+            'The ' + upperCaseMarker + ' label on a DOCTYPE was not all upper case ("' + marker.text + '").');
+      }
+
       if (upperCaseMarker === 'PUBLIC') {
-         this._cursor.getSpace();
-         const quote = this._cursor.getChar(); // quote
-         const pubidLiteral = this._cursor.getToTerminator([ quote.text ]);
-         this._cursor.getChar(); // quote
-         publicText = pubidLiteral.chunk ? pubidLiteral.chunk.text : '';
+         const betweenSpace = this._cursor.getSpace();
+         const quote = this._cursor.peekChar(); // quote
+         const isQuote = quote && (quote.text === '"' || quote.text === '\'');
+         let pubidLiteral;
 
-         if (publicText) {
-            const match = PUBID_CHARS.exec(publicText);
-
-            if (!match || match[0] !== publicText) {
-               this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
-                  'The public id had "' + publicText[match[0].length] + '" which is not a legal character.');
-            }
+         if (isQuote) {
+            this._cursor.getMatch(quote.text);
+            pubidLiteral = this._cursor.getToTerminator([ quote.text ]);
+            this._cursor.getMatch(quote.text);
+            publicText = pubidLiteral.chunk ? pubidLiteral.chunk.text : '';
          } else {
-            publicText = '';
+            this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
+            pubidLiteral = this._cursor.getWord([]);
+            publicText = pubidLiteral.text;
+         }
+
+         const match = PUBID_CHARS.exec(publicText);
+
+         if (!betweenSpace) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE);
+         }
+
+         if (!match || match[0] !== publicText) {
+            this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
+               'The public id had "' + publicText[match[0].length] + '" which is not a legal character.');
          }
       }
 
-      if (upperCaseMarker === 'SYSTEM' || upperCaseMarker === 'PUBLIC') {
-         this._cursor.getSpace();
-         const quote = this._cursor.getChar(); // quote
-         const systemLiteral = this._cursor.getToTerminator([ quote.text ]);
-         this._cursor.getChar(); // quote
+      // both SYSTEM and PUBLIC need to consume the systemLiteral
+      const betweenSpace = this._cursor.getSpace();
+      const quote = this._cursor.peekChar(); // quote
+      const isQuote = quote && (quote.text === '"' || quote.text === '\'');
+      let systemLiteral;
+      let systemText;
 
+      if (isQuote) {
+         this._cursor.getMatch(quote.text);
+         systemLiteral = this._cursor.getToTerminator([ quote.text ]);
+         this._cursor.getMatch(quote.text);
          systemText = systemLiteral.chunk ? systemLiteral.chunk.text : '';
       } else {
-         return marker;
+         this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
+         systemLiteral = this._cursor.getWord([]);
+         systemText = systemLiteral.text;
+      }
+
+      if (!betweenSpace) {
+         this._reportSyntaxError(upperCaseMarker === 'SYSTEM' ?
+            XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE :
+            XmlErrorToken.ERROR.PUBLIC_NO_SPACE);
       }
 
       return {
