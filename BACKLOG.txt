@@ -13,7 +13,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 -- next: 81
 ---------------------------------------------
 [28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
-[75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
+√ [75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
 √ [11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
 √ [12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
 √ [13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
@@ -22,7 +22,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 √ 81:S read an external id  (separate routine since we'll use this in other places)
 	√ system literal
 	√ read a public ID
-[1.5]
+[1.5] + [0.75]
 80:M Problematic doctype
 	√ ERROR: space before DOCTYPE
 	√ ERROR: Case of doctype
@@ -34,15 +34,22 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ ERROR: unknown word (not PUBLIC or SYSTEM)
 	√ ERROR: names not names <-- not sure how much I care. If it is bad, in most cases it will be flagged in DTD and actual usage.
 	√ ERROR: no quote on literal
-	- Could consolidate the quote checking into a utility routine.
-	ERROR: test with [ and >, with a word and no word
+	√ ERROR: No name
+	√ ERROR: test with [ and >, with a word and no word
 		SYSTEM, public, any literal terminated with [ or " or >
 	ERROR: Crap in the declaration
 		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
-	- Cleanup retrieveExternalId
-	ERROR: No name
 	ERROR: Any other doctype errors?
-
+		- space between name and following
+		- need not have space between external id and subset!
+		- intSubset is optional
+X: test notation with no public or system
+Y: test publicid with no system with notation and doctype
+Z: Consider other error cases for notation.
+- Cleanup retrieveExternalId
+- Could consolidate the quote checking into a utility routine.
+- Should extract all the declaration stuff into another file
+- restructure so routines do not automatically put into pendingTokens. Caller should decide.
 
 =============================================
 BLOG IDEAS
@@ -50,6 +57,7 @@ BLOG IDEAS
 - Blog: comment about the problems of flexible time and measuring
 - Blog: writing a matcher
 - Blog build process?
+- Blog spec changes.
 =============================================
 CLEANUP
 - could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.

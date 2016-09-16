@@ -12,6 +12,7 @@ const DeclarationToken = XmlToken.DeclarationToken;
 const StartTagToken = XmlToken.StartTagToken;
 const TagToken = XmlToken.TagToken;
 const DocTypeToken = XmlToken.DocTypeToken;
+const NotationToken = XmlToken.NotationToken;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -341,13 +342,17 @@ class XmlTokenStream {
                case 'DOCTYPE':
                   const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
                   this._cursor.getSpace();
-                  const externalId = this._retrieveExternalId();
+                  const externalId = this._retrieveExternalId([ '[', '>' ], true);
                   this._cursor.getSpace();
                   this._cursor.getMatch('[');
                   this._cursor.getSpace();
                   this._cursor.getMatch(']');
                   this._cursor.getSpace();
                   this._cursor.getMatch('>');
+
+                  if (!docTypeName) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_NO_NAME);
+                  }
 
                   if (docTypeName && !docTypeName.couldBeName) {
                      this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_TYPE_NOT_NAME,
@@ -358,6 +363,23 @@ class XmlTokenStream {
                   this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '',
                      externalId ? externalId.systemLiteral : undefined,
                      externalId ? externalId.pubidLiteral : undefined, []));
+                  return;
+               case 'NOTATION':
+                  const notionName = this._cursor.getWord([ '>' ]); // could look for quotes, too
+                  this._cursor.getSpace();
+                  const externalOrPublicId = this._retrieveExternalId([ '>' ], false);
+                  this._cursor.getSpace();
+                  this._cursor.getMatch('>');
+
+                  if (notionName && !notionName.couldBeName) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
+                        'The name of the NOTATION does not match the syntax for names. Found: "' +
+                           notionName.text + '".');
+                  }
+
+                  this._pendingTokens.push(new NotationToken(notionName ? notionName.text : '',
+                     externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
+                     externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined));
                   return;
             }
          }
@@ -415,17 +437,21 @@ class XmlTokenStream {
    }
 
    /**********************************************************************\
-    _retrieveExternalId tries to extract an ExternalID from the current
-    position in the cursor. It assumes any leading space has already been
-    consumed.
+    _retrieveExternalId tries to extract an ExternalID or a PublicID from
+    the current position in the cursor. It assumes any leading space has
+    already been consumed.
 
       [75] ExternalID    ::= 'SYSTEM' S SystemLiteral |
                              'PUBLIC' S PubidLiteral S SystemLiteral
+      [83] PublicID      ::= 'PUBLIC' S PubidLiteral
       [11] SystemLiteral ::= ('"' [^"]* '"') | ("'" [^']* "'")
       [12] PubidLiteral  ::= '"' PubidChar* '"' |
                              "'" (PubidChar - "'")* "'"
       [13] PubidChar     ::= #x20 | #xD | #xA | [a-zA-Z0-9] |
                              [-'()+,./:=?;!*#@$_%]
+
+    PARAM
+    requireSystemIdOnPublic 
 
     RETURN
     Either an object containing a "systemLiteral" or a "systemLiteral" and a
@@ -437,29 +463,30 @@ class XmlTokenStream {
     empty strings.
    \**********************************************************************/
 
-   _retrieveExternalId() {
-      const marker = this._cursor.getWord([ '[', '>', '"', '\'' ]);
+   _retrieveExternalId(terminators, requireSystemIdOnPublic) {
+      const xIdTerminators = terminators.slice().concat([ '"', '\'' ]);
+      const xIdType = this._cursor.getWord(xIdTerminators);
 
-      if (!marker) {
+      if (!xIdType) {
          return;
       }
 
-      const upperCaseMarker = marker.text.toLocaleUpperCase();
+      const upperCaseXIdType = xIdType.text.toLocaleUpperCase();
       let publicText;
 
-      if (upperCaseMarker !== 'SYSTEM' && upperCaseMarker !== 'PUBLIC') {
+      if (upperCaseXIdType !== 'SYSTEM' && upperCaseXIdType !== 'PUBLIC') {
          this._reportSyntaxError(XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID,
-            'The ExternalID on a DOCTYPE had an unknown source type ("' + marker.text + '").');
+            'The ExternalID on a DOCTYPE had an unknown source type ("' + xIdType.text + '").');
 
-         return marker;
+         return xIdType;
       }
 
-      if (upperCaseMarker !== marker.text) {
+      if (upperCaseXIdType !== xIdType.text) {
          this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
-            'The ' + upperCaseMarker + ' label on a DOCTYPE was not all upper case ("' + marker.text + '").');
+            'The ' + upperCaseXIdType + ' label on a DOCTYPE was not all upper case ("' + xIdType.text + '").');
       }
 
-      if (upperCaseMarker === 'PUBLIC') {
+      if (upperCaseXIdType === 'PUBLIC') {
          const betweenSpace = this._cursor.getSpace();
          const quote = this._cursor.peekChar(); // quote
          const isQuote = quote && (quote.text === '"' || quote.text === '\'');
@@ -471,9 +498,20 @@ class XmlTokenStream {
             this._cursor.getMatch(quote.text);
             publicText = pubidLiteral.chunk ? pubidLiteral.chunk.text : '';
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
-            pubidLiteral = this._cursor.getWord([]);
-            publicText = pubidLiteral.text;
+            let quoteIsTerminator = false;
+            for (let index = 0; index < terminators.length; index++) {
+               if (terminators[index] === quote.text) {
+                  quoteIsTerminator = true;
+               }
+            }
+
+            if (quoteIsTerminator) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_MISSING);
+            } else {
+               this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
+               pubidLiteral = this._cursor.getWord([]);
+               publicText = pubidLiteral.text;
+            }
          }
 
          const match = PUBID_CHARS.exec(publicText);
@@ -482,13 +520,14 @@ class XmlTokenStream {
             this._reportSyntaxError(XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE);
          }
 
-         if (!match || match[0] !== publicText) {
+         if (publicText && (!match || match[0] !== publicText)) {
             this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
                'The public id had "' + publicText[match[0].length] + '" which is not a legal character.');
          }
       }
 
-      // both SYSTEM and PUBLIC need to consume the systemLiteral
+      // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
+
       const betweenSpace = this._cursor.getSpace();
       const quote = this._cursor.peekChar(); // quote
       const isQuote = quote && (quote.text === '"' || quote.text === '\'');
@@ -501,13 +540,28 @@ class XmlTokenStream {
          this._cursor.getMatch(quote.text);
          systemText = systemLiteral.chunk ? systemLiteral.chunk.text : '';
       } else {
-         this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
-         systemLiteral = this._cursor.getWord([]);
-         systemText = systemLiteral.text;
+         let quoteIsTerminator = false;
+         for (let index = 0; index < terminators.length; index++) {
+            if (terminators[index] === quote.text) {
+               quoteIsTerminator = true;
+            }
+         }
+
+         if (quoteIsTerminator) {
+            if (!requireSystemIdOnPublic) {
+               // this is ok
+            } else {
+               this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING);
+            }
+         } else {
+            this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
+            systemLiteral = this._cursor.getWord([]);
+            systemText = systemLiteral.text;
+         }
       }
 
       if (!betweenSpace) {
-         this._reportSyntaxError(upperCaseMarker === 'SYSTEM' ?
+         this._reportSyntaxError(upperCaseXIdType === 'SYSTEM' ?
             XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE :
             XmlErrorToken.ERROR.PUBLIC_NO_SPACE);
       }

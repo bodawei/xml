@@ -86,6 +86,19 @@ class DocTypeToken extends XmlToken {
 
 }
 
+
+class NotationToken extends XmlToken {
+
+   constructor(name, systemLiteral, pubidLiteral) {
+      super(XmlToken.NOTATION, name);
+
+      this.name = name;
+      this.systemLiteral = systemLiteral;
+      this.pubidLiteral = pubidLiteral;
+   }
+
+}
+
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
@@ -113,5 +126,6 @@ XmlToken.DeclarationToken = DeclarationToken;
 XmlToken.DocTypeToken = DocTypeToken;
 XmlToken.StartTagToken = StartTagToken;
 XmlToken.TagToken = TagToken;
+XmlToken.NotationToken = NotationToken;
 
 module.exports = XmlToken;

@@ -906,6 +906,34 @@ describe('XmlTokenStream', () => {
             'The name of the DOCTYPE does not match the syntax for names. Found: "$frog".');
       });
 
+      it('reports a syntax error if there is no DOCTYPE name', () => {
+         expectSyntaxError('<!DOCTYPE [ ] >',
+            XmlErrorToken.ERROR.DOCTYPE_NO_NAME, 'There was no name name for the DOCTYPE.');
+      });
+
+   });
+
+   describe('parsing NOTATION', () => {
+
+      it('retrieves a token of type NOTATION', () => {
+         const s = makeStrictStream('<!NOTATION one >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.NOTATION);
+      });
+
+      it('retrieves the name of the notation', () => {
+         const s = makeStrictStream('<!NOTATION testType >');
+
+         expect(s.getNext().name).toEqual('testType');
+      });
+
+      it('reports a syntax error if the actual type name is not a name', () => {
+         expectSyntaxError('<!NOTATION $frog >',
+            XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
+            'The name of the NOTATION does not match the syntax for names. Found: "$frog".');
+      });
+
    });
 
    describe('parsing ExternalId', () => {
@@ -962,6 +990,16 @@ describe('XmlTokenStream', () => {
             'The systemLiteral was not quoted.');
       });
 
+      it('retrieves the publicID and system literals even when unquoted', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC one two [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
+         ignoreError(s, XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('one');
+         expect(t.systemLiteral).toEqual('two');
+      });
+
       it('reports a syntax error if the public id has illegal characters', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC \'"\' "system" [ ] >',
             XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
@@ -972,6 +1010,14 @@ describe('XmlTokenStream', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "ABCDE{" "system" [ ] >',
             XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
             'The public id had "{" which is not a legal character.');
+      });
+
+      it('retrieves the publicID literal even when it has illegal characters', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('ABCDE{');
       });
 
       it('throws no error if the public id has all legal characters', () => {
@@ -989,10 +1035,26 @@ describe('XmlTokenStream', () => {
             'The PUBLIC label on a DOCTYPE was not all upper case ("PuBliC").');
       });
 
+      it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
+         const s = makeLaxStream('<!DOCTYPE testType public "ABCDE" "two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('ABCDE');
+      });
+
       it('reports a syntax error if SYSTEM is the wrong case', () => {
          expectSyntaxError('<!DOCTYPE testType SYStem "system" [ ] >',
             XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
             'The SYSTEM label on a DOCTYPE was not all upper case ("SYStem").');
+      });
+
+      it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
+         const s = makeLaxStream('<!DOCTYPE testType system "ABCDE" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE);
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('ABCDE');
       });
 
       it('reports a syntax error if no space between the pubid and system', () => {
@@ -1013,10 +1075,54 @@ describe('XmlTokenStream', () => {
             'No space was found beteen PUBLIC and the pubidLiteral.');
       });
 
-      it('reports a syntax error if no space between PUBLIC and the literal', () => {
+      it('retrieves the systemLiterals even when spaces missing', () => {
+         const s = makeLaxStream('<!DOCTYPE testType SYSTEM"one" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE);
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('one');
+      });
+
+      it('retrieves the publicID and system literals even when spaces missing', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC"one""two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.PUBLIC_NO_SPACE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('one');
+         expect(t.systemLiteral).toEqual('two');
+      });
+
+      it('reports a syntax error if there is an unknown type of external id', () => {
          expectSyntaxError('<!DOCTYPE testType FOO [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID,
             'The ExternalID on a DOCTYPE had an unknown source type ("FOO").');
+      });
+
+      it('reports a syntax error if systemLiteral is missing from a PUBLIC externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" [ ] >',
+            XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING,
+            'No systemLiteral was found.');
+      });
+
+      it('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
+         const s = makeStrictStream('<!NOTATION testType PUBLIC "pubid" >');
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrowError();
+      });
+
+      it('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType SYSTEM [ ] >',
+            XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING,
+            'No systemLiteral was found.');
+      });
+
+      it('reports a syntax error if pubIdLiteral is missing from a PUBLIC externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC [ ] >',
+            XmlErrorToken.ERROR.PUBIDLITERAL_MISSING,
+            'No pubIdLiteral was found.');
       });
 
    });
