@@ -12,7 +12,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 
 -- next: 81
 ---------------------------------------------
-[28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+√ [28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
 √ [75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
 √ [11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
 √ [12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
@@ -37,19 +37,20 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	√ ERROR: No name
 	√ ERROR: test with [ and >, with a word and no word
 		SYSTEM, public, any literal terminated with [ or " or >
-	ERROR: Crap in the declaration
-		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
-	ERROR: Any other doctype errors?
+	√ Y: test publicid with no system with notation and doctype
+	√ X: test notation with no public or system and with no name
+	√ Z: Consider other error cases for notation.
+	√ ERROR: Any other doctype errors?
 		- space between name and following
 		- need not have space between external id and subset!
 		- intSubset is optional
-X: test notation with no public or system
-Y: test publicid with no system with notation and doctype
-Z: Consider other error cases for notation.
+	√ ERROR: Crap in the declaration
+		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
 - Cleanup retrieveExternalId
-- Could consolidate the quote checking into a utility routine.
+	- Could consolidate the quote checking into a utility routine.
 - Should extract all the declaration stuff into another file
 - restructure so routines do not automatically put into pendingTokens. Caller should decide.
+- Cursors can't be synchronous!
 
 =============================================
 BLOG IDEAS

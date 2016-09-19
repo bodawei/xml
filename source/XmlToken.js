@@ -86,7 +86,6 @@ class DocTypeToken extends XmlToken {
 
 }
 
-
 class NotationToken extends XmlToken {
 
    constructor(name, systemLiteral, pubidLiteral) {

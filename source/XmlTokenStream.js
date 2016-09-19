@@ -321,7 +321,7 @@ class XmlTokenStream {
          this._getBracketItem();
       } else {
          const declarationName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
-         this._cursor.getSpace();
+         const postDeclarationSpace = this._cursor.getSpace();
 
          if (leadingSpace) {
             this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_EXTRA_LEADING_SPACE);
@@ -338,17 +338,19 @@ class XmlTokenStream {
                   'Expected to find "' + upperCaseType + '" but found "' + type + '".');
             }
 
+            if (!postDeclarationSpace) {
+               this._reportSyntaxError(XmlErrorToken.ERROR.DECLARATION_MISSING_SPACE_AFTER_NAME,
+                  'No space found after the declaration name "' + type + '".');
+            }
+
             switch (upperCaseType) {
+               // [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+
                case 'DOCTYPE':
                   const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
                   this._cursor.getSpace();
                   const externalId = this._retrieveExternalId([ '[', '>' ], true);
-                  this._cursor.getSpace();
-                  this._cursor.getMatch('[');
-                  this._cursor.getSpace();
-                  this._cursor.getMatch(']');
-                  this._cursor.getSpace();
-                  this._cursor.getMatch('>');
+                  let docJunk;
 
                   if (!docTypeName) {
                      this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_NO_NAME);
@@ -360,16 +362,70 @@ class XmlTokenStream {
                            docTypeName.text + '".');
                   }
 
-                  this._pendingTokens.push(new DocTypeToken(docTypeName ? docTypeName.text : '',
+                  if (externalId && externalId.text) {
+                     docJunk = [ externalId ];
+                     const more = this._cursor.getToTerminator([ '>' ]);
+
+                     if (more.chunk) {
+                        docJunk.push(more.chunk);
+                     }
+
+                     this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
+                  } else {
+                     this._cursor.getSpace();
+                     this._cursor.getMatch('[');
+                     this._cursor.getSpace();
+                     this._cursor.getMatch(']');
+                  }
+
+                  this._cursor.getSpace();
+                  const doctypeClosing = this._cursor.getMatch('>');
+
+                  if (!doctypeClosing) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET);
+                  }
+
+                  const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
                      externalId ? externalId.systemLiteral : undefined,
-                     externalId ? externalId.pubidLiteral : undefined, []));
+                     externalId ? externalId.pubidLiteral : undefined, []);
+                  docToken.junk = docJunk;
+
+                  this._pendingTokens.push(docToken);
                   return;
+               // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
                case 'NOTATION':
-                  const notionName = this._cursor.getWord([ '>' ]); // could look for quotes, too
-                  this._cursor.getSpace();
+                  let notionName = this._cursor.getWord([ '>' ]); // could look for quotes, too
+                  const postNotationNameSpace = this._cursor.getSpace();
                   const externalOrPublicId = this._retrieveExternalId([ '>' ], false);
+                  let junk;
+
+                  if (!notionName) {
+                     notionName = { text: '' };
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
+                  }
+
+                  if (!postNotationNameSpace) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
+                        'No space found after the notation name "' + notionName.text + '".');
+                  }
+
+                  if (!externalOrPublicId) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
+                        'The ExternalID or PublicId for the notation "' + notionName.text +
+                           '" declaration is missing.');
+                  } else if (externalOrPublicId.text) {
+                     junk = [ externalOrPublicId ];
+                     const more = this._cursor.getToTerminator([ '>' ]);
+
+                     if (more.chunk) {
+                        junk.push(more.chunk);
+                     }
+
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+                  }
+
                   this._cursor.getSpace();
-                  this._cursor.getMatch('>');
+                  const closing = this._cursor.getMatch('>');
 
                   if (notionName && !notionName.couldBeName) {
                      this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
@@ -377,9 +433,16 @@ class XmlTokenStream {
                            notionName.text + '".');
                   }
 
-                  this._pendingTokens.push(new NotationToken(notionName ? notionName.text : '',
+                  if (!closing) {
+                     this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET,
+                        'The closing ">" for the notation "' + notionName.text + '" could not be found.');
+                  }
+
+                  const notationToken = new NotationToken(notionName.text,
                      externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
-                     externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined));
+                     externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
+                  notationToken.junk = junk;
+                  this._pendingTokens.push(notationToken);
                   return;
             }
          }
@@ -451,7 +514,10 @@ class XmlTokenStream {
                              [-'()+,./:=?;!*#@$_%]
 
     PARAM
-    requireSystemIdOnPublic 
+    terminators: An array of characters this should terminate parsing of
+      the id for
+    requireSystemIdOnPublic: true if the systemLiteral is required for
+      a PUBLIC
 
     RETURN
     Either an object containing a "systemLiteral" or a "systemLiteral" and a
@@ -541,7 +607,7 @@ class XmlTokenStream {
          systemText = systemLiteral.chunk ? systemLiteral.chunk.text : '';
       } else {
          let quoteIsTerminator = false;
-         for (let index = 0; index < terminators.length; index++) {
+         for (let index = 0; quote && index < terminators.length; index++) {
             if (terminators[index] === quote.text) {
                quoteIsTerminator = true;
             }
@@ -553,17 +619,21 @@ class XmlTokenStream {
             } else {
                this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING);
             }
-         } else {
+         } else if (quote) {
             this._reportSyntaxError(XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
             systemLiteral = this._cursor.getWord([]);
             systemText = systemLiteral.text;
          }
       }
 
-      if (!betweenSpace) {
+      if (!betweenSpace && requireSystemIdOnPublic) {
          this._reportSyntaxError(upperCaseXIdType === 'SYSTEM' ?
             XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE :
             XmlErrorToken.ERROR.PUBLIC_NO_SPACE);
+      }
+
+      if (publicText === undefined && systemText === undefined) {
+         return;
       }
 
       return {

@@ -758,7 +758,7 @@ describe('XmlTokenStream', () => {
    describe('parsing BangItem', () => {
 
       it('reports an error if an unknown bang item found', () => {
-         const s = makeStrictStream('<!FISH');
+         const s = makeStrictStream('<!FISH ');
 
          expect(() => {
             s.getNext();
@@ -871,6 +871,12 @@ describe('XmlTokenStream', () => {
          expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_WRONG_CASE);
       });
 
+      it('reports a syntax error if no space after the declaration name', () => {
+         expectSyntaxError('<!DOCTYPE>',
+            XmlErrorToken.ERROR.DECLARATION_MISSING_SPACE_AFTER_NAME,
+            'No space found after the declaration name "DOCTYPE".');
+      });
+
    });
 
    describe('parsing DOCTYPE', () => {
@@ -911,27 +917,121 @@ describe('XmlTokenStream', () => {
             XmlErrorToken.ERROR.DOCTYPE_NO_NAME, 'There was no name name for the DOCTYPE.');
       });
 
+      it('reports a syntax error if there is no closing > for the DOCTYPE', () => {
+         expectSyntaxError('<!DOCTYPE foo ',
+            XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET,
+            'The closing "<" for the DOCTYPE could not be found.');
+      });
+
+      it('includes junk tokens in DocType token', () => {
+         const s = makeLaxStream('<!DOCTYPE foo fish>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
+
+         const t = s.getNext();
+         expect(t.junk.length).toEqual(1);
+         expect(t.junk[0].text).toEqual('fish');
+      });
+
+      it('includes junk tokens in DocType token when there is more than one word', () => {
+         const s = makeLaxStream('<!DOCTYPE foo fish are fun>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
+
+         const t = s.getNext();
+         expect(t.junk.length).toEqual(2);
+         expect(t.junk[0].text).toEqual('fish');
+         expect(t.junk[1].text).toEqual(' are fun');
+      });
+
    });
 
    describe('parsing NOTATION', () => {
 
       it('retrieves a token of type NOTATION', () => {
-         const s = makeStrictStream('<!NOTATION one >');
+         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo" >');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.NOTATION);
       });
 
       it('retrieves the name of the notation', () => {
-         const s = makeStrictStream('<!NOTATION testType >');
+         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo">');
 
-         expect(s.getNext().name).toEqual('testType');
+         expect(s.getNext().name).toEqual('notationName');
+      });
+
+      it('retrieves the name of the notation', () => {
+         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo">');
+
+         expect(s.getNext().name).toEqual('notationName');
+      });
+
+      it('reports a syntax error if there is no space after the notation name', () => {
+         expectSyntaxError('<!NOTATION >',
+            XmlErrorToken.ERROR.NOTATION_MISSING_NAME,
+            'No name found for a notation declaration.');
+      });
+
+      it('gives the notation token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!NOTATION >');
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('includes junk tokens in notation token', () => {
+         const s = makeLaxStream('<!NOTATION myNotation fish>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+
+         const t = s.getNext();
+         expect(t.junk.length).toEqual(1);
+         expect(t.junk[0].text).toEqual('fish');
+      });
+
+      it('includes junk tokens in notation token when there is more than one word', () => {
+         const s = makeLaxStream('<!NOTATION myNotation fish are fun>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+
+         const t = s.getNext();
+         expect(t.junk.length).toEqual(2);
+         expect(t.junk[0].text).toEqual('fish');
+         expect(t.junk[1].text).toEqual(' are fun');
+      });
+
+      it('reports a syntax error if there is no space after the notation name', () => {
+         expectSyntaxError('<!NOTATION frog>',
+            XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
+            'No space found after the notation name "frog".');
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {
-         expectSyntaxError('<!NOTATION $frog >',
+         expectSyntaxError('<!NOTATION $frog PUBLIC "foo">',
             XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
             'The name of the NOTATION does not match the syntax for names. Found: "$frog".');
+      });
+
+      it('reports a syntax error if no externalId or publicId is provided', () => {
+         expectSyntaxError('<!NOTATION notationName >',
+            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
+            'The ExternalID or PublicId for the notation "notationName" declaration is missing.');
+      });
+
+      it('reports a syntax error if there is no name', () => {
+         expectSyntaxError('<!NOTATION PUBLIC "foo">',
+            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
+            'The ExternalID or PublicId for the notation "PUBLIC" declaration is missing.');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!NOTATION notationName PUBLIC "foo" ',
+            XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET,
+            'The closing ">" for the notation "notationName" could not be found.');
       });
 
    });
