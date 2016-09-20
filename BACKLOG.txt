@@ -22,7 +22,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 √ 81:S read an external id  (separate routine since we'll use this in other places)
 	√ system literal
 	√ read a public ID
-[1.5] + [0.75]
+[1.5] + [0.75] + 1.25
 80:M Problematic doctype
 	√ ERROR: space before DOCTYPE
 	√ ERROR: Case of doctype
@@ -46,8 +46,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 		- intSubset is optional
 	√ ERROR: Crap in the declaration
 		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
-- Cleanup retrieveExternalId
-	- Could consolidate the quote checking into a utility routine.
+	√ - Cleanup retrieveExternalId
+		- Could consolidate the quote checking into a utility routine.
 - Should extract all the declaration stuff into another file
 - restructure so routines do not automatically put into pendingTokens. Caller should decide.
 - Cursors can't be synchronous!
