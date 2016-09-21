@@ -14,69 +14,6 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 
 describe('XmlTokenStream', () => {
 
-   beforeEach(() => {
-
-      jasmine.addMatchers({
-         toBeSyntaxError: () => {
-            return {
-               compare: (actual, expected) => {
-                  const typePass = actual.type === XmlToken.SYNTAX_ERROR;
-                  const codePass = actual.code === expected;
-                  let message;
-
-                  if (!typePass || !codePass) {
-                     message = 'Expected syntax error code ' + actual.code +
-                        ' not to match ' + expected.code;
-                  } else {
-                     message = 'Expected syntax error code ' + actual.code +
-                        ' to match ' + expected.code;
-                  }
-
-                  return {
-                     pass: typePass && codePass,
-                     message: message
-                  };
-               }
-            };
-         },
-         toEqualProps: (util, customEqualityTesters) => {
-            return {
-               compare: (actual, expected) => {
-                  const mismatchedActual = {};
-                  const mismatchedExpected = {};
-                  const actualSubset = {};
-                  let pass = true;
-                  let message;
-
-                  for (const propName in expected) {
-                     actualSubset[propName] = actual[propName];
-
-                     if (!util.equals(actual[propName], expected[propName], customEqualityTesters)) {
-                        pass = false;
-                        mismatchedActual[propName] = actual[propName];
-                        mismatchedExpected[propName] = expected[propName];
-                     }
-                  }
-
-                  if (pass) {
-                     message = 'Expected ' + JSON.stringify(actualSubset) +
-                        ' not to match ' + JSON.stringify(expected);
-                  } else {
-                     message = 'Expected ' + JSON.stringify(mismatchedActual) +
-                        ' to match ' + JSON.stringify(mismatchedExpected);
-                  }
-
-                  return {
-                     pass: pass,
-                     message: message
-                  };
-               }
-            };
-         }
-      });
-
-   });
-
    function makeStringTokenArray(values, offset = 0) {
       const results = [];
 

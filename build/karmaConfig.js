@@ -9,6 +9,7 @@ var isparta = require('isparta');
 
 var BASE_PATH = process.cwd();
 var OUT_DIR = BASE_PATH + '/temp/';
+var BUILD_DIR = BASE_PATH + '/build/';
 var SOURCE_DIR = BASE_PATH + '/source/';
 
 // http://karma-runner.github.io/1.0/config/configuration-file.html
@@ -22,6 +23,7 @@ module.exports = function karmaConfig(config) {
       autoWatch: false,
       singleRun: true,
       files: [
+         BUILD_DIR + '**/*.jasmine*.js',
          SOURCE_DIR + '**/*.js'
       ],
       exclude: [],
@@ -56,4 +58,6 @@ module.exports = function karmaConfig(config) {
    // Need to configure this "externally" for the dynamic key. note: Order matters
    config.preprocessors[SOURCE_DIR + '/**/*.js'] = [ 'browserify' ];
    config.preprocessors[SOURCE_DIR + '*.js'] = [ 'coverage' ];
+   config.preprocessors[BUILD_DIR + '/**/*.js'] = [ 'browserify' ];
+   config.preprocessors[BUILD_DIR + '*.js'] = [ 'coverage' ];
 };
