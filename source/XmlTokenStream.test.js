@@ -898,13 +898,7 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().name).toEqual('notationName');
       });
 
-      it('retrieves the name of the notation', () => {
-         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo">');
-
-         expect(s.getNext().name).toEqual('notationName');
-      });
-
-      it('reports a syntax error if there is no space after the notation name', () => {
+      it('reports a syntax error if there is no notation name', () => {
          expectSyntaxError('<!NOTATION >',
             XmlErrorToken.ERROR.NOTATION_MISSING_NAME,
             'No name found for a notation declaration.');
@@ -959,17 +953,95 @@ describe('XmlTokenStream', () => {
             'The ExternalID or PublicId for the notation "notationName" declaration is missing.');
       });
 
-      it('reports a syntax error if there is no name', () => {
-         expectSyntaxError('<!NOTATION PUBLIC "foo">',
-            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
-            'The ExternalID or PublicId for the notation "PUBLIC" declaration is missing.');
-      });
-
       it('reports a syntax error if there is no closing angle bracket', () => {
          expectSyntaxError('<!NOTATION notationName PUBLIC "foo" ',
             XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET,
             'The closing ">" for the notation "notationName" could not be found.');
       });
+
+   });
+
+   describe('parsing ENTITY', () => {
+
+      it('retrieves a token of type ENTITY', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ENTITY);
+      });
+
+      it('retrieves the name of the entity', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+
+         expect(s.getNext().name).toEqual('entityName');
+      });
+
+      it('reports a syntax error if there is no name', () => {
+         expectSyntaxError('<!ENTITY >',
+            XmlErrorToken.ERROR.ENTITY_MISSING_NAME,
+            'No name found for an entity declaration.');
+      });
+
+      it('reports a syntax error if the name does not match the syntax for names', () => {
+         expectSyntaxError('<!ENTITY $badName >',
+            XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
+            'The name of the ENTITY does not match the syntax for names. Found: "$badName".');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!ENTITY entityName ',
+            XmlErrorToken.ERROR.ENTITY_MISSING_CLOSE_BRACKET,
+            'The closing ">" for the entity "entityName" could not be found.');
+      });
+
+      it('reports a syntax error if there is no space after the notation name', () => {
+         expectSyntaxError('<!ENTITY theName>',
+            XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
+            'No space found after the entity name "theName".');
+      });
+//
+//      it('gives the notation token an empty name if none is specified', () => {
+//         const s = makeLaxStream('<!NOTATION >');
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME);
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME);
+//
+//         expect(s.getNext().name).toEqual('');
+//      });
+//
+//      it('includes junk tokens in notation token', () => {
+//         const s = makeLaxStream('<!NOTATION myNotation fish>');
+//         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+//
+//         const t = s.getNext();
+//         expect(t.junk.length).toEqual(1);
+//         expect(t.junk[0].text).toEqual('fish');
+//      });
+//
+//      it('includes junk tokens in notation token when there is more than one word', () => {
+//         const s = makeLaxStream('<!NOTATION myNotation fish are fun>');
+//         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
+//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+//
+//         const t = s.getNext();
+//         expect(t.junk.length).toEqual(2);
+//         expect(t.junk[0].text).toEqual('fish');
+//         expect(t.junk[1].text).toEqual(' are fun');
+//      });
+//
+//      it('reports a syntax error if there is no space after the notation name', () => {
+//         expectSyntaxError('<!NOTATION frog>',
+//            XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
+//            'No space found after the notation name "frog".');
+//      });
+//
+//      it('reports a syntax error if no externalId or publicId is provided', () => {
+//         expectSyntaxError('<!NOTATION notationName >',
+//            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
+//            'The ExternalID or PublicId for the notation "notationName" declaration is missing.');
+//      });
 
    });
 
@@ -1466,19 +1538,15 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is no space after a value', () => {
-         const s = makeStrictStream('<?xml version="1.1"encoding="usascii" standalone="yes"?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('There must be a space before an attribute name.');
+         expectSyntaxError('<?xml version="1.1"encoding="usascii" standalone="yes"?>',
+            XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
+            'Missing space before attribute name.');
       });
 
       it('throws an error if no parameters are included', () => {
-         const s = makeStrictStream('<?xml ?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('There must be at least a version specified for an XML Declaration.');
+         expectSyntaxError('<?xml ?>',
+            XmlErrorToken.ERROR.XMLDECL_NO_ATTRIBUTES,
+            'Missing version in an XML Declaration.');
       });
 
       it('throws an error if an unknown parameter is provided', () => {
@@ -1489,19 +1557,10 @@ describe('XmlTokenStream', () => {
          }).toThrowError('Unknown XML Declaration parameter "bogus".');
       });
 
-      it('throws an error if the close is missing and not lax', () => {
-         const s = makeStrictStream('<?xml version="1.0"');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Missing closing ?> on XML Declaration.');
-      });
-
-      it('reports an error if the close is missing and lax', () => {
-         const s = makeLaxStream('<?xml version="1.0"');
-
-         const token = s.getNext();
-         expect(token.code).toEqual(XmlErrorToken.ERROR.MISSING_XMLDECL_CLOSE);
+      it('throws an error if the close is missing', () => {
+         expectSyntaxError('<?xml version="1.0"',
+            XmlErrorToken.ERROR.XMLDECL_NO_CLOSE,
+            'Missing closing "?>" on an XML Declaration.');
       });
 
       it('retrieves the expected chunks', () => {
@@ -1986,19 +2045,9 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is no space between attributes', () => {
-            const s = makeStrictStream('<elementName attr1="value"attr2="value2">');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('There must be a space before an attribute name.');
-         });
-
-         it('generates an error token if there is no space between attributes', () => {
-            const s = makeLaxStream('<elementName attr1="value"attr2="value2">');
-
-            const t = s.getNext();
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
+            expectSyntaxError('<elementName attr1="value"attr2="value2">',
+               XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
+               'Missing space before attribute name.');
          });
 
          it('throws an error if there is no quote around the attribute value', () => {

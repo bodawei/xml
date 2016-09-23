@@ -98,12 +98,24 @@ class NotationToken extends XmlToken {
 
 }
 
+class EntityToken extends XmlToken {
+
+   constructor(name) {
+      super(XmlToken.ENTITY, name);
+
+      this.name = name;
+   }
+
+}
+
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
 
 XmlToken.XMLDECL = 'XmlDecl';
 XmlToken.DOCTYPE = 'DocType';
+XmlToken.NOTATION = 'NotationDeclaration';
+XmlToken.ENTITY = 'EntityDeclaration';
 
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
@@ -126,5 +138,6 @@ XmlToken.DocTypeToken = DocTypeToken;
 XmlToken.StartTagToken = StartTagToken;
 XmlToken.TagToken = TagToken;
 XmlToken.NotationToken = NotationToken;
+XmlToken.EntityToken = EntityToken;
 
 module.exports = XmlToken;

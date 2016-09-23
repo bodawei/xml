@@ -8,51 +8,25 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints. ACTUAL: 6
-7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 
+7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
+9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 
 
--- next: 81
+-- next: 87
 ---------------------------------------------
-√ [28]   	doctypedecl	   ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
-√ [75]   	ExternalID	   ::=   	'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
-√ [11]   	SystemLiteral	   ::=   	('"' [^"]* '"') | ("'" [^']* "'")
-√ [12]   	PubidLiteral	   ::=   	'"' PubidChar* '"' | "'" (PubidChar - "'")* "'"
-√ [13]   	PubidChar	   ::=   	#x20 | #xD | #xA | [a-zA-Z0-9] | [-'()+,./:=?;!*#@$_%]
 
-√ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
-√ 81:S read an external id  (separate routine since we'll use this in other places)
-	√ system literal
-	√ read a public ID
-[1.5] + [0.75] + 1.25
-80:M Problematic doctype
-	√ ERROR: space before DOCTYPE
-	√ ERROR: Case of doctype
-	√ ERROR: pubid has illegal character
-	√ ERROR: Case of public or system
-	√ ERROR: No spaces between publid and system
-	√ ERROR: No spaces between SYSTEM and system literal
-	√ ERROR: No spaces between PUBLIC and publid 
-	√ ERROR: unknown word (not PUBLIC or SYSTEM)
-	√ ERROR: names not names <-- not sure how much I care. If it is bad, in most cases it will be flagged in DTD and actual usage.
-	√ ERROR: no quote on literal
-	√ ERROR: No name
-	√ ERROR: test with [ and >, with a word and no word
-		SYSTEM, public, any literal terminated with [ or " or >
-	√ Y: test publicid with no system with notation and doctype
-	√ X: test notation with no public or system and with no name
-	√ Z: Consider other error cases for notation.
-	√ ERROR: Any other doctype errors?
-		- space between name and following
-		- need not have space between external id and subset!
-		- intSubset is optional
-	√ ERROR: Crap in the declaration
-		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
-	√ - Cleanup retrieveExternalId
-		- Could consolidate the quote checking into a utility routine.
-	√ 78:S: Extract handlers into a common setup area, and figure out how to test them.
-- Look online about how to test handlers in a better way
-- Should extract all the declaration stuff into another file
-- restructure so routines do not automatically put into pendingTokens. Caller should decide.
-- Cursors can't be synchronous!
+[70]   	EntityDecl	   ::=   	GEDecl | PEDecl
+[71]   	GEDecl	   ::=   	'<!ENTITY' S Name S EntityDef S? '>'
+[72]   	PEDecl	   ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
+[73]   	EntityDef	   ::=   	EntityValue | (ExternalID NDataDecl?)
+[74]   	PEDef	   ::=   	EntityValue | ExternalID
+[76]   	NDataDecl	   ::=   	S 'NDATA' S Name
+[9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
+	|  "'" ([^%&'] | PEReference | Reference)* "'"
+
+81:S: Get entity with ExternalID (partial 71)
+82:S: Parse a PEDecl (with %)
+83:S: Parse an NDecl after the external id
+84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
 
 =============================================
 BLOG IDEAS
@@ -63,13 +37,6 @@ BLOG IDEAS
 - Blog spec changes.
 - Blog: Asynchronous
 =============================================
-CLEANUP
-- could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
-
-RESEARCH (when have net)
-- do performance test jsperf of regex vs hand parsing (see also the stuff in 52, below)
-	- Also look at getName
-
 BUILD
 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good.
 60:XL Improve build output
@@ -99,7 +66,7 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [7m 9s]
+--- technical debt [7m 10s]
 77:S: Code for getting references is getting uuuuuugly
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL
@@ -120,12 +87,18 @@ PROJECT
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 53:M: use xml decl encoding to change input if needed
 52:S: StringCursorSpeedup
-	getToTerminator, getWord all seem like have opportuity to speed up
+	- do performance test jsperf of regex vs hand parsing
+		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
 	optimize getToTerminator for single terminator case
 	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
 		Note: Can't do regex from an offset without doing a substr. sigh.
 56:S: Reorganize getAttributes, as it seems too tangled
 57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
+85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
+
+ideas
+- Should extract all the declaration stuff into another file
+- restructure so routines do not automatically put into pendingTokens. Caller should decide.
 
 --- Basic processing  [1M 3S]
 71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
@@ -134,15 +107,14 @@ PROJECT
 70:S: Recognize char entities in PI and Commands
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [7XL]
-26:XL Deal with parameter entities
+--- DTD [6XL]
 20:XL Read element declaration
 21:XL Read element content structure
 22:XL read attribute declaration
-23:XL read entity declaration
 24:XL read conditional sections
 25:XL read external entities
 	including header
+26:XL Deal with parameter entities
 
 --- Validity [4XL 1S]
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
@@ -159,6 +131,7 @@ PROJECT
 
 
 ---- Extra (not part of MVP)
+I:XL Cursors can't be synchronous!
 15:M: Put a limit on how much read in in one chunk (pass in as option). 
 33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
 34:M:Cope with junk before xmldeclaration
@@ -489,3 +462,38 @@ SPRINT 5
 SPRINT 6
 ========
 x19:XL Read doctype: Replaced with 79-81
+√ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
+√ 81:S read an external id  (separate routine since we'll use this in other places)
+	√ system literal
+	√ read a public ID
+[1.5] + [0.75] + 1.25
+80:M Problematic doctype
+	√ ERROR: space before DOCTYPE
+	√ ERROR: Case of doctype
+	√ ERROR: pubid has illegal character
+	√ ERROR: Case of public or system
+	√ ERROR: No spaces between publid and system
+	√ ERROR: No spaces between SYSTEM and system literal
+	√ ERROR: No spaces between PUBLIC and publid 
+	√ ERROR: unknown word (not PUBLIC or SYSTEM)
+	√ ERROR: names not names <-- not sure how much I care. If it is bad, in most cases it will be flagged in DTD and actual usage.
+	√ ERROR: no quote on literal
+	√ ERROR: No name
+	√ ERROR: test with [ and >, with a word and no word
+		SYSTEM, public, any literal terminated with [ or " or >
+	√ Y: test publicid with no system with notation and doctype
+	√ X: test notation with no public or system and with no name
+	√ Z: Consider other error cases for notation.
+	√ ERROR: Any other doctype errors?
+		- space between name and following
+		- need not have space between external id and subset!
+		- intSubset is optional
+	√ ERROR: Crap in the declaration
+		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
+	√ - Cleanup retrieveExternalId
+		- Could consolidate the quote checking into a utility routine.
+	√ 78:S: Extract handlers into a common setup area, and figure out how to test them.
+
+SPRINT 7
+========
+x23:XL read entity declaration

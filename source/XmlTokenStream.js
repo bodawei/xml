@@ -13,6 +13,7 @@ const StartTagToken = XmlToken.StartTagToken;
 const TagToken = XmlToken.TagToken;
 const DocTypeToken = XmlToken.DocTypeToken;
 const NotationToken = XmlToken.NotationToken;
+const EntityToken = XmlToken.EntityToken;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -446,6 +447,42 @@ class XmlTokenStream {
                notationToken.junk = junk;
                this._pendingTokens.push(notationToken);
                return;
+            case 'ENTITY':
+               let entityName = this._cursor.getWord([ '>' ]);
+               const postEntityNameSpace = this._cursor.getSpace();
+               const entityExternalId = this._retrieveExternalId([ '>' ], false);
+               let entityJunk;
+
+               if (!entityName) {
+                  entityName = { text: '' };
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_NAME);
+               }
+
+               if (!postEntityNameSpace) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
+                     'No space found after the entity name "' + entityName.text + '".');
+               }
+
+               this._cursor.getSpace();
+               const entityClosing = this._cursor.getMatch('>');
+
+               if (entityName && !entityName.couldBeName) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
+                     'The name of the ENTITY does not match the syntax for names. Found: "' +
+                        entityName.text + '".');
+               }
+
+               if (!entityClosing) {
+                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_CLOSE_BRACKET,
+                     'The closing ">" for the entity "' + entityName.text + '" could not be found.');
+               }
+
+               const entityToken = new EntityToken(entityName.text,
+                  entityExternalId ? entityExternalId.systemLiteral : undefined,
+                  entityExternalId ? entityExternalId.pubidLiteral : undefined);
+               entityToken.junk = entityJunk;
+               this._pendingTokens.push(entityToken);
+               return;
          }
       }
 
@@ -712,11 +749,11 @@ class XmlTokenStream {
       const close = this._cursor.getMatch('?>');
 
       if (!close) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.MISSING_XMLDECL_CLOSE);
+         this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_NO_CLOSE);
       }
 
       if (params.length === 0) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.NO_ATTRIBUTES);
+         this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_NO_ATTRIBUTES);
       }
 
       // check that the parameters are in the right order and have the right values
@@ -936,7 +973,7 @@ class XmlTokenStream {
          let value = [];
 
          if (!lastSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.NO_SPACE_BEFORE_ATTR);
+            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME);
          }
 
          if (!name.couldBeName && elementAttribute) {
