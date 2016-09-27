@@ -25,6 +25,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 
 √ 81:S: Get entity with ExternalID (partial 71)
 √ 82:S: Parse a PEDecl (with %)
+-- 1.5hr
 83:S: Parse an NDecl after the external id
 84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
 

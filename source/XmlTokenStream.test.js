@@ -1402,8 +1402,7 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('<?XmL version="1.1"?>');
          ignoreError(s, XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE);
 
-         let t = s.getNext();
-         expect(t.type).toEqual(XmlToken.XMLDECL);
+         expect(s.getNext().type).toEqual(XmlToken.XMLDECL);
       });
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
@@ -1503,7 +1502,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD);
-            ignoreError(s, XmlErrorToken.ERROR.UNKNOWN_ATTR);
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ATTR_UNKNOWN);
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', undefined);
@@ -1578,36 +1577,24 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if version is not a supported value', () => {
-            const s = makeStrictStream('<?xml version="1.2" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"version" must be "1.0" or "1.1" but found "1.2".');
+            expectSyntaxError('<?xml version="1.2" ?>',
+               XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD,
+               '"version" must be "1.0" or "1.1". Found "1.2".');
          });
 
-         it('reports version in wrong position as second syntax error', () => {
-            const s = makeLaxStream('<?xml encoding="usascii" version="1.1" ?>');
+         it('reports a syntax error if version in wrong position', () => {
+            const s = makeLaxStream('<?xml encoding="usascii" version="1.1"?>');
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ENCODING_WRONG_ORDER);
 
-            s.getNext();
-            const second = s.getNext();
-
-            expect(second.message).toEqual('"version" attribute should be at position #0 but was at #1.');
+            const t = s.getNext();
+            expect(t.code).toEqual(XmlErrorToken.ERROR.XMLDECL_VERSION_WRONG_ORDER);
+            expect(t.message).toEqual('"version" must be the first attribute. Found as #1.');
          });
 
          it('throws a syntax error if version is not the right case', () => {
-            const s = makeStrictStream('<?xml VeRsIoN="1.1" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"version" must be lower case. Found "VeRsIoN".');
-         });
-
-         it('accepts the wrong case for version if lax', () => {
-            const s = makeLaxStream('<?xml  VERSION="1.1" ?>');
-
-            const syntaxErrorToken = s.getNext();
-
-            expect(syntaxErrorToken.code).toEqual(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE);
+            expectSyntaxError('<?xml VeRsIoN="1.1" ?>',
+               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               '"version" must be lower case. Found "VeRsIoN".');
          });
 
       });
@@ -1634,27 +1621,15 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if encoding found in the wrong position', () => {
-            const s = makeStrictStream('<?xml encoding="frog" version="1.1" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('encoding attribute in the wrong position. Should be after version, but was #0.');
+            expectSyntaxError('<?xml encoding="frog" version="1.1" ?>',
+               XmlErrorToken.ERROR.XMLDECL_ENCODING_WRONG_ORDER,
+               '"encoding" must be after "version" and before "standalone".');
          });
 
          it('throws a syntax error if is not the right case', () => {
-            const s = makeStrictStream('<?xml version="1.1" EnCoDiNG="bogys" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"encoding" must be lower case. Found "EnCoDiNG".');
-         });
-
-         it('accepts the wrong case if lax', () => {
-            const s = makeLaxStream('<?xml  version="1.1" ENCODING="usascii" ?>');
-
-            const syntaxErrorToken = s.getNext();
-
-            expect(syntaxErrorToken.code).toEqual(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE);
+            expectSyntaxError('<?xml version="1.1" EnCoDiNG="bogys" ?>',
+               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               '"encoding" must be lower case. Found "EnCoDiNG".');
          });
 
       });
@@ -1676,51 +1651,40 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if standalone in the wrong position', () => {
-            const s = makeStrictStream('<?xml standalone="frog" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('standalone attribute in the wrong position. Should be #1 or #2, but was #0.');
+            expectSyntaxError('<?xml standalone="frog" ?>',
+               XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_ORDER,
+               '"standalone" must come after "version".');
          });
 
          it('throws a syntax error if standalone is not yes or no', () => {
-            const s = makeStrictStream('<?xml version="1.1" standalone="bogus"?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"standalone" must be "yes" or "no" but found "bogus".');
+            expectSyntaxError('<?xml version="1.1" standalone="bogus" ?>',
+               XmlErrorToken.ERROR.XMLDECL_STANDALONE_INVALID,
+               '"standalone" must be "yes" or "no". Found "bogus".');
          });
 
          it('throws a syntax error if is not the right case', () => {
-            const s = makeStrictStream('<?xml version="1.1" STANDaLoNE="yes" ?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"standalone" must be lower case. Found "STANDaLoNE".');
+            expectSyntaxError('<?xml version="1.1" STANDaLoNE="yes" ?>',
+               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               '"standalone" must be lower case. Found "STANDaLoNE".');
          });
 
          it('accepts the wrong case if lax', () => {
-            const s = makeLaxStream('<?xml  version="1.1" STANDALONE="no" ?>');
-
-            const syntaxErrorToken = s.getNext();
-
-            expect(syntaxErrorToken.code).toEqual(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE);
+            expectSyntaxError('<?xml  version="1.1" STANDALONE="no" ?>',
+               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               '"standalone" must be lower case. Found "STANDALONE".');
          });
 
-         it('accepts the wrong case for parameter if lax', () => {
+         it('returns the expected standalone value, even when wrong case used', () => {
             const s = makeLaxStream('<?xml  version="1.1" standalone="NO" ?>');
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE);
 
-            const syntaxErrorToken = s.getNext();
-
-            expect(syntaxErrorToken.code).toEqual(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE);
+            compareXmlDeclAttribute(s.getNext().params[1], 'standalone', 'no');
          });
 
-         it('produces a useful message if parameter is the wrong case', () => {
-            const s = makeLaxStream('<?xml  version="1.1" standalone="yEs" ?>');
-
-            const syntaxErrorToken = s.getNext();
-
-            expect(syntaxErrorToken.message).toEqual('"yes" must be lower case. Found "yEs".');
+         it('reports error if standalone value is wrong case', () => {
+            expectSyntaxError('<?xml  version="1.1" standalone="NO" ?>',
+               XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE,
+               '"no" must be lower case. Found "NO".');
          });
 
       });

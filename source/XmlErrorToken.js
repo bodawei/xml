@@ -17,16 +17,18 @@ class XmlErrorToken extends XmlToken {
 
 XmlErrorToken.ERROR = {
    XMLDECL_NO_ATTRIBUTES: 'XMLDECL_NO_ATTRIBUTES',
+   XMLDECL_ATTR_UNKNOWN: 'XMLDECL_ATTR_UNKNOWN',
    XMLDECL_NO_CLOSE: 'XMLDECL_NO_CLOSE',
    XMLDECL_ATTR_WRONG_CASE: 'XMLDECL_ATTR_WRONG_CASE',
-   XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
-   XMLDECL_VERSION_INVALD: 'XMLDECL_VERSION_INVALD',
-   XMLDECL_ENCODING_INVALID: 'XMLDECL_ENCODING_INVALID',
    XMLDECL_TARGET_WRONG_CASE: 'XMLDECL_TARGET_WRONG_CASE',
+   XMLDECL_VERSION_INVALD: 'XMLDECL_VERSION_INVALD',
+   XMLDECL_VERSION_WRONG_ORDER: 'XMLDECL_VERSION_WRONG_ORDER',
+   XMLDECL_ENCODING_INVALID: 'XMLDECL_ENCODING_INVALID',
+   XMLDECL_ENCODING_WRONG_ORDER: 'XMLDECL_ENCODING_WRONG_ORDER',
+   XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
+   XMLDECL_STANDALONE_INVALID: 'XMLDECL_STANDALONE_INVALID',
+   XMLDECL_STANDALONE_WRONG_ORDER: 'XMLDECL_STANDALONE_WRONG_ORDER',
 
-   UNKNOWN_ATTR: 'UNKNOWN_ATTR',
-   ATTR_WRONG_ORDER: 'ATTR_WRONG_ORDER',
-   BAD_STANDALONE: 'BAD_STANDALONE',
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
    PI_NO_TERMINATOR: 'PI_NO_TERMINATOR',
@@ -103,13 +105,19 @@ XmlErrorToken.STRING = {};
 const err = XmlErrorToken.ERROR;
 const str = XmlErrorToken.STRING;
 
+// THING(_SUBTHING)_PROBLEM = "THING must WHATEVER. Found OTHER"
 str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML Declaration.';
 str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" on an XML Declaration.';
 str[err.XMLDECL_ATTR_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
-str[err.XMLDECL_STANDALONE_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
-str[err.XMLDECL_VERSION_INVALD] = '"version" must be "1.0" or "1.1" but found "{0}".';
-str[err.XMLDECL_ENCODING_INVALID] =  '"encoding" must be alphanumeric. Found "{0}".';
+str[err.XMLDECL_ATTR_UNKNOWN] = 'Unknown XML Declaration parameter "{0}".';
 str[err.XMLDECL_TARGET_WRONG_CASE] = '"xml" must be lower case. Found "{0}".';
+str[err.XMLDECL_VERSION_INVALD] = '"version" must be "1.0" or "1.1". Found "{0}".';
+str[err.XMLDECL_VERSION_WRONG_ORDER] = '"version" must be the first attribute. Found as #{0}.';
+str[err.XMLDECL_ENCODING_INVALID] = '"encoding" must be alphanumeric. Found "{0}".';
+str[err.XMLDECL_ENCODING_WRONG_ORDER] = '"encoding" must be after "version" and before "standalone".';
+str[err.XMLDECL_STANDALONE_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
+str[err.XMLDECL_STANDALONE_INVALID] = '"standalone" must be "yes" or "no". Found "{0}".';
+str[err.XMLDECL_STANDALONE_WRONG_ORDER] = '"standalone" must come after "version".';
 
 str[err.PI_NO_TERMINATOR] = 'Closing ?> not found for processing instruction.';
 str[err.PI_NO_TARGET] = 'Missing target name in processing instruction.';

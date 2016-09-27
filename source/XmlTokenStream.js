@@ -16,6 +16,8 @@ const NotationToken = XmlToken.NotationToken;
 const EntityToken = XmlToken.EntityToken;
 const ParameterEntityToken = XmlToken.ParameterEntityToken;
 
+const ERRORS = XmlErrorToken.ERROR;
+
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
 const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
@@ -124,7 +126,7 @@ class XmlTokenStream {
          content = this._cursor.getToTerminator([ '<', '&', ']]>' ]);
 
          if (content.terminator === ']]>') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
+            this._reportSyntaxError(ERRORS.CHARDATA_BAD_DATA);
 
             this._pushToken(XmlToken.CHARDATA, content.chunk.text);
 
@@ -145,7 +147,7 @@ class XmlTokenStream {
       const next = this._cursor.peekChar();
 
       if (space) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE);
+         this._reportSyntaxError(ERRORS.REFERENCE_ILLEGAL_SPACE);
       }
 
       if (next.text === '#') {
@@ -165,18 +167,18 @@ class XmlTokenStream {
          let entityCursor;
 
          if (!entityName) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_NO_NAME);
+            this._reportSyntaxError(ERRORS.REFERENCE_NO_NAME);
          } else {
             entityCursor = this._entityManager.getEntity(entityName);
          }
 
          if (afterSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE,
+            this._reportSyntaxError(ERRORS.REFERENCE_ILLEGAL_TRAILING_SPACE,
                'A space was found after the entity name "' + name.text + '".');
          }
 
          if (!closingSemicolon) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.REFERENCE_NO_SEMICOLON);
+            this._reportSyntaxError(ERRORS.REFERENCE_NO_SEMICOLON);
          }
 
          const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
@@ -244,12 +246,12 @@ class XmlTokenStream {
       const nextChar = this._cursor.peekChar();
 
       if (space) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
+         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_ILLEGAL_SPACE);
       }
 
       if (nextChar.text.toLocaleLowerCase() === 'x') {
          if (nextChar.text !== 'x') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_CASE_WRONG);
+            this._reportSyntaxError(ERRORS.CHAR_REFERENCE_HEX_CASE_WRONG);
          }
 
          isHex = true;
@@ -262,14 +264,14 @@ class XmlTokenStream {
       const semicolon = this._cursor.getMatch(';');
 
       if (afterSpace) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
+         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
       }
 
       if (!digits) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_NO_DIGITS);
+         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_NO_DIGITS);
       } else {
          if (!isHex && !digits.isDecimal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+            this._reportSyntaxError(ERRORS.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
             isHex = true;
          }
 
@@ -277,11 +279,11 @@ class XmlTokenStream {
       }
 
       if (afterDigitsSpace) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
+         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
       }
 
       if (!semicolon) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_MISSING_SEMICOLON);
+         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_MISSING_SEMICOLON);
       }
 
       return character;
@@ -297,12 +299,12 @@ class XmlTokenStream {
       const results = this._cursor.getToTerminator([ '-->' ]);
 
       if (!results.terminator) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_MISSING_END);
+         this._reportSyntaxError(ERRORS.COMMENT_MISSING_END);
       } else {
          this._cursor.getMatch('-->');
 
          if (results.chunk && results.chunk.text[results.chunk.text.length - 1] === '-') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN);
+            this._reportSyntaxError(ERRORS.COMMENT_ENDS_WITH_HYPHEN);
          }
       }
 
@@ -317,7 +319,7 @@ class XmlTokenStream {
 
       if (bracket) {
          if (leadingSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_SQUARE_BRACKET);
+            this._reportSyntaxError(ERRORS.SPACE_BEFORE_SQUARE_BRACKET);
          }
 
          this._getBracketItem();
@@ -328,22 +330,22 @@ class XmlTokenStream {
       const postDeclarationSpace = this._cursor.getSpace();
 
       if (leadingSpace) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_EXTRA_LEADING_SPACE);
+         this._reportSyntaxError(ERRORS.BANGITEM_EXTRA_LEADING_SPACE);
       }
 
       if (!declarationName) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_TYPE);
+         this._reportSyntaxError(ERRORS.BANGITEM_NO_TYPE);
       } else {
          const type = declarationName.text;
          const upperCaseType = type.toLocaleUpperCase();
 
          if (type !== upperCaseType) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_WRONG_CASE,
+            this._reportSyntaxError(ERRORS.BANGITEM_WRONG_CASE,
                'Expected to find "' + upperCaseType + '" but found "' + type + '".');
          }
 
          if (!postDeclarationSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.DECLARATION_MISSING_SPACE_AFTER_NAME,
+            this._reportSyntaxError(ERRORS.DECLARATION_MISSING_SPACE_AFTER_NAME,
                'No space found after the declaration name "' + type + '".');
          }
 
@@ -357,11 +359,11 @@ class XmlTokenStream {
                let docJunk;
 
                if (!docTypeName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_NO_NAME);
+                  this._reportSyntaxError(ERRORS.DOCTYPE_NO_NAME);
                }
 
                if (docTypeName && !docTypeName.couldBeName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_TYPE_NOT_NAME,
+                  this._reportSyntaxError(ERRORS.DOCTYPE_TYPE_NOT_NAME,
                      'The name of the DOCTYPE does not match the syntax for names. Found: "' +
                         docTypeName.text + '".');
                }
@@ -374,7 +376,7 @@ class XmlTokenStream {
                      docJunk.push(more.chunk);
                   }
 
-                  this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
+                  this._reportSyntaxError(ERRORS.DOCTYPE_EXTRA_JUNK);
                } else {
                   this._cursor.getSpace();
                   this._cursor.getMatch('[');
@@ -386,7 +388,7 @@ class XmlTokenStream {
                const doctypeClosing = this._cursor.getMatch('>');
 
                if (!doctypeClosing) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET);
+                  this._reportSyntaxError(ERRORS.DOCTYPE_MISSING_CLOSE_BRACKET);
                }
 
                const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
@@ -405,16 +407,16 @@ class XmlTokenStream {
 
                if (!notionName) {
                   notionName = { text: '' };
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
+                  this._reportSyntaxError(ERRORS.NOTATION_MISSING_NAME);
                }
 
                if (!postNotationNameSpace) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
+                  this._reportSyntaxError(ERRORS.NOTATION_MISSING_SPACE_AFTER_NAME,
                      'No space found after the notation name "' + notionName.text + '".');
                }
 
                if (!externalOrPublicId) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
+                  this._reportSyntaxError(ERRORS.NOTATION_MISSING_EXTERNALID,
                      'The ExternalID or PublicId for the notation "' + notionName.text +
                         '" declaration is missing.');
                } else if (externalOrPublicId.text) {
@@ -425,20 +427,20 @@ class XmlTokenStream {
                      junk.push(more.chunk);
                   }
 
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+                  this._reportSyntaxError(ERRORS.NOTATION_EXTRA_JUNK);
                }
 
                this._cursor.getSpace();
                const closing = this._cursor.getMatch('>');
 
                if (notionName && notionName.text !== '' && !notionName.couldBeName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
+                  this._reportSyntaxError(ERRORS.NOTATION_NAME_NOT_NAME,
                      'The name of the NOTATION does not match the syntax for names. Found: "' +
                         notionName.text + '".');
                }
 
                if (!closing) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET,
+                  this._reportSyntaxError(ERRORS.NOTATION_MISSING_CLOSE_BRACKET,
                      'The closing ">" for the notation "' + notionName.text + '" could not be found.');
                }
 
@@ -454,7 +456,7 @@ class XmlTokenStream {
 
                if (!entityName) {
                   entityName = { text: '' };
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_NAME);
+                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_NAME);
                } else if (entityName.text === '%') {
                   isParameter = true;
                   this._cursor.getSpace(); // either have space or >. no need to error if space not here
@@ -465,7 +467,7 @@ class XmlTokenStream {
                let entityJunk;
 
                if (!postEntityNameSpace) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
+                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_SPACE_AFTER_NAME,
                      'No space found after the entity name "' + entityName.text + '".');
                }
 
@@ -473,20 +475,20 @@ class XmlTokenStream {
                const entityClosing = this._cursor.getMatch('>');
 
                if (entityName && entityName.text !== '' && !entityName.couldBeName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
+                  this._reportSyntaxError(ERRORS.ENTITY_NAME_NOT_NAME,
                      'The name of the ENTITY does not match the syntax for names. Found: "' +
                         entityName.text + '".');
                }
 
                if (!entityClosing) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_CLOSE_BRACKET,
+                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_CLOSE_BRACKET,
                      'The closing ">" for the entity "' + entityName.text + '" could not be found.');
                }
 
                const entityToken = isParameter ?
                   new ParameterEntityToken(entityName.text,
-                     entityExternalId ? entityExternalId.systemLiteral : undefined,
-                     entityExternalId ? entityExternalId.pubidLiteral : undefined) :
+                     entityExternalId.systemLiteral,
+                     entityExternalId.pubidLiteral) :
                   new EntityToken(entityName.text,
                      entityExternalId ? entityExternalId.systemLiteral : undefined,
                      entityExternalId ? entityExternalId.pubidLiteral : undefined);
@@ -496,7 +498,7 @@ class XmlTokenStream {
          }
       }
 
-      this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNSUPPORTED);
+      this._reportSyntaxError(ERRORS.BANGITEM_UNSUPPORTED);
    }
 
    _getBracketItem() {
@@ -506,11 +508,11 @@ class XmlTokenStream {
       const secondBracket = this._cursor.getMatch('[');
 
       if (!bracketItemType) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+         this._reportSyntaxError(ERRORS.BANGITEM_NO_NAME);
       }
 
       if (!secondBracket) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+         this._reportSyntaxError(ERRORS.BANGITEM_MISSING_SECOND_SQUARE);
       }
 
       /*
@@ -522,27 +524,27 @@ class XmlTokenStream {
        */
       if (bracketItemType && bracketItemType.text.toLocaleLowerCase() === 'cdata') {
          if (preSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_SPACE_BEFORE_NAME);
+            this._reportSyntaxError(ERRORS.CDATA_SPACE_BEFORE_NAME);
          }
          if (bracketItemType.text !== 'CDATA') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_NOT_CAPITALIZED,
+            this._reportSyntaxError(ERRORS.CDATA_NOT_CAPITALIZED,
                '"CDATA" must be all capital. found "' + bracketItemType.text + '".');
          }
          if (postSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_SPACE_AFTER_NAME);
+            this._reportSyntaxError(ERRORS.CDATA_SPACE_AFTER_NAME);
          }
 
          const results = this._cursor.getToTerminator([ ']]>' ]);
 
          if (!results.terminator) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+            this._reportSyntaxError(ERRORS.CDATA_MISSING_CLOSE);
          } else {
             this._cursor.getMatch(']]>');
          }
 
          this._pushToken(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME,
+         this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN_BRACKET_NAME,
             'Unknown Bang-bracket item. Found "' + bracketItemType.text + '".');
       }
    }
@@ -589,36 +591,36 @@ class XmlTokenStream {
       let publicText;
 
       if (upperCaseXIdType !== 'SYSTEM' && upperCaseXIdType !== 'PUBLIC') {
-         this._reportSyntaxError(XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID,
+         this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN_ID,
             'The ExternalID on a DOCTYPE had an unknown source type ("' + xIdType.text + '").');
          return xIdType;
       }
 
       if (upperCaseXIdType !== xIdType.text) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
+         this._reportSyntaxError(ERRORS.DOCTYPE_PARAM_BAD_CASE,
             'The ' + upperCaseXIdType + ' label on a DOCTYPE was not all upper case ("' + xIdType.text + '").');
       }
 
       if (upperCaseXIdType === 'PUBLIC') {
-         publicText = this._getQuotedLiteral(true, terminators, XmlErrorToken.ERROR.PUBIDLITERAL_MISSING,
-            XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE,
-            XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
+         publicText = this._getQuotedLiteral(true, terminators, ERRORS.PUBIDLITERAL_MISSING,
+            ERRORS.PUBLIC_NO_LEADING_SPACE,
+            ERRORS.PUBIDLITERAL_NOQUOTE);
 
          const match = PUBID_CHARS.exec(publicText);
 
          if (publicText && (!match || match[0] !== publicText)) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
+            this._reportSyntaxError(ERRORS.PUBIDLITERAL_BAD_CHARS,
                'The public id had "' + publicText[match[0].length] + '" which is not a legal character.');
          }
       }
 
       // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
       const systemText = this._getQuotedLiteral(requireSystemIdOnPublic, terminators,
-         XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING,
+         ERRORS.SYSTEMLITERAL_MISSING,
          upperCaseXIdType === 'SYSTEM' ?
-            XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE :
-            XmlErrorToken.ERROR.PUBLIC_NO_SPACE,
-         XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
+            ERRORS.SYSTEM_NO_LEADING_SPACE :
+            ERRORS.PUBLIC_NO_SPACE,
+         ERRORS.SYSTEMLITERAL_NOQUOTE);
 
       return (publicText === undefined && systemText === undefined) ?
          undefined : {
@@ -697,22 +699,22 @@ class XmlTokenStream {
       const target = this._cursor.getWord([ '?>' ]);
 
       if (space) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
+         this._reportSyntaxError(ERRORS.PI_SPACE_BEFORE_TARGET,
             'Space found before processing intruction target.');
       }
 
       if (!target) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.PI_NO_TARGET);
+         this._reportSyntaxError(ERRORS.PI_NO_TARGET);
       }
 
       if (target && !target.couldBeName) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.PI_TARGET_NOT_NAME,
+         this._reportSyntaxError(ERRORS.PI_TARGET_NOT_NAME,
             'The target name does not match the syntax for names. Found: "' + target.text + '".');
       }
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
          if (target.text !== 'xml') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE, [ target.text ]);
+            this._reportSyntaxError(ERRORS.XMLDECL_TARGET_WRONG_CASE, [ target.text ]);
          }
          this._getXmlDecl();
       } else {
@@ -721,7 +723,7 @@ class XmlTokenStream {
 
          // If we found no ?> (thus, really, end of file) report an error.
          if (!results.terminator) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.PI_NO_TERMINATOR);
+            this._reportSyntaxError(ERRORS.PI_NO_TERMINATOR);
          } else {
             this._cursor.getMatch('?>');
          }
@@ -732,38 +734,32 @@ class XmlTokenStream {
       }
    }
 
-   /*
-    * Parse the XML Declaration which ha the following format:
-    *   [23] XMLDecl	    ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
-    *   [24] VersionInfo ::= S 'version' Eq ("'" VersionNum "'" |
-    *                        '"' VersionNum '"')
-    *   [25] Eq	       ::= S? '=' S?
-    *   [26] VersionNum  ::= '1.1' | '1.0'
-    *   [27] Misc	       ::= Comment | PI | S
-    *   [80] EncodingDecl::= S 'encoding' Eq ('"' EncName '"' |
-    *                        "'" EncName "'" )
-    *   [32] SDDecl	    ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
-    *                        ('"' ('yes' | 'no') '"'))
-    *   [81] EncName	    ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
-    *
-    * RETURN None.  however, this does add an XMLToken and possibly various
-    *        syntax error tokens to the pending queue. The XMLToken is of type
-    *        XmlToken.XMLDECL, with a params property, which is an array of
-    *        objects corresponding to the "attributes" of the xml declaration
-    *        in the order they were found, each object has a name and a value.
-    */
+   /**********************************************************************\
+    _getXmlDecl parses an XML Declaration which has the following format:
+
+      [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
+      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                            '"' VersionNum '"')
+      [25] Eq           ::= S? '=' S?
+      [26] VersionNum   ::= '1.1' | '1.0'
+      [27] Misc         ::= Comment | PI | S
+      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                            "'" EncName "'" )
+      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
+                            ('"' ('yes' | 'no') '"'))
+      [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+
+    RETURN
+    None. Adds an XMLDECL token, and possibly errors, to the queue.
+   \**********************************************************************/
    _getXmlDecl() {
       const params = this._getAttributes(false);
-
       const close = this._cursor.getMatch('?>');
+      let seenVersion = false;
+      let seenStandalone = false;
 
-      if (!close) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_NO_CLOSE);
-      }
-
-      if (params.length === 0) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_NO_ATTRIBUTES);
-      }
+      this._assertSyntax(close, ERRORS.XMLDECL_NO_CLOSE);
+      this._assertSyntax(params.length !== 0, ERRORS.XMLDECL_NO_ATTRIBUTES);
 
       // check that the parameters are in the right order and have the right values
       for (let index = 0; index < params.length; index++) {
@@ -772,53 +768,36 @@ class XmlTokenStream {
 
          switch (lcName) {
             case 'version':
-               if (index !== 0) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTR_WRONG_ORDER,
-                     '"version" attribute should be at position #0 but was at #' + index + '.');
-               }
-               if (param.name !== lcName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
-               }
-               if (param.value !== '1.1' && param.value !== '1.0') {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD, [ param.value ]);
-               }
+               seenVersion = true;
+               this._assertSyntax(index === 0, ERRORS.XMLDECL_VERSION_WRONG_ORDER, [ index ]);
+               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
+               this._assertSyntax(param.value === '1.1' || param.value === '1.0',
+                  ERRORS.XMLDECL_VERSION_INVALD, [ param.value ]);
                break;
             case 'encoding':
-               if (index !== 1) {
-                  this._reportSyntaxError(XmlErrorToken.ATTR_WRONG_ORDER,
-                     'encoding attribute in the wrong position. Should be after version, but was #' +
-                     index + '.');
-               }
-               if (param.name !== lcName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
-                        '"' + lcName + '" must be lower case. Found "' + param.name + '".');
-               }
-               if (!param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/)) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID, [ param.value ]);
-               }
+               this._assertSyntax(seenVersion && !seenStandalone, ERRORS.XMLDECL_ENCODING_WRONG_ORDER);
+               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
+               this._assertSyntax(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
+                  ERRORS.XMLDECL_ENCODING_INVALID, [ param.value ]);
                break;
             case 'standalone':
                const lcValue = param.value.toLocaleLowerCase();
 
-               if (index !== 1 && index !== 2) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTR_WRONG_ORDER,
-                     'standalone attribute in the wrong position. Should be #1 or #2, but was #' +
-                     index + '.');
-               }
-               if (param.name !== lcName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
-               }
-               if (param.value !== lcValue) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE, [ lcValue, param.value ]);
-               }
-               if (param.value !== 'no' && param.value !== 'yes') {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_STANDALONE,
-                        '"standalone" must be "yes" or "no" but found "' + param.value + '".');
+               seenStandalone = true;
+
+               this._assertSyntax(seenVersion, ERRORS.XMLDECL_STANDALONE_WRONG_ORDER);
+               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
+               this._assertSyntax(param.value === lcValue,
+                  ERRORS.XMLDECL_STANDALONE_WRONG_CASE, [ lcValue, param.value ]);
+
+               if (lcValue !== 'no' && lcValue !== 'yes') {
+                  this._reportSyntaxError(ERRORS.XMLDECL_STANDALONE_INVALID, [ param.value ]);
+               } else {
+                  param.value = lcValue;
                }
                break;
             default:
-               this._reportSyntaxError(XmlErrorToken.ERROR.UNKNOWN_ATTR,
-                  'Unknown XML Declaration parameter "' + param.name + '".');
+               this._reportSyntaxError(ERRORS.XMLDECL_ATTR_UNKNOWN, [ param.name ]);
          }
       }
 
@@ -857,25 +836,25 @@ class XmlTokenStream {
             if (isStartOrEmpty) {
                isEmpty = true;
             } else {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE);
+               this._reportSyntaxError(ERRORS.ELEMENT_END_BAD_CLOSE);
             }
          }
       }
 
       if (leadingSpace) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
+         this._reportSyntaxError(ERRORS.ELEMENT_LEADING_SPACE);
       }
 
       if (!name) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         this._reportSyntaxError(ERRORS.ELEMENT_MISSING_NAME);
       } else if (!name.couldBeName) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_BAD_NAME,
+         this._reportSyntaxError(ERRORS.ELEMENT_BAD_NAME,
             'The element name does not match the syntax for names. Found: "' +
             name.text + '".');
       }
 
       if (!close) {
-         this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+         this._reportSyntaxError(ERRORS.ELEMENT_MISSING_CLOSE);
       }
 
       const startType = isEmpty ? XmlToken.ELEMENT_EMPTY : XmlToken.ELEMENT_START;
@@ -897,7 +876,7 @@ class XmlTokenStream {
          if (lastElement === xtoken.name) {
             this._elementNameStack.pop();
          } else {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ELEMENT_UNBALANCED,
+            this._reportSyntaxError(ERRORS.ELEMENT_UNBALANCED,
                'Element end tag does not match. Expected "' + lastElement + '" but found "' + xtoken.name + '".');
 
          }
@@ -977,24 +956,24 @@ class XmlTokenStream {
          let value = [];
 
          if (!lastSpace) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME);
+            this._reportSyntaxError(ERRORS.ATTRIBUTE_NO_SPACE_BEFORE_NAME);
          }
 
          if (!name.couldBeName && elementAttribute) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME,
+            this._reportSyntaxError(ERRORS.ATTRIBUTE_BAD_NAME,
                'The attribute name does not match the syntax for names. Found: "' +
                   name.text + '".');
          }
 
          if (!equal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_EQUAL);
          }
 
          if (gotQuote) {
             this._cursor.getChar();     // consume the quote
             ({value, abort} = this._getQuotedAttributeValue(name, quote, elementAttribute));
          } else if (!equal) {
-            this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_VALUE);
             attributes.push(makePair(name, value, undefined, elementAttribute));
 
             name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
@@ -1013,12 +992,12 @@ class XmlTokenStream {
             const terminator = this._cursor.peekChar();
 
             if (value.length === 0) {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+               this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_VALUE);
             } else {
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+               this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_QUOTE);
 
                if (terminator && terminator.text === '<') {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+                  this._reportSyntaxError(ERRORS.ATTRIBUTE_BAD_VALUE,
                      'An "<" was found in the value for attribute "' + name.text + '".');
                   attributes.push(makePair(name, value, undefined, elementAttribute));
                   break;   // Stop processing of attributes
@@ -1091,12 +1070,12 @@ class XmlTokenStream {
                }
                break;
             case '<':
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE,
+               this._reportSyntaxError(ERRORS.ATTRIBUTE_BAD_VALUE,
                   'An "<" was found in the value for attribute "' + nameChunk.text + '".');
                result.abort = true;
                break;
             default: // no terminator
-               this._reportSyntaxError(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+               this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_CLOSE_QUOTE);
                break;
          }
       }
@@ -1132,6 +1111,12 @@ class XmlTokenStream {
       }
 
       return this._pendingTokens.length > 0;
+   }
+
+   _assertSyntax(condition, code, message) {
+      if (!condition) {
+         this._reportSyntaxError(code, message);
+      }
    }
 
    _reportSyntaxError(code, message) {

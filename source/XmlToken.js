@@ -43,6 +43,11 @@ class ProcessingInstructionToken extends XmlToken {
 
 }
 
+/**********************************************************************\
+ The params property, is an array of objects corresponding to
+ the "attributes" of the xml declaration in the order they were found,
+ each object has a name and a value.
+\**********************************************************************/
 class DeclarationToken extends XmlToken {
 
    constructor(params, chunks) {
