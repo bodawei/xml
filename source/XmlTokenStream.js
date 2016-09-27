@@ -14,6 +14,7 @@ const TagToken = XmlToken.TagToken;
 const DocTypeToken = XmlToken.DocTypeToken;
 const NotationToken = XmlToken.NotationToken;
 const EntityToken = XmlToken.EntityToken;
+const ParameterEntityToken = XmlToken.ParameterEntityToken;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -430,7 +431,7 @@ class XmlTokenStream {
                this._cursor.getSpace();
                const closing = this._cursor.getMatch('>');
 
-               if (notionName && !notionName.couldBeName) {
+               if (notionName && notionName.text !== '' && !notionName.couldBeName) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
                      'The name of the NOTATION does not match the syntax for names. Found: "' +
                         notionName.text + '".');
@@ -448,15 +449,20 @@ class XmlTokenStream {
                this._pendingTokens.push(notationToken);
                return;
             case 'ENTITY':
+               let isParameter = false;
                let entityName = this._cursor.getWord([ '>' ]);
-               const postEntityNameSpace = this._cursor.getSpace();
-               const entityExternalId = this._retrieveExternalId([ '>' ], false);
-               let entityJunk;
 
                if (!entityName) {
                   entityName = { text: '' };
                   this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_NAME);
+               } else if (entityName.text === '%') {
+                  isParameter = true;
+                  this._cursor.getSpace(); // either have space or >. no need to error if space not here
+                  entityName = this._cursor.getWord([ '>' ]);
                }
+               const postEntityNameSpace = this._cursor.getSpace();
+               const entityExternalId = this._retrieveExternalId([ '>' ], false);
+               let entityJunk;
 
                if (!postEntityNameSpace) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
@@ -466,7 +472,7 @@ class XmlTokenStream {
                this._cursor.getSpace();
                const entityClosing = this._cursor.getMatch('>');
 
-               if (entityName && !entityName.couldBeName) {
+               if (entityName && entityName.text !== '' && !entityName.couldBeName) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
                      'The name of the ENTITY does not match the syntax for names. Found: "' +
                         entityName.text + '".');
@@ -477,9 +483,13 @@ class XmlTokenStream {
                      'The closing ">" for the entity "' + entityName.text + '" could not be found.');
                }
 
-               const entityToken = new EntityToken(entityName.text,
-                  entityExternalId ? entityExternalId.systemLiteral : undefined,
-                  entityExternalId ? entityExternalId.pubidLiteral : undefined);
+               const entityToken = isParameter ?
+                  new ParameterEntityToken(entityName.text,
+                     entityExternalId ? entityExternalId.systemLiteral : undefined,
+                     entityExternalId ? entityExternalId.pubidLiteral : undefined) :
+                  new EntityToken(entityName.text,
+                     entityExternalId ? entityExternalId.systemLiteral : undefined,
+                     entityExternalId ? entityExternalId.pubidLiteral : undefined);
                entityToken.junk = entityJunk;
                this._pendingTokens.push(entityToken);
                return;
@@ -702,8 +712,7 @@ class XmlTokenStream {
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
          if (target.text !== 'xml') {
-            this._reportSyntaxError(XmlErrorToken.ERROR.XML_NOT_LOWERCASE,
-               'The xml target name was not all lower case (' + target.text + ').');
+            this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE, [ target.text ]);
          }
          this._getXmlDecl();
       } else {
@@ -768,12 +777,10 @@ class XmlTokenStream {
                      '"version" attribute should be at position #0 but was at #' + index + '.');
                }
                if (param.name !== lcName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
-                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
                }
                if (param.value !== '1.1' && param.value !== '1.0') {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_VERSION,
-                     '"version" must be "1.0" or "1.1" but found "' + param.value + '".');
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD, [ param.value ]);
                }
                break;
             case 'encoding':
@@ -784,11 +791,10 @@ class XmlTokenStream {
                }
                if (param.name !== lcName) {
                   this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
-                        '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+                        '"' + lcName + '" must be lower case. Found "' + param.name + '".');
                }
                if (!param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/)) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.BAD_ENCODING,
-                     '"encoding" must be alphanumerics, but found "' + param.value + '".');
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID, [ param.value ]);
                }
                break;
             case 'standalone':
@@ -800,12 +806,10 @@ class XmlTokenStream {
                      index + '.');
                }
                if (param.name !== lcName) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
-                     '"' + lcName + '" must be lower case, but found "' + param.name + '".');
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE, [ lcName, param.name ]);
                }
                if (param.value !== lcValue) {
-                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE,
-                     '"' + lcValue + '" must be lower case, but found "' + param.value + '".');
+                  this._reportSyntaxError(XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE, [ lcValue, param.value ]);
                }
                if (param.value !== 'no' && param.value !== 'yes') {
                   this._reportSyntaxError(XmlErrorToken.ERROR.BAD_STANDALONE,
@@ -1132,8 +1136,16 @@ class XmlTokenStream {
 
    _reportSyntaxError(code, message) {
       if (typeof message !== 'string') {
+         const params = message;
          message = XmlErrorToken.STRING[code];
+
+         if (typeof params === 'object') {
+            for (let index = 0; index < params.length; index++) {
+               message = message.replace('{' + index + '}', params[index]);
+            }
+         }
       }
+
       const error = new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message);
       if (this._options.lax) {
          this._pendingTokens.push(error);

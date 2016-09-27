@@ -909,7 +909,6 @@ describe('XmlTokenStream', () => {
          ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
          ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME);
          ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME);
 
          expect(s.getNext().name).toEqual('');
       });
@@ -970,10 +969,23 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.ENTITY);
       });
 
+      it('retrieves a token of type PARAMETER_ENTITY', () => {
+         const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.PARAMETER_ENTITY);
+      });
+
       it('retrieves the name of the entity', () => {
          const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('entityName');
+      });
+
+      it('retrieves the name of the parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().name).toEqual('paramEntityName');
       });
 
       it('reports a syntax error if there is no name', () => {
@@ -988,60 +1000,25 @@ describe('XmlTokenStream', () => {
             'The name of the ENTITY does not match the syntax for names. Found: "$badName".');
       });
 
+      it('gives the entity token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!ENTITY >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_MISSING_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
       it('reports a syntax error if there is no closing angle bracket', () => {
          expectSyntaxError('<!ENTITY entityName ',
             XmlErrorToken.ERROR.ENTITY_MISSING_CLOSE_BRACKET,
             'The closing ">" for the entity "entityName" could not be found.');
       });
 
-      it('reports a syntax error if there is no space after the notation name', () => {
+      it('reports a syntax error if there is no space after the entity name', () => {
          expectSyntaxError('<!ENTITY theName>',
             XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
             'No space found after the entity name "theName".');
       });
-//
-//      it('gives the notation token an empty name if none is specified', () => {
-//         const s = makeLaxStream('<!NOTATION >');
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME);
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME);
-//
-//         expect(s.getNext().name).toEqual('');
-//      });
-//
-//      it('includes junk tokens in notation token', () => {
-//         const s = makeLaxStream('<!NOTATION myNotation fish>');
-//         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
-//
-//         const t = s.getNext();
-//         expect(t.junk.length).toEqual(1);
-//         expect(t.junk[0].text).toEqual('fish');
-//      });
-//
-//      it('includes junk tokens in notation token when there is more than one word', () => {
-//         const s = makeLaxStream('<!NOTATION myNotation fish are fun>');
-//         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-//         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
-//
-//         const t = s.getNext();
-//         expect(t.junk.length).toEqual(2);
-//         expect(t.junk[0].text).toEqual('fish');
-//         expect(t.junk[1].text).toEqual(' are fun');
-//      });
-//
-//      it('reports a syntax error if there is no space after the notation name', () => {
-//         expectSyntaxError('<!NOTATION frog>',
-//            XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
-//            'No space found after the notation name "frog".');
-//      });
-//
-//      it('reports a syntax error if no externalId or publicId is provided', () => {
-//         expectSyntaxError('<!NOTATION notationName >',
-//            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
-//            'The ExternalID or PublicId for the notation "notationName" declaration is missing.');
-//      });
 
    });
 
@@ -1423,19 +1400,16 @@ describe('XmlTokenStream', () => {
 
       it('allows the xml after <? to be any case in lax mode', () => {
          const s = makeLaxStream('<?XmL version="1.1"?>');
+         ignoreError(s, XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE);
 
          let t = s.getNext();
-         expect(t.code).toEqual(XmlErrorToken.ERROR.XML_NOT_LOWERCASE);
-         t = s.getNext();
          expect(t.type).toEqual(XmlToken.XMLDECL);
       });
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
-         const s = makeStrictStream('<?XmL version="1.1"?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('The xml target name was not all lower case (XmL).');
+         expectSyntaxError('<?XmL version="1.1"?>',
+            XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE,
+            '"xml" must be lower case. Found "XmL".');
       });
 
       it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
@@ -1444,7 +1418,7 @@ describe('XmlTokenStream', () => {
             'lax:allowOpenAngleBracketsInAttributeValues': false
          });
 
-         expect(s.getNext().code).toEqual(XmlErrorToken.ERROR.BAD_ENCODING);
+         expect(s.getNext().code).toEqual(XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID);
       });
 
       describe('"attribute" equal signs', () => {
@@ -1528,7 +1502,7 @@ describe('XmlTokenStream', () => {
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
             ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.BAD_VERSION);
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD);
             ignoreError(s, XmlErrorToken.ERROR.UNKNOWN_ATTR);
 
             const t = s.getNext();
@@ -1625,7 +1599,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('"version" must be lower case, but found "VeRsIoN".');
+            }).toThrowError('"version" must be lower case. Found "VeRsIoN".');
          });
 
          it('accepts the wrong case for version if lax', () => {
@@ -1648,19 +1622,15 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws a syntax error if encoding is not rightly encoded', () => {
-            const s = makeStrictStream('<?xml version="1.1" encoding="bogus$"?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"encoding" must be alphanumerics, but found "bogus$".');
+            expectSyntaxError('<?xml version="1.1" encoding="bogus$"?>',
+               XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID,
+               '"encoding" must be alphanumeric. Found "bogus$".');
          });
 
          it('throws a syntax error if encoding starts with a bad character', () => {
-            const s = makeStrictStream('<?xml version="1.1" encoding="0usascii"?>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('"encoding" must be alphanumerics, but found "0usascii".');
+            expectSyntaxError('<?xml version="1.1" encoding="0usascii"?>',
+               XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID,
+               '"encoding" must be alphanumeric. Found "0usascii".');
          });
 
          it('throws an error if encoding found in the wrong position', () => {
@@ -1676,7 +1646,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('"encoding" must be lower case, but found "EnCoDiNG".');
+            }).toThrowError('"encoding" must be lower case. Found "EnCoDiNG".');
          });
 
          it('accepts the wrong case if lax', () => {
@@ -1726,7 +1696,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('"standalone" must be lower case, but found "STANDaLoNE".');
+            }).toThrowError('"standalone" must be lower case. Found "STANDaLoNE".');
          });
 
          it('accepts the wrong case if lax', () => {
@@ -1750,7 +1720,7 @@ describe('XmlTokenStream', () => {
 
             const syntaxErrorToken = s.getNext();
 
-            expect(syntaxErrorToken.message).toEqual('"yes" must be lower case, but found "yEs".');
+            expect(syntaxErrorToken.message).toEqual('"yes" must be lower case. Found "yEs".');
          });
 
       });

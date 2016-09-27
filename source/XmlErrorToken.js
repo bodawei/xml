@@ -20,12 +20,12 @@ XmlErrorToken.ERROR = {
    XMLDECL_NO_CLOSE: 'XMLDECL_NO_CLOSE',
    XMLDECL_ATTR_WRONG_CASE: 'XMLDECL_ATTR_WRONG_CASE',
    XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
+   XMLDECL_VERSION_INVALD: 'XMLDECL_VERSION_INVALD',
+   XMLDECL_ENCODING_INVALID: 'XMLDECL_ENCODING_INVALID',
+   XMLDECL_TARGET_WRONG_CASE: 'XMLDECL_TARGET_WRONG_CASE',
 
-   XML_NOT_LOWERCASE: 'XmlTargetNotLowerCase',
    UNKNOWN_ATTR: 'UNKNOWN_ATTR',
    ATTR_WRONG_ORDER: 'ATTR_WRONG_ORDER',
-   BAD_VERSION: 'BAD_VERSION',
-   BAD_ENCODING: 'BAD_ENCODING',
    BAD_STANDALONE: 'BAD_STANDALONE',
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
@@ -105,6 +105,12 @@ const str = XmlErrorToken.STRING;
 
 str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML Declaration.';
 str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" on an XML Declaration.';
+str[err.XMLDECL_ATTR_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
+str[err.XMLDECL_STANDALONE_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
+str[err.XMLDECL_VERSION_INVALD] = '"version" must be "1.0" or "1.1" but found "{0}".';
+str[err.XMLDECL_ENCODING_INVALID] =  '"encoding" must be alphanumeric. Found "{0}".';
+str[err.XMLDECL_TARGET_WRONG_CASE] = '"xml" must be lower case. Found "{0}".';
+
 str[err.PI_NO_TERMINATOR] = 'Closing ?> not found for processing instruction.';
 str[err.PI_NO_TARGET] = 'Missing target name in processing instruction.';
 str[err.COMMENT_MISSING_END] = 'Closing --> not found for comment.';

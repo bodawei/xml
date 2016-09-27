@@ -23,8 +23,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 [9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
 	|  "'" ([^%&'] | PEReference | Reference)* "'"
 
-81:S: Get entity with ExternalID (partial 71)
-82:S: Parse a PEDecl (with %)
+√ 81:S: Get entity with ExternalID (partial 71)
+√ 82:S: Parse a PEDecl (with %)
 83:S: Parse an NDecl after the external id
 84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
 
