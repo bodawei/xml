@@ -48,6 +48,7 @@ class ProcessingInstructionToken extends XmlToken {
  the "attributes" of the xml declaration in the order they were found,
  each object has a name and a value.
 \**********************************************************************/
+
 class DeclarationToken extends XmlToken {
 
    constructor(params, chunks) {
@@ -105,18 +106,19 @@ class NotationToken extends XmlToken {
 
 class EntityToken extends XmlToken {
 
-   constructor(name) {
+   constructor(name, systemLiteral, publicLiteral, notationDataName) {
       super(XmlToken.ENTITY, name);
 
       this.name = name;
+      this.notationDataName = notationDataName;
    }
 
 }
 
 class ParameterEntityToken extends EntityToken {
 
-   constructor(name) {
-      super(name);
+   constructor(name, systemLiteral, publicLiteral, notationDataName) {
+      super(name, systemLiteral, publicLiteral, notationDataName);
 
       this.type = XmlToken.PARAMETER_ENTITY;
    }

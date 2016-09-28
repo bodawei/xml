@@ -982,6 +982,30 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().name).toEqual('entityName');
       });
 
+      it('retrieves the NDATA name', () => {
+         const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity" "system" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('sets the notation data name to undefined if none specified', () => {
+         const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('retrieves the NDATA name on a parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity" "system" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('sets the notation data name to undefined if none specified on a parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
       it('retrieves the name of the parameter entity', () => {
          const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
@@ -1308,50 +1332,34 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no ?> found', () => {
-         const s = makeStrictStream('<?foo glorky');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Closing ?> not found for processing instruction.');
+         expectSyntaxError('<?frog glorky',
+            XmlErrorToken.ERROR.PI_NO_CLOSE,
+            'Missing closing ?> in a processing instruction.');
       });
 
       it('returns the content up to EOF if no ?> found in lax mode', () => {
          const s = makeLaxStream('<?foo glorky');
-         ignoreError(s, XmlErrorToken.ERROR.PI_NO_TERMINATOR);
+         ignoreError(s, XmlErrorToken.ERROR.PI_NO_CLOSE);
 
          expect(s.getNext().content).toEqual('glorky');
       });
 
       it('throws an error if a space is between the <? and the target', () => {
-         const s = makeStrictStream('<? foo glorky?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found before processing intruction target.');
+         expectSyntaxError('<? foo glorky?>',
+            XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
+            'Must not have a space before the target name.');
       });
 
       it('throws an error if the name does not match the name syntax', () => {
-         const s = makeStrictStream('<?frog$ glorky?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('The target name does not match the syntax for names. Found: "frog$".');
+         expectSyntaxError('<?frog$ glorky?>',
+            XmlErrorToken.ERROR.PI_TARGET_NOT_NAME,
+            'The target name must match the syntax for names. Found: "frog$".');
       });
 
       it('throws an error if there is no target', () => {
-         const s = makeStrictStream('<??>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Missing target name in processing instruction.');
-      });
-
-      it('generates an error token if a there is no target', () => {
-         const s = makeLaxStream('<??>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.PI_NO_TARGET);
+         expectSyntaxError('<??>',
+            XmlErrorToken.ERROR.PI_NO_TARGET,
+            'Missing target name in a processing instruction.');
       });
 
    });
@@ -1390,19 +1398,10 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.XMLDECL);
       });
 
-      it('throws an error if a space is between the <? and the target if in strict mode', () => {
-         const s = makeStrictStream('<? xml version="1.1"?>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found before processing intruction target.');
-      });
-
-      it('allows the xml after <? to be any case in lax mode', () => {
-         const s = makeLaxStream('<?XmL version="1.1"?>');
-         ignoreError(s, XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE);
-
-         expect(s.getNext().type).toEqual(XmlToken.XMLDECL);
+      it('throws an error if a space is between the <? and the target', () => {
+         expectSyntaxError('<? xml version="1.1"?>',
+            XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
+            'Must not have a space before the target name.');
       });
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
@@ -1533,7 +1532,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if the close is missing', () => {
          expectSyntaxError('<?xml version="1.0"',
             XmlErrorToken.ERROR.XMLDECL_NO_CLOSE,
-            'Missing closing "?>" on an XML Declaration.');
+            'Missing closing "?>" in an XML Declaration.');
       });
 
       it('retrieves the expected chunks', () => {

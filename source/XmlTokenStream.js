@@ -452,6 +452,7 @@ class XmlTokenStream {
                return;
             case 'ENTITY':
                let isParameter = false;
+               let notationDataName;
                let entityName = this._cursor.getWord([ '>' ]);
 
                if (!entityName) {
@@ -462,6 +463,7 @@ class XmlTokenStream {
                   this._cursor.getSpace(); // either have space or >. no need to error if space not here
                   entityName = this._cursor.getWord([ '>' ]);
                }
+
                const postEntityNameSpace = this._cursor.getSpace();
                const entityExternalId = this._retrieveExternalId([ '>' ], false);
                let entityJunk;
@@ -469,6 +471,16 @@ class XmlTokenStream {
                if (!postEntityNameSpace) {
                   this._reportSyntaxError(ERRORS.ENTITY_MISSING_SPACE_AFTER_NAME,
                      'No space found after the entity name "' + entityName.text + '".');
+               }
+
+               if (entityExternalId) {
+                  this._cursor.getSpace();
+                  const ndataMarker = this._cursor.getWord([ '>' ]);
+                  if (ndataMarker && ndataMarker.text === 'NDATA') {
+                     this._cursor.getSpace(); // do not need to chec. either has space or at >
+                     const ndata = this._cursor.getWord([ '>' ]);
+                     notationDataName = ndata.text;
+                  }
                }
 
                this._cursor.getSpace();
@@ -488,10 +500,12 @@ class XmlTokenStream {
                const entityToken = isParameter ?
                   new ParameterEntityToken(entityName.text,
                      entityExternalId.systemLiteral,
-                     entityExternalId.pubidLiteral) :
+                     entityExternalId.pubidLiteral,
+                     notationDataName) :
                   new EntityToken(entityName.text,
                      entityExternalId ? entityExternalId.systemLiteral : undefined,
-                     entityExternalId ? entityExternalId.pubidLiteral : undefined);
+                     entityExternalId ? entityExternalId.pubidLiteral : undefined,
+                     notationDataName);
                entityToken.junk = entityJunk;
                this._pendingTokens.push(entityToken);
                return;
@@ -698,24 +712,16 @@ class XmlTokenStream {
       const space = this._cursor.getSpace();
       const target = this._cursor.getWord([ '?>' ]);
 
-      if (space) {
-         this._reportSyntaxError(ERRORS.PI_SPACE_BEFORE_TARGET,
-            'Space found before processing intruction target.');
-      }
+      this._assertSyntax(!space, ERRORS.PI_SPACE_BEFORE_TARGET);
 
       if (!target) {
          this._reportSyntaxError(ERRORS.PI_NO_TARGET);
-      }
-
-      if (target && !target.couldBeName) {
-         this._reportSyntaxError(ERRORS.PI_TARGET_NOT_NAME,
-            'The target name does not match the syntax for names. Found: "' + target.text + '".');
+      } else if (!target.couldBeName) {
+         this._reportSyntaxError(ERRORS.PI_TARGET_NOT_NAME, [ target.text ]);
       }
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
-         if (target.text !== 'xml') {
-            this._reportSyntaxError(ERRORS.XMLDECL_TARGET_WRONG_CASE, [ target.text ]);
-         }
+         this._assertSyntax(target.text === 'xml', ERRORS.XMLDECL_TARGET_WRONG_CASE, [ target.text ]);
          this._getXmlDecl();
       } else {
          this._cursor.getSpace();   // optional space
@@ -723,7 +729,7 @@ class XmlTokenStream {
 
          // If we found no ?> (thus, really, end of file) report an error.
          if (!results.terminator) {
-            this._reportSyntaxError(ERRORS.PI_NO_TERMINATOR);
+            this._reportSyntaxError(ERRORS.PI_NO_CLOSE);
          } else {
             this._cursor.getMatch('?>');
          }

@@ -28,11 +28,11 @@ XmlErrorToken.ERROR = {
    XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
    XMLDECL_STANDALONE_INVALID: 'XMLDECL_STANDALONE_INVALID',
    XMLDECL_STANDALONE_WRONG_ORDER: 'XMLDECL_STANDALONE_WRONG_ORDER',
-
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
-   PI_NO_TERMINATOR: 'PI_NO_TERMINATOR',
+   PI_NO_CLOSE: 'PI_NO_CLOSE',
    PI_NO_TARGET: 'PI_NO_TARGET',
+
    COMMENT_MISSING_END: 'COMMENT_MISSING_END',
    COMMENT_ENDS_WITH_HYPHEN: 'COMMENT_ENDS_WITH_HYPHEN',
    ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
@@ -106,8 +106,9 @@ const err = XmlErrorToken.ERROR;
 const str = XmlErrorToken.STRING;
 
 // THING(_SUBTHING)_PROBLEM = "THING must WHATEVER. Found OTHER"
+// THING_NO_(whatever) = "Missing WHATEVER for THING"
 str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML Declaration.';
-str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" on an XML Declaration.';
+str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" in an XML Declaration.';
 str[err.XMLDECL_ATTR_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_ATTR_UNKNOWN] = 'Unknown XML Declaration parameter "{0}".';
 str[err.XMLDECL_TARGET_WRONG_CASE] = '"xml" must be lower case. Found "{0}".';
@@ -118,9 +119,11 @@ str[err.XMLDECL_ENCODING_WRONG_ORDER] = '"encoding" must be after "version" and 
 str[err.XMLDECL_STANDALONE_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_STANDALONE_INVALID] = '"standalone" must be "yes" or "no". Found "{0}".';
 str[err.XMLDECL_STANDALONE_WRONG_ORDER] = '"standalone" must come after "version".';
+str[err.PI_SPACE_BEFORE_TARGET] = 'Must not have a space before the target name.';
+str[err.PI_TARGET_NOT_NAME] = 'The target name must match the syntax for names. Found: "{0}".';
+str[err.PI_NO_CLOSE] = 'Missing closing ?> in a processing instruction.';
+str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';
 
-str[err.PI_NO_TERMINATOR] = 'Closing ?> not found for processing instruction.';
-str[err.PI_NO_TARGET] = 'Missing target name in processing instruction.';
 str[err.COMMENT_MISSING_END] = 'Closing --> not found for comment.';
 str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Comment should not end with a hyphen.';
 str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';
