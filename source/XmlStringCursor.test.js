@@ -797,6 +797,38 @@ describe('XmlStringCursor', () => {
 
    });
 
+   describe('unget()', () => {
+
+      it('ungets the most recent chunk', () => {
+         const c = new XmlStringCursor('one two');
+         const chunk = c.getWord([]);
+
+         c.unget(chunk);
+
+         expect(c.getWord([])).toEqual(chunk);
+      });
+
+      it('ungets multiple chunks', () => {
+         const c = new XmlStringCursor('one two');
+         const chunk = c.getWord([]);
+         const chunk2 = c.getSpace();
+
+         c.unget(chunk2);
+         c.unget(chunk);
+
+         expect(c.getWord([])).toEqual(chunk);
+      });
+
+      it('throws an error if nothing has been retrieved', () => {
+         const c = new XmlStringCursor('one two');
+
+         expect(() => {
+            c.unget(new WithSpaceChunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4)));
+         }).toThrowError('Chunk passed to unget() is not the most recent chunk returned.');
+      });
+
+   });
+
    describe('getRecentChunks()', () => {
 
       it('returns nothing initially', () => {

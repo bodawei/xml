@@ -857,28 +857,17 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if there is no closing > for the DOCTYPE', () => {
          expectSyntaxError('<!DOCTYPE foo ',
             XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET,
-            'The closing "<" for the DOCTYPE could not be found.');
+            'The closing ">" for the DOCTYPE could not be found.');
       });
 
-      it('includes junk tokens in DocType token', () => {
+      it('auto-terminates the doctype token when the > is not found as expected', () => {
          const s = makeLaxStream('<!DOCTYPE foo fish>');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET);
+         let t = s.getNext(); // get the doctype token
 
-         const t = s.getNext();
-         expect(t.junk.length).toEqual(1);
-         expect(t.junk[0].text).toEqual('fish');
-      });
-
-      it('includes junk tokens in DocType token when there is more than one word', () => {
-         const s = makeLaxStream('<!DOCTYPE foo fish are fun>');
-         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_EXTRA_JUNK);
-
-         const t = s.getNext();
-         expect(t.junk.length).toEqual(2);
-         expect(t.junk[0].text).toEqual('fish');
-         expect(t.junk[1].text).toEqual(' are fun');
+         t = s.getNext();
+         expect(t.data).toEqual('fish>');
       });
 
    });
@@ -913,25 +902,15 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().name).toEqual('');
       });
 
-      it('includes junk tokens in notation token', () => {
+      it('auto-terminates the notation token when the > is not found as expected', () => {
          const s = makeLaxStream('<!NOTATION myNotation fish>');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET);
+         let t = s.getNext(); // get the notation token
 
-         const t = s.getNext();
-         expect(t.junk.length).toEqual(1);
-         expect(t.junk[0].text).toEqual('fish');
-      });
-
-      it('includes junk tokens in notation token when there is more than one word', () => {
-         const s = makeLaxStream('<!NOTATION myNotation fish are fun>');
-         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_EXTRA_JUNK);
-
-         const t = s.getNext();
-         expect(t.junk.length).toEqual(2);
-         expect(t.junk[0].text).toEqual('fish');
-         expect(t.junk[1].text).toEqual(' are fun');
+         t = s.getNext();
+         expect(t.data).toEqual('fish>');
       });
 
       it('reports a syntax error if there is no space after the notation name', () => {
@@ -969,29 +948,174 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.ENTITY);
       });
 
-      it('retrieves a token of type PARAMETER_ENTITY', () => {
-         const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.PARAMETER_ENTITY);
-      });
-
       it('retrieves the name of the entity', () => {
          const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('entityName');
       });
 
-      it('retrieves the NDATA name', () => {
-         const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity" "system" NDATA testData>');
+      it('retrieves the value of the entity in double quotes', () => {
+         const s = makeStrictStream('<!ENTITY entityName "value">');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
+      });
+
+      it('retrieves the value of the entity in single quotes', () => {
+         const s = makeStrictStream('<!ENTITY entityName \'value\'>');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
+      });
+
+      it('accepts a value with no contents', () => {
+         const s = makeStrictStream('<!ENTITY entityName "">');
+
+         expect(s.getNext().value).toEqual([ ]);
+      });
+
+      it('does not expand entity references in the value', () => {
+         const s = makeStrictStream('<!ENTITY entityName "value&amp;">');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value&amp;') ]);
+      });
+
+      it('sets the value to undefined if none specified', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+
+         expect(s.getNext().value).toBeUndefined();
+      });
+
+      it('retrieves the NDATA name when a two value PUBLIC is specified', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testPublic" "system" NDATA testData>');
 
          expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves the NDATA name when a one value PUBLIC is specified ', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
+         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NDATA_NO_SPACE_BEFORE);
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves an undefined NDATA name if no name included', () => {
+         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME);
+
+         expect(s.getNext().notationDataName).toBeUndefined();
       });
 
       it('sets the notation data name to undefined if none specified', () => {
          const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('reports a syntax error if there is no name', () => {
+         expectSyntaxError('<!ENTITY >',
+            XmlErrorToken.ERROR.ENTITY_NO_NAME,
+            'No name found for an entity declaration.');
+      });
+
+      it('reports a syntax error if the name does not match the syntax for names', () => {
+         expectSyntaxError('<!ENTITY $badName "value">',
+            XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
+            'The entity name must match the syntax for names. Found: "$badName".');
+      });
+
+      it('gives the entity token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!ENTITY >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NAME_NO_TRAILING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_VALUE);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!ENTITY entityName PUBLIC "publicValue"',
+            XmlErrorToken.ERROR.ENTITY_NO_CLOSE,
+            'Mising closing ">" in the entity "entityName".');
+      });
+
+      it('reports a syntax error if there is no space after the entity name', () => {
+         expectSyntaxError('<!ENTITY theName>',
+            XmlErrorToken.ERROR.ENTITY_NAME_NO_TRAILING_SPACE,
+            'Missing space after the entity "theName".');
+      });
+
+      it('reports a syntax error if there is no SYSTEM, PUBLIC or entity value', () => {
+         expectSyntaxError('<!ENTITY theName >',
+            XmlErrorToken.ERROR.ENTITY_NO_VALUE,
+            'Missing value or external identifier in entity "theName".');
+      });
+
+      it('reports a syntax error if there is no space before the NDATA marker', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo"NDATA fred>',
+            XmlErrorToken.ERROR.ENTITY_NDATA_NO_SPACE_BEFORE,
+            'Missing space before NDATA in entity "theName".');
+      });
+
+      it('reports a syntax error if NDATA is the wrong case', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" nData fred>',
+            XmlErrorToken.ERROR.ENTITY_NDATA_WRONG_CASE,
+            'NDATA in entity "theName" must be upper case. Found "nData".');
+      });
+
+      it('reports a syntax error if there is no NDATA name', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA>',
+            XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME,
+            'NDATA in entity "theName" must have a name.');
+      });
+
+      it('reports a syntax error if there is no NDATA name with space after NDATA', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA  >',
+            XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME,
+            'NDATA in entity "theName" must have a name.');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the SYSTEM', () => {
+         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" found junk  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('found junk  >');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the PUBLIC', () => {
+         const s = makeLaxStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('extra  >');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the NDATA', () => {
+         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('junk  >');
+      });
+
+   });
+
+   // whitebox, insofar as we "know" most of ENTITY and PARAMETER_ENTITY parsing is the same code
+   describe('parsing PARAMETER_ENTITY (whitebox)', () => {
+
+      it('retrieves a token of type PARAMETER_ENTITY', () => {
+         const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.PARAMETER_ENTITY);
       });
 
       it('retrieves the NDATA name on a parameter entity', () => {
@@ -1010,38 +1134,6 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('paramEntityName');
-      });
-
-      it('reports a syntax error if there is no name', () => {
-         expectSyntaxError('<!ENTITY >',
-            XmlErrorToken.ERROR.ENTITY_MISSING_NAME,
-            'No name found for an entity declaration.');
-      });
-
-      it('reports a syntax error if the name does not match the syntax for names', () => {
-         expectSyntaxError('<!ENTITY $badName >',
-            XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
-            'The name of the ENTITY does not match the syntax for names. Found: "$badName".');
-      });
-
-      it('gives the entity token an empty name if none is specified', () => {
-         const s = makeLaxStream('<!ENTITY >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_MISSING_NAME);
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME);
-
-         expect(s.getNext().name).toEqual('');
-      });
-
-      it('reports a syntax error if there is no closing angle bracket', () => {
-         expectSyntaxError('<!ENTITY entityName ',
-            XmlErrorToken.ERROR.ENTITY_MISSING_CLOSE_BRACKET,
-            'The closing ">" for the entity "entityName" could not be found.');
-      });
-
-      it('reports a syntax error if there is no space after the entity name', () => {
-         expectSyntaxError('<!ENTITY theName>',
-            XmlErrorToken.ERROR.ENTITY_MISSING_SPACE_AFTER_NAME,
-            'No space found after the entity name "theName".');
       });
 
    });
@@ -1259,26 +1351,22 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no --> found', () => {
-         const s = makeStrictStream('<!--junk comment');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Closing --> not found for comment.');
+         expectSyntaxError('<!--junk comment',
+            XmlErrorToken.ERROR.COMMENT_NO_CLOSE,
+            'Missing closing --> in a comment.');
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
          const s = makeLaxStream('<!--junk comment');
+         ignoreError(s, XmlErrorToken.ERROR.COMMENT_NO_CLOSE);
 
-         ignoreError(s, XmlErrorToken.ERROR.COMMENT_MISSING_END);
          expect(s.getNext().content).toEqual('junk comment');
       });
 
       it('throws an error if comment ends with a -', () => {
-         const s = makeStrictStream('<!--junk comment--->');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Comment should not end with a hyphen.');
+         expectSyntaxError('<!--junk comment--->',
+            XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN,
+            'Must not have a hyphen at end of a comment.');
       });
 
       it('retrieves the expected chunks', () => {

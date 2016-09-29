@@ -299,7 +299,7 @@ class XmlTokenStream {
       const results = this._cursor.getToTerminator([ '-->' ]);
 
       if (!results.terminator) {
-         this._reportSyntaxError(ERRORS.COMMENT_MISSING_END);
+         this._reportSyntaxError(ERRORS.COMMENT_NO_CLOSE);
       } else {
          this._cursor.getMatch('-->');
 
@@ -355,8 +355,9 @@ class XmlTokenStream {
             case 'DOCTYPE':
                const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
                this._cursor.getSpace();
-               const externalId = this._retrieveExternalId([ '[', '>' ], true);
-               let docJunk;
+               const externalId = this._retrieveExternalId([ '[', '>' ], {
+                  requireSystemOnPublic: true
+               });
 
                if (!docTypeName) {
                   this._reportSyntaxError(ERRORS.DOCTYPE_NO_NAME);
@@ -368,21 +369,11 @@ class XmlTokenStream {
                         docTypeName.text + '".');
                }
 
-               if (externalId && externalId.text) {
-                  docJunk = [ externalId ];
-                  const more = this._cursor.getToTerminator([ '>' ]);
-
-                  if (more.chunk) {
-                     docJunk.push(more.chunk);
-                  }
-
-                  this._reportSyntaxError(ERRORS.DOCTYPE_EXTRA_JUNK);
-               } else {
-                  this._cursor.getSpace();
-                  this._cursor.getMatch('[');
-                  this._cursor.getSpace();
-                  this._cursor.getMatch(']');
-               }
+               // lame DTD parsing
+               this._cursor.getSpace();
+               this._cursor.getMatch('[');
+               this._cursor.getSpace();
+               this._cursor.getMatch(']');
 
                this._cursor.getSpace();
                const doctypeClosing = this._cursor.getMatch('>');
@@ -394,16 +385,13 @@ class XmlTokenStream {
                const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
                   externalId ? externalId.systemLiteral : undefined,
                   externalId ? externalId.pubidLiteral : undefined, []);
-               docToken.junk = docJunk;
-
                this._pendingTokens.push(docToken);
                return;
             // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
             case 'NOTATION':
                let notionName = this._cursor.getWord([ '>' ]); // could look for quotes, too
                const postNotationNameSpace = this._cursor.getSpace();
-               const externalOrPublicId = this._retrieveExternalId([ '>' ], false);
-               let junk;
+               const externalOrPublicId = this._retrieveExternalId([ '>' ]);
 
                if (!notionName) {
                   notionName = { text: '' };
@@ -419,15 +407,6 @@ class XmlTokenStream {
                   this._reportSyntaxError(ERRORS.NOTATION_MISSING_EXTERNALID,
                      'The ExternalID or PublicId for the notation "' + notionName.text +
                         '" declaration is missing.');
-               } else if (externalOrPublicId.text) {
-                  junk = [ externalOrPublicId ];
-                  const more = this._cursor.getToTerminator([ '>' ]);
-
-                  if (more.chunk) {
-                     junk.push(more.chunk);
-                  }
-
-                  this._reportSyntaxError(ERRORS.NOTATION_EXTRA_JUNK);
                }
 
                this._cursor.getSpace();
@@ -447,9 +426,21 @@ class XmlTokenStream {
                const notationToken = new NotationToken(notionName.text,
                   externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
                   externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
-               notationToken.junk = junk;
                this._pendingTokens.push(notationToken);
                return;
+            // Consume an entity declaration.  Note, that we are biased here if we
+            // find something unexpected (e.g. stuff after NDATA, or no ExternalId or EntityValue)
+            // to assume that the > is missing and report that, than to try to consume the whole
+            // rest of the document as junk content.
+            //
+            // [70] EntityDecl  ::= GEDecl | PEDecl
+            // [71] GEDecl      ::= '<!ENTITY' S Name S EntityDef S? '>'
+            // [72] PEDecl      ::= '<!ENTITY' S '%' S Name S PEDef S? '>'
+            // [73] EntityDef   ::= EntityValue | (ExternalID NDataDecl?)
+            // [74] PEDef       ::= EntityValue | ExternalID
+            // [76] NDataDecl   ::= S 'NDATA' S Name
+            //  [9] EntityValue ::= '"' ([^%&"] | PEReference | Reference)* '"' |
+            //                      "'" ([^%&'] | PEReference | Reference)* "'"
             case 'ENTITY':
                let isParameter = false;
                let notationDataName;
@@ -457,7 +448,7 @@ class XmlTokenStream {
 
                if (!entityName) {
                   entityName = { text: '' };
-                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_NAME);
+                  this._reportSyntaxError(ERRORS.ENTITY_NO_NAME);
                } else if (entityName.text === '%') {
                   isParameter = true;
                   this._cursor.getSpace(); // either have space or >. no need to error if space not here
@@ -465,48 +456,62 @@ class XmlTokenStream {
                }
 
                const postEntityNameSpace = this._cursor.getSpace();
-               const entityExternalId = this._retrieveExternalId([ '>' ], false);
-               let entityJunk;
+               const valueQuote = this._cursor.peekChar();
+               let entityExternalId;
+               let value;
 
-               if (!postEntityNameSpace) {
-                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_SPACE_AFTER_NAME,
-                     'No space found after the entity name "' + entityName.text + '".');
+               this._assertSyntax(postEntityNameSpace, ERRORS.ENTITY_NAME_NO_TRAILING_SPACE, [ entityName.text ]);
+
+               if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
+                  this._cursor.getChar();     // consume the quote
+                  value = this._getQuotedValue(valueQuote, { isEntityValue: true });
+               } else {
+                  entityExternalId = this._retrieveExternalId([ '>' ], { isEntity: true });
                }
 
                if (entityExternalId) {
-                  this._cursor.getSpace();
+                  const preNDataSpace = this._cursor.getSpace();
                   const ndataMarker = this._cursor.getWord([ '>' ]);
-                  if (ndataMarker && ndataMarker.text === 'NDATA') {
-                     this._cursor.getSpace(); // do not need to chec. either has space or at >
-                     const ndata = this._cursor.getWord([ '>' ]);
-                     notationDataName = ndata.text;
+
+                  if (ndataMarker) {
+                     if (ndataMarker.text.toLocaleUpperCase() !== 'NDATA') {
+                        this._cursor.unget(ndataMarker);
+                     } else {
+                        this._cursor.getSpace(); // no need to check. either have space or no word next
+                        const ndataName = this._cursor.getWord([ '>' ]);
+
+                        this._assertSyntax(preNDataSpace, ERRORS.ENTITY_NDATA_NO_SPACE_BEFORE, [ entityName.text ]);
+                        this._assertSyntax(ndataMarker.text === 'NDATA',
+                           ERRORS.ENTITY_NDATA_WRONG_CASE, [ entityName.text, ndataMarker.text ]);
+
+                        if (ndataName) {
+                           notationDataName = ndataName.text;
+                        } else {
+                           this._reportSyntaxError(ERRORS.ENTITY_NDATA_NO_NAME, [ entityName.text ]);
+                        }
+                     }
                   }
                }
 
                this._cursor.getSpace();
                const entityClosing = this._cursor.getMatch('>');
 
-               if (entityName && entityName.text !== '' && !entityName.couldBeName) {
-                  this._reportSyntaxError(ERRORS.ENTITY_NAME_NOT_NAME,
-                     'The name of the ENTITY does not match the syntax for names. Found: "' +
-                        entityName.text + '".');
-               }
-
-               if (!entityClosing) {
-                  this._reportSyntaxError(ERRORS.ENTITY_MISSING_CLOSE_BRACKET,
-                     'The closing ">" for the entity "' + entityName.text + '" could not be found.');
-               }
+               this._assertSyntax(value || entityExternalId, ERRORS.ENTITY_NO_VALUE, [ entityName.text ]);
+               this._assertSyntax(entityName && (entityName.text === '' || entityName.couldBeName),
+                  ERRORS.ENTITY_NAME_NOT_NAME, [ entityName.text ]);
+               this._assertSyntax(entityClosing, ERRORS.ENTITY_NO_CLOSE, [ entityName.text ]);
 
                const entityToken = isParameter ?
                   new ParameterEntityToken(entityName.text,
+                     value,
                      entityExternalId.systemLiteral,
                      entityExternalId.pubidLiteral,
                      notationDataName) :
                   new EntityToken(entityName.text,
+                     value,
                      entityExternalId ? entityExternalId.systemLiteral : undefined,
                      entityExternalId ? entityExternalId.pubidLiteral : undefined,
                      notationDataName);
-               entityToken.junk = entityJunk;
                this._pendingTokens.push(entityToken);
                return;
          }
@@ -580,20 +585,22 @@ class XmlTokenStream {
     PARAM
     terminators: An array of characters this should terminate parsing of
       the id for
-    requireSystemIdOnPublic: true if the systemLiteral is required for
-      a PUBLIC
+    options: Flags for special cases
+      requireSystemOnPublic: true if the systemLiteral is required for
+         a PUBLIC
+      isEntity: true if this is for an entity (which means NDATA could
+         be found instead of the system value on a PUBLIC)
 
     RETURN
     Either an object containing a "systemLiteral" or a "systemLiteral" and a
-    "publidLiteral" property, a TextChunk containing the word read that
-    turned out to be neither SYSTEM or PUBLIC, or undefined if nothing was
-    found.
+    "publidLiteral" property, or undefined if neither SYSTEM nor PUBLIC could
+    be found.
     Note that the system and pubid properties may be undefined if they
     were not specified, or may be empty strings if they were specified with
     empty strings.
    \**********************************************************************/
 
-   _retrieveExternalId(terminators, requireSystemIdOnPublic) {
+   _retrieveExternalId(terminators, options = {}) {
       const xIdTerminators = terminators.slice().concat([ '"', '\'' ]);
       const xIdType = this._cursor.getWord(xIdTerminators);
 
@@ -605,9 +612,10 @@ class XmlTokenStream {
       let publicText;
 
       if (upperCaseXIdType !== 'SYSTEM' && upperCaseXIdType !== 'PUBLIC') {
+         this._cursor.unget(xIdType);
          this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN_ID,
             'The ExternalID on a DOCTYPE had an unknown source type ("' + xIdType.text + '").');
-         return xIdType;
+         return;
       }
 
       if (upperCaseXIdType !== xIdType.text) {
@@ -616,7 +624,7 @@ class XmlTokenStream {
       }
 
       if (upperCaseXIdType === 'PUBLIC') {
-         publicText = this._getQuotedLiteral(true, terminators, ERRORS.PUBIDLITERAL_MISSING,
+         publicText = this._getQuotedLiteral(true, false, terminators, ERRORS.PUBIDLITERAL_MISSING,
             ERRORS.PUBLIC_NO_LEADING_SPACE,
             ERRORS.PUBIDLITERAL_NOQUOTE);
 
@@ -629,11 +637,9 @@ class XmlTokenStream {
       }
 
       // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
-      const systemText = this._getQuotedLiteral(requireSystemIdOnPublic, terminators,
+      const systemText = this._getQuotedLiteral(options.requireSystemOnPublic, options.isEntity, terminators,
          ERRORS.SYSTEMLITERAL_MISSING,
-         upperCaseXIdType === 'SYSTEM' ?
-            ERRORS.SYSTEM_NO_LEADING_SPACE :
-            ERRORS.PUBLIC_NO_SPACE,
+         upperCaseXIdType === 'SYSTEM' ? ERRORS.SYSTEM_NO_LEADING_SPACE : ERRORS.PUBLIC_NO_SPACE,
          ERRORS.SYSTEMLITERAL_NOQUOTE);
 
       return (publicText === undefined && systemText === undefined) ?
@@ -650,6 +656,7 @@ class XmlTokenStream {
     PARAM
     literalRequired: True if this must find a value (will report an error
       if not found)
+    isEntity: true if this is for an entity.
     terminators: An array of values that may terminate this logical section
     literalMissing: Error code to report if the value is missing
     noBetweenSpace: Error code if there was no leading space
@@ -659,7 +666,7 @@ class XmlTokenStream {
     undefined, if no such value, or the string between the quotes.
    \**********************************************************************/
 
-   _getQuotedLiteral(literalRequired, terminators, literalMissing, noBetweenSpace, noQuoteError) {
+   _getQuotedLiteral(literalRequired, isEntity, terminators, literalMissing, noBetweenSpace, noQuoteError) {
       const betweenSpace = this._cursor.getSpace();
       const quote = this._cursor.peekChar(); // quote
       const isQuote = quote && (quote.text === '"' || quote.text === '\'');
@@ -675,6 +682,17 @@ class XmlTokenStream {
          const literal = this._cursor.getToTerminator([ quote.text ]);
          this._cursor.getMatch(quote.text);
          return literal.chunk ? literal.chunk.text : '';
+      }
+
+      if (isEntity) {
+         const possibleNData = this._cursor.getWord(terminators);
+         if (possibleNData && possibleNData.text.toLocaleUpperCase() === 'NDATA') {
+            this._cursor.unget(possibleNData);
+            if (betweenSpace) {
+               this._cursor.unget(betweenSpace);
+            }
+            return;
+         }
       }
 
       let quoteIsTerminator = false;
@@ -977,7 +995,10 @@ class XmlTokenStream {
 
          if (gotQuote) {
             this._cursor.getChar();     // consume the quote
-            ({value, abort} = this._getQuotedAttributeValue(name, quote, elementAttribute));
+            ({value, abort} = this._getQuotedValue(quote, {
+               attributeName: name.text,
+               isElementAttribute: elementAttribute
+            }));
          } else if (!equal) {
             this._reportSyntaxError(ERRORS.ATTRIBUTE_MISSING_VALUE);
             attributes.push(makePair(name, value, undefined, elementAttribute));
@@ -1022,25 +1043,28 @@ class XmlTokenStream {
       return attributes;
    }
 
-   /*
-    * _getQuotedAttributeValue consumes the next data from the cursor
-    * to extract the quoted value for an attribute.
-    *
-    * This assumes that the opening quote has already been consumed.
-    *
-    * PARAMS
-    * nameChunk is the TextChunk containing the name of the attribute
-    * quoteChunk is the TextChunk containing the quote that opened the value
-    * elementAttribute is a boolean indicating whether this is an attribute
-    *    for an element (true) or an XML Declaration (false).
-    * RETURN
-    * An object that contains the array of possibly zero XmlTokens found
-    * to make up the attribute value, and a flag named abort. If abort is
-    * true, it indicates that a "<" was found in the attribute value, and
-    * not only attribute value gathering should stop, but the whole start
-    * tag processing should stop.
-    */
-   _getQuotedAttributeValue(nameChunk, quoteChunk, elementAttribute) {
+   /**********************************************************************\
+    _getQuotedValue consumes the next data from the cursor to extract
+    a quoted value.  This is used for several diverse types of quoted
+    values, so the options specify which variation should be handled.
+
+    PARAMS
+    quoteChunk is the TextChunk containing the quote that opened the value
+    options is an Object containing these values:
+      isElementAttribute: true if this is an element attribute's value
+      isEntityValue: If true, expand parameter entity values
+      nameChunk: If this is an element or xmldecl attribute value, this
+                 the name of the attribute must be provided here.
+
+    RETURN
+    For attributes, this returns an object that contains the array of
+    possibly zero XmlTokens found to make up the attribute value, and a
+    flag named abort. If abort is true, it indicates that a "<" was found
+    in the attribute value, and not only attribute value gathering should
+    stop, but the whole start tag processing should stop.
+    For entity values, this just returns the array of XMLTokens
+   \**********************************************************************/
+   _getQuotedValue(quoteChunk, options) {
       const result = {
          value: [],
          abort: false
@@ -1048,7 +1072,7 @@ class XmlTokenStream {
       let done = false;
       const terminators = [ quoteChunk.text ];
 
-      if (elementAttribute) {
+      if (options.isElementAttribute) {
          terminators.push('&');
 
          if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
@@ -1077,7 +1101,7 @@ class XmlTokenStream {
                break;
             case '<':
                this._reportSyntaxError(ERRORS.ATTRIBUTE_BAD_VALUE,
-                  'An "<" was found in the value for attribute "' + nameChunk.text + '".');
+                  'An "<" was found in the value for attribute "' + options.attributeName + '".');
                result.abort = true;
                break;
             default: // no terminator
@@ -1086,7 +1110,7 @@ class XmlTokenStream {
          }
       }
 
-      return result;
+      return options.isEntityValue ? result.value : result;
    }
 
    getNext() {

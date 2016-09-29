@@ -32,9 +32,18 @@ XmlErrorToken.ERROR = {
    PI_TARGET_NOT_NAME: 'PI_TARGET_NOT_NAME',
    PI_NO_CLOSE: 'PI_NO_CLOSE',
    PI_NO_TARGET: 'PI_NO_TARGET',
-
-   COMMENT_MISSING_END: 'COMMENT_MISSING_END',
+   COMMENT_NO_CLOSE: 'COMMENT_NO_CLOSE',
    COMMENT_ENDS_WITH_HYPHEN: 'COMMENT_ENDS_WITH_HYPHEN',
+
+   ENTITY_NO_NAME: 'ENTITY_NO_NAME',
+   ENTITY_NAME_NOT_NAME: 'ENTITY_NAME_NOT_NAME',
+   ENTITY_NAME_NO_TRAILING_SPACE: 'ENTITY_NAME_NO_TRAILING_SPACE',
+   ENTITY_NDATA_NO_SPACE_BEFORE: 'ENTITY_NDATA_NO_SPACE_BEFORE',
+   ENTITY_NDATA_WRONG_CASE: 'ENTITY_NDATA_WRONG_CASE',
+   ENTITY_NDATA_NO_NAME: 'ENTITY_NDATA_NO_NAME',
+   ENTITY_NO_VALUE: 'ENTITY_NO_VALUE',
+   ENTITY_NO_CLOSE: 'ENTITY_NO_CLOSE',
+
    ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
    ELEMENT_LEADING_SPACE: 'ELEMENT_LEADING_SPACE',
    ELEMENT_MISSING_NAME: 'ELEMENT_MISSING_NAME',
@@ -93,11 +102,7 @@ XmlErrorToken.ERROR = {
    NOTATION_MISSING_EXTERNALID: 'NOTATION_MISSING_EXTERNALID',
    NOTATION_MISSING_SPACE_AFTER_NAME: 'NOTATION_MISSING_SPACE_AFTER_NAME',
    NOTATION_MISSING_CLOSE_BRACKET: 'NOTATION_MISSING_CLOSE_BRACKET',
-   NOTATION_EXTRA_JUNK: 'NOTATION_EXTRA_JUNK',
-   ENTITY_MISSING_NAME: 'ENTITY_MISSING_NAME',
-   ENTITY_NAME_NOT_NAME: 'ENTITY_NAME_NOT_NAME',
-   ENTITY_MISSING_SPACE_AFTER_NAME: 'ENTITY_MISSING_SPACE_AFTER_NAME',
-   ENTITY_MISSING_CLOSE_BRACKET: 'ENTITY_MISSING_CLOSE_BRACKET'
+   NOTATION_EXTRA_JUNK: 'NOTATION_EXTRA_JUNK'
 };
 
 XmlErrorToken.STRING = {};
@@ -123,9 +128,18 @@ str[err.PI_SPACE_BEFORE_TARGET] = 'Must not have a space before the target name.
 str[err.PI_TARGET_NOT_NAME] = 'The target name must match the syntax for names. Found: "{0}".';
 str[err.PI_NO_CLOSE] = 'Missing closing ?> in a processing instruction.';
 str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';
+str[err.COMMENT_NO_CLOSE] = 'Missing closing --> in a comment.';
+str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Must not have a hyphen at end of a comment.';
 
-str[err.COMMENT_MISSING_END] = 'Closing --> not found for comment.';
-str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Comment should not end with a hyphen.';
+str[err.ENTITY_NO_NAME] = 'No name found for an entity declaration.';
+str[err.ENTITY_NAME_NOT_NAME] = 'The entity name must match the syntax for names. Found: "{0}".';
+str[err.ENTITY_NAME_NO_TRAILING_SPACE] = 'Missing space after the entity "{0}".';
+str[err.ENTITY_NDATA_NO_SPACE_BEFORE] = 'Missing space before NDATA in entity "{0}".';
+str[err.ENTITY_NDATA_WRONG_CASE] = 'NDATA in entity "{0}" must be upper case. Found "{1}".';
+str[err.ENTITY_NDATA_NO_NAME] = 'NDATA in entity "{0}" must have a name.';
+str[err.ENTITY_NO_VALUE] = 'Missing value or external identifier in entity "{0}".';
+str[err.ENTITY_NO_CLOSE] = 'Mising closing ">" in the entity "{0}".';
+
 str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';
 str[err.ELEMENT_MISSING_NAME] = 'Name missing in element tag.';
 str[err.ELEMENT_MISSING_CLOSE] = 'Missing closing of element tag.';
@@ -166,10 +180,7 @@ str[err.PUBIDLITERAL_MISSING] = 'No pubIdLiteral was found.';
 str[err.SYSTEMLITERAL_NOQUOTE] = 'The systemLiteral was not quoted.';
 str[err.SYSTEMLITERAL_MISSING] = 'No systemLiteral was found.';
 str[err.DOCTYPE_NO_NAME] = 'There was no name name for the DOCTYPE.';
-str[err.DOCTYPE_MISSING_CLOSE_BRACKET] = 'The closing "<" for the DOCTYPE could not be found.';
-str[err.DOCTYPE_EXTRA_JUNK] = 'Extra junk found in DOCTYPE declaration.';
+str[err.DOCTYPE_MISSING_CLOSE_BRACKET] = 'The closing ">" for the DOCTYPE could not be found.';
 str[err.NOTATION_MISSING_NAME] = 'No name found for a notation declaration.';
-str[err.NOTATION_EXTRA_JUNK] = 'Extra junk found in NOTATION declaration.';
-str[err.ENTITY_MISSING_NAME] = 'No name found for an entity declaration.';
 
 module.exports = XmlErrorToken;

@@ -11,22 +11,23 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 
 
--- next: 87
+-- next: 88
 ---------------------------------------------
 
-[70]   	EntityDecl	   ::=   	GEDecl | PEDecl
-[71]   	GEDecl	   ::=   	'<!ENTITY' S Name S EntityDef S? '>'
-[72]   	PEDecl	   ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
-[73]   	EntityDef	   ::=   	EntityValue | (ExternalID NDataDecl?)
-[74]   	PEDef	   ::=   	EntityValue | ExternalID
-[76]   	NDataDecl	   ::=   	S 'NDATA' S Name
-[9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
-	|  "'" ([^%&'] | PEReference | Reference)* "'"
+√ [70]   	EntityDecl	   ::=   	GEDecl | PEDecl
+√ [71]   	GEDecl	   ::=   	'<!ENTITY' S Name S EntityDef S? '>'
+√ [72]   	PEDecl	   ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
+√ [73]   	EntityDef	   ::=   	EntityValue | (ExternalID NDataDecl?)
+√ [74]   	PEDef	   ::=   	EntityValue | ExternalID
+√ [76]   	NDataDecl	   ::=   	S 'NDATA' S Name
+√ [9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
+√	|  "'" ([^%&'] | PEReference | Reference)* "'"
 
 √ 81:S: Get entity with ExternalID (partial 71)
 √ 82:S: Parse a PEDecl (with %)
 -- 1.5hr
 √ 83:S: Parse an NDecl after the external id
+[1.5hr left]
 84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
 	- more testing for externalid?
 	- In particular, the lack of a system id on the externalid gums up the notation
@@ -70,6 +71,7 @@ BUILD
 
 PROJECT
 --- technical debt [7m 10s]
+87:S: Handle PEReferences and character references in entity values
 77:S: Code for getting references is getting uuuuuugly
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL

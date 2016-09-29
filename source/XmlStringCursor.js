@@ -384,6 +384,32 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+     unget() backs the cursor up past the specified chunk.  That chunk
+     must have been the most recent chunk returned by this cursor, and
+     it must be called before getRecentChunks() has been called.
+     Note that if this cursor has returned A, B, C, you can call unget(C),
+     unget(B), unget(A).
+
+     Note: This could actually operate without the parameter. However,
+     this signature makes it more explicit in the client code what is
+     happening, and provides some error reporting in case the user is
+     confused.
+
+     PARAM
+     chunk the most recent chunk returned
+   \**********************************************************************/
+
+   unget(chunk) {
+      // validate that this is the most recent chunk returned
+      if (this._chunks.length === 0 || this._chunks[this._chunks.length - 1] !== chunk) {
+         throw new Error('Chunk passed to unget() is not the most recent chunk returned.');
+      }
+
+      this._chunks.length = this._chunks.length - 1;
+      this._offset = chunk.startOffset.clone();
+   }
+
+   /**********************************************************************\
      RETURN
      All the chunks generated since the last time this routine was called.
    \**********************************************************************/

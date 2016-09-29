@@ -106,10 +106,11 @@ class NotationToken extends XmlToken {
 
 class EntityToken extends XmlToken {
 
-   constructor(name, systemLiteral, publicLiteral, notationDataName) {
+   constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
       super(XmlToken.ENTITY, name);
 
       this.name = name;
+      this.value = value;
       this.notationDataName = notationDataName;
    }
 
@@ -117,8 +118,8 @@ class EntityToken extends XmlToken {
 
 class ParameterEntityToken extends EntityToken {
 
-   constructor(name, systemLiteral, publicLiteral, notationDataName) {
-      super(name, systemLiteral, publicLiteral, notationDataName);
+   constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
+      super(name, value, systemLiteral, publicLiteral, notationDataName);
 
       this.type = XmlToken.PARAMETER_ENTITY;
    }
