@@ -27,8 +27,8 @@ x20:XL Read element declaration
 	- no name
 	- bad name
 	- case of any
-89:S: EMPTY or #PCDATA
-	- case of any
+√ 89:S: EMPTY or #PCDATA
+	- case of empty
 	- case of PCData 
 90:S: Mixed
 	- names not names

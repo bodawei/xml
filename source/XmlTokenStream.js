@@ -520,13 +520,31 @@ class XmlTokenStream {
             // [51] Mixed       ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
             //                      '(' S? '#PCDATA' S? ')'
             case 'ELEMENT':
-               const elementName = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace(); // no need to check this, as if no space, then no contentToken
-               const contentToken = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace();
-               const elementClose = this._cursor.getMatch('>');
                let nameText;
                let contentText;
+               let contentToken;
+               let contentList;
+               let listClose = true;
+
+               const elementName = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace(); // no need to check this, as if no space, then no contentToken
+               const mixedStart = this._cursor.peekChar();
+               if (mixedStart && mixedStart.text === '(') {
+                  contentList = [];
+                  this._cursor.getChar();
+                  this._cursor.getSpace();
+                  const word = this._cursor.getWord([ '>', ')' ]);
+                  this._cursor.getSpace();
+                  listClose = this._cursor.getMatch(')');
+
+                  if (word) {
+                     contentList.push(word);
+                  }
+               } else {
+                  contentToken = this._cursor.getWord([ '>' ]);
+               }
+               this._cursor.getSpace();
+               const elementClose = this._cursor.getMatch('>');
 
                if (!elementName) {
                   nameText = '';
@@ -538,18 +556,31 @@ class XmlTokenStream {
                this._assertSyntax(nameText === '' || elementName.couldBeName,
                   ERRORS.ELEMENTDECL_NAME_NOT_NAME, [ nameText ]);
 
-               if (!contentToken) {
-                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_CONTENT_TYPE, [ nameText ]);
+               if (!contentToken && !contentList) {
+                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_CONTENT_SPEC, [ nameText ]);
+               } else if (contentList) {
+                  contentText = [];
+                  this._assertSyntax(contentList.length, ERRORS.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS, [ nameText ]);
+
+                  for (let index = 0; index < contentList.length; index++) {
+                     const item = contentList[index];
+
+                     this._assertSyntax(item.text === '#PCDATA',
+                        ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ '#PCDATA', item.text ]);
+                     contentText.push('#PCDATA');
+                  }
                } else {
                   contentText = contentToken.text;
+                  const upperText = contentToken.text.toLocaleUpperCase();
 
-                  this._assertSyntax(contentText.toLocaleUpperCase() === 'ANY',
-                     ERRORS.ELEMENTDECL_CONTENT_TYPE_UNKNOWN, [ contentText ]);
-                  this._assertSyntax(contentText.toLocaleUpperCase() === contentText,
-                     ERRORS.ELEMENTDECL_CONTENT_TYPE_WRONG_CASE, [ contentText.toLocaleUpperCase(), contentText ]);
-                  // force the case of ANY etc?
+                  this._assertSyntax(upperText === 'ANY' || upperText === 'EMPTY',
+                     ERRORS.ELEMENTDECL_CONTENT_SPEC_UNKNOWN, [ contentText ]);
+                  this._assertSyntax(upperText === contentText,
+                     ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ contentText.toLocaleUpperCase(), contentText ]);
+                  contentText = upperText;
                }
 
+               this._assertSyntax(listClose, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                this._assertSyntax(elementClose, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));

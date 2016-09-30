@@ -46,9 +46,11 @@ XmlErrorToken.ERROR = {
    ELEMENTDECL_NO_NAME: 'ELEMENTDECL_NO_NAME',
    ELEMENTDECL_NO_SPACE_AFTER_NAME: 'ELEMENTDECL_NO_SPACE_AFTER_NAME',
    ELEMENTDECL_NAME_NOT_NAME: 'ELEMENTDECL_NAME_NOT_NAME',
-   ELEMENTDECL_NO_CONTENT_TYPE: 'ELEMENTDECL_NO_CONTENT_TYPE',
-   ELEMENTDECL_CONTENT_TYPE_WRONG_CASE: 'ELEMENTDECL_CONTENT_TYPE_WRONG_CASE',
-   ELEMENTDECL_CONTENT_TYPE_UNKNOWN: 'ELEMENTDECL_CONTENT_TYPE_UNKNOWN',
+   ELEMENTDECL_NO_CONTENT_SPEC: 'ELEMENTDECL_NO_CONTENT_SPEC',
+   ELEMENTDECL_CONTENT_SPEC_WRONG_CASE: 'ELEMENTDECL_CONTENT_SPEC_WRONG_CASE',
+   ELEMENTDECL_CONTENT_SPEC_UNKNOWN: 'ELEMENTDECL_CONTENT_SPEC_UNKNOWN',
+   ELEMENTDECL_NO_CONTENT_SPEC_ITEMS: 'ELEMENTDECL_NO_CONTENT_SPEC_ITEMS',
+   ELEMENTDECL_NO_SPEC_CLOSE: 'ELEMENTDECL_NO_SPEC_CLOSE',
    ELEMENTDECL_NO_CLOSE: 'ELEMENTDECL_NO_CLOSE',
 
    ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
@@ -147,9 +149,11 @@ str[err.ENTITY_NO_CLOSE] = 'Missing closing ">" in the entity "{0}".';
 
 str[err.ELEMENTDECL_NO_NAME] = 'No name found for an element declaration.';
 str[err.ELEMENTDECL_NAME_NOT_NAME] = 'The element declaration name must match the syntax for names. Found: "{0}".';
-str[err.ELEMENTDECL_NO_CONTENT_TYPE] = 'No content type found for element declaration "{0}".';
-str[err.ELEMENTDECL_CONTENT_TYPE_WRONG_CASE] = 'The content type must be "{0}". Found "{1}".';
-str[err.ELEMENTDECL_CONTENT_TYPE_UNKNOWN] = 'An unknown content type was found. Found "{0}".';
+str[err.ELEMENTDECL_NO_CONTENT_SPEC] = 'No content spec found for element declaration "{0}".';
+str[err.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE] = 'The content spec must be "{0}". Found "{1}".';
+str[err.ELEMENTDECL_CONTENT_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
+str[err.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS] = 'Missing items in the content spec in element declaration "{0}".';
+str[err.ELEMENTDECL_NO_SPEC_CLOSE] = 'Missing closing ")" for content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration "{0}".';
 
 str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';

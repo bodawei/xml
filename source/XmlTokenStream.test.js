@@ -1153,16 +1153,28 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().name).toEqual('testElement');
       });
 
-      it('retrieves an ANY content type', () => {
+      it('retrieves an ANY content spec', () => {
          const s = makeStrictStream('<!ELEMENT testElement ANY>');
 
          expect(s.getNext().contentType).toEqual('ANY');
       });
 
-      it('retrieves an ANY content type', () => {
-         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+      it('retrieves an EMPTY content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement EMPTY>');
 
-         expect(s.getNext().contentType).toEqual('ANY');
+         expect(s.getNext().contentType).toEqual('EMPTY');
+      });
+
+      it('retrieves a #PCDATA content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA)>');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+      });
+
+      it('retrieves a #PCDATA content spec padded with spaces', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (    #PCDATA    )  >');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -1171,28 +1183,66 @@ describe('XmlTokenStream', () => {
             'No name found for an element declaration.');
       });
 
-      it('reports a syntax error if there is no content type', () => {
+      it('reports a syntax error if there is no content spec', () => {
          expectSyntaxError('<!ELEMENT testElement>',
-            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_TYPE,
-            'No content type found for element declaration "testElement".');
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC,
+            'No content spec found for element declaration "testElement".');
       });
 
-      it('reports a syntax error if content type is the wrong case', () => {
+      it('reports a syntax error if #PCDATA is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement ( #pcdata )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            'The content spec must be "#PCDATA". Found "#pcdata".');
+      });
+
+      it('reports a syntax error if no closing ")" on content spec', () => {
+         expectSyntaxError('<!ELEMENT testElement ( #PCDATA >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC_CLOSE,
+            'Missing closing ")" for content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if no items in the content spec', () => {
+         expectSyntaxError('<!ELEMENT testElement (  ) >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS,
+            'Missing items in the content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if no items in the content spec, including no whitespace', () => {
+         expectSyntaxError('<!ELEMENT testElement () >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS,
+            'Missing items in the content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if content spec is the wrong case', () => {
          expectSyntaxError('<!ELEMENT testElement anY>',
-            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_TYPE_WRONG_CASE,
-            'The content type must be "ANY". Found "anY".');
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            'The content spec must be "ANY". Found "anY".');
       });
 
-      it('reports a syntax error if an unknown content type is found', () => {
+      it('reports a syntax error if content spec is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement empty   >',
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            'The content spec must be "EMPTY". Found "empty".');
+      });
+
+      it('uppercases expected values', () => {
+         const s = makeLaxStream('<!ELEMENT testElement empty   >');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE);
+
+         const t = s.getNext();
+         expect(t.contentType).toEqual('EMPTY');
+      });
+
+      it('reports a syntax error if an unknown content spec is found', () => {
          expectSyntaxError('<!ELEMENT testElement BOGUS>',
-            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_TYPE_UNKNOWN,
-            'An unknown content type was found. Found "BOGUS".');
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_UNKNOWN,
+            'An unknown content spec was found. Found "BOGUS".');
       });
 
       it('gives the notation token an empty name if none is specified', () => {
          const s = makeLaxStream('<!ELEMENT >');
          ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME);
-         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_TYPE);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC);
 
          expect(s.getNext().name).toEqual('');
       });
