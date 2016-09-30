@@ -126,6 +126,17 @@ class ParameterEntityToken extends EntityToken {
 
 }
 
+class ElementDeclarationToken extends XmlToken {
+
+   constructor(name, contentType) {
+      super(XmlToken.ELEMENT_DECL);
+
+      this.name = name;
+      this.contentType = contentType;
+   }
+
+}
+
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
@@ -135,6 +146,7 @@ XmlToken.DOCTYPE = 'DocType';
 XmlToken.NOTATION = 'NotationDeclaration';
 XmlToken.ENTITY = 'EntityDeclaration';
 XmlToken.PARAMETER_ENTITY = 'ParameterEntityDeclaration';
+XmlToken.ELEMENT_DECL = 'ElementDeclaratin';
 
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
@@ -159,5 +171,6 @@ XmlToken.TagToken = TagToken;
 XmlToken.NotationToken = NotationToken;
 XmlToken.EntityToken = EntityToken;
 XmlToken.ParameterEntityToken = ParameterEntityToken;
+XmlToken.ElementDeclarationToken = ElementDeclarationToken;
 
 module.exports = XmlToken;

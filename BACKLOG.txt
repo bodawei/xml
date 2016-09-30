@@ -7,30 +7,35 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
 7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
-7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint [changing to timebox] = 32 sprints. ACTUAL: 6
+7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint = 32 sprints. ACTUAL: 6 see Note5
 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
-9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 
+9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
+9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 
 
--- next: 88
+-- next: 91
 ---------------------------------------------
 
-√ [70]   	EntityDecl	   ::=   	GEDecl | PEDecl
-√ [71]   	GEDecl	   ::=   	'<!ENTITY' S Name S EntityDef S? '>'
-√ [72]   	PEDecl	   ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
-√ [73]   	EntityDef	   ::=   	EntityValue | (ExternalID NDataDecl?)
-√ [74]   	PEDef	   ::=   	EntityValue | ExternalID
-√ [76]   	NDataDecl	   ::=   	S 'NDATA' S Name
-√ [9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
-√	|  "'" ([^%&'] | PEReference | Reference)* "'"
+[45]   	elementdecl	   ::=   	'<!ELEMENT' S Name S contentspec S? '>'	[VC: Unique Element Type Declaration]
+[46]   	contentspec	   ::=   	'EMPTY' | 'ANY' | Mixed | children
+Mixed	   ::=   	'(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
+| '(' S? '#PCDATA' S? ')'	[VC: Proper Group/PE Nesting]
+[VC: No Duplicate Types]
 
-√ 81:S: Get entity with ExternalID (partial 71)
-√ 82:S: Parse a PEDecl (with %)
--- 1.5hr
-√ 83:S: Parse an NDecl after the external id
-[1.5hr left]
-84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
-	- more testing for externalid?
-	- In particular, the lack of a system id on the externalid gums up the notation
+x20:XL Read element declaration
+√ 88:S: Basic !ELEMENT with name and ANY as value with errors
+	- no content spec
+	- no name
+	- bad name
+	- case of any
+89:S: EMPTY or #PCDATA
+	- case of any
+	- case of PCData 
+90:S: Mixed
+	- names not names
+12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
+
+
 
 =============================================
 BLOG IDEAS
@@ -70,19 +75,27 @@ BUILD
 58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [7m 10s]
+--- technical debt [6m 11s]
 87:S: Handle PEReferences and character references in entity values
 77:S: Code for getting references is getting uuuuuugly
+56:S: Reorganize getAttributes, as it seems too tangled
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
 9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
 11:M: Provide some kind of internationalizable string catalog
 73:S: If error is thrown, we can still call getNextToken.  Should block that.
-12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
-	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
-13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)
-	- xmldecl, misc, element misc
+13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)  xmldecl, misc, element misc
+52:S: StringCursorSpeedup
+	- do performance test jsperf of regex vs hand parsing
+		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
+	optimize getToTerminator for single terminator case
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
+		Note: Can't do regex from an offset without doing a substr. sigh.
+85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
+57:S: Consider adding something like an EOF flag to cursor so we could layer some future version on top?
+
+53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
 44:M:Enforce 1.0 vs 1.1 line ending changes
 45:S:Review various 1.0 standards with respect to Name (and Char definitions)
@@ -90,16 +103,6 @@ PROJECT
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-53:M: use xml decl encoding to change input if needed
-52:S: StringCursorSpeedup
-	- do performance test jsperf of regex vs hand parsing
-		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
-	optimize getToTerminator for single terminator case
-	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" then do more examining?
-		Note: Can't do regex from an offset without doing a substr. sigh.
-56:S: Reorganize getAttributes, as it seems too tangled
-57:S: Consider adding something like an EOF flag to cursor so we could more easily layer some future version on top if we need?
-85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 
 ideas
 - Should extract all the declaration stuff into another file
@@ -109,17 +112,18 @@ ideas
 71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
 	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
 69:S: Rework PI and Comment to be arrays of content, just like attributes
-70:S: Recognize char entities in PI and Commands
+70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [6XL]
-20:XL Read element declaration
+--- DTD [5XL]
 21:XL Read element content structure
 22:XL read attribute declaration
 24:XL read conditional sections
 25:XL read external entities
 	including header
 26:XL Deal with parameter entities
+	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
+	- otherwise, just notice %value; and accept if in right place or barf and treat as &;
 
 --- Validity [4XL 1S]
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
@@ -464,6 +468,7 @@ SPRINT 5
 √ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
 √ 75:S: need a toEqualProps() handelr in tests for entities
 
+Note5  changing to timebox. So only put 3.5 hours into the sprint.  (not sure if this was for sprint 5 or sprint6)
 SPRINT 6
 ========
 x19:XL Read doctype: Replaced with 79-81
@@ -502,3 +507,25 @@ x19:XL Read doctype: Replaced with 79-81
 SPRINT 7
 ========
 x23:XL read entity declaration
+√ [70]   	EntityDecl	   ::=   	GEDecl | PEDecl
+√ [71]   	GEDecl	   ::=   	'<!ENTITY' S Name S EntityDef S? '>'
+√ [72]   	PEDecl	   ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
+√ [73]   	EntityDef	   ::=   	EntityValue | (ExternalID NDataDecl?)
+√ [74]   	PEDef	   ::=   	EntityValue | ExternalID
+√ [76]   	NDataDecl	   ::=   	S 'NDATA' S Name
+√ [9]   	EntityValue	   ::=   	'"' ([^%&"] | PEReference | Reference)* '"'
+√	|  "'" ([^%&'] | PEReference | Reference)* "'"
+
+√ 81:S: Get entity with ExternalID (partial 71)
+√ 82:S: Parse a PEDecl (with %)
+-- 1.5hr
+√ 83:S: Parse an NDecl after the external id
+[1.5hr left]
+84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
+	- more testing for externalid?
+	- In particular, the lack of a system id on the externalid gums up the notation
+
+Note7: We actually took 4.5 hours for this sprint when it was scheduled for 3.5.  We didn't even completely finish, because we didn't do PEReferences or char refs.  In theory we should have dropped 84 from the sprint an shipped without.  However, as it stands, we had only half done 83... that is, there was a major case which didn't work. Our priorities were wrong here, in that this would have left us with a buggy project.  we really would have needed to roll back before 83 to ship the sprint.  This would have worked better if we'd actually put the time into fixing 83's feature rather than 84.  With that said, much of the work for 84 was actually testing to make sure 81 and 83 were ok.  As I was going through the sprint, I kept saying "yeah, I'm leaving some dirt bt will clean up later". This jeopardized the whole sprint and caused overtime.  This should not be allowed again.
+Paying for this with no cleanup and no build.  This is the bad, because those are important, but it keeps the time more honest.
+This is a disaster sprint
+Moral: You should never have a checkin which leaves you in a have to rollback state.

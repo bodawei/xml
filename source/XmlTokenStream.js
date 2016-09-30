@@ -15,6 +15,7 @@ const DocTypeToken = XmlToken.DocTypeToken;
 const NotationToken = XmlToken.NotationToken;
 const EntityToken = XmlToken.EntityToken;
 const ParameterEntityToken = XmlToken.ParameterEntityToken;
+const ElementDeclarationToken = XmlToken.ElementDeclarationToken;
 
 const ERRORS = XmlErrorToken.ERROR;
 
@@ -513,6 +514,45 @@ class XmlTokenStream {
                      entityExternalId ? entityExternalId.pubidLiteral : undefined,
                      notationDataName);
                this._pendingTokens.push(entityToken);
+               return;
+            // [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
+            // [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
+            // [51] Mixed       ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
+            //                      '(' S? '#PCDATA' S? ')'
+            case 'ELEMENT':
+               const elementName = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace(); // no need to check this, as if no space, then no contentToken
+               const contentToken = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace();
+               const elementClose = this._cursor.getMatch('>');
+               let nameText;
+               let contentText;
+
+               if (!elementName) {
+                  nameText = '';
+                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_NAME);
+               } else {
+                  nameText = elementName.text;
+               }
+
+               this._assertSyntax(nameText === '' || elementName.couldBeName,
+                  ERRORS.ELEMENTDECL_NAME_NOT_NAME, [ nameText ]);
+
+               if (!contentToken) {
+                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_CONTENT_TYPE, [ nameText ]);
+               } else {
+                  contentText = contentToken.text;
+
+                  this._assertSyntax(contentText.toLocaleUpperCase() === 'ANY',
+                     ERRORS.ELEMENTDECL_CONTENT_TYPE_UNKNOWN, [ contentText ]);
+                  this._assertSyntax(contentText.toLocaleUpperCase() === contentText,
+                     ERRORS.ELEMENTDECL_CONTENT_TYPE_WRONG_CASE, [ contentText.toLocaleUpperCase(), contentText ]);
+                  // force the case of ANY etc?
+               }
+
+               this._assertSyntax(elementClose, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+
+               this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
          }
       }

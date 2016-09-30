@@ -1040,7 +1040,7 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if there is no closing angle bracket', () => {
          expectSyntaxError('<!ENTITY entityName PUBLIC "publicValue"',
             XmlErrorToken.ERROR.ENTITY_NO_CLOSE,
-            'Mising closing ">" in the entity "entityName".');
+            'Missing closing ">" in the entity "entityName".');
       });
 
       it('reports a syntax error if there is no space after the entity name', () => {
@@ -1134,6 +1134,79 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('paramEntityName');
+      });
+
+   });
+
+   describe('parsing ELEMENT', () => {
+
+      it('retrieves a token of type ELEMENT_DECL', () => {
+         const s = makeStrictStream('<!ELEMENT elementName ANY>');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ELEMENT_DECL);
+      });
+
+      it('retrieves the name of the element', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+
+         expect(s.getNext().name).toEqual('testElement');
+      });
+
+      it('retrieves an ANY content type', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+
+         expect(s.getNext().contentType).toEqual('ANY');
+      });
+
+      it('retrieves an ANY content type', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+
+         expect(s.getNext().contentType).toEqual('ANY');
+      });
+
+      it('reports a syntax error if there is no element name', () => {
+         expectSyntaxError('<!ELEMENT >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME,
+            'No name found for an element declaration.');
+      });
+
+      it('reports a syntax error if there is no content type', () => {
+         expectSyntaxError('<!ELEMENT testElement>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_TYPE,
+            'No content type found for element declaration "testElement".');
+      });
+
+      it('reports a syntax error if content type is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement anY>',
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_TYPE_WRONG_CASE,
+            'The content type must be "ANY". Found "anY".');
+      });
+
+      it('reports a syntax error if an unknown content type is found', () => {
+         expectSyntaxError('<!ELEMENT testElement BOGUS>',
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_TYPE_UNKNOWN,
+            'An unknown content type was found. Found "BOGUS".');
+      });
+
+      it('gives the notation token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!ELEMENT >');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_TYPE);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('reports a syntax error if the actual name is not a name', () => {
+         expectSyntaxError('<!ELEMENT $badName ANY>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NAME_NOT_NAME,
+            'The element declaration name must match the syntax for names. Found: "$badName".');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!ELEMENT elemName ANY ',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CLOSE,
+            'Missing closing ">" in the element declaration "elemName".');
       });
 
    });
