@@ -845,7 +845,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the actual type name is not a name', () => {
          expectSyntaxError('<!DOCTYPE $frog [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_TYPE_NOT_NAME,
+            XmlErrorToken.ERROR.DOCTYPE_TYPE_NAME_INVALID,
             'The name of the DOCTYPE does not match the syntax for names. Found: "$frog".');
       });
 
@@ -921,7 +921,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the actual type name is not a name', () => {
          expectSyntaxError('<!NOTATION $frog PUBLIC "foo">',
-            XmlErrorToken.ERROR.NOTATION_NAME_NOT_NAME,
+            XmlErrorToken.ERROR.NOTATION_NAME_NAME_INVALID,
             'The name of the NOTATION does not match the syntax for names. Found: "$frog".');
       });
 
@@ -1024,7 +1024,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the name does not match the syntax for names', () => {
          expectSyntaxError('<!ENTITY $badName "value">',
-            XmlErrorToken.ERROR.ENTITY_NAME_NOT_NAME,
+            XmlErrorToken.ERROR.ENTITY_NAME_NAME_INVALID,
             'The entity name must match the syntax for names. Found: "$badName".');
       });
 
@@ -1177,6 +1177,24 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
       });
 
+      it('retrieves multiple names from the content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA | one|two |three)>');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA', 'one', 'two', 'three' ]);
+      });
+
+      it('retrieves names from the content spec regardless of spaces around "|"s', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (zero | one|two |three)>');
+
+         expect(s.getNext().contentType).toEqual([ 'zero', 'one', 'two', 'three' ]);
+      });
+
+      it('retrieves names from the content spec preserving their case', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
+
+         expect(s.getNext().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
+      });
+
       it('reports a syntax error if there is no element name', () => {
          expectSyntaxError('<!ELEMENT >',
             XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME,
@@ -1193,6 +1211,37 @@ describe('XmlTokenStream', () => {
          expectSyntaxError('<!ELEMENT testElement ( #pcdata )>',
             XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
             'The content spec must be "#PCDATA". Found "#pcdata".');
+      });
+
+      it('reports a syntax error if #PCDATA is not in the first position', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one | #PCDATA )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_PCDATA_NOT_FIRST,
+            '#PCDATA must be in the first position in the content spec of element declaration "testElement".');
+      });
+
+      // Abandon the parsing in this ambiguous case, so as to not swallow whole doc if )> are missing
+      it('reports a syntax error if there are names without dividing "|"s', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one two three )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC_CLOSE,
+            'Missing closing ")" for content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if there are "|"s without intervening names', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one | two | ||three )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NO_NAMES,
+            '2 element name missing from the content spec in the element declaration "testElement".');
+      });
+
+      it('reports a syntax error if any names do not match the syntax for names', () => {
+         const s = makeLaxStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
+
+         let t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_BAD);
+         expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "$bogus".');
+
+         t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_BAD);
+         expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "bogus2!".');
       });
 
       it('reports a syntax error if no closing ")" on content spec', () => {
@@ -1249,7 +1298,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the actual name is not a name', () => {
          expectSyntaxError('<!ELEMENT $badName ANY>',
-            XmlErrorToken.ERROR.ELEMENTDECL_NAME_NOT_NAME,
+            XmlErrorToken.ERROR.ELEMENTDECL_NAME_NAME_INVALID,
             'The element declaration name must match the syntax for names. Found: "$badName".');
       });
 
@@ -1563,7 +1612,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if the name does not match the name syntax', () => {
          expectSyntaxError('<?frog$ glorky?>',
-            XmlErrorToken.ERROR.PI_TARGET_NOT_NAME,
+            XmlErrorToken.ERROR.PI_TARGET_NAME_INVALID,
             'The target name must match the syntax for names. Found: "frog$".');
       });
 

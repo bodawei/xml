@@ -11,6 +11,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 
+	#210 min
 
 -- next: 91
 ---------------------------------------------
@@ -30,8 +31,11 @@ x20:XL Read element declaration
 √ 89:S: EMPTY or #PCDATA
 	- case of empty
 	- case of PCData 
-90:S: Mixed
+90:S: Mixed. note that name can be terminated by | as well as )
 	- names not names
+	- pcdata not first
+	- missing | (e.g. count when don't see it, report later)
+	- missing name. just count as well.
 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
 	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
 

@@ -365,7 +365,7 @@ class XmlTokenStream {
                }
 
                if (docTypeName && !docTypeName.couldBeName) {
-                  this._reportSyntaxError(ERRORS.DOCTYPE_TYPE_NOT_NAME,
+                  this._reportSyntaxError(ERRORS.DOCTYPE_TYPE_NAME_INVALID,
                      'The name of the DOCTYPE does not match the syntax for names. Found: "' +
                         docTypeName.text + '".');
                }
@@ -414,7 +414,7 @@ class XmlTokenStream {
                const closing = this._cursor.getMatch('>');
 
                if (notionName && notionName.text !== '' && !notionName.couldBeName) {
-                  this._reportSyntaxError(ERRORS.NOTATION_NAME_NOT_NAME,
+                  this._reportSyntaxError(ERRORS.NOTATION_NAME_NAME_INVALID,
                      'The name of the NOTATION does not match the syntax for names. Found: "' +
                         notionName.text + '".');
                }
@@ -499,7 +499,7 @@ class XmlTokenStream {
 
                this._assertSyntax(value || entityExternalId, ERRORS.ENTITY_NO_VALUE, [ entityName.text ]);
                this._assertSyntax(entityName && (entityName.text === '' || entityName.couldBeName),
-                  ERRORS.ENTITY_NAME_NOT_NAME, [ entityName.text ]);
+                  ERRORS.ENTITY_NAME_NAME_INVALID, [ entityName.text ]);
                this._assertSyntax(entityClosing, ERRORS.ENTITY_NO_CLOSE, [ entityName.text ]);
 
                const entityToken = isParameter ?
@@ -525,24 +525,45 @@ class XmlTokenStream {
                let contentToken;
                let contentList;
                let listClose = true;
+               let missingNames = 0;
 
                const elementName = this._cursor.getWord([ '>' ]);
                this._cursor.getSpace(); // no need to check this, as if no space, then no contentToken
                const mixedStart = this._cursor.peekChar();
-               if (mixedStart && mixedStart.text === '(') {
-                  contentList = [];
-                  this._cursor.getChar();
-                  this._cursor.getSpace();
-                  const word = this._cursor.getWord([ '>', ')' ]);
-                  this._cursor.getSpace();
-                  listClose = this._cursor.getMatch(')');
 
-                  if (word) {
-                     contentList.push(word);
-                  }
-               } else {
+               if (!mixedStart || mixedStart.text !== '(') {
                   contentToken = this._cursor.getWord([ '>' ]);
+               } else {
+                  let done = false;
+                  contentList = [];
+
+                  this._cursor.getChar();
+
+                  while (!done) {
+                     let gotOr = false;
+                     this._cursor.getSpace();
+                     const elemName = this._cursor.getWord([ '>', ')', '|' ]);
+                     this._cursor.getSpace();
+                     const orChar = this._cursor.peekChar();
+                     if (orChar && orChar.text === '|') {
+                        this._cursor.getChar();
+                        gotOr = true;
+                     }
+                     this._cursor.getSpace();
+                     listClose = this._cursor.getMatch(')');
+
+                     if (elemName) {
+                        contentList.push(elemName);
+                     } else {
+                        missingNames++;
+                     }
+
+                     if (listClose || !gotOr) {
+                        done = true;
+                     }
+                  }
                }
+
                this._cursor.getSpace();
                const elementClose = this._cursor.getMatch('>');
 
@@ -554,21 +575,32 @@ class XmlTokenStream {
                }
 
                this._assertSyntax(nameText === '' || elementName.couldBeName,
-                  ERRORS.ELEMENTDECL_NAME_NOT_NAME, [ nameText ]);
+                  ERRORS.ELEMENTDECL_NAME_NAME_INVALID, [ nameText ]);
 
                if (!contentToken && !contentList) {
                   this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_CONTENT_SPEC, [ nameText ]);
                } else if (contentList) {
                   contentText = [];
-                  this._assertSyntax(contentList.length, ERRORS.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS, [ nameText ]);
+
+                  this._assertSyntax(missingNames === 0 || contentList.length === 0,
+                     ERRORS.ELEMENTDECL_CONTENT_SPEC_NO_NAMES, [ missingNames, nameText ]);
+                  this._assertSyntax(contentList.length > 0, ERRORS.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS, [ nameText ]);
 
                   for (let index = 0; index < contentList.length; index++) {
                      const item = contentList[index];
 
-                     this._assertSyntax(item.text === '#PCDATA',
-                        ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ '#PCDATA', item.text ]);
-                     contentText.push('#PCDATA');
+                     if (item.text.toLocaleUpperCase() === '#PCDATA') {
+                        this._assertSyntax(item.text === '#PCDATA',
+                           ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ '#PCDATA', item.text ]);
+                        this._assertSyntax(index === 0, ERRORS.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
+
+                        contentText.push('#PCDATA');
+                     } else {
+                        this._assertSyntax(item.couldBeName, ERRORS.ELEMENTDECL_CONTENT_SPEC_NAME_BAD, [ item.text ]);
+                        contentText.push(item.text);
+                     }
                   }
+                  this._assertSyntax(listClose, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                } else {
                   contentText = contentToken.text;
                   const upperText = contentToken.text.toLocaleUpperCase();
@@ -576,11 +608,10 @@ class XmlTokenStream {
                   this._assertSyntax(upperText === 'ANY' || upperText === 'EMPTY',
                      ERRORS.ELEMENTDECL_CONTENT_SPEC_UNKNOWN, [ contentText ]);
                   this._assertSyntax(upperText === contentText,
-                     ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ contentText.toLocaleUpperCase(), contentText ]);
+                     ERRORS.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE, [ upperText, contentText ]);
                   contentText = upperText;
                }
 
-               this._assertSyntax(listClose, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                this._assertSyntax(elementClose, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
@@ -806,7 +837,7 @@ class XmlTokenStream {
       if (!target) {
          this._reportSyntaxError(ERRORS.PI_NO_TARGET);
       } else if (!target.couldBeName) {
-         this._reportSyntaxError(ERRORS.PI_TARGET_NOT_NAME, [ target.text ]);
+         this._reportSyntaxError(ERRORS.PI_TARGET_NAME_INVALID, [ target.text ]);
       }
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
