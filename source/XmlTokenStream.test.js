@@ -188,27 +188,15 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('wow ');
       });
 
-      it('throws an error if there is a ]]> in the CharData', () => {
-         const s = makeStrictStream('blah blah ]]> blah');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Found unexpected "]]>" in chardata.');
-      });
-
-      it('generates an error token if there is a ]]> in the CharData', () => {
-         const s = makeLaxStream('testing testing ]]> testing');
-
-         const t = s.getNext();
-         expect(t).toEqualProps({
-            type: XmlToken.SYNTAX_ERROR,
-            code: XmlErrorToken.ERROR.CHARDATA_BAD_DATA
-         });
+      it('throws an error token if there is a ]]> in the CharData', () => {
+         expectSyntaxError('testing testing ]]> testing',
+            XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT,
+            '"]]>" must not appear in in character data.');
       });
 
       it('includes the "]]>" as char data in lax mode', () => {
          const s = makeLaxStream('testing testing ]]>testing');
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_BAD_DATA);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
 
          expect(s.getNext().data).toEqual('testing testing ');
          expect(s.getNext().data).toEqual(']]>');
@@ -257,138 +245,64 @@ describe('XmlTokenStream', () => {
          expect(t.data).toEqual('N');
       });
 
-      it('reports an error if there is a space after the &', () => {
-         const s = makeStrictStream('& #65;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unexpected space after & in reference.');
-      });
-
-      it('generates an error token in lax mode if there is a space after the &', () => {
-         const s = makeLaxStream('& #65;');
-
-         const t = s.getNext();
-         expect(t).toEqualProps({
-            type: XmlToken.SYNTAX_ERROR,
-            code: XmlErrorToken.ERROR.REFERENCE_ILLEGAL_SPACE
-         });
+      it('throws an error if there is a space after the &', () => {
+         expectSyntaxError('& #65;',
+            XmlErrorToken.ERROR.REFERENCE_XTRA_SPACE,
+            'Must not have space in an entity reference.');
       });
 
       it('reports an error if there is a space after the #', () => {
-         const s = makeStrictStream('&# 65;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unexpected space after # in character entity reference.');
+         expectSyntaxError('&# 65;',
+            XmlErrorToken.ERROR.CHARREF_XTRA_SPACE,
+            'Must not have a space after the "#" in a character reference.');
       });
 
       it('generates an error token in lax mode if there is a space after the #', () => {
          const s = makeLaxStream('&# 65;');
 
          const t = s.getNext();
-         expect(t).toBeSyntaxError(XmlErrorToken.ERROR.CHAR_REFERENCE_ILLEGAL_SPACE);
+         expect(t).toBeSyntaxError(XmlErrorToken.ERROR.CHARREF_XTRA_SPACE);
       });
 
-      it('reports an error if the "x" in a hex reference is the wrong case', () => {
-         const s = makeStrictStream('&#X41;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Case of the "x" in a hexadecimal character entity reference is wrong.');
-      });
-
-      it('generates an error token in lax mode if the "x" in a hex reference is the wrong case', () => {
-         const s = makeLaxStream('&#X41;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_CASE_WRONG);
+      it('throws an error if the "x" in a hex reference is the wrong case', () => {
+         expectSyntaxError('&#X41;',
+            XmlErrorToken.ERROR.CHARREF_INVALID_HEX_CASE,
+            '"x" in a hexadecimal character reference must be lower case.');
       });
 
       it('reports an error if a space is found after the  "x" in a hex reference', () => {
-         const s = makeStrictStream('&#x 41;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unexpected space before digits in a character entity reference.');
+         expectSyntaxError('&#x 41;',
+            XmlErrorToken.ERROR.CHARREF_XTRA_SPACE_BEFORE_DIGITS,
+            'Must not have spaces before digits in a character reference.');
       });
 
-      it('generates an error token in lax mode if a space is found after the  "x" in a hex reference', () => {
-         const s = makeLaxStream('&#x 41;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
+      it('reports an error if no digits found in a character reference', () => {
+         expectSyntaxError('&#;',
+            XmlErrorToken.ERROR.CHARREF_NO_DIGITS,
+            'Missing digits in a character reference.');
       });
 
-      it('reports an error if no digits found in a character entity reference', () => {
-         const s = makeStrictStream('&#;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('No digits found in a character entity reference.');
+      it('throws an error if space is found after digits in a character reference', () => {
+         expectSyntaxError('&#12 ;',
+            XmlErrorToken.ERROR.CHARREF_XTRA_SPACE_AFTER_DIGITS,
+            'Must not have spaces after digits in a character reference.');
       });
 
-      it('generates an error token in lax mode if no digits found in a character entity reference', () => {
-         const s = makeLaxStream('&#;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_NO_DIGITS);
+      it('throws an error if no semicolon is found after digits in a character reference', () => {
+         expectSyntaxError('&#12</end>',
+            XmlErrorToken.ERROR.CHARREF_NO_SEMICOLON,
+            'Must have a ";" after a character reference.');
       });
 
-      it('reports an error if space is found after digits in a character entity reference', () => {
-         const s = makeStrictStream('&#12 ;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unexpected spaces found after the digits of a character entity reference.');
-      });
-
-      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeLaxStream('&#12 ;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
-      });
-
-      it('reports an error if space is found after digits in a character entity reference', () => {
-         const s = makeStrictStream('&#12</end>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Semicolon missing from character entity reference.');
-      });
-
-      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeLaxStream('&#12</end>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_MISSING_SEMICOLON);
-      });
-
-      it('reports an error if hex digits found in a decimal character entity reference', () => {
-         const s = makeStrictStream('&#4e;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('A character entity reference was specified as decimal (&#digits;) but included hex digits.');
-      });
-
-      it('generates an error token in lax mode if space is found after digits in a character entity reference', () => {
-         const s = makeLaxStream('&#4e;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+      it('reports an error if hex digits found in a decimal character reference', () => {
+         expectSyntaxError('&#4e;',
+            XmlErrorToken.ERROR.CHARREF_INVALID_BASE,
+            'A decimal character reference must not contain hex digits. Found "4e".');
       });
 
       it('recognizes hex digits even if specified as decimal', () => {
          const s = makeLaxStream('&#4e;');
-         ignoreError(s, XmlErrorToken.ERROR.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+         ignoreError(s, XmlErrorToken.ERROR.CHARREF_INVALID_BASE);
 
          expect(s.getNext().data).toEqual('N');
       });
@@ -419,57 +333,26 @@ describe('XmlTokenStream', () => {
    describe('parsing entity reference', () => {
 
       it('throws an error if there is no entity name', () => {
-         const s = makeStrictStream('&;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('No entity name found.');
-      });
-
-      it('generates an error token in lax mode if there is no entity name', () => {
-         const s = makeLaxStream('&;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_NO_NAME);
+         expectSyntaxError('&;',
+            XmlErrorToken.ERROR.REFERENCE_NO_NAME,
+            'Missing name in entity reference.');
       });
 
       it('throws an error if there is a space after the entity name', () => {
-         const s = makeStrictStream('&frog ;');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('A space was found after the entity name "frog".');
-      });
-
-      it('generates an error token in lax mode if space is found after entity name', () => {
-         const s = makeLaxStream('&frog ;');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
+         expectSyntaxError('&frog ;',
+            XmlErrorToken.ERROR.REFERENCE_XTRA_TRAILING_SPACE,
+            'Must not have a space after the entity reference "frog".');
       });
 
       it('throws an error if there is no closing semicolon', () => {
-         const s = makeStrictStream('&frog');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('A reference was found without a closing semicolon.');
-      });
-
-      it('generates an error token in lax mode if there is no closing semicolon', () => {
-         const s = makeLaxStream('&frog ');
-         ignoreError(s, XmlErrorToken.ERROR.REFERENCE_ILLEGAL_TRAILING_SPACE);
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.REFERENCE_NO_SEMICOLON);
+         expectSyntaxError('&frog',
+            XmlErrorToken.ERROR.REFERENCE_NO_SEMICOLON,
+            'Missing semicolon after entity reference "frog".');
       });
 
       it('expands entitys', () => {
          const s = makeStrictStream('&quot;');
-         const startToken = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
+         const startToken = new XmlToken(XmlToken.ENTITY_START, 'quot');
          startToken.haveEntityData = true;
 
          let token = s.getNext();
@@ -480,7 +363,7 @@ describe('XmlTokenStream', () => {
          expect(token).toEqual(new XmlToken(XmlToken.CHARDATA, '"'));
          token = s.getNext();
          token.chunks = undefined;
-         expect(token).toEqual(new XmlToken(XmlToken.ENTITYDECL_END, 'quot'));
+         expect(token).toEqual(new XmlToken(XmlToken.ENTITY_END, 'quot'));
 
       });
 
@@ -494,7 +377,7 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('root');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
          expect(token.data).toEqual('level1');
 
          token = s.getNext();
@@ -502,11 +385,11 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('child');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
          expect(token.data).toEqual('level2');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
+         expect(token.type).toEqual(XmlToken.ENTITY_START);
          expect(token.data).toEqual('quot');
 
          token = s.getNext();
@@ -514,7 +397,7 @@ describe('XmlTokenStream', () => {
          expect(token.data).toEqual('"');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
          expect(token.data).toEqual('quot');
 
          token = s.getNext();
@@ -522,7 +405,7 @@ describe('XmlTokenStream', () => {
          expect(token.data).toEqual('A');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
          expect(token.data).toEqual('level2');
 
          token = s.getNext();
@@ -530,7 +413,7 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('child');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
+         expect(token.type).toEqual(XmlToken.ENTITY_END);
          expect(token.data).toEqual('level1');
 
          token = s.getNext();
@@ -590,90 +473,46 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if EOF found in middle', () => {
-         const s = makeStrictStream('<![CDATA[junk comment');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Closing ]]> not found for CDATA section.');
-      });
-
-      it('generates an error token in lax mode if EOF found in middle', () => {
-         const s = makeLaxStream('<![CDATA[junk comment');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+         expectSyntaxError('<![CDATA[junk comment',
+            XmlErrorToken.ERROR.CDATA_NO_CLOSE,
+            'Missing closing "]]>" in CDATA section.');
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
          const s = makeLaxStream('<![CDATA[ junk cdata');
-         ignoreError(s, XmlErrorToken.ERROR.CDATA_MISSING_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.CDATA_NO_CLOSE);
 
          expect(s.getNext().data).toEqual(' junk cdata');
       });
 
       it('throws an error if space found before first square bracket', () => {
-         const s = makeStrictStream('<! [CDATA[junk comment ]]>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found before opening "[".');
-      });
-
-      it('generates an error token in lax mode if EOF found in middle', () => {
-         const s = makeLaxStream('<! [CDATA[junk comment ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.SPACE_BEFORE_SQUARE_BRACKET);
+         expectSyntaxError('<! [CDATA[junk comment ]]>',
+            XmlErrorToken.ERROR.BRACKETITEM_XTRA_SPACE_BEFORE,
+            'Must not have space before opening "[".');
       });
 
       it('throws an error if space found before CDATA', () => {
-         const s = makeStrictStream('<![   CDATA[junk comment ]]>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found before CDATA.');
-      });
-
-      it('generates an error token in lax mode if space found CDATA', () => {
-         const s = makeLaxStream('<![ CDATA[junk comment ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_SPACE_BEFORE_NAME);
+         expectSyntaxError('<![   CDATA[junk comment ]]>',
+            XmlErrorToken.ERROR.CDATA_XTRA_SPACE_BEFORE,
+            'Must not have space before CDATA.');
       });
 
       it('throws an error if space found after CDATA', () => {
-         const s = makeStrictStream('<![CDATA    [junk comment ]]>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found after CDATA.');
-      });
-
-      it('generates an error token in lax mode if space found after CDATA', () => {
-         const s = makeLaxStream('<![CDATA   [junk comment ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_SPACE_AFTER_NAME);
+         expectSyntaxError('<![CDATA    [junk comment ]]>',
+            XmlErrorToken.ERROR.CDATA_XTRA_SPACE_AFTER,
+            'Must not have space after CDATA.');
       });
 
       it('throws an error if CDATA has wrong case', () => {
-         const s = makeStrictStream('<![cDaTa[junk comment ]]>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('"CDATA" must be all capital. found "cDaTa".');
+         expectSyntaxError('<![cDaTa[junk comment ]]>',
+            XmlErrorToken.ERROR.CDATA_INVALID_CASE,
+            '"CDATA" must be capitalized. Found "cDaTa".');
       });
 
       it('generates an error token in lax mode if space found after CDATA', () => {
-         const s = makeLaxStream('<![cdata[junk comment ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CDATA_NOT_CAPITALIZED);
+         expectSyntaxError('<![cdata[junk comment ]]>',
+            XmlErrorToken.ERROR.CDATA_INVALID_CASE,
+            '"CDATA" must be capitalized. Found "cdata".');
       });
 
       it('retrieves the expected chunks', () => {
@@ -695,123 +534,75 @@ describe('XmlTokenStream', () => {
    describe('parsing BangItem', () => {
 
       it('reports an error if an unknown bang item found', () => {
-         const s = makeStrictStream('<!FISH ');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unsupported "<!" item.');
+         expectSyntaxError('<!FISH ',
+            XmlErrorToken.ERROR.BANGITEM_UNKNOWN,
+            'Unkown "<!" item.');
       });
 
-      it('reports an error if an unknown name appears in a <![xxx[ construction', () => {
-         const s = makeStrictStream('<![Test[');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Unknown Bang-bracket item. Found "Test".');
-      });
-
-      it('generates an error token in lax mode if an unknown name appears in a <![xxx[ construction', () => {
-         const s = makeLaxStream('<![Testing[ ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_UNKNOWN_BRACKET_NAME);
+      it('throws an error if an unknown name appears in a <![xxx[ construction', () => {
+         expectSyntaxError('<![Test[ ]]',
+            XmlErrorToken.ERROR.BRACKETITEM_UNKNOWN,
+            'Unknown "<![" item. Found "Test".');
       });
 
       it('reports an error if there is no name provided', () => {
-         const s = makeStrictStream('<![[');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('No target name provided in the <![name[ construction.');
+         expectSyntaxError('<![[',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_NAME,
+            'Missing name in a "<![" item.');
       });
 
       it('generates an error token in lax mode if there is no name provided', () => {
-         const s = makeLaxStream('<![[ ]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+         expectSyntaxError('<![[ ]]>',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_NAME,
+            'Missing name in a "<![" item.');
       });
 
       it('generates an error token in lax mode if EOF in the middle of the constructon', () => {
-         const s = makeLaxStream('<![');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_NO_NAME);
+         expectSyntaxError('<![',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_NAME,
+            'Missing name in a "<![" item.');
       });
 
       it('reports an error if there is no second square bracket', () => {
-         const s = makeStrictStream('<![Name ]]>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Second square bracket missing.');
+         expectSyntaxError('<![Name ]]>',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_SECOND_BRACKET,
+            'Missing a second opening square bracket.');
       });
 
       it('generates an error token in lax mode if there is no second square bracket', () => {
-         const s = makeLaxStream('<![Testing]]>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+         expectSyntaxError('<![Testing]]>',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_SECOND_BRACKET,
+            'Missing a second opening square bracket.');
       });
 
       it('generates an error token in lax mode if there is an EOF before the second [', () => {
-         const s = makeLaxStream('<![Testing');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.BANGITEM_MISSING_SECOND_SQUARE);
+         expectSyntaxError('<![Testing',
+            XmlErrorToken.ERROR.BRACKETITEM_NO_SECOND_BRACKET,
+            'Missing a second opening square bracket.');
       });
 
       it('reports an error if a space is found before the name', () => {
-         const s = makeStrictStream('<! NAME>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Space found before name in a <!...> declaration.');
+         expectSyntaxError('<! NAME>',
+            XmlErrorToken.ERROR.BANGITEM_NAME_XTRA_SPACE_BEFORE,
+            'Must not have space before the name in a "<!" item.');
       });
 
-      it('generates an error token in lax mode if there is no second square bracket', () => {
-         const s = makeLaxStream('<! NAME>');
-
-         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_EXTRA_LEADING_SPACE);
+      it('throws an error if there is no name for the bang item', () => {
+         expectSyntaxError('<!>',
+            XmlErrorToken.ERROR.BANGITEM_NO_NAME,
+            'Must have a name for a "<!" item.');
       });
 
-      it('reports an error if there is no name for the bang item', () => {
-         const s = makeStrictStream('<!>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('No declaration found in an <!...> declaration.');
+      it('throws an error if the type name is the wrong case', () => {
+         expectSyntaxError('<!docType >',
+            XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE,
+            '"DOCTYPE" must be upper case. Found "docType".');
       });
 
-      it('generates an error token in lax mode if there is no name for the bang item', () => {
-         const s = makeLaxStream('<!>');
-
-         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_NO_TYPE);
-      });
-
-      it('reports an error if the type name is the wrong case', () => {
-         const s = makeStrictStream('<!docType >');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Expected to find "DOCTYPE" but found "docType".');
-      });
-
-      it('generates an error token in lax mode if the type name is the wrong case', () => {
-         const s = makeLaxStream('<!doctype>');
-
-         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_INVALID_CASE);
-      });
-
-      it('reports a syntax error if no space after the declaration name', () => {
+      it('throws a syntax error if no space after the declaration name', () => {
          expectSyntaxError('<!DOCTYPE>',
-            XmlErrorToken.ERROR.DECLARATION_MISSING_SPACE_AFTER_NAME,
-            'No space found after the declaration name "DOCTYPE".');
+            XmlErrorToken.ERROR.BANGITEM_NAME_XTRA_SPACE_AFTER,
+            'Must not have space after "DOCTYPE" of a "<!" item.');
       });
 
    });
@@ -879,7 +670,7 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo" >');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.NOTATION);
+         expect(t.type).toEqual(XmlToken.NOTATION_DECL);
       });
 
       it('retrieves the name of the notation', () => {
@@ -946,7 +737,7 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity" >');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.ENTITY);
+         expect(t.type).toEqual(XmlToken.ENTITY_DECL);
       });
 
       it('retrieves the name of the entity', () => {
@@ -1116,7 +907,7 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.PARAMETER_ENTITY);
+         expect(t.type).toEqual(XmlToken.PARAMETERENTITY_DECL);
       });
 
       it('retrieves the NDATA name on a parameter entity', () => {
@@ -1217,7 +1008,7 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if #PCDATA is not in the first position', () => {
          expectSyntaxError('<!ELEMENT testElement ( one | #PCDATA )>',
             XmlErrorToken.ERROR.ELEMENTDECL_PCDATA_NOT_FIRST,
-            '#PCDATA must be in the first position in the content spec of element declaration "testElement".');
+            '#PCDATA must be first in the content spec of element declaration "testElement".');
       });
 
       // Abandon the parsing in this ambiguous case, so as to not swallow whole doc if )> are missing
@@ -1230,7 +1021,7 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if there are "|"s without intervening names', () => {
          expectSyntaxError('<!ELEMENT testElement ( one | two | ||three )>',
             XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NO_NAMES,
-            '2 element name missing from the content spec in the element declaration "testElement".');
+            'Missing 2 name from the content spec in the element declaration "testElement".');
       });
 
       it('reports a syntax error if any names do not match the syntax for names', () => {
@@ -2122,7 +1913,7 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity reference in the value', () => {
             const s = makeStrictStream('<elemName attr1="tw&quot;o">');
-            const start = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
+            const start = new XmlToken(XmlToken.ENTITY_START, 'quot');
             start.haveEntityData = true;
 
             const t = s.getNext();
@@ -2131,7 +1922,7 @@ describe('XmlTokenStream', () => {
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
                   start,
                   new XmlToken(XmlToken.TEXT, '"'),
-                  new XmlToken(XmlToken.ENTITYDECL_END, 'quot'),
+                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2143,11 +1934,11 @@ describe('XmlTokenStream', () => {
             s._entityManager.addEntity('foo', '<bar>&one;</bar>');   // WHITE BOX
             s._entityManager.addEntity('one', '&quot;&#x41;');
             const t = s.getNext();
-            const startFoo = new XmlToken(XmlToken.ENTITYDECL_START, 'foo');
+            const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
             startFoo.haveEntityData = true;
-            const startOne = new XmlToken(XmlToken.ENTITYDECL_START, 'one');
+            const startOne = new XmlToken(XmlToken.ENTITY_START, 'one');
             startOne.haveEntityData = true;
-            const startQuot = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
+            const startQuot = new XmlToken(XmlToken.ENTITY_START, 'quot');
             startQuot.haveEntityData = true;
 
             expect(t.attributes).toEqual([ {
@@ -2158,11 +1949,11 @@ describe('XmlTokenStream', () => {
                   startOne,
                   startQuot,
                   new XmlToken(XmlToken.TEXT, '"'),
-                  new XmlToken(XmlToken.ENTITYDECL_END, 'quot'),
+                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
                   new XmlToken(XmlToken.CHAR_REF, 'A'),
-                  new XmlToken(XmlToken.ENTITYDECL_END, 'one'),
+                  new XmlToken(XmlToken.ENTITY_END, 'one'),
                   new XmlToken(XmlToken.TEXT, '</bar>'),
-                  new XmlToken(XmlToken.ENTITYDECL_END, 'foo'),
+                  new XmlToken(XmlToken.ENTITY_END, 'foo'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2172,14 +1963,14 @@ describe('XmlTokenStream', () => {
          it('will accept a reference to an unknown entity', () => {
             const s = makeStrictStream('<elemName attr1="tw&test;o">');
             const t = s.getNext();
-            const startTest = new XmlToken(XmlToken.ENTITYDECL_START, 'test');
+            const startTest = new XmlToken(XmlToken.ENTITY_START, 'test');
             startTest.haveEntityData = false;
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
                   startTest,
-                  new XmlToken(XmlToken.ENTITYDECL_END, 'test'),
+                  new XmlToken(XmlToken.ENTITY_END, 'test'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2735,20 +2526,18 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('');
 
          expect(() => {
-            s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-               'Found a space before the xml target name.');
-         }).toThrowError('Found a space before the xml target name.');
+            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN, []);
+         }).toThrowError('Unkown "<!" item.');
       });
 
       it('includes an error token in the error', () => {
          const s = makeStrictStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
-            XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-            'Found a space before the xml target name.');
+            XmlErrorToken.ERROR.BANGITEM_UNKNOWN,
+            'Unkown "<!" item.');
 
          try {
-            s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-               'Found a space before the xml target name.');
+            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN, []);
          } catch (error) {
             expect(error.details).toEqual(expected);
          }
@@ -2758,19 +2547,39 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('');
 
          expect(() => {
-            s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-            'Found a space before the xml target name.');
+            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN);
          }).not.toThrow();
       });
 
       it('queues a syntax error token if in lax mode', () => {
          const s = makeLaxStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
-            XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-            'Found a space before the xml target name.');
+            XmlErrorToken.ERROR.BANGITEM_UNKNOWN,
+            'Unkown "<!" item.');
 
-         s._reportSyntaxError(XmlErrorToken.ERROR.SPACE_BEFORE_TARGET,
-         'Found a space before the xml target name.');
+         s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN);
+
+         expect(s.getNext()).toEqual(expected);
+      });
+
+      it('replaces parameters', () => {
+         const s = makeLaxStream('');
+         const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
+            XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE,
+            '"one" must be upper case. Found "two".');
+
+         s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE, [ 'one', 'two' ]);
+
+         expect(s.getNext()).toEqual(expected);
+      });
+
+      it('replaces only the parameters provided', () => {
+         const s = makeLaxStream('');
+         const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
+            XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE,
+            '"one" must be upper case. Found "{1}".');
+
+         s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE, [ 'one' ]);
 
          expect(s.getNext()).toEqual(expected);
       });

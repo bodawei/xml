@@ -127,7 +127,7 @@ class XmlTokenStream {
          content = this._cursor.getToTerminator([ '<', '&', ']]>' ]);
 
          if (content.terminator === ']]>') {
-            this._reportSyntaxError(ERRORS.CHARDATA_BAD_DATA);
+            this._reportSyntaxError(ERRORS.CHARDATA_INVALID_TEXT);
 
             this._pushToken(XmlToken.CHARDATA, content.chunk.text);
 
@@ -147,9 +147,7 @@ class XmlTokenStream {
       const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
 
-      if (space) {
-         this._reportSyntaxError(ERRORS.REFERENCE_ILLEGAL_SPACE);
-      }
+      this._assertSyntax(!space, ERRORS.REFERENCE_XTRA_SPACE);
 
       if (next.text === '#') {
          this._cursor.getChar();
@@ -173,16 +171,10 @@ class XmlTokenStream {
             entityCursor = this._entityManager.getEntity(entityName);
          }
 
-         if (afterSpace) {
-            this._reportSyntaxError(ERRORS.REFERENCE_ILLEGAL_TRAILING_SPACE,
-               'A space was found after the entity name "' + name.text + '".');
-         }
+         this._assertSyntax(!afterSpace, ERRORS.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+         this._assertSyntax(closingSemicolon, ERRORS.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
-         if (!closingSemicolon) {
-            this._reportSyntaxError(ERRORS.REFERENCE_NO_SEMICOLON);
-         }
-
-         const startToken = new XmlToken(XmlToken.ENTITYDECL_START, entityName);
+         const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
          startToken.haveEntityData = !!entityCursor;
 
          if (inAttribute) {
@@ -192,14 +184,14 @@ class XmlTokenStream {
                this._getAttributeReference(entityCursor, result);
             }
 
-            result.push(new XmlToken(XmlToken.ENTITYDECL_END, entityName));
+            result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
             return result;
          } else {
             startToken.chunks = this._cursor.getRecentChunks();
             this._pendingTokens.push(startToken);
 
             if (entityCursor) {
-               const endToken = new XmlToken(XmlToken.ENTITYDECL_END, entityName);
+               const endToken = new XmlToken(XmlToken.ENTITY_END, entityName);
                endToken.chunks = [];
 
                this._cursorContexts.push({
@@ -209,7 +201,7 @@ class XmlTokenStream {
 
                this._cursor = entityCursor;
             } else {
-               this._pushToken(XmlToken.ENTITYDECL_END, entityName);
+               this._pushToken(XmlToken.ENTITY_END, entityName);
             }
          }
       }
@@ -246,14 +238,10 @@ class XmlTokenStream {
       const space = this._cursor.getSpace();
       const nextChar = this._cursor.peekChar();
 
-      if (space) {
-         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_ILLEGAL_SPACE);
-      }
+      this._assertSyntax(!space, ERRORS.CHARREF_XTRA_SPACE);
 
       if (nextChar.text.toLocaleLowerCase() === 'x') {
-         if (nextChar.text !== 'x') {
-            this._reportSyntaxError(ERRORS.CHAR_REFERENCE_HEX_CASE_WRONG);
-         }
+         this._assertSyntax(nextChar.text === 'x', ERRORS.CHARREF_INVALID_HEX_CASE);
 
          isHex = true;
          this._cursor.getChar();
@@ -264,28 +252,21 @@ class XmlTokenStream {
       const afterDigitsSpace = this._cursor.getSpace();
       const semicolon = this._cursor.getMatch(';');
 
-      if (afterSpace) {
-         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_SPACE_BEFORE_DIGITS);
-      }
+      this._assertSyntax(!afterSpace, ERRORS.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
 
       if (!digits) {
-         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_NO_DIGITS);
+         this._reportSyntaxError(ERRORS.CHARREF_NO_DIGITS);
       } else {
          if (!isHex && !digits.isDecimal) {
-            this._reportSyntaxError(ERRORS.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF);
+            this._reportSyntaxError(ERRORS.CHARREF_INVALID_BASE, [ digits.text ]);
             isHex = true;
          }
 
          character = String.fromCharCode(parseInt(digits.text, isHex ? 16 : 10));
       }
 
-      if (afterDigitsSpace) {
-         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_SPACE_AFTER_DIGITS);
-      }
-
-      if (!semicolon) {
-         this._reportSyntaxError(ERRORS.CHAR_REFERENCE_MISSING_SEMICOLON);
-      }
+      this._assertSyntax(!afterDigitsSpace, ERRORS.CHARREF_XTRA_SPACE_AFTER_DIGITS);
+      this._assertSyntax(semicolon, ERRORS.CHARREF_NO_SEMICOLON);
 
       return character;
    }
@@ -319,9 +300,7 @@ class XmlTokenStream {
       const bracket = this._cursor.getMatch('[');
 
       if (bracket) {
-         if (leadingSpace) {
-            this._reportSyntaxError(ERRORS.SPACE_BEFORE_SQUARE_BRACKET);
-         }
+         this._assertSyntax(!leadingSpace, ERRORS.BRACKETITEM_XTRA_SPACE_BEFORE);
 
          this._getBracketItem();
          return;
@@ -330,25 +309,16 @@ class XmlTokenStream {
       const declarationName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
       const postDeclarationSpace = this._cursor.getSpace();
 
-      if (leadingSpace) {
-         this._reportSyntaxError(ERRORS.BANGITEM_EXTRA_LEADING_SPACE);
-      }
+      this._assertSyntax(!leadingSpace, ERRORS.BANGITEM_NAME_XTRA_SPACE_BEFORE);
 
       if (!declarationName) {
-         this._reportSyntaxError(ERRORS.BANGITEM_NO_TYPE);
+         this._reportSyntaxError(ERRORS.BANGITEM_NO_NAME);
       } else {
          const type = declarationName.text;
          const upperCaseType = type.toLocaleUpperCase();
 
-         if (type !== upperCaseType) {
-            this._reportSyntaxError(ERRORS.BANGITEM_INVALID_CASE,
-               'Expected to find "' + upperCaseType + '" but found "' + type + '".');
-         }
-
-         if (!postDeclarationSpace) {
-            this._reportSyntaxError(ERRORS.DECLARATION_MISSING_SPACE_AFTER_NAME,
-               'No space found after the declaration name "' + type + '".');
-         }
+         this._assertSyntax(type === upperCaseType, ERRORS.BANGITEM_NAME_INVALID_CASE, [ upperCaseType, type ]);
+         this._assertSyntax(postDeclarationSpace, ERRORS.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
 
          switch (upperCaseType) {
             // [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
@@ -375,9 +345,7 @@ class XmlTokenStream {
                this._cursor.getSpace();
                const doctypeClosing = this._cursor.getMatch('>');
 
-               if (!doctypeClosing) {
-                  this._reportSyntaxError(ERRORS.DOCTYPE_NO_CLOSE);
-               }
+               this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
 
                const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
                   externalId ? externalId.systemLiteral : undefined,
@@ -603,7 +571,7 @@ class XmlTokenStream {
          }
       }
 
-      this._reportSyntaxError(ERRORS.BANGITEM_UNSUPPORTED);
+      this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
    }
 
    _getBracketItem() {
@@ -612,13 +580,8 @@ class XmlTokenStream {
       const postSpace = this._cursor.getSpace();
       const secondBracket = this._cursor.getMatch('[');
 
-      if (!bracketItemType) {
-         this._reportSyntaxError(ERRORS.BANGITEM_NO_NAME);
-      }
-
-      if (!secondBracket) {
-         this._reportSyntaxError(ERRORS.BANGITEM_MISSING_SECOND_SQUARE);
-      }
+      this._assertSyntax(bracketItemType, ERRORS.BRACKETITEM_NO_NAME);
+      this._assertSyntax(secondBracket, ERRORS.BRACKETITEM_NO_SECOND_BRACKET);
 
       /*
        * Retrieve a CData section
@@ -628,29 +591,21 @@ class XmlTokenStream {
        *   [21] CDEnd   ::=  ']]>'
        */
       if (bracketItemType && bracketItemType.text.toLocaleLowerCase() === 'cdata') {
-         if (preSpace) {
-            this._reportSyntaxError(ERRORS.CDATA_SPACE_BEFORE_NAME);
-         }
-         if (bracketItemType.text !== 'CDATA') {
-            this._reportSyntaxError(ERRORS.CDATA_NOT_CAPITALIZED,
-               '"CDATA" must be all capital. found "' + bracketItemType.text + '".');
-         }
-         if (postSpace) {
-            this._reportSyntaxError(ERRORS.CDATA_SPACE_AFTER_NAME);
-         }
+         this._assertSyntax(!preSpace, ERRORS.CDATA_XTRA_SPACE_BEFORE);
+         this._assertSyntax(bracketItemType.text === 'CDATA', ERRORS.CDATA_INVALID_CASE, [ bracketItemType.text ]);
+         this._assertSyntax(!postSpace, ERRORS.CDATA_XTRA_SPACE_AFTER);
 
          const results = this._cursor.getToTerminator([ ']]>' ]);
 
          if (!results.terminator) {
-            this._reportSyntaxError(ERRORS.CDATA_MISSING_CLOSE);
+            this._reportSyntaxError(ERRORS.CDATA_NO_CLOSE);
          } else {
             this._cursor.getMatch(']]>');
          }
 
          this._pushToken(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
-         this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN_BRACKET_NAME,
-            'Unknown Bang-bracket item. Found "' + bracketItemType.text + '".');
+         this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
    }
 
@@ -754,9 +709,7 @@ class XmlTokenStream {
       const isQuote = quote && (quote.text === '"' || quote.text === '\'');
 
       if (!betweenSpace) {
-         if (literalRequired) {
-            this._reportSyntaxError(noBetweenSpace);
-         }
+         this._assertSyntax(!literalRequired, noBetweenSpace);
       }
 
       if (isQuote) {
@@ -785,9 +738,7 @@ class XmlTokenStream {
       }
 
       if (quoteIsTerminator) {
-         if (literalRequired) {
-            this._reportSyntaxError(literalMissing);
-         }
+         this._assertSyntax(!literalRequired, literalMissing);
       } else if (quote) {
          this._reportSyntaxError(noQuoteError);
          const literal = this._cursor.getWord([]);
@@ -1207,21 +1158,18 @@ class XmlTokenStream {
       return this._pendingTokens.length > 0;
    }
 
-   _assertSyntax(condition, code, message) {
+   _assertSyntax(condition, code, params) {
       if (!condition) {
-         this._reportSyntaxError(code, message);
+         this._reportSyntaxError(code, params);
       }
    }
 
-   _reportSyntaxError(code, message) {
-      if (typeof message !== 'string') {
-         const params = message;
-         message = XmlErrorToken.STRING[code];
+   _reportSyntaxError(code, params) {
+      let message = XmlErrorToken.STRING[code];
 
-         if (typeof params === 'object') {
-            for (let index = 0; index < params.length; index++) {
-               message = message.replace('{' + index + '}', params[index]);
-            }
+      if (typeof params === 'object') {
+         for (let index = 0; index < params.length; index++) {
+            message = message.replace('{' + index + '}', params[index]);
          }
       }
 

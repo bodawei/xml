@@ -95,7 +95,7 @@ class DocTypeToken extends XmlToken {
 class NotationToken extends XmlToken {
 
    constructor(name, systemLiteral, pubidLiteral) {
-      super(XmlToken.NOTATION, name);
+      super(XmlToken.NOTATION_DECL, name);
 
       this.name = name;
       this.systemLiteral = systemLiteral;
@@ -107,7 +107,7 @@ class NotationToken extends XmlToken {
 class EntityToken extends XmlToken {
 
    constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
-      super(XmlToken.ENTITY, name);
+      super(XmlToken.ENTITY_DECL, name);
 
       this.name = name;
       this.value = value;
@@ -121,7 +121,7 @@ class ParameterEntityToken extends EntityToken {
    constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
       super(name, value, systemLiteral, publicLiteral, notationDataName);
 
-      this.type = XmlToken.PARAMETER_ENTITY;
+      this.type = XmlToken.PARAMETERENTITY_DECL;
    }
 
 }
@@ -143,10 +143,10 @@ XmlToken.PI = 'ProcessingInstruction';
 
 XmlToken.XMLDECL = 'XmlDecl';
 XmlToken.DOCTYPE = 'DocType';
-XmlToken.NOTATION = 'NotationDeclaration';
-XmlToken.ENTITY = 'EntityDeclaration';
-XmlToken.PARAMETER_ENTITY = 'ParameterEntityDeclaration';
-XmlToken.ELEMENT_DECL = 'ElementDeclaratin';
+XmlToken.NOTATION_DECL = 'NotationDeclaration';
+XmlToken.ENTITY_DECL = 'EntityDeclaration';
+XmlToken.PARAMETERENTITY_DECL = 'ParameterEntityDeclaration';
+XmlToken.ELEMENT_DECL = 'ElementDeclaration';
 
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
