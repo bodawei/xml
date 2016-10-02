@@ -469,7 +469,7 @@ describe('XmlTokenStream', () => {
 
       it('expands entitys', () => {
          const s = makeStrictStream('&quot;');
-         const startToken = new XmlToken(XmlToken.ENTITY_START, 'quot');
+         const startToken = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
          startToken.haveEntityData = true;
 
          let token = s.getNext();
@@ -480,7 +480,7 @@ describe('XmlTokenStream', () => {
          expect(token).toEqual(new XmlToken(XmlToken.CHARDATA, '"'));
          token = s.getNext();
          token.chunks = undefined;
-         expect(token).toEqual(new XmlToken(XmlToken.ENTITY_END, 'quot'));
+         expect(token).toEqual(new XmlToken(XmlToken.ENTITYDECL_END, 'quot'));
 
       });
 
@@ -494,7 +494,7 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('root');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
          expect(token.data).toEqual('level1');
 
          token = s.getNext();
@@ -502,11 +502,11 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('child');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
          expect(token.data).toEqual('level2');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_START);
          expect(token.data).toEqual('quot');
 
          token = s.getNext();
@@ -514,7 +514,7 @@ describe('XmlTokenStream', () => {
          expect(token.data).toEqual('"');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
          expect(token.data).toEqual('quot');
 
          token = s.getNext();
@@ -522,7 +522,7 @@ describe('XmlTokenStream', () => {
          expect(token.data).toEqual('A');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
          expect(token.data).toEqual('level2');
 
          token = s.getNext();
@@ -530,7 +530,7 @@ describe('XmlTokenStream', () => {
          expect(token.name).toEqual('child');
 
          token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
+         expect(token.type).toEqual(XmlToken.ENTITYDECL_END);
          expect(token.data).toEqual('level1');
 
          token = s.getNext();
@@ -805,7 +805,7 @@ describe('XmlTokenStream', () => {
       it('generates an error token in lax mode if the type name is the wrong case', () => {
          const s = makeLaxStream('<!doctype>');
 
-         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_WRONG_CASE);
+         expect(s.getNext()).toBeSyntaxError(XmlErrorToken.ERROR.BANGITEM_INVALID_CASE);
       });
 
       it('reports a syntax error if no space after the declaration name', () => {
@@ -845,25 +845,26 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the actual type name is not a name', () => {
          expectSyntaxError('<!DOCTYPE $frog [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_TYPE_NAME_INVALID,
-            'The name of the DOCTYPE does not match the syntax for names. Found: "$frog".');
+            XmlErrorToken.ERROR.DOCTYPE_NAME_INVALID,
+            'The document type name must match the syntax for names. Found: "$frog".');
       });
 
       it('reports a syntax error if there is no DOCTYPE name', () => {
          expectSyntaxError('<!DOCTYPE [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_NO_NAME, 'There was no name name for the DOCTYPE.');
+            XmlErrorToken.ERROR.DOCTYPE_NO_NAME,
+            'Missing name for the document type.');
       });
 
       it('reports a syntax error if there is no closing > for the DOCTYPE', () => {
          expectSyntaxError('<!DOCTYPE foo ',
-            XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET,
-            'The closing ">" for the DOCTYPE could not be found.');
+            XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE,
+            'Missing closing ">" for in the document type.');
       });
 
       it('auto-terminates the doctype token when the > is not found as expected', () => {
          const s = makeLaxStream('<!DOCTYPE foo fish>');
-         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_MISSING_CLOSE_BRACKET);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE);
          let t = s.getNext(); // get the doctype token
 
          t = s.getNext();
@@ -889,24 +890,24 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if there is no notation name', () => {
          expectSyntaxError('<!NOTATION >',
-            XmlErrorToken.ERROR.NOTATION_MISSING_NAME,
-            'No name found for a notation declaration.');
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_NAME,
+            'Missing name for a notation declaration.');
       });
 
       it('gives the notation token an empty name if none is specified', () => {
          const s = makeLaxStream('<!NOTATION >');
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_NAME);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_SPACE_AFTER_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
 
          expect(s.getNext().name).toEqual('');
       });
 
       it('auto-terminates the notation token when the > is not found as expected', () => {
          const s = makeLaxStream('<!NOTATION myNotation fish>');
-         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID);
-         ignoreError(s, XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE);
          let t = s.getNext(); // get the notation token
 
          t = s.getNext();
@@ -915,26 +916,26 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if there is no space after the notation name', () => {
          expectSyntaxError('<!NOTATION frog>',
-            XmlErrorToken.ERROR.NOTATION_MISSING_SPACE_AFTER_NAME,
-            'No space found after the notation name "frog".');
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_SPACE_AFTER_NAME,
+            'Missing space after the name in the notation declaration "frog".');
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {
          expectSyntaxError('<!NOTATION $frog PUBLIC "foo">',
-            XmlErrorToken.ERROR.NOTATION_NAME_NAME_INVALID,
-            'The name of the NOTATION does not match the syntax for names. Found: "$frog".');
+            XmlErrorToken.ERROR.NOTATIONDECL_NAME_INVALID,
+            'The notation declaration name must match the syntax for names. Found: "$frog".');
       });
 
       it('reports a syntax error if no externalId or publicId is provided', () => {
          expectSyntaxError('<!NOTATION notationName >',
-            XmlErrorToken.ERROR.NOTATION_MISSING_EXTERNALID,
-            'The ExternalID or PublicId for the notation "notationName" declaration is missing.');
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID,
+            'Missing the external id the notation declaration "notationName".');
       });
 
       it('reports a syntax error if there is no closing angle bracket', () => {
          expectSyntaxError('<!NOTATION notationName PUBLIC "foo" ',
-            XmlErrorToken.ERROR.NOTATION_MISSING_CLOSE_BRACKET,
-            'The closing ">" for the notation "notationName" could not be found.');
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE,
+            'Missing closing ">" in the notation declaration "notationName".');
       });
 
    });
@@ -998,14 +999,14 @@ describe('XmlTokenStream', () => {
 
       it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
          const s = makeLaxStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NDATA_NO_SPACE_BEFORE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
 
          expect(s.getNext().notationDataName).toEqual('testData');
       });
 
       it('retrieves an undefined NDATA name if no name included', () => {
          const s = makeLaxStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME);
 
          expect(s.getNext().notationDataName).toBeUndefined();
       });
@@ -1018,70 +1019,70 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if there is no name', () => {
          expectSyntaxError('<!ENTITY >',
-            XmlErrorToken.ERROR.ENTITY_NO_NAME,
-            'No name found for an entity declaration.');
+            XmlErrorToken.ERROR.ENTITYDECL_NO_NAME,
+            'Missing name for an entity declaration.');
       });
 
       it('reports a syntax error if the name does not match the syntax for names', () => {
          expectSyntaxError('<!ENTITY $badName "value">',
-            XmlErrorToken.ERROR.ENTITY_NAME_NAME_INVALID,
+            XmlErrorToken.ERROR.ENTITYDECL_NAME_INVALID,
             'The entity name must match the syntax for names. Found: "$badName".');
       });
 
       it('gives the entity token an empty name if none is specified', () => {
          const s = makeLaxStream('<!ENTITY >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_NAME);
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NAME_NO_TRAILING_SPACE);
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_VALUE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NAME_NO_TRAILING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_VALUE);
 
          expect(s.getNext().name).toEqual('');
       });
 
       it('reports a syntax error if there is no closing angle bracket', () => {
          expectSyntaxError('<!ENTITY entityName PUBLIC "publicValue"',
-            XmlErrorToken.ERROR.ENTITY_NO_CLOSE,
+            XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE,
             'Missing closing ">" in the entity "entityName".');
       });
 
       it('reports a syntax error if there is no space after the entity name', () => {
          expectSyntaxError('<!ENTITY theName>',
-            XmlErrorToken.ERROR.ENTITY_NAME_NO_TRAILING_SPACE,
+            XmlErrorToken.ERROR.ENTITYDECL_NAME_NO_TRAILING_SPACE,
             'Missing space after the entity "theName".');
       });
 
       it('reports a syntax error if there is no SYSTEM, PUBLIC or entity value', () => {
          expectSyntaxError('<!ENTITY theName >',
-            XmlErrorToken.ERROR.ENTITY_NO_VALUE,
+            XmlErrorToken.ERROR.ENTITYDECL_NO_VALUE,
             'Missing value or external identifier in entity "theName".');
       });
 
       it('reports a syntax error if there is no space before the NDATA marker', () => {
          expectSyntaxError('<!ENTITY theName SYSTEM "foo"NDATA fred>',
-            XmlErrorToken.ERROR.ENTITY_NDATA_NO_SPACE_BEFORE,
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_SPACE_BEFORE,
             'Missing space before NDATA in entity "theName".');
       });
 
       it('reports a syntax error if NDATA is the wrong case', () => {
          expectSyntaxError('<!ENTITY theName SYSTEM "foo" nData fred>',
-            XmlErrorToken.ERROR.ENTITY_NDATA_WRONG_CASE,
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_INVALID_CASE,
             'NDATA in entity "theName" must be upper case. Found "nData".');
       });
 
       it('reports a syntax error if there is no NDATA name', () => {
          expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA>',
-            XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME,
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME,
             'NDATA in entity "theName" must have a name.');
       });
 
       it('reports a syntax error if there is no NDATA name with space after NDATA', () => {
          expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA  >',
-            XmlErrorToken.ERROR.ENTITY_NDATA_NO_NAME,
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME,
             'NDATA in entity "theName" must have a name.');
       });
 
       it('reports a missing ">" syntax error if there is junk after the SYSTEM', () => {
          const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" found junk  >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
 
          t = s.getNext();
@@ -1090,7 +1091,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a missing ">" syntax error if there is junk after the PUBLIC', () => {
          const s = makeLaxStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
 
          t = s.getNext();
@@ -1099,7 +1100,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a missing ">" syntax error if there is junk after the NDATA', () => {
          const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
-         ignoreError(s, XmlErrorToken.ERROR.ENTITY_NO_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
 
          t = s.getNext();
@@ -1198,7 +1199,7 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if there is no element name', () => {
          expectSyntaxError('<!ELEMENT >',
             XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME,
-            'No name found for an element declaration.');
+            'Missing name for an element declaration.');
       });
 
       it('reports a syntax error if there is no content spec', () => {
@@ -1209,7 +1210,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if #PCDATA is the wrong case', () => {
          expectSyntaxError('<!ELEMENT testElement ( #pcdata )>',
-            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE,
             'The content spec must be "#PCDATA". Found "#pcdata".');
       });
 
@@ -1236,11 +1237,11 @@ describe('XmlTokenStream', () => {
          const s = makeLaxStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
 
          let t = s.getNext();
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_BAD);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID);
          expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "$bogus".');
 
          t = s.getNext();
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_BAD);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID);
          expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "bogus2!".');
       });
 
@@ -1264,19 +1265,19 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if content spec is the wrong case', () => {
          expectSyntaxError('<!ELEMENT testElement anY>',
-            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE,
             'The content spec must be "ANY". Found "anY".');
       });
 
       it('reports a syntax error if content spec is the wrong case', () => {
          expectSyntaxError('<!ELEMENT testElement empty   >',
-            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE,
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE,
             'The content spec must be "EMPTY". Found "empty".');
       });
 
       it('uppercases expected values', () => {
          const s = makeLaxStream('<!ELEMENT testElement empty   >');
-         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE);
 
          const t = s.getNext();
          expect(t.contentType).toEqual('EMPTY');
@@ -1298,7 +1299,7 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the actual name is not a name', () => {
          expectSyntaxError('<!ELEMENT $badName ANY>',
-            XmlErrorToken.ERROR.ELEMENTDECL_NAME_NAME_INVALID,
+            XmlErrorToken.ERROR.ELEMENTDECL_NAME_INVALID,
             'The element declaration name must match the syntax for names. Found: "$badName".');
       });
 
@@ -1354,20 +1355,20 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the pubidLiteral is not quoted', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC pubid "system" [ ] >',
-            XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE,
-            'The pubidLiteral was not quoted.');
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE,
+            'Missing quotes around the public literal.');
       });
 
       it('reports a syntax error if the systemLiteral is not quoted', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" system [ ] >',
-            XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE,
-            'The systemLiteral was not quoted.');
+            XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE,
+            'Missing quotes around the system literal.');
       });
 
       it('retrieves the publicID and system literals even when unquoted', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC one two [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.PUBIDLITERAL_NOQUOTE);
-         ignoreError(s, XmlErrorToken.ERROR.SYSTEMLITERAL_NOQUOTE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE);
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('one');
@@ -1376,19 +1377,19 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the public id has illegal characters', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC \'"\' "system" [ ] >',
-            XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
-            'The public id had """ which is not a legal character.');
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found """.');
       });
 
       it('reports a syntax error if the public id has some legal and some illegal characters', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "ABCDE{" "system" [ ] >',
-            XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS,
-            'The public id had "{" which is not a legal character.');
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found "{".');
       });
 
       it('retrieves the publicID literal even when it has illegal characters', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.PUBIDLITERAL_BAD_CHARS);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS);
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('ABCDE{');
@@ -1405,13 +1406,13 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if PUBLIC is the wrong case', () => {
          expectSyntaxError('<!DOCTYPE testType PuBliC "pubid" "system" [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
-            'The PUBLIC label on a DOCTYPE was not all upper case ("PuBliC").');
+            XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
+            'The "PUBLIC" label must be all upper case. Found "PuBliC".');
       });
 
       it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
          const s = makeLaxStream('<!DOCTYPE testType public "ABCDE" "two" [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('ABCDE');
@@ -1419,13 +1420,13 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if SYSTEM is the wrong case', () => {
          expectSyntaxError('<!DOCTYPE testType SYStem "system" [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE,
-            'The SYSTEM label on a DOCTYPE was not all upper case ("SYStem").');
+            XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
+            'The "SYSTEM" label must be all upper case. Found "SYStem".');
       });
 
       it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
          const s = makeLaxStream('<!DOCTYPE testType system "ABCDE" [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_PARAM_BAD_CASE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('ABCDE');
@@ -1433,25 +1434,25 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if no space between the pubid and system', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid""system" [ ] >',
-            XmlErrorToken.ERROR.PUBLIC_NO_SPACE,
-            'No space was found beteen the publidLiteral and the systemLiteral.');
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE,
+            'Missing space beteen the public and the system literals.');
       });
 
       it('reports a syntax error if no space between SYSTEM and the literal', () => {
          expectSyntaxError('<!DOCTYPE testType SYSTEM"system" [ ] >',
-            XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE,
-            'No space was found beteen SYSTEM and the systemLiteral.');
+            XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
+            'Missing space beteen SYSTEM and the literal.');
       });
 
       it('reports a syntax error if no space between PUBLIC and the literal', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC"pubid" "system" [ ] >',
-            XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE,
-            'No space was found beteen PUBLIC and the pubidLiteral.');
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
+            'Missing space beteen PUBLIC and the literal.');
       });
 
       it('retrieves the systemLiterals even when spaces missing', () => {
          const s = makeLaxStream('<!DOCTYPE testType SYSTEM"one" [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.SYSTEM_NO_LEADING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('one');
@@ -1459,8 +1460,8 @@ describe('XmlTokenStream', () => {
 
       it('retrieves the publicID and system literals even when spaces missing', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC"one""two" [ ] >');
-         ignoreError(s, XmlErrorToken.ERROR.PUBLIC_NO_LEADING_SPACE);
-         ignoreError(s, XmlErrorToken.ERROR.PUBLIC_NO_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE);
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('one');
@@ -1469,14 +1470,14 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if there is an unknown type of external id', () => {
          expectSyntaxError('<!DOCTYPE testType FOO [ ] >',
-            XmlErrorToken.ERROR.EXTERNALID_UNKNOWN_ID,
-            'The ExternalID on a DOCTYPE had an unknown source type ("FOO").');
+            XmlErrorToken.ERROR.EXTERNALID_UNKNOWN,
+            'The external id was an unknown type. Found "FOO".');
       });
 
       it('reports a syntax error if systemLiteral is missing from a PUBLIC externalId', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" [ ] >',
-            XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING,
-            'No systemLiteral was found.');
+            XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
       });
 
       it('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
@@ -1489,14 +1490,14 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {
          expectSyntaxError('<!DOCTYPE testType SYSTEM [ ] >',
-            XmlErrorToken.ERROR.SYSTEMLITERAL_MISSING,
-            'No systemLiteral was found.');
+            XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
       });
 
       it('reports a syntax error if pubIdLiteral is missing from a PUBLIC externalId', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC [ ] >',
-            XmlErrorToken.ERROR.PUBIDLITERAL_MISSING,
-            'No pubIdLiteral was found.');
+            XmlErrorToken.ERROR.EXTERNALID_NO_PUBLIC,
+            'Missing public literal.');
       });
 
    });
@@ -1666,7 +1667,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
          expectSyntaxError('<?XmL version="1.1"?>',
-            XmlErrorToken.ERROR.XMLDECL_TARGET_WRONG_CASE,
+            XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE,
             '"xml" must be lower case. Found "XmL".');
       });
 
@@ -1693,12 +1694,12 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('No equal sign found for an attribute.');
+            }).toThrowError('"version" must be followed by an "=".');
          });
 
          it('accepts the lack of an equal sign in lax mode', () => {
             const s = makeLaxStream('<?xml version "1.1"?>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
@@ -1727,7 +1728,7 @@ describe('XmlTokenStream', () => {
 
             expect(() => {
                s.getNext();
-            }).toThrowError('No quote found for an attribute.');
+            }).toThrowError('The value for "version" must be quoted.');
          });
 
          it('throws no error in lax mode', () => {
@@ -1735,12 +1736,12 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
 
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
          });
 
          it('makes the best guess for the attr value if no quotes', () => {
             const s = makeLaxStream('<?xml version=1.1 ?>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
@@ -1748,7 +1749,7 @@ describe('XmlTokenStream', () => {
 
          it('stops at processing instruction boundary even when no quotes', () => {
             const s = makeLaxStream('<?xml version=1.1?>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
             compareXmlDeclAttribute(t.params[0], 'version', '1.1');
@@ -1756,10 +1757,10 @@ describe('XmlTokenStream', () => {
 
          it('stops at processing instruction boundary even when no equal and no quotes', () => {
             const s = makeLaxStream('<?xml version 1.1?>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
             ignoreError(s, XmlErrorToken.ERROR.XMLDECL_VERSION_INVALD);
             ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ATTR_UNKNOWN);
 
@@ -1772,7 +1773,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if there is no space after a value', () => {
          expectSyntaxError('<?xml version="1.1"encoding="usascii" standalone="yes"?>',
             XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
-            'Missing space before attribute name.');
+            '"encoding" must have a space before it.');
       });
 
       it('throws an error if no parameters are included', () => {
@@ -1843,16 +1844,16 @@ describe('XmlTokenStream', () => {
 
          it('reports a syntax error if version in wrong position', () => {
             const s = makeLaxStream('<?xml encoding="usascii" version="1.1"?>');
-            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ENCODING_WRONG_ORDER);
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID_ORDER);
 
             const t = s.getNext();
-            expect(t.code).toEqual(XmlErrorToken.ERROR.XMLDECL_VERSION_WRONG_ORDER);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.XMLDECL_VERSION_INVALID_ORDER);
             expect(t.message).toEqual('"version" must be the first attribute. Found as #1.');
          });
 
          it('throws a syntax error if version is not the right case', () => {
             expectSyntaxError('<?xml VeRsIoN="1.1" ?>',
-               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               XmlErrorToken.ERROR.XMLDECL_ATTR_INVALID_CASE,
                '"version" must be lower case. Found "VeRsIoN".');
          });
 
@@ -1881,13 +1882,13 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if encoding found in the wrong position', () => {
             expectSyntaxError('<?xml encoding="frog" version="1.1" ?>',
-               XmlErrorToken.ERROR.XMLDECL_ENCODING_WRONG_ORDER,
+               XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID_ORDER,
                '"encoding" must be after "version" and before "standalone".');
          });
 
          it('throws a syntax error if is not the right case', () => {
             expectSyntaxError('<?xml version="1.1" EnCoDiNG="bogys" ?>',
-               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               XmlErrorToken.ERROR.XMLDECL_ATTR_INVALID_CASE,
                '"encoding" must be lower case. Found "EnCoDiNG".');
          });
 
@@ -1911,7 +1912,7 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if standalone in the wrong position', () => {
             expectSyntaxError('<?xml standalone="frog" ?>',
-               XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_ORDER,
+               XmlErrorToken.ERROR.XMLDECL_STANDALONE_INVALID_ORDER,
                '"standalone" must come after "version".');
          });
 
@@ -1923,26 +1924,26 @@ describe('XmlTokenStream', () => {
 
          it('throws a syntax error if is not the right case', () => {
             expectSyntaxError('<?xml version="1.1" STANDaLoNE="yes" ?>',
-               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               XmlErrorToken.ERROR.XMLDECL_ATTR_INVALID_CASE,
                '"standalone" must be lower case. Found "STANDaLoNE".');
          });
 
          it('accepts the wrong case if lax', () => {
             expectSyntaxError('<?xml  version="1.1" STANDALONE="no" ?>',
-               XmlErrorToken.ERROR.XMLDECL_ATTR_WRONG_CASE,
+               XmlErrorToken.ERROR.XMLDECL_ATTR_INVALID_CASE,
                '"standalone" must be lower case. Found "STANDALONE".');
          });
 
          it('returns the expected standalone value, even when wrong case used', () => {
             const s = makeLaxStream('<?xml  version="1.1" standalone="NO" ?>');
-            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE);
+            ignoreError(s, XmlErrorToken.ERROR.XMLDECL_STANDALONE_INVALID_CASE);
 
             compareXmlDeclAttribute(s.getNext().params[1], 'standalone', 'no');
          });
 
          it('reports error if standalone value is wrong case', () => {
             expectSyntaxError('<?xml  version="1.1" standalone="NO" ?>',
-               XmlErrorToken.ERROR.XMLDECL_STANDALONE_WRONG_CASE,
+               XmlErrorToken.ERROR.XMLDECL_STANDALONE_INVALID_CASE,
                '"no" must be lower case. Found "NO".');
          });
 
@@ -1968,7 +1969,7 @@ describe('XmlTokenStream', () => {
 
       it('retrieves the name with a slash in it in lax mode', () => {
          const s = makeLaxStream('<n/ame>');
-         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
 
          const t = s.getNext();
          expect(t.name).toEqual('n/ame');
@@ -1977,7 +1978,7 @@ describe('XmlTokenStream', () => {
       it('retrieves an empty name if there is no name in the start tag', () => {
          const s = makeLaxStream('<>');
 
-         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_NAME);
          const t = s.getNext();
          expect(t.name).toEqual('');
       });
@@ -1994,7 +1995,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('Space found after opening of an element tag.');
+         }).toThrowError('Must not have space after opening "<" of an element tag.');
       });
 
       it('generates an error token if a space is found after the <', () => {
@@ -2002,23 +2003,13 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE);
       });
 
       it('throws an error if the name is not a name', () => {
-         const s = makeStrictStream('<9name>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('The element name does not match the syntax for names. Found: "9name".');
-      });
-
-      it('generates an error token if the name is not a name', () => {
-         const s = makeLaxStream('<9name>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+         expectSyntaxError('<9name>',
+            XmlErrorToken.ERROR.ELEMENT_NAME_INVALID,
+            'The element tag name must match the syntax for names. Found: "9name".');
       });
 
       it('generates an error token if > is missing', () => {
@@ -2026,23 +2017,13 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
       });
 
       it('throws an error if name is missing', () => {
-         const s = makeStrictStream('<>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Name missing in element tag.');
-      });
-
-      it('generates an error token if name is missing', () => {
-         const s = makeLaxStream('<>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         expectSyntaxError('<>',
+            XmlErrorToken.ERROR.ELEMENT_NO_NAME,
+            'Missing name in element tag.');
       });
 
       describe('with attributes', () => {
@@ -2141,7 +2122,7 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity reference in the value', () => {
             const s = makeStrictStream('<elemName attr1="tw&quot;o">');
-            const start = new XmlToken(XmlToken.ENTITY_START, 'quot');
+            const start = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
             start.haveEntityData = true;
 
             const t = s.getNext();
@@ -2150,7 +2131,7 @@ describe('XmlTokenStream', () => {
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
                   start,
                   new XmlToken(XmlToken.TEXT, '"'),
-                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
+                  new XmlToken(XmlToken.ENTITYDECL_END, 'quot'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2162,11 +2143,11 @@ describe('XmlTokenStream', () => {
             s._entityManager.addEntity('foo', '<bar>&one;</bar>');   // WHITE BOX
             s._entityManager.addEntity('one', '&quot;&#x41;');
             const t = s.getNext();
-            const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
+            const startFoo = new XmlToken(XmlToken.ENTITYDECL_START, 'foo');
             startFoo.haveEntityData = true;
-            const startOne = new XmlToken(XmlToken.ENTITY_START, 'one');
+            const startOne = new XmlToken(XmlToken.ENTITYDECL_START, 'one');
             startOne.haveEntityData = true;
-            const startQuot = new XmlToken(XmlToken.ENTITY_START, 'quot');
+            const startQuot = new XmlToken(XmlToken.ENTITYDECL_START, 'quot');
             startQuot.haveEntityData = true;
 
             expect(t.attributes).toEqual([ {
@@ -2177,11 +2158,11 @@ describe('XmlTokenStream', () => {
                   startOne,
                   startQuot,
                   new XmlToken(XmlToken.TEXT, '"'),
-                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
+                  new XmlToken(XmlToken.ENTITYDECL_END, 'quot'),
                   new XmlToken(XmlToken.CHAR_REF, 'A'),
-                  new XmlToken(XmlToken.ENTITY_END, 'one'),
+                  new XmlToken(XmlToken.ENTITYDECL_END, 'one'),
                   new XmlToken(XmlToken.TEXT, '</bar>'),
-                  new XmlToken(XmlToken.ENTITY_END, 'foo'),
+                  new XmlToken(XmlToken.ENTITYDECL_END, 'foo'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2191,14 +2172,14 @@ describe('XmlTokenStream', () => {
          it('will accept a reference to an unknown entity', () => {
             const s = makeStrictStream('<elemName attr1="tw&test;o">');
             const t = s.getNext();
-            const startTest = new XmlToken(XmlToken.ENTITY_START, 'test');
+            const startTest = new XmlToken(XmlToken.ENTITYDECL_START, 'test');
             startTest.haveEntityData = false;
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
                   startTest,
-                  new XmlToken(XmlToken.ENTITY_END, 'test'),
+                  new XmlToken(XmlToken.ENTITYDECL_END, 'test'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2206,92 +2187,48 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if there is a < in the attribute value', () => {
-            const s = makeStrictStream('<elementName attr1="value<">');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('An "<" was found in the value for attribute "attr1".');
-         });
-
-         it('generates an error token if there is a < in the attribute value', () => {
-            const s = makeLaxStream('<elementName attr1="value<">');
-
-            const t = s.getNext();
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
+            expectSyntaxError('<elementName attr1="value<">',
+               XmlErrorToken.ERROR.ATTRIBUTE_INVALID_VALUE,
+               'The value of attribute "attr1" must not contain "<".');
          });
 
          it('throws an error if the attribute name is not a legal XML name', () => {
-            const s = makeStrictStream('<elementName 1attr="value">');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('The attribute name does not match the syntax for names. Found: "1attr".');
-         });
-
-         it('generates an error token if name is missing', () => {
-            const s = makeLaxStream('<elementName 1attr="value">');
-
-            const t = s.getNext();
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
+            expectSyntaxError('<elementName 1attr="value">',
+               XmlErrorToken.ERROR.ATTRIBUTE_INVALID_NAME,
+               'The attribute name must match the syntax for names. Found: "1attr".');
          });
 
          it('throws an error if there is no space between attributes', () => {
             expectSyntaxError('<elementName attr1="value"attr2="value2">',
                XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
-               'Missing space before attribute name.');
+               '"attr2" must have a space before it.');
          });
 
          it('throws an error if there is no quote around the attribute value', () => {
-            const s = makeStrictStream('<elementName attr1=value>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('No quote found for an attribute.');
-         });
-
-         it('generates an error token if there is no space between attributes', () => {
-            const s = makeLaxStream('<elementName attr1=value>');
-
-            const t = s.getNext();
-
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            expectSyntaxError('<elementName attr1=value>',
+               XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE,
+               'The value for "attr1" must be quoted.');
          });
 
          it('reads a single word if there is no quote', () => {
             const s = makeLaxStream('<elementName attr1= value>');
 
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
             const t = s.getNext();
 
             compareAttribute(t.attributes[0], 'attr1', 'value');
          });
 
          it('throws an error if there is no equal sign', () => {
-            const s = makeStrictStream('<elementName attr1 "value">');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('No equal sign found for an attribute.');
-         });
-
-         it('generates an error token if there is no equal sign', () => {
-            const s = makeLaxStream('<elementName attr1 "value">');
-
-            const t = s.getNext();
-
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            expectSyntaxError('<elementName attr1 "value">',
+               XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL,
+               '"attr1" must be followed by an "=".');
          });
 
          it('throws an error if there is no value', () => {
-            const s = makeStrictStream('<elementName attr1= >');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('Missing value for an attribute.');
+            expectSyntaxError('<elementName attr1= >',
+               XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE,
+               '"attr1" must have a value.');
          });
 
          it('generates an error token if there is no value', () => {
@@ -2300,30 +2237,19 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
 
             expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
          });
 
          it('throws an error if there is no closing quote', () => {
-            const s = makeStrictStream('<elementName attr1="one>');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('No closing quote for an attribute.');
-         });
-
-         it('generates an error token if there is no closing quote', () => {
-            const s = makeLaxStream('<elementName attr1="one>');
-
-            const t = s.getNext();
-
-            expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-            expect(t.code).toEqual(XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
+            expectSyntaxError('<elementName attr1="one>',
+               XmlErrorToken.ERROR.ATTRIBUTE_NO_CLOSE_QUOTE,
+               'The value for "attr1" must close with a quote.');
          });
 
          it('infers an equal sign and reads the value if in lax mode and equal missing', () => {
             const s = makeLaxStream('<elementName attr1 "value one">');
 
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
             const t = s.getNext();
 
             compareAttribute(t.attributes[0], 'attr1', 'value one');
@@ -2331,12 +2257,12 @@ describe('XmlTokenStream', () => {
 
          it('reads a new name if both equal and quote are missing', () => {
             const s = makeLaxStream('<elementName attr1  value one>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
 
             const t = s.getNext();
 
@@ -2347,10 +2273,10 @@ describe('XmlTokenStream', () => {
 
          it('returns undefined for values when they are not present', () => {
             const s = makeLaxStream('<elementName attr1  value>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
 
             const t = s.getNext();
 
@@ -2360,10 +2286,10 @@ describe('XmlTokenStream', () => {
 
          it('considers quotes in a name to be part of the name', () => {
             const s = makeLaxStream('<elementName attr1"boo"  two=value>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_INVALID_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
 
@@ -2373,8 +2299,8 @@ describe('XmlTokenStream', () => {
 
          it('does not consider a close angle bracket to be part of the name', () => {
             const s = makeLaxStream('<elementName one>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
 
             const t = s.getNext();
 
@@ -2383,7 +2309,7 @@ describe('XmlTokenStream', () => {
 
          it('does not consider a close angle bracket to be part of the value in a bad value', () => {
             const s = makeLaxStream('<elementName one=two>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
 
@@ -2392,8 +2318,8 @@ describe('XmlTokenStream', () => {
 
          it('does not consider a close angle bracket to be part of the value when no equal', () => {
             const s = makeLaxStream('<elementName one >');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
 
             const t = s.getNext();
 
@@ -2402,9 +2328,9 @@ describe('XmlTokenStream', () => {
 
          it('considers quotes at the start of the name to be part of the name', () => {
             const s = makeLaxStream('<elementName "one="vone"  \'two=vtwo>');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_NAME);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_INVALID_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_INVALID_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
 
@@ -2414,9 +2340,9 @@ describe('XmlTokenStream', () => {
 
          it('handles eof in middle of name', () => {
             const s = makeLaxStream('<elementName nam');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_EQUAL);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_EQUAL);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             const t = s.getNext();
 
@@ -2425,8 +2351,8 @@ describe('XmlTokenStream', () => {
 
          it('handles eof after equal', () => {
             const s = makeLaxStream('<elementName name=');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             const t = s.getNext();
 
@@ -2435,8 +2361,8 @@ describe('XmlTokenStream', () => {
 
          it('handles eof in value', () => {
             const s = makeLaxStream('<elementName name="one');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_CLOSE_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             const t = s.getNext();
 
@@ -2445,8 +2371,8 @@ describe('XmlTokenStream', () => {
 
          it('handles eof at start of value', () => {
             const s = makeLaxStream('<elementName name="');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_CLOSE_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_CLOSE_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             const t = s.getNext();
 
@@ -2454,22 +2380,20 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if a < is found in an attribute', () => {
-            const s = makeStrictStream('<elementName name="myvalue<one">');
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('An "<" was found in the value for attribute "name".');
+            expectSyntaxError('<elementName name="myvalue<one">',
+               XmlErrorToken.ERROR.ATTRIBUTE_INVALID_VALUE,
+               'The value of attribute "name" must not contain "<".');
          });
 
          it('terminates start tag and continues processing if an < in an attribute value in lax mode', () => {
             const s = makeLaxStream('<elementName name="one<two">');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_INVALID_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             let t = s.getNext();
 
             compareAttribute(t.attributes[0], 'name', 'one');
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
 
             t = s.getNext();
             expect(t.name).toEqual('two"');
@@ -2488,14 +2412,14 @@ describe('XmlTokenStream', () => {
 
          it('terminates start tag if an < in a quoteless attribute value in lax mode', () => {
             const s = makeLaxStream('<elementName name=one<two">');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_BAD_VALUE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_INVALID_VALUE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             let t = s.getNext();
 
             compareAttribute(t.attributes[0], 'name', 'one');
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
 
             t = s.getNext();
             expect(t.name).toEqual('two"');
@@ -2503,8 +2427,8 @@ describe('XmlTokenStream', () => {
 
          it('terminates gracefully even when EOF at end of quoteless attribute value', () => {
             const s = makeLaxStream('<elementName name=one');
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
-            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
 
             const t = s.getNext();
 
@@ -2516,7 +2440,7 @@ describe('XmlTokenStream', () => {
                lax: true,
                'lax:allowOpenAngleBracketsInAttributeValues': true
             });
-            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_MISSING_QUOTE);
+            ignoreError(s, XmlErrorToken.ERROR.ATTRIBUTE_NO_QUOTE);
 
             const t = s.getNext();
 
@@ -2573,7 +2497,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('Space found after opening of an element tag.');
+         }).toThrowError('Must not have space after opening "<" of an element tag.');
       });
 
       it('generates an error token if a space is found after the <', () => {
@@ -2581,23 +2505,13 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE);
       });
 
       it('throws an error if the name is not a name', () => {
-         const s = makeStrictStream('<9name/>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('The element name does not match the syntax for names. Found: "9name".');
-      });
-
-      it('generates an error token if the name is not a name', () => {
-         const s = makeLaxStream('<9name/>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+         expectSyntaxError('<9name/>',
+            XmlErrorToken.ERROR.ELEMENT_NAME_INVALID,
+            'The element tag name must match the syntax for names. Found: "9name".');
       });
 
       it('throws an error if /> is missing', () => {
@@ -2613,7 +2527,7 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
       });
 
       it('generates an error token if name is missing', () => {
@@ -2622,7 +2536,7 @@ describe('XmlTokenStream', () => {
          s.getNext();
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_NO_NAME);
       });
 
       it('retrieves the expected chunks', () => {
@@ -2660,7 +2574,7 @@ describe('XmlTokenStream', () => {
       it('retrieves an empty name if there is no name in the end tag', () => {
          const s = makeLaxStream('<name></>');
          ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_NAME);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
 
          const t = s.getNext();
@@ -2690,7 +2604,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('Space found after opening of an element tag.');
+         }).toThrowError('Must not have space after opening "<" of an element tag.');
       });
 
       it('generates an error token if a space is found after the </', () => {
@@ -2699,7 +2613,7 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_LEADING_SPACE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE);
       });
 
       it('throws an error if a it finds the wrong close', () => {
@@ -2708,7 +2622,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('Got the wrong close of an end element tag.');
+         }).toThrowError('End element tag must close with ">". Found "/>".');
       });
 
       it('generates an error token if it finds the wrong close', () => {
@@ -2717,7 +2631,7 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_END_BAD_CLOSE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_END_INVALID_CLOSE);
       });
 
       it('throws an error if the name is not a name', () => {
@@ -2725,7 +2639,7 @@ describe('XmlTokenStream', () => {
 
          expect(() => {
             s.getNext();
-         }).toThrowError('The element name does not match the syntax for names. Found: "9name".');
+         }).toThrowError('The element tag name must match the syntax for names. Found: "9name".');
       });
 
       it('generates an error token if the name is not a name', () => {
@@ -2733,7 +2647,7 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_BAD_NAME);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
       });
 
       it('throws an error if > is missing', () => {
@@ -2749,23 +2663,13 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_CLOSE);
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_NO_CLOSE);
       });
 
       it('throws an error if name is missing', () => {
-         const s = makeStrictStream('</>');
-
-         expect(() => {
-            s.getNext();
-         }).toThrowError('Name missing in element tag.');
-      });
-
-      it('generates an error token if name is missing', () => {
-         const s = makeLaxStream('</>');
-
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
-         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENT_MISSING_NAME);
+         expectSyntaxError('</>',
+            XmlErrorToken.ERROR.ELEMENT_NO_NAME,
+            'Missing name in element tag.');
       });
 
       it('throws no error if the tag names match', () => {
@@ -2785,7 +2689,7 @@ describe('XmlTokenStream', () => {
          expect(() => {
             s.getNext();
             s.getNext();
-         }).toThrowError('Element end tag does not match. Expected "one" but found "two".');
+         }).toThrowError('Expected end tag "one". Found "two".');
       });
 
       it('throws an error if the end element name does not match the start, even on deeper trees', () => {
@@ -2798,7 +2702,7 @@ describe('XmlTokenStream', () => {
             s.getNext();
             s.getNext();
             s.getNext();
-         }).toThrowError('Element end tag does not match. Expected "two" but found "one".');
+         }).toThrowError('Expected end tag "two". Found "one".');
       });
 
       it('generates an error token if the end element name does not match the start', () => {

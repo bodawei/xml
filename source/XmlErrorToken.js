@@ -19,57 +19,84 @@ XmlErrorToken.ERROR = {
    XMLDECL_NO_ATTRIBUTES: 'XMLDECL_NO_ATTRIBUTES',
    XMLDECL_ATTR_UNKNOWN: 'XMLDECL_ATTR_UNKNOWN',
    XMLDECL_NO_CLOSE: 'XMLDECL_NO_CLOSE',
-   XMLDECL_ATTR_WRONG_CASE: 'XMLDECL_ATTR_WRONG_CASE',
-   XMLDECL_TARGET_WRONG_CASE: 'XMLDECL_TARGET_WRONG_CASE',
+   XMLDECL_ATTR_INVALID_CASE: 'XMLDECL_ATTR_INVALID_CASE',
+   XMLDECL_TARGET_INVALID_CASE: 'XMLDECL_TARGET_INVALID_CASE',
    XMLDECL_VERSION_INVALD: 'XMLDECL_VERSION_INVALD',
-   XMLDECL_VERSION_WRONG_ORDER: 'XMLDECL_VERSION_WRONG_ORDER',
+   XMLDECL_VERSION_INVALID_ORDER: 'XMLDECL_VERSION_INVALID_ORDER',
    XMLDECL_ENCODING_INVALID: 'XMLDECL_ENCODING_INVALID',
-   XMLDECL_ENCODING_WRONG_ORDER: 'XMLDECL_ENCODING_WRONG_ORDER',
-   XMLDECL_STANDALONE_WRONG_CASE: 'XMLDECL_STANDALONE_WRONG_CASE',
+   XMLDECL_ENCODING_INVALID_ORDER: 'XMLDECL_ENCODING_INVALID_ORDER',
    XMLDECL_STANDALONE_INVALID: 'XMLDECL_STANDALONE_INVALID',
-   XMLDECL_STANDALONE_WRONG_ORDER: 'XMLDECL_STANDALONE_WRONG_ORDER',
+   XMLDECL_STANDALONE_INVALID_CASE: 'XMLDECL_STANDALONE_INVALID_CASE',
+   XMLDECL_STANDALONE_INVALID_ORDER: 'XMLDECL_STANDALONE_INVALID_ORDER',
+
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NAME_INVALID: 'PI_TARGET_NAME_INVALID',
    PI_NO_CLOSE: 'PI_NO_CLOSE',
    PI_NO_TARGET: 'PI_NO_TARGET',
+
    COMMENT_NO_CLOSE: 'COMMENT_NO_CLOSE',
    COMMENT_ENDS_WITH_HYPHEN: 'COMMENT_ENDS_WITH_HYPHEN',
 
-   ENTITY_NO_NAME: 'ENTITY_NO_NAME',
-   ENTITY_NAME_NAME_INVALID: 'ENTITY_NAME_NAME_INVALID',
-   ENTITY_NAME_NO_TRAILING_SPACE: 'ENTITY_NAME_NO_TRAILING_SPACE',
-   ENTITY_NDATA_NO_SPACE_BEFORE: 'ENTITY_NDATA_NO_SPACE_BEFORE',
-   ENTITY_NDATA_WRONG_CASE: 'ENTITY_NDATA_WRONG_CASE',
-   ENTITY_NDATA_NO_NAME: 'ENTITY_NDATA_NO_NAME',
-   ENTITY_NO_VALUE: 'ENTITY_NO_VALUE',
-   ENTITY_NO_CLOSE: 'ENTITY_NO_CLOSE',
+   ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
+   ELEMENT_XTRA_LEADING_SPACE: 'ELEMENT_XTRA_LEADING_SPACE',
+   ELEMENT_NO_NAME: 'ELEMENT_NO_NAME',
+   ELEMENT_NAME_INVALID: 'ELEMENT_NAME_INVALID',
+   ELEMENT_NO_CLOSE: 'ELEMENT_NO_CLOSE',
+   ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
+   ELEMENT_END_INVALID_CLOSE: 'ELEMENT_END_INVALID_CLOSE',
+
+   ATTRIBUTE_INVALID_NAME: 'ATTRIBUTE_INVALID_NAME',
+   ATTRIBUTE_NO_SPACE_BEFORE_NAME: 'ATTRIBUTE_NO_SPACE_BEFORE_NAME',
+   ATTRIBUTE_NO_EQUAL: 'ATTRIBUTE_NO_EQUAL',
+   ATTRIBUTE_NO_VALUE: 'ATTRIBUTE_NO_VALUE',
+   ATTRIBUTE_NO_QUOTE: 'ATTRIBUTE_NO_QUOTE',
+   ATTRIBUTE_NO_CLOSE_QUOTE: 'ATTRIBUTE_NO_CLOSE_QUOTE',
+   ATTRIBUTE_INVALID_VALUE: 'ATTRIBUTE_INVALID_VALUE',
+
+   DOCTYPE_NO_NAME: 'DOCTYPE_NO_NAME',
+   DOCTYPE_NAME_INVALID: 'DOCTYPE_NAME_INVALID',
+   DOCTYPE_NO_CLOSE: 'DOCTYPE_NO_CLOSE',
+
+   ENTITYDECL_NO_NAME: '.ENTITYDECL_NO_NAME',
+   EXTERNALID_INVALID_CASE: 'EXTERNALID_INVALID_CASE',
+   ENTITYDECL_NAME_INVALID: 'ENTITYDECL_NAME_INVALID',
+   ENTITYDECL_NAME_NO_TRAILING_SPACE: 'ENTITYDECL_NAME_NO_TRAILING_SPACE',
+   ENTITYDECL_NDATA_NO_SPACE_BEFORE: 'ENTITYDECL_NDATA_NO_SPACE_BEFORE',
+   ENTITYDECL_NDATA_INVALID_CASE: 'ENTITYDECL_NDATA_INVALID_CASE',
+   ENTITYDECL_NDATA_NO_NAME: 'ENTITYDECL_NDATA_NO_NAME',
+   ENTITYDECL_NO_VALUE: 'ENTITYDECL_NO_VALUE',
+   ENTITYDECL_NO_CLOSE: 'ENTITYDECL_NO_CLOSE',
+
    ELEMENTDECL_NO_NAME: 'ELEMENTDECL_NO_NAME',
    ELEMENTDECL_NO_SPACE_AFTER_NAME: 'ELEMENTDECL_NO_SPACE_AFTER_NAME',
-   ELEMENTDECL_NAME_NAME_INVALID: 'ELEMENTDECL_NAME_NAME_INVALID',
+   ELEMENTDECL_NAME_INVALID: 'ELEMENTDECL_NAME_INVALID',
    ELEMENTDECL_NO_CONTENT_SPEC: 'ELEMENTDECL_NO_CONTENT_SPEC',
-   ELEMENTDECL_CONTENT_SPEC_WRONG_CASE: 'ELEMENTDECL_CONTENT_SPEC_WRONG_CASE',
+   ELEMENTDECL_CONTENT_SPEC_INVALID_CASE: 'ELEMENTDECL_CONTENT_SPEC_INVALID_CASE',
    ELEMENTDECL_CONTENT_SPEC_UNKNOWN: 'ELEMENTDECL_CONTENT_SPEC_UNKNOWN',
    ELEMENTDECL_CONTENT_SPEC_NO_ORS: 'ELEMENTDECL_CONTENT_SPEC_NO_ORS',
    ELEMENTDECL_CONTENT_SPEC_NO_NAMES: 'ELEMENTDECL_CONTENT_SPEC_NO_NAMES',
-   ELEMENTDECL_CONTENT_SPEC_NAME_BAD: 'ELEMENTDECL_CONTENT_SPEC_NAME_BAD',
+   ELEMENTDECL_CONTENT_SPEC_NAME_INVALID: 'ELEMENTDECL_CONTENT_SPEC_NAME_INVALID',
    ELEMENTDECL_PCDATA_NOT_FIRST: 'ELEMENTDECL_PCDATA_NOT_FIRST',
    ELEMENTDECL_NO_CONTENT_SPEC_ITEMS: 'ELEMENTDECL_NO_CONTENT_SPEC_ITEMS',
    ELEMENTDECL_NO_SPEC_CLOSE: 'ELEMENTDECL_NO_SPEC_CLOSE',
    ELEMENTDECL_NO_CLOSE: 'ELEMENTDECL_NO_CLOSE',
 
-   ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
-   ELEMENT_LEADING_SPACE: 'ELEMENT_LEADING_SPACE',
-   ELEMENT_MISSING_NAME: 'ELEMENT_MISSING_NAME',
-   ELEMENT_BAD_NAME: 'ELEMENT_BAD_NAME',
-   ELEMENT_MISSING_CLOSE: 'ELEMENT_MISSING_CLOSE',
-   ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
-   ATTRIBUTE_BAD_NAME: 'ATTRIBUTE_BAD_NAME',
-   ATTRIBUTE_NO_SPACE_BEFORE_NAME: 'ATTRIBUTE_NO_SPACE_BEFORE_NAME',
-   ATTRIBUTE_MISSING_QUOTE: 'ATTRIBUTE_MISSING_QUOTE',
-   ATTRIBUTE_MISSING_CLOSE_QUOTE: 'ATTRIBUTE_MISSING_CLOSE_QUOTE',
-   ATTRIBUTE_MISSING_EQUAL: 'ATTRIBUTE_MISSING_EQUAL',
-   ATTRIBUTE_BAD_VALUE: 'ATTRIBUTE_BAD_VALUE',
-   ATTRIBUTE_MISSING_VALUE: 'ATTRIBUTE_MISSING_VALUE',
+   NOTATIONDECL_NO_NAME: 'NOTATIONDECL_NO_NAME',
+   NOTATIONDECL_NAME_INVALID: 'NOTATIONDECL_NAME_INVALID',
+   NOTATIONDECL_NO_EXTERNALID: 'NOTATIONDECL_NO_EXTERNALID',
+   NOTATIONDECL_NO_SPACE_AFTER_NAME: 'NOTATIONDECL_NO_SPACE_AFTER_NAME',
+   NOTATIONDECL_NO_CLOSE: 'NOTATIONDECL_NO_CLOSE',
+
+   EXTERNALID_UNKNOWN: 'EXTERNALID_UNKNOWN',
+   EXTERNALID_PUBLIC_NO_SPACE: 'EXTERNALID_PUBLIC_NO_SPACE',
+   EXTERNALID_PUBLIC_NO_LEADING_SPACE: 'EXTERNALID_PUBLIC_NO_LEADING_SPACE',
+   EXTERNALID_SYSTEM_NO_LEADING_SPACE: 'EXTERNALID_SYSTEM_NO_LEADING_SPACE',
+   EXTERNALID_PUBLIC_INVALID_CHARS: 'EXTERNALID_PUBLIC_INVALID_CHARS',
+   EXTERNALID_PUBLIC_NO_QUOTE: 'EXTERNALID_PUBLIC_NO_QUOTE',
+   EXTERNALID_NO_PUBLIC: 'EXTERNALID_NO_PUBLIC',
+   EXTERNALID_SYSTEM_NO_QUOTE: 'EXTERNALID_SYSTEM_NO_QUOTE',
+   EXTERNALID_NO_SYSTEM: 'EXTERNALID_NO_SYSTEM',
+
    CHARDATA_BAD_DATA: 'CHARDATA_BAD_DATA',
    CDATA_MISSING_CLOSE: 'CDATA_MISSING_CLOSE',
    CDATA_SPACE_BEFORE_NAME: 'CDATA_SPACE_BEFORE_NAME',
@@ -82,7 +109,7 @@ XmlErrorToken.ERROR = {
    BANGITEM_NO_NAME: 'BANGITEM_NO_NAME',
    BANGITEM_EXTRA_LEADING_SPACE: 'BANGITEM_EXTRA_LEADING_SPACE',
    BANGITEM_NO_TYPE: 'BANGITEM_NO_TYPE',
-   BANGITEM_WRONG_CASE: 'BANGITEM_WRONG_CASE',
+   BANGITEM_INVALID_CASE: 'BANGITEM_INVALID_CASE',
    DECLARATION_MISSING_SPACE_AFTER_NAME: 'DECLARATION_MISSING_SPACE_AFTER_NAME',
    NOT_SUPPORTED: 'NOT_SUPPORTED',
    REFERENCE_ILLEGAL_SPACE: 'REFERENCE_ILLEGAL_SPACE',
@@ -95,25 +122,7 @@ XmlErrorToken.ERROR = {
    CHAR_REFERENCE_NO_DIGITS: 'CHAR_REFERENCE_NO_DIGITS',
    CHAR_REFERENCE_SPACE_AFTER_DIGITS: 'CHAR_REFERENCE_SPACE_AFTER_DIGITS',
    CHAR_REFERENCE_MISSING_SEMICOLON: 'CHAR_REFERENCE_MISSING_SEMICOLON',
-   CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF: 'CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF',
-   DOCTYPE_PARAM_BAD_CASE: 'DOCTYPE_PARAM_BAD_CASE',
-   DOCTYPE_TYPE_NAME_INVALID: 'DOCTYPE_TYPE_NAME_INVALID',
-   DOCTYPE_NO_NAME: 'DOCTYPE_NO_NAME',
-   DOCTYPE_MISSING_CLOSE_BRACKET: 'DOCTYPE_MISSING_CLOSE_BRACKET',
-   EXTERNALID_UNKNOWN_ID: 'EXTERNALID_UNKNOWN_ID',
-   PUBLIC_NO_SPACE: 'PUBLIC_NO_SPACE',
-   PUBLIC_NO_LEADING_SPACE: 'PUBLIC_NO_LEADING_SPACE',
-   SYSTEM_NO_LEADING_SPACE: 'SYSTEM_NO_LEADING_SPACE',
-   PUBIDLITERAL_BAD_CHARS: 'PUBIDLITERAL_BAD_CHARS',
-   PUBIDLITERAL_NOQUOTE: 'PUBIDLITERAL_NOQUOTE',
-   PUBIDLITERAL_MISSING: 'PUBIDLITERAL_MISSING',
-   SYSTEMLITERAL_NOQUOTE: 'SYSTEMLITERAL_NOQUOTE',
-   SYSTEMLITERAL_MISSING: 'SYSTEMLITERAL_MISSING',
-   NOTATION_MISSING_NAME: 'NOTATION_MISSING_NAME',
-   NOTATION_NAME_NAME_INVALID: 'NOTATION_NAME_NAME_INVALID',
-   NOTATION_MISSING_EXTERNALID: 'NOTATION_MISSING_EXTERNALID',
-   NOTATION_MISSING_SPACE_AFTER_NAME: 'NOTATION_MISSING_SPACE_AFTER_NAME',
-   NOTATION_MISSING_CLOSE_BRACKET: 'NOTATION_MISSING_CLOSE_BRACKET'
+   CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF: 'CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF'
 };
 
 XmlErrorToken.STRING = {};
@@ -122,63 +131,93 @@ const err = XmlErrorToken.ERROR;
 const str = XmlErrorToken.STRING;
 
 // THING(_SUBTHING)_PROBLEM = "THING must WHATEVER. Found OTHER"
-// THING_NO_(whatever) = "Missing WHATEVER for THING"
+// THING_NO_(whatever) = "Missing WHATEVER in a THING"
 str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML Declaration.';
 str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" in an XML Declaration.';
-str[err.XMLDECL_ATTR_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
+str[err.XMLDECL_ATTR_INVALID_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_ATTR_UNKNOWN] = 'Unknown XML Declaration parameter "{0}".';
-str[err.XMLDECL_TARGET_WRONG_CASE] = '"xml" must be lower case. Found "{0}".';
+str[err.XMLDECL_TARGET_INVALID_CASE] = '"xml" must be lower case. Found "{0}".';
 str[err.XMLDECL_VERSION_INVALD] = '"version" must be "1.0" or "1.1". Found "{0}".';
-str[err.XMLDECL_VERSION_WRONG_ORDER] = '"version" must be the first attribute. Found as #{0}.';
+str[err.XMLDECL_VERSION_INVALID_ORDER] = '"version" must be the first attribute. Found as #{0}.';
 str[err.XMLDECL_ENCODING_INVALID] = '"encoding" must be alphanumeric. Found "{0}".';
-str[err.XMLDECL_ENCODING_WRONG_ORDER] = '"encoding" must be after "version" and before "standalone".';
-str[err.XMLDECL_STANDALONE_WRONG_CASE] = '"{0}" must be lower case. Found "{1}".';
+str[err.XMLDECL_ENCODING_INVALID_ORDER] = '"encoding" must be after "version" and before "standalone".';
+str[err.XMLDECL_STANDALONE_INVALID_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_STANDALONE_INVALID] = '"standalone" must be "yes" or "no". Found "{0}".';
-str[err.XMLDECL_STANDALONE_WRONG_ORDER] = '"standalone" must come after "version".';
+str[err.XMLDECL_STANDALONE_INVALID_ORDER] = '"standalone" must come after "version".';
+
 str[err.PI_SPACE_BEFORE_TARGET] = 'Must not have a space before the target name.';
+str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';
 str[err.PI_TARGET_NAME_INVALID] = 'The target name must match the syntax for names. Found: "{0}".';
 str[err.PI_NO_CLOSE] = 'Missing closing ?> in a processing instruction.';
-str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';
+
 str[err.COMMENT_NO_CLOSE] = 'Missing closing --> in a comment.';
 str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Must not have a hyphen at end of a comment.';
 
-str[err.ENTITY_NO_NAME] = 'No name found for an entity declaration.';
-str[err.ENTITY_NAME_NAME_INVALID] = 'The entity name must match the syntax for names. Found: "{0}".';
-str[err.ENTITY_NAME_NO_TRAILING_SPACE] = 'Missing space after the entity "{0}".';
-str[err.ENTITY_NDATA_NO_SPACE_BEFORE] = 'Missing space before NDATA in entity "{0}".';
-str[err.ENTITY_NDATA_WRONG_CASE] = 'NDATA in entity "{0}" must be upper case. Found "{1}".';
-str[err.ENTITY_NDATA_NO_NAME] = 'NDATA in entity "{0}" must have a name.';
-str[err.ENTITY_NO_VALUE] = 'Missing value or external identifier in entity "{0}".';
-str[err.ENTITY_NO_CLOSE] = 'Missing closing ">" in the entity "{0}".';
+str[err.ELEMENT_UNBALANCED] = 'Expected end tag "{0}". Found "{1}".';
+str[err.ELEMENT_XTRA_LEADING_SPACE] = 'Must not have space after opening "<" of an element tag.';
+str[err.ELEMENT_NO_NAME] = 'Missing name in element tag.';
+str[err.ELEMENT_NAME_INVALID] = 'The element tag name must match the syntax for names. Found: "{0}".';
+str[err.ELEMENT_NO_CLOSE] = 'Missing closing of element tag.';
+str[err.ELEMENT_END_INVALID_CLOSE] = 'End element tag must close with ">". Found "/>".';
 
-str[err.ELEMENTDECL_NO_NAME] = 'No name found for an element declaration.';
-str[err.ELEMENTDECL_NAME_NAME_INVALID] = 'The element declaration name must match the syntax for names. Found: "{0}".';
+str[err.ATTRIBUTE_INVALID_NAME] = 'The attribute name must match the syntax for names. Found: "{0}".';
+str[err.ATTRIBUTE_NO_SPACE_BEFORE_NAME] = '"{0}" must have a space before it.';
+str[err.ATTRIBUTE_NO_EQUAL] = '"{0}" must be followed by an "=".';
+str[err.ATTRIBUTE_NO_VALUE] = '"{0}" must have a value.';
+str[err.ATTRIBUTE_NO_QUOTE] = 'The value for "{0}" must be quoted.';
+str[err.ATTRIBUTE_NO_CLOSE_QUOTE] = 'The value for "{0}" must close with a quote.';
+str[err.ATTRIBUTE_INVALID_VALUE] = 'The value of attribute "{0}" must not contain "<".';
+
+str[err.DOCTYPE_NO_NAME] = 'Missing name for the document type.';
+str[err.DOCTYPE_NAME_INVALID] = 'The document type name must match the syntax for names. Found: "{0}".';
+str[err.DOCTYPE_NO_CLOSE] = 'Missing closing ">" for in the document type.';
+
+str[err.ENTITYDECL_NO_NAME] = 'Missing name for an entity declaration.';
+str[err.ENTITYDECL_NAME_INVALID] = 'The entity name must match the syntax for names. Found: "{0}".';
+str[err.ENTITYDECL_NAME_NO_TRAILING_SPACE] = 'Missing space after the entity "{0}".';
+str[err.ENTITYDECL_NDATA_NO_SPACE_BEFORE] = 'Missing space before NDATA in entity "{0}".';
+str[err.ENTITYDECL_NDATA_INVALID_CASE] = 'NDATA in entity "{0}" must be upper case. Found "{1}".';
+str[err.ENTITYDECL_NDATA_NO_NAME] = 'NDATA in entity "{0}" must have a name.';
+str[err.ENTITYDECL_NO_VALUE] = 'Missing value or external identifier in entity "{0}".';
+str[err.ENTITYDECL_NO_CLOSE] = 'Missing closing ">" in the entity "{0}".';
+
+str[err.ELEMENTDECL_NO_NAME] = 'Missing name for an element declaration.';
+str[err.ELEMENTDECL_NAME_INVALID] = 'The element declaration name must match the syntax for names. Found: "{0}".';
 str[err.ELEMENTDECL_NO_CONTENT_SPEC] = 'No content spec found for element declaration "{0}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_WRONG_CASE] = 'The content spec must be "{0}". Found "{1}".';
+str[err.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE] = 'The content spec must be "{0}". Found "{1}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
 str[err.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS] = 'Missing items in the content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_NO_NAMES] =
    '{0} element name missing from the content spec in the element declaration "{1}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_NAME_BAD] = 'Names in content spec must match the syntax for names. Found "{0}".';
+str[err.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID] = 'Names in content spec must match the syntax for names. Found "{0}".';
 str[err.ELEMENTDECL_PCDATA_NOT_FIRST] =
    '#PCDATA must be in the first position in the content spec of element declaration "{0}".';
 str[err.ELEMENTDECL_NO_SPEC_CLOSE] = 'Missing closing ")" for content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration "{0}".';
 
-str[err.ELEMENT_LEADING_SPACE] = 'Space found after opening of an element tag.';
-str[err.ELEMENT_MISSING_NAME] = 'Name missing in element tag.';
-str[err.ELEMENT_MISSING_CLOSE] = 'Missing closing of element tag.';
-str[err.ELEMENT_END_BAD_CLOSE] = 'Got the wrong close of an end element tag.';
-str[err.ATTRIBUTE_NO_SPACE_BEFORE_NAME] = 'Missing space before attribute name.';
-str[err.ATTRIBUTE_MISSING_QUOTE] = 'No quote found for an attribute.';
-str[err.ATTRIBUTE_MISSING_CLOSE_QUOTE] = 'No closing quote for an attribute.';
-str[err.ATTRIBUTE_MISSING_EQUAL] = 'No equal sign found for an attribute.';
-str[err.ATTRIBUTE_MISSING_VALUE] = 'Missing value for an attribute.';
+str[err.NOTATIONDECL_NO_NAME] = 'Missing name for a notation declaration.';
+str[err.NOTATIONDECL_NAME_INVALID] = 'The notation declaration name must match the syntax for names. Found: "{0}".';
+str[err.NOTATIONDECL_NO_EXTERNALID] = 'Missing the external id the notation declaration "{0}".';
+str[err.NOTATIONDECL_NO_SPACE_AFTER_NAME] = 'Missing space after the name in the notation declaration "{0}".';
+str[err.NOTATIONDECL_NO_CLOSE] = 'Missing closing ">" in the notation declaration "{0}".';
+
+str[err.EXTERNALID_UNKNOWN] = 'The external id was an unknown type. Found "{0}".';
+str[err.EXTERNALID_INVALID_CASE] = 'The "{0}" label must be all upper case. Found "{1}".';
+str[err.EXTERNALID_NO_PUBLIC] = 'Missing public literal.';
+str[err.EXTERNALID_NO_SYSTEM] = 'Missing system literal.';
+str[err.EXTERNALID_PUBLIC_NO_SPACE] = 'Missing space beteen the public and the system literals.';
+str[err.EXTERNALID_PUBLIC_NO_LEADING_SPACE] = 'Missing space beteen PUBLIC and the literal.';
+str[err.EXTERNALID_PUBLIC_INVALID_CHARS] = 'The public literal has invalid charaters. Found "{0}".';
+str[err.EXTERNALID_PUBLIC_NO_QUOTE] = 'Missing quotes around the public literal.';
+str[err.EXTERNALID_SYSTEM_NO_LEADING_SPACE] = 'Missing space beteen SYSTEM and the literal.';
+str[err.EXTERNALID_SYSTEM_NO_QUOTE] = 'Missing quotes around the system literal.';
+
 str[err.CHARDATA_BAD_DATA] = 'Found unexpected "]]>" in chardata.';
 str[err.CDATA_MISSING_CLOSE] = 'Closing ]]> not found for CDATA section.';
 str[err.SPACE_BEFORE_SQUARE_BRACKET] = 'Space found before opening "[".';
 str[err.CDATA_SPACE_BEFORE_NAME] = 'Space found before CDATA.';
 str[err.CDATA_SPACE_AFTER_NAME] = 'Space found after CDATA.';
+
 str[err.BANGITEM_UNSUPPORTED] = 'Unsupported "<!" item.';
 str[err.BANGITEM_NO_TYPE] = 'No declaration found in an <!...> declaration.';
 str[err.BANGITEM_MISSING_SECOND_SQUARE] = 'Second square bracket missing.';
@@ -197,15 +236,5 @@ str[err.CHAR_REFERENCE_HEX_DIGITS_DECIMAL_REF] =
    'A character entity reference was specified as decimal (&#digits;) but included hex digits.';
 str[err.REFERENCE_NO_NAME] = 'No entity name found.';
 str[err.REFERENCE_NO_SEMICOLON] = 'A reference was found without a closing semicolon.';
-str[err.PUBLIC_NO_SPACE] = 'No space was found beteen the publidLiteral and the systemLiteral.';
-str[err.PUBLIC_NO_LEADING_SPACE] = 'No space was found beteen PUBLIC and the pubidLiteral.';
-str[err.SYSTEM_NO_LEADING_SPACE] = 'No space was found beteen SYSTEM and the systemLiteral.';
-str[err.PUBIDLITERAL_NOQUOTE] = 'The pubidLiteral was not quoted.';
-str[err.PUBIDLITERAL_MISSING] = 'No pubIdLiteral was found.';
-str[err.SYSTEMLITERAL_NOQUOTE] = 'The systemLiteral was not quoted.';
-str[err.SYSTEMLITERAL_MISSING] = 'No systemLiteral was found.';
-str[err.DOCTYPE_NO_NAME] = 'There was no name name for the DOCTYPE.';
-str[err.DOCTYPE_MISSING_CLOSE_BRACKET] = 'The closing ">" for the DOCTYPE could not be found.';
-str[err.NOTATION_MISSING_NAME] = 'No name found for a notation declaration.';
 
 module.exports = XmlErrorToken;
