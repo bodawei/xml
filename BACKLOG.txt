@@ -18,8 +18,18 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 ---------------------------------------------
 x22:XL read attribute declaration
 x 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good. -- right now I don't see why.
+40:S:git aliases?
 
-91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
+[52]   	AttlistDecl	   ::=   	'<!ATTLIST' S Name AttDef* S? '>'
+[53]   	AttDef	   ::=   	S Name S AttType S DefaultDecl
+[54]   	AttType	   ::=   	StringType | TokenizedType | EnumeratedType
+[55]   	StringType	   ::=   	'CDATA'
+[56]   	TokenizedType	   ::=   	'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
+[57]   	EnumeratedType	   ::=   	NotationType | Enumeration
+[58]   	NotationType	   ::=   	'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
+[59]   	Enumeration	   ::=   	'(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
+[60]   	DefaultDecl	   ::=   	'#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
+√ 91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
 	missing name
 	missing name
 	names not names
@@ -52,6 +62,12 @@ BLOG IDEAS
 CLEANUP
 - begin to pull out dtd related stuff into a separate test file.
 BUILD
+39:M:Investigate getting node testing into build process
+	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
+	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
+	+: Can we move the spec definition into build?
+	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
+58: Build infrastructure for running xmlconf tests.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
@@ -66,28 +82,23 @@ BUILD
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
-39:M:Investigate getting node testing into build process
-	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
-	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
-	+: Can we move the spec definition into build?
-	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
 	git hooks should validate checkin comment has bug number and is the right format.
-40:S:git aliases?
 41:XL:Investigate Gulp
-58: Build infrastructure for running xmlconf tests.
 
 PROJECT
---- technical debt [6m 11s]
+--- technical debt [6m 10s]
+9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
+11:M: Provide some kind of internationalizable string catalog
+	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
+	in the process, might be good to give these numeric codes.
 87:S: Handle PEReferences and character references in entity values
 77:S: Code for getting references is getting uuuuuugly
 56:S: Reorganize getAttributes, as it seems too tangled
 58:S: Remove data prop on token, and make all token types more explicit
 8:S: review xmltokenstream for testing and code logic: SMALL
 	- Should return '' rather than undefined for things like comments and pi's etc.
-9:M: Include context for syntax errors (relevant string tokens)  (needs a bit of design)
-11:M: Provide some kind of internationalizable string catalog
 73:S: If error is thrown, we can still call getNextToken.  Should block that.
 13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)  xmldecl, misc, element misc
 52:S: StringCursorSpeedup
@@ -96,7 +107,6 @@ PROJECT
 	optimize getToTerminator for single terminator case
 	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
 		Note: Can't do regex from an offset without doing a substr. sigh.
-85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 57:S: Consider adding something like an EOF flag to cursor so we could layer some future version on top?
 
 53:M: use xml decl encoding to change input if needed
@@ -143,6 +153,7 @@ ideas
 
 
 ---- Extra (not part of MVP)
+85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 I:XL Cursors can't be synchronous!
 15:M: Put a limit on how much read in in one chunk (pass in as option). 
 33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.

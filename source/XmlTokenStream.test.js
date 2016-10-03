@@ -996,7 +996,7 @@ describe('XmlTokenStream', () => {
       it('reports a syntax error if there is no content spec', () => {
          expectSyntaxError('<!ELEMENT testElement>',
             XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC,
-            'No content spec found for element declaration "testElement".');
+            'Missing content spec for element declaration "testElement".');
       });
 
       it('reports a syntax error if #PCDATA is the wrong case', () => {
@@ -1098,6 +1098,75 @@ describe('XmlTokenStream', () => {
          expectSyntaxError('<!ELEMENT elemName ANY ',
             XmlErrorToken.ERROR.ELEMENTDECL_NO_CLOSE,
             'Missing closing ">" in the element declaration "elemName".');
+      });
+
+   });
+
+   describe('parsing ATTLIST', () => {
+
+      it('retrieves a token of type ATTLIST_DECL', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ATTLIST_DECL);
+      });
+
+      it('retrieves the name of the element the attributes are associated with', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+
+         expect(s.getNext().elementName).toEqual('elementName');
+      });
+
+      it('retrieves the set of attributes', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            flag: '#REQUIRED'
+         } ]);
+      });
+
+      it('reports a syntax error if there is no element name', () => {
+         expectSyntaxError('<!ATTLIST >',
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_NAME,
+            'Missing element name in an attribute list declaration.');
+      });
+
+      it('reports a syntax error if there is no attribute name', () => {
+         expectSyntaxError('<!ATTLIST elementName>',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_NAME,
+            'Missing attribute name for an attribute declaration for "elementName".');
+      });
+
+      it('reports a syntax error if the element name is invalid', () => {
+         expectSyntaxError('<!ATTLIST bad$name>',
+            XmlErrorToken.ERROR.ATTLISTDECL_NAME_INVALID,
+            'The element name must match the syntax for names. Found "bad$name".');
+      });
+
+      it('reports a syntax error if the element name is invalid', () => {
+         expectSyntaxError('<!ATTLIST elemName attr$name >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NAME_INVALID,
+            'The attribute name must match the syntax for names. Found "attr$name".');
+      });
+
+      it('reports a syntax error if the type is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_TYPE,
+            'Missing type for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if the type is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA>',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT,
+            'Missing default value for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if the type is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA #REQUIRED',
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE,
+            'Missing closing ">" in the attribute list declaration "elemName".');
       });
 
    });

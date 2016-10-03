@@ -6,7 +6,7 @@
 
 const XmlToken = require('./XmlToken.js');
 
-function toBeSyntaxError(util, customEqualityTesters) {
+function toBeSyntaxError() {
    return {
       compare: (actual, expected) => {
          const typePass = actual.type === XmlToken.SYNTAX_ERROR;
@@ -27,7 +27,7 @@ function toBeSyntaxError(util, customEqualityTesters) {
          };
       }
    };
-};
+}
 
 beforeEach(() => {
 
@@ -36,7 +36,6 @@ beforeEach(() => {
    });
 
 });
-
 
 module.exports = {
    toBeSyntaxError

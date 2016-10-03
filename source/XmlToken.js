@@ -137,6 +137,17 @@ class ElementDeclarationToken extends XmlToken {
 
 }
 
+class AttributeListDeclarationToken extends XmlToken {
+
+   constructor(elementName, attributes) {
+      super(XmlToken.ATTLIST_DECL);
+
+      this.elementName = elementName;
+      this.attributes = attributes;
+   }
+
+}
+
 XmlToken.SPACE = 'WhiteSpace';
 XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
@@ -147,6 +158,7 @@ XmlToken.NOTATION_DECL = 'NotationDeclaration';
 XmlToken.ENTITY_DECL = 'EntityDeclaration';
 XmlToken.PARAMETERENTITY_DECL = 'ParameterEntityDeclaration';
 XmlToken.ELEMENT_DECL = 'ElementDeclaration';
+XmlToken.ATTLIST_DECL = 'AttributeListDeclaration';
 
 XmlToken.ELEMENT_START = 'ElementStartTag';
 XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
@@ -172,5 +184,6 @@ XmlToken.NotationToken = NotationToken;
 XmlToken.EntityToken = EntityToken;
 XmlToken.ParameterEntityToken = ParameterEntityToken;
 XmlToken.ElementDeclarationToken = ElementDeclarationToken;
+XmlToken.AttributeListDeclarationToken = AttributeListDeclarationToken;
 
 module.exports = XmlToken;

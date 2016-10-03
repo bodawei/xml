@@ -16,6 +16,7 @@ const NotationToken = XmlToken.NotationToken;
 const EntityToken = XmlToken.EntityToken;
 const ParameterEntityToken = XmlToken.ParameterEntityToken;
 const ElementDeclarationToken = XmlToken.ElementDeclarationToken;
+const AttributeListDeclarationToken = XmlToken.AttributeListDeclarationToken;
 
 const ERRORS = XmlErrorToken.ERROR;
 
@@ -567,6 +568,51 @@ class XmlTokenStream {
                this._assertSyntax(elementClose, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
+               return;
+            case 'ATTLIST':
+               let elemNameText;
+               let attrNameText;
+
+               const elementNameChunk = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace();
+               const attrNameChunk = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace();
+               const attrType = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace();
+               const attrDefault = this._cursor.getWord([ '>' ]);
+               this._cursor.getSpace();
+               const attListClose = this._cursor.getMatch('>');
+
+               if (!elementNameChunk) {
+                  elemNameText = '';
+                  this._reportSyntaxError(ERRORS.ATTLISTDECL_NO_NAME);
+               } else {
+                  elemNameText = elementNameChunk.text;
+               }
+
+               this._assertSyntax(elementNameChunk && (elemNameText === '' || elementNameChunk.couldBeName),
+                  ERRORS.ATTLISTDECL_NAME_INVALID, [ elemNameText ]);
+
+               if (!attrNameChunk) {
+                  attrNameText = '';
+                  this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTRIBUTE_NO_NAME, [ elemNameText ]);
+               } else {
+                  attrNameText = attrNameChunk.text;
+               }
+
+               this._assertSyntax(attrNameChunk && (attrNameText === '' || attrNameChunk.couldBeName),
+                  ERRORS.ATTLISTDECL_ATTRIBUTE_NAME_INVALID, [ attrNameText ]);
+
+               this._assertSyntax(attrType, ERRORS.ATTLISTDECL_ATTRIBUTE_NO_TYPE, [ attrNameText, elemNameText ]);
+               this._assertSyntax(attrDefault, ERRORS.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT, [ attrNameText, elemNameText ]);
+
+               this._assertSyntax(attListClose, ERRORS.ATTLISTDECL_NO_CLOSE, [ elemNameText ]);
+
+               this._pendingTokens.push(new AttributeListDeclarationToken(elemNameText, [ {
+                  name: attrNameText,
+                  type: attrType && attrType.text,
+                  flag: attrDefault && attrDefault.text
+               } ]));
                return;
          }
       }

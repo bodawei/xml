@@ -37,8 +37,7 @@ function toEqualProps(util, customEqualityTesters) {
          };
       }
    };
-};
-
+}
 
 beforeEach(() => {
    jasmine.addMatchers({
