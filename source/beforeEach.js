@@ -6,31 +6,38 @@
 
 const XmlToken = require('./XmlToken.js');
 
+function toBeSyntaxError(util, customEqualityTesters) {
+   return {
+      compare: (actual, expected) => {
+         const typePass = actual.type === XmlToken.SYNTAX_ERROR;
+         const codePass = actual.code === expected;
+         let message;
+
+         if (typePass && codePass) {
+            message = 'Expected syntax error code ' + actual.code +
+               ' not to match ' + expected + '.';
+         } else {
+            message = 'Expected syntax error code ' + actual.code +
+               ' to match ' + expected + '.';
+         }
+
+         return {
+            pass: typePass && codePass,
+            message: message
+         };
+      }
+   };
+};
+
 beforeEach(() => {
 
    jasmine.addMatchers({
-      toBeSyntaxError: () => {
-         return {
-            compare: (actual, expected) => {
-               const typePass = actual.type === XmlToken.SYNTAX_ERROR;
-               const codePass = actual.code === expected;
-               let message;
-
-               if (!typePass || !codePass) {
-                  message = 'Expected syntax error code ' + actual.code +
-                     ' not to match ' + expected.code;
-               } else {
-                  message = 'Expected syntax error code ' + actual.code +
-                     ' to match ' + expected.code;
-               }
-
-               return {
-                  pass: typePass && codePass,
-                  message: message
-               };
-            }
-         };
-      }
+      toBeSyntaxError
    });
 
 });
+
+
+module.exports = {
+   toBeSyntaxError
+};

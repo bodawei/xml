@@ -10,37 +10,35 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint = 32 sprints. ACTUAL: 6 see Note5
 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
-9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 
+9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
+10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  see Note8
 	#210 min
 
 -- next: 91
 ---------------------------------------------
+x22:XL read attribute declaration
+x 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good. -- right now I don't see why.
 
-[45]   	elementdecl	   ::=   	'<!ELEMENT' S Name S contentspec S? '>'	[VC: Unique Element Type Declaration]
-[46]   	contentspec	   ::=   	'EMPTY' | 'ANY' | Mixed | children
-Mixed	   ::=   	'(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
-| '(' S? '#PCDATA' S? ')'	[VC: Proper Group/PE Nesting]
-[VC: No Duplicate Types]
-
-x20:XL Read element declaration
-√ 88:S: Basic !ELEMENT with name and ANY as value with errors
-	- no content spec
-	- no name
-	- bad name
-	- case of any
-√ 89:S: EMPTY or #PCDATA
-	- case of empty
-	- case of PCData 
-90:S: Mixed. note that name can be terminated by | as well as )
-	- names not names
-	- pcdata not first
-	- missing | (e.g. count when don't see it, report later)
-	- missing name. just count as well.
-[2hr]
-12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
-	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
-
-
+91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
+	missing name
+	missing name
+	names not names
+	missing type
+	missing default
+	no finding >
+92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
+	case wrong
+	unknown type
+93:S: read in notation values and ( nmtoken)
+	no names
+	no name tokens
+	this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
+	Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values is a separate thing
+94:S: read #IMPLIED, optional #Fixed and attValue
+	case wrong
+	unknown type
+	Assume we can just use the existing attribute value reader
+	We do not at this level actually parse the value to see if it matches the validity constraints
 
 =============================================
 BLOG IDEAS
@@ -51,8 +49,9 @@ BLOG IDEAS
 - Blog spec changes.
 - Blog: Asynchronous
 =============================================
+CLEANUP
+- begin to pull out dtd related stuff into a separate test file.
 BUILD
-76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
@@ -120,9 +119,8 @@ ideas
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [5XL]
+--- DTD [4XL]
 21:XL Read element content structure
-22:XL read attribute declaration
 24:XL read conditional sections
 25:XL read external entities
 	including header
@@ -534,3 +532,32 @@ Note7: We actually took 4.5 hours for this sprint when it was scheduled for 3.5.
 Paying for this with no cleanup and no build.  This is the bad, because those are important, but it keeps the time more honest.
 This is a disaster sprint
 Moral: You should never have a checkin which leaves you in a have to rollback state.
+
+Sprint 8
+========
+[45]   	elementdecl	   ::=   	'<!ELEMENT' S Name S contentspec S? '>'	[VC: Unique Element Type Declaration]
+[46]   	contentspec	   ::=   	'EMPTY' | 'ANY' | Mixed | children
+Mixed	   ::=   	'(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
+| '(' S? '#PCDATA' S? ')'	[VC: Proper Group/PE Nesting]
+[VC: No Duplicate Types]
+
+x20:XL Read element declaration
+√ 88:S: Basic !ELEMENT with name and ANY as value with errors
+	- no content spec
+	- no name
+	- bad name
+	- case of any
+√ 89:S: EMPTY or #PCDATA
+	- case of empty
+	- case of PCData 
+90:S: Mixed. note that name can be terminated by | as well as )
+	- names not names
+	- pcdata not first
+	- missing | (e.g. count when don't see it, report later)
+	- missing name. just count as well.
+[2hr]
+√ 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
+
+Note8
+The big thing here is I went overschedule between 50 mintues and 80 (the difference is that I used the cleanup time to do this).  Again, this was because I was working on error messages.  I chose to do this despite the bad precedent just because I really wanted to get that task done. Could have shipped without it complete.... I just wanted it out of my hair.
