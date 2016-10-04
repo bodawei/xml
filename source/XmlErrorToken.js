@@ -114,7 +114,7 @@ XmlErrorToken.ERROR = {
 
    ATTLISTDECL_NO_NAME: 'ATTLISTDECL_NO_NAME',
    ATTLISTDECL_NAME_INVALID: 'ATTLISTDECL_NAME_INVALID',
-   ATTLISTDECL_ATTRIBUTE_NO_NAME: 'ATTLISTDECL_ATTRIBUTE_NO_NAME',
+   ATTLISTDECL_NO_ATTRIBUTES: 'ATTLISTDECL_NO_ATTRIBUTES',
    ATTLISTDECL_ATTRIBUTE_NAME_INVALID: 'ATTLISTDECL_ATTRIBUTE_NAME_INVALID',
    ATTLISTDECL_ATTRIBUTE_NO_TYPE: 'ATTLISTDECL_ATTRIBUTE_NO_TYPE',
    ATTLISTDECL_ATTRIBUTE_NO_DEFAULT: 'ATTLISTDECL_ATTRIBUTE_NO_DEFAULT',
@@ -240,7 +240,7 @@ str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration 
 
 str[err.ATTLISTDECL_NO_NAME] = 'Missing element name in an attribute list declaration.';
 str[err.ATTLISTDECL_NAME_INVALID] = 'The element name must match the syntax for names. Found "{0}".';
-str[err.ATTLISTDECL_ATTRIBUTE_NO_NAME] = 'Missing attribute name for an attribute declaration for "{0}".';
+str[err.ATTLISTDECL_NO_ATTRIBUTES] = 'Missing attribute definitions for an attribute declaration for "{0}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NAME_INVALID] = 'The attribute name must match the syntax for names. Found "{0}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NO_TYPE] = 'Missing type for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT] =

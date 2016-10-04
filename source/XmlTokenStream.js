@@ -571,15 +571,27 @@ class XmlTokenStream {
                return;
             case 'ATTLIST':
                let elemNameText;
-               let attrNameText;
+               let done = false;
+               const rawAttrs = [];
+               const attributes = [];
 
                const elementNameChunk = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace();
-               const attrNameChunk = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace();
-               const attrType = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace();
-               const attrDefault = this._cursor.getWord([ '>' ]);
+               while (!done) {
+                  const attr = {};
+
+                  this._cursor.getSpace();
+                  attr.attrNameChunk = this._cursor.getWord([ '>' ]);
+                  this._cursor.getSpace();
+                  attr.attrType = this._cursor.getWord([ '>' ]);
+                  this._cursor.getSpace();
+                  attr.attrDefault = this._cursor.getWord([ '>' ]);
+
+                  if (attr.attrNameChunk) {
+                     rawAttrs.push(attr);
+                  } else {
+                     done = true;
+                  }
+               }
                this._cursor.getSpace();
                const attListClose = this._cursor.getMatch('>');
 
@@ -593,26 +605,29 @@ class XmlTokenStream {
                this._assertSyntax(elementNameChunk && (elemNameText === '' || elementNameChunk.couldBeName),
                   ERRORS.ATTLISTDECL_NAME_INVALID, [ elemNameText ]);
 
-               if (!attrNameChunk) {
-                  attrNameText = '';
-                  this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTRIBUTE_NO_NAME, [ elemNameText ]);
-               } else {
-                  attrNameText = attrNameChunk.text;
+               this._assertSyntax(rawAttrs.length > 0, ERRORS.ATTLISTDECL_NO_ATTRIBUTES, [ elemNameText ]);
+
+               for (let index = 0; index < rawAttrs.length; index++) {
+                  const attr = rawAttrs[index];
+                  const attrNameText = attr.attrNameChunk.text;
+
+                  this._assertSyntax(attr.attrNameChunk.couldBeName,
+                     ERRORS.ATTLISTDECL_ATTRIBUTE_NAME_INVALID, [ attrNameText ]);
+                  this._assertSyntax(attr.attrType,
+                     ERRORS.ATTLISTDECL_ATTRIBUTE_NO_TYPE, [ attrNameText, elemNameText ]);
+                  this._assertSyntax(attr.attrDefault,
+                     ERRORS.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT, [ attrNameText, elemNameText ]);
+
+                  attributes.push({
+                     name: attrNameText,
+                     type: attr.attrType && attr.attrType.text,
+                     flag: attr.attrDefault && attr.attrDefault.text
+                  });
                }
-
-               this._assertSyntax(attrNameChunk && (attrNameText === '' || attrNameChunk.couldBeName),
-                  ERRORS.ATTLISTDECL_ATTRIBUTE_NAME_INVALID, [ attrNameText ]);
-
-               this._assertSyntax(attrType, ERRORS.ATTLISTDECL_ATTRIBUTE_NO_TYPE, [ attrNameText, elemNameText ]);
-               this._assertSyntax(attrDefault, ERRORS.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT, [ attrNameText, elemNameText ]);
 
                this._assertSyntax(attListClose, ERRORS.ATTLISTDECL_NO_CLOSE, [ elemNameText ]);
 
-               this._pendingTokens.push(new AttributeListDeclarationToken(elemNameText, [ {
-                  name: attrNameText,
-                  type: attrType && attrType.text,
-                  flag: attrDefault && attrDefault.text
-               } ]));
+               this._pendingTokens.push(new AttributeListDeclarationToken(elemNameText, attributes));
                return;
          }
       }

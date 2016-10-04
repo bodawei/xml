@@ -1117,7 +1117,7 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().elementName).toEqual('elementName');
       });
 
-      it('retrieves the set of attributes', () => {
+      it('retrieves the an attribute definition', () => {
          const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -1127,16 +1127,32 @@ describe('XmlTokenStream', () => {
          } ]);
       });
 
+      it('retrieves multiple attribute definitions', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'attrName CDATA #REQUIRED ' +
+               'attrName2 IDREF #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            flag: '#REQUIRED'
+         }, {
+            name: 'attrName2',
+            type: 'IDREF',
+            flag: '#IMPLIED'
+         } ]);
+      });
+
       it('reports a syntax error if there is no element name', () => {
          expectSyntaxError('<!ATTLIST >',
             XmlErrorToken.ERROR.ATTLISTDECL_NO_NAME,
             'Missing element name in an attribute list declaration.');
       });
 
-      it('reports a syntax error if there is no attribute name', () => {
+      it('reports a syntax error if there no attributes', () => {
          expectSyntaxError('<!ATTLIST elementName>',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_NAME,
-            'Missing attribute name for an attribute declaration for "elementName".');
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_ATTRIBUTES,
+            'Missing attribute definitions for an attribute declaration for "elementName".');
       });
 
       it('reports a syntax error if the element name is invalid', () => {
