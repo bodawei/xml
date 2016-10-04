@@ -117,6 +117,8 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_NO_ATTRIBUTES: 'ATTLISTDECL_NO_ATTRIBUTES',
    ATTLISTDECL_ATTRIBUTE_NAME_INVALID: 'ATTLISTDECL_ATTRIBUTE_NAME_INVALID',
    ATTLISTDECL_ATTRIBUTE_NO_TYPE: 'ATTLISTDECL_ATTRIBUTE_NO_TYPE',
+   ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN: 'ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN',
+   ATTLISTDECL_ATTRIBUTE_TYPE_INVALID: 'ATTLISTDECL_ATTRIBUTE_TYPE_INVALID',
    ATTLISTDECL_ATTRIBUTE_NO_DEFAULT: 'ATTLISTDECL_ATTRIBUTE_NO_DEFAULT',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
 
@@ -243,6 +245,10 @@ str[err.ATTLISTDECL_NAME_INVALID] = 'The element name must match the syntax for 
 str[err.ATTLISTDECL_NO_ATTRIBUTES] = 'Missing attribute definitions for an attribute declaration for "{0}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NAME_INVALID] = 'The attribute name must match the syntax for names. Found "{0}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NO_TYPE] = 'Missing type for attribute "{0}" in the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN] =
+   'The type must be a standardized value in the attribute declaration for "{0}". Found "{1}".';
+str[err.ATTLISTDECL_ATTRIBUTE_TYPE_INVALID] =
+   'The type "{0}" must be upper case in the attribute declaration for "{1}". Found "{2}".';
 str[err.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT] =
    'Missing default value for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_NO_CLOSE] = 'Missing closing ">" in the attribute list declaration "{0}".';

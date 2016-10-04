@@ -54,6 +54,7 @@ is a separate thing
 	Assume we can just use the existing attribute value reader
 	We do not at this level actually parse the value to see if it matches the validity constraints
 
+- think about should we be auto-correcting case when we know it should be?
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)

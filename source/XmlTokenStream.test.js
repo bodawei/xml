@@ -1143,6 +1143,75 @@ describe('XmlTokenStream', () => {
          } ]);
       });
 
+      it('recognizes all known string attribute types', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #REQUIRED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            flag: '#REQUIRED'
+         } ]);
+      });
+
+      it('recognizes all known tokenized attribute types', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'IdName ID #IMPLIED ' +
+               'IdRefName IDREF #IMPLIED ' +
+               'IdRefsName IDREFS #IMPLIED ' +
+               'EntityName ENTITY #IMPLIED ' +
+               'EntitiesName ENTITIES #IMPLIED ' +
+               'NmTokenName NMTOKEN #IMPLIED ' +
+               'NmTokensName NMTOKENS #IMPLIED ' +
+               'NotationsName NOTATION #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'IdName',
+            type: 'ID',
+            flag: '#IMPLIED'
+         }, {
+            name: 'IdRefName',
+            type: 'IDREF',
+            flag: '#IMPLIED'
+         }, {
+            name: 'IdRefsName',
+            type: 'IDREFS',
+            flag: '#IMPLIED'
+         }, {
+            name: 'EntityName',
+            type: 'ENTITY',
+            flag: '#IMPLIED'
+         }, {
+            name: 'EntitiesName',
+            type: 'ENTITIES',
+            flag: '#IMPLIED'
+         }, {
+            name: 'NmTokenName',
+            type: 'NMTOKEN',
+            flag: '#IMPLIED'
+         }, {
+            name: 'NmTokensName',
+            type: 'NMTOKENS',
+            flag: '#IMPLIED'
+         }, {
+            name: 'NotationsName',
+            type: 'NOTATION',
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('reports a syntax error if an unknown attribute type is specified', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName BOGUS #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN,
+            'The type must be a standardized value in the attribute declaration for "elemName". Found "BOGUS".');
+      });
+
+      it('reports a syntax error if an attribute type is specified in the wrong case', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IdRef #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_TYPE_INVALID,
+            'The type "IDREF" must be upper case in the attribute declaration for "elemName". Found "IdRef".');
+      });
+
       it('reports a syntax error if there is no element name', () => {
          expectSyntaxError('<!ATTLIST >',
             XmlErrorToken.ERROR.ATTLISTDECL_NO_NAME,
