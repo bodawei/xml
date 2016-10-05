@@ -176,10 +176,13 @@ class XmlStringCursor {
       }
 
       let couldBeName = this._isNameStartChar(nextChar);
+      let couldBeNmToken = couldBeName || this._isNameChar(nextChar); // if it is a name, it is a nmtoken
       let index = this._offset.index + 1;
 
       while (nextChar && !atTerminator()) {
-         couldBeName = couldBeName && this._isNameChar(nextChar); // first time through is redundant
+         const isNameChar = this._isNameChar(nextChar);
+         couldBeName = couldBeName && isNameChar; // first time through is redundant
+         couldBeNmToken = couldBeNmToken && isNameChar;
          this._offset.index ++;
          this._offset.column ++;
 
@@ -188,7 +191,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, index - 1);
-      return this._makeWordChunk(rawString, couldBeName, startOffset);
+      return this._makeWordChunk(rawString, couldBeName, couldBeNmToken, startOffset);
    }
 
    /**********************************************************************\
@@ -611,14 +614,17 @@ class XmlStringCursor {
    /**********************************************************************\
      PARAM
      data for a word chunk, whether it could be a name, and the start offset.
+     couldBeName boolean flag could this be a name (production 5)
+     couldBeNmToken boolean flag could this be a nmtoken (production 7)
+     startOffset Offset data structure where this word started
 
      RETURN
      a word chunk using the parameters and the current cursor offset.
      Note this also pushes the chunk into the set of recent chunks.
    \**********************************************************************/
 
-   _makeWordChunk(data, couldBeName, startOffset) {
-      const chunk = new TextChunk.WordChunk(data, couldBeName, startOffset, this._offset.clone());
+   _makeWordChunk(data, couldBeName, couldBeNmToken, startOffset) {
+      const chunk = new TextChunk.WordChunk(data, couldBeName, couldBeNmToken, startOffset, this._offset.clone());
       this._chunks.push(chunk);
       return chunk;
    }

@@ -14,9 +14,10 @@ class PlainChunk {
 
 class WordChunk extends PlainChunk {
 
-   constructor(text, couldBeName, startOffset, endOffset) {
+   constructor(text, couldBeName, couldBeNmToken, startOffset, endOffset) {
       super(text, startOffset, endOffset);
       this.couldBeName = couldBeName;
+      this.couldBeNmToken = couldBeNmToken;
    }
 }
 

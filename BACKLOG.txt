@@ -38,23 +38,24 @@ x 76:S: for that matter, something that compares a stream of tokens without payi
 	missing default
 	no finding >
 √ 95:S: read a set of attribute definitions
-92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
+√ 92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
 	case wrong
 	unknown type
-93:S: read in notation values and ( nmtoken)
-	no names
+[1hr 40]
+√93:S: read in notation values
+	√ no names
 	no name tokens
-	this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
-	Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values 
+	√ this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
+	√ Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values 
 is a separate thing
 	- beware that the ( should terminate many of the names.
+ and enumeration
 94:S: read #IMPLIED, optional #Fixed and attValue
 	case wrong
 	unknown type
 	Assume we can just use the existing attribute value reader
 	We do not at this level actually parse the value to see if it matches the validity constraints
 
-- think about should we be auto-correcting case when we know it should be?
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -170,6 +171,8 @@ I:XL Cursors can't be synchronous!
 
 ISSUES
 --------
+- think about should we be auto-correcting case when we know it should be?  e.g. in attribute definitions
+
 - getWord has multiple terminators, but doesn't inform you of which it hit
 
 * ISSUE: Need to figure out what to do with xml decl not being an xml decl

@@ -427,7 +427,7 @@ describe('XmlTokenStream', () => {
          let t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('&'),
-            new TextChunk.WordChunk('lt', true),
+            new TextChunk.WordChunk('lt', true, true),
             new TextChunk.PlainChunk(';')
          ]));
 
@@ -522,7 +522,7 @@ describe('XmlTokenStream', () => {
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('['),
-            new TextChunk.WordChunk('CDATA', true),
+            new TextChunk.WordChunk('CDATA', true, true),
             new TextChunk.PlainChunk('['),
             new TextChunk.WithSpaceChunk(' one ', ' one '),
             new TextChunk.PlainChunk(']]>')
@@ -1005,6 +1005,13 @@ describe('XmlTokenStream', () => {
             'The content spec must be "#PCDATA". Found "#pcdata".');
       });
 
+      it('fixes the case of #PCDATA if it is specified in the wrong case', () => {
+         const s = makeLaxStream('<!ELEMENT testElement ( #pcdata )>');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE);
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+      });
+
       it('reports a syntax error if #PCDATA is not in the first position', () => {
          expectSyntaxError('<!ELEMENT testElement ( one | #PCDATA )>',
             XmlErrorToken.ERROR.ELEMENTDECL_PCDATA_NOT_FIRST,
@@ -1044,13 +1051,13 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if no items in the content spec', () => {
          expectSyntaxError('<!ELEMENT testElement (  ) >',
-            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS,
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING,
             'Missing items in the content spec in element declaration "testElement".');
       });
 
       it('reports a syntax error if no items in the content spec, including no whitespace', () => {
          expectSyntaxError('<!ELEMENT testElement () >',
-            XmlErrorToken.ERROR.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS,
+            XmlErrorToken.ERROR.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING,
             'Missing items in the content spec in element declaration "testElement".');
       });
 
@@ -1123,6 +1130,7 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
+            list: undefined,
             flag: '#REQUIRED'
          } ]);
       });
@@ -1135,10 +1143,12 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
+            list: undefined,
             flag: '#REQUIRED'
          }, {
             name: 'attrName2',
             type: 'IDREF',
+            list: undefined,
             flag: '#IMPLIED'
          } ]);
       });
@@ -1150,6 +1160,7 @@ describe('XmlTokenStream', () => {
          expect(s.getNext().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
+            list: undefined,
             flag: '#REQUIRED'
          } ]);
       });
@@ -1162,54 +1173,99 @@ describe('XmlTokenStream', () => {
                'EntityName ENTITY #IMPLIED ' +
                'EntitiesName ENTITIES #IMPLIED ' +
                'NmTokenName NMTOKEN #IMPLIED ' +
-               'NmTokensName NMTOKENS #IMPLIED ' +
-               'NotationsName NOTATION #IMPLIED>');
+               'NmTokensName NMTOKENS #IMPLIED >');
 
          expect(s.getNext().attributes).toEqual([ {
             name: 'IdName',
             type: 'ID',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'IdRefName',
             type: 'IDREF',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'IdRefsName',
             type: 'IDREFS',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'EntityName',
             type: 'ENTITY',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'EntitiesName',
             type: 'ENTITIES',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'NmTokenName',
             type: 'NMTOKEN',
+            list: undefined,
             flag: '#IMPLIED'
          }, {
             name: 'NmTokensName',
             type: 'NMTOKENS',
-            flag: '#IMPLIED'
-         }, {
-            name: 'NotationsName',
-            type: 'NOTATION',
+            list: undefined,
             flag: '#IMPLIED'
          } ]);
       });
 
-      it('reports a syntax error if an unknown attribute type is specified', () => {
-         expectSyntaxError('<!ATTLIST elemName attrName BOGUS #REQUIRED >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN,
-            'The type must be a standardized value in the attribute declaration for "elemName". Found "BOGUS".');
+      it('recognizes a NOTATION type with one value', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'NotationName NOTATION  ( one ) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'NotationName',
+            type: 'NOTATION',
+            list: [ 'one' ],
+            flag: '#IMPLIED'
+         } ]);
       });
 
-      it('reports a syntax error if an attribute type is specified in the wrong case', () => {
-         expectSyntaxError('<!ATTLIST elemName attrName IdRef #REQUIRED >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_TYPE_INVALID,
-            'The type "IDREF" must be upper case in the attribute declaration for "elemName". Found "IdRef".');
+      it('recognizes a NOTATION type with multiple values', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'NotationName NOTATION  ( one|two | three) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'NotationName',
+            type: 'NOTATION',
+            list: [ 'one', 'two', 'three' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes multiple NOTATION attributes', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'First NOTATION \n\t( one|two | three) #IMPLIED ' +
+               'Second NOTATION ( test1 | test2\t|\t\n test3) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'First',
+            type: 'NOTATION',
+            list: [ 'one', 'two', 'three' ],
+            flag: '#IMPLIED'
+         }, {
+            name: 'Second',
+            type: 'NOTATION',
+            list: [ 'test1', 'test2', 'test3' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('fixes a mistaken capitalization of the type', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'CDataName cdata #REQUIRED>');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_INVALID);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED'
+         } ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -1232,23 +1288,101 @@ describe('XmlTokenStream', () => {
 
       it('reports a syntax error if the element name is invalid', () => {
          expectSyntaxError('<!ATTLIST elemName attr$name >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NAME_INVALID,
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NAME_INVALID,
             'The attribute name must match the syntax for names. Found "attr$name".');
       });
 
       it('reports a syntax error if the type is missing', () => {
          expectSyntaxError('<!ATTLIST elemName attrName >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_TYPE,
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_TYPE,
             'Missing type for attribute "attrName" in the attribute declaration for "elemName".');
       });
 
-      it('reports a syntax error if the type is missing', () => {
+      it('reports a syntax error if an unknown attribute type is specified', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName BOGUS #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
+            'The type must be a standardized value in the attribute declaration for "elemName". Found "BOGUS".');
+      });
+
+      it('reports a syntax error if an attribute type is specified in the wrong case', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IdRef #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_INVALID,
+            'The type "IDREF" must be upper case in the attribute declaration for "elemName". Found "IdRef".');
+      });
+
+      it('reports a syntax error if notation has no values', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_EMPTY,
+            'The notation in the attribute declaration for "e" must have one or more names.');
+      });
+
+      it('reports a syntax error if notation has no parenthesis values', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_EMPTY,
+            'The notation in the attribute declaration for "e" must have one or more names.');
+      });
+
+      it('reports a syntax error if notation values are not names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( $bad ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NAME_INVALID,
+            'The name in the attribute declaration for "e" must match the syntax for names. Found "$bad".');
+      });
+
+      it('reports a syntax error if notation has no space between NOTATION and list', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION( name ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
+            'The notation in the attribute declaration for "e" must have a space before the name.');
+      });
+
+      it('reports a syntax error if notation has no vertical bars between NOTATION names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('terminates the attribute list definition early if a vertical bar between NOTATION names is omitted', () => {
+         const s = makeLaxStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NAME_INVALID);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_DEFAULT);
+
+         const t = s.getNext();
+         expect(t.attributes[1].name).toEqual(')');
+         expect(t.attributes[1].type).toEqual('#REQUIRED');
+      });
+
+      it('reports a syntax error if notation has extra vertical bars between NOTATION names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name | || | name2 ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_NAMES,
+            'Missing 3 name from the attribute declaration for "e".');
+      });
+
+      it('reports a syntax error if notation has no terminating ")" to the list', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('reports a syntax error if notation has no termination to the list or the whole attribute', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name #REQUIRED ',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('reports a syntax error if there is no space between the closing ")" and the default', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name | name2 )#REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE,
+            'Missing space before default for attribute "attrName" in the attribute declaration for "e".');
+      });
+
+      it('reports a syntax error if the default is missing', () => {
          expectSyntaxError('<!ATTLIST elemName attrName CDATA>',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT,
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_DEFAULT,
             'Missing default value for attribute "attrName" in the attribute declaration for "elemName".');
       });
 
-      it('reports a syntax error if the type is missing', () => {
+      it('reports a syntax error if the close is missing', () => {
          expectSyntaxError('<!ATTLIST elemName attrName CDATA #REQUIRED',
             XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE,
             'Missing closing ">" in the attribute list declaration "elemName".');
@@ -1747,15 +1881,15 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<?'),
-            new TextChunk.WordChunk('xml', true),
+            new TextChunk.WordChunk('xml', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('version', true),
+            new TextChunk.WordChunk('version', true, true),
             new TextChunk.PlainChunk('='),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('1.1', '1.1'),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('encoding', true),
+            new TextChunk.WordChunk('encoding', true, true),
             new TextChunk.PlainChunk('='),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('usascii', 'usascii'),
@@ -2400,7 +2534,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
-            new TextChunk.WordChunk('one', true),
+            new TextChunk.WordChunk('one', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('>')
          ]));
@@ -2490,7 +2624,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
-            new TextChunk.WordChunk('one', true),
+            new TextChunk.WordChunk('one', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('/>')
          ]));
@@ -2666,7 +2800,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('</'),
-            new TextChunk.WordChunk('one', true),
+            new TextChunk.WordChunk('one', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('>')
          ], 5));

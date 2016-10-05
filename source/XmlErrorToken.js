@@ -108,18 +108,23 @@ XmlErrorToken.ERROR = {
    ELEMENTDECL_CONTENT_SPEC_NO_NAMES: 'ELEMENTDECL_CONTENT_SPEC_NO_NAMES',
    ELEMENTDECL_CONTENT_SPEC_NAME_INVALID: 'ELEMENTDECL_CONTENT_SPEC_NAME_INVALID',
    ELEMENTDECL_PCDATA_NOT_FIRST: 'ELEMENTDECL_PCDATA_NOT_FIRST',
-   ELEMENTDECL_NO_CONTENT_SPEC_ITEMS: 'ELEMENTDECL_NO_CONTENT_SPEC_ITEMS',
+   ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING: 'ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING',
    ELEMENTDECL_NO_SPEC_CLOSE: 'ELEMENTDECL_NO_SPEC_CLOSE',
    ELEMENTDECL_NO_CLOSE: 'ELEMENTDECL_NO_CLOSE',
 
    ATTLISTDECL_NO_NAME: 'ATTLISTDECL_NO_NAME',
    ATTLISTDECL_NAME_INVALID: 'ATTLISTDECL_NAME_INVALID',
    ATTLISTDECL_NO_ATTRIBUTES: 'ATTLISTDECL_NO_ATTRIBUTES',
-   ATTLISTDECL_ATTRIBUTE_NAME_INVALID: 'ATTLISTDECL_ATTRIBUTE_NAME_INVALID',
-   ATTLISTDECL_ATTRIBUTE_NO_TYPE: 'ATTLISTDECL_ATTRIBUTE_NO_TYPE',
-   ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN: 'ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN',
-   ATTLISTDECL_ATTRIBUTE_TYPE_INVALID: 'ATTLISTDECL_ATTRIBUTE_TYPE_INVALID',
-   ATTLISTDECL_ATTRIBUTE_NO_DEFAULT: 'ATTLISTDECL_ATTRIBUTE_NO_DEFAULT',
+   ATTLISTDECL_ATTR_NAME_INVALID: 'ATTLISTDECL_ATTR_NAME_INVALID',
+   ATTLISTDECL_ATTR_NO_TYPE: 'ATTLISTDECL_ATTR_NO_TYPE',
+   ATTLISTDECL_ATTR_TYPE_UNKNOWN: 'ATTLISTDECL_ATTR_TYPE_UNKNOWN',
+   ATTLISTDECL_ATTR_TYPE_INVALID: 'ATTLISTDECL_ATTR_TYPE_INVALID',
+   ATTLISTDECL_ATTR_NOTA_NO_SPACE: 'ATTLISTDECL_ATTR_NOTA_NO_SPACE',
+   ATTLISTDECL_ATTR_NOTA_NO_NAMES: 'ATTLISTDECL_ATTR_NOTA_NO_NAMES',
+   ATTLISTDECL_ATTR_NOTA_NAME_INVALID: 'ATTLISTDECL_ATTR_NOTA_NAME_INVALID',
+   ATTLISTDECL_ATTR_NOTA_EMPTY: 'ATTLISTDECL_ATTR_NOTA_EMPTY',
+   ATTLISTDECL_ATTR_NO_DEFAULT: 'ATTLISTDECL_ATTR_NO_DEFAULT',
+   ATTLISTDECL_ATTR_DEFAULT_NO_SPACE: 'ATTLISTDECL_ATTR_DEFAULT_NO_SPACE',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
 
    NOTATIONDECL_NO_NAME: 'NOTATIONDECL_NO_NAME',
@@ -233,7 +238,7 @@ str[err.ELEMENTDECL_NAME_INVALID] = 'The element declaration name must match the
 str[err.ELEMENTDECL_NO_CONTENT_SPEC] = 'Missing content spec for element declaration "{0}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE] = 'The content spec must be "{0}". Found "{1}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
-str[err.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS] = 'Missing items in the content spec in element declaration "{0}".';
+str[err.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING] = 'Missing items in the content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_NO_NAMES] = 'Missing {0} name from the content spec in the element declaration "{1}".';
 str[err.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID] = 'Names in content spec must match the syntax for names. Found "{0}".';
 str[err.ELEMENTDECL_PCDATA_NOT_FIRST] = '#PCDATA must be first in the content spec of element declaration "{0}".';
@@ -243,14 +248,24 @@ str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration 
 str[err.ATTLISTDECL_NO_NAME] = 'Missing element name in an attribute list declaration.';
 str[err.ATTLISTDECL_NAME_INVALID] = 'The element name must match the syntax for names. Found "{0}".';
 str[err.ATTLISTDECL_NO_ATTRIBUTES] = 'Missing attribute definitions for an attribute declaration for "{0}".';
-str[err.ATTLISTDECL_ATTRIBUTE_NAME_INVALID] = 'The attribute name must match the syntax for names. Found "{0}".';
-str[err.ATTLISTDECL_ATTRIBUTE_NO_TYPE] = 'Missing type for attribute "{0}" in the attribute declaration for "{1}".';
-str[err.ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN] =
+str[err.ATTLISTDECL_ATTR_NAME_INVALID] = 'The attribute name must match the syntax for names. Found "{0}".';
+str[err.ATTLISTDECL_ATTR_NO_TYPE] = 'Missing type for attribute "{0}" in the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_TYPE_UNKNOWN] =
    'The type must be a standardized value in the attribute declaration for "{0}". Found "{1}".';
-str[err.ATTLISTDECL_ATTRIBUTE_TYPE_INVALID] =
+str[err.ATTLISTDECL_ATTR_TYPE_INVALID] =
    'The type "{0}" must be upper case in the attribute declaration for "{1}". Found "{2}".';
-str[err.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT] =
+str[err.ATTLISTDECL_ATTR_NOTA_NAME_INVALID] = 'The name in the attribute declaration for "{0}"' +
+   ' must match the syntax for names. Found "{1}".';
+str[err.ATTLISTDECL_ATTR_NOTA_EMPTY] =
+   'The notation in the attribute declaration for "{0}" must have one or more names.';
+str[err.ATTLISTDECL_ATTR_NOTA_NO_SPACE] =
+   'The notation in the attribute declaration for "{0}" must have a space before the name.';
+str[err.ATTLISTDECL_ATTR_NOTA_NO_NAMES] = 'Missing {0} name from the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_NOTA_NO_CLOSE] = 'Missing closing ")" for the notation in the attribute definition for "{0}".';
+str[err.ATTLISTDECL_ATTR_NO_DEFAULT] =
    'Missing default value for attribute "{0}" in the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE] =
+   'Missing space before default for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_NO_CLOSE] = 'Missing closing ">" in the attribute list declaration "{0}".';
 
 str[err.NOTATIONDECL_NO_NAME] = 'Missing name for a notation declaration.';

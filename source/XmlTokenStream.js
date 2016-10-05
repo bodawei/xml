@@ -537,7 +537,8 @@ class XmlTokenStream {
 
                   this._assertSyntax(missingNames === 0 || contentList.length === 0,
                      ERRORS.ELEMENTDECL_CONTENT_SPEC_NO_NAMES, [ missingNames, nameText ]);
-                  this._assertSyntax(contentList.length > 0, ERRORS.ELEMENTDECL_NO_CONTENT_SPEC_ITEMS, [ nameText ]);
+                  this._assertSyntax(contentList.length > 0,
+                     ERRORS.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING, [ nameText ]);
 
                   for (let index = 0; index < contentList.length; index++) {
                      const item = contentList[index];
@@ -571,20 +572,36 @@ class XmlTokenStream {
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
             case 'ATTLIST':
-               let elName;
                let done = false;
                const rawAttrs = [];
-               const attributes = [];
 
                const elNameChunk = this._cursor.getWord([ '>' ]);
+
                while (!done) {
                   const attr = {};
 
                   this._cursor.getSpace();
                   attr.name = this._cursor.getWord([ '>' ]);
                   this._cursor.getSpace();
-                  attr.type = this._cursor.getWord([ '>' ]);
-                  this._cursor.getSpace();
+                  attr.type = this._cursor.getWord([ '>', '(' ]);
+
+                  if (attr.type && attr.type.text.toLocaleUpperCase() === 'NOTATION') {
+                     attr.postNotationSpace = this._cursor.getSpace();
+                     attr.opening = this._cursor.peekChar();
+
+                     if (attr.opening && attr.opening.text === '(') {
+                        this._cursor.getChar();
+
+                        const listInfo = this._getListItems([ '>' ]);
+
+                        attr.list = listInfo.list;
+                        attr.close = listInfo.close;
+                        attr.missingCount = listInfo.missingCount;
+                     }
+                  }
+
+                  attr.preDefaultSpace = this._cursor.getSpace();
+
                   attr.default = this._cursor.getWord([ '>' ]);
 
                   if (attr.name) {
@@ -593,48 +610,72 @@ class XmlTokenStream {
                      done = true;
                   }
                }
+
                this._cursor.getSpace();
                const attListClose = this._cursor.getMatch('>');
 
-               if (!elNameChunk) {
-                  elName = '';
-                  this._reportSyntaxError(ERRORS.ATTLISTDECL_NO_NAME);
-               } else {
-                  elName = elNameChunk.text;
-               }
+               const attributes = [];
+               const elName = elNameChunk ? elNameChunk.text : '';
+               const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
 
-               this._assertSyntax(elNameChunk && (elName === '' || elNameChunk.couldBeName),
-                  ERRORS.ATTLISTDECL_NAME_INVALID, [ elName ]);
+               this._assertSyntax(elName !== '', ERRORS.ATTLISTDECL_NO_NAME);
+               this._assertSyntax(nameValid, ERRORS.ATTLISTDECL_NAME_INVALID, [ elName ]);
                this._assertSyntax(rawAttrs.length > 0, ERRORS.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
 
                for (let index = 0; index < rawAttrs.length; index++) {
                   const attr = rawAttrs[index];
                   const attrName = attr.name.text;
+                  let list;
                   let attrType = '';
 
-                  this._assertSyntax(attr.name.couldBeName, ERRORS.ATTLISTDECL_ATTRIBUTE_NAME_INVALID, [ attrName ]);
+                  this._assertSyntax(attr.name.couldBeName, ERRORS.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
 
                   if (!attr.type) {
-                     this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTRIBUTE_NO_TYPE, [ attrName, elName ]);
+                     this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
                   } else {
                      attrType = attr.type.text;
 
                      const upper = attrType.toLocaleUpperCase();
                      const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
 
-                     this._assertSyntax(known, ERRORS.ATTLISTDECL_ATTRIBUTE_TYPE_UNKNOWN, [ elName, attrType ]);
+                     this._assertSyntax(known, ERRORS.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
 
-                     if (known && attr.type.text !== upper) {
-                        this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTRIBUTE_TYPE_INVALID, [ upper, elName, attrType ]);
-                        attr.type.text = upper;
+                     if (known && attrType !== upper) {
+                        this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
+                        attrType = upper;
+                     }
+
+                     if (attrType === 'NOTATION') {
+                        const attrList = attr.list || [];
+                        list = [];
+
+                        this._assertSyntax(attr.postNotationSpace, ERRORS.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
+                        this._assertSyntax(attrList.length > 0, ERRORS.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
+
+                        for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
+                           this._assertSyntax(attrList[listIndex].couldBeName,
+                              ERRORS.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
+                           list.push(attrList[listIndex].text);
+                        }
+
+                        this._assertSyntax(attr.missingCount === 0,
+                           ERRORS.ATTLISTDECL_ATTR_NOTA_NO_NAMES, [ attr.missingCount, elName ]);
+
+                        if (attr.close) {
+                           this._assertSyntax(attr.preDefaultSpace,
+                              ERRORS.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
+                        } else {
+                           this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTR_NOTA_NO_CLOSE, [ attrName, elName ]);
+                        }
                      }
                   }
 
-                  this._assertSyntax(attr.default, ERRORS.ATTLISTDECL_ATTRIBUTE_NO_DEFAULT, [ attrName, elName ]);
+                  this._assertSyntax(attr.default, ERRORS.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
 
                   attributes.push({
                      name: attrName,
                      type: attrType,
+                     list: list,
                      flag: attr.default && attr.default.text
                   });
                }
@@ -682,6 +723,72 @@ class XmlTokenStream {
       } else if (bracketItemType) {
          this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
+   }
+
+   /**********************************************************************\
+    _retrieveExternalId gets all the items from a list that is terminated
+    by a ")", where individual items are terminated by "|"'s.
+
+    If a "|" is missing, we assume that the list was ended prematurely.
+    We could, theoretically, assume this just meant the "|" was omitted
+    and keep reading items.  However, this runs the risk of consuming the
+    whole file, in theory.  So, we err on a highly conservative position.
+
+    If a name is omitted, we keep a count of the number of missing names
+    (if, perchance, the whole file is nothing but |'s, then we will
+    consume it all. seems unlikely in practice).
+
+    PARAM
+    terminators: An array of characters that could terminate the list
+    beyond the ones we know.
+
+    RETURN
+    An object with these properties:
+      list: An array of 0 or more WordChunks, each one representing a name
+         found in the ist
+      missingCount: The number of names missing from the list (e.g. empty
+         space between "|"'s)
+      close: The Chunk representing the closing ")" of the list, if found.
+   \**********************************************************************/
+
+   _getListItems(terminators) {
+      const results = {
+         list: [],
+         missingCount: 0,
+         close: undefined
+      };
+      const listTerminators = terminators.slice().concat([ ')', '|' ]);
+      let done = false;
+
+      this._cursor.getChar();
+
+      while (!done) {
+         let gotOr = false;
+         this._cursor.getSpace();
+         const aName = this._cursor.getWord(listTerminators);
+         this._cursor.getSpace();
+         const orChar = this._cursor.peekChar();
+
+         if (orChar && orChar.text === '|') {
+            this._cursor.getChar();
+            gotOr = true;
+         }
+
+         this._cursor.getSpace();
+         results.close = this._cursor.getMatch(')');
+
+         if (aName) {
+            results.list.push(aName);
+         } else {
+            results.missingCount++;
+         }
+
+         if (results.close || !gotOr) {
+            done = true;
+         }
+      }
+
+      return results;
    }
 
    /**********************************************************************\
