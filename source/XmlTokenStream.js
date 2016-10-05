@@ -5,6 +5,8 @@
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
+const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
+
 const CommentToken = XmlToken.CommentToken;
 const ProcessingInstructionToken = XmlToken.ProcessingInstructionToken;
 const SpaceToken = XmlToken.SpaceToken;
@@ -55,6 +57,7 @@ class XmlTokenStream {
       this._elementNameStack = [];
       this._entityManager = entityManager;
       this._cursorContexts = [];
+      this._dtdParser = new XmlTokenStreamDtd();
 
       this._options = {
          lax: false,
@@ -473,146 +476,63 @@ class XmlTokenStream {
             // [51] Mixed       ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
             //                      '(' S? '#PCDATA' S? ')'
             case 'ELEMENT':
-               let nameText;
                let contentText;
-               let contentToken;
-               let contentList;
-               let listClose = true;
-               let missingNames = 0;
 
-               const elementName = this._cursor.getWord([ '>' ]);
-               this._cursor.getSpace(); // no need to check this, as if no space, then no contentToken
-               const mixedStart = this._cursor.peekChar();
+               const parsedEl = this._dtdParser.parseElement(this._cursor);
+               const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
 
-               if (!mixedStart || mixedStart.text !== '(') {
-                  contentToken = this._cursor.getWord([ '>' ]);
-               } else {
-                  let done = false;
-                  contentList = [];
-
-                  this._cursor.getChar();
-
-                  while (!done) {
-                     let gotOr = false;
-                     this._cursor.getSpace();
-                     const elemName = this._cursor.getWord([ '>', ')', '|' ]);
-                     this._cursor.getSpace();
-                     const orChar = this._cursor.peekChar();
-                     if (orChar && orChar.text === '|') {
-                        this._cursor.getChar();
-                        gotOr = true;
-                     }
-                     this._cursor.getSpace();
-                     listClose = this._cursor.getMatch(')');
-
-                     if (elemName) {
-                        contentList.push(elemName);
-                     } else {
-                        missingNames++;
-                     }
-
-                     if (listClose || !gotOr) {
-                        done = true;
-                     }
-                  }
-               }
-
-               this._cursor.getSpace();
-               const elementClose = this._cursor.getMatch('>');
-
-               if (!elementName) {
-                  nameText = '';
+               if (nameText === '') {
                   this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_NAME);
-               } else {
-                  nameText = elementName.text;
                }
 
-               this._assertSyntax(nameText === '' || elementName.couldBeName,
+               this._assertSyntax(nameText === '' || parsedEl.elementName.couldBeName,
                   ERRORS.ELEMENTDECL_NAME_INVALID, [ nameText ]);
 
-               if (!contentToken && !contentList) {
-                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_CONTENT_SPEC, [ nameText ]);
-               } else if (contentList) {
+               if (!parsedEl.contentChunk && !parsedEl.list) {
+                  this._reportSyntaxError(ERRORS.ELEMENTDECL_NO_SPEC, [ nameText ]);
+               } else if (parsedEl.list) {
                   contentText = [];
 
-                  this._assertSyntax(missingNames === 0 || contentList.length === 0,
-                     ERRORS.ELEMENTDECL_CONTENT_SPEC_NO_NAMES, [ missingNames, nameText ]);
-                  this._assertSyntax(contentList.length > 0,
-                     ERRORS.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING, [ nameText ]);
+                  this._assertSyntax(parsedEl.missingNames === 0 || parsedEl.list.length === 0,
+                     ERRORS.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingNames, nameText ]);
+                  this._assertSyntax(parsedEl.list.length > 0, ERRORS.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
 
-                  for (let index = 0; index < contentList.length; index++) {
-                     const item = contentList[index];
+                  for (let index = 0; index < parsedEl.list.length; index++) {
+                     const item = parsedEl.list[index];
 
                      if (item.text.toLocaleUpperCase() === '#PCDATA') {
                         this._assertSyntax(item.text === '#PCDATA',
-                           ERRORS.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
+                           ERRORS.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
                         this._assertSyntax(index === 0, ERRORS.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
 
                         contentText.push('#PCDATA');
                      } else {
-                        this._assertSyntax(item.couldBeName,
-                           ERRORS.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID, [ item.text ]);
+                        this._assertSyntax(item.couldBeName, ERRORS.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
                         contentText.push(item.text);
                      }
                   }
-                  this._assertSyntax(listClose, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
+                  this._assertSyntax(parsedEl.listCloseChunk, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                } else {
-                  contentText = contentToken.text;
-                  const upperText = contentToken.text.toLocaleUpperCase();
+                  contentText = parsedEl.contentChunk.text;
+                  const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
 
                   this._assertSyntax(upperText === 'ANY' || upperText === 'EMPTY',
-                     ERRORS.ELEMENTDECL_CONTENT_SPEC_UNKNOWN, [ contentText ]);
+                     ERRORS.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
                   this._assertSyntax(upperText === contentText,
-                     ERRORS.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE, [ upperText, contentText ]);
+                     ERRORS.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
                   contentText = upperText;
                }
 
-               this._assertSyntax(elementClose, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+               this._assertSyntax(parsedEl.closeChunk, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
             case 'ATTLIST':
-               let done = false;
-               const rawAttrs = [];
+               const parseResults = this._dtdParser.parseAttList(this._cursor);
 
-               const elNameChunk = this._cursor.getWord([ '>' ]);
-
-               while (!done) {
-                  const attr = {};
-
-                  this._cursor.getSpace();
-                  attr.name = this._cursor.getWord([ '>' ]);
-                  this._cursor.getSpace();
-                  attr.type = this._cursor.getWord([ '>', '(' ]);
-
-                  if (attr.type && attr.type.text.toLocaleUpperCase() === 'NOTATION') {
-                     attr.postNotationSpace = this._cursor.getSpace();
-                     attr.opening = this._cursor.peekChar();
-
-                     if (attr.opening && attr.opening.text === '(') {
-                        this._cursor.getChar();
-
-                        const listInfo = this._getListItems([ '>' ]);
-
-                        attr.list = listInfo.list;
-                        attr.close = listInfo.close;
-                        attr.missingCount = listInfo.missingCount;
-                     }
-                  }
-
-                  attr.preDefaultSpace = this._cursor.getSpace();
-
-                  attr.default = this._cursor.getWord([ '>' ]);
-
-                  if (attr.name) {
-                     rawAttrs.push(attr);
-                  } else {
-                     done = true;
-                  }
-               }
-
-               this._cursor.getSpace();
-               const attListClose = this._cursor.getMatch('>');
+               const elNameChunk = parseResults.elementNameChunk;
+               const rawAttrs = parseResults.attributes;
+               const attListClose = parseResults.closeChunk;
 
                const attributes = [];
                const elName = elNameChunk ? elNameChunk.text : '';
@@ -723,72 +643,6 @@ class XmlTokenStream {
       } else if (bracketItemType) {
          this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
-   }
-
-   /**********************************************************************\
-    _retrieveExternalId gets all the items from a list that is terminated
-    by a ")", where individual items are terminated by "|"'s.
-
-    If a "|" is missing, we assume that the list was ended prematurely.
-    We could, theoretically, assume this just meant the "|" was omitted
-    and keep reading items.  However, this runs the risk of consuming the
-    whole file, in theory.  So, we err on a highly conservative position.
-
-    If a name is omitted, we keep a count of the number of missing names
-    (if, perchance, the whole file is nothing but |'s, then we will
-    consume it all. seems unlikely in practice).
-
-    PARAM
-    terminators: An array of characters that could terminate the list
-    beyond the ones we know.
-
-    RETURN
-    An object with these properties:
-      list: An array of 0 or more WordChunks, each one representing a name
-         found in the ist
-      missingCount: The number of names missing from the list (e.g. empty
-         space between "|"'s)
-      close: The Chunk representing the closing ")" of the list, if found.
-   \**********************************************************************/
-
-   _getListItems(terminators) {
-      const results = {
-         list: [],
-         missingCount: 0,
-         close: undefined
-      };
-      const listTerminators = terminators.slice().concat([ ')', '|' ]);
-      let done = false;
-
-      this._cursor.getChar();
-
-      while (!done) {
-         let gotOr = false;
-         this._cursor.getSpace();
-         const aName = this._cursor.getWord(listTerminators);
-         this._cursor.getSpace();
-         const orChar = this._cursor.peekChar();
-
-         if (orChar && orChar.text === '|') {
-            this._cursor.getChar();
-            gotOr = true;
-         }
-
-         this._cursor.getSpace();
-         results.close = this._cursor.getMatch(')');
-
-         if (aName) {
-            results.list.push(aName);
-         } else {
-            results.missingCount++;
-         }
-
-         if (results.close || !gotOr) {
-            done = true;
-         }
-      }
-
-      return results;
    }
 
    /**********************************************************************\

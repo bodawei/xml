@@ -101,14 +101,14 @@ XmlErrorToken.ERROR = {
    ELEMENTDECL_NO_NAME: 'ELEMENTDECL_NO_NAME',
    ELEMENTDECL_NO_SPACE_AFTER_NAME: 'ELEMENTDECL_NO_SPACE_AFTER_NAME',
    ELEMENTDECL_NAME_INVALID: 'ELEMENTDECL_NAME_INVALID',
-   ELEMENTDECL_NO_CONTENT_SPEC: 'ELEMENTDECL_NO_CONTENT_SPEC',
-   ELEMENTDECL_CONTENT_SPEC_INVALID_CASE: 'ELEMENTDECL_CONTENT_SPEC_INVALID_CASE',
-   ELEMENTDECL_CONTENT_SPEC_UNKNOWN: 'ELEMENTDECL_CONTENT_SPEC_UNKNOWN',
-   ELEMENTDECL_CONTENT_SPEC_NO_ORS: 'ELEMENTDECL_CONTENT_SPEC_NO_ORS',
-   ELEMENTDECL_CONTENT_SPEC_NO_NAMES: 'ELEMENTDECL_CONTENT_SPEC_NO_NAMES',
-   ELEMENTDECL_CONTENT_SPEC_NAME_INVALID: 'ELEMENTDECL_CONTENT_SPEC_NAME_INVALID',
+   ELEMENTDECL_NO_SPEC: 'ELEMENTDECL_NO_SPEC',
+   ELEMENTDECL_SPEC_INVALID_CASE: 'ELEMENTDECL_SPEC_INVALID_CASE',
+   ELEMENTDECL_SPEC_UNKNOWN: 'ELEMENTDECL_SPEC_UNKNOWN',
+   ELEMENTDECL_SPEC_NO_ORS: 'ELEMENTDECL_SPEC_NO_ORS',
+   ELEMENTDECL_SPEC_NO_NAMES: 'ELEMENTDECL_SPEC_NO_NAMES',
+   ELEMENTDECL_SPEC_NAME_INVALID: 'ELEMENTDECL_SPEC_NAME_INVALID',
    ELEMENTDECL_PCDATA_NOT_FIRST: 'ELEMENTDECL_PCDATA_NOT_FIRST',
-   ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING: 'ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING',
+   ELEMENTDECL_SPEC_ITEMS_MISSING: 'ELEMENTDECL_SPEC_ITEMS_MISSING',
    ELEMENTDECL_NO_SPEC_CLOSE: 'ELEMENTDECL_NO_SPEC_CLOSE',
    ELEMENTDECL_NO_CLOSE: 'ELEMENTDECL_NO_CLOSE',
 
@@ -235,12 +235,12 @@ str[err.ENTITYDECL_NO_CLOSE] = 'Missing closing ">" in the entity "{0}".';
 
 str[err.ELEMENTDECL_NO_NAME] = 'Missing name for an element declaration.';
 str[err.ELEMENTDECL_NAME_INVALID] = 'The element declaration name must match the syntax for names. Found: "{0}".';
-str[err.ELEMENTDECL_NO_CONTENT_SPEC] = 'Missing content spec for element declaration "{0}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_INVALID_CASE] = 'The content spec must be "{0}". Found "{1}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_ITEMS_MISSING] = 'Missing items in the content spec in element declaration "{0}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_NO_NAMES] = 'Missing {0} name from the content spec in the element declaration "{1}".';
-str[err.ELEMENTDECL_CONTENT_SPEC_NAME_INVALID] = 'Names in content spec must match the syntax for names. Found "{0}".';
+str[err.ELEMENTDECL_NO_SPEC] = 'Missing content spec for element declaration "{0}".';
+str[err.ELEMENTDECL_SPEC_INVALID_CASE] = 'The content spec must be "{0}". Found "{1}".';
+str[err.ELEMENTDECL_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
+str[err.ELEMENTDECL_SPEC_ITEMS_MISSING] = 'Missing items in the content spec in element declaration "{0}".';
+str[err.ELEMENTDECL_SPEC_NO_NAMES] = 'Missing {0} name from the content spec in the element declaration "{1}".';
+str[err.ELEMENTDECL_SPEC_NAME_INVALID] = 'Names in content spec must match the syntax for names. Found "{0}".';
 str[err.ELEMENTDECL_PCDATA_NOT_FIRST] = '#PCDATA must be first in the content spec of element declaration "{0}".';
 str[err.ELEMENTDECL_NO_SPEC_CLOSE] = 'Missing closing ")" for content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration "{0}".';

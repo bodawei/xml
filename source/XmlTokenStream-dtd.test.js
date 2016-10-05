@@ -1,0 +1,1003 @@
+/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+
+'use strict';
+
+/* eslint-env jasmine */
+
+const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlToken = require('./XmlToken.js');
+
+const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
+const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
+const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
+const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
+
+describe('XmlTokenStream (dtd)', () => {
+
+   describe('parsing DOCTYPE', () => {
+
+      it('retrieves a token of type DOCTYPE', () => {
+         const s = makeStrictStream('<!DOCTYPE one >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.DOCTYPE);
+      });
+
+      it('retrieves the name of the doctype', () => {
+         const s = makeStrictStream('<!DOCTYPE testType >');
+
+         expect(s.getNext().name).toEqual('testType');
+      });
+
+      it('retrieves an empty internal subset if there is none specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType >');
+
+         expect(s.getNext().internalDtd).toEqual([]);
+      });
+
+      it('retrieves an empty internal subset if an empty one is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType [ ] >');
+
+         expect(s.getNext().internalDtd).toEqual([]);
+      });
+
+      it('reports a syntax error if the actual type name is not a name', () => {
+         expectSyntaxError('<!DOCTYPE $frog [ ] >',
+            XmlErrorToken.ERROR.DOCTYPE_NAME_INVALID,
+            'The document type name must match the syntax for names. Found: "$frog".');
+      });
+
+      it('reports a syntax error if there is no DOCTYPE name', () => {
+         expectSyntaxError('<!DOCTYPE [ ] >',
+            XmlErrorToken.ERROR.DOCTYPE_NO_NAME,
+            'Missing name for the document type.');
+      });
+
+      it('reports a syntax error if there is no closing > for the DOCTYPE', () => {
+         expectSyntaxError('<!DOCTYPE foo ',
+            XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE,
+            'Missing closing ">" for in the document type.');
+      });
+
+      it('auto-terminates the doctype token when the > is not found as expected', () => {
+         const s = makeLaxStream('<!DOCTYPE foo fish>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE);
+         let t = s.getNext(); // get the doctype token
+
+         t = s.getNext();
+         expect(t.data).toEqual('fish>');
+      });
+
+   });
+
+   describe('parsing NOTATION declaration', () => {
+
+      it('retrieves a token of type NOTATION', () => {
+         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.NOTATION_DECL);
+      });
+
+      it('retrieves the name of the notation', () => {
+         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo">');
+
+         expect(s.getNext().name).toEqual('notationName');
+      });
+
+      it('reports a syntax error if there is no notation name', () => {
+         expectSyntaxError('<!NOTATION >',
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_NAME,
+            'Missing name for a notation declaration.');
+      });
+
+      it('gives the notation token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!NOTATION >');
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_SPACE_AFTER_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('auto-terminates the notation token when the > is not found as expected', () => {
+         const s = makeLaxStream('<!NOTATION myNotation fish>');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
+         ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE);
+         let t = s.getNext(); // get the notation token
+
+         t = s.getNext();
+         expect(t.data).toEqual('fish>');
+      });
+
+      it('reports a syntax error if there is no space after the notation name', () => {
+         expectSyntaxError('<!NOTATION frog>',
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_SPACE_AFTER_NAME,
+            'Missing space after the name in the notation declaration "frog".');
+      });
+
+      it('reports a syntax error if the actual type name is not a name', () => {
+         expectSyntaxError('<!NOTATION $frog PUBLIC "foo">',
+            XmlErrorToken.ERROR.NOTATIONDECL_NAME_INVALID,
+            'The notation declaration name must match the syntax for names. Found: "$frog".');
+      });
+
+      it('reports a syntax error if no externalId or publicId is provided', () => {
+         expectSyntaxError('<!NOTATION notationName >',
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID,
+            'Missing the external id the notation declaration "notationName".');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!NOTATION notationName PUBLIC "foo" ',
+            XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE,
+            'Missing closing ">" in the notation declaration "notationName".');
+      });
+
+   });
+
+   describe('parsing ENTITY declaration', () => {
+
+      it('retrieves a token of type ENTITY', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ENTITY_DECL);
+      });
+
+      it('retrieves the name of the entity', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+
+         expect(s.getNext().name).toEqual('entityName');
+      });
+
+      it('retrieves the value of the entity in double quotes', () => {
+         const s = makeStrictStream('<!ENTITY entityName "value">');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
+      });
+
+      it('retrieves the value of the entity in single quotes', () => {
+         const s = makeStrictStream('<!ENTITY entityName \'value\'>');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
+      });
+
+      it('accepts a value with no contents', () => {
+         const s = makeStrictStream('<!ENTITY entityName "">');
+
+         expect(s.getNext().value).toEqual([ ]);
+      });
+
+      it('does not expand entity references in the value', () => {
+         const s = makeStrictStream('<!ENTITY entityName "value&amp;">');
+
+         expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value&amp;') ]);
+      });
+
+      it('sets the value to undefined if none specified', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+
+         expect(s.getNext().value).toBeUndefined();
+      });
+
+      it('retrieves the NDATA name when a two value PUBLIC is specified', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testPublic" "system" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves the NDATA name when a one value PUBLIC is specified ', () => {
+         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
+         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('retrieves an undefined NDATA name if no name included', () => {
+         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME);
+
+         expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('sets the notation data name to undefined if none specified', () => {
+         const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('reports a syntax error if there is no name', () => {
+         expectSyntaxError('<!ENTITY >',
+            XmlErrorToken.ERROR.ENTITYDECL_NO_NAME,
+            'Missing name for an entity declaration.');
+      });
+
+      it('reports a syntax error if the name does not match the syntax for names', () => {
+         expectSyntaxError('<!ENTITY $badName "value">',
+            XmlErrorToken.ERROR.ENTITYDECL_NAME_INVALID,
+            'The entity name must match the syntax for names. Found: "$badName".');
+      });
+
+      it('gives the entity token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!ENTITY >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NAME_NO_TRAILING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_VALUE);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!ENTITY entityName PUBLIC "publicValue"',
+            XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE,
+            'Missing closing ">" in the entity "entityName".');
+      });
+
+      it('reports a syntax error if there is no space after the entity name', () => {
+         expectSyntaxError('<!ENTITY theName>',
+            XmlErrorToken.ERROR.ENTITYDECL_NAME_NO_TRAILING_SPACE,
+            'Missing space after the entity "theName".');
+      });
+
+      it('reports a syntax error if there is no SYSTEM, PUBLIC or entity value', () => {
+         expectSyntaxError('<!ENTITY theName >',
+            XmlErrorToken.ERROR.ENTITYDECL_NO_VALUE,
+            'Missing value or external identifier in entity "theName".');
+      });
+
+      it('reports a syntax error if there is no space before the NDATA marker', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo"NDATA fred>',
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_SPACE_BEFORE,
+            'Missing space before NDATA in entity "theName".');
+      });
+
+      it('reports a syntax error if NDATA is the wrong case', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" nData fred>',
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_INVALID_CASE,
+            'NDATA in entity "theName" must be upper case. Found "nData".');
+      });
+
+      it('reports a syntax error if there is no NDATA name', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA>',
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME,
+            'NDATA in entity "theName" must have a name.');
+      });
+
+      it('reports a syntax error if there is no NDATA name with space after NDATA', () => {
+         expectSyntaxError('<!ENTITY theName SYSTEM "foo" NDATA  >',
+            XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME,
+            'NDATA in entity "theName" must have a name.');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the SYSTEM', () => {
+         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" found junk  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('found junk  >');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the PUBLIC', () => {
+         const s = makeLaxStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('extra  >');
+      });
+
+      it('reports a missing ">" syntax error if there is junk after the NDATA', () => {
+         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
+         ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
+         let t = s.getNext(); // get the entity token
+
+         t = s.getNext();
+         expect(t.data).toEqual('junk  >');
+      });
+
+   });
+
+   // whitebox, insofar as we "know" most of ENTITY and PARAMETER_ENTITY parsing is the same code
+   describe('parsing PARAMETER_ENTITY declaration (whitebox)', () => {
+
+      it('retrieves a token of type PARAMETER_ENTITY', () => {
+         const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.PARAMETERENTITY_DECL);
+      });
+
+      it('retrieves the NDATA name on a parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity" "system" NDATA testData>');
+
+         expect(s.getNext().notationDataName).toEqual('testData');
+      });
+
+      it('sets the notation data name to undefined if none specified on a parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('retrieves the name of the parameter entity', () => {
+         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+
+         expect(s.getNext().name).toEqual('paramEntityName');
+      });
+
+   });
+
+   describe('parsing ELEMENT', () => {
+
+      it('retrieves a token of type ELEMENT_DECL', () => {
+         const s = makeStrictStream('<!ELEMENT elementName ANY>');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ELEMENT_DECL);
+      });
+
+      it('retrieves the name of the element', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+
+         expect(s.getNext().name).toEqual('testElement');
+      });
+
+      it('retrieves an ANY content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+
+         expect(s.getNext().contentType).toEqual('ANY');
+      });
+
+      it('retrieves an EMPTY content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement EMPTY>');
+
+         expect(s.getNext().contentType).toEqual('EMPTY');
+      });
+
+      it('retrieves a #PCDATA content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA)>');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+      });
+
+      it('retrieves a #PCDATA content spec padded with spaces', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (    #PCDATA    )  >');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+      });
+
+      it('retrieves multiple names from the content spec', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA | one|two |three)>');
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA', 'one', 'two', 'three' ]);
+      });
+
+      it('retrieves names from the content spec regardless of spaces around "|"s', () => {
+         const s = makeStrictStream('<!ELEMENT testElement (zero | one|two |three)>');
+
+         expect(s.getNext().contentType).toEqual([ 'zero', 'one', 'two', 'three' ]);
+      });
+
+      it('retrieves names from the content spec preserving their case', () => {
+         const s = makeStrictStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
+
+         expect(s.getNext().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
+      });
+
+      it('reports a syntax error if there is no element name', () => {
+         expectSyntaxError('<!ELEMENT >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME,
+            'Missing name for an element declaration.');
+      });
+
+      it('reports a syntax error if there is no content spec', () => {
+         expectSyntaxError('<!ELEMENT testElement>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC,
+            'Missing content spec for element declaration "testElement".');
+      });
+
+      it('reports a syntax error if #PCDATA is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement ( #pcdata )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE,
+            'The content spec must be "#PCDATA". Found "#pcdata".');
+      });
+
+      it('fixes the case of #PCDATA if it is specified in the wrong case', () => {
+         const s = makeLaxStream('<!ELEMENT testElement ( #pcdata )>');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE);
+
+         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+      });
+
+      it('reports a syntax error if #PCDATA is not in the first position', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one | #PCDATA )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_PCDATA_NOT_FIRST,
+            '#PCDATA must be first in the content spec of element declaration "testElement".');
+      });
+
+      // Abandon the parsing in this ambiguous case, so as to not swallow whole doc if )> are missing
+      it('reports a syntax error if there are names without dividing "|"s', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one two three )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC_CLOSE,
+            'Missing closing ")" for content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if there are "|"s without intervening names', () => {
+         expectSyntaxError('<!ELEMENT testElement ( one | two | ||three )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_NO_NAMES,
+            'Missing 2 name from the content spec in the element declaration "testElement".');
+      });
+
+      it('reports a syntax error if any names do not match the syntax for names', () => {
+         const s = makeLaxStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
+
+         let t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_SPEC_NAME_INVALID);
+         expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "$bogus".');
+
+         t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_SPEC_NAME_INVALID);
+         expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "bogus2!".');
+      });
+
+      it('reports a syntax error if no closing ")" on content spec', () => {
+         expectSyntaxError('<!ELEMENT testElement ( #PCDATA >',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC_CLOSE,
+            'Missing closing ")" for content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if no items in the content spec', () => {
+         expectSyntaxError('<!ELEMENT testElement (  ) >',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_ITEMS_MISSING,
+            'Missing items in the content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if no items in the content spec, including no whitespace', () => {
+         expectSyntaxError('<!ELEMENT testElement () >',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_ITEMS_MISSING,
+            'Missing items in the content spec in element declaration "testElement".');
+      });
+
+      it('reports a syntax error if content spec is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement anY>',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE,
+            'The content spec must be "ANY". Found "anY".');
+      });
+
+      it('reports a syntax error if content spec is the wrong case', () => {
+         expectSyntaxError('<!ELEMENT testElement empty   >',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE,
+            'The content spec must be "EMPTY". Found "empty".');
+      });
+
+      it('uppercases expected values', () => {
+         const s = makeLaxStream('<!ELEMENT testElement empty   >');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE);
+
+         const t = s.getNext();
+         expect(t.contentType).toEqual('EMPTY');
+      });
+
+      it('reports a syntax error if an unknown content spec is found', () => {
+         expectSyntaxError('<!ELEMENT testElement BOGUS>',
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_UNKNOWN,
+            'An unknown content spec was found. Found "BOGUS".');
+      });
+
+      it('gives the notation token an empty name if none is specified', () => {
+         const s = makeLaxStream('<!ELEMENT >');
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC);
+
+         expect(s.getNext().name).toEqual('');
+      });
+
+      it('reports a syntax error if the actual name is not a name', () => {
+         expectSyntaxError('<!ELEMENT $badName ANY>',
+            XmlErrorToken.ERROR.ELEMENTDECL_NAME_INVALID,
+            'The element declaration name must match the syntax for names. Found: "$badName".');
+      });
+
+      it('reports a syntax error if there is no closing angle bracket', () => {
+         expectSyntaxError('<!ELEMENT elemName ANY ',
+            XmlErrorToken.ERROR.ELEMENTDECL_NO_CLOSE,
+            'Missing closing ">" in the element declaration "elemName".');
+      });
+
+   });
+
+   describe('parsing ATTLIST', () => {
+
+      it('retrieves a token of type ATTLIST_DECL', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.ATTLIST_DECL);
+      });
+
+      it('retrieves the name of the element the attributes are associated with', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+
+         expect(s.getNext().elementName).toEqual('elementName');
+      });
+
+      it('retrieves the an attribute definition', () => {
+         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED'
+         } ]);
+      });
+
+      it('retrieves multiple attribute definitions', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'attrName CDATA #REQUIRED ' +
+               'attrName2 IDREF #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED'
+         }, {
+            name: 'attrName2',
+            type: 'IDREF',
+            list: undefined,
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes all known string attribute types', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #REQUIRED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED'
+         } ]);
+      });
+
+      it('recognizes all known tokenized attribute types', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'IdName ID #IMPLIED ' +
+               'IdRefName IDREF #IMPLIED ' +
+               'IdRefsName IDREFS #IMPLIED ' +
+               'EntityName ENTITY #IMPLIED ' +
+               'EntitiesName ENTITIES #IMPLIED ' +
+               'NmTokenName NMTOKEN #IMPLIED ' +
+               'NmTokensName NMTOKENS #IMPLIED >');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'IdName',
+            type: 'ID',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'IdRefName',
+            type: 'IDREF',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'IdRefsName',
+            type: 'IDREFS',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'EntityName',
+            type: 'ENTITY',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'EntitiesName',
+            type: 'ENTITIES',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'NmTokenName',
+            type: 'NMTOKEN',
+            list: undefined,
+            flag: '#IMPLIED'
+         }, {
+            name: 'NmTokensName',
+            type: 'NMTOKENS',
+            list: undefined,
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes a NOTATION type with one value', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'NotationName NOTATION  ( one ) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'NotationName',
+            type: 'NOTATION',
+            list: [ 'one' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes a NOTATION type with multiple values', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'NotationName NOTATION  ( one|two | three) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'NotationName',
+            type: 'NOTATION',
+            list: [ 'one', 'two', 'three' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes a NOTATION type with multiple values and no whitespace', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'NotationName NOTATION (one|two|three) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'NotationName',
+            type: 'NOTATION',
+            list: [ 'one', 'two', 'three' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('recognizes multiple NOTATION attributes', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'First NOTATION \n\t( one|two | three) #IMPLIED ' +
+               'Second NOTATION ( test1 | test2\t|\t\n test3) #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'First',
+            type: 'NOTATION',
+            list: [ 'one', 'two', 'three' ],
+            flag: '#IMPLIED'
+         }, {
+            name: 'Second',
+            type: 'NOTATION',
+            list: [ 'test1', 'test2', 'test3' ],
+            flag: '#IMPLIED'
+         } ]);
+      });
+
+      it('fixes a mistaken capitalization of the type', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'CDataName cdata #REQUIRED>');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_INVALID);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED'
+         } ]);
+      });
+
+      it('reports a syntax error if there is no element name', () => {
+         expectSyntaxError('<!ATTLIST >',
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_NAME,
+            'Missing element name in an attribute list declaration.');
+      });
+
+      it('reports a syntax error if there no attributes', () => {
+         expectSyntaxError('<!ATTLIST elementName>',
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_ATTRIBUTES,
+            'Missing attribute definitions for an attribute declaration for "elementName".');
+      });
+
+      it('reports a syntax error if the element name is invalid', () => {
+         expectSyntaxError('<!ATTLIST bad$name>',
+            XmlErrorToken.ERROR.ATTLISTDECL_NAME_INVALID,
+            'The element name must match the syntax for names. Found "bad$name".');
+      });
+
+      it('reports a syntax error if the element name is invalid', () => {
+         expectSyntaxError('<!ATTLIST elemName attr$name >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NAME_INVALID,
+            'The attribute name must match the syntax for names. Found "attr$name".');
+      });
+
+      it('reports a syntax error if the type is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_TYPE,
+            'Missing type for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if an unknown attribute type is specified', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName BOGUS #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
+            'The type must be a standardized value in the attribute declaration for "elemName". Found "BOGUS".');
+      });
+
+      it('reports a syntax error if an attribute type is specified in the wrong case', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IdRef #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_INVALID,
+            'The type "IDREF" must be upper case in the attribute declaration for "elemName". Found "IdRef".');
+      });
+
+      it('reports a syntax error if notation has no values', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_EMPTY,
+            'The notation in the attribute declaration for "e" must have one or more names.');
+      });
+
+      it('reports a syntax error if notation has no parenthesis values', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_EMPTY,
+            'The notation in the attribute declaration for "e" must have one or more names.');
+      });
+
+      it('reports a syntax error if notation values are not names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( $bad ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NAME_INVALID,
+            'The name in the attribute declaration for "e" must match the syntax for names. Found "$bad".');
+      });
+
+      it('reports a syntax error if notation has no space between NOTATION and list', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION( name ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
+            'The notation in the attribute declaration for "e" must have a space before the name.');
+      });
+
+      it('reports a syntax error if notation has no vertical bars between NOTATION names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('terminates the attribute list definition early if a vertical bar between NOTATION names is omitted', () => {
+         const s = makeLaxStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NAME_INVALID);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_UNKNOWN);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_DEFAULT);
+
+         const t = s.getNext();
+         expect(t.attributes[1].name).toEqual(')');
+         expect(t.attributes[1].type).toEqual('#REQUIRED');
+      });
+
+      it('reports a syntax error if notation has extra vertical bars between NOTATION names', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name | || | name2 ) #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_NAMES,
+            'Missing 3 name from the attribute declaration for "e".');
+      });
+
+      it('reports a syntax error if notation has no terminating ")" to the list', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('reports a syntax error if notation has no termination to the list or the whole attribute', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name #REQUIRED ',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
+            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+      });
+
+      it('reports a syntax error if there is no space between the closing ")" and the default', () => {
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name | name2 )#REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE,
+            'Missing space before default for attribute "attrName" in the attribute declaration for "e".');
+      });
+
+      it('reports a syntax error if the default is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA>',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_DEFAULT,
+            'Missing default value for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if the close is missing', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA #REQUIRED',
+            XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE,
+            'Missing closing ">" in the attribute list declaration "elemName".');
+      });
+
+   });
+
+   describe('parsing ExternalId', () => {
+
+      it('retrieves only a systemLiteral when SYSTEM is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(t.pubidLiteral).toBeUndefined();
+      });
+
+      it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('public');
+         expect(t.systemLiteral).toEqual('./system.xml');
+      });
+
+      it('retrieves a systemLiteral in single quotes', () => {
+         const s = makeStrictStream('<!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(t.pubidLiteral).toBeUndefined();
+      });
+
+      it('retrieves both a systemLiteral and a pubidLiteral in single quotes', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('public');
+         expect(t.systemLiteral).toEqual('./system.xml');
+      });
+
+      it('retrieves zero length publicID and system literals', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "" "" [ ] >');
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('');
+         expect(t.systemLiteral).toEqual('');
+      });
+
+      it('reports a syntax error if the pubidLiteral is not quoted', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC pubid "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE,
+            'Missing quotes around the public literal.');
+      });
+
+      it('reports a syntax error if the systemLiteral is not quoted', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" system [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE,
+            'Missing quotes around the system literal.');
+      });
+
+      it('retrieves the publicID and system literals even when unquoted', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC one two [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('one');
+         expect(t.systemLiteral).toEqual('two');
+      });
+
+      it('reports a syntax error if the public id has illegal characters', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC \'"\' "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found """.');
+      });
+
+      it('reports a syntax error if the public id has some legal and some illegal characters', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC "ABCDE{" "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found "{".');
+      });
+
+      it('retrieves the publicID literal even when it has illegal characters', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('ABCDE{');
+      });
+
+      it('throws no error if the public id has all legal characters', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  "system" [ ] >');
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrowError();
+      });
+
+      it('reports a syntax error if PUBLIC is the wrong case', () => {
+         expectSyntaxError('<!DOCTYPE testType PuBliC "pubid" "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
+            'The "PUBLIC" label must be all upper case. Found "PuBliC".');
+      });
+
+      it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
+         const s = makeLaxStream('<!DOCTYPE testType public "ABCDE" "two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('ABCDE');
+      });
+
+      it('reports a syntax error if SYSTEM is the wrong case', () => {
+         expectSyntaxError('<!DOCTYPE testType SYStem "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
+            'The "SYSTEM" label must be all upper case. Found "SYStem".');
+      });
+
+      it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
+         const s = makeLaxStream('<!DOCTYPE testType system "ABCDE" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('ABCDE');
+      });
+
+      it('reports a syntax error if no space between the pubid and system', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid""system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE,
+            'Missing space beteen the public and the system literals.');
+      });
+
+      it('reports a syntax error if no space between SYSTEM and the literal', () => {
+         expectSyntaxError('<!DOCTYPE testType SYSTEM"system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
+            'Missing space beteen SYSTEM and the literal.');
+      });
+
+      it('reports a syntax error if no space between PUBLIC and the literal', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC"pubid" "system" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
+            'Missing space beteen PUBLIC and the literal.');
+      });
+
+      it('retrieves the systemLiterals even when spaces missing', () => {
+         const s = makeLaxStream('<!DOCTYPE testType SYSTEM"one" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('one');
+      });
+
+      it('retrieves the publicID and system literals even when spaces missing', () => {
+         const s = makeLaxStream('<!DOCTYPE testType PUBLIC"one""two" [ ] >');
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE);
+
+         const t = s.getNext();
+         expect(t.pubidLiteral).toEqual('one');
+         expect(t.systemLiteral).toEqual('two');
+      });
+
+      it('reports a syntax error if there is an unknown type of external id', () => {
+         expectSyntaxError('<!DOCTYPE testType FOO [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_UNKNOWN,
+            'The external id was an unknown type. Found "FOO".');
+      });
+
+      it('reports a syntax error if systemLiteral is missing from a PUBLIC externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
+      });
+
+      it('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
+         const s = makeStrictStream('<!NOTATION testType PUBLIC "pubid" >');
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrowError();
+      });
+
+      it('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType SYSTEM [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
+      });
+
+      it('reports a syntax error if pubIdLiteral is missing from a PUBLIC externalId', () => {
+         expectSyntaxError('<!DOCTYPE testType PUBLIC [ ] >',
+            XmlErrorToken.ERROR.EXTERNALID_NO_PUBLIC,
+            'Missing public literal.');
+      });
+
+   });
+
+});
