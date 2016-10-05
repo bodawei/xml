@@ -2,8 +2,6 @@
 
 'use strict';
 
-const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
-
 class XmlTokenStreamDtd {
 
    parseElement(cursor) {

@@ -1787,7 +1787,6 @@ describe('XmlTokenStream', () => {
             s.getNext();
             s.getNext();
             s.getNext();
-            s.getNext();
          }).toThrowError('Expected end tag "two". Found "one".');
       });
 

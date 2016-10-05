@@ -11,6 +11,7 @@ var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
 var SOURCE_DIR = './source/';
 var OUT_DIR = './temp/';
+var NODE_COVERAGE_OUT_DIR = OUT_DIR + 'nodeCoverage';
 var DIST_DIR = './dist/';
 var NODE_MODULES_DIR = './node_modules';
 var DIST_NPM_DIR = DIST_DIR + '/npm/' + MODULE_NAME + '/';
@@ -47,6 +48,41 @@ module.exports = function standardBuild(grunt) {
    }
 
    grunt.initConfig({
+      // See https://www.npmjs.com/package/grunt-jasmine-node-coverage
+      /* eslint-disable camelcase */
+      jasmine_node: {
+         dist: {
+            src: [ '/**/*.js' ],
+            options: {
+               forceExit: true,
+               jasmine: {
+                  spec_dir: SOURCE_DIR,
+                  spec_files: [ '**/*.test.js' ],
+                  reporters: {
+                     // See https://github.com/bcaudan/jasmine-spec-reporter
+                     spec: {
+                        displaySuccessesSummary: false,
+                        displayFailuresSummary: true,
+                        displaySuccessfulSpec: false,
+                        displayFailedSpec: true,
+                        displaySpecDuration: true
+                     }
+                  }
+               },
+               coverage: {
+                  reportDir: NODE_COVERAGE_OUT_DIR,
+                  excludes: [ '**/*.test.js' ],
+                  report: [
+                     'lcov',
+                     'text' // or text-summary
+                  ],
+                  collect: [
+                     '*coverage.json'
+                  ]
+               }
+            }
+         }
+      },
       eslint: {
          target: JS_FILE_GLOB,
          options: {
@@ -128,9 +164,12 @@ module.exports = function standardBuild(grunt) {
       }
    });
 
+   grunt.loadNpmTasks('grunt-jasmine-node-coverage');
+
    grunt.registerTask('default', [
       'eslint',
       'test',
+      'jasmine_node:dist',
       '_dist'
    ]);
 

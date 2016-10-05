@@ -11,15 +11,13 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
-10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  see Note8
+10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
+10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
+
 	#210 min
 
 -- next: 97
 ---------------------------------------------
-x22:XL read attribute declaration
-x 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good. -- right now I don't see why.
-40:S:git aliases?
-
 [52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
 [53] AttDef         ::= S Name S AttType S DefaultDecl
 [54] AttType        ::= StringType | TokenizedType | EnumeratedType
@@ -30,32 +28,18 @@ x 76:S: for that matter, something that compares a stream of tokens without payi
 [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
 [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
 
-√ 91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
-	missing name
-	missing name
-	names not names
-	missing type
-	missing default
-	no finding >
-√ 95:S: read a set of attribute definitions
-√ 92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
-	case wrong
-	unknown type
-[1hr 40]
-√93:S: read in notation values
-	√ no names
-	no name tokens
-	√ this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
-	√ Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values 
-is a separate thing
-	- beware that the ( should terminate many of the names.
-
 96:S Read enumeration
 94:S: read #IMPLIED, optional #Fixed and attValue
 	case wrong
 	unknown type
 	Assume we can just use the existing attribute value reader
 	We do not at this level actually parse the value to see if it matches the validity constraints
+9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
+	I suggest _reportSyntaxError(code, params, chunkOfOccurrence, chunk|[array of tokens of starts of things to this point]
+		The last param would normally mark the start of the syntax element the problem occurred in, but in some cases (e.g. in references) we may be several entities deep)
+		note that undefined would mean eof.
+		This is a bit of a wildcard, as I haven't looked at every case yet.
+	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
 
 =============================================
 BLOG IDEAS
@@ -67,14 +51,9 @@ BLOG IDEAS
 - Blog: Asynchronous
 =============================================
 CLEANUP
-- begin to pull out dtd related stuff into a separate test file.
-- refactor the other call to getListItems
+- continue to pull out dtd related stuff into a separate code file (pave way for async?)
+
 BUILD
-39:M:Investigate getting node testing into build process
-	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
-	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
-	+: Can we move the spec definition into build?
-	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
 58: Build infrastructure for running xmlconf tests.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
@@ -90,6 +69,7 @@ BUILD
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
+97:M: Fix jasmine tests in node so they run stuff from build too.
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
 	git hooks should validate checkin comment has bug number and is the right format.
@@ -97,7 +77,6 @@ BUILD
 
 PROJECT
 --- technical debt [6m 10s]
-9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
 	in the process, might be good to give these numeric codes.
@@ -582,3 +561,39 @@ x20:XL Read element declaration
 
 Note8
 The big thing here is I went overschedule between 50 mintues and 80 (the difference is that I used the cleanup time to do this).  Again, this was because I was working on error messages.  I chose to do this despite the bad precedent just because I really wanted to get that task done. Could have shipped without it complete.... I just wanted it out of my hair.
+
+
+Sprint 9
+========
+x22:XL read attribute declaration
+x 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good. -- right now I don't see why.
+40:S:git aliases?
+
+√ 91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
+	missing name
+	missing name
+	names not names
+	missing type
+	missing default
+	no finding >
+√ 95:S: read a set of attribute definitions
+√ 92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
+	case wrong
+	unknown type
+[1hr 40]
+√93:S: read in notation values
+	√ no names
+	no name tokens
+	√ this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
+	√ Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values 
+is a separate thing
+	- beware that the ( should terminate many of the names.
+√ 39:M:Investigate getting node testing into build process
+	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
+	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
+	+: Can we move the spec definition into build?
+	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
+
+
+Note9
+This was in some ways a bad sprint, in that the things committed to were not all delivered (and we had to add 95 in the middle, having overlooked this detail in the planning).  On the other hand, we didn't go over time in order to deliver a functioning thing, we just didn't deliver on all the functionality as hoped, so from another vantage point it was very successful.
