@@ -43,6 +43,7 @@ class XmlTokenStreamDtd {
          attr.name = cursor.getWord([ '>' ]);
          cursor.getSpace();
          attr.type = cursor.getWord([ '>', '(' ]);
+         const postType = cursor.peekChar();
 
          if (attr.type && attr.type.text.toLocaleUpperCase() === 'NOTATION') {
             attr.postNotationSpace = cursor.getSpace();
@@ -57,6 +58,17 @@ class XmlTokenStreamDtd {
                attr.close = listInfo.close;
                attr.missingCount = listInfo.missingCount;
             }
+         } else if (!attr.type && postType && postType.text === '(') {
+            cursor.getChar();
+
+            const enumInfo = this._getListItems(cursor, [ '>' ]);
+            attr.list = enumInfo.list;
+            attr.close = enumInfo.close;
+            attr.missingCount = enumInfo.missingCount;
+
+            attr.type = {
+               text: 'ENUMERATION'
+            };
          }
 
          attr.preDefaultSpace = cursor.getSpace();

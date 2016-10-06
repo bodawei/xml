@@ -807,6 +807,79 @@ describe('XmlTokenStream (dtd)', () => {
             'Missing closing ">" in the attribute list declaration "elemName".');
       });
 
+      describe('enumeration type', () => {
+
+         it('recognizes an enumeration type ', () => {
+            const s = makeStrictStream('<!ATTLIST elementName ' +
+                  'EnumerationName ( one ) #IMPLIED>');
+
+            expect(s.getNext().attributes).toEqual([ {
+               name: 'EnumerationName',
+               type: 'ENUMERATION',
+               list: [ 'one' ],
+               flag: '#IMPLIED'
+            } ]);
+         });
+
+         it('recognizes multiple enumeration attributes', () => {
+            const s = makeStrictStream('<!ATTLIST elementName ' +
+                  'First CDATA #IMPLIED ' +
+                  'Second NOTATION \n\t(one | two | three) #IMPLIED ' +
+                  'Third \n\t( one|two | three) #IMPLIED ' +
+                  'Fourth ( test1 | test2\t|\t\n test3) #IMPLIED>');
+
+            expect(s.getNext().attributes).toEqual([ {
+               name: 'First',
+               type: 'CDATA',
+               list: undefined,
+               flag: '#IMPLIED'
+            }, {
+               name: 'Second',
+               type: 'NOTATION',
+               list: [ 'one', 'two', 'three' ],
+               flag: '#IMPLIED'
+            }, {
+               name: 'Third',
+               type: 'ENUMERATION',
+               list: [ 'one', 'two', 'three' ],
+               flag: '#IMPLIED'
+            }, {
+               name: 'Fourth',
+               type: 'ENUMERATION',
+               list: [ 'test1', 'test2', 'test3' ],
+               flag: '#IMPLIED'
+            } ]);
+         });
+
+         it('accepts an enumerated value that is an NmToken but not a name ', () => {
+            const s = makeStrictStream('<!ATTLIST elementName ' +
+                  'EnumerationName ( -one ) #IMPLIED>');
+
+            expect(s.getNext().attributes).toEqual([ {
+               name: 'EnumerationName',
+               type: 'ENUMERATION',
+               list: [ '-one' ],
+               flag: '#IMPLIED'
+            } ]);
+         });
+
+         // Whitebox: We don't test all the cases for missing names and |'s since that is common code
+
+         it('reports a syntax error if the enumeration values is not an NmToken', () => {
+            expectSyntaxError('<!ATTLIST e attrName ( $bad ) #REQUIRED>',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID,
+               'The value in the enumeration in the attribute declaration for "e" must match the syntax for ' +
+                  'nmtokens. Found "$bad".');
+         });
+
+         it('reports a syntax error if the enumeration is mising a close "("', () => {
+            expectSyntaxError('<!ATTLIST e attrName ( name #REQUIRED>',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NO_CLOSE,
+               'Missing closing ")" for the enumeration in the attribute definition for "attrName".');
+         });
+
+      });
+
    });
 
    describe('parsing ExternalId', () => {

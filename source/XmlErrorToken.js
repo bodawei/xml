@@ -123,6 +123,9 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_NOTA_NO_NAMES: 'ATTLISTDECL_ATTR_NOTA_NO_NAMES',
    ATTLISTDECL_ATTR_NOTA_NAME_INVALID: 'ATTLISTDECL_ATTR_NOTA_NAME_INVALID',
    ATTLISTDECL_ATTR_NOTA_EMPTY: 'ATTLISTDECL_ATTR_NOTA_EMPTY',
+   ATTLISTDECL_ATTR_NOTA_NO_CLOSE: 'ATTLISTDECL_ATTR_NOTA_NO_CLOSE',
+   ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID: 'ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID',
+   ATTLISTDECL_ATTR_ENUM_NO_CLOSE: 'ATTLISTDECL_ATTR_ENUM_NO_CLOSE',
    ATTLISTDECL_ATTR_NO_DEFAULT: 'ATTLISTDECL_ATTR_NO_DEFAULT',
    ATTLISTDECL_ATTR_DEFAULT_NO_SPACE: 'ATTLISTDECL_ATTR_DEFAULT_NO_SPACE',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
@@ -262,6 +265,11 @@ str[err.ATTLISTDECL_ATTR_NOTA_NO_SPACE] =
    'The notation in the attribute declaration for "{0}" must have a space before the name.';
 str[err.ATTLISTDECL_ATTR_NOTA_NO_NAMES] = 'Missing {0} name from the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTR_NOTA_NO_CLOSE] = 'Missing closing ")" for the notation in the attribute definition for "{0}".';
+str[err.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID] =
+   'The value in the enumeration in the attribute declaration for "{0}" must match the syntax for nmtokens. ' +
+   'Found "{1}".';
+str[err.ATTLISTDECL_ATTR_ENUM_NO_CLOSE] =
+   'Missing closing ")" for the enumeration in the attribute definition for "{0}".';
 str[err.ATTLISTDECL_ATTR_NO_DEFAULT] =
    'Missing default value for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE] =

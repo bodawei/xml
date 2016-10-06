@@ -29,7 +29,8 @@ const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
-const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
+const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
+   'ENUMERATION' ];
 
 function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    let value = valueChunk;
@@ -565,16 +566,25 @@ class XmlTokenStream {
                         attrType = upper;
                      }
 
-                     if (attrType === 'NOTATION') {
+                     if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
                         const attrList = attr.list || [];
                         list = [];
 
-                        this._assertSyntax(attr.postNotationSpace, ERRORS.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
+                        if (attrType === 'NOTATION') {
+                           this._assertSyntax(attr.postNotationSpace, ERRORS.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
+                              [ elName ]);
+                        }
                         this._assertSyntax(attrList.length > 0, ERRORS.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
 
                         for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
-                           this._assertSyntax(attrList[listIndex].couldBeName,
-                              ERRORS.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
+                           if (attrType === 'NOTATION') {
+                              this._assertSyntax(attrList[listIndex].couldBeName,
+                                 ERRORS.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
+                           } else {
+                              this._assertSyntax(attrList[listIndex].couldBeNmToken,
+                                 ERRORS.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
+                           }
+
                            list.push(attrList[listIndex].text);
                         }
 
@@ -585,7 +595,8 @@ class XmlTokenStream {
                            this._assertSyntax(attr.preDefaultSpace,
                               ERRORS.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
                         } else {
-                           this._reportSyntaxError(ERRORS.ATTLISTDECL_ATTR_NOTA_NO_CLOSE, [ attrName, elName ]);
+                           this._reportSyntaxError(attrType === 'NOTATION' ? ERRORS.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
+                              ERRORS.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
                         }
                      }
                   }

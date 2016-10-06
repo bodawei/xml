@@ -28,7 +28,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
 [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
 
-96:S Read enumeration
+√ 96:S Read enumeration
 94:S: read #IMPLIED, optional #Fixed and attValue
 	case wrong
 	unknown type
@@ -40,7 +40,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 		note that undefined would mean eof.
 		This is a bit of a wildcard, as I haven't looked at every case yet.
 	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
-
+- clean up attrlistdecl error constants and messages.  in particular might be good to do something like element.attr in the messages
+- change the getList so you can say ( name name name ), and change error reporting.
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -69,7 +70,7 @@ BUILD
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
-97:M: Fix jasmine tests in node so they run stuff from build too.
+97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
 	git hooks should validate checkin comment has bug number and is the right format.

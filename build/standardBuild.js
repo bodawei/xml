@@ -11,7 +11,6 @@ var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
 var SOURCE_DIR = './source/';
 var OUT_DIR = './temp/';
-var NODE_COVERAGE_OUT_DIR = OUT_DIR + 'nodeCoverage';
 var DIST_DIR = './dist/';
 var NODE_MODULES_DIR = './node_modules';
 var DIST_NPM_DIR = DIST_DIR + '/npm/' + MODULE_NAME + '/';
@@ -52,7 +51,7 @@ module.exports = function standardBuild(grunt) {
       /* eslint-disable camelcase */
       jasmine_node: {
          dist: {
-            src: [ '/**/*.js' ],
+            src: [ '**/*.js' ],
             options: {
                forceExit: true,
                jasmine: {
@@ -70,7 +69,7 @@ module.exports = function standardBuild(grunt) {
                   }
                },
                coverage: {
-                  reportDir: NODE_COVERAGE_OUT_DIR,
+                  reportDir: OUT_DIR + 'nodeCoverage',
                   excludes: [ '**/*.test.js' ],
                   report: [
                      'lcov',
