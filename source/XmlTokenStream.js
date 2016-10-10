@@ -31,6 +31,7 @@ const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
+const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
 function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    let value = valueChunk;
@@ -496,6 +497,8 @@ class XmlTokenStream {
 
                   this._assertSyntax(parsedEl.missingNames === 0 || parsedEl.list.length === 0,
                      ERRORS.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingNames, nameText ]);
+                  this._assertSyntax(parsedEl.missingOrs === 0 || parsedEl.list.length <= 1,
+                     ERRORS.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOrs, nameText ]);
                   this._assertSyntax(parsedEl.list.length > 0, ERRORS.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
 
                   for (let index = 0; index < parsedEl.list.length; index++) {
@@ -529,7 +532,7 @@ class XmlTokenStream {
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
             case 'ATTLIST':
-               const parseResults = this._dtdParser.parseAttList(this._cursor);
+               const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
 
                const elNameChunk = parseResults.elementNameChunk;
                const rawAttrs = parseResults.attributes;
@@ -548,6 +551,7 @@ class XmlTokenStream {
                   const attrName = attr.name.text;
                   let list;
                   let attrType = '';
+                  let attrDefault;
 
                   this._assertSyntax(attr.name.couldBeName, ERRORS.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
 
@@ -588,26 +592,65 @@ class XmlTokenStream {
                            list.push(attrList[listIndex].text);
                         }
 
+                        this._assertSyntax(attr.missingOr === 0,
+                           ERRORS.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
                         this._assertSyntax(attr.missingCount === 0,
-                           ERRORS.ATTLISTDECL_ATTR_NOTA_NO_NAMES, [ attr.missingCount, elName ]);
+                           ERRORS.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
 
-                        if (attr.close) {
-                           this._assertSyntax(attr.preDefaultSpace,
-                              ERRORS.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
-                        } else {
+                        if (!attr.close) {
                            this._reportSyntaxError(attrType === 'NOTATION' ? ERRORS.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
                               ERRORS.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
                         }
                      }
                   }
 
-                  this._assertSyntax(attr.default, ERRORS.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
+                  if (!attr.default && !attr.value) {
+                     this._assertSyntax(attr.default, ERRORS.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
+                  }
+
+                  if (attr.default) {
+                     attrDefault = attr.default.text;
+
+                     const upper = attrDefault.toLocaleUpperCase();
+                     const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
+
+                     if (!known) {
+                        this._assertSyntax(known, ERRORS.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
+                     } else {
+                        this._assertSyntax(upper === attrDefault,
+                           ERRORS.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
+                        attrDefault = upper;
+
+                        if (attrDefault === '#FIXED') {
+                           this._assertSyntax(attr.postFixedSpace, ERRORS.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                        }
+                     }
+                  }
+
+                  if (attr.value || attr.default) {
+                     this._assertSyntax(attr.preDefaultSpace,
+                        ERRORS.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
+
+                     if (attr.value) {
+                        this._assertSyntax(!attr.aborted, ERRORS.ATTLISTDECL_ATTR_INVALID, [ elName ]);
+                        if (!attr.aborted) {
+                           this._assertSyntax(attr.quote, ERRORS.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
+                        }
+                     }
+                  }
+
+                  if (attr.value) {
+                     for (let index = 0; index < attr.value.length; index++) {
+                        attr.value[index] = attr.value[index].text;
+                     }
+                  }
 
                   attributes.push({
                      name: attrName,
                      type: attrType,
                      list: list,
-                     flag: attr.default && attr.default.text
+                     flag: attrDefault,
+                     value: attr.value
                   });
                }
 

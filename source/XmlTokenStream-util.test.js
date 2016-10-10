@@ -8,8 +8,9 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
-function makeLaxStream(str) {
-   return makeStream(str, new XmlEntityManager(), { lax: true });
+function makeLaxStream(str, options = {}) {
+   options.lax = true;
+   return makeStream(str, new XmlEntityManager(), options);
 }
 
 function makeStrictStream(str) {

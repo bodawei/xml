@@ -425,11 +425,10 @@ describe('XmlTokenStream (dtd)', () => {
             '#PCDATA must be first in the content spec of element declaration "testElement".');
       });
 
-      // Abandon the parsing in this ambiguous case, so as to not swallow whole doc if )> are missing
       it('reports a syntax error if there are names without dividing "|"s', () => {
          expectSyntaxError('<!ELEMENT testElement ( one two three )>',
-            XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC_CLOSE,
-            'Missing closing ")" for content spec in element declaration "testElement".');
+            XmlErrorToken.ERROR.ELEMENTDECL_SPEC_NO_ORS,
+            'Missing 2 "|" from the content spec in the element declaration "testElement".');
       });
 
       it('reports a syntax error if there are "|"s without intervening names', () => {
@@ -538,7 +537,8 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
-            flag: '#REQUIRED'
+            flag: '#REQUIRED',
+            value: undefined
          } ]);
       });
 
@@ -551,12 +551,14 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
-            flag: '#REQUIRED'
+            flag: '#REQUIRED',
+            value: undefined
          }, {
             name: 'attrName2',
             type: 'IDREF',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          } ]);
       });
 
@@ -568,7 +570,8 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
-            flag: '#REQUIRED'
+            flag: '#REQUIRED',
+            value: undefined
          } ]);
       });
 
@@ -586,37 +589,44 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'IdName',
             type: 'ID',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'IdRefName',
             type: 'IDREF',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'IdRefsName',
             type: 'IDREFS',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'EntityName',
             type: 'ENTITY',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'EntitiesName',
             type: 'ENTITIES',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'NmTokenName',
             type: 'NMTOKEN',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'NmTokensName',
             type: 'NMTOKENS',
             list: undefined,
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          } ]);
       });
 
@@ -628,7 +638,8 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one' ],
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          } ]);
       });
 
@@ -640,7 +651,8 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          } ]);
       });
 
@@ -652,7 +664,8 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          } ]);
       });
 
@@ -665,12 +678,92 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'First',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
          }, {
             name: 'Second',
             type: 'NOTATION',
             list: [ 'test1', 'test2', 'test3' ],
-            flag: '#IMPLIED'
+            flag: '#IMPLIED',
+            value: undefined
+         } ]);
+      });
+
+      it('recognizes an #IMPLIED type', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #IMPLIED>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#IMPLIED',
+            value: undefined
+         } ]);
+      });
+
+      it('recognizes an default value in double quotes', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "this is a test value">');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ 'this is a test value' ]
+         } ]);
+      });
+
+      it('recognizes an default value in single quotes', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA \'this is a test value\'>');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ 'this is a test value' ]
+         } ]);
+      });
+
+      it('recognizes an empty default value', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "">');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ ]
+         } ]);
+      });
+
+      it('recognizes an default with a reference in it, without expanding it', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "one &amp;">');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ 'one &amp;' ]
+         } ]);
+      });
+
+      it('recognizes an default value with the #FIXED flag', () => {
+         const s = makeStrictStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #FIXED "this is a test value">');
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#FIXED',
+            value: [ 'this is a test value' ]
          } ]);
       });
 
@@ -683,7 +776,50 @@ describe('XmlTokenStream (dtd)', () => {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
-            flag: '#REQUIRED'
+            flag: '#REQUIRED',
+            value: undefined
+         } ]);
+      });
+
+      it('fixes a mistaken non-capitalized default #REQUIRED value', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #required>');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#REQUIRED',
+            value: undefined
+         } ]);
+      });
+
+      it('fixes a mistaken non-capitalized default #IMPLIED value', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #implied>');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#IMPLIED',
+            value: undefined
+         } ]);
+      });
+
+      it('fixes a mistaken non-capitalized default #FIXED value', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'CDataName CDATA #FiXeD "foo">');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: '#FIXED',
+            value: [ 'foo' ]
          } ]);
       });
 
@@ -729,6 +865,24 @@ describe('XmlTokenStream (dtd)', () => {
             'The type "IDREF" must be upper case in the attribute declaration for "elemName". Found "IdRef".');
       });
 
+      it('reports a syntax error if an attribute flag in the wrong case', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IDREF #implied >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID,
+            'The default "#IMPLIED" must be upper case in the attribute declaration for "elemName". Found "#implied".');
+      });
+
+      it('reports a syntax error if there is an unknown attribute flag', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IDREF #FROG >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
+            'The default "#FROG" must be one of the specified default values in attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if there is an unknown attribute flag', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName IDREF #FROG >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
+            'The default "#FROG" must be one of the specified default values in attribute declaration for "elemName".');
+      });
+
       it('reports a syntax error if notation has no values', () => {
          expectSyntaxError('<!ATTLIST e attrName NOTATION ( ) #REQUIRED >',
             XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_EMPTY,
@@ -755,30 +909,31 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('reports a syntax error if notation has no vertical bars between NOTATION names', () => {
          expectSyntaxError('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
-            'Missing closing ")" for the notation in the attribute definition for "attrName".');
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS,
+            'Missing 1 "|" from the attribute declaration for "e".');
       });
 
-      it('terminates the attribute list definition early if a vertical bar between NOTATION names is omitted', () => {
+      it('extracts the expected notation names if a vertical bar between NOTATION names is omitted', () => {
          const s = makeLaxStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
-         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE);
-         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NAME_INVALID);
-         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_UNKNOWN);
-         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_DEFAULT);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS);
 
-         const t = s.getNext();
-         expect(t.attributes[1].name).toEqual(')');
-         expect(t.attributes[1].type).toEqual('#REQUIRED');
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'NOTATION',
+            list: [ 'name', 'name2' ],
+            flag: '#REQUIRED',
+            value: undefined
+         } ]);
       });
 
       it('reports a syntax error if notation has extra vertical bars between NOTATION names', () => {
          expectSyntaxError('<!ATTLIST e attrName NOTATION ( name | || | name2 ) #REQUIRED >',
-            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_NAMES,
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_NAMES,
             'Missing 3 name from the attribute declaration for "e".');
       });
 
       it('reports a syntax error if notation has no terminating ")" to the list', () => {
-         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name #REQUIRED >',
+         expectSyntaxError('<!ATTLIST e attrName NOTATION ( name >',
             XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NOTA_NO_CLOSE,
             'Missing closing ")" for the notation in the attribute definition for "attrName".');
       });
@@ -801,10 +956,74 @@ describe('XmlTokenStream (dtd)', () => {
             'Missing default value for attribute "attrName" in the attribute declaration for "elemName".');
       });
 
+      it('reports a syntax error if no space between the type and the #FIXED flag and the attribute value', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA#FIXED "test value">',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE,
+            'Missing space before default for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if no space between the #FIXED flag and the attribute value', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA #FIXED"test value">',
+            XmlErrorToken.ERROR.ATTLISTDECL_FIXED_NO_SPACE,
+            'Missing space after #FIXED in attribute declaration for "elemName".');
+      });
+
+      it('reports a syntax error if no space between type and the attribute default', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA"test value">',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE,
+            'Missing space before default for attribute "attrName" in the attribute declaration for "elemName".');
+      });
+
       it('reports a syntax error if the close is missing', () => {
          expectSyntaxError('<!ATTLIST elemName attrName CDATA #REQUIRED',
             XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE,
             'Missing closing ">" in the attribute list declaration "elemName".');
+      });
+
+      it('reports a syntax error if there is a "<" in the attribute value', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA #FIXED "test < value">',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_INVALID,
+            'Must not have a "<" in an attribute value in the attribute list declaration for "elemName".');
+      });
+
+      it('allows an attribute with "<" in the default if the right lax flag is set', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'attrName CDATA "one < two">', {
+                  'lax:allowOpenAngleBracketsInAttributeValues': true
+               });
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ 'one < two' ]
+         } ]);
+      });
+
+      it('terminates the attribute list element early if there is a "<" in the attribute value ', () => {
+         const s = makeLaxStream('<!ATTLIST elementName ' +
+               'attrName CDATA "one < two">');
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_INVALID);
+         ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE);
+
+         expect(s.getNext().attributes).toEqual([ {
+            name: 'attrName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ 'one ' ]
+         } ]);
+
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
+         expect(s.getNext().type).toEqual(XmlToken.ELEMENT_START);
+      });
+
+      it('reports a syntax error if there is not a closing quote', () => {
+         expectSyntaxError('<!ATTLIST elemName attrName CDATA "test >',
+            XmlErrorToken.ERROR.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE,
+            'Missing closing quote in the attribute list declaration for "elemName".');
       });
 
       describe('enumeration type', () => {
@@ -817,7 +1036,8 @@ describe('XmlTokenStream (dtd)', () => {
                name: 'EnumerationName',
                type: 'ENUMERATION',
                list: [ 'one' ],
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             } ]);
          });
 
@@ -832,22 +1052,26 @@ describe('XmlTokenStream (dtd)', () => {
                name: 'First',
                type: 'CDATA',
                list: undefined,
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             }, {
                name: 'Second',
                type: 'NOTATION',
                list: [ 'one', 'two', 'three' ],
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             }, {
                name: 'Third',
                type: 'ENUMERATION',
                list: [ 'one', 'two', 'three' ],
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             }, {
                name: 'Fourth',
                type: 'ENUMERATION',
                list: [ 'test1', 'test2', 'test3' ],
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             } ]);
          });
 
@@ -859,7 +1083,8 @@ describe('XmlTokenStream (dtd)', () => {
                name: 'EnumerationName',
                type: 'ENUMERATION',
                list: [ '-one' ],
-               flag: '#IMPLIED'
+               flag: '#IMPLIED',
+               value: undefined
             } ]);
          });
 
@@ -872,10 +1097,35 @@ describe('XmlTokenStream (dtd)', () => {
                   'nmtokens. Found "$bad".');
          });
 
-         it('reports a syntax error if the enumeration is mising a close "("', () => {
-            expectSyntaxError('<!ATTLIST e attrName ( name #REQUIRED>',
+         it('reports a syntax error if the enumeration is mising a close ")"', () => {
+            expectSyntaxError('<!ATTLIST e attrName ( name >',
                XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NO_CLOSE,
                'Missing closing ")" for the enumeration in the attribute definition for "attrName".');
+         });
+
+         it('reports a syntax error if enumeration has no vertical bars between names', () => {
+            expectSyntaxError('<!ATTLIST e attrName ( name name2 ) #REQUIRED >',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS,
+               'Missing 1 "|" from the attribute declaration for "e".');
+         });
+
+         it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
+            const s = makeLaxStream('<!ATTLIST e attrName ( name name2 ) #REQUIRED >');
+            ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS);
+
+            expect(s.getNext().attributes).toEqual([ {
+               name: 'attrName',
+               type: 'ENUMERATION',
+               list: [ 'name', 'name2' ],
+               flag: '#REQUIRED',
+               value: undefined
+            } ]);
+         });
+
+         it('reports a syntax error if enumeration has extra vertical bars between names', () => {
+            expectSyntaxError('<!ATTLIST e attrName ( name | || | name2 ) #REQUIRED >',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_NAMES,
+               'Missing 3 name from the attribute declaration for "e".');
          });
 
       });

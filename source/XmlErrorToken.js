@@ -120,7 +120,8 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_TYPE_UNKNOWN: 'ATTLISTDECL_ATTR_TYPE_UNKNOWN',
    ATTLISTDECL_ATTR_TYPE_INVALID: 'ATTLISTDECL_ATTR_TYPE_INVALID',
    ATTLISTDECL_ATTR_NOTA_NO_SPACE: 'ATTLISTDECL_ATTR_NOTA_NO_SPACE',
-   ATTLISTDECL_ATTR_NOTA_NO_NAMES: 'ATTLISTDECL_ATTR_NOTA_NO_NAMES',
+   ATTLISTDECL_ATTR_LIST_NO_NAMES: 'ATTLISTDECL_ATTR_LIST_NO_NAMES',
+   ATTLISTDECL_ATTR_LIST_NO_ORS: 'ATTLISTDECL_ATTR_LIST_NO_ORS',
    ATTLISTDECL_ATTR_NOTA_NAME_INVALID: 'ATTLISTDECL_ATTR_NOTA_NAME_INVALID',
    ATTLISTDECL_ATTR_NOTA_EMPTY: 'ATTLISTDECL_ATTR_NOTA_EMPTY',
    ATTLISTDECL_ATTR_NOTA_NO_CLOSE: 'ATTLISTDECL_ATTR_NOTA_NO_CLOSE',
@@ -128,6 +129,11 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_ENUM_NO_CLOSE: 'ATTLISTDECL_ATTR_ENUM_NO_CLOSE',
    ATTLISTDECL_ATTR_NO_DEFAULT: 'ATTLISTDECL_ATTR_NO_DEFAULT',
    ATTLISTDECL_ATTR_DEFAULT_NO_SPACE: 'ATTLISTDECL_ATTR_DEFAULT_NO_SPACE',
+   ATTLISTDECL_ATTR_DEFAULT_INVALID: 'ATTLISTDECL_ATTR_DEFAULT_INVALID',
+   ATTLISTDECL_ATTR_DEFAULT_UNKNOWN: 'ATTLISTDECL_ATTR_DEFAULT_UNKNOWN',
+   ATTLISTDECL_FIXED_NO_SPACE: 'ATTLISTDECL_FIXED_NO_SPACE',
+   ATTLISTDECL_ATTR_INVALID: 'ATTLISTDECL_ATTR_INVALID',
+   ATTLISTDECL_ATTR_NO_CLOSE_QUOTE: 'ATTLISTDECL_ATTR_NO_CLOSE_QUOTE',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
 
    NOTATIONDECL_NO_NAME: 'NOTATIONDECL_NO_NAME',
@@ -243,6 +249,7 @@ str[err.ELEMENTDECL_SPEC_INVALID_CASE] = 'The content spec must be "{0}". Found 
 str[err.ELEMENTDECL_SPEC_UNKNOWN] = 'An unknown content spec was found. Found "{0}".';
 str[err.ELEMENTDECL_SPEC_ITEMS_MISSING] = 'Missing items in the content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_SPEC_NO_NAMES] = 'Missing {0} name from the content spec in the element declaration "{1}".';
+str[err.ELEMENTDECL_SPEC_NO_ORS] = 'Missing {0} "|" from the content spec in the element declaration "{1}".';
 str[err.ELEMENTDECL_SPEC_NAME_INVALID] = 'Names in content spec must match the syntax for names. Found "{0}".';
 str[err.ELEMENTDECL_PCDATA_NOT_FIRST] = '#PCDATA must be first in the content spec of element declaration "{0}".';
 str[err.ELEMENTDECL_NO_SPEC_CLOSE] = 'Missing closing ")" for content spec in element declaration "{0}".';
@@ -263,7 +270,8 @@ str[err.ATTLISTDECL_ATTR_NOTA_EMPTY] =
    'The notation in the attribute declaration for "{0}" must have one or more names.';
 str[err.ATTLISTDECL_ATTR_NOTA_NO_SPACE] =
    'The notation in the attribute declaration for "{0}" must have a space before the name.';
-str[err.ATTLISTDECL_ATTR_NOTA_NO_NAMES] = 'Missing {0} name from the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_LIST_NO_NAMES] = 'Missing {0} name from the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_LIST_NO_ORS] = 'Missing {0} "|" from the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTR_NOTA_NO_CLOSE] = 'Missing closing ")" for the notation in the attribute definition for "{0}".';
 str[err.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID] =
    'The value in the enumeration in the attribute declaration for "{0}" must match the syntax for nmtokens. ' +
@@ -274,6 +282,14 @@ str[err.ATTLISTDECL_ATTR_NO_DEFAULT] =
    'Missing default value for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE] =
    'Missing space before default for attribute "{0}" in the attribute declaration for "{1}".';
+str[err.ATTLISTDECL_ATTR_DEFAULT_INVALID] =
+   'The default "{0}" must be upper case in the attribute declaration for "{1}". Found "{2}".';
+str[err.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN] =
+   'The default "{0}" must be one of the specified default values in attribute declaration for "{1}".';
+str[err.ATTLISTDECL_FIXED_NO_SPACE] = 'Missing space after #FIXED in attribute declaration for "{0}".';
+str[err.ATTLISTDECL_ATTR_INVALID] =
+   'Must not have a "<" in an attribute value in the attribute list declaration for "{0}".';
+str[err.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE] = 'Missing closing quote in the attribute list declaration for "{0}".';
 str[err.ATTLISTDECL_NO_CLOSE] = 'Missing closing ">" in the attribute list declaration "{0}".';
 
 str[err.NOTATIONDECL_NO_NAME] = 'Missing name for a notation declaration.';

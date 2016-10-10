@@ -27,21 +27,23 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 [58] NotationType   ::= 'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
 [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
 [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
-
+[10]   	AttValue	   ::=   	'"' ([^<&"] | Reference)* '"' |  "'" ([^<&'] | Reference)* "'"
 √ 96:S Read enumeration
-94:S: read #IMPLIED, optional #Fixed and attValue
-	case wrong
-	unknown type
-	Assume we can just use the existing attribute value reader
-	We do not at this level actually parse the value to see if it matches the validity constraints
-9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
+√9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
 	I suggest _reportSyntaxError(code, params, chunkOfOccurrence, chunk|[array of tokens of starts of things to this point]
 		The last param would normally mark the start of the syntax element the problem occurred in, but in some cases (e.g. in references) we may be several entities deep)
 		note that undefined would mean eof.
 		This is a bit of a wildcard, as I haven't looked at every case yet.
 	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
+√ - change the getList so you can say ( name name name ), and change error reporting.
+√ 94:S: read #IMPLIED, optional #Fixed and attValue
+	case wrong
+	unknown type
+	Assume we can just use the existing attribute value reader
+	We do not at this level actually parse the value to see if it matches the validity constraints
 - clean up attrlistdecl error constants and messages.  in particular might be good to do something like element.attr in the messages
-- change the getList so you can say ( name name name ), and change error reporting.
+- cleanup getITems
+- should we be expanding character references in attribute defaults?
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
