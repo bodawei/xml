@@ -612,7 +612,17 @@ describe('XmlTokenStream', () => {
       it('throws an error if no --> found', () => {
          expectSyntaxError('<!--junk comment',
             XmlErrorToken.ERROR.COMMENT_NO_CLOSE,
-            'Missing closing --> in a comment.');
+            'Missing closing --> in a comment.',
+            new Offset(0, 16, 16),
+            [ new Offset(0, 0, 0) ]);
+      });
+
+      it('throws an error if no --> found immediately after the opening', () => {
+         expectSyntaxError('<!--',
+            XmlErrorToken.ERROR.COMMENT_NO_CLOSE,
+            'Missing closing --> in a comment.',
+            new Offset(0, 4, 4),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
@@ -625,7 +635,9 @@ describe('XmlTokenStream', () => {
       it('throws an error if comment ends with a -', () => {
          expectSyntaxError('<!--junk comment--->',
             XmlErrorToken.ERROR.COMMENT_ENDS_WITH_HYPHEN,
-            'Must not have a hyphen at end of a comment.');
+            'Must not have a hyphen at end of a comment.',
+            new Offset(0, 16, 16),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('retrieves the expected chunks', () => {
@@ -681,7 +693,30 @@ describe('XmlTokenStream', () => {
       it('throws an error if no ?> found', () => {
          expectSyntaxError('<?frog glorky',
             XmlErrorToken.ERROR.PI_NO_CLOSE,
-            'Missing closing ?> in a processing instruction.');
+            'Missing closing ?> in a processing instruction.',
+            new Offset(0, 13, 13));
+      });
+
+      it('throws an error if no ?> found after space after target', () => {
+         expectSyntaxError('<?frog ',
+            XmlErrorToken.ERROR.PI_NO_CLOSE,
+            'Missing closing ?> in a processing instruction.',
+            new Offset(0, 7, 7));
+      });
+
+      it('throws an error if no ?> found after target', () => {
+         expectSyntaxError('<?frog',
+            XmlErrorToken.ERROR.PI_NO_CLOSE,
+            'Missing closing ?> in a processing instruction.',
+            new Offset(0, 6, 6));
+      });
+
+      it('sets the right offset when finding no ?> found after opening', () => {
+         const s = makeLaxStream('<?');
+         ignoreError(s, XmlErrorToken.ERROR.PI_NO_TARGET);
+
+         const t = s.getNext();
+         expect(t.place).toEqual(new Offset(0, 2, 2));
       });
 
       it('returns the content up to EOF if no ?> found in lax mode', () => {
@@ -694,19 +729,22 @@ describe('XmlTokenStream', () => {
       it('throws an error if a space is between the <? and the target', () => {
          expectSyntaxError('<? foo glorky?>',
             XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
-            'Must not have a space before the target name.');
+            'Must not have a space before the target name.',
+            new Offset(0, 2, 2));
       });
 
       it('throws an error if the name does not match the name syntax', () => {
          expectSyntaxError('<?frog$ glorky?>',
             XmlErrorToken.ERROR.PI_TARGET_NAME_INVALID,
-            'The target name must match the syntax for names. Found: "frog$".');
+            'The target name must match the syntax for names. Found: "frog$".',
+            new Offset(0, 2, 2));
       });
 
       it('throws an error if there is no target', () => {
          expectSyntaxError('<??>',
             XmlErrorToken.ERROR.PI_NO_TARGET,
-            'Missing target name in a processing instruction.');
+            'Missing target name in a processing instruction.',
+            new Offset(0, 2, 2));
       });
 
    });
@@ -748,13 +786,15 @@ describe('XmlTokenStream', () => {
       it('throws an error if a space is between the <? and the target', () => {
          expectSyntaxError('<? xml version="1.1"?>',
             XmlErrorToken.ERROR.PI_SPACE_BEFORE_TARGET,
-            'Must not have a space before the target name.');
+            'Must not have a space before the target name.',
+            new Offset(0, 2, 2));
       });
 
       it('throws an error the xml after <? is in mixed case if in strict mode', () => {
          expectSyntaxError('<?XmL version="1.1"?>',
             XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE,
-            '"xml" must be lower case. Found "XmL".');
+            '"xml" must be lower case. Found "XmL".',
+            new Offset(0, 2, 2));
       });
 
       it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
@@ -859,7 +899,8 @@ describe('XmlTokenStream', () => {
       it('throws an error if there is no space after a value', () => {
          expectSyntaxError('<?xml version="1.1"encoding="usascii" standalone="yes"?>',
             XmlErrorToken.ERROR.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
-            '"encoding" must have a space before it.');
+            '"encoding" must have a space before it.',
+            new Offset(0, 19, 19));
       });
 
       it('throws an error if no parameters are included', () => {
@@ -1876,6 +1917,22 @@ describe('XmlTokenStream', () => {
          s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE, [ 'one' ]);
 
          expect(s.getNext()).toEqual(expected);
+      });
+
+      it('recognizes entities within entities', () => {
+         const s = makeLaxStream('<root>&level1;</root>');
+         s._entityManager.addEntity('level1', '<child>&level2;</child>');   // WHITE BOX
+         s._entityManager.addEntity('level2', '<!--bug');
+
+         ignoreToken(s, XmlToken.ELEMENT_START);   // root
+         ignoreToken(s, XmlToken.ENTITY_START); // level1
+         ignoreToken(s, XmlToken.ELEMENT_START); // child
+         ignoreToken(s, XmlToken.ENTITY_START); // level2
+
+         const token = s.getNext();
+
+         expect(token.place).toEqual(new Offset(0, 7, 7));
+         expect(token.context).toEqual([ new Offset(0, 0, 0), new Offset(0, 7, 7), new Offset(0, 6, 6) ]);
       });
 
    });

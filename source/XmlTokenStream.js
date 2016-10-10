@@ -2,6 +2,7 @@
 
 'use strict';
 
+const Offset = require('./Offset.js');
 const XmlToken = require('./XmlToken.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
@@ -83,7 +84,7 @@ class XmlTokenStream {
 
             switch (markupToken.text) {
                case '&':
-                  this._getReference();
+                  this._getReference(markupToken);
                   break;
                case '<':
                   this._getTag(true);
@@ -92,13 +93,13 @@ class XmlTokenStream {
                   this._getTag(false);
                   break;
                case '<?':
-                  this._getProcessingInstruction();
+                  this._getProcessingInstruction(markupToken);
                   break;
                case '<!':
                   this._getBangItem();
                   break;
                case '<!--':
-                  this._getComment();
+                  this._getComment(markupToken);
                   break;
             }
             break;
@@ -150,7 +151,7 @@ class XmlTokenStream {
       } while (content.terminator !== '>');
    }
 
-   _getReference(inAttribute) {
+   _getReference(start, inAttribute) {
       const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
 
@@ -203,7 +204,8 @@ class XmlTokenStream {
 
                this._cursorContexts.push({
                   cursor: this._cursor,
-                  token: endToken
+                  token: endToken,
+                  start: start
                });
 
                this._cursor = entityCursor;
@@ -222,10 +224,10 @@ class XmlTokenStream {
       }
 
       while (result.terminator) {
-         cursor.getChar(); // swallow the &
+         const start = cursor.getChar(); // swallow the &
          const tempCursor = this._cursor;
          this._cursor = cursor;
-         const stuff = this._getReference(true);
+         const stuff = this._getReference(start, true);
          this._cursor = tempCursor;
          for (const index in stuff) {
             contents.push(stuff[index]);
@@ -283,17 +285,19 @@ class XmlTokenStream {
     *   [15] Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
     * PARAMS: The first token (currently not used)
     */
-   _getComment() {
-      this._cursor.getMarkup();
+   _getComment(start) {
       const results = this._cursor.getToTerminator([ '-->' ]);
 
       if (!results.terminator) {
-         this._reportSyntaxError(ERRORS.COMMENT_NO_CLOSE);
+         this._reportSyntaxError(ERRORS.COMMENT_NO_CLOSE, results.chunk || start, start);
       } else {
          this._cursor.getMatch('-->');
 
          if (results.chunk && results.chunk.text[results.chunk.text.length - 1] === '-') {
-            this._reportSyntaxError(ERRORS.COMMENT_ENDS_WITH_HYPHEN);
+            const place = results.chunk.endOffset.clone();
+            place.index --;
+            place.column --;
+            this._reportSyntaxError(ERRORS.COMMENT_ENDS_WITH_HYPHEN, place, start);
          }
       }
 
@@ -848,29 +852,29 @@ class XmlTokenStream {
     * RETURN None.  Does queue an XMLToken of type XmlToken.XMLDECL or
     *        XmlToken.PI and possibly syntax error tokens.
     */
-   _getProcessingInstruction() {
-      this._cursor.getMarkup();
+   _getProcessingInstruction(start) {
       const space = this._cursor.getSpace();
       const target = this._cursor.getWord([ '?>' ]);
 
-      this._assertSyntax(!space, ERRORS.PI_SPACE_BEFORE_TARGET);
+      this._assertSyntax(!space, ERRORS.PI_SPACE_BEFORE_TARGET, start.endOffset);
 
       if (!target) {
-         this._reportSyntaxError(ERRORS.PI_NO_TARGET);
+         this._reportSyntaxError(ERRORS.PI_NO_TARGET, space || start, start);
       } else if (!target.couldBeName) {
-         this._reportSyntaxError(ERRORS.PI_TARGET_NAME_INVALID, [ target.text ]);
+         this._reportSyntaxError(ERRORS.PI_TARGET_NAME_INVALID, [ target.text ], space || start, start);
       }
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
-         this._assertSyntax(target.text === 'xml', ERRORS.XMLDECL_TARGET_INVALID_CASE, [ target.text ]);
+         this._assertSyntax(target.text === 'xml', ERRORS.XMLDECL_TARGET_INVALID_CASE, [ target.text ],
+            space || start, start);
          this._getXmlDecl();
       } else {
-         this._cursor.getSpace();   // optional space
+         const optSpace = this._cursor.getSpace();   // optional space
          const results = this._cursor.getToTerminator([ '?>' ]);
 
          // If we found no ?> (thus, really, end of file) report an error.
          if (!results.terminator) {
-            this._reportSyntaxError(ERRORS.PI_NO_CLOSE);
+            this._reportSyntaxError(ERRORS.PI_NO_CLOSE, results.chunk || optSpace || target || space || start, start);
          } else {
             this._cursor.getMatch('?>');
          }
@@ -1096,7 +1100,7 @@ class XmlTokenStream {
          const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
          let value = [];
 
-         this._assertSyntax(lastSpace, ERRORS.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ]);
+         this._assertSyntax(lastSpace, ERRORS.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ], name.startOffset);
          this._assertSyntax(name.couldBeName || !elementAttribute, ERRORS.ATTRIBUTE_INVALID_NAME, [ name.text ]);
          this._assertSyntax(equal, ERRORS.ATTRIBUTE_NO_EQUAL, [ name.text ]);
 
@@ -1199,8 +1203,8 @@ class XmlTokenStream {
                break;
             case '&':
                done = false;
-               this._cursor.getChar(); // consume the &
-               const tokens = this._getReference(true);
+               const start = this._cursor.getChar(); // consume the &
+               const tokens = this._getReference(start, true);
                for (const index in tokens) {
                   result.value.push(tokens[index]);
                }
@@ -1248,22 +1252,44 @@ class XmlTokenStream {
       return this._pendingTokens.length > 0;
    }
 
-   _assertSyntax(condition, code, params) {
+   _assertSyntax(condition, code, params, place, context) {
       if (!condition) {
-         this._reportSyntaxError(code, params);
+         this._reportSyntaxError(code, params, place, context);
       }
    }
 
-   _reportSyntaxError(code, params) {
+   _reportSyntaxError(code, params, place, context) {
       let message = XmlErrorToken.STRING[code];
+      let stuff;
 
       if (typeof params === 'object') {
-         for (let index = 0; index < params.length; index++) {
-            message = message.replace('{' + index + '}', params[index]);
+         if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
+            context = place;
+            place = params;
+            params = undefined;
+         } else {
+            for (let index = 0; index < params.length; index++) {
+               message = message.replace('{' + index + '}', params[index]);
+            }
          }
       }
 
-      const error = new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message);
+      if (place instanceof TextChunk.PlainChunk) {
+         place = place.endOffset;
+      }
+
+      if (context) {
+         const superContexts = [];
+
+         for (let index = this._cursorContexts.length - 1; index >= 0; index--) {
+            superContexts.push(this._cursorContexts[index].start.startOffset);
+         }
+
+         stuff = [ context.startOffset ].concat(superContexts);
+      }
+
+      const error = new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, stuff);
+
       if (this._options.lax) {
          this._pendingTokens.push(error);
          return;

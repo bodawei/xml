@@ -6,11 +6,31 @@ const XmlToken = require('./XmlToken.js');
 
 class XmlErrorToken extends XmlToken {
 
-   constructor(type, code, message) {
+   /**********************************************************************\
+    XmlErrorToken holds inforamtion about some kind of error.
+
+    PARAM
+    type: The type of the token (ERROR)
+    code: The error code
+    message: A message about the error
+    place: an Offset describing where the error happened when parsing.
+    context: an array of Offsets, each describing where the start of a
+      syntactic element was when the error happened.  For example, if parsing
+      encountered
+            <blah error>
+      the first Offset would be the location of the <.  If this was in the
+      body of an entity being processed, the next Offset would be the start
+      of that entity reference, and if that, in turn, was in another, the
+      next Offset would be the start of that reference, and so on.
+   \**********************************************************************/
+
+   constructor(type, code, message, place, context) {
       super(type, '');
       this.type = type;
       this.code = code;
       this.message = message;
+      this.place = place;
+      this.context = context;
    }
 
 }

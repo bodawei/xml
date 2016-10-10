@@ -44,6 +44,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 - clean up attrlistdecl error constants and messages.  in particular might be good to do something like element.attr in the messages
 - cleanup getITems
 - should we be expanding character references in attribute defaults?
+-- Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
