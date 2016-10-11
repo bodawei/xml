@@ -4,6 +4,7 @@
 
 /* eslint-env jasmine */
 
+const Offset = require('./Offset.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlToken = require('./XmlToken.js');
 
@@ -1088,6 +1089,27 @@ describe('XmlTokenStream (dtd)', () => {
             } ]);
          });
 
+         it('reports a syntax error if there is no space between the attr name and the enumerations', () => {
+            expectSyntaxError('<!ATTLIST e attrName( name ) #REQUIRED>',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
+               'Must have a space before enumeration in attribute declaration for "e".',
+               new Offset(0, 20, 20),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
+            const s = makeLaxStream('<!ATTLIST e attrName( name ) #REQUIRED>');
+            ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE);
+
+            expect(s.getNext().attributes).toEqual([ {
+               name: 'attrName',
+               type: 'ENUMERATION',
+               list: [ 'name' ],
+               flag: '#REQUIRED',
+               value: undefined
+            } ]);
+         });
+
          // Whitebox: We don't test all the cases for missing names and |'s since that is common code
 
          it('reports a syntax error if the enumeration values is not an NmToken', () => {
@@ -1126,6 +1148,18 @@ describe('XmlTokenStream (dtd)', () => {
             expectSyntaxError('<!ATTLIST e attrName ( name | || | name2 ) #REQUIRED >',
                XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_NAMES,
                'Missing 3 name from the attribute declaration for "e".');
+         });
+
+      });
+
+      describe('value', () => {
+
+         it('reports a syntax error if there is no value after the fixed flag', () => {
+            expectSyntaxError('<!ATTLIST e attrName CDATA #FIXED>',
+               XmlErrorToken.ERROR.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
+               'Must have a value after #FIXED in attribute declaration for "e".',
+               new Offset(0, 33, 33),
+               [ new Offset(0, 0, 0) ]);
          });
 
       });

@@ -96,7 +96,7 @@ class XmlTokenStream {
                   this._getProcessingInstruction(markupToken);
                   break;
                case '<!':
-                  this._getBangItem();
+                  this._getBangItem(markupToken);
                   break;
                case '<!--':
                   this._getComment(markupToken);
@@ -305,7 +305,7 @@ class XmlTokenStream {
       this._pendingTokens.push(new CommentToken(content, this._cursor.getRecentChunks()));
    }
 
-   _getBangItem() {
+   _getBangItem(start) {
       this._cursor.getMarkup();
       const leadingSpace = this._cursor.getSpace();
       const bracket = this._cursor.getMatch('[');
@@ -582,6 +582,11 @@ class XmlTokenStream {
                            this._assertSyntax(attr.postNotationSpace, ERRORS.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
                               [ elName ]);
                         }
+
+                        if (attrType === 'ENUMERATION') {
+                           this._assertSyntax(attr.preEnumSpaceChunk, ERRORS.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
+                              [ elName ], attr.name, start);
+                        }
                         this._assertSyntax(attrList.length > 0, ERRORS.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
 
                         for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
@@ -626,7 +631,11 @@ class XmlTokenStream {
                         attrDefault = upper;
 
                         if (attrDefault === '#FIXED') {
-                           this._assertSyntax(attr.postFixedSpace, ERRORS.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                           if (attr.value) {
+                              this._assertSyntax(attr.postFixedSpace, ERRORS.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                           }
+                           this._assertSyntax(attr.value, ERRORS.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
+                              attr.default, start);
                         }
                      }
                   }

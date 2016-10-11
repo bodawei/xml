@@ -1,4 +1,4 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/*Copyright ® 2016 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -15,12 +15,11 @@ class XmlTokenStreamDtd {
          results.contentChunk = cursor.getWord([ '>' ]);
       } else {
          cursor.getChar();
-         const listInfo = this._getListItems(cursor, [ '>' ]);
+         this._getListItems(cursor, [ '>' ], results);
 
-         results.list = listInfo.list;
-         results.listCloseChunk = listInfo.close;
-         results.missingNames = listInfo.missingCount;
-         results.missingOrs = listInfo.missingOr;
+         results.listCloseChunk = results.close;
+         results.missingNames = results.missingCount;
+         results.missingOrs = results.missingOr;
       }
 
       cursor.getSpace();
@@ -30,18 +29,46 @@ class XmlTokenStreamDtd {
    }
 
    /**********************************************************************\
-    * [52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
-    * [53] AttDef         ::= S Name S AttType S DefaultDecl
-    * [54] AttType        ::= StringType | TokenizedType | EnumeratedType
-    * [55] StringType     ::= 'CDATA'
-    * [56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' |
-    *                         'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
-    * [57] EnumeratedType ::= NotationType | Enumeration
-    * [58] NotationType   ::= 'NOTATION' S '(' S? Name
-    *                         (S? '|' S? Name)* S? ')'
-    * [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
-    * [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' |
-    *                         (('#FIXED' S)? AttValue)
+    parseAttList extracts an AttlistDecl from the input stream, and returns
+    a data structure with all the pieces.
+
+    This assumes that the "<!ATTLIST S" has already been parsed.
+
+    PARAM
+    cursor: The cursor to read from
+    options: This makes use of the
+         lax:allowOpenAngleBracketsInAttributeValues option.
+
+    RETURN
+      {
+         elementNameChunk  // Name
+         attributes: [ {
+            name
+            type
+            preEnumSpaceChunk      // The space between Name and (enum)
+            default
+            value
+            missingCount   // Number of missing names's (enum and notation)
+            missingOr      // Number of missing |'s (enum and notation)
+            close          // Closing ")" (enum and notation)
+            quote          // Quote opening AttValue
+            aborted        // true if < found in AttValue
+         }],
+         closeChunk        // the closing >
+      }
+
+    SYNTAX
+    [52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef S? '>'
+    [53] AttDef         ::= S Name S AttType S DefaultDecl
+    [54] AttType        ::= StringType | TokenizedType | EnumeratedType
+    [55] StringType     ::= 'CDATA'
+    [56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' |
+                            'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
+    [57] EnumeratedType ::= NotationType | Enumeration
+    [58] NotationType   ::= 'NOTATION' S '(' S? Name (S? '|' S? Name)S? ')'
+    [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)S? ')'
+    [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' |
+                            (('#FIXED' S)? AttValue)
    \**********************************************************************/
    parseAttList(cursor, options) {
       const results = {
@@ -51,47 +78,41 @@ class XmlTokenStreamDtd {
 
       results.elementNameChunk = cursor.getWord([ '>' ]);
 
+      // Consume each AttDef
       while (!done) {
          const attr = {};
 
          cursor.getSpace();
-         attr.name = cursor.getWord([ '>' ]);
-         cursor.getSpace();
-         attr.type = cursor.getWord([ '>', '(', '#', '"', '\'' ]); // only?
-         const postType = cursor.peekChar();
+         attr.name = cursor.getWord([ '>', '(' ]);
+         const postNameSpace = cursor.getSpace();
+         const enumStart = cursor.peekChar();
 
-         if (attr.type && attr.type.text.toLocaleUpperCase() === 'NOTATION') {
-            attr.postNotationSpace = cursor.getSpace();
-            attr.opening = cursor.peekChar();
-
-            if (attr.opening && attr.opening.text === '(') {
-               cursor.getChar();
-
-               const listInfo = this._getListItems(cursor, [ '>', '#', '"', '\'' ]);
-
-               attr.list = listInfo.list;
-               attr.close = listInfo.close;
-               attr.missingCount = listInfo.missingCount;
-               attr.missingOr = listInfo.missingOr;
-            }
-         } else if (!attr.type && postType && postType.text === '(') {
+         if (enumStart && enumStart.text === '(') {
             cursor.getChar();
-
-            const enumInfo = this._getListItems(cursor, [ '>', '#', '"', '\'' ]);
-            attr.list = enumInfo.list;
-            attr.close = enumInfo.close;
-            attr.missingCount = enumInfo.missingCount;
-            attr.missingOr = enumInfo.missingOr;
+            attr.preEnumSpaceChunk = postNameSpace;
+            this._getListItems(cursor, [ '>', '#', '"', '\'' ], attr);
 
             attr.type = {
                text: 'ENUMERATION'
             };
+         } else {
+            attr.type = cursor.getWord([ '>', '(', '#', '"', '\'' ]); // only?
+
+            if (attr.type && attr.type.text.toLocaleUpperCase() === 'NOTATION') {
+               attr.postNotationSpace = cursor.getSpace();
+               attr.opening = cursor.peekChar();
+
+               if (attr.opening && attr.opening.text === '(') {
+                  cursor.getChar();
+
+                  this._getListItems(cursor, [ '>', '#', '"', '\'' ], attr);
+               }
+            }
          }
 
          attr.preDefaultSpace = cursor.getSpace();
 
          const nextChar = cursor.peekChar();
-         let quotedResults;
 
          if (nextChar && nextChar.text === '#') {
             attr.default = cursor.getWord([ '>', '"', '\'' ]);
@@ -99,22 +120,20 @@ class XmlTokenStreamDtd {
             if (attr.default.text.toLocaleUpperCase() === '#FIXED') {
                attr.postFixedSpace = cursor.getSpace();
 
-               const quoteChunk = cursor.getChar(); // NEed to cope with non-quote
-               quotedResults = this._getQuotedValue(cursor, quoteChunk, options);
+               const quoteChunk = cursor.peekChar();
+
+               if (quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'')) {
+                  cursor.getChar();
+                  this._getQuotedValue(cursor, quoteChunk, options, attr);
+               }
             }
          } else if (nextChar && nextChar.text !== '>') {
-            const quoteChunk = cursor.getChar(); // NEed to cope with non-quote
-            quotedResults = this._getQuotedValue(cursor, quoteChunk, options);
+            const quoteChunk = cursor.getChar();
+            this._getQuotedValue(cursor, quoteChunk, options, attr);
          }
 
-         if (quotedResults) {
-            attr.value = quotedResults.value;
-            attr.quote = quotedResults.quote;
-            attr.aborted = quotedResults.abort;
-
-            if (attr.aborted) {
-               done = true;
-            }
+         if (attr.aborted) {
+            done = true;
          }
 
          if (attr.name) {
@@ -153,13 +172,12 @@ class XmlTokenStreamDtd {
       close: The Chunk representing the closing ")" of the list, if found.
    \**********************************************************************/
 
-   _getListItems(cursor, terminators) {
-      const results = {
-         list: [],
-         missingCount: 0,
-         missingOr: 0,
-         close: undefined
-      };
+   _getListItems(cursor, terminators, results) {
+      results.missingCount = 0;
+      results.missingOr = 0;
+      results.close = undefined;
+      results.list = [];
+
       const listTerminators = terminators.slice().concat([ ')', '|' ]);
       let done = false;
 
@@ -188,8 +206,6 @@ class XmlTokenStreamDtd {
             done = true;
          }
       }
-
-      return results;
    }
 
    /**********************************************************************\
@@ -213,14 +229,13 @@ class XmlTokenStreamDtd {
     stop, but the whole start tag processing should stop.
     For entity values, this just returns the array of XMLTokens
    \**********************************************************************/
-   _getQuotedValue(cursor, quoteChunk, options = {}) {
-      const result = {
-         value: [],
-         abort: false,
-         quote: undefined
-      };
+   _getQuotedValue(cursor, quoteChunk, options = {}, result) {
       let done = false;
       const terminators = [ quoteChunk.text ];
+
+      result.value = [];
+      result.aborted = false;
+      result.quote = undefined;
 
       if (!options['lax:allowOpenAngleBracketsInAttributeValues']) {
          terminators.push('<');
@@ -241,14 +256,12 @@ class XmlTokenStreamDtd {
                result.quote = quoteChunk.text;
                break;
             case '<':
-               result.abort = true;
+               result.aborted = true;
                break;
             default: // no terminator
                break;
          }
       }
-
-      return result;
    }
 
 }

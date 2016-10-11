@@ -12,39 +12,12 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
 10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
-10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
-
+10/6 Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
+10/10 Sprint 11: 112sp [8XL 6M 14S]. Average: 5 per sprint = 23 sprints. ACTUAL:
 	#210 min
 
+
 -- next: 97
----------------------------------------------
-[52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
-[53] AttDef         ::= S Name S AttType S DefaultDecl
-[54] AttType        ::= StringType | TokenizedType | EnumeratedType
-[55] StringType     ::= 'CDATA'
-[56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
-[57] EnumeratedType ::= NotationType | Enumeration
-[58] NotationType   ::= 'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
-[59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
-[60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
-[10]   	AttValue	   ::=   	'"' ([^<&"] | Reference)* '"' |  "'" ([^<&'] | Reference)* "'"
-√ 96:S Read enumeration
-√9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
-	I suggest _reportSyntaxError(code, params, chunkOfOccurrence, chunk|[array of tokens of starts of things to this point]
-		The last param would normally mark the start of the syntax element the problem occurred in, but in some cases (e.g. in references) we may be several entities deep)
-		note that undefined would mean eof.
-		This is a bit of a wildcard, as I haven't looked at every case yet.
-	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
-√ - change the getList so you can say ( name name name ), and change error reporting.
-√ 94:S: read #IMPLIED, optional #Fixed and attValue
-	case wrong
-	unknown type
-	Assume we can just use the existing attribute value reader
-	We do not at this level actually parse the value to see if it matches the validity constraints
-- clean up attrlistdecl error constants and messages.  in particular might be good to do something like element.attr in the messages
-- cleanup getITems
-- should we be expanding character references in attribute defaults?
--- Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -57,8 +30,12 @@ BLOG IDEAS
 CLEANUP
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
 
+RESEARCH
+- should we be expanding character references in attribute defaults?
+
 BUILD
 58: Build infrastructure for running xmlconf tests.
+- Get windows build to work
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
@@ -80,7 +57,7 @@ BUILD
 41:XL:Investigate Gulp
 
 PROJECT
---- technical debt [6m 10s]
+--- technical debt [5m 10s]
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
 	in the process, might be good to give these numeric codes.
@@ -112,6 +89,7 @@ PROJECT
 ideas
 - Should extract all the declaration stuff into another file
 - restructure so routines do not automatically put into pendingTokens. Caller should decide.
+- Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
 
 --- Basic processing  [1M 3S]
 71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
@@ -601,3 +579,35 @@ is a separate thing
 
 Note9
 This was in some ways a bad sprint, in that the things committed to were not all delivered (and we had to add 95 in the middle, having overlooked this detail in the planning).  On the other hand, we didn't go over time in order to deliver a functioning thing, we just didn't deliver on all the functionality as hoped, so from another vantage point it was very successful.
+
+
+Sprint 10
+=========
+[52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
+[53] AttDef         ::= S Name S AttType S DefaultDecl
+[54] AttType        ::= StringType | TokenizedType | EnumeratedType
+[55] StringType     ::= 'CDATA'
+[56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
+[57] EnumeratedType ::= NotationType | Enumeration
+[58] NotationType   ::= 'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
+[59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
+[60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
+[10]   	AttValue	   ::=   	'"' ([^<&"] | Reference)* '"' |  "'" ([^<&'] | Reference)* "'"
+√ 96:S Read enumeration
+√9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
+	I suggest _reportSyntaxError(code, params, chunkOfOccurrence, chunk|[array of tokens of starts of things to this point]
+		The last param would normally mark the start of the syntax element the problem occurred in, but in some cases (e.g. in references) we may be several entities deep)
+		note that undefined would mean eof.
+		This is a bit of a wildcard, as I haven't looked at every case yet.
+	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
+√ - change the getList so you can say ( name name name ), and change error reporting.
+√ 94:S: read #IMPLIED, optional #Fixed and attValue
+	case wrong
+	unknown type
+	Assume we can just use the existing attribute value reader
+	We do not at this level actually parse the value to see if it matches the validity constraints
+
+Note 10
+This was OK.  We went over schedule some.  here, again, #94 was much more complex than given credit for.  We might have been fine on time except we decied to change getListItems partway through this, which probably took up the 20 minutes we went over schedule.
+Again what killed 94 was all the errors that can happen.  And it is worse than it looks because the resulting code is rather nasty, and may not be sufficiently tested.
+I think the goal for 9, originally, was to convert everything to using the new errors. instead we just did a proof of concept with comments and some processing instructions. I'm ok with that because as I looked at the impact, I realized it really is asking for things to be reorganized (separating parsing from error checking). In this regard, we went grossly over schedule, because 94 was quite big.

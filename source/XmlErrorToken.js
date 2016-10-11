@@ -152,6 +152,7 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_DEFAULT_INVALID: 'ATTLISTDECL_ATTR_DEFAULT_INVALID',
    ATTLISTDECL_ATTR_DEFAULT_UNKNOWN: 'ATTLISTDECL_ATTR_DEFAULT_UNKNOWN',
    ATTLISTDECL_FIXED_NO_SPACE: 'ATTLISTDECL_FIXED_NO_SPACE',
+   ATTLISTDECL_ATTR_FIXED_NO_VALUE: 'ATTLISTDECL_ATTR_FIXED_NO_VALUE',
    ATTLISTDECL_ATTR_INVALID: 'ATTLISTDECL_ATTR_INVALID',
    ATTLISTDECL_ATTR_NO_CLOSE_QUOTE: 'ATTLISTDECL_ATTR_NO_CLOSE_QUOTE',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
@@ -298,6 +299,7 @@ str[err.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID] =
    'Found "{1}".';
 str[err.ATTLISTDECL_ATTR_ENUM_NO_CLOSE] =
    'Missing closing ")" for the enumeration in the attribute definition for "{0}".';
+str[err.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE] = 'Must have a space before enumeration in attribute declaration for "{0}".';
 str[err.ATTLISTDECL_ATTR_NO_DEFAULT] =
    'Missing default value for attribute "{0}" in the attribute declaration for "{1}".';
 str[err.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE] =
@@ -307,6 +309,7 @@ str[err.ATTLISTDECL_ATTR_DEFAULT_INVALID] =
 str[err.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN] =
    'The default "{0}" must be one of the specified default values in attribute declaration for "{1}".';
 str[err.ATTLISTDECL_FIXED_NO_SPACE] = 'Missing space after #FIXED in attribute declaration for "{0}".';
+str[err.ATTLISTDECL_ATTR_FIXED_NO_VALUE] = 'Must have a value after #FIXED in attribute declaration for "{0}".';
 str[err.ATTLISTDECL_ATTR_INVALID] =
    'Must not have a "<" in an attribute value in the attribute list declaration for "{0}".';
 str[err.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE] = 'Missing closing quote in the attribute list declaration for "{0}".';
