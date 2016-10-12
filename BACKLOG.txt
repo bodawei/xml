@@ -99,6 +99,7 @@ ideas
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
 --- DTD [4XL]
+L: Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
 21:XL Read element content structure
 24:XL read conditional sections
 25:XL read external entities

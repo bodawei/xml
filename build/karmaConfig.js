@@ -12,13 +12,15 @@ var OUT_DIR = BASE_PATH + '/temp/';
 var BUILD_DIR = BASE_PATH + '/build/';
 var SOURCE_DIR = BASE_PATH + '/source/';
 
+var BABEL_PRESETS = 'es2015';
+
 // http://karma-runner.github.io/1.0/config/configuration-file.html
 module.exports = function karmaConfig(config) {
    config.set({
       basePath: './',
       logLevel: config.LOG_ERROR, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
       reportSlowerThan: 200,
-      browsers: [ 'PhantomJS2' ],
+      browsers: [ 'PhantomJS' ],
       captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
       autoWatch: false,
       singleRun: true,
@@ -38,7 +40,7 @@ module.exports = function karmaConfig(config) {
                ignore: '**/*.test.js',
                instrumenter: isparta
             } ],
-            [ 'babelify', {presets: [ 'es2015' ]} ]
+            [ 'babelify', {presets: [ BABEL_PRESETS ]} ]
          ]
       },
       reporters: [ 'progress', 'junit', 'coverage' ],
