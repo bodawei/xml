@@ -60,6 +60,7 @@ class XmlTokenStream {
       this._elementNameStack = [];
       this._entityManager = entityManager;
       this._cursorContexts = [];
+      this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
 
       this._options = {
@@ -75,45 +76,87 @@ class XmlTokenStream {
       }
    }
 
+   _pushEnveloper(close, token) {
+      this._envelopers.push({
+         close: close,
+         token: token
+      });
+   }
+
+   _peekEnveloper() {
+      return this._envelopers[this._envelopers.length - 1];
+   }
+
+   _popEnveloper() {
+      return this._envelopers.pop();
+   }
+
    _nextToken() {
-      const type = this._cursor.peekType();
+      let type;
+      let finished = false;
 
-      switch (type) {
-         case TextChunk.TYPE.MARKUP:
-            const markupToken = this._cursor.getMarkup();
+      while (!finished) {
+         type = this._cursor.peekType();
 
-            switch (markupToken.text) {
-               case '&':
-                  this._getReference(markupToken);
-                  break;
-               case '<':
-                  this._getTag(true);
-                  break;
-               case '</':
-                  this._getTag(false);
-                  break;
-               case '<?':
-                  this._getProcessingInstruction(markupToken);
-                  break;
-               case '<!':
-                  this._getBangItem(markupToken);
-                  break;
-               case '<!--':
-                  this._getComment(markupToken);
-                  break;
-            }
-            break;
-         case TextChunk.TYPE.SPACE:
-            // only recognize spaces when we aren't between tags
-            if (this._elementNameStack.length === 0) {
-               this._getS();
-            } else {
+         switch (type) {
+            case TextChunk.TYPE.MARKUP:
+               const markupToken = this._cursor.getMarkup();
+
+               switch (markupToken.text) {
+                  case '&':
+                     this._getReference(markupToken);
+                     break;
+                  case '<':
+                     this._getTag(true);
+                     break;
+                  case '</':
+                     this._getTag(false);
+                     break;
+                  case '<?':
+                     this._getProcessingInstruction(markupToken);
+                     break;
+                  case '<!':
+                     this._getBangItem(markupToken);
+                     break;
+                  case '<!--':
+                     this._getComment(markupToken);
+                     break;
+               }
+               break;
+            case TextChunk.TYPE.SPACE:
+               // only recognize spaces when we aren't between tags
+               if (this._elementNameStack.length === 0) {
+                  this._getS();
+               } else {
+                  this._getContent();
+               }
+               break;
+            case TextChunk.TYPE.CLOSE:
+               const pendingClose = this._peekEnveloper();
+               let close;
+
+               if (pendingClose) {
+                  close = this._cursor.getClose();
+
+                  if (close.text !== pendingClose.close) {
+                     this._cursor.unget(close);
+                     close = undefined;
+                  } else {
+                     this._popEnveloper();
+                     this._pendingTokens.push(pendingClose.token);
+                  }
+               }
+
+               if (!close) {
+                  this._getContent();
+               }
+               break;
+            case TextChunk.TYPE.STRING:
                this._getContent();
-            }
-            break;
-         case TextChunk.TYPE.STRING:
-            this._getContent();
-            break;
+               break;
+         }
+
+         finished = (this._envelopers.length === 0);
       }
 
       return this._pendingTokens.shift();
@@ -137,7 +180,9 @@ class XmlTokenStream {
          if (content.terminator === ']]>') {
             this._reportSyntaxError(ERRORS.CHARDATA_INVALID_TEXT);
 
-            this._pushToken(XmlToken.CHARDATA, content.chunk.text);
+            if (content.chunk) {
+               this._pushToken(XmlToken.CHARDATA, content.chunk.text);
+            }
 
             content = {
                chunk: this._cursor.getMatch(']]>')
@@ -148,7 +193,7 @@ class XmlTokenStream {
          }
 
          this._pushToken(XmlToken.CHARDATA, content.chunk.text);
-      } while (content.terminator !== '>');
+      } while (content.terminator && content.terminator !== '<');
    }
 
    _getReference(start, inAttribute) {
@@ -349,19 +394,25 @@ class XmlTokenStream {
 
                // lame DTD parsing
                this._cursor.getSpace();
-               this._cursor.getMatch('[');
+               const openDtd = this._cursor.getMatch('[');
                this._cursor.getSpace();
-               this._cursor.getMatch(']');
 
-               this._cursor.getSpace();
-               const doctypeClosing = this._cursor.getMatch('>');
+               if (openDtd) {
+                  const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
+                     externalId ? externalId.systemLiteral : undefined,
+                     externalId ? externalId.pubidLiteral : undefined, []);
 
-               this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
+                  this._pushEnveloper(']', docToken);
+               } else {
+                  this._cursor.getSpace();
+                  const doctypeClosing = this._cursor.getMatch('>');
+                  this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
 
-               const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
-                  externalId ? externalId.systemLiteral : undefined,
-                  externalId ? externalId.pubidLiteral : undefined, []);
-               this._pendingTokens.push(docToken);
+                  const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
+                     externalId ? externalId.systemLiteral : undefined,
+                     externalId ? externalId.pubidLiteral : undefined, []);
+                  this._pendingTokens.push(docToken);
+               }
                return;
             // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
             case 'NOTATION':

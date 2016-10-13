@@ -16,6 +16,7 @@ const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
+const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 
 describe('XmlTokenStream', () => {
 
@@ -36,11 +37,6 @@ describe('XmlTokenStream', () => {
 
    function makeStream(str, entityManager, options) {
       return new XmlTokenStream(new XmlStringCursor(str), entityManager, options);
-   }
-
-   function ignoreToken(stream, tokenType) {
-      const token = stream.getNext();
-      expect(token.type).toEqual(tokenType);
    }
 
    function compareXmlDeclAttribute(attr, name, value) {

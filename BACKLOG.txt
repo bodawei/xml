@@ -16,13 +16,14 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  Added a missing feature for recovering from doctype
 	#210 min
 x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
-S 99 add a TERMINATOR type to peekType in cursor
+√ S 99 add a TERMINATOR type to peekType in cursor
 	Needs to match ] or ]]>
 S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
 	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
 S: 101 If matches end of DOCTYPE, switches to doctype finish
 	doctype then needs to store the token on the stack, and not allow others to flow out
 	Some provision for early cancel
+	- some whitespace in the internal dtd is showing up as a space token. OK?
 S 102 Rework token delivery so routines do not know where they are delivering them
 	in general a token is created and pushed, and then routine adds chunks
 	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
@@ -31,7 +32,7 @@ S 103 Report syntax error if declaration outside of the right context  (this mig
 	set inDtd flag (make it a state, as we'll need it later)
 	report error if get a dtd type while not in dtd
 	report error if get a non dtd type while in a dtd
-
+- cleanup: note bad things with getCharData in 100
 
 -- next: 104
 =============================================
@@ -51,6 +52,7 @@ RESEARCH
 - should we be expanding character references in attribute defaults?
 
 BUILD
+97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
 58:L Build infrastructure for running xmlconf tests.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
@@ -72,7 +74,6 @@ BUILD
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
-97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
 ??: Investigate why current node causes coverage to fail
 	- Find out version where it started failing (after 6.2.1 and before 6.4)
 	- Search on web
@@ -133,6 +134,7 @@ ideas
 	including header
 21:XL Read element content structure
 24:XL read conditional sections
+	- need to deal with possibly closing the conditional if the end of the internal subset is found
 26:XL Deal with parameter entities
 	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
 	- otherwise, just notice %value; and accept if in right place or barf and treat as &;

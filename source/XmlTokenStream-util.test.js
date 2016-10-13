@@ -26,6 +26,11 @@ function ignoreError(stream, errorCode) {
    expect(token.code).toEqual(errorCode);
 }
 
+function ignoreToken(stream, tokenType) {
+   const token = stream.getNext();
+   expect(token.type).toEqual(tokenType);
+}
+
 function expectSyntaxError(input, code, message, place, context) {
    const strictS = makeStrictStream(input);
    const laxS = makeLaxStream(input);
@@ -49,6 +54,7 @@ function expectSyntaxError(input, code, message, place, context) {
 module.exports = {
    expectSyntaxError,
    ignoreError,
+   ignoreToken,
    makeStrictStream,
    makeLaxStream
 };

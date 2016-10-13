@@ -12,6 +12,7 @@ const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
+const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 
 describe('XmlTokenStream (dtd)', () => {
 
@@ -40,6 +41,33 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictStream('<!DOCTYPE testType [ ] >');
 
          expect(s.getNext().internalDtd).toEqual([]);
+      });
+
+      it('retrieves an a simple internal subset', () => {
+         const s = makeStrictStream('<!DOCTYPE testType [ <!ENTITY test "one"> ] >');
+
+         expect(s.getNext().type).toEqual(XmlToken.ENTITY_DECL);
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
+         expect(s.getNext().internalDtd).toEqual([]);
+      });
+
+      it('does not cause problems if a close appears when none expected', () => {
+         const s = makeStrictStream(']');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.CHARDATA);
+         expect(t.data).toEqual(']');
+      });
+
+      it('does not cause problems if the wrong kind of close is encountered', () => {
+         const s = makeLaxStream('<!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
+         ignoreToken(s, XmlToken.ENTITY_DECL);
+         ignoreToken(s, XmlToken.SPACE);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.CHARDATA);
+         expect(t.data).toEqual(']]>');
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {
@@ -1182,6 +1210,23 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('public');
          expect(t.systemLiteral).toEqual('./system.xml');
+      });
+
+      it('retrieves the public and system literals when PUBLIC is specified, and an internal dtd is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
+         ignoreToken(s, XmlToken.ENTITY_DECL);
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(t.pubidLiteral).toEqual('./public.xml');
+      });
+
+      it('retrieves the public and system literals when PUBLIC is specified, no internal dtd is specified', () => {
+         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" >');
+
+         const t = s.getNext();
+         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(t.pubidLiteral).toEqual('./public.xml');
       });
 
       it('retrieves a systemLiteral in single quotes', () => {
