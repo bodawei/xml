@@ -42,14 +42,14 @@ class XmlStringCursor {
       this._chunks = [];
    }
 
-   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+   /**********************************************************************\
     Returns the most likely type for the next token in the cursor. In some
     cases, the next token is ambiguous (e.g. is it a CHAR or a WORD or a
     STRING?). In those cases, this assumes STRING.
 
     RETURN
-    One of the XmlStringToken constants: MARKUP, SPACE, or STRING.
-   \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+    One of the XmlStringToken constants: MARKUP, CLOSE, SPACE, or STRING.
+   \**********************************************************************/
 
    peekType() {
       const nextChar = this._source[this._offset.index];
@@ -62,6 +62,8 @@ class XmlStringCursor {
          return TextChunk.TYPE.MARKUP;
       } else if (this._isSpace(this._source[this._offset.index])) {
          return TextChunk.TYPE.SPACE;
+      } else if (nextChar === ']') {
+         return TextChunk.TYPE.CLOSE;
       } else {
          return TextChunk.TYPE.STRING;
       }
@@ -248,6 +250,36 @@ class XmlStringCursor {
       this._chunks.push(chunk);
 
       return chunk;
+   }
+
+   /**********************************************************************\
+    getClose() returns the close character from the input stream.
+
+    RETURN
+    A TextChunk chunk containing "]" or "]]>", or undefined if no close is
+    at the current position
+   \**********************************************************************/
+
+   getClose() {
+      const startOffset = this._offset.clone();
+      const firstChar = this._source[this._offset.index];
+      const secondChar = this._source[this._offset.index + 1];
+      const thirdChar = this._source[this._offset.index + 2];
+
+      if (!firstChar || firstChar !== ']') {
+         return;
+      }
+
+      this._offset.index ++;
+      this._offset.column ++;
+
+      if (firstChar === ']' && secondChar === ']' && thirdChar === '>') {
+         this._offset.index += 2;
+         this._offset.column += 2;
+      }
+
+      const rawString = this._source.substring(startOffset.index, this._offset.index);
+      return this._makePlainChunk(rawString, startOffset);
    }
 
    /**********************************************************************\

@@ -13,25 +13,27 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
 10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
 10/6 Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
-10/13 Sprint 11: 112sp [8XL 6M 14S]. Average: 5 per sprint = 23 sprints. ACTUAL:
+10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  Added a missing feature for recovering from doctype
 	#210 min
 x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
-
 S 99 add a TERMINATOR type to peekType in cursor
 	Needs to match ] or ]]>
-
 S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
 	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
-
 S: 101 If matches end of DOCTYPE, switches to doctype finish
 	doctype then needs to store the token on the stack, and not allow others to flow out
 	Some provision for early cancel
+S 102 Rework token delivery so routines do not know where they are delivering them
+	in general a token is created and pushed, and then routine adds chunks
+	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
+S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
+	parser needs to know if doing an external dtd subset or not
+	set inDtd flag (make it a state, as we'll need it later)
+	report error if get a dtd type while not in dtd
+	report error if get a non dtd type while in a dtd
 
 
-
-
-
--- next: 99
+-- next: 104
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -40,6 +42,7 @@ BLOG IDEAS
 - Blog build process?
 - Blog spec changes.
 - Blog: Asynchronous
+- SVCC: how to set up karma etc.
 =============================================
 CLEANUP
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
@@ -49,11 +52,6 @@ RESEARCH
 
 BUILD
 58:L Build infrastructure for running xmlconf tests.
-??: Investigate why current node causes coverage to fail
-	- Find out version where it started failing (after 6.2.1 and before 6.4)
-	- Search on web
-	- debug down to the problem
-?? Investigate the failures in cygwin shell: Looks like it is firefox
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
@@ -61,7 +59,13 @@ BUILD
 	- On a failing build, should dump the whole grunt output (can then have verbose reports)
 		- non-100% coverage should actually be a failure.
 	61:M: Build a reporter for coverage which just reports the final summaries
-		- NS: Need documentation for coverage reporter plugins
+		√ NS: Need documentation for coverage reporter plugins
+			see /Users/bodawei/active/電/xml/node_modules/istanbul/lib/report/index.js
+		- Put a dummy reporter in that matches the api. Give it some config params in karma config
+			then emulate text.js and see if it can access the param and write "foo" to disk
+		- Figure out how to abstract the summaries and report 'PhantomJS coverage: 100%"
+		- Figure out how to configure this for jasmine in node
+		- Build should fail if not 100%
 	59:M: Build a reporter for karma which dumps testing results to a file
 		- this is in prep for adding this info to the checkin
 		- NS: Need docuemntation for karma reporters
@@ -69,24 +73,26 @@ BUILD
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
+??: Investigate why current node causes coverage to fail
+	- Find out version where it started failing (after 6.2.1 and before 6.4)
+	- Search on web
+	- debug down to the problem
+?? Investigate the failures in cygwin shell: Looks like it is firefox
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
+		- include a time with percent change from previous commit
 	git hooks should validate checkin comment has bug number and is the right format.
 41:XL:Investigate Gulp
 
 PROJECT
---- technical debt [5m 10s]
+--- technical debt [5m 11s]
+73:S: If error is thrown, we can still call getNextToken.  Should block that.
+58:S: Remove data prop on token, and make all token types more explicit
+13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
 	in the process, might be good to give these numeric codes.
 87:S: Handle PEReferences and character references in entity values
-77:S: Code for getting references is getting uuuuuugly
-56:S: Reorganize getAttributes, as it seems too tangled
-58:S: Remove data prop on token, and make all token types more explicit
-8:S: review xmltokenstream for testing and code logic: SMALL
-	- Should return '' rather than undefined for things like comments and pi's etc.
-73:S: If error is thrown, we can still call getNextToken.  Should block that.
-13:M: Decide where this level of syntax checking should go (doing balance checking in XmlTokenStream. this there too?)  xmldecl, misc, element misc
 52:S: StringCursorSpeedup
 	- do performance test jsperf of regex vs hand parsing
 		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
@@ -94,6 +100,11 @@ PROJECT
 	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
 		Note: Can't do regex from an offset without doing a substr. sigh.
 57:S: Consider adding something like an EOF flag to cursor so we could layer some future version on top?
+
+77:S: Code for getting references is getting uuuuuugly
+56:S: Reorganize getAttributes, as it seems too tangled
+8:S: review xmltokenstream for testing and code logic: SMALL
+	- Should return '' rather than undefined for things like comments and pi's etc.
 
 53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
@@ -103,6 +114,7 @@ PROJECT
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 
 ideas
 - Should extract all the declaration stuff into another file
@@ -134,9 +146,6 @@ ideas
 31:XL Deal with interoperability (mainly to help some sgml processors)
 	interoperability: empty element should only be used for elements which are declared EMPTY
 32:XL Run through standard test cases
-
---- Misc [1s]
-74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 
 
 ---- Extra (not part of MVP)

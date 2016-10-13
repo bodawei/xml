@@ -63,6 +63,18 @@ describe('XmlStringCursor', () => {
          expect(c.peekType()).toEqual(TYPE.STRING);
       });
 
+      it('returns CLOSE if the next is a square bracket', () => {
+         const c = new XmlStringCursor(']<');
+
+         expect(c.peekType()).toEqual(TYPE.CLOSE);
+      });
+
+      it('returns CLOSE if the next the end of a conditional section', () => {
+         const c = new XmlStringCursor(']]>');
+
+         expect(c.peekType()).toEqual(TYPE.CLOSE);
+      });
+
       it('returns undefined if at the end of the input', () => {
          const c = new XmlStringCursor('');
 
@@ -742,6 +754,54 @@ describe('XmlStringCursor', () => {
 
          expect(c.getRecentChunks()).toEqual([
             new PlainChunk('&', new Offset(0, 0, 0), new Offset(0, 1, 1))
+         ]);
+      });
+
+   });
+
+   describe('getClose()', () => {
+
+      it('returns undefined if cursor is at the end of the input', () => {
+         const c = new XmlStringCursor('');
+
+         expect(c.getClose()).toBeUndefined();
+      });
+
+      it('returns undefined if the next character is not ]', () => {
+         const c = new XmlStringCursor('frog');
+
+         expect(c.getClose()).toBeUndefined();
+      });
+
+      it('returns a chunk with the close if the next is just ]', () => {
+         const c = new XmlStringCursor(']frog');
+
+         expect(c.getClose()).toEqual(new PlainChunk(']', new Offset(0, 0, 0),
+             new Offset(0, 1, 1)));
+      });
+
+      it('returns a chunk with the coose if the next ]]>', () => {
+         const c = new XmlStringCursor(']]>frog');
+
+         expect(c.getClose()).toEqual(new PlainChunk(']]>', new Offset(0, 0, 0),
+             new Offset(0, 3, 3)));
+      });
+
+      it('adds the chunk with ]]> close to the recent chunks', () => {
+         const c = new XmlStringCursor(']]>foo');
+         c.getClose();
+
+         expect(c.getRecentChunks()).toEqual([
+            new PlainChunk(']]>', new Offset(0, 0, 0), new Offset(0, 3, 3))
+         ]);
+      });
+
+      it('adds the chunk with "]" to the recent chunks', () => {
+         const c = new XmlStringCursor(']>');
+         c.getClose();
+
+         expect(c.getRecentChunks()).toEqual([
+            new PlainChunk(']', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
       });
 

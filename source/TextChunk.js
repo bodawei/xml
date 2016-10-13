@@ -45,6 +45,7 @@ module.exports = {
    TYPE: {
       STRING: 'STRING_TYPE',
       SPACE: 'SPACE_TYPE',
-      MARKUP: 'MARKUP_TYPE'
+      MARKUP: 'MARKUP_TYPE',
+      CLOSE: 'CLOSE_TYPE'
    }
 };
