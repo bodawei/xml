@@ -39,12 +39,14 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves an empty internal subset if an empty one is specified', () => {
          const s = makeStrictStream('<!DOCTYPE testType [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          expect(s.getNext().internalDtd).toEqual([]);
       });
 
       it('retrieves an a simple internal subset', () => {
          const s = makeStrictStream('<!DOCTYPE testType [ <!ENTITY test "one"> ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          expect(s.getNext().type).toEqual(XmlToken.ENTITY_DECL);
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
@@ -59,8 +61,27 @@ describe('XmlTokenStream (dtd)', () => {
          expect(t.data).toEqual(']');
       });
 
+      it('parses the end of the DOCTYPE element when there is an internal subset', () => {
+         const s = makeStrictStream('<!DOCTYPE testType [ <!ENTITY test "one"> ] > <testType></testType>');
+         ignoreToken(s, XmlToken.SPACE); // DJB
+
+         expect(s.getNext().type).toEqual(XmlToken.ENTITY_DECL);
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
+         expect(s.getNext().type).toEqual(XmlToken.DOCTYPE);
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
+         expect(s.getNext().name).toEqual('testType');
+      });
+
+      it('parses the end of the DOCTYPE element when there is no internal subset', () => {
+         const s = makeStrictStream('<!DOCTYPE testType > <testType></testType>');
+         expect(s.getNext().type).toEqual(XmlToken.DOCTYPE);
+         expect(s.getNext().type).toEqual(XmlToken.SPACE);
+         expect(s.getNext().name).toEqual('testType');
+      });
+
       it('does not cause problems if the wrong kind of close is encountered', () => {
          const s = makeLaxStream('<!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
          ignoreToken(s, XmlToken.ENTITY_DECL);
          ignoreToken(s, XmlToken.SPACE);
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
@@ -1198,6 +1219,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves only a systemLiteral when SYSTEM is specified', () => {
          const s = makeStrictStream('<!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('./system.xml');
@@ -1206,6 +1228,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
          const s = makeStrictStream('<!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('public');
@@ -1214,6 +1237,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves the public and system literals when PUBLIC is specified, and an internal dtd is specified', () => {
          const s = makeStrictStream('<!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
          ignoreToken(s, XmlToken.ENTITY_DECL);
 
          const t = s.getNext();
@@ -1231,6 +1255,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves a systemLiteral in single quotes', () => {
          const s = makeStrictStream('<!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('./system.xml');
@@ -1239,6 +1264,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves both a systemLiteral and a pubidLiteral in single quotes', () => {
          const s = makeStrictStream('<!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('public');
@@ -1247,6 +1273,7 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('retrieves zero length publicID and system literals', () => {
          const s = makeStrictStream('<!DOCTYPE testType PUBLIC "" "" [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('');
@@ -1269,6 +1296,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC one two [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('one');
@@ -1290,6 +1318,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the publicID literal even when it has illegal characters', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('ABCDE{');
@@ -1298,6 +1327,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('throws no error if the public id has all legal characters', () => {
          const s = makeStrictStream('<!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
             'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  "system" [ ] >');
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          expect(() => {
             s.getNext();
@@ -1313,6 +1343,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
          const s = makeLaxStream('<!DOCTYPE testType public "ABCDE" "two" [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('ABCDE');
@@ -1327,6 +1358,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
          const s = makeLaxStream('<!DOCTYPE testType system "ABCDE" [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('ABCDE');
@@ -1353,6 +1385,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the systemLiterals even when spaces missing', () => {
          const s = makeLaxStream('<!DOCTYPE testType SYSTEM"one" [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('one');
@@ -1362,6 +1395,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxStream('<!DOCTYPE testType PUBLIC"one""two" [ ] >');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE);
+         ignoreToken(s, XmlToken.SPACE); // DJB
 
          const t = s.getNext();
          expect(t.pubidLiteral).toEqual('one');

@@ -142,6 +142,7 @@ class XmlTokenStream {
                      this._cursor.unget(close);
                      close = undefined;
                   } else {
+                     this._closeDocType();
                      this._popEnveloper();
                      this._pendingTokens.push(pendingClose.token);
                   }
@@ -392,10 +393,8 @@ class XmlTokenStream {
                   this._reportSyntaxError(ERRORS.DOCTYPE_NAME_INVALID, [ docTypeName.text ]);
                }
 
-               // lame DTD parsing
                this._cursor.getSpace();
                const openDtd = this._cursor.getMatch('[');
-               this._cursor.getSpace();
 
                if (openDtd) {
                   const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
@@ -404,9 +403,7 @@ class XmlTokenStream {
 
                   this._pushEnveloper(']', docToken);
                } else {
-                  this._cursor.getSpace();
-                  const doctypeClosing = this._cursor.getMatch('>');
-                  this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
+                  this._closeDocType();
 
                   const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
                      externalId ? externalId.systemLiteral : undefined,
@@ -726,6 +723,12 @@ class XmlTokenStream {
       }
 
       this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
+   }
+
+   _closeDocType() {
+      this._cursor.getSpace();
+      const doctypeClosing = this._cursor.getMatch('>');
+      this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
    }
 
    _getBracketItem() {

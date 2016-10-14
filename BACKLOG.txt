@@ -18,21 +18,28 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
 √ S 99 add a TERMINATOR type to peekType in cursor
 	Needs to match ] or ]]>
-S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
+√ S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
 	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
-S: 101 If matches end of DOCTYPE, switches to doctype finish
+[1h 20min]
+√ S: 101 If matches end of DOCTYPE, switches to doctype finish
 	doctype then needs to store the token on the stack, and not allow others to flow out
-	Some provision for early cancel
-	- some whitespace in the internal dtd is showing up as a space token. OK?
-S 102 Rework token delivery so routines do not know where they are delivering them
+	Some provision for early cancel (what did I mean?)
+	- some whitespace in the internal dtd is showing up as a space token. but not all is. (probably all should show up. taht's easy)
+x S 102 Rework token delivery so routines do not know where they are delivering them
 	in general a token is created and pushed, and then routine adds chunks
 	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
+S 104 Provide an end of doctype token, and internal subset, if any, appears between them
+S 105 dtd declaration types must start including their chunks always.
+
 S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
 	parser needs to know if doing an external dtd subset or not
 	set inDtd flag (make it a state, as we'll need it later)
 	report error if get a dtd type while not in dtd
 	report error if get a non dtd type while in a dtd
 - cleanup: note bad things with getCharData in 100
+- push and pop envelopers are slightly strange routines.
+
+- last minute consideration: Don't put the dtd inside the doctype, but make that a start/end thing
 
 -- next: 104
 =============================================
