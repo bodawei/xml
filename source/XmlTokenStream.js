@@ -14,7 +14,8 @@ const SpaceToken = XmlToken.SpaceToken;
 const DeclarationToken = XmlToken.DeclarationToken;
 const StartTagToken = XmlToken.StartTagToken;
 const TagToken = XmlToken.TagToken;
-const DocTypeToken = XmlToken.DocTypeToken;
+const DocTypeStartToken = XmlToken.DocTypeStartToken;
+const DocTypeEndToken = XmlToken.DocTypeEndToken;
 const NotationToken = XmlToken.NotationToken;
 const EntityToken = XmlToken.EntityToken;
 const ParameterEntityToken = XmlToken.ParameterEntityToken;
@@ -395,20 +396,15 @@ class XmlTokenStream {
 
                this._cursor.getSpace();
                const openDtd = this._cursor.getMatch('[');
+               const docToken = new DocTypeStartToken(docTypeName ? docTypeName.text : '',
+                  externalId ? externalId.systemLiteral : undefined,
+                  externalId ? externalId.pubidLiteral : undefined);
+               this._pendingTokens.push(docToken);
 
                if (openDtd) {
-                  const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
-                     externalId ? externalId.systemLiteral : undefined,
-                     externalId ? externalId.pubidLiteral : undefined, []);
-
                   this._pushEnveloper(']', docToken);
                } else {
                   this._closeDocType();
-
-                  const docToken = new DocTypeToken(docTypeName ? docTypeName.text : '',
-                     externalId ? externalId.systemLiteral : undefined,
-                     externalId ? externalId.pubidLiteral : undefined, []);
-                  this._pendingTokens.push(docToken);
                }
                return;
             // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
@@ -729,6 +725,8 @@ class XmlTokenStream {
       this._cursor.getSpace();
       const doctypeClosing = this._cursor.getMatch('>');
       this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
+
+      this._pendingTokens.push(new DocTypeEndToken());
    }
 
    _getBracketItem() {

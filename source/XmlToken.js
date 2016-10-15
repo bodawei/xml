@@ -79,15 +79,22 @@ class StartTagToken extends TagToken {
 
 }
 
-class DocTypeToken extends XmlToken {
+class DocTypeStartToken extends XmlToken {
 
-   constructor(name, systemLiteral, pubidLiteral, internalDtd) {
-      super(XmlToken.DOCTYPE, name);
+   constructor(name, systemLiteral, pubidLiteral) {
+      super(XmlToken.DOCTYPE_START, name);
 
       this.name = name;
-      this.internalDtd = internalDtd;
       this.systemLiteral = systemLiteral;
       this.pubidLiteral = pubidLiteral;
+   }
+
+}
+
+class DocTypeEndToken extends XmlToken {
+
+   constructor() {
+      super(XmlToken.DOCTYPE_END);
    }
 
 }
@@ -153,7 +160,8 @@ XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
 
 XmlToken.XMLDECL = 'XmlDecl';
-XmlToken.DOCTYPE = 'DocType';
+XmlToken.DOCTYPE_START = 'DocTypeStart';
+XmlToken.DOCTYPE_END = 'DocTypeEnd';
 XmlToken.NOTATION_DECL = 'NotationDeclaration';
 XmlToken.ENTITY_DECL = 'EntityDeclaration';
 XmlToken.PARAMETERENTITY_DECL = 'ParameterEntityDeclaration';
@@ -177,7 +185,8 @@ XmlToken.CommentToken = CommentToken;
 XmlToken.ProcessingInstructionToken = ProcessingInstructionToken;
 XmlToken.SpaceToken = SpaceToken;
 XmlToken.DeclarationToken = DeclarationToken;
-XmlToken.DocTypeToken = DocTypeToken;
+XmlToken.DocTypeStartToken = DocTypeStartToken;
+XmlToken.DocTypeEndToken = DocTypeEndToken;
 XmlToken.StartTagToken = StartTagToken;
 XmlToken.TagToken = TagToken;
 XmlToken.NotationToken = NotationToken;
