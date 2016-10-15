@@ -55,8 +55,11 @@ module.exports = function standardBuild(grunt) {
             options: {
                forceExit: true,
                jasmine: {
-                  spec_dir: SOURCE_DIR,
-                  spec_files: [ '**/*.test.js' ],
+                  spec_dir: './',
+                  spec_files: [
+                     SOURCE_DIR + '**/*.test.js',
+                     BUILD_DIR + '**/*.test.js'
+                  ],
                   reporters: {
                      // See https://github.com/bcaudan/jasmine-spec-reporter
                      spec: {

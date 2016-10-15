@@ -103,8 +103,10 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!DOCTYPE testType > <testType></testType>');
 
          const t = s.getNext();
-         expect(t.code).toEqual(XmlErrorToken.ERROR.DOCTYPE_INVALID_CONTEXT);
-         expect(t.message).toEqual('A doctype must not be declared inside of the internal or external subset.');
+         expect(t).toEqualProps({
+            code: XmlErrorToken.ERROR.DOCTYPE_INVALID_CONTEXT,
+            message: 'A doctype must not be declared inside of the internal or external subset.'
+         });
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {

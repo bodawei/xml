@@ -31,19 +31,15 @@ x S 102 Rework token delivery so routines do not know where they are delivering 
 √ S 104 Provide an end of doctype token, and internal subset, if any, appears between them
 [2.5 hr?]  Lost a block of time there.
 
-S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
+√ S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
 	parser needs to know if doing an external dtd subset or not
 	set inDtd flag (make it a state, as we'll need it later)
 	report error if get a dtd type while not in dtd
 	report error if get a non dtd type while in a dtd
-S 105 dtd declaration types must start including their chunks always.
-- not done with: references, comments, element start, processing instruction, cdata, xmldecl
-- cleanup: note bad things with getCharData in 100
-- push and pop envelopers are slightly strange routines.
 
 Note: Bad process. Changed design with 104 and 105.  I think it is better, but 105 risks going over the end of the time.  Moving it to after the agreed to work. I'm ejecting 102.  I forget why I thought it was needed aside from doctype, so will re-address when the need becomes apparent again.
 
--- next: 106
+-- next: 107
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -55,13 +51,19 @@ BLOG IDEAS
 - SVCC: how to set up karma etc.
 =============================================
 CLEANUP
+- cleanup: note bad things with getCharData in 100
+- push and pop envelopers are slightly strange routines.
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
+- is invalid context the right thing?
+- good to have something that checks a series of tokwns?
+- a thing in tests which expects error in external subset
 
 RESEARCH
 - should we be expanding character references in attribute defaults?
 
 BUILD
 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
+Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
 58:L Build infrastructure for running xmlconf tests.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build
@@ -95,14 +97,16 @@ BUILD
 41:XL:Investigate Gulp
 
 PROJECT
---- technical debt [5m 11s]
+--- technical debt [5m 13s]
 73:S: If error is thrown, we can still call getNextToken.  Should block that.
+106:S Finish out of context error reporting for: references, comments, element start, processing instruction, cdata, xmldecl
 58:S: Remove data prop on token, and make all token types more explicit
 13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
 	in the process, might be good to give these numeric codes.
 87:S: Handle PEReferences and character references in entity values
+105:S dtd declaration types must start including their chunks always.
 52:S: StringCursorSpeedup
 	- do performance test jsperf of regex vs hand parsing
 		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
