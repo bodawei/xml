@@ -10,6 +10,8 @@ const XmlToken = require('./XmlToken.js');
 
 const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
+const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeLaxExternalSubsetStream;
+const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
@@ -90,10 +92,19 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, XmlToken.ENTITY_DECL);
          ignoreToken(s, XmlToken.SPACE);
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.CHARDATA);
          expect(t.data).toEqual(']]>');
+      });
+
+      it('reports a syntax error if doctype is declared in a DTD context', () => {
+         const s = makeLaxExternalSubsetStream('<!DOCTYPE testType > <testType></testType>');
+
+         const t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.DOCTYPE_INVALID_CONTEXT);
+         expect(t.message).toEqual('A doctype must not be declared inside of the internal or external subset.');
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {
@@ -134,14 +145,14 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing NOTATION declaration', () => {
 
       it('retrieves a token of type NOTATION', () => {
-         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo" >');
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo" >');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.NOTATION_DECL);
       });
 
       it('retrieves the name of the notation', () => {
-         const s = makeStrictStream('<!NOTATION notationName PUBLIC "foo">');
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo">');
 
          expect(s.getNext().name).toEqual('notationName');
       });
@@ -153,7 +164,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('gives the notation token an empty name if none is specified', () => {
-         const s = makeLaxStream('<!NOTATION >');
+         const s = makeLaxExternalSubsetStream('<!NOTATION >');
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_NAME);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_SPACE_AFTER_NAME);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
@@ -162,14 +173,23 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('auto-terminates the notation token when the > is not found as expected', () => {
-         const s = makeLaxStream('<!NOTATION myNotation fish>');
+         const s = makeLaxExternalSubsetStream('<!NOTATION myNotation fish>');
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE);
          let t = s.getNext(); // get the notation token
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('fish>');
+      });
+
+      it('reports a syntax error if notation is declared outside of a DTD context', () => {
+         expectSyntaxError('<!NOTATION frog PUBLIC "foo">',
+            XmlErrorToken.ERROR.NOTATIONDECL_INVALID_CONTEXT,
+            'A notation must not be declared outside of the internal or external subset.',
+            new Offset(0, 0, 0),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('reports a syntax error if there is no space after the notation name', () => {
@@ -201,78 +221,86 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing ENTITY declaration', () => {
 
       it('retrieves a token of type ENTITY', () => {
-         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity" >');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" >');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ENTITY_DECL);
       });
 
       it('retrieves the name of the entity', () => {
-         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('entityName');
       });
 
       it('retrieves the value of the entity in double quotes', () => {
-         const s = makeStrictStream('<!ENTITY entityName "value">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value">');
 
          expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
       });
 
       it('retrieves the value of the entity in single quotes', () => {
-         const s = makeStrictStream('<!ENTITY entityName \'value\'>');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName \'value\'>');
 
          expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value') ]);
       });
 
       it('accepts a value with no contents', () => {
-         const s = makeStrictStream('<!ENTITY entityName "">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName "">');
 
          expect(s.getNext().value).toEqual([ ]);
       });
 
       it('does not expand entity references in the value', () => {
-         const s = makeStrictStream('<!ENTITY entityName "value&amp;">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value&amp;">');
 
          expect(s.getNext().value).toEqual([ new XmlToken(XmlToken.TEXT, 'value&amp;') ]);
       });
 
       it('sets the value to undefined if none specified', () => {
-         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 
          expect(s.getNext().value).toBeUndefined();
       });
 
       it('retrieves the NDATA name when a two value PUBLIC is specified', () => {
-         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testPublic" "system" NDATA testData>');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testPublic" "system" NDATA testData>');
 
          expect(s.getNext().notationDataName).toEqual('testData');
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified ', () => {
-         const s = makeStrictStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
 
          expect(s.getNext().notationDataName).toEqual('testData');
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
-         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
+         const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
 
          expect(s.getNext().notationDataName).toEqual('testData');
       });
 
       it('retrieves an undefined NDATA name if no name included', () => {
-         const s = makeLaxStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
+         const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NDATA_NO_NAME);
 
          expect(s.getNext().notationDataName).toBeUndefined();
       });
 
       it('sets the notation data name to undefined if none specified', () => {
-         const s = makeStrictStream('<!ENTITY paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('reports a syntax error if entity is declared outside of a DTD context', () => {
+         expectSyntaxError('<!ENTITY entityName PUBLIC "testentity" >',
+            XmlErrorToken.ERROR.ENTITYDECL_INVALID_CONTEXT,
+            'An entity must not be declared outside of the internal or external subset.',
+            new Offset(0, 0, 0),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('reports a syntax error if there is no name', () => {
@@ -288,7 +316,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('gives the entity token an empty name if none is specified', () => {
-         const s = makeLaxStream('<!ENTITY >');
+         const s = makeLaxExternalSubsetStream('<!ENTITY >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_NAME);
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NAME_NO_TRAILING_SPACE);
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_VALUE);
@@ -339,27 +367,30 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('reports a missing ">" syntax error if there is junk after the SYSTEM', () => {
-         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" found junk  >');
+         const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" found junk  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('found junk  >');
       });
 
       it('reports a missing ">" syntax error if there is junk after the PUBLIC', () => {
-         const s = makeLaxStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
+         const s = makeLaxExternalSubsetStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('extra  >');
       });
 
       it('reports a missing ">" syntax error if there is junk after the NDATA', () => {
-         const s = makeLaxStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
+         const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('junk  >');
@@ -371,26 +402,27 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing PARAMETER_ENTITY declaration (whitebox)', () => {
 
       it('retrieves a token of type PARAMETER_ENTITY', () => {
-         const s = makeStrictStream('<!ENTITY % entityName PUBLIC "testentity" >');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % entityName PUBLIC "testentity" >');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.PARAMETERENTITY_DECL);
       });
 
       it('retrieves the NDATA name on a parameter entity', () => {
-         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity" "system" NDATA testData>');
+         const s = makeStrictExternalSubsetStream(
+            '<!ENTITY % paramEntityName PUBLIC "testentity" "system" NDATA testData>');
 
          expect(s.getNext().notationDataName).toEqual('testData');
       });
 
       it('sets the notation data name to undefined if none specified on a parameter entity', () => {
-         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().notationDataName).toBeUndefined();
       });
 
       it('retrieves the name of the parameter entity', () => {
-         const s = makeStrictStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().name).toEqual('paramEntityName');
       });
@@ -400,58 +432,66 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing ELEMENT', () => {
 
       it('retrieves a token of type ELEMENT_DECL', () => {
-         const s = makeStrictStream('<!ELEMENT elementName ANY>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT elementName ANY>');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ELEMENT_DECL);
       });
 
       it('retrieves the name of the element', () => {
-         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ANY>');
 
          expect(s.getNext().name).toEqual('testElement');
       });
 
       it('retrieves an ANY content spec', () => {
-         const s = makeStrictStream('<!ELEMENT testElement ANY>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ANY>');
 
          expect(s.getNext().contentType).toEqual('ANY');
       });
 
       it('retrieves an EMPTY content spec', () => {
-         const s = makeStrictStream('<!ELEMENT testElement EMPTY>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement EMPTY>');
 
          expect(s.getNext().contentType).toEqual('EMPTY');
       });
 
       it('retrieves a #PCDATA content spec', () => {
-         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA)>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (#PCDATA)>');
 
          expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('retrieves a #PCDATA content spec padded with spaces', () => {
-         const s = makeStrictStream('<!ELEMENT testElement (    #PCDATA    )  >');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (    #PCDATA    )  >');
 
          expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('retrieves multiple names from the content spec', () => {
-         const s = makeStrictStream('<!ELEMENT testElement (#PCDATA | one|two |three)>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (#PCDATA | one|two |three)>');
 
          expect(s.getNext().contentType).toEqual([ '#PCDATA', 'one', 'two', 'three' ]);
       });
 
       it('retrieves names from the content spec regardless of spaces around "|"s', () => {
-         const s = makeStrictStream('<!ELEMENT testElement (zero | one|two |three)>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (zero | one|two |three)>');
 
          expect(s.getNext().contentType).toEqual([ 'zero', 'one', 'two', 'three' ]);
       });
 
       it('retrieves names from the content spec preserving their case', () => {
-         const s = makeStrictStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
+         const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
 
          expect(s.getNext().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
+      });
+
+      it('reports a syntax error if notation is declared outside of a DTD context', () => {
+         expectSyntaxError('<!ELEMENT testElement ( #PCDATA )>',
+            XmlErrorToken.ERROR.ELEMENTDECL_INVALID_CONTEXT,
+            'An element must not be declared outside of the internal or external subset.',
+            new Offset(0, 0, 0),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -473,7 +513,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('fixes the case of #PCDATA if it is specified in the wrong case', () => {
-         const s = makeLaxStream('<!ELEMENT testElement ( #pcdata )>');
+         const s = makeLaxExternalSubsetStream('<!ELEMENT testElement ( #pcdata )>');
          ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE);
 
          expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
@@ -498,7 +538,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('reports a syntax error if any names do not match the syntax for names', () => {
-         const s = makeLaxStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
+         const s = makeLaxExternalSubsetStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
 
          let t = s.getNext();
          expect(t.code).toEqual(XmlErrorToken.ERROR.ELEMENTDECL_SPEC_NAME_INVALID);
@@ -540,7 +580,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('uppercases expected values', () => {
-         const s = makeLaxStream('<!ELEMENT testElement empty   >');
+         const s = makeLaxExternalSubsetStream('<!ELEMENT testElement empty   >');
          ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_SPEC_INVALID_CASE);
 
          const t = s.getNext();
@@ -554,7 +594,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('gives the notation token an empty name if none is specified', () => {
-         const s = makeLaxStream('<!ELEMENT >');
+         const s = makeLaxExternalSubsetStream('<!ELEMENT >');
          ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_NAME);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENTDECL_NO_SPEC);
 
@@ -578,20 +618,20 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing ATTLIST', () => {
 
       it('retrieves a token of type ATTLIST_DECL', () => {
-         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.ATTLIST_DECL);
       });
 
       it('retrieves the name of the element the attributes are associated with', () => {
-         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
 
          expect(s.getNext().elementName).toEqual('elementName');
       });
 
       it('retrieves the an attribute definition', () => {
-         const s = makeStrictStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
 
          expect(s.getNext().attributes).toEqual([ {
             name: 'attrName',
@@ -603,7 +643,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves multiple attribute definitions', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'attrName CDATA #REQUIRED ' +
                'attrName2 IDREF #IMPLIED>');
 
@@ -623,7 +663,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes all known string attribute types', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #REQUIRED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -636,7 +676,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes all known tokenized attribute types', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'IdName ID #IMPLIED ' +
                'IdRefName IDREF #IMPLIED ' +
                'IdRefsName IDREFS #IMPLIED ' +
@@ -691,7 +731,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes a NOTATION type with one value', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION  ( one ) #IMPLIED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -704,7 +744,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes a NOTATION type with multiple values', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION  ( one|two | three) #IMPLIED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -717,7 +757,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes a NOTATION type with multiple values and no whitespace', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION (one|two|three) #IMPLIED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -730,7 +770,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes multiple NOTATION attributes', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'First NOTATION \n\t( one|two | three) #IMPLIED ' +
                'Second NOTATION ( test1 | test2\t|\t\n test3) #IMPLIED>');
 
@@ -750,7 +790,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an #IMPLIED type', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #IMPLIED>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -763,7 +803,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an default value in double quotes', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "this is a test value">');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -776,7 +816,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an default value in single quotes', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA \'this is a test value\'>');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -789,7 +829,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an empty default value', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "">');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -802,7 +842,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an default with a reference in it, without expanding it', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "one &amp;">');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -815,7 +855,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('recognizes an default value with the #FIXED flag', () => {
-         const s = makeStrictStream('<!ATTLIST elementName ' +
+         const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #FIXED "this is a test value">');
 
          expect(s.getNext().attributes).toEqual([ {
@@ -828,7 +868,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('fixes a mistaken capitalization of the type', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName cdata #REQUIRED>');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_TYPE_INVALID);
 
@@ -842,7 +882,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('fixes a mistaken non-capitalized default #REQUIRED value', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #required>');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
@@ -856,7 +896,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('fixes a mistaken non-capitalized default #IMPLIED value', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #implied>');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
@@ -870,7 +910,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('fixes a mistaken non-capitalized default #FIXED value', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #FiXeD "foo">');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
@@ -881,6 +921,14 @@ describe('XmlTokenStream (dtd)', () => {
             flag: '#FIXED',
             value: [ 'foo' ]
          } ]);
+      });
+
+      it('reports a syntax error if an attribute list is declared outside of a DTD context', () => {
+         expectSyntaxError('<!ATTLIST elementName attrName CDATA #REQUIRED >',
+            XmlErrorToken.ERROR.ATTLISTDECL_INVALID_CONTEXT,
+            'An attribute list must not be declared outside of the internal or external subset.',
+            new Offset(0, 0, 0),
+            [ new Offset(0, 0, 0) ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -974,7 +1022,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('extracts the expected notation names if a vertical bar between NOTATION names is omitted', () => {
-         const s = makeLaxStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
+         const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS);
 
          expect(s.getNext().attributes).toEqual([ {
@@ -1047,7 +1095,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('allows an attribute with "<" in the default if the right lax flag is set', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'attrName CDATA "one < two">', {
                   'lax:allowOpenAngleBracketsInAttributeValues': true
                });
@@ -1062,7 +1110,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('terminates the attribute list element early if there is a "<" in the attribute value ', () => {
-         const s = makeLaxStream('<!ATTLIST elementName ' +
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'attrName CDATA "one < two">');
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_INVALID);
          ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_NO_CLOSE);
@@ -1089,7 +1137,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('enumeration type', () => {
 
          it('recognizes an enumeration type ', () => {
-            const s = makeStrictStream('<!ATTLIST elementName ' +
+            const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                   'EnumerationName ( one ) #IMPLIED>');
 
             expect(s.getNext().attributes).toEqual([ {
@@ -1102,7 +1150,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('recognizes multiple enumeration attributes', () => {
-            const s = makeStrictStream('<!ATTLIST elementName ' +
+            const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                   'First CDATA #IMPLIED ' +
                   'Second NOTATION \n\t(one | two | three) #IMPLIED ' +
                   'Third \n\t( one|two | three) #IMPLIED ' +
@@ -1136,7 +1184,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('accepts an enumerated value that is an NmToken but not a name ', () => {
-            const s = makeStrictStream('<!ATTLIST elementName ' +
+            const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                   'EnumerationName ( -one ) #IMPLIED>');
 
             expect(s.getNext().attributes).toEqual([ {
@@ -1157,7 +1205,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
-            const s = makeLaxStream('<!ATTLIST e attrName( name ) #REQUIRED>');
+            const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName( name ) #REQUIRED>');
             ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE);
 
             expect(s.getNext().attributes).toEqual([ {
@@ -1191,7 +1239,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
-            const s = makeLaxStream('<!ATTLIST e attrName ( name name2 ) #REQUIRED >');
+            const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName ( name name2 ) #REQUIRED >');
             ignoreError(s, XmlErrorToken.ERROR.ATTLISTDECL_ATTR_LIST_NO_ORS);
 
             expect(s.getNext().attributes).toEqual([ {
@@ -1411,7 +1459,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
-         const s = makeStrictStream('<!NOTATION testType PUBLIC "pubid" >');
+         const s = makeStrictExternalSubsetStream('<!NOTATION testType PUBLIC "pubid" >');
 
          expect(() => {
             s.getNext();

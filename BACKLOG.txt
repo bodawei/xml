@@ -28,7 +28,8 @@ x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities i
 x S 102 Rework token delivery so routines do not know where they are delivering them
 	in general a token is created and pushed, and then routine adds chunks
 	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
-S 104 Provide an end of doctype token, and internal subset, if any, appears between them
+√ S 104 Provide an end of doctype token, and internal subset, if any, appears between them
+[2.5 hr?]  Lost a block of time there.
 
 S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
 	parser needs to know if doing an external dtd subset or not
@@ -36,6 +37,7 @@ S 103 Report syntax error if declaration outside of the right context  (this mig
 	report error if get a dtd type while not in dtd
 	report error if get a non dtd type while in a dtd
 S 105 dtd declaration types must start including their chunks always.
+- not done with: references, comments, element start, processing instruction, cdata, xmldecl
 - cleanup: note bad things with getCharData in 100
 - push and pop envelopers are slightly strange routines.
 

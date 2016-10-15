@@ -35,6 +35,17 @@ const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES'
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
+const ENTITY_TYPE = {
+   DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
+   EXTERNAL_ENTITY: 'EXTERNAL_ENTITY',
+   EXTERNAL_SUBSET: 'EXTERNAL_SUBSET'
+};
+
+const STATE = {
+   NORMAL: 'NORMAL',
+   IN_DTD: 'IN_DTD'
+};
+
 function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    let value = valueChunk;
 
@@ -63,10 +74,12 @@ class XmlTokenStream {
       this._cursorContexts = [];
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
+      this._state = STATE.NORMAL;
 
       this._options = {
          lax: false,
-         'lax:allowOpenAngleBracketsInAttributeValues': false
+         'lax:allowOpenAngleBracketsInAttributeValues': false,
+         entityType: ENTITY_TYPE.DOCUMENT_ENTITY
       };
 
       for (const name in options) {
@@ -74,6 +87,12 @@ class XmlTokenStream {
             throw new Error('"' + name + '" is not a supported option name.');
          }
          this._options[name] = options[name];
+      }
+
+      this._entityType = this._options.entityType;
+
+      if (this._entityType === ENTITY_TYPE.EXTERNAL_SUBSET) {
+         this._state = STATE.IN_DTD;
       }
    }
 
@@ -183,6 +202,8 @@ class XmlTokenStream {
             this._reportSyntaxError(ERRORS.CHARDATA_INVALID_TEXT);
 
             if (content.chunk) {
+               this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.CHARDATA_INVALID_CONTEXT,
+                  content.chunk.startOffset);
                this._pushToken(XmlToken.CHARDATA, content.chunk.text);
             }
 
@@ -194,6 +215,7 @@ class XmlTokenStream {
             return;
          }
 
+         this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.CHARDATA_INVALID_CONTEXT, content.chunk.startOffset);
          this._pushToken(XmlToken.CHARDATA, content.chunk.text);
       } while (content.terminator && content.terminator !== '<');
    }
@@ -399,10 +421,14 @@ class XmlTokenStream {
                const docToken = new DocTypeStartToken(docTypeName ? docTypeName.text : '',
                   externalId ? externalId.systemLiteral : undefined,
                   externalId ? externalId.pubidLiteral : undefined);
+
+               this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.DOCTYPE_INVALID_CONTEXT,
+                  start.startOffset, start);
                this._pendingTokens.push(docToken);
 
                if (openDtd) {
                   this._pushEnveloper(']', docToken);
+                  this._state = STATE.IN_DTD;
                } else {
                   this._closeDocType();
                }
@@ -433,6 +459,9 @@ class XmlTokenStream {
                const notationToken = new NotationToken(notationName.text,
                   externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
                   externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
+
+               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.NOTATIONDECL_INVALID_CONTEXT, [],
+                  start.startOffset, start);
                this._pendingTokens.push(notationToken);
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
@@ -519,6 +548,10 @@ class XmlTokenStream {
                      entityExternalId ? entityExternalId.systemLiteral : undefined,
                      entityExternalId ? entityExternalId.pubidLiteral : undefined,
                      notationDataName);
+
+               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ENTITYDECL_INVALID_CONTEXT,
+                  start.startOffset, start);
+
                this._pendingTokens.push(entityToken);
                return;
             // [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
@@ -576,6 +609,9 @@ class XmlTokenStream {
                }
 
                this._assertSyntax(parsedEl.closeChunk, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+
+               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ELEMENTDECL_INVALID_CONTEXT,
+                  start.startOffset, start);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
@@ -712,6 +748,8 @@ class XmlTokenStream {
                }
 
                this._assertSyntax(attListClose, ERRORS.ATTLISTDECL_NO_CLOSE, [ elName ]);
+               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ATTLISTDECL_INVALID_CONTEXT,
+                  start.startOffset, start);
 
                this._pendingTokens.push(new AttributeListDeclarationToken(elName, attributes));
                return;
@@ -727,6 +765,7 @@ class XmlTokenStream {
       this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
 
       this._pendingTokens.push(new DocTypeEndToken());
+      this._state = STATE.NORMAL;
    }
 
    _getBracketItem() {

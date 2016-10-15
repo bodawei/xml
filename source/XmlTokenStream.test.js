@@ -14,6 +14,8 @@ const XmlToken = require('./XmlToken.js');
 
 const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
+const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeLaxExternalSubsetStream;
+const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
@@ -72,7 +74,8 @@ describe('XmlTokenStream', () => {
 
          expect(s._options).toEqual({
             lax: false,
-            'lax:allowOpenAngleBracketsInAttributeValues': false
+            'lax:allowOpenAngleBracketsInAttributeValues': false,
+            entityType: 'DOCUMENT_ENTITY'
          });
       });
 
@@ -124,6 +127,13 @@ describe('XmlTokenStream', () => {
          expect(t.type).toEqual(XmlToken.SPACE);
       });
 
+      it('retrieves a token of type SPACE in a DTD context', () => {
+         const s = makeStrictExternalSubsetStream(' \n  ');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.SPACE);
+      });
+
       it('retrieves the expected chunks', () => {
          const s = makeStrictStream(' \t ');
 
@@ -163,6 +173,14 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.data).toEqual('wow ');
+      });
+
+      it('throws an error if found in a DTD context', () => {
+         const s = makeLaxExternalSubsetStream('asdf');
+
+         const t = s.getNext();
+         expect(t.code).toEqual(XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         expect(t.message).toEqual('CharData must not be included in the internal or external subset.');
       });
 
       it('throws an error token if there is a ]]> in the CharData', () => {

@@ -13,8 +13,19 @@ function makeLaxStream(str, options = {}) {
    return makeStream(str, new XmlEntityManager(), options);
 }
 
-function makeStrictStream(str) {
-   return makeStream(str, new XmlEntityManager(), {});
+function makeStrictStream(str, options = {}) {
+   return makeStream(str, new XmlEntityManager(), options);
+}
+
+function makeLaxExternalSubsetStream(str, options = {}) {
+   options.lax = true;
+   options.entityType = 'EXTERNAL_SUBSET';
+   return makeStream(str, new XmlEntityManager(), options);
+}
+
+function makeStrictExternalSubsetStream(str, options = {}) {
+   options.entityType = 'EXTERNAL_SUBSET';
+   return makeStream(str, new XmlEntityManager(), options);
 }
 
 function makeStream(str, entityManager, options) {
@@ -56,5 +67,7 @@ module.exports = {
    ignoreError,
    ignoreToken,
    makeStrictStream,
-   makeLaxStream
+   makeLaxStream,
+   makeLaxExternalSubsetStream,
+   makeStrictExternalSubsetStream
 };

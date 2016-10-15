@@ -74,6 +74,7 @@ XmlErrorToken.ERROR = {
    ATTRIBUTE_INVALID_VALUE: 'ATTRIBUTE_INVALID_VALUE',
 
    CHARDATA_INVALID_TEXT: 'CHARDATA_INVALID_TEXT',
+   CHARDATA_INVALID_CONTEXT: 'CHARDATA_INVALID_CONTEXT',
 
    CDATA_NO_CLOSE: 'CDATA_NO_CLOSE',
    CDATA_XTRA_SPACE_BEFORE: 'CDATA_XTRA_SPACE_BEFORE',
@@ -107,6 +108,7 @@ XmlErrorToken.ERROR = {
    DOCTYPE_NO_NAME: 'DOCTYPE_NO_NAME',
    DOCTYPE_NAME_INVALID: 'DOCTYPE_NAME_INVALID',
    DOCTYPE_NO_CLOSE: 'DOCTYPE_NO_CLOSE',
+   DOCTYPE_INVALID_CONTEXT: 'DOCTYPE_INVALID_CONTEXT',
 
    ENTITYDECL_NO_NAME: '.ENTITYDECL_NO_NAME',
    EXTERNALID_INVALID_CASE: 'EXTERNALID_INVALID_CASE',
@@ -117,6 +119,7 @@ XmlErrorToken.ERROR = {
    ENTITYDECL_NDATA_NO_NAME: 'ENTITYDECL_NDATA_NO_NAME',
    ENTITYDECL_NO_VALUE: 'ENTITYDECL_NO_VALUE',
    ENTITYDECL_NO_CLOSE: 'ENTITYDECL_NO_CLOSE',
+   ENTITYDECL_INVALID_CONTEXT: 'ENTITYDECL_INVALID_CONTEXT',
 
    ELEMENTDECL_NO_NAME: 'ELEMENTDECL_NO_NAME',
    ELEMENTDECL_NO_SPACE_AFTER_NAME: 'ELEMENTDECL_NO_SPACE_AFTER_NAME',
@@ -131,6 +134,7 @@ XmlErrorToken.ERROR = {
    ELEMENTDECL_SPEC_ITEMS_MISSING: 'ELEMENTDECL_SPEC_ITEMS_MISSING',
    ELEMENTDECL_NO_SPEC_CLOSE: 'ELEMENTDECL_NO_SPEC_CLOSE',
    ELEMENTDECL_NO_CLOSE: 'ELEMENTDECL_NO_CLOSE',
+   ELEMENTDECL_INVALID_CONTEXT: 'ELEMENTDECL_INVALID_CONTEXT',
 
    ATTLISTDECL_NO_NAME: 'ATTLISTDECL_NO_NAME',
    ATTLISTDECL_NAME_INVALID: 'ATTLISTDECL_NAME_INVALID',
@@ -146,6 +150,7 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_NOTA_EMPTY: 'ATTLISTDECL_ATTR_NOTA_EMPTY',
    ATTLISTDECL_ATTR_NOTA_NO_CLOSE: 'ATTLISTDECL_ATTR_NOTA_NO_CLOSE',
    ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID: 'ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID',
+   ATTLISTDECL_ATTR_ENUM_NO_PRESPACE: 'ATTLISTDECL_ATTR_ENUM_NO_PRESPACE',
    ATTLISTDECL_ATTR_ENUM_NO_CLOSE: 'ATTLISTDECL_ATTR_ENUM_NO_CLOSE',
    ATTLISTDECL_ATTR_NO_DEFAULT: 'ATTLISTDECL_ATTR_NO_DEFAULT',
    ATTLISTDECL_ATTR_DEFAULT_NO_SPACE: 'ATTLISTDECL_ATTR_DEFAULT_NO_SPACE',
@@ -156,12 +161,14 @@ XmlErrorToken.ERROR = {
    ATTLISTDECL_ATTR_INVALID: 'ATTLISTDECL_ATTR_INVALID',
    ATTLISTDECL_ATTR_NO_CLOSE_QUOTE: 'ATTLISTDECL_ATTR_NO_CLOSE_QUOTE',
    ATTLISTDECL_NO_CLOSE: 'ATTLISTDECL_NO_CLOSE',
+   ATTLISTDECL_INVALID_CONTEXT: 'ATTLISTDECL_INVALID_CONTEXT',
 
    NOTATIONDECL_NO_NAME: 'NOTATIONDECL_NO_NAME',
    NOTATIONDECL_NAME_INVALID: 'NOTATIONDECL_NAME_INVALID',
    NOTATIONDECL_NO_EXTERNALID: 'NOTATIONDECL_NO_EXTERNALID',
    NOTATIONDECL_NO_SPACE_AFTER_NAME: 'NOTATIONDECL_NO_SPACE_AFTER_NAME',
    NOTATIONDECL_NO_CLOSE: 'NOTATIONDECL_NO_CLOSE',
+   NOTATIONDECL_INVALID_CONTEXT: 'NOTATIONDECL_INVALID_CONTEXT',
 
    EXTERNALID_UNKNOWN: 'EXTERNALID_UNKNOWN',
    EXTERNALID_PUBLIC_NO_SPACE: 'EXTERNALID_PUBLIC_NO_SPACE',
@@ -220,6 +227,7 @@ str[err.ATTRIBUTE_NO_CLOSE_QUOTE] = 'The value for "{0}" must close with a quote
 str[err.ATTRIBUTE_INVALID_VALUE] = 'The value of attribute "{0}" must not contain "<".';
 
 str[err.CHARDATA_INVALID_TEXT] = '"]]>" must not appear in in character data.';
+str[err.CHARDATA_INVALID_CONTEXT] = 'CharData must not be included in the internal or external subset.';
 
 str[err.CDATA_INVALID_CASE] = '"CDATA" must be capitalized. Found "{0}".';
 str[err.CDATA_XTRA_SPACE_BEFORE] = 'Must not have space before CDATA.';
@@ -253,6 +261,7 @@ str[err.BRACKETITEM_NO_NAME] = 'Missing name in a "<![" item.';
 str[err.DOCTYPE_NO_NAME] = 'Missing name for the document type.';
 str[err.DOCTYPE_NAME_INVALID] = 'The document type name must match the syntax for names. Found: "{0}".';
 str[err.DOCTYPE_NO_CLOSE] = 'Missing closing ">" for in the document type.';
+str[err.DOCTYPE_INVALID_CONTEXT] = 'A doctype must not be declared inside of the internal or external subset.';
 
 str[err.ENTITYDECL_NO_NAME] = 'Missing name for an entity declaration.';
 str[err.ENTITYDECL_NAME_INVALID] = 'The entity name must match the syntax for names. Found: "{0}".';
@@ -262,6 +271,7 @@ str[err.ENTITYDECL_NDATA_INVALID_CASE] = 'NDATA in entity "{0}" must be upper ca
 str[err.ENTITYDECL_NDATA_NO_NAME] = 'NDATA in entity "{0}" must have a name.';
 str[err.ENTITYDECL_NO_VALUE] = 'Missing value or external identifier in entity "{0}".';
 str[err.ENTITYDECL_NO_CLOSE] = 'Missing closing ">" in the entity "{0}".';
+str[err.ENTITYDECL_INVALID_CONTEXT] = 'An entity must not be declared outside of the internal or external subset.';
 
 str[err.ELEMENTDECL_NO_NAME] = 'Missing name for an element declaration.';
 str[err.ELEMENTDECL_NAME_INVALID] = 'The element declaration name must match the syntax for names. Found: "{0}".';
@@ -275,6 +285,7 @@ str[err.ELEMENTDECL_SPEC_NAME_INVALID] = 'Names in content spec must match the s
 str[err.ELEMENTDECL_PCDATA_NOT_FIRST] = '#PCDATA must be first in the content spec of element declaration "{0}".';
 str[err.ELEMENTDECL_NO_SPEC_CLOSE] = 'Missing closing ")" for content spec in element declaration "{0}".';
 str[err.ELEMENTDECL_NO_CLOSE] = 'Missing closing ">" in the element declaration "{0}".';
+str[err.ELEMENTDECL_INVALID_CONTEXT] = 'An element must not be declared outside of the internal or external subset.';
 
 str[err.ATTLISTDECL_NO_NAME] = 'Missing element name in an attribute list declaration.';
 str[err.ATTLISTDECL_NAME_INVALID] = 'The element name must match the syntax for names. Found "{0}".';
@@ -314,12 +325,15 @@ str[err.ATTLISTDECL_ATTR_INVALID] =
    'Must not have a "<" in an attribute value in the attribute list declaration for "{0}".';
 str[err.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE] = 'Missing closing quote in the attribute list declaration for "{0}".';
 str[err.ATTLISTDECL_NO_CLOSE] = 'Missing closing ">" in the attribute list declaration "{0}".';
+str[err.ATTLISTDECL_INVALID_CONTEXT] =
+   'An attribute list must not be declared outside of the internal or external subset.';
 
 str[err.NOTATIONDECL_NO_NAME] = 'Missing name for a notation declaration.';
 str[err.NOTATIONDECL_NAME_INVALID] = 'The notation declaration name must match the syntax for names. Found: "{0}".';
 str[err.NOTATIONDECL_NO_EXTERNALID] = 'Missing the external id the notation declaration "{0}".';
 str[err.NOTATIONDECL_NO_SPACE_AFTER_NAME] = 'Missing space after the name in the notation declaration "{0}".';
 str[err.NOTATIONDECL_NO_CLOSE] = 'Missing closing ">" in the notation declaration "{0}".';
+str[err.NOTATIONDECL_INVALID_CONTEXT] = 'A notation must not be declared outside of the internal or external subset.';
 
 str[err.EXTERNALID_UNKNOWN] = 'The external id was an unknown type. Found "{0}".';
 str[err.EXTERNALID_INVALID_CASE] = 'The "{0}" label must be all upper case. Found "{1}".';
