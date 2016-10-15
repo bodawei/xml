@@ -166,6 +166,7 @@ describe('XmlTokenStream', () => {
 
          const t = s.getNext();
          expect(t.data).toEqual('wow ');
+         expect(s.getNext().type).toEqual(XmlToken.ELEMENT_START);
       });
 
       it('retrieves a token with the specified data up to a reference', () => {
@@ -179,8 +180,10 @@ describe('XmlTokenStream', () => {
          const s = makeLaxExternalSubsetStream('asdf');
 
          const t = s.getNext();
-         expect(t.code).toEqual(XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
-         expect(t.message).toEqual('CharData must not be included in the internal or external subset.');
+         expect(t).toEqualProps({
+            code: XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT,
+            message: 'CharData must not be included in the internal or external subset.'
+         });
       });
 
       it('throws an error token if there is a ]]> in the CharData', () => {
@@ -194,6 +197,14 @@ describe('XmlTokenStream', () => {
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
 
          expect(s.getNext().data).toEqual('testing testing ');
+         expect(s.getNext().data).toEqual(']]>');
+         expect(s.getNext().data).toEqual('testing');
+      });
+
+      it('includes the "]]>" as char data in lax mode, even when there are no preceeding data', () => {
+         const s = makeLaxStream(']]>testing');
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
+
          expect(s.getNext().data).toEqual(']]>');
          expect(s.getNext().data).toEqual('testing');
       });

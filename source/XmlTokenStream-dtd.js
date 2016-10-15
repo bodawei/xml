@@ -4,6 +4,73 @@
 
 class XmlTokenStreamDtd {
 
+   /**********************************************************************\
+    parseEntity extracts an entity declaration from the provided cursor
+    and returns a data structure that describes what was extracted.
+
+    This assumes that the "<!ENTITY S" has already been parsed.
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+      {
+         nameChunk: The chunk with the entity name
+         isParameter: True if this is a parameter entry declaration
+         postNameSpaceChunk: The space after the name, if any.
+      }
+    SYNTAX
+      // [70] EntityDecl  ::= GEDecl | PEDecl
+      // [71] GEDecl      ::= '<!ENTITY' S Name S EntityDef S? '>'
+      // [72] PEDecl      ::= '<!ENTITY' S '%' S Name S PEDef S? '>'
+      // [73] EntityDef   ::= EntityValue | (ExternalID NDataDecl?)
+      // [74] PEDef       ::= EntityValue | ExternalID
+      // [76] NDataDecl   ::= S 'NDATA' S Name
+      //  [9] EntityValue ::= '"' ([^%&"] | PEReference | Reference)* '"' |
+      //                      "'" ([^%&'] | PEReference | Reference)* "'"
+   \**********************************************************************/
+   parseEntity(cursor) {
+      const results = {};
+
+      results.nameChunk = cursor.getWord([ '>' ]);
+
+      if (results.nameChunk && results.nameChunk.text === '%') {
+         results.isParameter = true;
+         cursor.getSpace(); // either have space or >. no need to error if space not here
+         results.nameChunk = cursor.getWord([ '>' ]);
+      }
+
+      results.postNameSpaceChunk = cursor.getSpace();
+
+      return results;
+   }
+
+   /**********************************************************************\
+    parseElement extracts an element declaration from the provided cursor
+    and returns a data structure that describes what was extracted
+
+    This assumes that the "<!ELEMENT S" has already been parsed.
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+    {
+       elenentName  // Name of the elment
+       contentChunk // Chunk containing the EMPTY or ANY text
+       missingCount // The number of names missing if Mixed
+       missingOr    // The number of "|"'s missing if Mixed
+       close        // The close of the Mixed list
+       list         // An array of Mixed names
+       closeChunk   // Chunk that has the closing ">"
+    }
+
+    SYNTAX
+      // [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
+      // [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
+      // [51] Mixed       ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
+      //                      '(' S? '#PCDATA' S? ')'
+   \**********************************************************************/
    parseElement(cursor) {
       const results = {};
 
@@ -16,10 +83,6 @@ class XmlTokenStreamDtd {
       } else {
          cursor.getChar();
          this._getListItems(cursor, [ '>' ], results);
-
-         results.listCloseChunk = results.close;
-         results.missingNames = results.missingCount;
-         results.missingOrs = results.missingOr;
       }
 
       cursor.getSpace();
@@ -169,6 +232,7 @@ class XmlTokenStreamDtd {
          found in the ist
       missingCount: The number of names missing from the list (e.g. empty
          space between "|"'s)
+      missingOr: The number of |'s missing from the list
       close: The Chunk representing the closing ")" of the list, if found.
    \**********************************************************************/
 

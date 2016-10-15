@@ -96,6 +96,10 @@ class XmlTokenStream {
       }
    }
 
+   _noEnvelopers() {
+      return this._envelopers.length === 0;
+   }
+
    _pushEnveloper(close, token) {
       this._envelopers.push({
          close: close,
@@ -177,7 +181,7 @@ class XmlTokenStream {
                break;
          }
 
-         finished = (this._envelopers.length === 0);
+         finished = this._noEnvelopers();
       }
 
       return this._pendingTokens.shift();
@@ -469,35 +473,20 @@ class XmlTokenStream {
             // to assume that the > is missing and report that, than to try to consume the whole
             // rest of the document as junk content.
             //
-            // [70] EntityDecl  ::= GEDecl | PEDecl
-            // [71] GEDecl      ::= '<!ENTITY' S Name S EntityDef S? '>'
-            // [72] PEDecl      ::= '<!ENTITY' S '%' S Name S PEDef S? '>'
-            // [73] EntityDef   ::= EntityValue | (ExternalID NDataDecl?)
-            // [74] PEDef       ::= EntityValue | ExternalID
-            // [76] NDataDecl   ::= S 'NDATA' S Name
-            //  [9] EntityValue ::= '"' ([^%&"] | PEReference | Reference)* '"' |
-            //                      "'" ([^%&'] | PEReference | Reference)* "'"
             case 'ENTITY':
-               let isParameter = false;
+               const parsedEntity = this._dtdParser.parseEntity(this._cursor);
+               const enNameText = parsedEntity.nameChunk ? parsedEntity.nameChunk.text : '';
                let notationDataName;
-               let entityName = this._cursor.getWord([ '>' ]);
-
-               if (!entityName) {
-                  entityName = { text: '' };
-                  this._reportSyntaxError(ERRORS.ENTITYDECL_NO_NAME);
-               } else if (entityName.text === '%') {
-                  isParameter = true;
-                  this._cursor.getSpace(); // either have space or >. no need to error if space not here
-                  entityName = this._cursor.getWord([ '>' ]);
-               }
-
-               const postEntityNameSpace = this._cursor.getSpace();
-               const valueQuote = this._cursor.peekChar();
                let entityExternalId;
                let value;
 
-               this._assertSyntax(postEntityNameSpace, ERRORS.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ entityName.text ]);
+               this._assertSyntax(parsedEntity.nameChunk, ERRORS.ENTITYDECL_NO_NAME);
+               this._assertSyntax((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
+                  ERRORS.ENTITYDECL_NAME_INVALID, [ enNameText ]);
+               this._assertSyntax(parsedEntity.postNameSpaceChunk,
+                  ERRORS.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
+               const valueQuote = this._cursor.peekChar();
                if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
                   this._cursor.getChar();     // consume the quote
                   value = this._getQuotedValue(valueQuote, { isEntityValue: true });
@@ -516,14 +505,14 @@ class XmlTokenStream {
                         this._cursor.getSpace(); // no need to check. either have space or no word next
                         const ndataName = this._cursor.getWord([ '>' ]);
 
-                        this._assertSyntax(preNDataSpace, ERRORS.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ entityName.text ]);
+                        this._assertSyntax(preNDataSpace, ERRORS.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
                         this._assertSyntax(ndataMarker.text === 'NDATA',
-                           ERRORS.ENTITYDECL_NDATA_INVALID_CASE, [ entityName.text, ndataMarker.text ]);
+                           ERRORS.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, ndataMarker.text ]);
 
                         if (ndataName) {
                            notationDataName = ndataName.text;
                         } else {
-                           this._reportSyntaxError(ERRORS.ENTITYDECL_NDATA_NO_NAME, [ entityName.text ]);
+                           this._reportSyntaxError(ERRORS.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
                         }
                      }
                   }
@@ -532,18 +521,16 @@ class XmlTokenStream {
                this._cursor.getSpace();
                const entityClosing = this._cursor.getMatch('>');
 
-               this._assertSyntax(value || entityExternalId, ERRORS.ENTITYDECL_NO_VALUE, [ entityName.text ]);
-               this._assertSyntax(entityName && (entityName.text === '' || entityName.couldBeName),
-                  ERRORS.ENTITYDECL_NAME_INVALID, [ entityName.text ]);
-               this._assertSyntax(entityClosing, ERRORS.ENTITYDECL_NO_CLOSE, [ entityName.text ]);
+               this._assertSyntax(value || entityExternalId, ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
+               this._assertSyntax(entityClosing, ERRORS.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
-               const entityToken = isParameter ?
-                  new ParameterEntityToken(entityName.text,
+               const entityToken = parsedEntity.isParameter ?
+                  new ParameterEntityToken(enNameText,
                      value,
                      entityExternalId.systemLiteral,
                      entityExternalId.pubidLiteral,
                      notationDataName) :
-                  new EntityToken(entityName.text,
+                  new EntityToken(enNameText,
                      value,
                      entityExternalId ? entityExternalId.systemLiteral : undefined,
                      entityExternalId ? entityExternalId.pubidLiteral : undefined,
@@ -554,10 +541,6 @@ class XmlTokenStream {
 
                this._pendingTokens.push(entityToken);
                return;
-            // [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
-            // [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
-            // [51] Mixed       ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*' |
-            //                      '(' S? '#PCDATA' S? ')'
             case 'ELEMENT':
                let contentText;
 
@@ -576,10 +559,10 @@ class XmlTokenStream {
                } else if (parsedEl.list) {
                   contentText = [];
 
-                  this._assertSyntax(parsedEl.missingNames === 0 || parsedEl.list.length === 0,
-                     ERRORS.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingNames, nameText ]);
-                  this._assertSyntax(parsedEl.missingOrs === 0 || parsedEl.list.length <= 1,
-                     ERRORS.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOrs, nameText ]);
+                  this._assertSyntax(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
+                     ERRORS.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
+                  this._assertSyntax(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
+                     ERRORS.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
                   this._assertSyntax(parsedEl.list.length > 0, ERRORS.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
 
                   for (let index = 0; index < parsedEl.list.length; index++) {
@@ -596,7 +579,7 @@ class XmlTokenStream {
                         contentText.push(item.text);
                      }
                   }
-                  this._assertSyntax(parsedEl.listCloseChunk, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
+                  this._assertSyntax(parsedEl.close, ERRORS.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                } else {
                   contentText = parsedEl.contentChunk.text;
                   const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();

@@ -36,6 +36,13 @@ x S 102 Rework token delivery so routines do not know where they are delivering 
 	set inDtd flag (make it a state, as we'll need it later)
 	report error if get a dtd type while not in dtd
 	report error if get a non dtd type while in a dtd
+√ 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
+√ Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
+√ cleanup: note bad things with getCharData in 100
+√ push and pop envelopers are slightly strange routines.
+√ is invalid context the right thing?
+? good to have something that checks a series of tokwns?
+√ a thing in tests which expects error in external subset
 
 Note: Bad process. Changed design with 104 and 105.  I think it is better, but 105 risks going over the end of the time.  Moving it to after the agreed to work. I'm ejecting 102.  I forget why I thought it was needed aside from doctype, so will re-address when the need becomes apparent again.
 
@@ -51,19 +58,12 @@ BLOG IDEAS
 - SVCC: how to set up karma etc.
 =============================================
 CLEANUP
-- cleanup: note bad things with getCharData in 100
-- push and pop envelopers are slightly strange routines.
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
-- is invalid context the right thing?
-- good to have something that checks a series of tokwns?
-- a thing in tests which expects error in external subset
 
 RESEARCH
 - should we be expanding character references in attribute defaults?
 
 BUILD
-97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
-Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
 58:L Build infrastructure for running xmlconf tests.
 60:XL Improve build output
 	- Goal: on a good build we don't need to show anything of the build

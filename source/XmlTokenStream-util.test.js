@@ -62,8 +62,29 @@ function expectSyntaxError(input, code, message, place, context) {
    }
 }
 
+function expectExternalSubsetSyntaxError(input, code, message, place, context) {
+   const strictS = makeStrictExternalSubsetStream(input);
+   const laxS = makeLaxExternalSubsetStream(input);
+
+   expect(() => {
+      strictS.getNext();
+   }).toThrowError(message);
+
+   const error = laxS.getNext();
+   expect(error).toBeSyntaxError(code);
+
+   if (place) {
+      expect(error.place).toEqual(place);
+   }
+
+   if (context) {
+      expect(error.context).toEqual(context);
+   }
+}
+
 module.exports = {
    expectSyntaxError,
+   expectExternalSubsetSyntaxError,
    ignoreError,
    ignoreToken,
    makeStrictStream,
