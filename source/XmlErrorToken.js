@@ -49,6 +49,8 @@ XmlErrorToken.ERROR = {
    XMLDECL_STANDALONE_INVALID_CASE: 'XMLDECL_STANDALONE_INVALID_CASE',
    XMLDECL_STANDALONE_INVALID_ORDER: 'XMLDECL_STANDALONE_INVALID_ORDER',
 
+   TEXTDECL_XTRA_STANDALONE: 'TEXTDECL_XTRA_STANDALONE',
+
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NAME_INVALID: 'PI_TARGET_NAME_INVALID',
    PI_NO_CLOSE: 'PI_NO_CLOSE',
@@ -190,8 +192,8 @@ const str = XmlErrorToken.STRING;
 //   THING(_SUBTHING)_PROBLEM = "THING must WHATEVER. Found OTHER"
 //   THING_NO_(whatever) = "Missing WHATEVER in a THING"
 //   THING_XTRA_... = "Must not ..."
-str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML Declaration.';
-str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" in an XML Declaration.';
+str[err.XMLDECL_NO_ATTRIBUTES] = 'Missing version in an XML or Text Declaration.';
+str[err.XMLDECL_NO_CLOSE] = 'Missing closing "?>" in an XML or Text Declaration.';
 str[err.XMLDECL_ATTR_INVALID_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_ATTR_UNKNOWN] = 'Unknown XML Declaration parameter "{0}".';
 str[err.XMLDECL_TARGET_INVALID_CASE] = '"xml" must be lower case. Found "{0}".';
@@ -202,6 +204,8 @@ str[err.XMLDECL_ENCODING_INVALID_ORDER] = '"encoding" must be after "version" an
 str[err.XMLDECL_STANDALONE_INVALID_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_STANDALONE_INVALID] = '"standalone" must be "yes" or "no". Found "{0}".';
 str[err.XMLDECL_STANDALONE_INVALID_ORDER] = '"standalone" must come after "version".';
+
+str[err.TEXTDECL_XTRA_STANDALONE] = '"standalone" must not be in a Text Declaration.';
 
 str[err.PI_SPACE_BEFORE_TARGET] = 'Must not have a space before the target name.';
 str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';

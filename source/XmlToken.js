@@ -59,6 +59,21 @@ class DeclarationToken extends XmlToken {
 
 }
 
+/**********************************************************************\
+ TextDeclarationToken is used to represent a TextDecl in an external
+ entity.
+\**********************************************************************/
+
+class TextDeclarationToken extends XmlToken {
+
+   constructor(params, chunks) {
+      super(XmlToken.TEXTDECL, undefined, chunks);
+
+      this.params = params;
+   }
+
+}
+
 class TagToken extends XmlToken {
 
    constructor(type, name, chunks) {
@@ -160,6 +175,7 @@ XmlToken.COMMENT = 'Comment';
 XmlToken.PI = 'ProcessingInstruction';
 
 XmlToken.XMLDECL = 'XmlDecl';
+XmlToken.TEXTDECL = 'TextDecl';
 XmlToken.DOCTYPE_START = 'DocTypeStart';
 XmlToken.DOCTYPE_END = 'DocTypeEnd';
 XmlToken.NOTATION_DECL = 'NotationDeclaration';
@@ -185,6 +201,7 @@ XmlToken.CommentToken = CommentToken;
 XmlToken.ProcessingInstructionToken = ProcessingInstructionToken;
 XmlToken.SpaceToken = SpaceToken;
 XmlToken.DeclarationToken = DeclarationToken;
+XmlToken.TextDeclarationToken = TextDeclarationToken;
 XmlToken.DocTypeStartToken = DocTypeStartToken;
 XmlToken.DocTypeEndToken = DocTypeEndToken;
 XmlToken.StartTagToken = StartTagToken;

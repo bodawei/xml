@@ -41,7 +41,7 @@ module.exports = function standardBuild(grunt) {
    if (/darwin/.test(process.platform)) {
       browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari' ];
    } else if (/^win/.test(process.platform)) {
-      browsers = [ 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS' ];
+      browsers = [ 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
    } else {
       grunt.fail.fatal('Unknown or unsupported platform. Please add support for it with a pull request.');
    }

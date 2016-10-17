@@ -3,50 +3,43 @@ In theory done: 1(1-3), 2.5, 2.6
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 	XL=10, L=5, M=3, S=1
-6/16 Sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
-6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
-7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
-7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
-7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint = 32 sprints. ACTUAL: 6 see Note5
-7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
-9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
-9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
-10/1 Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
-10/6 Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
-10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  Added a missing feature for recovering from doctype
+ 6/16 Sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
+ 6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
+ 7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
+ 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
+ 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint = 32 sprints. ACTUAL: 6 see Note5
+ 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
+ 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
+ 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
+10/1  Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
+10/6  Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
+10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  5 Note11
+10/16 Sprint 12: 121sp [7XL 10M 21S]. Average: 5 per sprint = 25 sprints. ACTUAL:  Got longer as entity work was bigger tahn 10 by a lot
 	#210 min
-x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
-√ S 99 add a TERMINATOR type to peekType in cursor
-	Needs to match ] or ]]>
-√ S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
-	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
-[1h 20min]
-√ S: 101 If matches end of DOCTYPE, switches to doctype finish
-	doctype then needs to store the token on the stack, and not allow others to flow out
-	Some provision for early cancel (what did I mean?)
-	- some whitespace in the internal dtd is showing up as a space token. but not all is. (probably all should show up. taht's easy)
-x S 102 Rework token delivery so routines do not know where they are delivering them
-	in general a token is created and pushed, and then routine adds chunks
-	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
-√ S 104 Provide an end of doctype token, and internal subset, if any, appears between them
-[2.5 hr?]  Lost a block of time there.
 
-√ S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
-	parser needs to know if doing an external dtd subset or not
-	set inDtd flag (make it a state, as we'll need it later)
-	report error if get a dtd type while not in dtd
-	report error if get a non dtd type while in a dtd
-√ 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
-√ Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
-√ cleanup: note bad things with getCharData in 100
-√ push and pop envelopers are slightly strange routines.
-√ is invalid context the right thing?
-? good to have something that checks a series of tokwns?
-√ a thing in tests which expects error in external subset
+x25:XL read external entities -- need for xmlconf
 
-Note: Bad process. Changed design with 104 and 105.  I think it is better, but 105 risks going over the end of the time.  Moving it to after the agreed to work. I'm ejecting 102.  I forget why I thought it was needed aside from doctype, so will re-address when the need becomes apparent again.
+S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
+	- standlone is not allowed
+	- version is optional
 
--- next: 107
+M 109 Set up state for external entities both regular and extSubset, so they barf if no TextDecl (this will break some tests)
+	Transition is START -> EXTERNAL_CONTENT or START -> IN_DTD
+		Declaration tests will need to go through start, now
+			Errors should be modified so that if in START, we get a better error.
+		Comments, PI, etc should barf if in START
+	Realistically, we can do 13 and 106 in the process, since we will have to touch everything.
+
+S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
+	StringCursor can take a url (will create anExternalId structure) or a resolved externalId structure.
+		- can we wrap up the call to get pwd?
+	An externalId structure can be resolved if it is the root, or if .resolve(resolvedExtId)
+		Seems like parser should attach the externalId from the chunk that gave < to the parse structure
+		Final tokens need to have the resolved structure
+	
+
+
+-- next: 112
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -94,14 +87,15 @@ BUILD
 	Commit should do a test run and add report to comment.
 		- include a time with percent change from previous commit
 	git hooks should validate checkin comment has bug number and is the right format.
+111: Get Vivaldi to work
 41:XL:Investigate Gulp
 
 PROJECT
 --- technical debt [5m 13s]
 73:S: If error is thrown, we can still call getNextToken.  Should block that.
+13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
 106:S Finish out of context error reporting for: references, comments, element start, processing instruction, cdata, xmldecl
 58:S: Remove data prop on token, and make all token types more explicit
-13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
 	in the process, might be good to give these numeric codes.
@@ -134,6 +128,7 @@ ideas
 - Should extract all the declaration stuff into another file
 - restructure so routines do not automatically put into pendingTokens. Caller should decide.
 - Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
+- would be nice to have a param system so we could specificy explicitly whether XMLDECL_NO_ATTRIBUTES is an xml or text declaration
 
 --- Basic processing  [1M 3S]
 71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
@@ -142,9 +137,35 @@ ideas
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [4XL]
-25:XL read external entities -- need for xmlconf
-	including header
+--- DTD [3XL 3M 2S]
+S 108 Add a pluggable entity retriever that must be passed in
+	getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
+	Right now just fake delivers content using setTimeout
+	- does babel provide us with a Promise, or do we need to build our own?
+
+M 112: Browser entity retriever. For now must be sync to get a string cursor
+	Does an XMLHttpRequest (Can we in IE?)
+	http://jasmine.github.io/2.0/ajax.html
+		doesn't do async.  Doesn't do timeouts.  So, you'll end up layering more on top
+
+M 113: Node entity retriever. For now must be sync to get a string cursor. but testing can test both
+	use https://github.com/node-nock/nock
+
+S 114 Basic EntityHandler 
+	This is a wrapper around the main parser (should be async in style)
+		getNext():Promise
+			- need EndOfEntity token, or promise resolves with nothing.
+	Main parser should stop filling in references in getRererence
+	When it encounters an entity reference, will retrieve it from the entity manager and fill it in
+		in terms of async, it may have to wait for that to be retrieved and parse.
+
+M 115 Advanced EntityHandler
+	When it encounters: DOCTYPE or entityDecl with an externalID Sets up info in EntityManager
+	EntityManager should be set up to be either greedy or JIT
+		if greedy fetches all immediately
+		if JIT waits until a request and then fetches
+	returns a stream
+		This will be a dummy stream if we have already retrieve the whole thing.
 21:XL Read element content structure
 24:XL read conditional sections
 	- need to deal with possibly closing the conditional if the end of the internal subset is found
@@ -662,3 +683,40 @@ Note 10
 This was OK.  We went over schedule some.  here, again, #94 was much more complex than given credit for.  We might have been fine on time except we decied to change getListItems partway through this, which probably took up the 20 minutes we went over schedule.
 Again what killed 94 was all the errors that can happen.  And it is worse than it looks because the resulting code is rather nasty, and may not be sufficiently tested.
 I think the goal for 9, originally, was to convert everything to using the new errors. instead we just did a proof of concept with comments and some processing instructions. I'm ok with that because as I looked at the impact, I realized it really is asking for things to be reorganized (separating parsing from error checking). In this regard, we went grossly over schedule, because 94 was quite big.
+
+
+Sprint 11
+=========
+x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
+√ S 99 add a TERMINATOR type to peekType in cursor
+	Needs to match ] or ]]>
+√ S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
+	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
+[1h 20min]
+√ S: 101 If matches end of DOCTYPE, switches to doctype finish
+	doctype then needs to store the token on the stack, and not allow others to flow out
+	Some provision for early cancel (what did I mean?)
+	- some whitespace in the internal dtd is showing up as a space token. but not all is. (probably all should show up. taht's easy)
+x S 102 Rework token delivery so routines do not know where they are delivering them
+	in general a token is created and pushed, and then routine adds chunks
+	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
+√ S 104 Provide an end of doctype token, and internal subset, if any, appears between them
+[2.5 hr?]  Lost a block of time there.
+
+√ S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
+	parser needs to know if doing an external dtd subset or not
+	set inDtd flag (make it a state, as we'll need it later)
+	report error if get a dtd type while not in dtd
+	report error if get a non dtd type while in a dtd
+√ 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
+√ Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
+√ cleanup: note bad things with getCharData in 100
+√ push and pop envelopers are slightly strange routines.
+√ is invalid context the right thing?
+? good to have something that checks a series of tokwns?
+√ a thing in tests which expects error in external subset
+
+Note11
+This sprint went OK.  I changed a design direction in the middle, REalized that rather than going with the plan of embedding the internal subset into the doctype token (and by implication the same process for the forthcoming conditional section), I could just make the doctype token a start and end thing with the internal subset between.  This killed 102 and added 104 and 105 (the latter was too big to fit in the sprint).
+I lost some time in the middle of the sprint, so am not 100% sure I did this in time, but I think so.
+Nicely, the cleanup process addressed all the egregious stuff encountered quickly, and so went back to doing some work to help continuing to extract  stuff out of XmlTokenStream. And the build process cleanup 97 went faster than I expected, allowing me to also fix a problem I'd inadvertantly introduced with the addition of karma-edge-launcher on the mac.

@@ -16,9 +16,11 @@ const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
 const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeLaxExternalSubsetStream;
 const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
+const makeStrictExternalEntityStream = require('./XmlTokenStream-util.test.js').makeStrictExternalEntityStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
+const ENTITY_TYPE = require('./XmlTokenStream-util.test.js').ENTITY_TYPES;
 
 describe('XmlTokenStream', () => {
 
@@ -931,7 +933,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if no parameters are included', () => {
          expectSyntaxError('<?xml ?>',
             XmlErrorToken.ERROR.XMLDECL_NO_ATTRIBUTES,
-            'Missing version in an XML Declaration.');
+            'Missing version in an XML or Text Declaration.');
       });
 
       it('throws an error if an unknown parameter is provided', () => {
@@ -945,7 +947,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if the close is missing', () => {
          expectSyntaxError('<?xml version="1.0"',
             XmlErrorToken.ERROR.XMLDECL_NO_CLOSE,
-            'Missing closing "?>" in an XML Declaration.');
+            'Missing closing "?>" in an XML or Text Declaration.');
       });
 
       it('retrieves the expected chunks', () => {
@@ -1099,6 +1101,45 @@ describe('XmlTokenStream', () => {
                '"no" must be lower case. Found "NO".');
          });
 
+      });
+
+   });
+
+   describe('parsing TextDecl', () => {
+
+      it('can get a syntactically correct one', () => {
+         const s = makeStrictExternalEntityStream('<?xml version="1.1" encoding="usascii"?>');
+
+         const t = s.getNext();
+         expect(t.type).toEqual(XmlToken.TEXTDECL);
+      });
+
+      it('retrieves the number of parameters in the declaration', () => {
+         const s = makeStrictExternalEntityStream('<?xml version="1.1" encoding="usascii"?>');
+
+         const t = s.getNext();
+         expect(t.params.length).toEqual(2);
+      });
+
+      it('retrieves parameters in order', () => {
+         const s = makeStrictExternalEntityStream('<?xml version="1.1" encoding="usascii"?>');
+
+         const t = s.getNext();
+         compareXmlDeclAttribute(t.params[0], 'version', '1.1');
+         compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii');
+      });
+
+      it('understands no version', () => {
+         const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>');
+
+         expect(s.getNext().type).toEqual(XmlToken.TEXTDECL);
+      });
+
+      it('throws an error if a standalone value is present', () => {
+         expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+            '<?xml version="1.1" standalone="NO" ?>',
+            XmlErrorToken.ERROR.TEXTDECL_XTRA_STANDALONE,
+            '"standalone" must not be in a Text Declaration.');
       });
 
    });

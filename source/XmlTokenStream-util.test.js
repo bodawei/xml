@@ -8,6 +8,18 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
+const ENTITY_TYPES = {
+   DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
+   EXTERNAL_ENTITY: 'EXTERNAL_ENTITY',
+   EXTERNAL_SUBSET: 'EXTERNAL_SUBSET'
+};
+
+const ENTITY_TYPES_ARRAY = [
+   ENTITY_TYPES.DOCUMENT_ENTITY,
+   ENTITY_TYPES.EXTERNAL_ENTITY,
+   ENTITY_TYPES.EXTERNAL_SUBSET
+];
+
 function makeLaxStream(str, options = {}) {
    options.lax = true;
    return makeStream(str, new XmlEntityManager(), options);
@@ -28,6 +40,17 @@ function makeStrictExternalSubsetStream(str, options = {}) {
    return makeStream(str, new XmlEntityManager(), options);
 }
 
+function makeLaxExternalEntityStream(str, options = {}) {
+   options.lax = true;
+   options.entityType = 'EXTERNAL_ENTITY';
+   return makeStream(str, new XmlEntityManager(), options);
+}
+
+function makeStrictExternalEntityStream(str, options = {}) {
+   options.entityType = 'EXTERNAL_ENTITY';
+   return makeStream(str, new XmlEntityManager(), options);
+}
+
 function makeStream(str, entityManager, options) {
    return new XmlTokenStream(new XmlStringCursor(str), entityManager, options);
 }
@@ -42,9 +65,33 @@ function ignoreToken(stream, tokenType) {
    expect(token.type).toEqual(tokenType);
 }
 
-function expectSyntaxError(input, code, message, place, context) {
-   const strictS = makeStrictStream(input);
-   const laxS = makeLaxStream(input);
+function expectSyntaxError(entityType, input, code, message, place, context) {
+   if (ENTITY_TYPES_ARRAY.indexOf(entityType) === -1) {
+      context = place;
+      place = message;
+      message = code;
+      code = input;
+      input = entityType;
+      entityType = ENTITY_TYPES.DOCUMENT_ENTITY;
+   }
+
+   let strictS;
+   let laxS;
+
+   switch (entityType) {
+      case ENTITY_TYPES.DOCUMENT_ENTITY:
+         strictS = makeStrictStream(input);
+         laxS = makeLaxStream(input);
+         break;
+      case ENTITY_TYPES.EXTERNAL_ENTITY:
+         strictS = makeStrictExternalEntityStream(input);
+         laxS = makeLaxExternalEntityStream(input);
+         break;
+      case ENTITY_TYPES.EXTERNAL_SUBSET:
+         strictS = makeStrictExternalSubsetStream(input);
+         laxS = makeLaxExternalSubsetStream(input);
+         break;
+   }
 
    expect(() => {
       strictS.getNext();
@@ -90,5 +137,8 @@ module.exports = {
    makeStrictStream,
    makeLaxStream,
    makeLaxExternalSubsetStream,
-   makeStrictExternalSubsetStream
+   makeStrictExternalSubsetStream,
+   makeLaxExternalEntityStream,
+   makeStrictExternalEntityStream,
+   ENTITY_TYPES
 };

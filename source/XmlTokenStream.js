@@ -12,6 +12,7 @@ const CommentToken = XmlToken.CommentToken;
 const ProcessingInstructionToken = XmlToken.ProcessingInstructionToken;
 const SpaceToken = XmlToken.SpaceToken;
 const DeclarationToken = XmlToken.DeclarationToken;
+const TextDeclarationToken = XmlToken.TextDeclarationToken;
 const StartTagToken = XmlToken.StartTagToken;
 const TagToken = XmlToken.TagToken;
 const DocTypeStartToken = XmlToken.DocTypeStartToken;
@@ -44,6 +45,12 @@ const ENTITY_TYPE = {
 const STATE = {
    NORMAL: 'NORMAL',
    IN_DTD: 'IN_DTD'
+};
+
+const XML_DECL_PARAMS = {
+   version: 'version',
+   encoding: 'encoding',
+   standalone: 'standalone'
 };
 
 function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
@@ -950,7 +957,7 @@ class XmlTokenStream {
       if (target && target.text.toLocaleLowerCase() === 'xml') {
          this._assertSyntax(target.text === 'xml', ERRORS.XMLDECL_TARGET_INVALID_CASE, [ target.text ],
             space || start, start);
-         this._getXmlDecl();
+         this._getXmlDecl(start);
       } else {
          const optSpace = this._cursor.getSpace();   // optional space
          const results = this._cursor.getToTerminator([ '?>' ]);
@@ -972,6 +979,7 @@ class XmlTokenStream {
     _getXmlDecl parses an XML Declaration which has the following format:
 
       [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
+      [77] TextDecl     ::= '<?xml' VersionInfo? EncodingDecl S? '?>'
       [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
                             '"' VersionNum '"')
       [25] Eq           ::= S? '=' S?
@@ -989,6 +997,7 @@ class XmlTokenStream {
    _getXmlDecl() {
       const params = this._getAttributes(false);
       const close = this._cursor.getMatch('?>');
+      const isXmlDecl = this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY;
       let seenVersion = false;
       let seenStandalone = false;
 
@@ -1000,27 +1009,34 @@ class XmlTokenStream {
          const param = params[index];
          const lcName = param.name.toLocaleLowerCase();
 
+         if (XML_DECL_PARAMS[lcName]) {
+            this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
+         }
+
          switch (lcName) {
             case 'version':
                seenVersion = true;
                this._assertSyntax(index === 0, ERRORS.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
-               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
                this._assertSyntax(param.value === '1.1' || param.value === '1.0',
                   ERRORS.XMLDECL_VERSION_INVALD, [ param.value ]);
                break;
             case 'encoding':
-               this._assertSyntax(seenVersion && !seenStandalone, ERRORS.XMLDECL_ENCODING_INVALID_ORDER);
-               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
+               if (isXmlDecl) {
+                  this._assertSyntax(seenVersion && !seenStandalone, ERRORS.XMLDECL_ENCODING_INVALID_ORDER);
+               }
                this._assertSyntax(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
                   ERRORS.XMLDECL_ENCODING_INVALID, [ param.value ]);
                break;
             case 'standalone':
+               if (!isXmlDecl) {
+                  this._reportSyntaxError(ERRORS.TEXTDECL_XTRA_STANDALONE);
+               }
+
                const lcValue = param.value.toLocaleLowerCase();
 
                seenStandalone = true;
 
                this._assertSyntax(seenVersion, ERRORS.XMLDECL_STANDALONE_INVALID_ORDER);
-               this._assertSyntax(param.name === lcName, ERRORS.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
                this._assertSyntax(param.value === lcValue,
                   ERRORS.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, param.value ]);
 
@@ -1035,7 +1051,9 @@ class XmlTokenStream {
          }
       }
 
-      this._pendingTokens.push(new DeclarationToken(params, this._cursor.getRecentChunks()));
+      this._pendingTokens.push(isXmlDecl ?
+         new DeclarationToken(params, this._cursor.getRecentChunks()) :
+         new TextDeclarationToken(params, this._cursor.getRecentChunks()));
    }
 
    /*
