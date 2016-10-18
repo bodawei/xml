@@ -70,10 +70,26 @@ BUILD
 	61:M: Build a reporter for coverage which just reports the final summaries
 		√ NS: Need documentation for coverage reporter plugins
 			see /Users/bodawei/active/電/xml/node_modules/istanbul/lib/report/index.js
-		- Put a dummy reporter in that matches the api. Give it some config params in karma config
+		√ Put a dummy reporter in that matches the api. Give it some config params in karma config
 			then emulate text.js and see if it can access the param and write "foo" to disk
-		- Figure out how to abstract the summaries and report 'PhantomJS coverage: 100%"
-		- Figure out how to configure this for jasmine in node
+		√ Figure out how to abstract the summaries and report 'PhantomJS coverage: 100%"
+		√ Figure out how to configure this for jasmine in node
+		We can extract stuff from the json output from the coverage runner. See coverageSummary.js
+			- this is miles and miles easier than trying to write a reporter
+		Modify coverage reporter so it
+			https://nodejs.org/api/fs.html#fs_fs_stat_path_callback
+			- Identifies node output as distinguished from browsers
+			- writes out a final summary file like:
+				100% coverage for Chrome 34, node 6.2.1, Safari 123
+			- returns a pass or fail indicator
+			- would be good if it was async.
+		Find a way to run this from grunt
+			https://www.npmjs.com/package/grunt-run
+			https://www.npmjs.com/package/grunt-execute
+			https://github.com/sindresorhus/grunt-shell
+			We should invoke this, fail the build if it fails
+				http://gruntjs.com/api/grunt.fail
+			We should write summary line out
 		- Build should fail if not 100%
 	59:M: Build a reporter for karma which dumps testing results to a file
 		- this is in prep for adding this info to the checkin

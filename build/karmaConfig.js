@@ -51,6 +51,8 @@ module.exports = function karmaConfig(config) {
       coverageReporter: {
          dir : OUT_DIR + 'testCoverage/',
          reporters: [
+            { type: 'json', file: 'coverage.json' },
+            { type: 'json-summary', file: 'coverage-summary.json' },
             { type: 'html', subdir: 'report-html' },
             { type: 'text', subdir: '.', file: 'text.txt' }
          ]

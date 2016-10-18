@@ -76,6 +76,7 @@ module.exports = function standardBuild(grunt) {
                   excludes: [ '**/*.test.js' ],
                   report: [
                      'lcov',
+                     'json-summary',
                      'text' // or text-summary
                   ],
                   collect: [
