@@ -19,16 +19,33 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 
 x25:XL read external entities -- need for xmlconf
 
-S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
+√ S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
 	- standlone is not allowed
 	- version is optional
-
+[45min]
 M 109 Set up state for external entities both regular and extSubset, so they barf if no TextDecl (this will break some tests)
 	Transition is START -> EXTERNAL_CONTENT or START -> IN_DTD
 		Declaration tests will need to go through start, now
 			Errors should be modified so that if in START, we get a better error.
 		Comments, PI, etc should barf if in START
 	Realistically, we can do 13 and 106 in the process, since we will have to touch everything.
+		√ chardata (finish up)
+		√ char references ???
+		√ entity references
+		√CDATA
+		√comments
+		√ processing instructions
+		√ xmldecl
+		√ textdecl
+		√ start
+		√ empty
+		√ end
+		√ doctype
+		√ notation
+		√ entity
+		√ element
+		√ attlist
+[190min]
 
 S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
 	StringCursor can take a url (will create anExternalId structure) or a resolved externalId structure.
@@ -38,7 +55,9 @@ S 110 Need to associate an externalId with all entities and pass on to the curso
 		Final tokens need to have the resolved structure
 	
 
-
+- This parses badly
+	<?xml version="1.0"><!DOCTYPE one
+- no opening element gives weird error
 -- next: 112
 =============================================
 BLOG IDEAS

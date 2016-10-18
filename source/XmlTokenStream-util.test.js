@@ -129,9 +129,15 @@ function expectExternalSubsetSyntaxError(input, code, message, place, context) {
    }
 }
 
+function expectTokenType(stream, type) {
+   const t = stream.getNext();
+   expect(t.type).toEqual(type);
+}
+
 module.exports = {
    expectSyntaxError,
    expectExternalSubsetSyntaxError,
+   expectTokenType,
    ignoreError,
    ignoreToken,
    makeStrictStream,

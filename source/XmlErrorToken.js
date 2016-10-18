@@ -48,16 +48,20 @@ XmlErrorToken.ERROR = {
    XMLDECL_STANDALONE_INVALID: 'XMLDECL_STANDALONE_INVALID',
    XMLDECL_STANDALONE_INVALID_CASE: 'XMLDECL_STANDALONE_INVALID_CASE',
    XMLDECL_STANDALONE_INVALID_ORDER: 'XMLDECL_STANDALONE_INVALID_ORDER',
+   XMLDECL_INVALID_CONTEXT: 'XMLDECL_INVALID_CONTEXT',
 
    TEXTDECL_XTRA_STANDALONE: 'TEXTDECL_XTRA_STANDALONE',
+   TEXTDECL_NO_ENCODING: 'TEXTDECL_NO_ENCODING',
 
    PI_SPACE_BEFORE_TARGET: 'PI_SPACE_BEFORE_TARGET',
    PI_TARGET_NAME_INVALID: 'PI_TARGET_NAME_INVALID',
    PI_NO_CLOSE: 'PI_NO_CLOSE',
    PI_NO_TARGET: 'PI_NO_TARGET',
+   PI_INVALID_CONTEXT: 'PI_INVALID_CONTEXT',
 
    COMMENT_NO_CLOSE: 'COMMENT_NO_CLOSE',
    COMMENT_ENDS_WITH_HYPHEN: 'COMMENT_ENDS_WITH_HYPHEN',
+   COMMENT_INVALID_CONTEXT: 'COMMENT_INVALID_CONTEXT',
 
    ELEMENT_UNBALANCED: 'ELEMENT_UNBALANCED',
    ELEMENT_XTRA_LEADING_SPACE: 'ELEMENT_XTRA_LEADING_SPACE',
@@ -66,6 +70,8 @@ XmlErrorToken.ERROR = {
    ELEMENT_NO_CLOSE: 'ELEMENT_NO_CLOSE',
    ELEMENT_BAD_CLOSE: 'ELEMENT_BAD_CLOSE',
    ELEMENT_END_INVALID_CLOSE: 'ELEMENT_END_INVALID_CLOSE',
+   ELEMENT_INVALID_DOC_CONTEXT: 'ELEMENT_INVALID_DOC_CONTEXT',
+   ELEMENT_INVALID_DTD_CONTEXT: 'ELEMENT_INVALID_DTD_CONTEXT',
 
    ATTRIBUTE_INVALID_NAME: 'ATTRIBUTE_INVALID_NAME',
    ATTRIBUTE_NO_SPACE_BEFORE_NAME: 'ATTRIBUTE_NO_SPACE_BEFORE_NAME',
@@ -75,18 +81,25 @@ XmlErrorToken.ERROR = {
    ATTRIBUTE_NO_CLOSE_QUOTE: 'ATTRIBUTE_NO_CLOSE_QUOTE',
    ATTRIBUTE_INVALID_VALUE: 'ATTRIBUTE_INVALID_VALUE',
 
+   SPACE_INVALID_CONTEXT: 'SPACE_INVALID_CONTEXT',
+
    CHARDATA_INVALID_TEXT: 'CHARDATA_INVALID_TEXT',
-   CHARDATA_INVALID_CONTEXT: 'CHARDATA_INVALID_CONTEXT',
+   CHARDATA_INVALID_SUBSET_CONTEXT: 'CHARDATA_INVALID_SUBSET_CONTEXT',
+   CHARDATA_INVALID_DOC_CONTEXT: 'CHARDATA_INVALID_DOC_CONTEXT',
 
    CDATA_NO_CLOSE: 'CDATA_NO_CLOSE',
    CDATA_XTRA_SPACE_BEFORE: 'CDATA_XTRA_SPACE_BEFORE',
    CDATA_XTRA_SPACE_AFTER: 'CDATA_XTRA_SPACE_AFTER',
    CDATA_INVALID_CASE: 'CDATA_INVALID_CASE',
+   CDATA_INVALID_SUBSET_CONTEXT: 'CDATA_INVALID_SUBSET_CONTEXT',
+   CDATA_INVALID_DOC_CONTEXT: 'CDATA_INVALID_DOC_CONTEXT',
 
    REFERENCE_NO_NAME: 'REFERENCE_NO_NAME',
    REFERENCE_NO_SEMICOLON: 'REFERENCE_NO_SEMICOLON',
    REFERENCE_XTRA_SPACE: 'REFERENCE_XTRA_SPACE',
    REFERENCE_XTRA_TRAILING_SPACE: 'REFERENCE_XTRA_TRAILING_SPACE',
+   REFERENCE_INVALID_SUBSET_CONTEXT: 'REFERENCE_INVALID_SUBSET_CONTEXT',
+   REFERENCE_INVALID_DOC_CONTEXT: 'REFERENCE_INVALID_DOC_CONTEXT',
 
    CHARREF_XTRA_SPACE: 'CHARREF_XTRA_SPACE',
    CHARREF_INVALID_HEX_CASE: 'CHARREF_INVALID_HEX_CASE',
@@ -95,6 +108,8 @@ XmlErrorToken.ERROR = {
    CHARREF_XTRA_SPACE_AFTER_DIGITS: 'CHARREF_XTRA_SPACE_AFTER_DIGITS',
    CHARREF_NO_SEMICOLON: 'CHARREF_NO_SEMICOLON',
    CHARREF_INVALID_BASE: 'CHARREF_INVALID_BASE',
+   CHARREF_INVALID_SUBSET_CONTEXT: 'CHARREF_INVALID_SUBSET_CONTEXT',
+   CHARREF_INVALID_DOC_CONTEXT: 'CHARREF_INVALID_DOC_CONTEXT',
 
    BANGITEM_UNKNOWN: 'BANGITEM_UNKNOWN',
    BANGITEM_NAME_XTRA_SPACE_BEFORE: 'BANGITEM_NAME_XTRA_SPACE_BEFORE',
@@ -110,7 +125,8 @@ XmlErrorToken.ERROR = {
    DOCTYPE_NO_NAME: 'DOCTYPE_NO_NAME',
    DOCTYPE_NAME_INVALID: 'DOCTYPE_NAME_INVALID',
    DOCTYPE_NO_CLOSE: 'DOCTYPE_NO_CLOSE',
-   DOCTYPE_INVALID_CONTEXT: 'DOCTYPE_INVALID_CONTEXT',
+   DOCTYPE_INVALID_DOC_CONTEXT: 'DOCTYPE_INVALID_DOC_CONTEXT',
+   DOCTYPE_INVALID_EXTERNAL_CONTEXT: 'DOCTYPE_INVALID_EXTERNAL_CONTEXT',
 
    ENTITYDECL_NO_NAME: '.ENTITYDECL_NO_NAME',
    EXTERNALID_INVALID_CASE: 'EXTERNALID_INVALID_CASE',
@@ -204,16 +220,20 @@ str[err.XMLDECL_ENCODING_INVALID_ORDER] = '"encoding" must be after "version" an
 str[err.XMLDECL_STANDALONE_INVALID_CASE] = '"{0}" must be lower case. Found "{1}".';
 str[err.XMLDECL_STANDALONE_INVALID] = '"standalone" must be "yes" or "no". Found "{0}".';
 str[err.XMLDECL_STANDALONE_INVALID_ORDER] = '"standalone" must come after "version".';
+str[err.XMLDECL_INVALID_CONTEXT] = 'An XML or Text Declaration must be the first thing in the entity.';
 
 str[err.TEXTDECL_XTRA_STANDALONE] = '"standalone" must not be in a Text Declaration.';
+str[err.TEXTDECL_NO_ENCODING] = '"encoding" must be in a Text Declaration.';
 
 str[err.PI_SPACE_BEFORE_TARGET] = 'Must not have a space before the target name.';
 str[err.PI_NO_TARGET] = 'Missing target name in a processing instruction.';
 str[err.PI_TARGET_NAME_INVALID] = 'The target name must match the syntax for names. Found: "{0}".';
 str[err.PI_NO_CLOSE] = 'Missing closing ?> in a processing instruction.';
+str[err.PI_INVALID_CONTEXT] = 'A processing instruction must not be the first thing in the document entity.';
 
 str[err.COMMENT_NO_CLOSE] = 'Missing closing --> in a comment.';
 str[err.COMMENT_ENDS_WITH_HYPHEN] = 'Must not have a hyphen at end of a comment.';
+str[err.COMMENT_INVALID_CONTEXT] = 'A comment must not be the first thing in the document entity.';
 
 str[err.ELEMENT_UNBALANCED] = 'Expected end tag "{0}". Found "{1}".';
 str[err.ELEMENT_XTRA_LEADING_SPACE] = 'Must not have space after opening "<" of an element tag.';
@@ -221,6 +241,8 @@ str[err.ELEMENT_NO_NAME] = 'Missing name in element tag.';
 str[err.ELEMENT_NAME_INVALID] = 'The element tag name must match the syntax for names. Found: "{0}".';
 str[err.ELEMENT_NO_CLOSE] = 'Missing closing of element tag.';
 str[err.ELEMENT_END_INVALID_CLOSE] = 'End element tag must close with ">". Found "/>".';
+str[err.ELEMENT_INVALID_DOC_CONTEXT] = 'An element must not be before the Xml Declaration. Found "{0}".';
+str[err.ELEMENT_INVALID_DTD_CONTEXT] = 'An element must not be in the internal or external subset. Found "{0}".';
 
 str[err.ATTRIBUTE_INVALID_NAME] = 'The attribute name must match the syntax for names. Found: "{0}".';
 str[err.ATTRIBUTE_NO_SPACE_BEFORE_NAME] = '"{0}" must have a space before it.';
@@ -230,18 +252,24 @@ str[err.ATTRIBUTE_NO_QUOTE] = 'The value for "{0}" must be quoted.';
 str[err.ATTRIBUTE_NO_CLOSE_QUOTE] = 'The value for "{0}" must close with a quote.';
 str[err.ATTRIBUTE_INVALID_VALUE] = 'The value of attribute "{0}" must not contain "<".';
 
+str[err.SPACE_INVALID_CONTEXT] = 'The XML Declaration must appear before any content in the document entity.';
 str[err.CHARDATA_INVALID_TEXT] = '"]]>" must not appear in in character data.';
-str[err.CHARDATA_INVALID_CONTEXT] = 'CharData must not be included in the internal or external subset.';
+str[err.CHARDATA_INVALID_SUBSET_CONTEXT] = 'CharData must not be in the external subset. Found "{0}".';
+str[err.CHARDATA_INVALID_DOC_CONTEXT] = 'CharData must not be outside the content of the document entity. Found "{0}".';
 
 str[err.CDATA_INVALID_CASE] = '"CDATA" must be capitalized. Found "{0}".';
 str[err.CDATA_XTRA_SPACE_BEFORE] = 'Must not have space before CDATA.';
 str[err.CDATA_XTRA_SPACE_AFTER] = 'Must not have space after CDATA.';
 str[err.CDATA_NO_CLOSE] = 'Missing closing "]]>" in CDATA section.';
+str[err.CDATA_INVALID_SUBSET_CONTEXT] = 'A CDATA must not be in the external subset.';
+str[err.CDATA_INVALID_DOC_CONTEXT] = 'A CDATA must not be outside the content of the document entity.';
 
 str[err.REFERENCE_NO_NAME] = 'Missing name in entity reference.';
 str[err.REFERENCE_NO_SEMICOLON] = 'Missing semicolon after entity reference "{0}".';
 str[err.REFERENCE_XTRA_SPACE] = 'Must not have space in an entity reference.';
 str[err.REFERENCE_XTRA_TRAILING_SPACE] = 'Must not have a space after the entity reference "{0}".';
+str[err.REFERENCE_INVALID_SUBSET_CONTEXT] = 'An entity reference must not be in the external subset.';
+str[err.REFERENCE_INVALID_DOC_CONTEXT] = 'An entity reference must not be outside the content of the document entity.';
 
 str[err.CHARREF_XTRA_SPACE] = 'Must not have a space after the "#" in a character reference.';
 str[err.CHARREF_INVALID_HEX_CASE] = '"x" in a hexadecimal character reference must be lower case.';
@@ -250,6 +278,8 @@ str[err.CHARREF_NO_DIGITS] = 'Missing digits in a character reference.';
 str[err.CHARREF_XTRA_SPACE_AFTER_DIGITS] = 'Must not have spaces after digits in a character reference.';
 str[err.CHARREF_NO_SEMICOLON] = 'Must have a ";" after a character reference.';
 str[err.CHARREF_INVALID_BASE] = 'A decimal character reference must not contain hex digits. Found "{0}".';
+str[err.CHARREF_INVALID_SUBSET_CONTEXT] = 'A character reference must not be in the external subset.';
+str[err.CHARREF_INVALID_DOC_CONTEXT] = 'A character reference must not be outside the content of the document entity.';
 
 str[err.BANGITEM_UNKNOWN] = 'Unkown "<!" item.';
 str[err.BANGITEM_NAME_XTRA_SPACE_BEFORE] = 'Must not have space before the name in a "<!" item.';
@@ -265,7 +295,8 @@ str[err.BRACKETITEM_NO_NAME] = 'Missing name in a "<![" item.';
 str[err.DOCTYPE_NO_NAME] = 'Missing name for the document type.';
 str[err.DOCTYPE_NAME_INVALID] = 'The document type name must match the syntax for names. Found: "{0}".';
 str[err.DOCTYPE_NO_CLOSE] = 'Missing closing ">" for in the document type.';
-str[err.DOCTYPE_INVALID_CONTEXT] = 'A doctype must not be declared inside of the internal or external subset.';
+str[err.DOCTYPE_INVALID_DOC_CONTEXT] = 'A DOCTYPE must be declared once between the XML Declaration and the content.';
+str[err.DOCTYPE_INVALID_EXTERNAL_CONTEXT] = 'A DOCTYPE must not be declared in an external entity.';
 
 str[err.ENTITYDECL_NO_NAME] = 'Missing name for an entity declaration.';
 str[err.ENTITYDECL_NAME_INVALID] = 'The entity name must match the syntax for names. Found: "{0}".';

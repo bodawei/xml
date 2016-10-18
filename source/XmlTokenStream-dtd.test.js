@@ -12,36 +12,42 @@ const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
 const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeLaxExternalSubsetStream;
 const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
+const makeLaxExternalEntityStream = require('./XmlTokenStream-util.test.js').makeLaxExternalEntityStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
+const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
+const ENTITY_TYPE = require('./XmlTokenStream-util.test.js').ENTITY_TYPES;
 
 describe('XmlTokenStream (dtd)', () => {
 
    describe('parsing DOCTYPE', () => {
 
       it('retrieves a token of type DOCTYPE', () => {
-         const s = makeStrictStream('<!DOCTYPE one >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE one >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.DOCTYPE_START);
+         expectTokenType(s, XmlToken.DOCTYPE_START);
       });
 
       it('retrieves the name of the doctype', () => {
-         const s = makeStrictStream('<!DOCTYPE testType >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(s.getNext().name).toEqual('testType');
       });
 
       it('retrieves an empty internal subset if there is none specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_START);
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_END);
       });
 
       it('retrieves an empty internal subset if an empty one is specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_START);
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
@@ -49,7 +55,8 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves an a simple internal subset', () => {
-         const s = makeStrictStream('<!DOCTYPE testType [ <!ENTITY test "one"> ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_START);
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
@@ -59,15 +66,21 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('does not cause problems if a close appears when none expected', () => {
-         const s = makeStrictStream(']');
+         const s = makeLaxStream('<?xml version="1.0"?>]');
+         ignoreToken(s, XmlToken.XMLDECL);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_DOC_CONTEXT);
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.CHARDATA);
-         expect(t.data).toEqual(']');
+         expect(t).toEqualProps({
+            type: XmlToken.CHARDATA,
+            data: ']'
+         });
       });
 
       it('parses the end of the DOCTYPE element when there is an internal subset', () => {
-         const s = makeStrictStream('<!DOCTYPE testType [ <!ENTITY test "one"> ] > <testType></testType>');
+         const s = makeStrictStream(
+            '<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ] ><testType></testType>');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_START);
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
@@ -78,7 +91,9 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('parses the end of the DOCTYPE element when there is no internal subset', () => {
-         const s = makeStrictStream('<!DOCTYPE testType > <testType></testType>');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType > <testType></testType>');
+         ignoreToken(s, XmlToken.XMLDECL);
+
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_START);
          expect(s.getNext().type).toEqual(XmlToken.DOCTYPE_END);
          expect(s.getNext().type).toEqual(XmlToken.SPACE);
@@ -86,60 +101,160 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('does not cause problems if the wrong kind of close is encountered', () => {
-         const s = makeLaxStream('<!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreToken(s, XmlToken.DOCTYPE_START);
          ignoreToken(s, XmlToken.SPACE);
          ignoreToken(s, XmlToken.ENTITY_DECL);
          ignoreToken(s, XmlToken.SPACE);
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_DOC_CONTEXT);
 
          const t = s.getNext();
          expect(t.type).toEqual(XmlToken.CHARDATA);
          expect(t.data).toEqual(']]>');
       });
 
-      it('reports a syntax error if doctype is declared in a DTD context', () => {
-         const s = makeLaxExternalSubsetStream('<!DOCTYPE testType > <testType></testType>');
+      it('reports a syntax error if the actual type name is not a name', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE $frog [ ]');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t).toEqualProps({
-            code: XmlErrorToken.ERROR.DOCTYPE_INVALID_CONTEXT,
-            message: 'A doctype must not be declared inside of the internal or external subset.'
+         expect(s.getNext()).toEqualProps({
+            code: XmlErrorToken.ERROR.DOCTYPE_NAME_INVALID,
+            message: 'The document type name must match the syntax for names. Found: "$frog".'
          });
       });
 
-      it('reports a syntax error if the actual type name is not a name', () => {
-         expectSyntaxError('<!DOCTYPE $frog [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_NAME_INVALID,
-            'The document type name must match the syntax for names. Found: "$frog".');
-      });
-
       it('reports a syntax error if there is no DOCTYPE name', () => {
-         expectSyntaxError('<!DOCTYPE [ ] >',
-            XmlErrorToken.ERROR.DOCTYPE_NO_NAME,
-            'Missing name for the document type.');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE [ ]');
+         ignoreToken(s, XmlToken.XMLDECL);
+
+         expect(s.getNext()).toEqualProps({
+            code: XmlErrorToken.ERROR.DOCTYPE_NO_NAME,
+            message: 'Missing name for the document type.'
+         });
       });
 
       it('reports a syntax error if there is no closing > for the DOCTYPE', () => {
-         const s = makeLaxStream('<!DOCTYPE foo');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreToken(s, XmlToken.DOCTYPE_START);
 
-         const t = s.getNext();
-
-         expect(t.code).toEqual(XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE);
-         expect(t.message).toEqual('Missing closing ">" for in the document type.');
+         expect(s.getNext()).toEqualProps({
+            code: XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE,
+            message: 'Missing closing ">" for in the document type.'
+         });
       });
 
       it('auto-terminates the doctype token when the > is not found as expected', () => {
-         const s = makeLaxStream('<!DOCTYPE foo fish>');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo fish>');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
          ignoreToken(s, XmlToken.DOCTYPE_START);
          ignoreError(s, XmlErrorToken.ERROR.DOCTYPE_NO_CLOSE);
          ignoreToken(s, XmlToken.DOCTYPE_END);
-         const t = s.getNext();
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_DOC_CONTEXT);
 
+         const t = s.getNext();
          expect(t.data).toEqual('fish>');
+      });
+
+      describe('state transitions', () => {
+
+         it('can not appear at the start of a document entity', () => {
+            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+               '<!DOCTYPE one >',
+               XmlErrorToken.ERROR.DOCTYPE_INVALID_DOC_CONTEXT,
+               'A DOCTYPE must be declared once between the XML Declaration and the content.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can not appear at the start of the external subset', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_SUBSET,
+               '<!DOCTYPE one >',
+               XmlErrorToken.ERROR.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
+               'A DOCTYPE must not be declared in an external entity.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can not appear at the start of an external entity', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+               '<!DOCTYPE one >',
+               XmlErrorToken.ERROR.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
+               'A DOCTYPE must not be declared in an external entity.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear after the XML Declaration in a document entity', () => {
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType > ');
+            ignoreToken(s, XmlToken.XMLDECL);
+
+            expectTokenType(s, XmlToken.DOCTYPE_START);
+            expectTokenType(s, XmlToken.DOCTYPE_END);
+         });
+
+         it('can not appear after the Text Declaration in the external subset', () => {
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!DOCTYPE one >');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
+               message: 'A DOCTYPE must not be declared in an external entity.'
+            });
+         });
+
+         it('can not appear after the Text Declaration in an external entity', () => {
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!DOCTYPE one >');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
+               message: 'A DOCTYPE must not be declared in an external entity.'
+            });
+         });
+
+         it('can not appear twice in a document entity', () => {
+            const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE one ><!DOCTYPE two >');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+            ignoreToken(s, XmlToken.DOCTYPE_END);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.DOCTYPE_INVALID_DOC_CONTEXT,
+               message: 'A DOCTYPE must be declared once between the XML Declaration and the content.'
+            });
+         });
+
+         it('can not appear inside the internal subset', () => {
+            const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE one [<!DOCTYPE two >]>');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.DOCTYPE_INVALID_DOC_CONTEXT,
+               message: 'A DOCTYPE must be declared once between the XML Declaration and the content.'
+            });
+         });
+
+         it('can not appear once content has started', () => {
+            const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><one><!DOCTYPE one>');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.ELEMENT_START);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.DOCTYPE_INVALID_DOC_CONTEXT,
+               message: 'A DOCTYPE must be declared once between the XML Declaration and the content.'
+            });
+         });
+
       });
 
    });
@@ -149,8 +264,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves a token of type NOTATION', () => {
          const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo" >');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.NOTATION_DECL);
+         expectTokenType(s, XmlToken.NOTATION_DECL);
       });
 
       it('retrieves the name of the notation', () => {
@@ -180,18 +294,10 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE);
          let t = s.getNext(); // get the notation token
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_SUBSET_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('fish>');
-      });
-
-      it('reports a syntax error if notation is declared outside of a DTD context', () => {
-         expectSyntaxError('<!NOTATION frog PUBLIC "foo">',
-            XmlErrorToken.ERROR.NOTATIONDECL_INVALID_CONTEXT,
-            'A notation must not be declared outside of the internal or external subset.',
-            new Offset(0, 0, 0),
-            [ new Offset(0, 0, 0) ]);
       });
 
       it('reports a syntax error if there is no space after the notation name', () => {
@@ -218,6 +324,71 @@ describe('XmlTokenStream (dtd)', () => {
             'Missing closing ">" in the notation declaration "notationName".');
       });
 
+      describe('state transitions', () => {
+
+         it('can not appear at the start of a document entity', () => {
+            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+               '<!NOTATION frog PUBLIC "foo">',
+               XmlErrorToken.ERROR.NOTATIONDECL_INVALID_CONTEXT,
+               'A notation must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear at the start of the external subset', () => {
+            const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo" >');
+
+            expectTokenType(s, XmlToken.NOTATION_DECL);
+         });
+
+         it('can not appear at the start of an external entity', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+               '<!NOTATION frog PUBLIC "foo">',
+               XmlErrorToken.ERROR.NOTATIONDECL_INVALID_CONTEXT,
+               'A notation must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear in the DOCTYPE of a document entity', () => {
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!NOTATION frog PUBLIC "foo">]> ');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+
+            expectTokenType(s, XmlToken.NOTATION_DECL);
+         });
+
+         it('can appear after the Text Declaration in the external subset', () => {
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!NOTATION frog PUBLIC "foo">');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            expectTokenType(s, XmlToken.NOTATION_DECL);
+         });
+
+         it('can not appear after the Text Declaration in an external entity', () => {
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!NOTATION frog PUBLIC "foo">');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.NOTATIONDECL_INVALID_CONTEXT,
+               message: 'A notation must not be declared outside of the internal or external subset.'
+            });
+         });
+
+         it('changes state so can not include a Text Declaration in an external subset once used', () => {
+            const s = makeLaxExternalSubsetStream('<!NOTATION frog PUBLIC "foo"><?xml encoding="usascii"?>');
+            ignoreToken(s, XmlToken.NOTATION_DECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT,
+               message: 'An XML or Text Declaration must be the first thing in the entity.'
+            });
+         });
+
+      });
+
    });
 
    describe('parsing ENTITY declaration', () => {
@@ -225,8 +396,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves a token of type ENTITY', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" >');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.ENTITY_DECL);
+         expectTokenType(s, XmlToken.ENTITY_DECL);
       });
 
       it('retrieves the name of the entity', () => {
@@ -297,14 +467,6 @@ describe('XmlTokenStream (dtd)', () => {
          expect(s.getNext().notationDataName).toBeUndefined();
       });
 
-      it('reports a syntax error if entity is declared outside of a DTD context', () => {
-         expectSyntaxError('<!ENTITY entityName PUBLIC "testentity" >',
-            XmlErrorToken.ERROR.ENTITYDECL_INVALID_CONTEXT,
-            'An entity must not be declared outside of the internal or external subset.',
-            new Offset(0, 0, 0),
-            [ new Offset(0, 0, 0) ]);
-      });
-
       it('reports a syntax error if there is no name', () => {
          expectSyntaxError('<!ENTITY >',
             XmlErrorToken.ERROR.ENTITYDECL_NO_NAME,
@@ -372,7 +534,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" found junk  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_SUBSET_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('found junk  >');
@@ -382,7 +544,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_SUBSET_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('extra  >');
@@ -392,10 +554,75 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
          ignoreError(s, XmlErrorToken.ERROR.ENTITYDECL_NO_CLOSE);
          let t = s.getNext(); // get the entity token
-         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_CONTEXT);
+         ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_SUBSET_CONTEXT);
 
          t = s.getNext();
          expect(t.data).toEqual('junk  >');
+      });
+
+      describe('state transitions', () => {
+
+         it('can not appear at the start of a document entity', () => {
+            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+               '<!ENTITY entityName PUBLIC "testentity" >',
+               XmlErrorToken.ERROR.ENTITYDECL_INVALID_CONTEXT,
+               'An entity must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear at the start of the external subset', () => {
+            const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" >');
+
+            expectTokenType(s, XmlToken.ENTITY_DECL);
+         });
+
+         it('can not appear at the start of an external entity', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+               '<!ENTITY entityName PUBLIC "testentity" >',
+               XmlErrorToken.ERROR.ENTITYDECL_INVALID_CONTEXT,
+               'An entity must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear in the DOCTYPE of a document entity', () => {
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ENTITY name PUBLIC "test" >]>');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+
+            expectTokenType(s, XmlToken.ENTITY_DECL);
+         });
+
+         it('can appear after the Text Declaration in the external subset', () => {
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "testentity">');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            expectTokenType(s, XmlToken.ENTITY_DECL);
+         });
+
+         it('can not appear after the Text Declaration in an external entity', () => {
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "testentity">');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.ENTITYDECL_INVALID_CONTEXT,
+               message: 'An entity must not be declared outside of the internal or external subset.'
+            });
+         });
+
+         it('changes state so can not include a Text Declaration in an external subset once used', () => {
+            const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity"><?xml encoding="usascii"?>');
+            ignoreToken(s, XmlToken.ENTITY_DECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT,
+               message: 'An XML or Text Declaration must be the first thing in the entity.'
+            });
+         });
+
       });
 
    });
@@ -406,8 +633,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves a token of type PARAMETER_ENTITY', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY % entityName PUBLIC "testentity" >');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.PARAMETERENTITY_DECL);
+         expectTokenType(s, XmlToken.PARAMETERENTITY_DECL);
       });
 
       it('retrieves the NDATA name on a parameter entity', () => {
@@ -436,8 +662,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves a token of type ELEMENT_DECL', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT elementName ANY>');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.ELEMENT_DECL);
+         expectTokenType(s, XmlToken.ELEMENT_DECL);
       });
 
       it('retrieves the name of the element', () => {
@@ -615,6 +840,71 @@ describe('XmlTokenStream (dtd)', () => {
             'Missing closing ">" in the element declaration "elemName".');
       });
 
+      describe('state transitions', () => {
+
+         it('can not appear at the start of a document entity', () => {
+            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+               '<!ELEMENT elementName ANY>',
+               XmlErrorToken.ERROR.ELEMENTDECL_INVALID_CONTEXT,
+               'An element must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear at the start of the external subset', () => {
+            const s = makeStrictExternalSubsetStream('<!ELEMENT elementName ANY>');
+
+            expectTokenType(s, XmlToken.ELEMENT_DECL);
+         });
+
+         it('can not appear at the start of an external entity', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+               '<!ELEMENT elementName ANY>',
+               XmlErrorToken.ERROR.ELEMENTDECL_INVALID_CONTEXT,
+               'An element must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear in the DOCTYPE of a document entity', () => {
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ELEMENT elementName ANY>]>');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+
+            expectTokenType(s, XmlToken.ELEMENT_DECL);
+         });
+
+         it('can appear after the Text Declaration in the external subset', () => {
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!ELEMENT elementName ANY>');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            expectTokenType(s, XmlToken.ELEMENT_DECL);
+         });
+
+         it('can not appear after the Text Declaration in an external entity', () => {
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!ELEMENT elementName ANY>');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.ELEMENTDECL_INVALID_CONTEXT,
+               message: 'An element must not be declared outside of the internal or external subset.'
+            });
+         });
+
+         it('changes state so can not include a Text Declaration in an external subset once used', () => {
+            const s = makeLaxExternalSubsetStream('<!ELEMENT elementName ANY><?xml encoding="usascii"?>');
+            ignoreToken(s, XmlToken.ELEMENT_DECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT,
+               message: 'An XML or Text Declaration must be the first thing in the entity.'
+            });
+         });
+
+      });
+
    });
 
    describe('parsing ATTLIST', () => {
@@ -622,8 +912,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves a token of type ATTLIST_DECL', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.ATTLIST_DECL);
+         expectTokenType(s, XmlToken.ATTLIST_DECL);
       });
 
       it('retrieves the name of the element the attributes are associated with', () => {
@@ -1127,7 +1416,8 @@ describe('XmlTokenStream (dtd)', () => {
 
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NAME_INVALID);
-         expect(s.getNext().type).toEqual(XmlToken.ELEMENT_START);
+         ignoreError(s, XmlErrorToken.ERROR.ELEMENT_INVALID_DTD_CONTEXT);
+         expectTokenType(s, XmlToken.ELEMENT_START);
       });
 
       it('reports a syntax error if there is not a closing quote', () => {
@@ -1273,44 +1563,120 @@ describe('XmlTokenStream (dtd)', () => {
 
       });
 
+      describe('state transitions', () => {
+
+         it('can not appear at the start of a document entity', () => {
+            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+               '<!ATTLIST elementName attrName CDATA #REQUIRED >',
+               XmlErrorToken.ERROR.ATTLISTDECL_INVALID_CONTEXT,
+               'An attribute list must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear at the start of the external subset', () => {
+            const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED >');
+
+            expectTokenType(s, XmlToken.ATTLIST_DECL);
+         });
+
+         it('can not appear at the start of an external entity', () => {
+            expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+               '<!ATTLIST elementName attrName CDATA #REQUIRED >',
+               XmlErrorToken.ERROR.ATTLISTDECL_INVALID_CONTEXT,
+               'An attribute list must not be declared outside of the internal or external subset.',
+               new Offset(0, 0, 0),
+               [ new Offset(0, 0, 0) ]);
+         });
+
+         it('can appear in the DOCTYPE of a document entity', () => {
+            const s = makeStrictStream(
+               '<?xml version="1.0"?><!DOCTYPE testType [<!ATTLIST elementName attrName CDATA #REQUIRED >]>');
+            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.DOCTYPE_START);
+
+            expectTokenType(s, XmlToken.ATTLIST_DECL);
+         });
+
+         it('can appear after the Text Declaration in the external subset', () => {
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!ATTLIST nm nm2 CDATA #REQUIRED >');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            expectTokenType(s, XmlToken.ATTLIST_DECL);
+         });
+
+         it('can not appear after the Text Declaration in an external entity', () => {
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!ATTLIST en an CDATA #REQUIRED >');
+            ignoreToken(s, XmlToken.TEXTDECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.ATTLISTDECL_INVALID_CONTEXT,
+               message: 'An attribute list must not be declared outside of the internal or external subset.'
+            });
+         });
+
+         it('changes state so can not include a Text Declaration in an external subset once used', () => {
+            const s = makeLaxExternalSubsetStream('<!ATTLIST en an CDATA #REQUIRED><?xml encoding="usascii"?>');
+            ignoreToken(s, XmlToken.ATTLIST_DECL);
+
+            const t = s.getNext();
+            expect(t).toEqualProps({
+               code: XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT,
+               message: 'An XML or Text Declaration must be the first thing in the entity.'
+            });
+         });
+
+      });
+
    });
 
    describe('parsing ExternalId', () => {
 
       it('retrieves only a systemLiteral when SYSTEM is specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('./system.xml');
-         expect(t.pubidLiteral).toBeUndefined();
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: './system.xml',
+            pubidLiteral: undefined
+         });
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('public');
-         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: './system.xml',
+            pubidLiteral: 'public'
+         });
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, and an internal dtd is specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
+         const s = makeStrictStream(
+            '<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('./system.xml');
-         expect(t.pubidLiteral).toEqual('./public.xml');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: './system.xml',
+            pubidLiteral: './public.xml'
+         });
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, no internal dtd is specified', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('./system.xml');
-         expect(t.pubidLiteral).toEqual('./public.xml');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: './system.xml',
+            pubidLiteral: './public.xml'
+         });
       });
 
       it('retrieves a systemLiteral in single quotes', () => {
-         const s = makeStrictStream('<!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          const t = s.getNext();
          expect(t.systemLiteral).toEqual('./system.xml');
@@ -1318,19 +1684,23 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral in single quotes', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('public');
-         expect(t.systemLiteral).toEqual('./system.xml');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: './system.xml',
+            pubidLiteral: 'public'
+         });
       });
 
       it('retrieves zero length publicID and system literals', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC "" "" [ ] >');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "" "" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('');
-         expect(t.systemLiteral).toEqual('');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: '',
+            pubidLiteral: ''
+         });
       });
 
       it('reports a syntax error if the pubidLiteral is not quoted', () => {
@@ -1346,13 +1716,15 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the publicID and system literals even when unquoted', () => {
-         const s = makeLaxStream('<!DOCTYPE testType PUBLIC one two [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC one two [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('one');
-         expect(t.systemLiteral).toEqual('two');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: 'two',
+            pubidLiteral: 'one'
+         });
       });
 
       it('reports a syntax error if the public id has illegal characters', () => {
@@ -1368,16 +1740,17 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the publicID literal even when it has illegal characters', () => {
-         const s = makeLaxStream('<!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('ABCDE{');
+         expect(s.getNext().pubidLiteral).toEqual('ABCDE{');
       });
 
       it('throws no error if the public id has all legal characters', () => {
-         const s = makeStrictStream('<!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
             'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  "system" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
 
          expect(() => {
             s.getNext();
@@ -1391,11 +1764,14 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
-         const s = makeLaxStream('<!DOCTYPE testType public "ABCDE" "two" [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType public "ABCDE" "two" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('ABCDE');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: 'two',
+            pubidLiteral: 'ABCDE'
+         });
       });
 
       it('reports a syntax error if SYSTEM is the wrong case', () => {
@@ -1405,11 +1781,11 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
-         const s = makeLaxStream('<!DOCTYPE testType system "ABCDE" [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType system "ABCDE" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('ABCDE');
+         expect(s.getNext().systemLiteral).toEqual('ABCDE');
       });
 
       it('reports a syntax error if no space between the pubid and system', () => {
@@ -1431,21 +1807,25 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the systemLiterals even when spaces missing', () => {
-         const s = makeLaxStream('<!DOCTYPE testType SYSTEM"one" [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM"one" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('one');
+         expect(s.getNext()).toEqualProps({
+            systemLiteral: 'one'
+         });
       });
 
       it('retrieves the publicID and system literals even when spaces missing', () => {
-         const s = makeLaxStream('<!DOCTYPE testType PUBLIC"one""two" [ ] >');
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC"one""two" [ ] >');
+         ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE);
 
-         const t = s.getNext();
-         expect(t.pubidLiteral).toEqual('one');
-         expect(t.systemLiteral).toEqual('two');
+         expect(s.getNext()).toEqualProps({
+            pubidLiteral: 'one',
+            systemLiteral: 'two'
+         });
       });
 
       it('reports a syntax error if there is an unknown type of external id', () => {

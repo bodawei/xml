@@ -43,8 +43,12 @@ const ENTITY_TYPE = {
 };
 
 const STATE = {
-   NORMAL: 'NORMAL',
-   IN_DTD: 'IN_DTD'
+   START: 'START',
+   PROLOG_PREDOCTYPE: 'PROLOG_PREDOCTYPE',
+   PROLOG: 'PROLOG',
+   IN_CONTENT: 'IN_CONTENT',
+   IN_DTD: 'IN_DTD',
+   AFTER_CONTENT: 'AFTER_CONTENT'
 };
 
 const XML_DECL_PARAMS = {
@@ -81,7 +85,7 @@ class XmlTokenStream {
       this._cursorContexts = [];
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
-      this._state = STATE.NORMAL;
+      this._state = STATE.START;
 
       this._options = {
          lax: false,
@@ -97,10 +101,6 @@ class XmlTokenStream {
       }
 
       this._entityType = this._options.entityType;
-
-      if (this._entityType === ENTITY_TYPE.EXTERNAL_SUBSET) {
-         this._state = STATE.IN_DTD;
-      }
    }
 
    _noEnvelopers() {
@@ -138,10 +138,10 @@ class XmlTokenStream {
                      this._getReference(markupToken);
                      break;
                   case '<':
-                     this._getTag(true);
+                     this._getTag(markupToken, true);
                      break;
                   case '</':
-                     this._getTag(false);
+                     this._getTag(markupToken, false);
                      break;
                   case '<?':
                      this._getProcessingInstruction(markupToken);
@@ -175,7 +175,6 @@ class XmlTokenStream {
                   } else {
                      this._closeDocType();
                      this._popEnveloper();
-                     this._pendingTokens.push(pendingClose.token);
                   }
                }
 
@@ -197,6 +196,10 @@ class XmlTokenStream {
    _getS() {
       const space = this._cursor.getSpace();
 
+      if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
+         this._assertSyntax(this._state !== STATE.START, ERRORS.SPACE_INVALID_CONTEXT, space.startOffset, space);
+      }
+
       this._pendingTokens.push(new SpaceToken(space.text, this._cursor.getRecentChunks()));
    }
 
@@ -213,8 +216,8 @@ class XmlTokenStream {
             this._reportSyntaxError(ERRORS.CHARDATA_INVALID_TEXT);
 
             if (content.chunk) {
-               this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.CHARDATA_INVALID_CONTEXT,
-                  content.chunk.startOffset);
+               this._checkContentState(content.chunk,
+                  ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
                this._pushToken(XmlToken.CHARDATA, content.chunk.text);
             }
 
@@ -226,9 +229,27 @@ class XmlTokenStream {
             return;
          }
 
-         this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.CHARDATA_INVALID_CONTEXT, content.chunk.startOffset);
+         this._checkContentState(content.chunk,
+            ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
          this._pushToken(XmlToken.CHARDATA, content.chunk.text);
       } while (content.terminator && content.terminator !== '<');
+   }
+
+   _checkContentState(chunk, docError, subsetError) {
+      switch (this._entityType) {
+         case ENTITY_TYPE.DOCUMENT_ENTITY:
+            this._assertSyntax(this._state === STATE.IN_CONTENT, docError,
+               [ chunk.text ], chunk.startOffset, chunk);
+            break;
+         case ENTITY_TYPE.EXTERNAL_ENTITY:
+            if (this._state === STATE.START) {
+               this._state = STATE.IN_CONTENT;
+            }
+            break;
+         case ENTITY_TYPE.EXTERNAL_SUBSET:
+            this._reportSyntaxError(subsetError, [ chunk.text ], chunk.startOffset, chunk);
+            break;
+      }
    }
 
    _getReference(start, inAttribute) {
@@ -244,6 +265,7 @@ class XmlTokenStream {
          if (inAttribute) {
             return [ new XmlToken(XmlToken.CHAR_REF, character) ];
          } else {
+            this._checkContentState(start, ERRORS.CHARREF_INVALID_DOC_CONTEXT, ERRORS.CHARREF_INVALID_SUBSET_CONTEXT);
             this._pushToken(XmlToken.CHAR_REF, character);
          }
       } else {
@@ -275,6 +297,8 @@ class XmlTokenStream {
             result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
             return result;
          } else {
+            this._checkContentState(start,
+               ERRORS.REFERENCE_INVALID_DOC_CONTEXT, ERRORS.REFERENCE_INVALID_SUBSET_CONTEXT);
             startToken.chunks = this._cursor.getRecentChunks();
             this._pendingTokens.push(startToken);
 
@@ -382,6 +406,7 @@ class XmlTokenStream {
       }
 
       const content = results.chunk ? results.chunk.text : undefined;
+      this._checkPiAndCommentState(start, ERRORS.COMMENT_INVALID_CONTEXT);
       this._pendingTokens.push(new CommentToken(content, this._cursor.getRecentChunks()));
    }
 
@@ -393,7 +418,7 @@ class XmlTokenStream {
       if (bracket) {
          this._assertSyntax(!leadingSpace, ERRORS.BRACKETITEM_XTRA_SPACE_BEFORE);
 
-         this._getBracketItem();
+         this._getBracketItem(start);
          return;
       }
 
@@ -433,8 +458,14 @@ class XmlTokenStream {
                   externalId ? externalId.systemLiteral : undefined,
                   externalId ? externalId.pubidLiteral : undefined);
 
-               this._assertSyntax(this._state !== STATE.IN_DTD, ERRORS.DOCTYPE_INVALID_CONTEXT,
-                  start.startOffset, start);
+               if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
+                  if (this._state !== STATE.PROLOG_PREDOCTYPE) {
+                     this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
+                  }
+               } else {
+                  this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
+               }
+
                this._pendingTokens.push(docToken);
 
                if (openDtd) {
@@ -471,8 +502,8 @@ class XmlTokenStream {
                   externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
                   externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
 
-               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.NOTATIONDECL_INVALID_CONTEXT, [],
-                  start.startOffset, start);
+               this._checkDeclarationState(start, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
+
                this._pendingTokens.push(notationToken);
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
@@ -543,8 +574,7 @@ class XmlTokenStream {
                      entityExternalId ? entityExternalId.pubidLiteral : undefined,
                      notationDataName);
 
-               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ENTITYDECL_INVALID_CONTEXT,
-                  start.startOffset, start);
+               this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
 
                this._pendingTokens.push(entityToken);
                return;
@@ -600,8 +630,7 @@ class XmlTokenStream {
 
                this._assertSyntax(parsedEl.closeChunk, ERRORS.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
-               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ELEMENTDECL_INVALID_CONTEXT,
-                  start.startOffset, start);
+               this._checkDeclarationState(start, ERRORS.ELEMENTDECL_INVALID_CONTEXT);
 
                this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
                return;
@@ -738,8 +767,8 @@ class XmlTokenStream {
                }
 
                this._assertSyntax(attListClose, ERRORS.ATTLISTDECL_NO_CLOSE, [ elName ]);
-               this._assertSyntax(this._state === STATE.IN_DTD, ERRORS.ATTLISTDECL_INVALID_CONTEXT,
-                  start.startOffset, start);
+
+               this._checkDeclarationState(start, ERRORS.ATTLISTDECL_INVALID_CONTEXT);
 
                this._pendingTokens.push(new AttributeListDeclarationToken(elName, attributes));
                return;
@@ -754,11 +783,20 @@ class XmlTokenStream {
       const doctypeClosing = this._cursor.getMatch('>');
       this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
 
+      if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
+         this._state = STATE.PROLOG;
+      }
       this._pendingTokens.push(new DocTypeEndToken());
-      this._state = STATE.NORMAL;
    }
 
-   _getBracketItem() {
+   _checkDeclarationState(start, error) {
+      if (this._entityType === ENTITY_TYPE.EXTERNAL_SUBSET && this._state === STATE.START) {
+         this._state = STATE.IN_DTD;
+      }
+      this._assertSyntax(this._state === STATE.IN_DTD, error, start.startOffset, start);
+   }
+
+   _getBracketItem(start) {
       const preSpace = this._cursor.getSpace();
       const bracketItemType = this._cursor.getWord([ '[' ]);
       const postSpace = this._cursor.getSpace();
@@ -786,6 +824,8 @@ class XmlTokenStream {
          } else {
             this._cursor.getMatch(']]>');
          }
+
+         this._checkContentState(start, ERRORS.CDATA_INVALID_DOC_CONTEXT, ERRORS.CDATA_INVALID_SUBSET_CONTEXT);
 
          this._pushToken(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
@@ -971,7 +1011,26 @@ class XmlTokenStream {
 
          const targetName = target ? target.text : '';
          const content = results.chunk ? results.chunk.text : undefined;
+
+         this._checkPiAndCommentState(start, ERRORS.PI_INVALID_CONTEXT);
+
          this._pendingTokens.push(new ProcessingInstructionToken(targetName, content, this._cursor.getRecentChunks()));
+      }
+   }
+
+   _checkPiAndCommentState(start, error) {
+      if (this._state === STATE.START) {
+         switch (this._entityType) {
+            case ENTITY_TYPE.DOCUMENT_ENTITY:
+               this._reportSyntaxError(error, start.startOffset, start);
+               break;
+            case ENTITY_TYPE.EXTERNAL_ENTITY:
+               this._state = STATE.IN_CONTENT;
+               break;
+            case ENTITY_TYPE.EXTERNAL_SUBSET:
+               this._state = STATE.IN_DTD;
+               break;
+         }
       }
    }
 
@@ -994,11 +1053,12 @@ class XmlTokenStream {
     RETURN
     None. Adds an XMLDECL token, and possibly errors, to the queue.
    \**********************************************************************/
-   _getXmlDecl() {
+   _getXmlDecl(start) {
       const params = this._getAttributes(false);
       const close = this._cursor.getMatch('?>');
       const isXmlDecl = this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY;
       let seenVersion = false;
+      let seenEncoding = false;
       let seenStandalone = false;
 
       this._assertSyntax(close, ERRORS.XMLDECL_NO_CLOSE);
@@ -1021,6 +1081,7 @@ class XmlTokenStream {
                   ERRORS.XMLDECL_VERSION_INVALD, [ param.value ]);
                break;
             case 'encoding':
+               seenEncoding = true;
                if (isXmlDecl) {
                   this._assertSyntax(seenVersion && !seenStandalone, ERRORS.XMLDECL_ENCODING_INVALID_ORDER);
                }
@@ -1051,6 +1112,26 @@ class XmlTokenStream {
          }
       }
 
+      if (!isXmlDecl) {
+         this._assertSyntax(seenEncoding, ERRORS.TEXTDECL_NO_ENCODING, start.startOffset, start);
+      }
+
+      if (this._state === STATE.START) {
+         switch (this._entityType) {
+            case ENTITY_TYPE.DOCUMENT_ENTITY:
+               this._state = STATE.PROLOG_PREDOCTYPE;
+               break;
+            case ENTITY_TYPE.EXTERNAL_ENTITY:
+               this._state = STATE.IN_CONTENT;
+               break;
+            case ENTITY_TYPE.EXTERNAL_SUBSET:
+               this._state = STATE.IN_DTD;
+               break;
+         }
+      } else {
+         this._reportSyntaxError(ERRORS.XMLDECL_INVALID_CONTEXT);
+      }
+
       this._pendingTokens.push(isXmlDecl ?
          new DeclarationToken(params, this._cursor.getRecentChunks()) :
          new TextDeclarationToken(params, this._cursor.getRecentChunks()));
@@ -1066,7 +1147,7 @@ class XmlTokenStream {
     *        if an end tag
     * RETURN none
     */
-   _getTag(isStartOrEmpty) {
+   _getTag(start, isStartOrEmpty) {
       let attributes = [];
 
       const leadingSpace = this._cursor.getSpace();
@@ -1127,6 +1208,30 @@ class XmlTokenStream {
             this._reportSyntaxError(ERRORS.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
          }
       }
+
+      const nameText = name ? name.text : '';
+      switch (this._entityType) {
+         case ENTITY_TYPE.DOCUMENT_ENTITY:
+            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
+               this._state = STATE.IN_CONTENT;
+            } else if (this._state === STATE.IN_DTD) {
+               this._reportSyntaxError(ERRORS.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+            } else if (this._state !== STATE.IN_CONTENT) {
+               this._reportSyntaxError(ERRORS.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
+            }
+            break;
+         case ENTITY_TYPE.EXTERNAL_ENTITY:
+            if (this._state === STATE.START) {
+               this._state = STATE.IN_CONTENT;
+            }
+            this._assertSyntax(this._state === STATE.IN_CONTENT,
+               ERRORS.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
+            break;
+         case ENTITY_TYPE.EXTERNAL_SUBSET:
+            this._reportSyntaxError(ERRORS.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+            break;
+      }
+
       this._pendingTokens.push(xtoken);
    }
 
