@@ -14,38 +14,9 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 10/1  Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
 10/6  Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
 10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  5 Note11
-10/16 Sprint 12: 121sp [7XL 10M 21S]. Average: 5 per sprint = 25 sprints. ACTUAL:  Got longer as entity work was bigger tahn 10 by a lot
+10/16 Sprint 12: 121sp [7XL 10M 21S]. Average: 5 per sprint = 25 sprints. ACTUAL:  2 Note 12
+10/19 Sprint 13: 113sp [7XL 8M 19S]. Average: 5 per sprint = 23 sprints. ACTUAL:
 	#210 min
-
-x25:XL read external entities -- need for xmlconf
-
-√ S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
-	- standlone is not allowed
-	- version is optional
-[45min]
-M 109 Set up state for external entities both regular and extSubset, so they barf if no TextDecl (this will break some tests)
-	Transition is START -> EXTERNAL_CONTENT or START -> IN_DTD
-		Declaration tests will need to go through start, now
-			Errors should be modified so that if in START, we get a better error.
-		Comments, PI, etc should barf if in START
-	Realistically, we can do 13 and 106 in the process, since we will have to touch everything.
-		√ chardata (finish up)
-		√ char references ???
-		√ entity references
-		√CDATA
-		√comments
-		√ processing instructions
-		√ xmldecl
-		√ textdecl
-		√ start
-		√ empty
-		√ end
-		√ doctype
-		√ notation
-		√ entity
-		√ element
-		√ attlist
-[190min]
 
 S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
 	StringCursor can take a url (will create anExternalId structure) or a resolved externalId structure.
@@ -53,7 +24,17 @@ S 110 Need to associate an externalId with all entities and pass on to the curso
 	An externalId structure can be resolved if it is the root, or if .resolve(resolvedExtId)
 		Seems like parser should attach the externalId from the chunk that gave < to the parse structure
 		Final tokens need to have the resolved structure
-	
+
+S 108 Add a pluggable entity retriever that must be passed in
+	getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
+	Right now just fake delivers content using setTimeout
+	- does babel provide us with a Promise, or do we need to build our own?
+
+M 112: Browser entity retriever. For now must be sync to get a string cursor
+	Does an XMLHttpRequest (Can we in IE?)
+	http://jasmine.github.io/2.0/ajax.html
+		doesn't do async.  Doesn't do timeouts.  So, you'll end up layering more on top
+
 
 - This parses badly
 	<?xml version="1.0"><!DOCTYPE one
@@ -71,6 +52,9 @@ BLOG IDEAS
 =============================================
 CLEANUP
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
+	- Currently working on separating parse from validate in getQuotedLiteral and _retrieveExternalId in -dtd.js
+		- this will allow us to move all of parseNotation over, and then quickly entity
+		NS: make getQuotedLiteral return a structure containing the parsed data.
 
 RESEARCH
 - should we be expanding character references in attribute defaults?
@@ -110,10 +94,8 @@ BUILD
 41:XL:Investigate Gulp
 
 PROJECT
---- technical debt [5m 13s]
+--- technical debt [4m 12s]
 73:S: If error is thrown, we can still call getNextToken.  Should block that.
-13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
-106:S Finish out of context error reporting for: references, comments, element start, processing instruction, cdata, xmldecl
 58:S: Remove data prop on token, and make all token types more explicit
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
@@ -156,16 +138,7 @@ ideas
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 55:S: Rename lax to chillout?  Thus chillout:angleBracketInAttributeValueIsPartOfAttributeValue:true
 
---- DTD [3XL 3M 2S]
-S 108 Add a pluggable entity retriever that must be passed in
-	getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
-	Right now just fake delivers content using setTimeout
-	- does babel provide us with a Promise, or do we need to build our own?
-
-M 112: Browser entity retriever. For now must be sync to get a string cursor
-	Does an XMLHttpRequest (Can we in IE?)
-	http://jasmine.github.io/2.0/ajax.html
-		doesn't do async.  Doesn't do timeouts.  So, you'll end up layering more on top
+--- DTD [3XL 2M 1S]
 
 M 113: Node entity retriever. For now must be sync to get a string cursor. but testing can test both
 	use https://github.com/node-nock/nock
@@ -739,3 +712,40 @@ Note11
 This sprint went OK.  I changed a design direction in the middle, REalized that rather than going with the plan of embedding the internal subset into the doctype token (and by implication the same process for the forthcoming conditional section), I could just make the doctype token a start and end thing with the internal subset between.  This killed 102 and added 104 and 105 (the latter was too big to fit in the sprint).
 I lost some time in the middle of the sprint, so am not 100% sure I did this in time, but I think so.
 Nicely, the cleanup process addressed all the egregious stuff encountered quickly, and so went back to doing some work to help continuing to extract  stuff out of XmlTokenStream. And the build process cleanup 97 went faster than I expected, allowing me to also fix a problem I'd inadvertantly introduced with the addition of karma-edge-launcher on the mac.
+
+
+Sprint 12
+=========
+x25:XL read external entities -- need for xmlconf
+
+√ S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
+	- standlone is not allowed
+	- version is optional
+[45min]
+M 109 Set up state for external entities both regular and extSubset, so they barf if no TextDecl (this will break some tests)
+	Transition is START -> EXTERNAL_CONTENT or START -> IN_DTD
+		Declaration tests will need to go through start, now
+			Errors should be modified so that if in START, we get a better error.
+		Comments, PI, etc should barf if in START
+	Realistically, we can do 13 and 106 in the process, since we will have to touch everything.
+		√ chardata (finish up)
+		√ char references ???
+		√ entity references
+		√CDATA
+		√comments
+		√ processing instructions
+		√ xmldecl
+		√ textdecl
+		√ start
+		√ empty
+		√ end
+		√ doctype
+		√ notation
+		√ entity
+		√ element
+		√ attlist
+√ 13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
+√ 106:S Finish out of context error reporting for: references, comments, element start, processing instruction, cdata, xmldecl
+
+Note 12
+Got good stuff done. To say, however, that 109 was an understatement would be an  understaement. It was slated for M, thus 3, thus on the order probably of 120 minutes. It took closer to 400. Almost two whole sprints.  It could have been subdivided, but when I realized it was going to go over, I basically said : well, let's get the whole thing done.

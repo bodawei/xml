@@ -8,6 +8,7 @@ class PlainChunk {
       this.text = text;
       this.startOffset = startOffset;
       this.endOffset = endOffset;
+      this.entityInfo = {};
    }
 
 }

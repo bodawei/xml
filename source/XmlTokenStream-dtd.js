@@ -5,6 +5,33 @@
 class XmlTokenStreamDtd {
 
    /**********************************************************************\
+    parseNotation extracts a notation declaration from the provided cursor
+    and returns a data structure that describes what was extracted.
+
+    This assumes that the "<!NOTATION S" has already been parsed.
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+      {
+         nameChunk: The name of the notation
+         postNameSpaceChunk: The space after the name
+      }
+    SYNTAX
+      [82] NotationDecl ::=
+         '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
+   \**********************************************************************/
+   parseNotation(cursor) {
+      const results = {};
+
+      results.nameChunk = cursor.getWord([ '>' ]);
+      results.postNameSpaceChunk = cursor.getSpace();
+
+      return results;
+   }
+
+   /**********************************************************************\
     parseEntity extracts an entity declaration from the provided cursor
     and returns a data structure that describes what was extracted.
 
@@ -327,6 +354,155 @@ class XmlTokenStreamDtd {
          }
       }
    }
+
+   /**********************************************************************\
+    _retrieveExternalId tries to extract an ExternalID or a PublicID from
+    the current position in the cursor. It assumes any leading space has
+    already been consumed.
+
+      [75] ExternalID    ::= 'SYSTEM' S SystemLiteral |
+                             'PUBLIC' S PubidLiteral S SystemLiteral
+      [83] PublicID      ::= 'PUBLIC' S PubidLiteral
+      [11] SystemLiteral ::= ('"' [^"]* '"') | ("'" [^']* "'")
+      [12] PubidLiteral  ::= '"' PubidChar* '"' |
+                             "'" (PubidChar - "'")* "'"
+      [13] PubidChar     ::= #x20 | #xD | #xA | [a-zA-Z0-9] |
+                             [-'()+,./:=?;!*#@$_%]
+
+    PARAM
+    terminators: An array of characters this should terminate parsing of
+      the id for
+    options: Flags for special cases
+      requireSystemOnPublic: true if the systemLiteral is required for
+         a PUBLIC
+      isEntity: true if this is for an entity (which means NDATA could
+         be found instead of the system value on a PUBLIC)
+
+    RETURN
+    Either an object containing a "systemLiteral" or a "systemLiteral" and a
+    "publidLiteral" property, or undefined if neither SYSTEM nor PUBLIC could
+    be found.
+    Note that the system and pubid properties may be undefined if they
+    were not specified, or may be empty strings if they were specified with
+    empty strings.
+   \**********************************************************************/
+
+//   _retrieveExternalId(cursor, terminators, options = {}) {
+//      const result = {};
+//      const xIdTerminators = terminators.slice().concat([ '"', '\'' ]);
+//      const xIdType = cursor.getWord(xIdTerminators);
+//
+//      if (!xIdType) {
+//         return;
+//      }
+//
+//      const upperCaseXIdType = xIdType.text.toLocaleUpperCase();
+//      let publicText;
+//
+//      if (upperCaseXIdType !== 'SYSTEM' && upperCaseXIdType !== 'PUBLIC') {
+//         cursor.unget(xIdType);
+//         result.unkownTypeText = xIdType.text;
+//         return result;
+//      }
+//
+//      result.typeText = xIdType;
+//      result.uppercaseTypeText = upperCaseXIdType;
+//
+//      if (upperCaseXIdType === 'PUBLIC') {
+//         publicText = this._getQuotedLiteral(true, false, terminators, ERRORS.EXTERNALID_NO_PUBLIC,
+//            ERRORS.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
+//            ERRORS.EXTERNALID_PUBLIC_NO_QUOTE);
+//
+//         result.publicText = publicText;
+//      }
+//
+//      // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
+//      const systemText = this._getQuotedLiteral(options.requireSystemOnPublic, options.isEntity, terminators,
+//         ERRORS.EXTERNALID_NO_SYSTEM,
+//         upperCaseXIdType === 'SYSTEM' ? ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE :
+//             ERRORS.EXTERNALID_PUBLIC_NO_SPACE,
+//         ERRORS.EXTERNALID_SYSTEM_NO_QUOTE);
+//
+//      return (publicText === undefined && systemText === undefined) ?
+//         undefined : {
+//            pubidLiteral: publicText,
+//            systemLiteral: systemText
+//         };
+//   }
+//
+//   _validateExternald(extrnalId) {
+//      this._assertSyntax(!externalId.unkownTypeText, ERRORS.EXTERNALID_UNKNOWN, [ externalId.unkownTypeText ]);
+//
+//      if (extrnalId.typeChunk) {
+//         this._assertSyntax(extrnalId.uppercaseTypeText === extrnalId.typeChunk.text,
+//            ERRORS.EXTERNALID_INVALID_CASE, [ upperCaseXIdType, xIdType.text ]);
+//
+//         const match = PUBID_CHARS.exec(extrnalId.publicText);
+//
+//         if (extrnalId.publicText && (!match || match[0] !== extrnalId.publicText)) {
+//            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_INVALID_CHARS,
+//                [ extrnalId.publicText[match[0].length] ]);
+//         }
+//      }
+//
+//   }
+
+   /**********************************************************************\
+    _getQuotedLiteral generically extracts either a PublicID value or a
+    SystemLiteral value from the cursor.
+
+    PARAM
+    literalRequired: True if this must find a value (will report an error
+      if not found)
+    isEntity: true if this is for an entity.
+    terminators: An array of values that may terminate this logical section
+
+    RETURN
+    undefined, if no such value, or the string between the quotes.
+   \**********************************************************************/
+
+//   _getQuotedLiteral(cursor, literalRequired, isEntity, terminators) {
+//      const betweenSpace = cursor.getSpace();
+//      const quote = cursor.peekChar();
+//      const isQuote = quote && (quote.text === '"' || quote.text === '\'');
+//
+//      if (!betweenSpace) {
+//         this._assertSyntax(!literalRequired, noBetweenSpace);
+//      }
+//
+//      if (isQuote) {
+//         cursor.getMatch(quote.text);
+//         const literal = cursor.getToTerminator([ quote.text ]);
+//         cursor.getMatch(quote.text);
+//         return literal.chunk ? literal.chunk.text : '';
+//      }
+//
+//      if (isEntity) {
+//         const possibleNData = cursor.getWord(terminators);
+//         if (possibleNData && possibleNData.text.toLocaleUpperCase() === 'NDATA') {
+//            cursor.unget(possibleNData);
+//            if (betweenSpace) {
+//               cursor.unget(betweenSpace);
+//            }
+//            return;
+//         }
+//      }
+//
+//      let quoteIsTerminator = false;
+//      for (let index = 0; quote && index < terminators.length; index++) {
+//         if (terminators[index] === quote.text) {
+//            quoteIsTerminator = true;
+//         }
+//      }
+//
+//      if (quoteIsTerminator) {
+//         this._assertSyntax(!literalRequired, literalMissing);
+//      } else if (quote) {
+//         this._reportSyntaxError(noQuoteError);
+//         const literal = cursor.getWord([]);
+//         return literal.text;
+//      }
+//   }
 
 }
 

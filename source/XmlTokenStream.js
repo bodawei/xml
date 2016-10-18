@@ -477,28 +477,23 @@ class XmlTokenStream {
                return;
             // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
             case 'NOTATION':
-               let notationName = this._cursor.getWord([ '>' ]); // could look for quotes, too
-               const postNotationNameSpace = this._cursor.getSpace();
+               const parsedNotation = this._dtdParser.parseNotation(this._cursor);
+               const notNameText = parsedNotation.nameChunk ? parsedNotation.nameChunk.text : '';
+               const couldBeName = notNameText === '' ||
+                  (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
                const externalOrPublicId = this._retrieveExternalId([ '>' ]);
-
-               if (!notationName) {
-                  notationName = { text: '' };
-                  this._reportSyntaxError(ERRORS.NOTATIONDECL_NO_NAME);
-               }
-
-               this._assertSyntax(postNotationNameSpace,
-                  ERRORS.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notationName.text ]);
-               this._assertSyntax(externalOrPublicId, ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notationName.text ]);
 
                this._cursor.getSpace();
                const closing = this._cursor.getMatch('>');
 
-               this._assertSyntax(notationName && (notationName.text === '' || notationName.couldBeName),
-                  ERRORS.NOTATIONDECL_NAME_INVALID, [ notationName.text ]);
+               this._assertSyntax(parsedNotation.nameChunk, ERRORS.NOTATIONDECL_NO_NAME);
+               this._assertSyntax(couldBeName, ERRORS.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
+               this._assertSyntax(parsedNotation.postNameSpaceChunk,
+                  ERRORS.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
+               this._assertSyntax(externalOrPublicId, ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
+               this._assertSyntax(closing, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
 
-               this._assertSyntax(closing, ERRORS.NOTATIONDECL_NO_CLOSE, [ notationName.text ]);
-
-               const notationToken = new NotationToken(notationName.text,
+               const notationToken = new NotationToken(notNameText,
                   externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
                   externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
 
