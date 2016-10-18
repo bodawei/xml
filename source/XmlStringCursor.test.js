@@ -4,12 +4,13 @@
 
 /* eslint-env jasmine */
 
-const XmlStringCursor = require('./XmlStringCursor.js');
+const EntityLocation = require('./EntityLocation.js');
 const Offset = require('./Offset.js');
 const PlainChunk = require('./TextChunk.js').PlainChunk;
 const WordChunk = require('./TextChunk.js').WordChunk;
 const WithSpaceChunk = require('./TextChunk.js').WithSpaceChunk;
 const DigitChunk = require('./TextChunk.js').DigitChunk;
+const XmlStringCursor = require('./XmlStringCursor.js');
 const TYPE = require('./TextChunk.js').TYPE;
 
 describe('XmlStringCursor', () => {
@@ -216,6 +217,13 @@ describe('XmlStringCursor', () => {
          ]);
       });
 
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor(' hi', loc);
+
+         expect(c.getSpace().entityLocation).toEqual(loc);
+      });
+
    });
 
    describe('getWord()', () => {
@@ -303,6 +311,13 @@ describe('XmlStringCursor', () => {
          const expected = new WordChunk('test', true, true, new Offset(0, 0, 0), new Offset(0, 4, 4));
 
          expect(c.getRecentChunks()).toEqual([ expected ]);
+      });
+
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('one two', loc);
+
+         expect(c.getWord([]).entityLocation).toEqual(loc);
       });
 
       describe('couldBeName flag', () => {
@@ -616,6 +631,13 @@ describe('XmlStringCursor', () => {
          expect(c.getRecentChunks()).toEqual([ expected ]);
       });
 
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('123 ', loc);
+
+         expect(c.getDigits().entityLocation).toEqual(loc);
+      });
+
    });
 
    describe('getChar()', () => {
@@ -664,6 +686,13 @@ describe('XmlStringCursor', () => {
          expect(c.getRecentChunks()).toEqual([
             new PlainChunk('t', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
+      });
+
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('<foo>', loc);
+
+         expect(c.getChar().entityLocation).toEqual(loc);
       });
 
    });
@@ -757,6 +786,13 @@ describe('XmlStringCursor', () => {
          ]);
       });
 
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('<frog', loc);
+
+         expect(c.getMarkup().entityLocation).toEqual(loc);
+      });
+
    });
 
    describe('getClose()', () => {
@@ -803,6 +839,13 @@ describe('XmlStringCursor', () => {
          expect(c.getRecentChunks()).toEqual([
             new PlainChunk(']', new Offset(0, 0, 0), new Offset(0, 1, 1))
          ]);
+      });
+
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor(']frog', loc);
+
+         expect(c.getClose().entityLocation).toEqual(loc);
       });
 
    });
@@ -873,6 +916,13 @@ describe('XmlStringCursor', () => {
          expect(c.getRecentChunks()).toEqual([
             new PlainChunk('Tes', new Offset(0, 0, 0), new Offset(0, 3, 3))
          ]);
+      });
+
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('frogD', loc);
+
+         expect(c.getMatch('fro').entityLocation).toEqual(loc);
       });
 
    });
@@ -973,6 +1023,13 @@ describe('XmlStringCursor', () => {
          expect(c.getRecentChunks()).toEqual([
             new WithSpaceChunk('This is a ', 'This is a ', new Offset(0, 0, 0), new Offset(0, 10, 10))
          ]);
+      });
+
+      it('assigns a location to the created chunk', () => {
+         const loc = new EntityLocation('http://test.com/foo.bar');
+         const c = new XmlStringCursor('frogD', loc);
+
+         expect(c.getToTerminator([ 'D' ]).chunk.entityLocation).toEqual(loc);
       });
 
    });

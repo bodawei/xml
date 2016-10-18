@@ -30,9 +30,10 @@ class XmlStringCursor {
 
     PARAM
     The string that this cursor should use.
+    SourceLocation: The EntityLocation that corresponds to the string
    \**********************************************************************/
 
-   constructor(source) {
+   constructor(source, sourceLocation) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
       }
@@ -40,6 +41,7 @@ class XmlStringCursor {
       this._source = source;
       this._offset = new Offset(0, 0, 0);
       this._chunks = [];
+      this._sourceLoc = sourceLocation;
    }
 
    /**********************************************************************\
@@ -98,7 +100,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset);
+      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._sourceLoc);
    }
 
    /**********************************************************************\
@@ -623,7 +625,8 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeChunkWithSpace(data, originalString, startOffset) {
-      const chunk = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone());
+      const chunk = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone(),
+         this._sourceLoc);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -638,7 +641,7 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makePlainChunk(data, startOffset) {
-      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone());
+      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(), this._sourceLoc);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -656,7 +659,8 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeWordChunk(data, couldBeName, couldBeNmToken, startOffset) {
-      const chunk = new TextChunk.WordChunk(data, couldBeName, couldBeNmToken, startOffset, this._offset.clone());
+      const chunk = new TextChunk.WordChunk(data, couldBeName, couldBeNmToken, startOffset, this._offset.clone(),
+         this._sourceLoc);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -671,7 +675,7 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeDigitChunk(data, isDecimal, startOffset) {
-      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone());
+      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone(), this._sourceLoc);
       this._chunks.push(chunk);
       return chunk;
    }

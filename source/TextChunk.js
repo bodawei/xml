@@ -4,19 +4,19 @@
 
 class PlainChunk {
 
-   constructor(text, startOffset, endOffset) {
+   constructor(text, startOffset, endOffset, entityLocation) {
       this.text = text;
       this.startOffset = startOffset;
       this.endOffset = endOffset;
-      this.entityInfo = {};
+      this.entityLocation = entityLocation;
    }
 
 }
 
 class WordChunk extends PlainChunk {
 
-   constructor(text, couldBeName, couldBeNmToken, startOffset, endOffset) {
-      super(text, startOffset, endOffset);
+   constructor(text, couldBeName, couldBeNmToken, startOffset, endOffset, entityLocation) {
+      super(text, startOffset, endOffset, entityLocation);
       this.couldBeName = couldBeName;
       this.couldBeNmToken = couldBeNmToken;
    }
@@ -24,16 +24,16 @@ class WordChunk extends PlainChunk {
 
 class WithSpaceChunk extends PlainChunk {
 
-   constructor(text, originalText, startOffset, endOffset) {
-      super(text, startOffset, endOffset);
+   constructor(text, originalText, startOffset, endOffset, entityLocation) {
+      super(text, startOffset, endOffset, entityLocation);
       this.originalText = originalText;
    }
 }
 
 class DigitChunk extends PlainChunk {
 
-   constructor(text, isDecimal, startOffset, endOffset) {
-      super(text, startOffset, endOffset);
+   constructor(text, isDecimal, startOffset, endOffset, entityLocation) {
+      super(text, startOffset, endOffset, entityLocation);
       this.isDecimal = isDecimal;
    }
 }
