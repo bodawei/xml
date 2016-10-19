@@ -18,17 +18,25 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 10/19 Sprint 13: 113sp [7XL 8M 19S]. Average: 5 per sprint = 23 sprints. ACTUAL:
 	#210 min
 
-S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
+√ S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
 	StringCursor can take a url (will create anExternalId structure) or a resolved externalId structure.
 		- can we wrap up the call to get pwd?
 	An externalId structure can be resolved if it is the root, or if .resolve(resolvedExtId)
 		Seems like parser should attach the externalId from the chunk that gave < to the parse structure
 		Final tokens need to have the resolved structure
 
-S 108 Add a pluggable entity retriever that must be passed in
-	getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
-	Right now just fake delivers content using setTimeout
-	- does babel provide us with a Promise, or do we need to build our own?
+√ S 108 Add a pluggable entity retriever that must be passed in
+	√getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
+		No, should be returning a cursor
+	√ Right now just fake delivers content using setTimeout
+	√ does babel provide us with a Promise, or do we need to build our own?
+		Yes, but drags in the universe
+		Ended up using one that MDN recommended
+			https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+			https://github.com/stefanpenner/es6-promise
+		This seems like so much overhead taht I'll need to consider another api eventually.
+	x Should the EntityLocation actually become the entity???
+		I don't think so.
 
 M 112: Browser entity retriever. For now must be sync to get a string cursor
 	Does an XMLHttpRequest (Can we in IE?)
