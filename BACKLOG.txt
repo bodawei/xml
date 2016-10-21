@@ -37,17 +37,17 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan
 		This seems like so much overhead taht I'll need to consider another api eventually.
 	x Should the EntityLocation actually become the entity???
 		I don't think so.
+[1h50min]
 
 M 112: Browser entity retriever. For now must be sync to get a string cursor
+	PLAN THIS -- note: node will be unhappy for a bit.  in fact, code coverage is going to be a big problem because of the conditional nature here.
+		- in fact maybe we should end up with a module that wraps both browser and node to one api?
+		- I think 112 is going to become a research task.
 	Does an XMLHttpRequest (Can we in IE?)
 	http://jasmine.github.io/2.0/ajax.html
 		doesn't do async.  Doesn't do timeouts.  So, you'll end up layering more on top
 
-
-- This parses badly
-	<?xml version="1.0"><!DOCTYPE one
-- no opening element gives weird error
--- next: 112
+-- next: 113
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)
@@ -57,8 +57,11 @@ BLOG IDEAS
 - Blog spec changes.
 - Blog: Asynchronous
 - SVCC: how to set up karma etc.
+- Art: What fun things can you do with an xml parser?
 =============================================
 CLEANUP
+- This parses badly
+	<?xml version="1.0"><!DOCTYPE one
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
 	- Currently working on separating parse from validate in getQuotedLiteral and _retrieveExternalId in -dtd.js
 		- this will allow us to move all of parseNotation over, and then quickly entity

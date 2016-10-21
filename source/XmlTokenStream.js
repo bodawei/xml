@@ -481,21 +481,28 @@ class XmlTokenStream {
                const notNameText = parsedNotation.nameChunk ? parsedNotation.nameChunk.text : '';
                const couldBeName = notNameText === '' ||
                   (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
-               const externalOrPublicId = this._retrieveExternalId([ '>' ]);
-
-               this._cursor.getSpace();
-               const closing = this._cursor.getMatch('>');
 
                this._assertSyntax(parsedNotation.nameChunk, ERRORS.NOTATIONDECL_NO_NAME);
                this._assertSyntax(couldBeName, ERRORS.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
                this._assertSyntax(parsedNotation.postNameSpaceChunk,
                   ERRORS.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
-               this._assertSyntax(externalOrPublicId, ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
-               this._assertSyntax(closing, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
+               if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
+                  this._reportSyntaxError(ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
+               } else {
+                  this._validateExternalId(parsedNotation.externalId);
+               }
+               this._assertSyntax(parsedNotation.close, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
 
-               const notationToken = new NotationToken(notNameText,
-                  externalOrPublicId ? externalOrPublicId.systemLiteral : undefined,
-                  externalOrPublicId ? externalOrPublicId.pubidLiteral : undefined);
+               let notationToken;
+               if (parsedNotation.externalId) {
+                  const externalId = parsedNotation.externalId;
+                  /* eslint-disable no-console */
+                  const publicId = externalId.publicId ? externalId.publicId.text : undefined;
+                  const systemId = externalId.systemId ? externalId.systemId.text : undefined;
+                  notationToken = new NotationToken(notNameText, systemId, publicId);
+               } else {
+                  notationToken = new NotationToken(notNameText);
+               }
 
                this._checkDeclarationState(start, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
 
@@ -771,6 +778,27 @@ class XmlTokenStream {
       }
 
       this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
+   }
+
+   _validateExternalId(externalId) {
+//      if (externalId.unknownType) {
+//         this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
+//         return;
+//      }
+
+//      if (externalId.typeText) {
+      this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
+         ERRORS.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
+//      }
+
+//      if (externalId.publicId) {
+//         const match = PUBID_CHARS.exec(externalId.publicId.text);
+//
+//         if (externalId.publicId.text && (!match || match[0] !== externalId.publicId.text)) {
+//            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_INVALID_CHARS,
+//                [ externalId.publicId.text[match[0].length] ]);
+//         }
+//      }
    }
 
    _closeDocType() {

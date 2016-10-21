@@ -267,8 +267,14 @@ describe('XmlTokenStream (dtd)', () => {
          expectTokenType(s, XmlToken.NOTATION_DECL);
       });
 
-      it('retrieves the name of the notation', () => {
-         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo">');
+      it('retrieves a token of type NOTATION with both a public and private value', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo" "bar" >');
+
+         expectTokenType(s, XmlToken.NOTATION_DECL);
+      });
+
+      it('retrieves the name of the notation with a system externalID', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName SYSTEM "foo">');
 
          expect(s.getNext().name).toEqual('notationName');
       });
@@ -290,7 +296,6 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('auto-terminates the notation token when the > is not found as expected', () => {
          const s = makeLaxExternalSubsetStream('<!NOTATION myNotation fish>');
-         ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_UNKNOWN);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_EXTERNALID);
          ignoreError(s, XmlErrorToken.ERROR.NOTATIONDECL_NO_CLOSE);
          let t = s.getNext(); // get the notation token
