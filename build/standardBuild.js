@@ -6,6 +6,9 @@
 'use strict';
 
 var jitGrunt = require('jit-grunt');
+var os = require('os');
+
+var coverageReport = require('./coverageReport.js');
 
 var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
@@ -36,6 +39,7 @@ module.exports = function standardBuild(grunt) {
    var browsers;
 
    jitGrunt(grunt);
+   coverageReport(grunt);
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
@@ -72,7 +76,8 @@ module.exports = function standardBuild(grunt) {
                   }
                },
                coverage: {
-                  reportDir: OUT_DIR + 'nodeCoverage',
+                  reportDir: OUT_DIR + 'nodeCoverage/node ' + process.version +
+                     ' (' + os.type() + ' ' + os.release() + ')/',
                   excludes: [ '**/*.test.js' ],
                   report: [
                      'lcov',
@@ -164,15 +169,22 @@ module.exports = function standardBuild(grunt) {
          testReport: {
             file: OUT_DIR + '/testCoverage/text.txt'
          }
+      },
+      coveragereport:  {
+         dist: {
+            dir: OUT_DIR
+         }
       }
    });
 
    grunt.loadNpmTasks('grunt-jasmine-node-coverage');
 
    grunt.registerTask('default', [
-      'eslint',
+      'clean',
       'test',
       'jasmine_node:dist',
+      'eslint',
+      'coveragereport',
       '_dist'
    ]);
 
