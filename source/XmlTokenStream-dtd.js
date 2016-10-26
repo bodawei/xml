@@ -2,6 +2,8 @@
 
 'use strict';
 
+const XmlToken = require('./XmlToken.js');
+
 class XmlTokenStreamDtd {
 
    /**********************************************************************\
@@ -49,6 +51,9 @@ class XmlTokenStreamDtd {
          nameChunk: The chunk with the entity name
          isParameter: True if this is a parameter entry declaration
          postNameSpaceChunk: The space after the name, if any.
+         valueQuoteChunk
+         valueChunk
+         externalId
       }
     SYNTAX
       // [70] EntityDecl  ::= GEDecl | PEDecl
@@ -72,6 +77,20 @@ class XmlTokenStreamDtd {
       }
 
       results.postNameSpaceChunk = cursor.getSpace();
+
+      // EntityDef or PEDef
+
+      const valueQuote = cursor.peekChar();
+      if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
+         results.valueQuoteChunk = cursor.getChar();     // consume the quote
+         this._getQuotedValue(cursor, valueQuote, { isEntityValue: true }, results);
+         results.valueChunk = [ ];
+         if (results.value[0]) {
+            results.valueChunk.push(new XmlToken(XmlToken.TEXT, results.value[0].text));
+         }
+      } else {
+         results.externalId = this._retrieveExternalId(cursor, [ '>' ], { isEntity: true });
+      }
 
       return results;
    }
@@ -425,8 +444,22 @@ class XmlTokenStreamDtd {
 
       // both SYSTEM and PUBLIC need to consume the systemLiteral
       result.betweenSpaceChunk = cursor.getSpace();
-      result.systemId = this._getQuotedLiteral(cursor);
 
+      // Entities may have an NDATA after the publicId, and no systemId
+      const possibleNData = cursor.getWord(terminators);
+
+      if (possibleNData && possibleNData.text.toLocaleUpperCase() === 'NDATA') {
+         cursor.unget(possibleNData);
+         if (result.betweenSpaceChunk) {
+            cursor.unget(result.betweenSpaceChunk);
+            delete result.betweenSpaceChunk;
+         }
+         return result;
+      } else if (possibleNData) {
+         cursor.unget(possibleNData);
+      }
+
+      result.systemId = this._getQuotedLiteral(cursor);
       return result;
    }
 

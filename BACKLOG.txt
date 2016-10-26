@@ -73,6 +73,13 @@ M 116 Flesh out EntityManager
 CLEANUP
 - entityRetriever--> XmlEntityRetriever
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
+   - extract entity nodtaionid extraction
+   - do doctype parsing
+   - carefully remove _retrieveExternalId, we may have lost some functionality
+   - need validation of externalId.  We aren't doing that in entity at all pretty weird
+   - convert parsed externalId into an Entitylocation.
+   - resolve what we're doing with values for entities and attdef.  Array of toekns, a chunk or what?
+   - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
 - Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
 
 RESEARCH

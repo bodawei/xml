@@ -2302,7 +2302,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can appear after the DOCTYPE with an internal subset in a document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE name [<!ENTITY f "f">]><name> ');
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE name [<!ENTITY entName "f">]><name> ');
             ignoreToken(s, XmlToken.XMLDECL);
             ignoreToken(s, XmlToken.DOCTYPE_START);
             ignoreToken(s, XmlToken.ENTITY_DECL);

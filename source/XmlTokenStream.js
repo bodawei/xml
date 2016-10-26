@@ -517,8 +517,6 @@ class XmlTokenStream {
                const parsedEntity = this._dtdParser.parseEntity(this._cursor);
                const enNameText = parsedEntity.nameChunk ? parsedEntity.nameChunk.text : '';
                let notationDataName;
-               let entityExternalId;
-               let value;
 
                this._assertSyntax(parsedEntity.nameChunk, ERRORS.ENTITYDECL_NO_NAME);
                this._assertSyntax((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
@@ -526,15 +524,7 @@ class XmlTokenStream {
                this._assertSyntax(parsedEntity.postNameSpaceChunk,
                   ERRORS.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
-               const valueQuote = this._cursor.peekChar();
-               if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
-                  this._cursor.getChar();     // consume the quote
-                  value = this._getQuotedValue(valueQuote, { isEntityValue: true });
-               } else {
-                  entityExternalId = this._retrieveExternalId([ '>' ], { isEntity: true });
-               }
-
-               if (entityExternalId) {
+               if (parsedEntity.externalId) {
                   const preNDataSpace = this._cursor.getSpace();
                   const ndataMarker = this._cursor.getWord([ '>' ]);
 
@@ -561,19 +551,20 @@ class XmlTokenStream {
                this._cursor.getSpace();
                const entityClosing = this._cursor.getMatch('>');
 
-               this._assertSyntax(value || entityExternalId, ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
+               this._assertSyntax(parsedEntity.valueChunk || parsedEntity.externalId,
+                  ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
                this._assertSyntax(entityClosing, ERRORS.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
                const entityToken = parsedEntity.isParameter ?
                   new ParameterEntityToken(enNameText,
-                     value,
-                     entityExternalId.systemLiteral,
-                     entityExternalId.pubidLiteral,
+                     parsedEntity.valueChunk,
+                     parsedEntity.externalId.systemLiteral,
+                     parsedEntity.externalId.pubidLiteral,
                      notationDataName) :
                   new EntityToken(enNameText,
-                     value,
-                     entityExternalId ? entityExternalId.systemLiteral : undefined,
-                     entityExternalId ? entityExternalId.pubidLiteral : undefined,
+                     parsedEntity.valueChunk,
+                     parsedEntity.externalId ? parsedEntity.externalId.systemLiteral : undefined,
+                     parsedEntity.externalId ? parsedEntity.externalId.pubidLiteral : undefined,
                      notationDataName);
 
                this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
@@ -876,8 +867,6 @@ class XmlTokenStream {
     options: Flags for special cases
       requireSystemOnPublic: true if the systemLiteral is required for
          a PUBLIC
-      isEntity: true if this is for an entity (which means NDATA could
-         be found instead of the system value on a PUBLIC)
 
     RETURN
     Either an object containing a "systemLiteral" or a "systemLiteral" and a
@@ -909,7 +898,7 @@ class XmlTokenStream {
          ERRORS.EXTERNALID_INVALID_CASE, [ upperCaseXIdType, xIdType.text ]);
 
       if (upperCaseXIdType === 'PUBLIC') {
-         publicText = this._getQuotedLiteral(true, false, terminators, ERRORS.EXTERNALID_NO_PUBLIC,
+         publicText = this._getQuotedLiteral(true, terminators, ERRORS.EXTERNALID_NO_PUBLIC,
             ERRORS.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
             ERRORS.EXTERNALID_PUBLIC_NO_QUOTE);
 
@@ -921,7 +910,7 @@ class XmlTokenStream {
       }
 
       // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
-      const systemText = this._getQuotedLiteral(options.requireSystemOnPublic, options.isEntity, terminators,
+      const systemText = this._getQuotedLiteral(options.requireSystemOnPublic, terminators,
          ERRORS.EXTERNALID_NO_SYSTEM,
          upperCaseXIdType === 'SYSTEM' ? ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE : ERRORS.EXTERNALID_PUBLIC_NO_SPACE,
          ERRORS.EXTERNALID_SYSTEM_NO_QUOTE);
@@ -940,7 +929,6 @@ class XmlTokenStream {
     PARAM
     literalRequired: True if this must find a value (will report an error
       if not found)
-    isEntity: true if this is for an entity.
     terminators: An array of values that may terminate this logical section
     literalMissing: Error code to report if the value is missing
     noBetweenSpace: Error code if there was no leading space
@@ -950,7 +938,7 @@ class XmlTokenStream {
     undefined, if no such value, or the string between the quotes.
    \**********************************************************************/
 
-   _getQuotedLiteral(literalRequired, isEntity, terminators, literalMissing, noBetweenSpace, noQuoteError) {
+   _getQuotedLiteral(literalRequired, terminators, literalMissing, noBetweenSpace, noQuoteError) {
       const betweenSpace = this._cursor.getSpace();
       const quote = this._cursor.peekChar(); // quote
       const isQuote = quote && (quote.text === '"' || quote.text === '\'');
@@ -966,17 +954,6 @@ class XmlTokenStream {
          return literal.chunk ? literal.chunk.text : '';
       }
 
-      if (isEntity) {
-         const possibleNData = this._cursor.getWord(terminators);
-         if (possibleNData && possibleNData.text.toLocaleUpperCase() === 'NDATA') {
-            this._cursor.unget(possibleNData);
-            if (betweenSpace) {
-               this._cursor.unget(betweenSpace);
-            }
-            return;
-         }
-      }
-
       let quoteIsTerminator = false;
       for (let index = 0; quote && index < terminators.length; index++) {
          if (terminators[index] === quote.text) {
@@ -986,7 +963,7 @@ class XmlTokenStream {
 
       if (quoteIsTerminator) {
          this._assertSyntax(!literalRequired, literalMissing);
-      } else if (quote) {
+      } else {
          this._reportSyntaxError(noQuoteError);
          const literal = this._cursor.getWord([]);
          return literal.text;
@@ -1391,7 +1368,6 @@ class XmlTokenStream {
     quoteChunk is the TextChunk containing the quote that opened the value
     options is an Object containing these values:
       isElementAttribute: true if this is an element attribute's value
-      isEntityValue: If true, expand parameter entity values
       nameChunk: If this is an element or xmldecl attribute value, this
                  the name of the attribute must be provided here.
 
@@ -1448,7 +1424,7 @@ class XmlTokenStream {
          }
       }
 
-      return options.isEntityValue ? result.value : result;
+      return result;
    }
 
    getNext() {
