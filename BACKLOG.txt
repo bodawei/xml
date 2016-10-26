@@ -41,10 +41,37 @@ M 116 Flesh out EntityManager
 	hasParameterEntity():{internal|external|undefined}
 	getEntity(name, callback) --> or proise
 	getParameterEntity(name, callback)
+   ----
+   remainder:
+         √ add should just take an entity declaration token
+            name
+            value
+            location
+            notationDataName
+      √ add an entityisUnparsed() function
+      √ add an parameterEntityIsUnparsed() function
+      √ get returns nothing if it is a notation token
+      √getRawEntity
+      √getRawParameterEntity
+
+      add EntityRetriever
+         modify a get to retrieve.
+            Get needs a callback!
+      add eager flag
+         modifies add to start a fetch and cache
+            sets flag so get knows
+         get should turn around and retrieve again if eager on
+            should put a callback in structure so that can call back if proper
+         need to modify XmlTokenStream to pass in an EntityLocation
+
+      Technically, the raw value would be an array of XmlToken values.
+         Can fake this for now by extracting the text.  Always will only be one for now.  But of coure offsets coming out of the cursor will be messed up
+
 
 -- next: 118
 =============================================
 CLEANUP
+- entityRetriever--> XmlEntityRetriever
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
 - Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
 

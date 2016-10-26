@@ -11,6 +11,7 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
+const EntityToken = XmlToken.EntityToken;
 
 const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
@@ -600,8 +601,8 @@ describe('XmlTokenStream', () => {
 
       it('recognizes entities within entities', () => {
          const s = makeStrictExternalEntityStream('<root>&level1;</root>');
-         s._entityManager.addEntity('level1', '<child>&level2;</child>');   // WHITE BOX
-         s._entityManager.addEntity('level2', '&quot;&#x41;');
+         s._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
+         s._entityManager.addEntity(new EntityToken('level2', '&quot;&#x41;'));
 
          let token = s.getNext();
          expect(token.type).toEqual(XmlToken.ELEMENT_START);
@@ -1934,8 +1935,8 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity references in entity references', () => {
             const s = makeStrictExternalEntityStream('<elemName attr1="tw&foo;o">');
-            s._entityManager.addEntity('foo', '<bar>&one;</bar>');   // WHITE BOX
-            s._entityManager.addEntity('one', '&quot;&#x41;');
+            s._entityManager.addEntity(new EntityToken('foo', '<bar>&one;</bar>'));   // WHITE BOX
+            s._entityManager.addEntity(new EntityToken('one', '&quot;&#x41;'));
             const t = s.getNext();
             const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
             startFoo.haveEntityData = true;
@@ -2674,8 +2675,8 @@ describe('XmlTokenStream', () => {
 
       it('reports the place and context of the error', () => {
          const s = makeLaxStream('<?xml version="1.0"?><root>&level1;</root>');
-         s._entityManager.addEntity('level1', '<child>&level2;</child>');   // WHITE BOX
-         s._entityManager.addEntity('level2', '<!--bug');
+         s._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
+         s._entityManager.addEntity(new EntityToken('level2', '<!--bug'));
 
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreToken(s, XmlToken.ELEMENT_START);   // root
