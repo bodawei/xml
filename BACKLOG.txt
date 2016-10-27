@@ -1,4 +1,4 @@
-=============================================
+calc=============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  6/16 Sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
  6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
@@ -13,7 +13,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  5 Note11
 10/16 Sprint 12: 121sp [7XL 10M 21S]. Average: 5 per sprint = 25 sprints. ACTUAL:  2 Note 12
 10/19 Sprint 13: 113sp [7XL 8M 19S]. Average: 5 per sprint = 23 sprints. ACTUAL: 2 Note 13
-10/24 Sprint 14: 106sp [7XL 8M 12S]. Average: 5 per sprint = 21 sprints. ACTUAL:
+10/24 Sprint 14: 106sp [7XL 8M 12S]. Average: 5 per sprint = 21 sprints. ACTUAL: 0 Note14
+10/27 Sprint 15: 106sp [7XL 8M 12S]. Average: 5 per sprint = 21 sprints. ACTUAL: 
 
 S 114 Basic EntityHandler 
 	This is a wrapper around the main parser (should be async in style)
@@ -55,17 +56,17 @@ M 116 Flesh out EntityManager
       √getRawParameterEntity
 
       add EntityRetriever
-         modify a get to retrieve.
-            Get needs a callback!
+	change EntityRetriever to:
+	get(location, callback(error, success))
       add eager flag
          modifies add to start a fetch and cache
-            sets flag so get knows
-         get should turn around and retrieve again if eager on
-            should put a callback in structure so that can call back if proper
-         need to modify XmlTokenStream to pass in an EntityLocation
+            sets flag so get knows is fetching
 
-      Technically, the raw value would be an array of XmlToken values.
-         Can fake this for now by extracting the text.  Always will only be one for now.  But of coure offsets coming out of the cursor will be messed up
+      get should turn around and retrieve again if eager on
+            should put a callback in structure so that can call back if proper
+
+      need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
+
 
 
 -- next: 118
@@ -96,6 +97,8 @@ BUILD
 	59:M: Build a reporter for karma which dumps testing results to a file
 		- this is in prep for adding this info to the checkin
 		- NS: Need docuemntation for karma reporters
+		- Can use onBrowserComplete to get nice summary info, and write out per browser.
+		- Then can do a trivial thing like we are doing with coverage
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
@@ -109,6 +112,7 @@ BUILD
 		- include a time with percent change from previous commit
 	git hooks should validate checkin comment has bug number and is the right format.
 111: Get Vivaldi to work
+Create a json reporter for karma which is more complete, warns of duplicate test names, and document the api
 41:XL:Investigate Gulp
 
 PROJECT
@@ -151,6 +155,11 @@ M 115 Advanced EntityHandler
 		if JIT waits until a request and then fetches
 	returns a stream
 		This will be a dummy stream if we have already retrieve the whole thing.
+71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
+	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
+      Technically, the raw value would be an array of XmlToken values.
+         Can fake this for now by extracting the text.  Always will only be one for now.  But of coure offsets coming out of the cursor will be messed up
+- entityRetriever needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
 21:XL Read element content structure
 24:XL read conditional sections
@@ -158,8 +167,6 @@ M 115 Advanced EntityHandler
 26:XL Deal with parameter entities
 	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
 	- otherwise, just notice %value; and accept if in right place or barf and treat as &;
-71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
-	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
 M 112: Browser entity retriever. For now must be sync to get a string cursor
 	PLAN THIS -- note: node will be unhappy for a bit.  in fact, code coverage is going to be a big problem because of the conditional nature here.
 		- in fact maybe we should end up with a module that wraps both browser and node to one api?
@@ -868,3 +875,10 @@ Sprint 13
 Note13
 ------
 Disasterous sprint.  I finished 108, but as I was finishing it, realized I was going to have a problem with conditional code... using HTTP in node and XmlHttpRequest was going to mess up my code coverage numbers.  Then I realized I need to be able to load files in node, and you can't do that with XmlHttpRequest. And then began to also rethink what I'd been thinking about with the pluggable entity retriever.  Basically, I realized I needed to think about what I was trying to do more.  So, I spent the remainder of the sprint starting to think about this.  I also think that I really need to be thinking about what the async pattern is going to be.
+
+Sprint 14
+=========
+
+Note14
+Did do good research for the build part, planning on getting a karma report the next time.
+Coding part didn't go so well. Put time into both tasks, finished neither.  The first one turned out to be too big, and involved adding async api's to the xml token stream.  Implemented a promise-based one as planned, but in practice it felt too weird.  So, decided to do a different api.  Wasn't sure I could finish in time and do next task, so started on it, but only gave it an hour, and got mostly through.  Both will be easy to get done in the next sprint.
