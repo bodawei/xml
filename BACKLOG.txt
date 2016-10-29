@@ -1,20 +1,24 @@
-calc=============================================
+=============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 6/16 Sprint 1: 196story points. Assumed: 7 per sprint = 28 sprints. ACTUAL: 8
- 6/25 Sprint 2: 174story points. Average: 8 per sprint = 22 sprints. ACTUAL: 5
- 7/06 Sprint 3: 171story points. Average: 7 per sprint = 25 sprints. ACTUAL: 10
- 7/15 Sprint 4: 166sp [12XL 9M 19S]. Average: 7 per sprint = 24 sprints. ACTUAL: 7
- 7/22 Sprint 5: 159sp [12XL 8M 15S]. Average: 5 per sprint = 32 sprints. ACTUAL: 6 see Note5
- 7/30 Sprint 6: 153sp [11XL 9M 16S]. Average: 5 per sprint = 31 sprints. ACTUAL: 5
- 9/22 Sprint 7: 144sp [10XL 9M 18S]. Average: 5 per sprint = 29 sprints. ACTUAL: 6 see Note7
- 9/29 Sprint 8: 133sp [9XL 8M 19S]. Average: 5 per sprint = 27 sprints. ACTUAL: 6 see Note8
-10/1  Sprint 9: 120sp [8XL 7M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL: 3 see Note9
-10/6  Sprint 10: 117sp [8XL 7M 16S]. Average: 5 per sprint = 24 sprints. ACTUAL: 5 see Note10
-10/13 Sprint 11: 117sp [8XL 6M 19S]. Average: 5 per sprint = 24 sprints. ACTUAL:  5 Note11
-10/16 Sprint 12: 121sp [7XL 10M 21S]. Average: 5 per sprint = 25 sprints. ACTUAL:  2 Note 12
-10/19 Sprint 13: 113sp [7XL 8M 19S]. Average: 5 per sprint = 23 sprints. ACTUAL: 2 Note 13
-10/24 Sprint 14: 106sp [7XL 8M 12S]. Average: 5 per sprint = 21 sprints. ACTUAL: 0 Note14
-10/27 Sprint 15: 106sp [7XL 8M 12S]. Average: 5 per sprint = 21 sprints. ACTUAL: 
+ 6/16 Sprint 1: 196story points. Assumed: 7/sprint = 28 sprints. ACTUAL: 8
+ 6/25 Sprint 2: 174story points. Avg: 8/sprint = 22 sprints. ACTUAL: 5
+ 7/06 Sprint 3: 171story points. Avg: 7/sprint = 25 sprints. ACTUAL: 10
+ 7/15 Sprint 4: 166sp [12XL 9M 19S]. Avg: 7/sprint = 24 sprints. ACTUAL: 7
+ 7/22 Sprint 5: 159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6 see Note5
+ 7/30 Sprint 6: 153sp [11XL 9M 16S]. Avg: 5/sprint = 31 sprints. ACTUAL: 5
+ 9/22 Sprint 7: 144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6 see Note7
+ 9/29 Sprint 8: 133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6 see Note8
+10/1  Sprint 9: 120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3 see Note9
+10/6  Sprint 10: 117sp [8XL 7M 16S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5 see Note10
+10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5 Note11
+10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2 Note 12
+10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2 Note 13
+10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0 Note14
+10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 
+
+Notes
+- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
+-- Might be good in last 5 minutes to think some about subsequent things outside of sprint so we're more preapared
 
 S 114 Basic EntityHandler 
 	This is a wrapper around the main parser (should be async in style)
@@ -24,8 +28,30 @@ S 114 Basic EntityHandler
 	Main parser should stop filling in references in getRererence
 	When it encounters an entity reference, will retrieve it from the entity manager and fill it in
 		in terms of async, it may have to wait for that to be retrieved and parse.
-   - 105 min.  This is imping, but the API is horrible.
+√ S 118 Get async behavior in XmlTokenStream
+√ S 119 Get exceptions handled in XmlTokenStream
+	pull out of reportError, and put in nextToken(), 
+	break nextToken into a private routine called by both nextToken and tokenLoop, and the public one which will throw an exception
+		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
+	73:S: If error is thrown, we can still call getNextToken.  Should block that.
 
+M 120 get Async behavior in EntityStream
+- First part, get the read and loop working without replacing tokens, including testing.
+	In particular, we can't do a passthrough because the lower stream may be generating events while waiting for the upper.  We actually have to queue those
+	We can't rely on read, instead of events.  If anyone else has events, it will consume our items first.
+	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
+	So the solution here is to queue events from the stream, and then our read reads from there.
+	Whenever something queued, we start a loop
+- Second part is to start substituting.
+	- for references, we push the exisitng queue (which will have to capture tokens from underlying) and start a new one
+		read will now read from the queue that comes from that. 
+		if that is closed, then read notices and switches (the key point here is that read does the pushing and popping)
+			- must add closed state to XmlTokenStream
+	- for attributes, basically the same, but we don't release the element token until all attributes done.
+		- theoretiecally could be doing multiple attributes at once.
+- Note: if we did the alternate, we could have a very simple read and eventloop. in this case, read just reads off that queue, until it is closed.  Probablby the logic is almost the same, but there may be value in encapsulating it.
+
+----
 M 116 Flesh out EntityManager
 	_entityRetriever: Constructor
 	_map of EntityName -> {
@@ -55,18 +81,17 @@ M 116 Flesh out EntityManager
       √getRawEntity
       √getRawParameterEntity
 
-      add EntityRetriever
+S 121 add EntityRetriever
 	change EntityRetriever to:
 	get(location, callback(error, success))
       add eager flag
-         modifies add to start a fetch and cache
             sets flag so get knows is fetching
 
-      get should turn around and retrieve again if eager on
+S 122 addEntity should start fetching if eager flag on
+S 123 get should turn around and retrieve again if eager on
             should put a callback in structure so that can call back if proper
-
-      need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
-
+S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
+M 125 Extract entity replacement from XmlTokenStream into EntityStream
 
 
 -- next: 118
@@ -116,8 +141,7 @@ Create a json reporter for karma which is more complete, warns of duplicate test
 41:XL:Investigate Gulp
 
 PROJECT
---- technical debt [4m 10s]
-73:S: If error is thrown, we can still call getNextToken.  Should block that.
+--- technical debt [4m 9s]
 58:S: Remove data prop on token, and make all token types more explicit
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show

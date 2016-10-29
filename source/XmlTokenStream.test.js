@@ -100,6 +100,528 @@ describe('XmlTokenStream', () => {
 
    });
 
+   describe('on()', () => {
+      let token;
+      let errorObject;
+      let count;
+
+      beforeEach(() => {
+         jasmine.clock().install();
+         count = 0;
+         token = undefined;
+         errorObject = undefined;
+      });
+
+      afterEach(() => {
+         jasmine.clock().uninstall();
+      });
+
+      it('registers a "data" callback', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         s.on('data', (error, data) => {
+            if (count === 0) {
+               errorObject = error;
+               token = data;
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(errorObject).toBeUndefined();
+      });
+
+      it('registers a "token" callback', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         s.on('token', (error, data) => {
+            if (count === 0) {
+               errorObject = error;
+               token = data;
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(errorObject).toBeUndefined();
+      });
+
+      it('registers an "error" callback', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         s.on('error', (error, data) => {
+            if (count === 0) {
+               errorObject = error;
+               token = data;
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(token).toBeUndefined();
+         expect(errorObject.code).toEqual(XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
+      });
+
+      it('will not register the same callback multiple times', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         function callback() {
+            count++;
+         }
+
+         s.on('data', callback);
+         s.on('data', callback);
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(3);
+      });
+
+      it('throws an exception if an unknown event is registered', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         expect(() => {
+            s.on('bogus', () => {});
+         }).toThrowError('Event "bogus" is not known. Must be one of: error, token, data.');
+      });
+
+      it('throws an exception if no callback is provided', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         expect(() => {
+            s.on('data');
+         }).toThrowError('Callback must be a function with signature "function(error, data)".');
+      });
+
+   });
+
+   describe('off()', () => {
+      let count;
+
+      beforeEach(() => {
+         jasmine.clock().install();
+         count = 0;
+      });
+
+      afterEach(() => {
+         jasmine.clock().uninstall();
+      });
+
+      it('removes a "data" event handler', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         function remove() {
+            s.off('data', callback);
+         }
+
+         function callback() {
+            count++;
+            remove();
+         }
+
+         s.on('data', callback);
+
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(1);
+      });
+
+      it('registers a "token" callback', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         function remove() {
+            s.off('token', callback);
+         }
+
+         function callback() {
+            count++;
+            remove();
+         }
+
+         s.on('token', callback);
+
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(1);
+      });
+
+      it('registers an "error" callback', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         function remove() {
+            s.off('error', callback);
+         }
+
+         function callback() {
+            count++;
+            remove();
+         }
+
+         s.on('error', callback);
+
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(1);
+      });
+
+      it('throws no error if a there are no callbacks for the specified event', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+
+         expect(() => {
+            s.off('data', () => {});
+         }).not.toThrow();
+
+      });
+
+      it('throws no error if a callback that is not there is removed', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+         s.on('data', () => {});
+
+         expect(() => {
+            s.off('data', () => {});
+         }).not.toThrow();
+
+      });
+
+      it('can remove one handler without removing all (very whitebox)', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one>');
+         let count = 0;
+
+         function callback1() {
+            count++;
+         }
+         function callback2() {
+            count += 10;
+         }
+
+         s.on('data', callback1);
+         s.on('data', callback2);
+
+         s.off('data', callback2);
+
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(3);
+      });
+
+      it('throws an exception if an unknown event tries to be turned off', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         expect(() => {
+            s.off('bogus', () => {});
+         }).toThrowError('Event "bogus" is not known. Must be one of: error, token, data.');
+      });
+
+      it('throws an exception if no callback is provided', () => {
+         const s = makeLaxExternalEntityStream('<?XML ?>');
+
+         expect(() => {
+            s.off('data');
+         }).toThrowError('Callback must be a function with signature "function(error, data)".');
+      });
+
+   });
+
+   describe('event delivery', () => {
+      let count;
+
+      beforeEach(() => {
+         jasmine.clock().install();
+         count = 0;
+      });
+
+      afterEach(() => {
+         jasmine.clock().uninstall();
+      });
+
+      it('delivers all tokens', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one>');
+
+         s.on('data', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  break;
+               case 1:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 2:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(3);
+      });
+
+      it('can have a read done while in the handler', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one>');
+
+         s.on('data', (error, data) => {
+            if (count === 0) {
+               const next = s.getNext();
+               expect(next.type).toEqual(XmlToken.CHARDATA);
+               count += 10;
+            }
+
+            switch (count) {
+               case 10:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  break;
+               case 11:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(12);
+      });
+
+      it('delivers only errors to "error" handler', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+
+         s.on('error', (error) => {
+            switch (count) {
+               case 0:
+                  expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+                  break;
+               default:
+                  expect(error).toEqual('this should not happen');
+            }
+
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(1);
+      });
+
+      it('delivers only tokens to "token" handler', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+
+         s.on('token', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  break;
+               case 1:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 2:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  break;
+               case 3:
+                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(4);
+      });
+
+      it('delivers tokens and errors to "data" handler in a lax stream', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+
+         s.on('data', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  break;
+               case 1:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 2:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  break;
+               case 3:
+                  expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+                  break;
+               case 4:
+                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(5);
+      });
+
+      it('delivers tokens and errors to "data" handler in a strict stream without throwing an exception', () => {
+         const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+
+         s.on('data', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  break;
+               case 1:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 2:
+                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  break;
+               case 3:
+                  expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(4);
+      });
+
+      it('delivers no data after an error token with a strit stream', () => {
+         const s = makeStrictExternalEntityStream('foo<?xml encoding="utf-8"?>');
+
+         s.on('data', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 1:
+                  expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(2);
+      });
+
+      it('delivers data after an error token with a lax stream', () => {
+         const s = makeLaxExternalEntityStream('foo<?xml encoding="utf-8"?>');
+
+         s.on('data', (error, data) => {
+            switch (count) {
+               case 0:
+                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  break;
+               case 1:
+                  expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+                  break;
+               case 2:
+                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  break;
+               default:
+                  expect(data).toEqual('this should not happen');
+            }
+            count++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(3);
+      });
+
+   });
+
+   describe('getNext()', () => {
+
+      it('retrieves all tokens', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one>');
+
+         let token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.CHARDATA);
+
+         token = s.getNext();
+         expect(token.type).toEqual(XmlToken.ELEMENT_END);
+
+         token = s.getNext();
+         expect(token).toBeUndefined();
+      });
+
+      it('will not start a subsequent async call if one is already in progress', () => {
+         const s = makeLaxExternalEntityStream('<one>foo</one>');
+         // We have to fake async behavior because the stream isn't fully async-capable yet.
+         spyOn(s, '_innerNext');
+
+         const token = s.getNext();
+         expect(token).toBeUndefined();
+
+         s.getNext();
+         expect(s._innerNext.calls.count()).toEqual(1);
+      });
+
+      it('throws an error if an error is found in a strict stream', () => {
+         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
+
+         ignoreToken(s, XmlToken.CHARDATA);
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('"xml" must be lower case. Found "XML".');
+      });
+
+      it('throws no error if an error is found in a lax stream', () => {
+         const s = makeLaxExternalEntityStream('foo<?XML encoding="ff"?>');
+
+         ignoreToken(s, XmlToken.CHARDATA);
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrow();
+      });
+
+      it('will deliver no other data after an exception in a strict stream', () => {
+         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
+
+         ignoreToken(s, XmlToken.CHARDATA);
+         expect(() => {
+            s.getNext();
+         }).toThrowError('"xml" must be lower case. Found "XML".');
+
+         expect(s.getNext()).toBeUndefined();
+      });
+
+      it('will deliver other data after an exception in a lax stream', () => {
+         const s = makeLaxExternalEntityStream('foo<?xml encoding="ff"?>');
+
+         ignoreToken(s, XmlToken.CHARDATA);
+         ignoreError(s, XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
+
+         expectTokenType(s, XmlToken.TEXTDECL);
+      });
+
+      it('will deliver no other data after an exception in a strict stream with an error in the dtd', () => {
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo  [] ');
+
+         ignoreToken(s, XmlToken.XMLDECL);
+         ignoreToken(s, XmlToken.DOCTYPE_START);
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Missing closing ">" for in the document type.');
+
+         expect(s.getNext()).toBeUndefined();
+      });
+
+   });
+
    describe('hasNext()', () => {
 
       it('returns true if there is a token', () => {
@@ -117,6 +639,17 @@ describe('XmlTokenStream', () => {
 
       it('returns false if there is none', () => {
          const s = makeStrictExternalEntityStream('');
+
+         expect(s.hasNext()).toEqual(false);
+      });
+
+      it('will deliver false after an exception in a strict stream', () => {
+         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
+
+         ignoreToken(s, XmlToken.CHARDATA);
+         expect(() => {
+            s.getNext();
+         }).toThrowError('"xml" must be lower case. Found "XML".');
 
          expect(s.hasNext()).toEqual(false);
       });
@@ -2611,36 +3144,22 @@ describe('XmlTokenStream', () => {
 
    describe('_reportSyntaxError()', () => {
 
-      it('throws an error if in strict mode', () => {
-         const s = makeStrictStream('');
-
-         expect(() => {
-            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN, []);
-         }).toThrowError('Unkown "<!" item.');
-      });
-
       it('includes an error token in the error', () => {
          const s = makeStrictStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
             XmlErrorToken.ERROR.BANGITEM_UNKNOWN,
             'Unkown "<!" item.');
 
+         s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN, []);
+
          try {
-            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN, []);
+            s.getNext();
          } catch (error) {
             expect(error.details).toEqual(expected);
          }
       });
 
-      it('throws no error if in lax mode', () => {
-         const s = makeLaxStream('');
-
-         expect(() => {
-            s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_UNKNOWN);
-         }).not.toThrow();
-      });
-
-      it('queues a syntax error token if in lax mode', () => {
+      it('queues a syntax error token', () => {
          const s = makeLaxStream('');
          const expected = new XmlErrorToken(XmlToken.SYNTAX_ERROR,
             XmlErrorToken.ERROR.BANGITEM_UNKNOWN,

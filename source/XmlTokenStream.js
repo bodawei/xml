@@ -35,6 +35,7 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
+const EVENT_NAMES = [ 'error', 'token', 'data' ];
 
 const ENTITY_TYPE = {
    DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
@@ -86,6 +87,8 @@ class XmlTokenStream {
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
       this._state = STATE.START;
+      this._handlers = {};
+      this._errored = false;
 
       this._options = {
          lax: false,
@@ -101,6 +104,190 @@ class XmlTokenStream {
       }
 
       this._entityType = this._options.entityType;
+   }
+
+   getNext() {
+      const token = this._innerGetNext();
+
+      if (token instanceof XmlErrorToken && !this._options.lax) {
+         const e = new Error(token.message);
+         e.details = token;
+         throw e;
+      }
+
+      return token;
+   }
+
+   _innerGetNext() {
+      let token;
+
+      if (this._errored && !this._options.lax) {
+         return;
+      }
+
+      if (this._pendingTokens.length > 0) {
+         token = this._pendingTokens.shift();
+
+         if (token instanceof XmlErrorToken) {
+            this._errored = true;
+         }
+
+         return token;
+      }
+
+      this._nextToken();
+
+      token = this._pendingTokens.shift();
+
+      if (!token && this._cursorContexts.length > 0) {
+         const context = this._cursorContexts.pop();
+         this._cursor = context.cursor;
+         this._getting = false;
+         return context.token;   // this will never be an error token, so don't set errored
+      }
+
+      if (token instanceof XmlErrorToken) {
+         this._errored = true;
+      }
+      return token;
+   }
+
+   hasNext() {
+      if (this._errored && !this._options.lax) {
+         return false;
+      }
+      if (this._pendingTokens.length > 0) {
+         return true;
+      }
+
+      this._nextToken();
+
+      return this._pendingTokens.length > 0;
+   }
+
+   /**********************************************************************\
+    on() sets up an event handler that will be called on certain events.
+    If this is called repeatedly with the same callback for the same event,
+    subsequent ones will be ignored.
+
+    PARAM
+    eventName: The name of the event to listen to. one of: 'data',
+      'error', or 'token'
+    callback: The function to call on the specified event. The signature
+      is function(error, token).
+   \**********************************************************************/
+
+   on(eventName, callback) {
+      this._assertEventParams(eventName, callback);
+      this._handlers[eventName] = this._handlers[eventName] || [];
+
+      if (this._handlers[eventName].indexOf(callback) !== -1) {
+         return;
+      }
+
+      this._handlers[eventName].push(callback);
+
+      // Do not call loop immediately, as caller may want to set up multiple subscriptions before getting notified
+      setTimeout(() => {
+         this._tokenLoop();
+      }, 0);
+   }
+
+   /**********************************************************************\
+    off() removes an event handler that was set up with on().  If the
+    handler isn't present, this silently does nothing.
+
+    PARAM
+    eventName: The name of the event to listen to. one of: 'data',
+      'error', or 'token'
+    callback: The function to call on the specified event. The signature
+      is function(error, token).
+   \**********************************************************************/
+
+   off(eventName, callback) {
+      this._assertEventParams(eventName, callback);
+
+      if (!this._handlers[eventName]) {
+         return;
+      }
+
+      const index = this._handlers[eventName].indexOf(callback);
+
+      if (index !== -1) {
+         this._handlers[eventName].splice(index, 1);
+         if (this._handlers[eventName].length === 0) {
+            delete this._handlers[eventName];
+         }
+      }
+   }
+
+   _assertEventParams(eventName, callback) {
+      if (EVENT_NAMES.indexOf(eventName) === -1) {
+         throw new Error('Event "' + eventName + '" is not known. Must be one of: ' + EVENT_NAMES.join(', ') + '.');
+      }
+      if (!(callback instanceof Function)) {
+         throw new Error('Callback must be a function with signature "function(error, data)".');
+      }
+   }
+
+   _notifyHandlersSuccess(eventName, data) {
+      if (!this._handlers[eventName]) {
+         return;
+      }
+
+      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
+
+      for (let index = 0; index < handlers.length; index++) {
+         handlers[index](undefined, data);
+      }
+   }
+
+   _notifyHandlersError(eventName, error) {
+      if (!this._handlers[eventName]) {
+         return;
+      }
+
+      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
+
+      for (let index = 0; index < handlers.length; index++) {
+         handlers[index](error);
+      }
+   }
+
+   _tokenLoop() {
+      if (this._looping) {
+         return;
+      }
+
+      if (!this._handlers.error &&
+         !this._handlers.data &&
+         !this._handlers.token) {
+         return;
+      }
+
+      this._looping = true;
+
+      while (this._looping) {
+         const token = this._innerGetNext();
+
+         if (token) {
+            if (token instanceof XmlErrorToken) {
+               this._notifyHandlersError('data', token);
+               this._notifyHandlersError('error', token);
+            } else {
+               this._notifyHandlersSuccess('data', token);
+               this._notifyHandlersSuccess('token', token);
+            }
+         } else {
+            this._looping = false;
+         }
+      }
+   }
+
+   _pushToken(token) {
+      this._pendingTokens.push(token);
+      this._getting = false;
+      this._tokenLoop();
    }
 
    _noEnvelopers() {
@@ -123,6 +310,17 @@ class XmlTokenStream {
    }
 
    _nextToken() {
+
+      if (this._getting) {
+         return;
+      }
+      this._getting = true;
+
+      this._innerNext();
+   }
+
+   // This is separate from _nextToken to support a pseudo-async test case until we get full async capabilities in
+   _innerNext() {
       let type;
       let finished = false;
 
@@ -189,8 +387,6 @@ class XmlTokenStream {
 
          finished = this._noEnvelopers();
       }
-
-      return this._pendingTokens.shift();
    }
 
    _getS() {
@@ -200,7 +396,7 @@ class XmlTokenStream {
          this._assertSyntax(this._state !== STATE.START, ERRORS.SPACE_INVALID_CONTEXT, space.startOffset, space);
       }
 
-      this._pendingTokens.push(new SpaceToken(space.text, this._cursor.getRecentChunks()));
+      this._pushToken(new SpaceToken(space.text, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -218,7 +414,7 @@ class XmlTokenStream {
             if (content.chunk) {
                this._checkContentState(content.chunk,
                   ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
-               this._pushToken(XmlToken.CHARDATA, content.chunk.text);
+               this._pushTokenWrapper(XmlToken.CHARDATA, content.chunk.text);
             }
 
             content = {
@@ -231,7 +427,7 @@ class XmlTokenStream {
 
          this._checkContentState(content.chunk,
             ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
-         this._pushToken(XmlToken.CHARDATA, content.chunk.text);
+         this._pushTokenWrapper(XmlToken.CHARDATA, content.chunk.text);
       } while (content.terminator && content.terminator !== '<');
    }
 
@@ -266,7 +462,7 @@ class XmlTokenStream {
             return [ new XmlToken(XmlToken.CHAR_REF, character) ];
          } else {
             this._checkContentState(start, ERRORS.CHARREF_INVALID_DOC_CONTEXT, ERRORS.CHARREF_INVALID_SUBSET_CONTEXT);
-            this._pushToken(XmlToken.CHAR_REF, character);
+            this._pushTokenWrapper(XmlToken.CHAR_REF, character);
          }
       } else {
          const name = this._cursor.getWord([ ';' ]);
@@ -300,7 +496,7 @@ class XmlTokenStream {
             this._checkContentState(start,
                ERRORS.REFERENCE_INVALID_DOC_CONTEXT, ERRORS.REFERENCE_INVALID_SUBSET_CONTEXT);
             startToken.chunks = this._cursor.getRecentChunks();
-            this._pendingTokens.push(startToken);
+            this._pushToken(startToken);
 
             if (entityCursor) {
                const endToken = new XmlToken(XmlToken.ENTITY_END, entityName);
@@ -314,7 +510,7 @@ class XmlTokenStream {
 
                this._cursor = entityCursor;
             } else {
-               this._pushToken(XmlToken.ENTITY_END, entityName);
+               this._pushTokenWrapper(XmlToken.ENTITY_END, entityName);
             }
          }
       }
@@ -407,7 +603,7 @@ class XmlTokenStream {
 
       const content = results.chunk ? results.chunk.text : undefined;
       this._checkPiAndCommentState(start, ERRORS.COMMENT_INVALID_CONTEXT);
-      this._pendingTokens.push(new CommentToken(content, this._cursor.getRecentChunks()));
+      this._pushToken(new CommentToken(content, this._cursor.getRecentChunks()));
    }
 
    _getBangItem(start) {
@@ -466,7 +662,7 @@ class XmlTokenStream {
                   this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
                }
 
-               this._pendingTokens.push(docToken);
+               this._pushToken(docToken);
 
                if (openDtd) {
                   this._pushEnveloper(']', docToken);
@@ -506,7 +702,7 @@ class XmlTokenStream {
 
                this._checkDeclarationState(start, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
 
-               this._pendingTokens.push(notationToken);
+               this._pushToken(notationToken);
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
             // find something unexpected (e.g. stuff after NDATA, or no ExternalId or EntityValue)
@@ -569,7 +765,7 @@ class XmlTokenStream {
 
                this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
 
-               this._pendingTokens.push(entityToken);
+               this._pushToken(entityToken);
                return;
             case 'ELEMENT':
                let contentText;
@@ -625,7 +821,7 @@ class XmlTokenStream {
 
                this._checkDeclarationState(start, ERRORS.ELEMENTDECL_INVALID_CONTEXT);
 
-               this._pendingTokens.push(new ElementDeclarationToken(nameText, contentText));
+               this._pushToken(new ElementDeclarationToken(nameText, contentText));
                return;
             case 'ATTLIST':
                const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
@@ -763,7 +959,7 @@ class XmlTokenStream {
 
                this._checkDeclarationState(start, ERRORS.ATTLISTDECL_INVALID_CONTEXT);
 
-               this._pendingTokens.push(new AttributeListDeclarationToken(elName, attributes));
+               this._pushToken(new AttributeListDeclarationToken(elName, attributes));
                return;
          }
       }
@@ -800,7 +996,7 @@ class XmlTokenStream {
       if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
          this._state = STATE.PROLOG;
       }
-      this._pendingTokens.push(new DocTypeEndToken());
+      this._pushToken(new DocTypeEndToken());
    }
 
    _checkDeclarationState(start, error) {
@@ -841,7 +1037,7 @@ class XmlTokenStream {
 
          this._checkContentState(start, ERRORS.CDATA_INVALID_DOC_CONTEXT, ERRORS.CDATA_INVALID_SUBSET_CONTEXT);
 
-         this._pushToken(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
+         this._pushTokenWrapper(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
          this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
@@ -1014,7 +1210,7 @@ class XmlTokenStream {
 
          this._checkPiAndCommentState(start, ERRORS.PI_INVALID_CONTEXT);
 
-         this._pendingTokens.push(new ProcessingInstructionToken(targetName, content, this._cursor.getRecentChunks()));
+         this._pushToken(new ProcessingInstructionToken(targetName, content, this._cursor.getRecentChunks()));
       }
    }
 
@@ -1132,7 +1328,7 @@ class XmlTokenStream {
          this._reportSyntaxError(ERRORS.XMLDECL_INVALID_CONTEXT);
       }
 
-      this._pendingTokens.push(isXmlDecl ?
+      this._pushToken(isXmlDecl ?
          new DeclarationToken(params, this._cursor.getRecentChunks()) :
          new TextDeclarationToken(params, this._cursor.getRecentChunks()));
    }
@@ -1232,7 +1428,7 @@ class XmlTokenStream {
             break;
       }
 
-      this._pendingTokens.push(xtoken);
+      this._pushToken(xtoken);
    }
 
    /*
@@ -1427,36 +1623,6 @@ class XmlTokenStream {
       return result;
    }
 
-   getNext() {
-      if (this._pendingTokens.length > 0) {
-         return this._pendingTokens.shift();
-      }
-
-      let token = this._nextToken();
-
-      if (!token && this._cursorContexts.length > 0) {
-         const context = this._cursorContexts.pop();
-         this._cursor = context.cursor;
-         token = context.token;
-      }
-
-      return token;
-   }
-
-   hasNext() {
-      if (this._pendingTokens.length > 0) {
-         return true;
-      }
-
-      const token = this._nextToken();
-
-      if (token) {
-         this._pendingTokens.push(token);
-      }
-
-      return this._pendingTokens.length > 0;
-   }
-
    _assertSyntax(condition, code, params, place, context) {
       if (!condition) {
          this._reportSyntaxError(code, params, place, context);
@@ -1493,26 +1659,14 @@ class XmlTokenStream {
          stuff = [ context.startOffset ].concat(superContexts);
       }
 
-      const error = new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, stuff);
-
-      if (this._options.lax) {
-         this._pendingTokens.push(error);
-         return;
-      }
-
-      const e = new Error(message);
-      e.details = error;
-
-      throw e;
+      this._pushToken(new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, stuff));
    }
 
-   _pushToken(type, data) {
+   _pushTokenWrapper(type, data) {
       const xtoken = new XmlToken(type, data);
       xtoken.chunks = this._cursor.getRecentChunks();
 
-      this._pendingTokens.push(xtoken);
-
-      return xtoken;
+      this._pushToken(xtoken);
    }
 
 }
