@@ -42,6 +42,8 @@ M 120 get Async behavior in EntityStream
 	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
 	So the solution here is to queue events from the stream, and then our read reads from there.
 	Whenever something queued, we start a loop
+
+// need a way to share theon/off etc between the streams. right now is a straight copy and paste
 - Second part is to start substituting.
 	- for references, we push the exisitng queue (which will have to capture tokens from underlying) and start a new one
 		read will now read from the queue that comes from that. 
