@@ -20,7 +20,7 @@ Notes
 - I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
 -- Might be good in last 5 minutes to think some about subsequent things outside of sprint so we're more preapared
 
-S 114 Basic EntityHandler 
+xS 114 Basic EntityHandler 
 	This is a wrapper around the main parser (should be async in style)
 		getNext():Promise
 		mightHaveMore():Boolean
@@ -35,7 +35,7 @@ S 114 Basic EntityHandler
 		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
 	73:S: If error is thrown, we can still call getNextToken.  Should block that.
 
-M 120 get Async behavior in EntityStream
+√ M 120 get Async behavior in EntityStream
 - First part, get the read and loop working without replacing tokens, including testing.
 	In particular, we can't do a passthrough because the lower stream may be generating events while waiting for the upper.  We actually have to queue those
 	We can't rely on read, instead of events.  If anyone else has events, it will consume our items first.
@@ -43,7 +43,7 @@ M 120 get Async behavior in EntityStream
 	So the solution here is to queue events from the stream, and then our read reads from there.
 	Whenever something queued, we start a loop
 
-// need a way to share theon/off etc between the streams. right now is a straight copy and paste
+
 - Second part is to start substituting.
 	- for references, we push the exisitng queue (which will have to capture tokens from underlying) and start a new one
 		read will now read from the queue that comes from that. 
@@ -99,6 +99,9 @@ M 125 Extract entity replacement from XmlTokenStream into EntityStream
 -- next: 118
 =============================================
 CLEANUP
+- Need to finish up testing of XmlStream:
+	- need to test the obscure case explicitly
+	-- put in the rest of the testing.
 - entityRetriever--> XmlEntityRetriever
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
    - extract entity nodtaionid extraction

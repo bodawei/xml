@@ -2,13 +2,12 @@
 
 'use strict';
 
-const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlStream = require('./XmlStream.js');
 
-const EVENT_NAMES = [ 'error', 'token', 'data' ];
+class XmlEntityStream extends XmlStream {
 
-class XmlEntityStream {
-
-   constructor(tokenStream, entityManager) {
+   constructor(tokenStream, entityManager, options) {
+      super(options);
       if (!tokenStream || !tokenStream.on) {
          throw Error('The tokenStream must have an on() function.');
       }
@@ -23,7 +22,6 @@ class XmlEntityStream {
       };
 
       this._contexts = [];
-      this._handlers = {};
       this._entityManager = entityManager;
       this._contexts.push(context);
 
@@ -42,130 +40,11 @@ class XmlEntityStream {
     XmlToken, XmlErrorToken or undefined
    \**********************************************************************/
 
-   getNext() {
+   _innerGetNext() {
       const currentContext = this._contexts[this._contexts.length - 1];
 
       if (currentContext.data.length > 0) {
          return currentContext.data.shift();
-      }
-   }
-
-   /**********************************************************************\
-    on() sets up an event handler that will be called on certain events.
-    If this is called repeatedly with the same callback for the same event,
-    subsequent ones will be ignored.
-
-    PARAM
-    eventName: The name of the event to listen to. one of: 'data',
-      'error', or 'token'
-    callback: The function to call on the specified event. The signature
-      is function(error, token).
-   \**********************************************************************/
-
-   on(eventName, callback) {
-      this._assertEventParams(eventName, callback);
-      this._handlers[eventName] = this._handlers[eventName] || [];
-
-      if (this._handlers[eventName].indexOf(callback) !== -1) {
-         return;
-      }
-
-      this._handlers[eventName].push(callback);
-
-      // Do not call loop immediately, as caller may want to set up multiple subscriptions before getting notified
-      setTimeout(() => {
-         this._tokenLoop();
-      }, 0);
-   }
-
-   /**********************************************************************\
-    off() removes an event handler that was set up with on().  If the
-    handler isn't present, this silently does nothing.
-
-    PARAM
-    eventName: The name of the event to listen to. one of: 'data',
-      'error', or 'token'
-    callback: The function to call on the specified event. The signature
-      is function(error, token).
-   \**********************************************************************/
-
-   off(eventName, callback) {
-      this._assertEventParams(eventName, callback);
-
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const index = this._handlers[eventName].indexOf(callback);
-
-      if (index !== -1) {
-         this._handlers[eventName].splice(index, 1);
-         if (this._handlers[eventName].length === 0) {
-            delete this._handlers[eventName];
-         }
-      }
-   }
-
-   _assertEventParams(eventName, callback) {
-      if (EVENT_NAMES.indexOf(eventName) === -1) {
-         throw new Error('Event "' + eventName + '" is not known. Must be one of: ' + EVENT_NAMES.join(', ') + '.');
-      }
-      if (!(callback instanceof Function)) {
-         throw new Error('Callback must be a function with signature "function(error, data)".');
-      }
-   }
-
-   _notifyHandlersSuccess(eventName, data) {
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
-
-      for (let index = 0; index < handlers.length; index++) {
-         handlers[index](undefined, data);
-      }
-   }
-
-   _notifyHandlersError(eventName, error) {
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
-
-      for (let index = 0; index < handlers.length; index++) {
-         handlers[index](error);
-      }
-   }
-
-   _tokenLoop() {
-      if (this._looping) {
-         return;
-      }
-
-      if (!this._handlers.error &&
-         !this._handlers.data &&
-         !this._handlers.token) {
-         return;
-      }
-
-      this._looping = true;
-
-      while (this._looping) {
-         const token = this.getNext();
-
-         if (token) {
-            if (token instanceof XmlErrorToken) {
-               this._notifyHandlersError('data', token);
-               this._notifyHandlersError('error', token);
-            } else {
-               this._notifyHandlersSuccess('data', token);
-               this._notifyHandlersSuccess('token', token);
-            }
-         } else {
-            this._looping = false;
-         }
       }
    }
 

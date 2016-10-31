@@ -3,9 +3,10 @@
 'use strict';
 
 const Offset = require('./Offset.js');
-const XmlToken = require('./XmlToken.js');
-const XmlErrorToken = require('./XmlErrorToken.js');
 const TextChunk = require('./TextChunk.js');
+const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlStream = require('./XmlStream.js');
+const XmlToken = require('./XmlToken.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 
 const CommentToken = XmlToken.CommentToken;
@@ -35,7 +36,6 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
-const EVENT_NAMES = [ 'error', 'token', 'data' ];
 
 const ENTITY_TYPE = {
    DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
@@ -72,9 +72,10 @@ function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    };
 }
 
-class XmlTokenStream {
+class XmlTokenStream extends XmlStream {
 
    constructor(cursor, entityManager, options) {
+      super();
       if (!entityManager) {
          throw Error('Must provide an XmlEntityManager instance.');
       }
@@ -87,8 +88,6 @@ class XmlTokenStream {
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
       this._state = STATE.START;
-      this._handlers = {};
-      this._errored = false;
 
       this._options = {
          lax: false,
@@ -104,18 +103,6 @@ class XmlTokenStream {
       }
 
       this._entityType = this._options.entityType;
-   }
-
-   getNext() {
-      const token = this._innerGetNext();
-
-      if (token instanceof XmlErrorToken && !this._options.lax) {
-         const e = new Error(token.message);
-         e.details = token;
-         throw e;
-      }
-
-      return token;
    }
 
    _innerGetNext() {
@@ -163,125 +150,6 @@ class XmlTokenStream {
       this._nextToken();
 
       return this._pendingTokens.length > 0;
-   }
-
-   /**********************************************************************\
-    on() sets up an event handler that will be called on certain events.
-    If this is called repeatedly with the same callback for the same event,
-    subsequent ones will be ignored.
-
-    PARAM
-    eventName: The name of the event to listen to. one of: 'data',
-      'error', or 'token'
-    callback: The function to call on the specified event. The signature
-      is function(error, token).
-   \**********************************************************************/
-
-   on(eventName, callback) {
-      this._assertEventParams(eventName, callback);
-      this._handlers[eventName] = this._handlers[eventName] || [];
-
-      if (this._handlers[eventName].indexOf(callback) !== -1) {
-         return;
-      }
-
-      this._handlers[eventName].push(callback);
-
-      // Do not call loop immediately, as caller may want to set up multiple subscriptions before getting notified
-      setTimeout(() => {
-         this._tokenLoop();
-      }, 0);
-   }
-
-   /**********************************************************************\
-    off() removes an event handler that was set up with on().  If the
-    handler isn't present, this silently does nothing.
-
-    PARAM
-    eventName: The name of the event to listen to. one of: 'data',
-      'error', or 'token'
-    callback: The function to call on the specified event. The signature
-      is function(error, token).
-   \**********************************************************************/
-
-   off(eventName, callback) {
-      this._assertEventParams(eventName, callback);
-
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const index = this._handlers[eventName].indexOf(callback);
-
-      if (index !== -1) {
-         this._handlers[eventName].splice(index, 1);
-         if (this._handlers[eventName].length === 0) {
-            delete this._handlers[eventName];
-         }
-      }
-   }
-
-   _assertEventParams(eventName, callback) {
-      if (EVENT_NAMES.indexOf(eventName) === -1) {
-         throw new Error('Event "' + eventName + '" is not known. Must be one of: ' + EVENT_NAMES.join(', ') + '.');
-      }
-      if (!(callback instanceof Function)) {
-         throw new Error('Callback must be a function with signature "function(error, data)".');
-      }
-   }
-
-   _notifyHandlersSuccess(eventName, data) {
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
-
-      for (let index = 0; index < handlers.length; index++) {
-         handlers[index](undefined, data);
-      }
-   }
-
-   _notifyHandlersError(eventName, error) {
-      if (!this._handlers[eventName]) {
-         return;
-      }
-
-      const handlers = this._handlers[eventName].slice(0); // make a copy in case list is modified.
-
-      for (let index = 0; index < handlers.length; index++) {
-         handlers[index](error);
-      }
-   }
-
-   _tokenLoop() {
-      if (this._looping) {
-         return;
-      }
-
-      if (!this._handlers.error &&
-         !this._handlers.data &&
-         !this._handlers.token) {
-         return;
-      }
-
-      this._looping = true;
-
-      while (this._looping) {
-         const token = this._innerGetNext();
-
-         if (token) {
-            if (token instanceof XmlErrorToken) {
-               this._notifyHandlersError('data', token);
-               this._notifyHandlersError('error', token);
-            } else {
-               this._notifyHandlersSuccess('data', token);
-               this._notifyHandlersSuccess('token', token);
-            }
-         } else {
-            this._looping = false;
-         }
-      }
    }
 
    _pushToken(token) {
