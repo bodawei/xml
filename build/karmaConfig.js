@@ -43,15 +43,13 @@ module.exports = function karmaConfig(config) {
             [ 'babelify', {presets: [ BABEL_PRESETS ]} ]
          ]
       },
-      reporters: [ 'progress', 'junit', 'coverage', 'json-log', 'specjson', 'djb' ],
+      reporters: [ 'progress', 'junit', 'coverage', 'djb' ],
       junitReporter: {
          outputDir: OUT_DIR + 'testResults'
       },
-      jsonLogReporter: {
-         outputPath: './JSONLOG/'
-      },
-      specjsonReporter: {
-         outputFile: './karma-specs.json'
+      djbReporter: {
+         outputDir: OUT_DIR + 'testResults',
+         outputFile: 'total-summary.json'
       },
       // https://github.com/karma-runner/karma-coverage
       coverageReporter: {

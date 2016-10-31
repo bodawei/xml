@@ -16,34 +16,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0 Note14
 10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 
 
-Notes
-- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
--- Might be good in last 5 minutes to think some about subsequent things outside of sprint so we're more preapared
-
-xS 114 Basic EntityHandler 
-	This is a wrapper around the main parser (should be async in style)
-		getNext():Promise
-		mightHaveMore():Boolean
-			- eof is an error
-	Main parser should stop filling in references in getRererence
-	When it encounters an entity reference, will retrieve it from the entity manager and fill it in
-		in terms of async, it may have to wait for that to be retrieved and parse.
-√ S 118 Get async behavior in XmlTokenStream
-√ S 119 Get exceptions handled in XmlTokenStream
-	pull out of reportError, and put in nextToken(), 
-	break nextToken into a private routine called by both nextToken and tokenLoop, and the public one which will throw an exception
-		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
-	73:S: If error is thrown, we can still call getNextToken.  Should block that.
-
-√ M 120 get Async behavior in EntityStream
-- First part, get the read and loop working without replacing tokens, including testing.
-	In particular, we can't do a passthrough because the lower stream may be generating events while waiting for the upper.  We actually have to queue those
-	We can't rely on read, instead of events.  If anyone else has events, it will consume our items first.
-	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
-	So the solution here is to queue events from the stream, and then our read reads from there.
-	Whenever something queued, we start a loop
-
-
+M 120 get Async behavior in EntityStream
 - Second part is to start substituting.
 	- for references, we push the exisitng queue (which will have to capture tokens from underlying) and start a new one
 		read will now read from the queue that comes from that. 
@@ -101,7 +74,7 @@ M 125 Extract entity replacement from XmlTokenStream into EntityStream
 CLEANUP
 - Need to finish up testing of XmlStream:
 	- need to test the obscure case explicitly
-	-- put in the rest of the testing.
+	- put in the rest of the testing from XmlToken and XmlEntity
 - entityRetriever--> XmlEntityRetriever
 - continue to pull out dtd related stuff into a separate code file (pave way for async?)
    - extract entity nodtaionid extraction
@@ -119,31 +92,34 @@ RESEARCH
 BUILD
 58:L Build infrastructure for running xmlconf tests.
 60:XL Improve build output
-	- Goal: on a good build we don't need to show anything of the build
+	Goal: on a good build we don't need to show anything of the build
 		- But should include: style passed, which browsers and platform tested, and total coverage summaries
 		- The reports should be terse enough to even be able to be put in a commit checkin
-	- On a failing build, should dump the whole grunt output (can then have verbose reports)
+	On a failing build, should dump the whole grunt output (can then have verbose reports)
 		- non-100% coverage should actually be a failure.	
-	59:M: Build a reporter for karma which dumps testing results to a file
-		- this is in prep for adding this info to the checkin
-		- NS: Need docuemntation for karma reporters
-		- Can use onBrowserComplete to get nice summary info, and write out per browser.
-		- Then can do a trivial thing like we are doing with coverage
 	36:M:silence the build except for report
 		- quiet-grunt: Turns everything off in the whole node process.
+			- need to be able to override this for final report
 		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
-??: Investigate why current node causes coverage to fail
+126: Enhancements to the reporting
+	- can write out all tests into output rather than dots if you don't want to see them
+	- test reporter should report per browser
+	- test reporter should complain on duplicate test names!
+	- coverage reporter should have a percent cutoff
+	- coverage reporter should be able to exclude some files
+	- test reporter should dump all tests plus summary
+	- name reporter better
+127: Investigate why current node causes coverage to fail
 	- Find out version where it started failing (after 6.2.1 and before 6.4)
 	- Search on web
 	- debug down to the problem
-?? Investigate the failures in cygwin shell: Looks like it is firefox
+128 Investigate the failures in cygwin shell: Looks like it is firefox
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
-		- include a time with percent change from previous commit
+	include a time with percent change from previous commit
 	git hooks should validate checkin comment has bug number and is the right format.
 111: Get Vivaldi to work
-Create a json reporter for karma which is more complete, warns of duplicate test names, and document the api
-41:XL:Investigate Gulp
+41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
 --- technical debt [4m 9s]
@@ -911,3 +887,37 @@ Sprint 14
 Note14
 Did do good research for the build part, planning on getting a karma report the next time.
 Coding part didn't go so well. Put time into both tasks, finished neither.  The first one turned out to be too big, and involved adding async api's to the xml token stream.  Implemented a promise-based one as planned, but in practice it felt too weird.  So, decided to do a different api.  Wasn't sure I could finish in time and do next task, so started on it, but only gave it an hour, and got mostly through.  Both will be easy to get done in the next sprint.
+
+
+
+
+
+
+Notes
+- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
+-- Might be good in last 5 minutes to think some about subsequent things outside of sprint so we're more preapared
+
+xS 114 Basic EntityHandler 
+	This is a wrapper around the main parser (should be async in style)
+		getNext():Promise
+		mightHaveMore():Boolean
+			- eof is an error
+	Main parser should stop filling in references in getRererence
+	When it encounters an entity reference, will retrieve it from the entity manager and fill it in
+		in terms of async, it may have to wait for that to be retrieved and parse.
+√ S 118 Get async behavior in XmlTokenStream
+√ S 119 Get exceptions handled in XmlTokenStream
+	pull out of reportError, and put in nextToken(), 
+	break nextToken into a private routine called by both nextToken and tokenLoop, and the public one which will throw an exception
+		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
+	73:S: If error is thrown, we can still call getNextToken.  Should block that.
+√ 59:M: Build a reporter for karma which dumps testing results to a file
+
+√ M 120 get Async behavior in EntityStream
+- First part, get the read and loop working without replacing tokens, including testing.
+	In particular, we can't do a passthrough because the lower stream may be generating events while waiting for the upper.  We actually have to queue those
+	We can't rely on read, instead of events.  If anyone else has events, it will consume our items first.
+	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
+	So the solution here is to queue events from the stream, and then our read reads from there.
+	Whenever something queued, we start a loop
+

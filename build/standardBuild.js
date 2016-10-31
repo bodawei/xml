@@ -9,6 +9,7 @@ var jitGrunt = require('jit-grunt');
 var os = require('os');
 
 var coverageReport = require('./coverageReport.js');
+var testReport = require('./testReport.js');
 
 var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
@@ -40,6 +41,7 @@ module.exports = function standardBuild(grunt) {
 
    jitGrunt(grunt);
    coverageReport(grunt);
+   testReport(grunt);
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
@@ -170,6 +172,11 @@ module.exports = function standardBuild(grunt) {
             file: OUT_DIR + '/testCoverage/text.txt'
          }
       },
+      testreport:  {
+         dist: {
+            dir: OUT_DIR + '/testResults/'
+         }
+      },
       coveragereport:  {
          dist: {
             dir: OUT_DIR
@@ -184,6 +191,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'jasmine_node:dist',
       'eslint',
+      'testreport',
       'coveragereport',
       '_dist'
    ]);
