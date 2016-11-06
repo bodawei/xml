@@ -313,6 +313,69 @@ describe('XmlTokenStream', () => {
          expect(count).toEqual(3);
       });
 
+      describe('end', () => {
+
+         it('delivers an "end" event when all tokens consumed', () => {
+            const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+            let endCount = 0;
+
+            s.on('data', () => {
+               count++;
+            });
+            s.on('end', () => {
+               expect(count).toEqual(4);
+               endCount++;
+            });
+            jasmine.clock().tick(1);
+
+            expect(count).toEqual(4);
+            expect(endCount).toEqual(1);
+         });
+
+         it('delivers an "end" event after "error" in a strict stream', () => {
+            const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+            let endCount = 0;
+
+            s.on('error', () => {
+               count++;
+            });
+            s.on('end', () => {
+               expect(count).toEqual(1);
+               endCount++;
+            });
+            jasmine.clock().tick(1);
+
+            expect(count).toEqual(1);
+            expect(endCount).toEqual(1);
+         });
+
+         it('delivers an "end" event after throwing an exception in a getNext()', () => {
+            const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+            let endCount = 0;
+
+            s.on('data', () => {
+               s.getNext();   // consume foo
+               s.getNext();   // consume </one>
+               try {
+                  s.getNext();   // get the error
+               } catch (e) {
+                  // do nothing.
+               }
+               count++;
+               expect(endCount).toEqual(0);
+            });
+            s.on('end', () => {
+               expect(count).toEqual(1);
+               endCount++;
+            });
+            jasmine.clock().tick(1);
+
+            expect(count).toEqual(1);
+            expect(endCount).toEqual(1);
+         });
+
+      });
+
    });
 
    describe('getNext()', () => {
@@ -333,10 +396,11 @@ describe('XmlTokenStream', () => {
          expect(token).toBeUndefined();
       });
 
-      it('will not start a subsequent async call if one is already in progress', () => {
+      it('will not start a subsequent async call if one is already in progress (whitebox)', () => {
          const s = makeLaxExternalEntityStream('<one>foo</one>');
          // We have to fake async behavior because the stream isn't fully async-capable yet.
          spyOn(s, '_innerNext');
+         spyOn(s, '_setEnded');
 
          const token = s.getNext();
          expect(token).toBeUndefined();

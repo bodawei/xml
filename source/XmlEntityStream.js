@@ -25,9 +25,13 @@ class XmlEntityStream extends XmlStream {
       this._entityManager = entityManager;
       this._contexts.push(context);
 
+      // These are leaking
       tokenStream.on('data', (error, data) => {
          context.data.push(error || data);
          this._tokenLoop();
+      });
+      tokenStream.on('end', () => {
+         context.ended = true;
       });
 
    }
@@ -45,6 +49,8 @@ class XmlEntityStream extends XmlStream {
 
       if (currentContext.data.length > 0) {
          return currentContext.data.shift();
+      } else if (currentContext.ended) {
+         this._setEnded();
       }
    }
 

@@ -14,62 +14,43 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2 Note 12
 10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2 Note 13
 10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0 Note14
-10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 
+10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2 Note 15
+11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL:   // Retought about entities more. It is a huge mess.
 
-M 120 get Async behavior in EntityStream
-- Second part is to start substituting.
-	- for references, we push the exisitng queue (which will have to capture tokens from underlying) and start a new one
-		read will now read from the queue that comes from that. 
-		if that is closed, then read notices and switches (the key point here is that read does the pushing and popping)
-			- must add closed state to XmlTokenStream
-	- for attributes, basically the same, but we don't release the element token until all attributes done.
-		- theoretiecally could be doing multiple attributes at once.
-- Note: if we did the alternate, we could have a very simple read and eventloop. in this case, read just reads off that queue, until it is closed.  Probablby the logic is almost the same, but there may be value in encapsulating it.
+xM 120 get Async behavior in EntityStream
+NOTE: It would be prudent to do your detailed spec breakdown on 4.8 - 4.0 soon. I think you have all the details in your head now, but would be good to confirm. Does the SGML handbook explain the double expansion issue?
 
-----
-M 116 Flesh out EntityManager
-	_entityRetriever: Constructor
-	_map of EntityName -> {
-		entityLocation
-		data
-		cursor
-	}
-	_eager
-	get/setEntityRetriever()
-	get/setEager()
-	addEntity(name, data|location, internal|external)
-	addParameterEntity(name, data|location, internal|external)
-	hasEntity():{internal|external|default|undefined}
-	hasParameterEntity():{internal|external|undefined}
-	getEntity(name, callback) --> or proise
-	getParameterEntity(name, callback)
-   ----
-   remainder:
-         √ add should just take an entity declaration token
-            name
-            value
-            location
-            notationDataName
-      √ add an entityisUnparsed() function
-      √ add an parameterEntityIsUnparsed() function
-      √ get returns nothing if it is a notation token
-      √getRawEntity
-      √getRawParameterEntity
+S 129 add an end event in XmlStream
+	- So simple to do, except that it interacts with the errored case
 
-S 121 add EntityRetriever
-	change EntityRetriever to:
-	get(location, callback(error, success))
-      add eager flag
-            sets flag so get knows is fetching
+M 131 for references,
+	- notice a reference
+	- ask for it from entityManager
+	- if not there, error
+	- otherwise pushes a context
+	- sets up token stream there
+		handler queues tokens in that context
+		sets a flag when it is closed
+	- inner get next will just pull items off the queue, if any
+		- if queue empty, checks flag, and if so pops stream
+S 132 Set up architecture for attribute behavior
+	- for each attribute, scan if it has an entity start token
+		set up special token stream (as above)
+		if so, add it to the context, each with a private place to stash tokens
+		when empty arrives on each, continues down the attribute until empty
+	For now, uses an ordinary token stream. Just be careful to put the right stuff into it.
+			
 
-S 122 addEntity should start fetching if eager flag on
-S 123 get should turn around and retrieve again if eager on
-            should put a callback in structure so that can call back if proper
-S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
-M 125 Extract entity replacement from XmlTokenStream into EntityStream
+Note: Attributes coming out of XmlTokenStream will be
+	[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]  // underlying cursor is over other.  Let's ignore that.
 
+Internal Entity Values should be
+	[ TEXT, CHARREF, TEXT ]
 
--- next: 118
+External Entity Values should be essentially
+	[ TEXT ]
+
+-- next: 129
 =============================================
 CLEANUP
 - Need to finish up testing of XmlStream:
@@ -152,26 +133,35 @@ PROJECT
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 
---- DTD [3XL 4M]
-M 115 Advanced EntityHandler
+
+--- Entity management [8M 6S] !!!
+S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
+M 133 Need a special token stream which reads entity values for attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class. 
+
+S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
+M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
+M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
+
+S 121 add EntityRetriever to EntityManager
+	change EntityRetriever to:
+	get(location, callback(error, success))
+      add eager flag
+            sets flag so get knows is fetching
+S 122 addEntity should start fetching if eager flag on
+S 123 get should turn around and retrieve again if eager on
+            should put a callback in structure so that can call back if proper
+S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
+M 125 Extract entity replacement from XmlTokenStream into EntityStream
+
+M 115 Advanced XmlEntityStream
 	When it encounters: DOCTYPE or entityDecl with an externalID Sets up info in EntityManager
 	EntityManager should be set up to be either greedy or JIT
 		if greedy fetches all immediately
 		if JIT waits until a request and then fetches
 	returns a stream
 		This will be a dummy stream if we have already retrieve the whole thing.
-71:M: Need structure for entities from DTD that contain replacement text that can be parsed with char refs replaced, as well as original structure
-	This is an Entity cursor.  It returns the string token with char references replaces, but tokens have more complex offsets.
-      Technically, the raw value would be an array of XmlToken values.
-         Can fake this for now by extracting the text.  Always will only be one for now.  But of coure offsets coming out of the cursor will be messed up
-- entityRetriever needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
+M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
-21:XL Read element content structure
-24:XL read conditional sections
-	- need to deal with possibly closing the conditional if the end of the internal subset is found
-26:XL Deal with parameter entities
-	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
-	- otherwise, just notice %value; and accept if in right place or barf and treat as &;
 M 112: Browser entity retriever. For now must be sync to get a string cursor
 	PLAN THIS -- note: node will be unhappy for a bit.  in fact, code coverage is going to be a big problem because of the conditional nature here.
 		- in fact maybe we should end up with a module that wraps both browser and node to one api?
@@ -183,6 +173,14 @@ M 112: Browser entity retriever. For now must be sync to get a string cursor
 M 113: Node entity retriever. For now must be sync to get a string cursor. but testing can test both
 	use https://github.com/node-nock/nock
 	This also needs to deal with files 
+
+--- DTD [3XL]
+21:XL Read element content structure
+24:XL read conditional sections
+	- need to deal with possibly closing the conditional if the end of the internal subset is found
+26:XL Deal with parameter entities
+	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
+	- otherwise, just notice %value; and accept if in right place or barf and treat as &;
 
 --- Validity [4XL]
 28:XL Deal with validity (errors, which must be reported by validating xml processors)
@@ -883,6 +881,34 @@ Disasterous sprint.  I finished 108, but as I was finishing it, realized I was g
 
 Sprint 14
 =========
+M 116 Flesh out EntityManager
+	_entityRetriever: Constructor
+	_map of EntityName -> {
+		entityLocation
+		data
+		cursor
+	}
+	_eager
+	get/setEntityRetriever()
+	get/setEager()
+	addEntity(name, data|location, internal|external)
+	addParameterEntity(name, data|location, internal|external)
+	hasEntity():{internal|external|default|undefined}
+	hasParameterEntity():{internal|external|undefined}
+	getEntity(name, callback) --> or proise
+	getParameterEntity(name, callback)
+   ----
+   remainder:
+         √ add should just take an entity declaration token
+            name
+            value
+            location
+            notationDataName
+      √ add an entityisUnparsed() function
+      √ add an parameterEntityIsUnparsed() function
+      √ get returns nothing if it is a notation token
+      √getRawEntity
+      √getRawParameterEntity
 
 Note14
 Did do good research for the build part, planning on getting a karma report the next time.
@@ -890,13 +916,8 @@ Coding part didn't go so well. Put time into both tasks, finished neither.  The 
 
 
 
-
-
-
-Notes
-- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
--- Might be good in last 5 minutes to think some about subsequent things outside of sprint so we're more preapared
-
+Sprint 15
+=========
 xS 114 Basic EntityHandler 
 	This is a wrapper around the main parser (should be async in style)
 		getNext():Promise
@@ -911,7 +932,6 @@ xS 114 Basic EntityHandler
 	break nextToken into a private routine called by both nextToken and tokenLoop, and the public one which will throw an exception
 		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
 	73:S: If error is thrown, we can still call getNextToken.  Should block that.
-√ 59:M: Build a reporter for karma which dumps testing results to a file
 
 √ M 120 get Async behavior in EntityStream
 - First part, get the read and loop working without replacing tokens, including testing.
@@ -920,4 +940,9 @@ xS 114 Basic EntityHandler
 	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
 	So the solution here is to queue events from the stream, and then our read reads from there.
 	Whenever something queued, we start a loop
+√ 59:M: Build a reporter for karma which dumps testing results to a file
 
+
+Notes15
+- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
+Got further, but still taking longer than I expected. The reset early on was more realistic.

@@ -4,20 +4,26 @@
 
 const XmlErrorToken = require('./XmlErrorToken.js');
 
-const EVENT_NAMES = [ 'error', 'token', 'data' ];
+const EVENT_NAMES = [ 'data', 'end', 'error', 'token' ];
 
 /**********************************************************************\
  XmlStream is a generic superclass providing eventing and token/error
  delivery to all subclasses.
 
  Subclasses MUST define _innerGetNext().
+ _innerGetNext() must call _setEnded() when the end of data is found.
+ However, this class may also call _setEnded() if, for example, the
+ this is in strict mode and an error is encountered.  'end' will always
+ be delivered after the error token was delivered, though the caller
+ may need to call getNext first.
+ Subtype's hasNext() should also consult _noNext in case this needs to
+ override it's behavior.    (ick)
 \**********************************************************************/
 
 class XmlStream {
 
    constructor(options) {
       this._handlers = {};
-      this._errored = false;
       this._options = {
          lax: false
       };
@@ -28,11 +34,21 @@ class XmlStream {
    }
 
    getNext() {
+      if (this._ended) {
+         return;
+      }
+      if (this._errored) {
+         this._setEnded();
+         return;
+      }
+
       const token = this._innerGetNext();
 
       if (token instanceof XmlErrorToken && !this._options.lax) {
          const e = new Error(token.message);
          e.details = token;
+         this._errored = true;
+         this._noNext = true;
          throw e;
       }
 
@@ -116,11 +132,18 @@ class XmlStream {
       }
    }
 
-   _tokenLoop() {
-      if (this._looping) {
-         return;
+   _setEnded() {
+      if (!this._ended) {
+         this._notifyHandlers('end');
       }
 
+      this._ended = true;
+   }
+
+   _tokenLoop() {
+      if (this._looping || this._ended) {
+         return;
+      }
       if (!this._handlers.error &&
          !this._handlers.data &&
          !this._handlers.token) {
@@ -130,12 +153,24 @@ class XmlStream {
       this._looping = true;
 
       while (this._looping) {
+         if (this._errored) {
+            this._setEnded();
+            this._looping = false;
+            return;
+         }
+
          const token = this._innerGetNext();
 
          if (token) {
             if (token instanceof XmlErrorToken) {
                this._notifyHandlers('data', token);
                this._notifyHandlers('error', token);
+
+               // arbort and notify if we are in strict mode
+               if (!this._options.lax) {
+                  this._setEnded();
+                  this._looping = false;
+               }
             } else {
                this._notifyHandlers('data', undefined, token);
                this._notifyHandlers('token', undefined, token);

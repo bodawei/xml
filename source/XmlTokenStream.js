@@ -108,16 +108,8 @@ class XmlTokenStream extends XmlStream {
    _innerGetNext() {
       let token;
 
-      if (this._errored && !this._options.lax) {
-         return;
-      }
-
       if (this._pendingTokens.length > 0) {
          token = this._pendingTokens.shift();
-
-         if (token instanceof XmlErrorToken) {
-            this._errored = true;
-         }
 
          return token;
       }
@@ -130,17 +122,18 @@ class XmlTokenStream extends XmlStream {
          const context = this._cursorContexts.pop();
          this._cursor = context.cursor;
          this._getting = false;
-         return context.token;   // this will never be an error token, so don't set errored
+         return context.token;   // this will never be an error token
       }
 
-      if (token instanceof XmlErrorToken) {
-         this._errored = true;
+      if (!token) {
+         this._setEnded();
       }
+
       return token;
    }
 
    hasNext() {
-      if (this._errored && !this._options.lax) {
+      if (this._ended || this._noNext) {
          return false;
       }
       if (this._pendingTokens.length > 0) {
@@ -178,7 +171,6 @@ class XmlTokenStream extends XmlStream {
    }
 
    _nextToken() {
-
       if (this._getting) {
          return;
       }

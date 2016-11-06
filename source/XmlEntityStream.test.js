@@ -161,6 +161,22 @@ describe('XmlEntityStream', () => {
          expect(count).toEqual(4);
       });
 
+      it('delivers an "end" event when all tokens delivered', () => {
+         const ts = makeStrictExternalEntityStream('<?xml encoding="usascii"?><one>foo</one>');
+         const es = new XmlEntityStream(ts, new XmlEntityManager());
+         let endCount = 0;
+         es.on('data', () => {
+            count++;
+         });
+         es.on('end', () => {
+            endCount++;
+         });
+         jasmine.clock().tick(1);
+
+         expect(count).toEqual(4);
+         expect(endCount).toEqual(1);
+      });
+
    });
 
 });

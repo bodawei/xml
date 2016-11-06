@@ -49,6 +49,18 @@ describe('XmlStream', () => {
 
    });
 
+   describe('getNext()', () => {
+
+      it('will not return a value if called after ended', () => {
+         const s = makeStream();
+         s._setEnded();
+         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+
+         expect(s.getNext()).toBeUndefined();
+      });
+
+   });
+
    describe('on()', () => {
       let count;
 
@@ -110,7 +122,7 @@ describe('XmlStream', () => {
 
       it('will not register the same callback multiple times', () => {
          const s = makeStream();
-         dataItem = new XmlErrorToken(XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
+         dataItem = new XmlToken(XmlToken.ELEMENT_START);
          function callback() {
             count++;
             if (count === 2) {
@@ -125,12 +137,25 @@ describe('XmlStream', () => {
          expect(count).toEqual(2);
       });
 
+      it('registers an "end" callback (whitebox)', () => {
+         const s = makeStream();
+         let result;
+         s.on('end', (error, data) => {
+            result = data;
+            count++;
+         });
+         s._setEnded();
+
+         expect(count).toEqual(1);
+         expect(result).toBeUndefined();
+      });
+
       it('throws an exception if an unknown event is registered', () => {
          const s = makeStream();
 
          expect(() => {
             s.on('bogus', () => {});
-         }).toThrowError('Event "bogus" is not known. Must be one of: error, token, data.');
+         }).toThrowError('Event "bogus" is not known. Must be one of: data, end, error, token.');
       });
 
       it('throws an exception if no callback is provided', () => {
@@ -176,7 +201,7 @@ describe('XmlStream', () => {
          expect(count).toEqual(1);
       });
 
-      it('registers a "token" callback', () => {
+      it('removes a "token" callback', () => {
          const s = makeStream();
          dataItem = new XmlToken(XmlToken.ELEMENT_START);
 
@@ -196,7 +221,7 @@ describe('XmlStream', () => {
          expect(count).toEqual(1);
       });
 
-      it('registers an "error" callback', () => {
+      it('removes an "error" callback', () => {
          const s = makeStream();
          dataItem = new XmlErrorToken(XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
 
@@ -214,6 +239,22 @@ describe('XmlStream', () => {
          jasmine.clock().tick(1);
 
          expect(count).toEqual(1);
+      });
+
+      it('removes an "end" callback (whitebox)', () => {
+         const s = makeStream();
+         let result;
+         function callback(error, data) {
+            result = data;
+            count++;
+         }
+         s.on('end', callback);
+         s.off('end', callback);
+
+         s._setEnded();
+
+         expect(count).toEqual(0);
+         expect(result).toBeUndefined();
       });
 
       it('throws no error if a there are no callbacks for the specified event', () => {
@@ -264,7 +305,7 @@ describe('XmlStream', () => {
 
          expect(() => {
             s.off('bogus', () => {});
-         }).toThrowError('Event "bogus" is not known. Must be one of: error, token, data.');
+         }).toThrowError('Event "bogus" is not known. Must be one of: data, end, error, token.');
       });
 
       it('throws an exception if no callback is provided', () => {
@@ -273,6 +314,24 @@ describe('XmlStream', () => {
          expect(() => {
             s.off('data');
          }).toThrowError('Callback must be a function with signature "function(error, data)".');
+      });
+
+   });
+
+   describe('_setEnded()', () => {
+
+      it('will not send multiple notifications if called multiple times (whitebox)', () => {
+         const s = makeStream();
+         let count = 0;
+         s.on('end', () => {
+            count++;
+         });
+
+         s._setEnded();
+         s._setEnded();
+         s._setEnded();
+
+         expect(count).toEqual(1);
       });
 
    });
