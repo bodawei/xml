@@ -96,12 +96,11 @@ class StartTagToken extends TagToken {
 
 class DocTypeStartToken extends XmlToken {
 
-   constructor(name, systemLiteral, pubidLiteral) {
+   constructor(name, externalLocation) {
       super(XmlToken.DOCTYPE_START, name);
 
       this.name = name;
-      this.systemLiteral = systemLiteral;
-      this.pubidLiteral = pubidLiteral;
+      this.externalLoc = externalLocation;
    }
 
 }

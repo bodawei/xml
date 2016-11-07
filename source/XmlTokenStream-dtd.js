@@ -7,6 +7,43 @@ const XmlToken = require('./XmlToken.js');
 class XmlTokenStreamDtd {
 
    /**********************************************************************\
+    parseDocTypeStart extracts information about a DocType declaration.
+    It may parse the whole declaration, or it may only parse up to the
+    start of the internal subset
+
+    This assumes that the "<!DOCTYPE S" has already been parsed.
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+      {
+         nameChunk: The name of the notation
+         postNameSpaceChunk: The space after the name
+         externalId: The structure returned by getExternalId
+         postExternalIdChunk: As it says.
+         hasInternalSubset: true if [ was found
+         postInternalSubsetSpaceChunk: as the name says
+         closeChunk: The chunk for the >.  Undefined if hasInternalSubset
+      }
+    SYNTAX
+      [28] doctypedecl ::= '<!DOCTYPE' S
+         Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+   \**********************************************************************/
+   parseDocTypeStart(cursor) {
+      const results = {};
+
+      results.nameChunk = cursor.getWord([ '[', '>' ]); // could look for quotes, too
+      results.postNameSpaceChunk = cursor.getSpace();
+      results.externalId = this._retrieveExternalId(cursor, [ '[', '>' ], {
+                  requireSystemOnPublic: true
+               });
+      results.postExternalIdChunk = cursor.getSpace();
+
+      return results;
+   }
+
+   /**********************************************************************\
     parseNotation extracts a notation declaration from the provided cursor
     and returns a data structure that describes what was extracted.
 

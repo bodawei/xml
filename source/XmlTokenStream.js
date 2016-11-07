@@ -2,6 +2,7 @@
 
 'use strict';
 
+const EntityLocation = require('./EntityLocation.js');
 const Offset = require('./Offset.js');
 const TextChunk = require('./TextChunk.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
@@ -460,26 +461,30 @@ class XmlTokenStream extends XmlStream {
          this._assertSyntax(postDeclarationSpace, ERRORS.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
 
          switch (upperCaseType) {
-            // [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
-
             case 'DOCTYPE':
-               const docTypeName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
-               this._cursor.getSpace();
-               const externalId = this._retrieveExternalId([ '[', '>' ], {
-                  requireSystemOnPublic: true
-               });
+               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor);
+               const externalId = parsedDocType.externalId;
+               let externalLoc;
 
-               this._assertSyntax(docTypeName, ERRORS.DOCTYPE_NO_NAME);
+               this._assertSyntax(parsedDocType.nameChunk, ERRORS.DOCTYPE_NO_NAME);
 
-               if (docTypeName && !docTypeName.couldBeName) {
-                  this._reportSyntaxError(ERRORS.DOCTYPE_NAME_INVALID, [ docTypeName.text ]);
+               if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
+                  this._reportSyntaxError(ERRORS.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
                }
 
-               this._cursor.getSpace();
+               if (externalId) {
+                  this._validateExternalId(externalId);
+                  // EntityLocation could take the raw object and handle. note these still aren't quite right
+                  const systemId = externalId.systemId ? (externalId.systemId.literalChunk ? externalId.systemId.literalChunk.text : '') : undefined;
+                  const publicId = externalId.publicId ? (externalId.publicId.literalChunk ? externalId.publicId.literalChunk.text : '') : undefined;
+                  externalLoc = new EntityLocation(systemId, publicId);
+               }
+               this._assertSyntax(parsedDocType.externalId.betweenSpaceChunk, ERRORS.EXTERNALID_PUBLIC_NO_SPACE);
+               this._assertSyntax(parsedDocType.externalId.spaceAfterTypeChunk,
+                  parsedDocType.externalId.publicId ? "XXX"  : ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
                const openDtd = this._cursor.getMatch('[');
-               const docToken = new DocTypeStartToken(docTypeName ? docTypeName.text : '',
-                  externalId ? externalId.systemLiteral : undefined,
-                  externalId ? externalId.pubidLiteral : undefined);
+               const docToken = new DocTypeStartToken(parsedDocType.nameChunk ? parsedDocType.nameChunk.text : '',
+                  externalLoc);
 
                if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
                   if (this._state !== STATE.PROLOG_PREDOCTYPE) {
@@ -795,24 +800,33 @@ class XmlTokenStream extends XmlStream {
    }
 
    _validateExternalId(externalId) {
-//      if (externalId.unknownType) {
-//         this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
-//         return;
-//      }
+      if (externalId.unknownType) {
+         this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
+         return;
+      }
 
-//      if (externalId.typeText) {
-      this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
-         ERRORS.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
-//      }
+      if (externalId.typeText) {
+         this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
+            ERRORS.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
+      }
 
-//      if (externalId.publicId) {
-//         const match = PUBID_CHARS.exec(externalId.publicId.text);
-//
-//         if (externalId.publicId.text && (!match || match[0] !== externalId.publicId.text)) {
-//            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_INVALID_CHARS,
-//                [ externalId.publicId.text[match[0].length] ]);
-//         }
-//      }
+      if (externalId.publicId) {
+         if (!externalId.publicId.quote) {
+            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_NO_QUOTE);
+         }
+         const match = PUBID_CHARS.exec(externalId.publicId.literalChunk.text);
+
+         if (externalId.publicId.literalChunk.text && (!match || match[0] !== externalId.publicId.literalChunk.text)) {
+            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_INVALID_CHARS,
+                [ externalId.publicId.literalChunk.text[match[0].length] ]);
+         }
+      }
+
+      if (externalId.systemId) {
+         if (!externalId.systemId.quote) {
+            this._reportSyntaxError(ERRORS.EXTERNALID_SYSTEM_NO_QUOTE);
+         }
+      }
    }
 
    _closeDocType() {

@@ -4,6 +4,7 @@
 
 /* eslint-env jasmine */
 
+const EntityLocation = require('./EntityLocation.js');
 const Offset = require('./Offset.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlToken = require('./XmlToken.js');
@@ -1642,20 +1643,14 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: './system.xml',
-            pubidLiteral: undefined
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml'));
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: './system.xml',
-            pubidLiteral: 'public'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, and an internal dtd is specified', () => {
@@ -1663,64 +1658,50 @@ describe('XmlTokenStream (dtd)', () => {
             '<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: './system.xml',
-            pubidLiteral: './public.xml'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, no internal dtd is specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: './system.xml',
-            pubidLiteral: './public.xml'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
       });
 
       it('retrieves a systemLiteral in single quotes', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         const t = s.getNext();
-         expect(t.systemLiteral).toEqual('./system.xml');
-         expect(t.pubidLiteral).toBeUndefined();
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml'));
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral in single quotes', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: './system.xml',
-            pubidLiteral: 'public'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
       });
 
       it('retrieves zero length publicID and system literals', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "" "" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: '',
-            pubidLiteral: ''
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('', ''));
       });
 
-      it('reports a syntax error if the pubidLiteral is not quoted', () => {
+      xit('reports a syntax error if the pubidLiteral is not quoted', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC pubid "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE,
             'Missing quotes around the public literal.');
       });
 
-      it('reports a syntax error if the systemLiteral is not quoted', () => {
+      xit('reports a syntax error if the systemLiteral is not quoted', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" system [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_QUOTE,
             'Missing quotes around the system literal.');
       });
 
-      it('retrieves the publicID and system literals even when unquoted', () => {
+      xit('retrieves the publicID and system literals even when unquoted', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC one two [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_QUOTE);
@@ -1732,27 +1713,27 @@ describe('XmlTokenStream (dtd)', () => {
          });
       });
 
-      it('reports a syntax error if the public id has illegal characters', () => {
+      fit('reports a syntax error if the public id has illegal characters', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC \'"\' "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
             'The public literal has invalid charaters. Found """.');
       });
 
-      it('reports a syntax error if the public id has some legal and some illegal characters', () => {
+      fit('reports a syntax error if the public id has some legal and some illegal characters', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "ABCDE{" "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS,
             'The public literal has invalid charaters. Found "{".');
       });
 
-      it('retrieves the publicID literal even when it has illegal characters', () => {
+      fit('retrieves the publicID literal even when it has illegal characters', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "ABCDE{" "two" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_INVALID_CHARS);
 
-         expect(s.getNext().pubidLiteral).toEqual('ABCDE{');
+         expect(s.getNext().externalLoc.publicId).toEqual('ABCDE{');
       });
 
-      it('throws no error if the public id has all legal characters', () => {
+      fit('throws no error if the public id has all legal characters', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC " \n\r-\'()+,./:=?;!*#@$_%' +
             'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  "system" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
@@ -1762,90 +1743,82 @@ describe('XmlTokenStream (dtd)', () => {
          }).not.toThrowError();
       });
 
-      it('reports a syntax error if PUBLIC is the wrong case', () => {
+      fit('reports a syntax error if PUBLIC is the wrong case', () => {
          expectSyntaxError('<!DOCTYPE testType PuBliC "pubid" "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
             'The "PUBLIC" label must be all upper case. Found "PuBliC".');
       });
 
-      it('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
+      fit('retrieves the publicID literal even when PUBLIC is the wrong case', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType public "ABCDE" "two" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: 'two',
-            pubidLiteral: 'ABCDE'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('two', 'ABCDE'));
       });
 
-      it('reports a syntax error if SYSTEM is the wrong case', () => {
+      fit('reports a syntax error if SYSTEM is the wrong case', () => {
          expectSyntaxError('<!DOCTYPE testType SYStem "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE,
             'The "SYSTEM" label must be all upper case. Found "SYStem".');
       });
 
-      it('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
+      xit('retrieves the systemLiteral literal even when SYSTEM is the wrong case', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType system "ABCDE" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_INVALID_CASE);
 
-         expect(s.getNext().systemLiteral).toEqual('ABCDE');
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('ABCDE'));
       });
 
-      it('reports a syntax error if no space between the pubid and system', () => {
+      fit('reports a syntax error if no space between the pubid and system', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid""system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE,
             'Missing space beteen the public and the system literals.');
       });
 
-      it('reports a syntax error if no space between SYSTEM and the literal', () => {
+      xit('reports a syntax error if no space between SYSTEM and the literal', () => {
          expectSyntaxError('<!DOCTYPE testType SYSTEM"system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
             'Missing space beteen SYSTEM and the literal.');
       });
 
-      it('reports a syntax error if no space between PUBLIC and the literal', () => {
+      xit('reports a syntax error if no space between PUBLIC and the literal', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC"pubid" "system" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
             'Missing space beteen PUBLIC and the literal.');
       });
 
-      it('retrieves the systemLiterals even when spaces missing', () => {
+      xit('retrieves the systemLiterals even when spaces missing', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM"one" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
 
-         expect(s.getNext()).toEqualProps({
-            systemLiteral: 'one'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('one'));
       });
 
-      it('retrieves the publicID and system literals even when spaces missing', () => {
+      xit('retrieves the publicID and system literals even when spaces missing', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC"one""two" [ ] >');
          ignoreToken(s, XmlToken.XMLDECL);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          ignoreError(s, XmlErrorToken.ERROR.EXTERNALID_PUBLIC_NO_SPACE);
 
-         expect(s.getNext()).toEqualProps({
-            pubidLiteral: 'one',
-            systemLiteral: 'two'
-         });
+         expect(s.getNext().externalLoc).toEqual(new EntityLocation('two', 'one'));
       });
 
-      it('reports a syntax error if there is an unknown type of external id', () => {
+      fit('reports a syntax error if there is an unknown type of external id', () => {
          expectSyntaxError('<!DOCTYPE testType FOO [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_UNKNOWN,
             'The external id was an unknown type. Found "FOO".');
       });
 
-      it('reports a syntax error if systemLiteral is missing from a PUBLIC externalId', () => {
+      xit('reports a syntax error if systemLiteral is missing from a PUBLIC externalId', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC "pubid" [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
             'Missing system literal.');
       });
 
-      it('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
+      fit('reports no syntax error if systemLiteral is missing, but this is a PublicID', () => {
          const s = makeStrictExternalSubsetStream('<!NOTATION testType PUBLIC "pubid" >');
 
          expect(() => {
@@ -1853,13 +1826,13 @@ describe('XmlTokenStream (dtd)', () => {
          }).not.toThrowError();
       });
 
-      it('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {
+      xit('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {
          expectSyntaxError('<!DOCTYPE testType SYSTEM [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_NO_SYSTEM,
             'Missing system literal.');
       });
 
-      it('reports a syntax error if pubIdLiteral is missing from a PUBLIC externalId', () => {
+      xit('reports a syntax error if pubIdLiteral is missing from a PUBLIC externalId', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC [ ] >',
             XmlErrorToken.ERROR.EXTERNALID_NO_PUBLIC,
             'Missing public literal.');
