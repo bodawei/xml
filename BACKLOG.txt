@@ -20,7 +20,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 xM 120 get Async behavior in EntityStream
 NOTE: It would be prudent to do your detailed spec breakdown on 4.8 - 4.0 soon. I think you have all the details in your head now, but would be good to confirm. Does the SGML handbook explain the double expansion issue?
 
-S 129 add an end event in XmlStream
+√ S 129 add an end event in XmlStream
 	- So simple to do, except that it interacts with the errored case
 
 M 131 for references,
@@ -33,6 +33,25 @@ M 131 for references,
 		sets a flag when it is closed
 	- inner get next will just pull items off the queue, if any
 		- if queue empty, checks flag, and if so pops stream
+	√ place of error
+	√ error if no cursor/entity
+	√ sub-entity stream should be lax or not based on parent
+		--> should eventually become an entity stream, but that's a different story
+	√ Need to clean up cursorCiontexts in xml token stream
+		// should be easy once place of error is handled
+	+ review recent changes
+		√ new Context() would be nicer
+		√ remove hasNext and noNext
+		√ make sure you agree that you aren't going to be firing things out of line due to timings.
+		√ how do you know EntityStream._innerGetNext won't be called when no contexts?
+			PArent needs to promise never to call if ended
+			Need clearer definitions of contract. it is soupy at the moment.
+		√ move token test thingie into utils
+		// test that we are, in fact, unsubscribing from child streams.
+		// test subentry stream is lax or not
+		// should be unsubscribing in case of error too?
+		// optimize by not calling __tokenLoop if we aren't on the top in entity stream
+
 S 132 Set up architecture for attribute behavior
 	- for each attribute, scan if it has an entity start token
 		set up special token stream (as above)

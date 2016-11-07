@@ -12,12 +12,11 @@ const EVENT_NAMES = [ 'data', 'end', 'error', 'token' ];
 
  Subclasses MUST define _innerGetNext().
  _innerGetNext() must call _setEnded() when the end of data is found.
- However, this class may also call _setEnded() if, for example, the
- this is in strict mode and an error is encountered.  'end' will always
+ However, XmlStream class may also call _setEnded() if, for example, it
+ is in strict mode and an error is encountered. 'end' will always
  be delivered after the error token was delivered, though the caller
  may need to call getNext first.
- Subtype's hasNext() should also consult _noNext in case this needs to
- override it's behavior.    (ick)
+ This will never call _innerGetNext() once _setEnded() has been called.
 \**********************************************************************/
 
 class XmlStream {
@@ -48,7 +47,6 @@ class XmlStream {
          const e = new Error(token.message);
          e.details = token;
          this._errored = true;
-         this._noNext = true;
          throw e;
       }
 
@@ -181,9 +179,9 @@ class XmlStream {
              * to pull off another token and then have no where to deliver it to!
              * Subtle potential bug!
              */
-            if (!this._handlers.error &&
+            if (this._ended || (!this._handlers.error &&
                !this._handlers.data &&
-               !this._handlers.token) {
+               !this._handlers.token)) {
                this._looping = false;
             }
          } else {

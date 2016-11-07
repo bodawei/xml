@@ -13,34 +13,22 @@ const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
 const EntityToken = XmlToken.EntityToken;
 
-const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
-const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
-const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeLaxExternalSubsetStream;
-const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
-const makeLaxExternalEntityStream = require('./XmlTokenStream-util.test.js').makeLaxExternalEntityStream;
-const makeStrictExternalEntityStream = require('./XmlTokenStream-util.test.js').makeStrictExternalEntityStream;
-const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
-const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
-const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
-const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
-const ENTITY_TYPE = require('./XmlTokenStream-util.test.js').ENTITY_TYPES;
+const testUtils = require('./XmlTokenStream-util.test.js');
+const makeLaxStream = testUtils.makeLaxStream;
+const makeStrictStream = testUtils.makeStrictStream;
+const makeLaxExternalSubsetStream = testUtils.makeLaxExternalSubsetStream;
+const makeStrictExternalSubsetStream = testUtils.makeStrictExternalSubsetStream;
+const makeLaxExternalEntityStream = testUtils.makeLaxExternalEntityStream;
+const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
+const expectSyntaxError = testUtils.expectSyntaxError;
+const expectTokenType = testUtils.expectTokenType;
+const ignoreError = testUtils.ignoreError;
+const ignoreToken = testUtils.ignoreToken;
+const ENTITY_TYPE = testUtils.ENTITY_TYPES;
+
+const makeStringTokenArray = testUtils.makeStringTokenArray;
 
 describe('XmlTokenStream', () => {
-
-   function makeStringTokenArray(values, offset = 0) {
-      const results = [];
-
-      for (let index = 0; index < values.length; index++) {
-         const length = values[index].text.length;
-         values[index].startOffset = new Offset(0, offset, offset);
-         values[index].endOffset = new Offset(0, offset + length, offset + length);
-
-         results.push(values[index]);
-         offset += length;
-      }
-
-      return results;
-   }
 
    function makeStream(str, entityManager, options) {
       return new XmlTokenStream(new XmlStringCursor(str), entityManager, options);
@@ -459,40 +447,6 @@ describe('XmlTokenStream', () => {
          }).toThrowError('Missing closing ">" for in the document type.');
 
          expect(s.getNext()).toBeUndefined();
-      });
-
-   });
-
-   describe('hasNext()', () => {
-
-      it('returns true if there is a token', () => {
-         const s = makeStrictExternalEntityStream('<?two?>');
-
-         expect(s.hasNext()).toEqual(true);
-      });
-
-      it('can ask multiple times', () => {
-         const s = makeStrictExternalEntityStream('<?two?> ');
-
-         expect(s.hasNext()).toEqual(true);
-         expect(s.hasNext()).toEqual(true);
-      });
-
-      it('returns false if there is none', () => {
-         const s = makeStrictExternalEntityStream('');
-
-         expect(s.hasNext()).toEqual(false);
-      });
-
-      it('will deliver false after an exception in a strict stream', () => {
-         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
-
-         ignoreToken(s, XmlToken.CHARDATA);
-         expect(() => {
-            s.getNext();
-         }).toThrowError('"xml" must be lower case. Found "XML".');
-
-         expect(s.hasNext()).toEqual(false);
       });
 
    });
@@ -956,77 +910,6 @@ describe('XmlTokenStream', () => {
             'Missing semicolon after entity reference "frog".');
       });
 
-      it('expands entitys', () => {
-         const s = makeStrictExternalEntityStream('&quot;');
-         const startToken = new XmlToken(XmlToken.ENTITY_START, 'quot');
-         startToken.haveEntityData = true;
-
-         let token = s.getNext();
-         token.chunks = undefined;
-         expect(token).toEqual(startToken);
-         token = s.getNext();
-         token.chunks = undefined;
-         expect(token).toEqual(new XmlToken(XmlToken.CHARDATA, '"'));
-         token = s.getNext();
-         token.chunks = undefined;
-         expect(token).toEqual(new XmlToken(XmlToken.ENTITY_END, 'quot'));
-
-      });
-
-      it('recognizes entities within entities', () => {
-         const s = makeStrictExternalEntityStream('<root>&level1;</root>');
-         s._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
-         s._entityManager.addEntity(new EntityToken('level2', '&quot;&#x41;'));
-
-         let token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_START);
-         expect(token.name).toEqual('root');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('level1');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_START);
-         expect(token.name).toEqual('child');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('level2');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('quot');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.CHARDATA);
-         expect(token.data).toEqual('"');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('quot');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.CHAR_REF);
-         expect(token.data).toEqual('A');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('level2');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_END);
-         expect(token.name).toEqual('child');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('level1');
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_END);
-         expect(token.name).toEqual('root');
-      });
-
       it('retrieves the expected chunks', () => {
          const s = makeStrictExternalEntityStream('&lt;');
 
@@ -1034,14 +917,6 @@ describe('XmlTokenStream', () => {
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('&'),
             new TextChunk.WordChunk('lt', true, true),
-            new TextChunk.PlainChunk(';')
-         ]));
-
-         t = s.getNext();
-         expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('&'),
-            new TextChunk.PlainChunk('#'),
-            new TextChunk.DigitChunk('60', true),
             new TextChunk.PlainChunk(';')
          ]));
 
@@ -1078,7 +953,6 @@ describe('XmlTokenStream', () => {
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&amp;<?xml encoding="usascii"?>');
             ignoreToken(s, XmlToken.ENTITY_START);
-            ignoreToken(s, XmlToken.CHAR_REF);
             ignoreToken(s, XmlToken.ENTITY_END);
 
             expect(() => {
@@ -1122,7 +996,6 @@ describe('XmlTokenStream', () => {
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('&amp;<?xml encoding="foo"?>');
             ignoreToken(s, XmlToken.ENTITY_START);
-            ignoreToken(s, XmlToken.CHAR_REF);
             ignoreToken(s, XmlToken.ENTITY_END);
 
             const t = s.getNext();
@@ -3031,22 +2904,6 @@ describe('XmlTokenStream', () => {
          s._reportSyntaxError(XmlErrorToken.ERROR.BANGITEM_NAME_INVALID_CASE, [ 'one' ]);
 
          expect(s.getNext()).toEqual(expected);
-      });
-
-      it('reports the place and context of the error', () => {
-         const s = makeLaxStream('<?xml version="1.0"?><root>&level1;</root>');
-         s._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
-         s._entityManager.addEntity(new EntityToken('level2', '<!--bug'));
-
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);   // root
-         ignoreToken(s, XmlToken.ENTITY_START); // level1
-         ignoreToken(s, XmlToken.ELEMENT_START); // child
-         ignoreToken(s, XmlToken.ENTITY_START); // level2
-
-         const token = s.getNext();
-         expect(token.place).toEqual(new Offset(0, 7, 7));
-         expect(token.context).toEqual([ new Offset(0, 0, 0), new Offset(0, 7, 7), new Offset(0, 27, 27) ]);
       });
 
    });

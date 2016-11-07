@@ -100,6 +100,7 @@ XmlErrorToken.ERROR = {
    REFERENCE_XTRA_TRAILING_SPACE: 'REFERENCE_XTRA_TRAILING_SPACE',
    REFERENCE_INVALID_SUBSET_CONTEXT: 'REFERENCE_INVALID_SUBSET_CONTEXT',
    REFERENCE_INVALID_DOC_CONTEXT: 'REFERENCE_INVALID_DOC_CONTEXT',
+   REFERENCE_NO_DECLARATION: 'REFERENCE_NO_DECLARATION',
 
    CHARREF_XTRA_SPACE: 'CHARREF_XTRA_SPACE',
    CHARREF_INVALID_HEX_CASE: 'CHARREF_INVALID_HEX_CASE',
@@ -270,6 +271,7 @@ str[err.REFERENCE_XTRA_SPACE] = 'Must not have space in an entity reference.';
 str[err.REFERENCE_XTRA_TRAILING_SPACE] = 'Must not have a space after the entity reference "{0}".';
 str[err.REFERENCE_INVALID_SUBSET_CONTEXT] = 'An entity reference must not be in the external subset.';
 str[err.REFERENCE_INVALID_DOC_CONTEXT] = 'An entity reference must not be outside the content of the document entity.';
+str[err.REFERENCE_NO_DECLARATION] = 'Missing declaration for entity "{0}".';
 
 str[err.CHARREF_XTRA_SPACE] = 'Must not have a space after the "#" in a character reference.';
 str[err.CHARREF_INVALID_HEX_CASE] = '"x" in a hexadecimal character reference must be lower case.';

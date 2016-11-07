@@ -84,7 +84,6 @@ class XmlTokenStream extends XmlStream {
       this._pendingTokens = [];
       this._elementNameStack = [];
       this._entityManager = entityManager;
-      this._cursorContexts = [];
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
       this._state = STATE.START;
@@ -118,31 +117,11 @@ class XmlTokenStream extends XmlStream {
 
       token = this._pendingTokens.shift();
 
-      if (!token && this._cursorContexts.length > 0) {
-         const context = this._cursorContexts.pop();
-         this._cursor = context.cursor;
-         this._getting = false;
-         return context.token;   // this will never be an error token
-      }
-
       if (!token) {
          this._setEnded();
       }
 
       return token;
-   }
-
-   hasNext() {
-      if (this._ended || this._noNext) {
-         return false;
-      }
-      if (this._pendingTokens.length > 0) {
-         return true;
-      }
-
-      this._nextToken();
-
-      return this._pendingTokens.length > 0;
    }
 
    _pushToken(token) {
@@ -341,9 +320,9 @@ class XmlTokenStream extends XmlStream {
          this._assertSyntax(closingSemicolon, ERRORS.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
          const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
-         startToken.haveEntityData = !!entityCursor;
 
          if (inAttribute) {
+            startToken.haveEntityData = !!entityCursor;
             const result = [ startToken ];
 
             if (entityCursor) {
@@ -353,25 +332,13 @@ class XmlTokenStream extends XmlStream {
             result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
             return result;
          } else {
+            startToken.chunks = this._cursor.getRecentChunks();
+
             this._checkContentState(start,
                ERRORS.REFERENCE_INVALID_DOC_CONTEXT, ERRORS.REFERENCE_INVALID_SUBSET_CONTEXT);
-            startToken.chunks = this._cursor.getRecentChunks();
+
             this._pushToken(startToken);
-
-            if (entityCursor) {
-               const endToken = new XmlToken(XmlToken.ENTITY_END, entityName);
-               endToken.chunks = [];
-
-               this._cursorContexts.push({
-                  cursor: this._cursor,
-                  token: endToken,
-                  start: start
-               });
-
-               this._cursor = entityCursor;
-            } else {
-               this._pushTokenWrapper(XmlToken.ENTITY_END, entityName);
-            }
+            this._pushTokenWrapper(XmlToken.ENTITY_END, entityName);
          }
       }
    }
@@ -1491,7 +1458,6 @@ class XmlTokenStream extends XmlStream {
 
    _reportSyntaxError(code, params, place, context) {
       let message = XmlErrorToken.STRING[code];
-      let stuff;
 
       if (typeof params === 'object') {
          if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
@@ -1509,17 +1475,8 @@ class XmlTokenStream extends XmlStream {
          place = place.endOffset;
       }
 
-      if (context) {
-         const superContexts = [];
-
-         for (let index = this._cursorContexts.length - 1; index >= 0; index--) {
-            superContexts.push(this._cursorContexts[index].start.startOffset);
-         }
-
-         stuff = [ context.startOffset ].concat(superContexts);
-      }
-
-      this._pushToken(new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, stuff));
+      const contextArray = context ? [ context.startOffset ] : undefined;
+      this._pushToken(new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, contextArray));
    }
 
    _pushTokenWrapper(type, data) {

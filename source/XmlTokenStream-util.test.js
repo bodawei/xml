@@ -4,6 +4,7 @@
 
 /* eslint-env jasmine */
 
+const Offset = require('./Offset.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
@@ -134,6 +135,21 @@ function expectTokenType(stream, type) {
    expect(t.type).toEqual(type);
 }
 
+function makeStringTokenArray(values, offset = 0) {
+   const results = [];
+
+   for (let index = 0; index < values.length; index++) {
+      const length = values[index].text.length;
+      values[index].startOffset = new Offset(0, offset, offset);
+      values[index].endOffset = new Offset(0, offset + length, offset + length);
+
+      results.push(values[index]);
+      offset += length;
+   }
+
+   return results;
+}
+
 module.exports = {
    expectSyntaxError,
    expectExternalSubsetSyntaxError,
@@ -146,5 +162,6 @@ module.exports = {
    makeStrictExternalSubsetStream,
    makeLaxExternalEntityStream,
    makeStrictExternalEntityStream,
+   makeStringTokenArray,
    ENTITY_TYPES
 };

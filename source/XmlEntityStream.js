@@ -2,10 +2,47 @@
 
 'use strict';
 
+const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStream = require('./XmlStream.js');
+const XmlToken = require('./XmlToken.js');
+const XmlTokenStream = require('./XmlTokenStream.js');
+
+class Context {
+
+   constructor(cursor, stream, startToken) {
+      this.cursor = cursor;
+      this.stream = stream;
+      this.data = [];
+      this.start = startToken;
+   }
+
+}
+
+function setupHandlers(stream, context, entityStream) {
+
+   function dataHandler(error, data) {
+      context.data.push(error || data);
+
+      entityStream._tokenLoop();
+   }
+
+   function endHandler() {
+      context.ended = true;
+      unsubscribe();
+   }
+
+   function unsubscribe() {
+      stream.off('data', dataHandler);
+      stream.off('end', endHandler);
+   }
+
+   stream.on('data', dataHandler);
+   stream.on('end', endHandler);
+}
 
 class XmlEntityStream extends XmlStream {
 
+   // This will inherit the laxness of the tokenStream, unless options is specified
    constructor(tokenStream, entityManager, options) {
       super(options);
       if (!tokenStream || !tokenStream.on) {
@@ -16,24 +53,14 @@ class XmlEntityStream extends XmlStream {
          throw Error('Must provide an XmlEntityManager instance.');
       }
 
-      const context = {
-         stream: tokenStream,
-         data: []
-      };
+      const context = new Context(undefined, tokenStream);
 
       this._contexts = [];
       this._entityManager = entityManager;
       this._contexts.push(context);
+      this._options = options || tokenStream._options;
 
-      // These are leaking
-      tokenStream.on('data', (error, data) => {
-         context.data.push(error || data);
-         this._tokenLoop();
-      });
-      tokenStream.on('end', () => {
-         context.ended = true;
-      });
-
+      setupHandlers(tokenStream, context, this);
    }
 
    /**********************************************************************\
@@ -48,65 +75,52 @@ class XmlEntityStream extends XmlStream {
       const currentContext = this._contexts[this._contexts.length - 1];
 
       if (currentContext.data.length > 0) {
-         return currentContext.data.shift();
-      } else if (currentContext.ended) {
-         this._setEnded();
-      }
-   }
+         const token = currentContext.data.shift();
 
-/*
-   // no strict and lax yet or exceptions
-   // Improved algorithm.
+         if (token && token.type === XmlToken.ENTITY_START) {
+            const cursor = this._entityManager.getEntity(token.data);
 
-   read() {
-      if (!currentStream) {
-         return;
-      }
-      let token = currentStream.read();
+            if (cursor) {
+               const stream = new XmlTokenStream(cursor, this._entityManager, {
+                  entityType: 'EXTERNAL_ENTITY',
+                  lax: this._options.lax
+               });
+               const context = new Context(cursor, stream, token);
+               this._contexts.push(context);
+               setupHandlers(stream, context, this);
+               token.haveEntityData = true;
+            } else {
+               const offset = token.chunks[0].statOffset;
+               let message = XmlErrorToken.STRING[XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION];
 
-      if (token) {
-         this._handleToken(); // my switch streams
+               message = message.replace('{0}', token.data);
+
+               currentContext.data.unshift(new XmlErrorToken(XmlToken.SYNTAX_ERROR,
+                  XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, message, offset, [ offset ]));
+            }
+
+         } else if (token && token.type === XmlToken.SYNTAX_ERROR) {
+            // add the hierarchical context of the error.
+            const contexts = token.context;
+
+            // we don't need to look at index 0, as it will never have a start
+            for (let index = this._contexts.length - 1; index > 0; index--) {
+               contexts.push(this._contexts[index].start.chunks[0].startOffset);
+            }
+            token.context = contexts;
+         }
+
          return token;
-      }
-
-      if (currentStream.atEOF()) {
-         currentStream = stramStack.pop();
-         return this._read();
-      }
-
-      return;
-   }
-
-   _tokenLoop(subStream) {
-      if (subStream !== currentStream) {
-         return;
-      }
-
-      // We could get called while we are already in a loop
-      if (this._looping) {
-         return;
-      }
-      this._looping = true;
-
-      while (this._looping) {
-         const token = this._read();
-
-         if (token) {
-            notifySubscribers(token);
+      } else if (currentContext.ended) {
+         this._contexts.pop();
+         if (this._contexts.length > 0) {
+            return this._innerGetNext();
          } else {
-            this._looping = false;
+            this._setEnded();
          }
       }
    }
 
-   // testing
-   should be able to iteratively read() through a cursor
-   should get all tokens via an on() event
-   should be able to do a read while in an event handler and read token
-   read should be able to start an async case, thus return nothing,
-      and a subsequent read should not start another
-
-*/
 }
 
 module.exports = XmlEntityStream;
