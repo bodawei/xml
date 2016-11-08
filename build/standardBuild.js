@@ -1,7 +1,7 @@
 /* Copyright ® 2016 by David John Burrowes. All rights reserved. */
 
 /* eslint-env node */
-/* eslint-disable no-var, prefer-spread */
+/* eslint-disable no-var, prefer-spread, global-require */
 
 'use strict';
 
@@ -187,6 +187,7 @@ module.exports = function standardBuild(grunt) {
    grunt.loadNpmTasks('grunt-jasmine-node-coverage');
 
    grunt.registerTask('default', [
+      'quietBuild',
       'clean',
       'test',
       'jasmine_node:dist',
@@ -199,6 +200,10 @@ module.exports = function standardBuild(grunt) {
    grunt.registerTask('dev', [ 'karma:dev' ]);
 
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
+
+   grunt.registerTask('quietBuild', 'Report on tests', () => {
+      require('quiet-grunt');
+   });
 
    grunt.registerTask('_testreport', 'Report on tests', () => {
       grunt.log.writeln('Style Checks passed');

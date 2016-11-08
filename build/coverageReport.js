@@ -56,7 +56,7 @@ module.exports = (grunt) => {
          if (keys[index] !== '100') {
             failed = true;
          }
-         grunt.log.writeln(keys[index] + '%: ' + totals[keys[index]].join(', '));
+         process.passthroughWrite(keys[index] + '%: ' + totals[keys[index]].join(', ') + '\n');
       }
 
       if (failed) {

@@ -18,7 +18,7 @@ module.exports = (grunt) => {
 
       var data = JSON.parse(testSummary);
 
-      grunt.log.writeln(data.success + ' tests passed.');
+      process.passthroughWrite(data.success + ' tests passed.\n');
 
       if (data.disconnected) {
          grunt.fail.fatal('Browsers disconnected. Build failed.');
