@@ -473,15 +473,12 @@ class XmlTokenStream extends XmlStream {
                }
 
                if (externalId) {
-                  this._validateExternalId(externalId);
+                  this._validateExternalId(externalId, true);
                   // EntityLocation could take the raw object and handle. note these still aren't quite right
-                  const systemId = externalId.systemId ? (externalId.systemId.literalChunk ? externalId.systemId.literalChunk.text : '') : undefined;
-                  const publicId = externalId.publicId ? (externalId.publicId.literalChunk ? externalId.publicId.literalChunk.text : '') : undefined;
+                  const systemId = externalId.systemId ? externalId.systemId.literalChunk.text : undefined;
+                  const publicId = externalId.publicId ? externalId.publicId.literalChunk.text : undefined;
                   externalLoc = new EntityLocation(systemId, publicId);
                }
-               this._assertSyntax(parsedDocType.externalId.betweenSpaceChunk, ERRORS.EXTERNALID_PUBLIC_NO_SPACE);
-               this._assertSyntax(parsedDocType.externalId.spaceAfterTypeChunk,
-                  parsedDocType.externalId.publicId ? "XXX"  : ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
                const openDtd = this._cursor.getMatch('[');
                const docToken = new DocTypeStartToken(parsedDocType.nameChunk ? parsedDocType.nameChunk.text : '',
                   externalLoc);
@@ -517,7 +514,7 @@ class XmlTokenStream extends XmlStream {
                if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
                   this._reportSyntaxError(ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
                } else {
-                  this._validateExternalId(parsedNotation.externalId);
+                  this._validateExternalId(parsedNotation.externalId, false);
                }
                this._assertSyntax(parsedNotation.close, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
 
@@ -799,21 +796,24 @@ class XmlTokenStream extends XmlStream {
       this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
    }
 
-   _validateExternalId(externalId) {
+   _validateExternalId(externalId, systemRequired) {
       if (externalId.unknownType) {
          this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
          return;
       }
 
-      if (externalId.typeText) {
-         this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
-            ERRORS.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
+      this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
+         ERRORS.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
+
+      if (externalId.uppercaseTypeText === 'PUBLIC') {
+         this._assertSyntax(externalId.publicId, ERRORS.EXTERNALID_NO_PUBLIC);
       }
 
       if (externalId.publicId) {
          if (!externalId.publicId.quote) {
             this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_NO_QUOTE);
          }
+         this._assertSyntax(externalId.spaceAfterTypeChunk, ERRORS.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          const match = PUBID_CHARS.exec(externalId.publicId.literalChunk.text);
 
          if (externalId.publicId.literalChunk.text && (!match || match[0] !== externalId.publicId.literalChunk.text)) {
@@ -822,9 +822,19 @@ class XmlTokenStream extends XmlStream {
          }
       }
 
+      if (systemRequired) {
+         this._assertSyntax(externalId.systemId, ERRORS.EXTERNALID_NO_SYSTEM);
+      }
+
       if (externalId.systemId) {
          if (!externalId.systemId.quote) {
             this._reportSyntaxError(ERRORS.EXTERNALID_SYSTEM_NO_QUOTE);
+         }
+
+         if (externalId.publicId) {
+            this._assertSyntax(externalId.betweenSpaceChunk, ERRORS.EXTERNALID_PUBLIC_NO_SPACE);
+         } else {
+            this._assertSyntax(externalId.spaceAfterTypeChunk, ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
          }
       }
    }
@@ -881,129 +891,6 @@ class XmlTokenStream extends XmlStream {
          this._pushTokenWrapper(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
       } else if (bracketItemType) {
          this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
-      }
-   }
-
-   /**********************************************************************\
-    _retrieveExternalId tries to extract an ExternalID or a PublicID from
-    the current position in the cursor. It assumes any leading space has
-    already been consumed.
-
-      [75] ExternalID    ::= 'SYSTEM' S SystemLiteral |
-                             'PUBLIC' S PubidLiteral S SystemLiteral
-      [83] PublicID      ::= 'PUBLIC' S PubidLiteral
-      [11] SystemLiteral ::= ('"' [^"]* '"') | ("'" [^']* "'")
-      [12] PubidLiteral  ::= '"' PubidChar* '"' |
-                             "'" (PubidChar - "'")* "'"
-      [13] PubidChar     ::= #x20 | #xD | #xA | [a-zA-Z0-9] |
-                             [-'()+,./:=?;!*#@$_%]
-
-    PARAM
-    terminators: An array of characters this should terminate parsing of
-      the id for
-    options: Flags for special cases
-      requireSystemOnPublic: true if the systemLiteral is required for
-         a PUBLIC
-
-    RETURN
-    Either an object containing a "systemLiteral" or a "systemLiteral" and a
-    "publidLiteral" property, or undefined if neither SYSTEM nor PUBLIC could
-    be found.
-    Note that the system and pubid properties may be undefined if they
-    were not specified, or may be empty strings if they were specified with
-    empty strings.
-   \**********************************************************************/
-
-   _retrieveExternalId(terminators, options = {}) {
-      const xIdTerminators = terminators.slice().concat([ '"', '\'' ]);
-      const xIdType = this._cursor.getWord(xIdTerminators);
-
-      if (!xIdType) {
-         return;
-      }
-
-      const upperCaseXIdType = xIdType.text.toLocaleUpperCase();
-      let publicText;
-
-      if (upperCaseXIdType !== 'SYSTEM' && upperCaseXIdType !== 'PUBLIC') {
-         this._cursor.unget(xIdType);
-         this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ xIdType.text ]);
-         return;
-      }
-
-      this._assertSyntax(upperCaseXIdType === xIdType.text,
-         ERRORS.EXTERNALID_INVALID_CASE, [ upperCaseXIdType, xIdType.text ]);
-
-      if (upperCaseXIdType === 'PUBLIC') {
-         publicText = this._getQuotedLiteral(true, terminators, ERRORS.EXTERNALID_NO_PUBLIC,
-            ERRORS.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
-            ERRORS.EXTERNALID_PUBLIC_NO_QUOTE);
-
-         const match = PUBID_CHARS.exec(publicText);
-
-         if (publicText && (!match || match[0] !== publicText)) {
-            this._reportSyntaxError(ERRORS.EXTERNALID_PUBLIC_INVALID_CHARS, [ publicText[match[0].length] ]);
-         }
-      }
-
-      // both SYSTEM and PUBLIC need to consume the systemLiteral unless requireSystemIdOnPublic is false
-      const systemText = this._getQuotedLiteral(options.requireSystemOnPublic, terminators,
-         ERRORS.EXTERNALID_NO_SYSTEM,
-         upperCaseXIdType === 'SYSTEM' ? ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE : ERRORS.EXTERNALID_PUBLIC_NO_SPACE,
-         ERRORS.EXTERNALID_SYSTEM_NO_QUOTE);
-
-      return (publicText === undefined && systemText === undefined) ?
-         undefined : {
-            pubidLiteral: publicText,
-            systemLiteral: systemText
-         };
-   }
-
-   /**********************************************************************\
-    _getQuotedLiteral generically extracts either a PublicID value or a
-    SystemLiteral value from the cursor.
-
-    PARAM
-    literalRequired: True if this must find a value (will report an error
-      if not found)
-    terminators: An array of values that may terminate this logical section
-    literalMissing: Error code to report if the value is missing
-    noBetweenSpace: Error code if there was no leading space
-    noQuoteError: Error quote if a quote was not found.
-
-    RETURN
-    undefined, if no such value, or the string between the quotes.
-   \**********************************************************************/
-
-   _getQuotedLiteral(literalRequired, terminators, literalMissing, noBetweenSpace, noQuoteError) {
-      const betweenSpace = this._cursor.getSpace();
-      const quote = this._cursor.peekChar(); // quote
-      const isQuote = quote && (quote.text === '"' || quote.text === '\'');
-
-      if (!betweenSpace) {
-         this._assertSyntax(!literalRequired, noBetweenSpace);
-      }
-
-      if (isQuote) {
-         this._cursor.getMatch(quote.text);
-         const literal = this._cursor.getToTerminator([ quote.text ]);
-         this._cursor.getMatch(quote.text);
-         return literal.chunk ? literal.chunk.text : '';
-      }
-
-      let quoteIsTerminator = false;
-      for (let index = 0; quote && index < terminators.length; index++) {
-         if (terminators[index] === quote.text) {
-            quoteIsTerminator = true;
-         }
-      }
-
-      if (quoteIsTerminator) {
-         this._assertSyntax(!literalRequired, literalMissing);
-      } else {
-         this._reportSyntaxError(noQuoteError);
-         const literal = this._cursor.getWord([]);
-         return literal.text;
       }
    }
 

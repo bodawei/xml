@@ -2,6 +2,7 @@
 
 'use strict';
 
+const TextChunk = require('./TextChunk.js');
 const XmlToken = require('./XmlToken.js');
 
 class XmlTokenStreamDtd {
@@ -35,9 +36,7 @@ class XmlTokenStreamDtd {
 
       results.nameChunk = cursor.getWord([ '[', '>' ]); // could look for quotes, too
       results.postNameSpaceChunk = cursor.getSpace();
-      results.externalId = this._retrieveExternalId(cursor, [ '[', '>' ], {
-                  requireSystemOnPublic: true
-               });
+      results.externalId = this._retrieveExternalId(cursor, [ '[', '>' ]);
       results.postExternalIdChunk = cursor.getSpace();
 
       return results;
@@ -477,6 +476,9 @@ class XmlTokenStreamDtd {
       result.spaceAfterTypeChunk = cursor.getSpace();
       if (upperCaseXIdType === 'PUBLIC') {
          result.publicId = this._getQuotedLiteral(cursor);
+         if (!result.publicId) {
+            result.publicId = this._getWordLiteral(cursor, terminators);
+         }
       }
 
       // both SYSTEM and PUBLIC need to consume the systemLiteral
@@ -497,6 +499,10 @@ class XmlTokenStreamDtd {
       }
 
       result.systemId = this._getQuotedLiteral(cursor);
+      if (!result.systemId) {
+         result.systemId = this._getWordLiteral(cursor, terminators);
+      }
+
       return result;
    }
 
@@ -526,10 +532,20 @@ class XmlTokenStreamDtd {
       if (isQuote) {
          cursor.getMatch(result.quote.text);
          const stringInfo = cursor.getToTerminator([ result.quote.text ]);
-         result.literalChunk = stringInfo.chunk;
+         result.literalChunk = stringInfo.chunk || new TextChunk.PlainChunk('', result.quote.endOffset,
+            result.quote.endOffset, result.quote.entityLocation);
          result.closeChunk = cursor.getMatch(result.quote.text);
 
          return result;
+      }
+   }
+
+   _getWordLiteral(cursor, terminators) {
+      const word = cursor.getWord(terminators);
+      if (word) {
+         return {
+            literalChunk: word
+         };
       }
    }
 
