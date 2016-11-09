@@ -202,7 +202,7 @@ module.exports = function standardBuild(grunt) {
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
 
    grunt.registerTask('quietBuild', 'Report on tests', () => {
-      require('quiet-grunt');
+      require('./quiet-grunt-mod.js');
    });
 
    grunt.registerTask('_testreport', 'Report on tests', () => {
