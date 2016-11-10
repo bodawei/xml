@@ -73,6 +73,16 @@ function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    };
 }
 
+// See §3.3.3 Attribute-Value Normalization
+function doCDataNormalization(valueArray) {
+   for (let index = 0; index < valueArray.length; index++) {
+      const item = valueArray[index];
+      if (item.type === XmlToken.TEXT) {
+         item.data = item.data.replace(/[\n\r\t]/g, ' ');
+      }
+   }
+}
+
 class XmlTokenStream extends XmlStream {
 
    constructor(cursor, entityManager, options) {
@@ -1272,6 +1282,9 @@ class XmlTokenStream extends XmlStream {
             }
          }
 
+         if (elementAttribute) {
+            doCDataNormalization(value);
+         }
          attributes.push(makePair(name, value, quote, elementAttribute));
 
          if (!abort) {

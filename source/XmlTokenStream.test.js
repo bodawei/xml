@@ -1573,6 +1573,16 @@ describe('XmlTokenStream', () => {
          compareXmlDeclAttribute(t.params[2], 'standalone', 'yes');
       });
 
+      it('does not do attribute value normalization on values', () => {
+         const s = makeLaxStream('<?xml version="1.1" encoding="usas\ncii" standalone="yes"?>');
+         ignoreError(s, XmlErrorToken.ERROR.XMLDECL_ENCODING_INVALID);
+
+         const t = s.getNext();
+         compareXmlDeclAttribute(t.params[0], 'version', '1.1');
+         compareXmlDeclAttribute(t.params[1], 'encoding', 'usas\ncii');
+         compareXmlDeclAttribute(t.params[2], 'standalone', 'yes');
+      });
+
       it('allows a space between the <? and the target if in lax mode', () => {
          const s = makeLaxStream('<? xml version="1.1"?>');
 
@@ -2462,6 +2472,41 @@ describe('XmlTokenStream', () => {
 
             const t = s.getNext();
             compareAttribute(t.attributes[0], 'name', 'one<two"');
+         });
+
+         describe('basic (CDATA) normalization', () => {
+
+            it('will replace spaces, newlines and tabs in ordinary text with spaces', () => {
+               const s = makeStrictExternalEntityStream('<elemName attr1="space: , tab:\t, newline:\n, cr:\r">');
+               const t = s.getNext();
+
+               expect(t.attributes).toEqual([ {
+                  name: 'attr1',
+                  value: [ new XmlToken(XmlToken.TEXT, 'space: , tab: , newline: , cr: ') ],
+                  quoteType: '"'
+               } ]);
+            });
+
+            it('will not replace characters in character references', () => {
+               const s = makeStrictExternalEntityStream('<el attr1="space:&#32;, tab:&#9;, newline:&#10;, cr:&#13;">');
+               const t = s.getNext();
+
+               expect(t.attributes).toEqual([ {
+                  name: 'attr1',
+                  value: [
+                     new XmlToken(XmlToken.TEXT, 'space:'),
+                     new XmlToken(XmlToken.CHAR_REF, ' '),
+                     new XmlToken(XmlToken.TEXT, ', tab:'),
+                     new XmlToken(XmlToken.CHAR_REF, '\t'),
+                     new XmlToken(XmlToken.TEXT, ', newline:'),
+                     new XmlToken(XmlToken.CHAR_REF, '\n'),
+                     new XmlToken(XmlToken.TEXT, ', cr:'),
+                     new XmlToken(XmlToken.CHAR_REF, '\r')
+                  ],
+                  quoteType: '"'
+               } ]);
+            });
+
          });
 
       });

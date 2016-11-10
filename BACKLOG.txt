@@ -19,9 +19,11 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL:
 
 KEEP READING ABOUT ENTITIES.
-Test out the case we just got in email
 
-S 137 Finish up the cleanup of doctype parsing. get the spacing dealt with and quoteless values. Merge in.
+√ Test out the case we just got in email
+√ S 137 Finish up the cleanup of doctype parsing. get the spacing dealt with and quoteless values. Merge in.
+√ S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
+ [74min]
 
 M 132 Set up architecture for attribute behavior
 	- for each attribute, scan if it has an entity start token
@@ -29,7 +31,6 @@ M 132 Set up architecture for attribute behavior
 			use ordinary token stream. Just be put the right stuff into it.
 		if so, add it to the context, each with a private place to stash tokens
 		when empty arrives on each, check if all others done.
-S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
 
 
 -- next: 142
@@ -135,6 +136,7 @@ S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top i
 74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 
 --- Basic processing  [2S]
+Add the rest ofthe stream api
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 
