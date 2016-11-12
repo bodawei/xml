@@ -16,6 +16,7 @@ const SpaceToken = XmlToken.SpaceToken;
 const DeclarationToken = XmlToken.DeclarationToken;
 const TextDeclarationToken = XmlToken.TextDeclarationToken;
 const StartTagToken = XmlToken.StartTagToken;
+const StartEntityToken = XmlToken.StartEntityToken;
 const TagToken = XmlToken.TagToken;
 const DocTypeStartToken = XmlToken.DocTypeStartToken;
 const DocTypeEndToken = XmlToken.DocTypeEndToken;
@@ -319,29 +320,18 @@ class XmlTokenStream extends XmlStream {
          const entityName = name ? name.text : '';
          const afterSpace = this._cursor.getSpace();
          const closingSemicolon = this._cursor.getMatch(';');
-         let entityCursor;
 
          if (!entityName) {
             this._reportSyntaxError(ERRORS.REFERENCE_NO_NAME);
-         } else {
-            entityCursor = this._entityManager.getEntity(entityName);
          }
 
          this._assertSyntax(!afterSpace, ERRORS.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
          this._assertSyntax(closingSemicolon, ERRORS.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
-         const startToken = new XmlToken(XmlToken.ENTITY_START, entityName);
+         const startToken = new StartEntityToken(entityName);
 
          if (inAttribute) {
-            startToken.haveEntityData = !!entityCursor;
-            const result = [ startToken ];
-
-            if (entityCursor) {
-               this._getAttributeReference(entityCursor, result);
-            }
-
-            result.push(new XmlToken(XmlToken.ENTITY_END, entityName));
-            return result;
+            return [ startToken, new XmlToken(XmlToken.ENTITY_END, entityName) ];
          } else {
             startToken.chunks = this._cursor.getRecentChunks();
 
@@ -350,31 +340,6 @@ class XmlTokenStream extends XmlStream {
 
             this._pushToken(startToken);
             this._pushTokenWrapper(XmlToken.ENTITY_END, entityName);
-         }
-      }
-   }
-
-   _getAttributeReference(cursor, contents) {
-      let result = cursor.getToTerminator([ '&' ]);
-
-      if (result.chunk) {
-         contents.push(new XmlToken(XmlToken.TEXT, result.chunk.text));
-      }
-
-      while (result.terminator) {
-         const start = cursor.getChar(); // swallow the &
-         const tempCursor = this._cursor;
-         this._cursor = cursor;
-         const stuff = this._getReference(start, true);
-         this._cursor = tempCursor;
-         for (const index in stuff) {
-            contents.push(stuff[index]);
-         }
-
-         result = cursor.getToTerminator([ '&' ]);
-
-         if (result.chunk) {
-            contents.push(new XmlToken(XmlToken.TEXT, result.chunk.text));
          }
       }
    }

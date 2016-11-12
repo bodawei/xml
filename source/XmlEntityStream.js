@@ -9,35 +9,151 @@ const XmlTokenStream = require('./XmlTokenStream.js');
 
 class Context {
 
+   constructor() {
+      this.data = [];
+      this.ended = false;
+   }
+
+   respondToEnd() {
+      // by default, a no-op
+   }
+
+   setupHandlers(stream, entityStream) {
+      const self = this;
+
+      function dataHandler(error, data) {
+         self.data.push(error || data);
+
+         entityStream._tokenLoop();
+      }
+
+      function endHandler() {
+         self.ended = true;
+         self.respondToEnd();
+
+         stream.off('data', dataHandler);
+         stream.off('end', endHandler);
+      }
+
+      stream.on('data', dataHandler);
+      stream.on('end', endHandler);
+   }
+
+}
+
+class ContentContext extends Context {
+
    constructor(cursor, stream, startToken) {
+      super();
+
       this.cursor = cursor;
       this.stream = stream;
-      this.data = [];
       this.start = startToken;
    }
 
 }
 
-function setupHandlers(stream, context, entityStream) {
+class ElementContext extends Context {
 
-   function dataHandler(error, data) {
-      context.data.push(error || data);
+   constructor(startElementToken, contentContext) {
+      super();
 
-      entityStream._tokenLoop();
+      this.token = startElementToken;
+      this.attrContexts = [];
+      this.contentContext = contentContext;
    }
 
-   function endHandler() {
-      context.ended = true;
-      unsubscribe();
+}
+
+class AttributeContext extends Context {
+
+   constructor(attribute, elementContext, entityStream) {
+      super();
+
+      this.attribute = attribute;
+      this.value = attribute.value;
+      this.index = 0;
+      this.elementContext = elementContext;
+      this.entityStream = entityStream;
    }
 
-   function unsubscribe() {
-      stream.off('data', dataHandler);
-      stream.off('end', endHandler);
+   /*
+    * Walk through attribute until we find an entity, then set up
+    * potentially async retrieval of that entity. If no entity declaration
+    * found, add an error. if no entities wrap up
+    */
+   expandAttribute() {
+      let piece;
+
+      while (!piece && this.index < this.value.length) {
+         this.data.push(this.value[this.index]);
+
+         if (this.value[this.index].type === XmlToken.ENTITY_START) {
+            piece = this.value[this.index];
+         }
+
+         this.index ++;
+      }
+
+      if (this.index >= this.value.length) {
+         this.ended = true;
+         this.finallyDone();
+         return;
+      }
+
+      const cursor = this.entityStream._entityManager.getEntity(piece.data);
+
+      if (cursor) {
+         piece.haveEntityData = true;
+         this.cursor = cursor;
+         this.stream = new XmlTokenStream(cursor, this.entityStream._entityManager, {
+            entityType: 'EXTERNAL_ENTITY',
+            lax: this.entityStream._options.lax
+         });
+
+         this.setupHandlers(this.stream, this.entityStream);
+      } else {
+         reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
+         // And continue processing.
+         this.expandAttribute();
+      }
    }
 
-   stream.on('data', dataHandler);
-   stream.on('end', endHandler);
+   respondToEnd() {
+      this.expandAttribute();
+   }
+
+   finallyDone() {
+//      let attrContextStillWorking = false;
+
+      this.cursor = undefined;
+      this.stream = undefined;
+
+      this.attribute.value = this.data;
+
+      for (let index = 0; index < this.elementContext.attrContexts.length; index++) {
+         //         const attrContext = this.elementContext.attrContexts[index];
+         // if (!attrContext.ended) {
+         //    attrContextStillWorking = true;
+         // }
+      }
+
+      // if (!attrContextStillWorking) {
+      this.elementContext.ended = true;
+      this.entityStream._tokenLoop();
+      // }
+   }
+
+}
+
+function reportError(id, token, context) {
+   const offset = token.chunks ? token.chunks[0].startOffset : undefined;
+   let message = XmlErrorToken.STRING[id];
+
+   message = message.replace('{0}', token.data);
+
+   context.data.unshift(new XmlErrorToken(XmlToken.SYNTAX_ERROR,
+      XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, message, offset, [ offset ]));
 }
 
 class XmlEntityStream extends XmlStream {
@@ -45,22 +161,21 @@ class XmlEntityStream extends XmlStream {
    // This will inherit the laxness of the tokenStream, unless options is specified
    constructor(tokenStream, entityManager, options) {
       super(options);
+
       if (!tokenStream || !tokenStream.on) {
          throw Error('The tokenStream must have an on() function.');
       }
-
       if (!entityManager) {
          throw Error('Must provide an XmlEntityManager instance.');
       }
 
-      const context = new Context(undefined, tokenStream);
-
-      this._contexts = [];
       this._entityManager = entityManager;
-      this._contexts.push(context);
-      this._options = options || tokenStream._options;
+      this._contexts = [
+         new ContentContext(undefined, tokenStream)
+      ];
+      this._options = options || tokenStream._options;   // EEW
 
-      setupHandlers(tokenStream, context, this);
+      this._contexts[0].setupHandlers(tokenStream, this);
    }
 
    /**********************************************************************\
@@ -77,41 +192,73 @@ class XmlEntityStream extends XmlStream {
       if (currentContext.data.length > 0) {
          const token = currentContext.data.shift();
 
-         if (token && token.type === XmlToken.ENTITY_START) {
-            const cursor = this._entityManager.getEntity(token.data);
+         switch (token.type) {
+            case XmlToken.ENTITY_START:
+               const cursor = this._entityManager.getEntity(token.data);
 
-            if (cursor) {
-               const stream = new XmlTokenStream(cursor, this._entityManager, {
-                  entityType: 'EXTERNAL_ENTITY',
-                  lax: this._options.lax
-               });
-               const context = new Context(cursor, stream, token);
-               this._contexts.push(context);
-               setupHandlers(stream, context, this);
-               token.haveEntityData = true;
-            } else {
-               const offset = token.chunks[0].statOffset;
-               let message = XmlErrorToken.STRING[XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION];
+               if (cursor) {
+                  const stream = new XmlTokenStream(cursor, this._entityManager, {
+                     entityType: 'EXTERNAL_ENTITY',
+                     lax: this._options.lax
+                  });
+                  const context = new ContentContext(cursor, stream, token);
+                  this._contexts.push(context);
+                  context.setupHandlers(stream, this);
+                  token.haveEntityData = true;
+               } else {
+                  reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
+               }
+               break;
+            case XmlToken.ELEMENT_START:
+            case XmlToken.ELEMENT_EMPTY:
+               let elementContext;
 
-               message = message.replace('{0}', token.data);
+               for (let attrIndex = 0; attrIndex < token.attributes.length; attrIndex++) {
+                  const attribute = token.attributes[attrIndex];
+                  let startEntityIndex = -1;
 
-               currentContext.data.unshift(new XmlErrorToken(XmlToken.SYNTAX_ERROR,
-                  XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, message, offset, [ offset ]));
-            }
+                  for (let index = 0; index < attribute.value.length; index++) {
+                     if (attribute.value[index].type === XmlToken.ENTITY_START) {
+                        startEntityIndex = index;
+                        break;
+                     }
+                  }
 
-         } else if (token && token.type === XmlToken.SYNTAX_ERROR) {
-            // add the hierarchical context of the error.
-            const contexts = token.context;
+                  if (startEntityIndex !== -1) {
+                     if (!elementContext) {
+                        elementContext = new ElementContext(token, currentContext);
+                        this._contexts.push(elementContext);
+                     }
 
-            // we don't need to look at index 0, as it will never have a start
-            for (let index = this._contexts.length - 1; index > 0; index--) {
-               contexts.push(this._contexts[index].start.chunks[0].startOffset);
-            }
-            token.context = contexts;
+                     const attrContext = new AttributeContext(attribute, elementContext, this);
+                     elementContext.attrContexts.push(attrContext);
+                     attrContext.expandAttribute();
+                  }
+               }
+
+               if (elementContext) {
+                  return;
+               }
+               break;
+            case XmlToken.SYNTAX_ERROR:
+               // add the hierarchical context of the error.
+               const contexts = token.context;
+
+               // we don't need to look at index 0, as it will never have a start
+               for (let index = this._contexts.length - 1; index > 0; index--) {
+                  contexts.push(this._contexts[index].start.chunks[0].startOffset);
+               }
+               token.context = contexts;
+               break;
          }
 
          return token;
       } else if (currentContext.ended) {
+         if (currentContext instanceof ElementContext) {
+            this._contexts.pop();
+            return currentContext.token;
+         }
+
          this._contexts.pop();
          if (this._contexts.length > 0) {
             return this._innerGetNext();

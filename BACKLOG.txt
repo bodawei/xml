@@ -13,24 +13,12 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5 Note11
 10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2 Note 12
 10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2 Note 13
-10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0 Note14
-10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2 Note 15
+10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0
+10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
 11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
-11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL:
+11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
 
 KEEP READING ABOUT ENTITIES.
-
-√ Test out the case we just got in email
-√ S 137 Finish up the cleanup of doctype parsing. get the spacing dealt with and quoteless values. Merge in.
-√ S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
- [74min]
-
-M 132 Set up architecture for attribute behavior
-	- for each attribute, scan if it has an entity start token
-		set up special context within the context
-			use ordinary token stream. Just be put the right stuff into it.
-		if so, add it to the context, each with a private place to stash tokens
-		when empty arrives on each, check if all others done.
 
 
 -- next: 142
@@ -106,10 +94,6 @@ BUILD
 
 PROJECT
 --- technical debt [4m 13s]
-S 138 EntityStream test that we are, in fact, unsubscribing from child streams.
-S 139 EntityStream test subentry stream is lax or not
-S 140 EntityStream should be unsubscribing in case of error too?
-S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top in entity stream
 58:S: Remove data prop on token, and make all token types more explicit
 11:M: Provide some kind of internationalizable string catalog
 	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
@@ -142,6 +126,18 @@ Add the rest ofthe stream api
 
 
 --- Entity management [8M 5S] !!!
+Attributes with references that themselves have references should work
+Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
+Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+Need to test error handling for attribute references
+Why do we need to call getNext multiple times is ugly. can we stop that?
+
+S 138 EntityStream test that we are, in fact, unsubscribing from child streams.
+S 139 EntityStream test subentry stream is lax or not
+S 140 EntityStream should be unsubscribing in case of error too?
+S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top in entity stream
+
+
 M 133 Need a special token stream which reads entity values for attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class. 
 
 S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
@@ -166,6 +162,7 @@ M 115 Advanced XmlEntityStream
 		if JIT waits until a request and then fetches
 	returns a stream
 		This will be a dummy stream if we have already retrieve the whole thing.
+
 M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
 M 112: Browser entity retriever. For now must be sync to get a string cursor
@@ -1000,4 +997,28 @@ Note16
 ------
 Much better than the last few sprints.  129 took much longer than expected, but fortunately 131 went a wee bit faster. Dropped a couple tests off the end, but it's ok.
 
+Sprint 17
+=========
+√ Test out the case we just got in email
+√ S 137 Finish up the cleanup of doctype parsing. get the spacing dealt with and quoteless values. Merge in.
+√ S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
+ [74min]
 
+M 132 Set up architecture for attribute behavior
+	√ for each attribute, scan if it has an entity start token
+		set up special context within the context
+			use ordinary token stream. Just be put the right stuff into it.
+		if so, add it to the context, each with a private place to stash tokens
+		when empty arrives on each, check if all others done.
+	√ clean up the wretched code.
+		√ Too much duplicate
+		√ switch is getting too long
+		√ pave way for recursive case
+
+Note17
+------
+You'll note that the last item in the sprint was "set up architecture", which implied to me it was only the first part of dealing with attribute behavior.  However, there is no second part.  So, the boundary wasn't clear.
+I started work on this, and ended up with some lose ends. Significantly went over time, but not sure that's illegal, as the boundary wasn't clear.  Maybe I was done.
+Either way, this entity stuff is really killing me. This was originally an XL (10 units, sorta).  I've now been working on this for 5 sprints (25) and the end is nowhere near in sight.Estimate is at least 29.  Not quite sure how this got so long. I think I'm also getting tangled in too many lose ends.
+I'm also running into a lot of async issues, and since I'm expectingto switch over to node streams, that may change.
+I really need to do a more careful set of planning.

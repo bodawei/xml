@@ -94,6 +94,17 @@ class StartTagToken extends TagToken {
 
 }
 
+class StartEntityToken extends XmlToken {
+
+   constructor(name, haveEntityData, chunks) {
+      super(XmlToken.ENTITY_START, name, chunks);
+
+      this.name = name;
+      this.haveEntityData = haveEntityData || false;
+   }
+
+}
+
 class DocTypeStartToken extends XmlToken {
 
    constructor(name, externalLocation) {
@@ -204,6 +215,7 @@ XmlToken.TextDeclarationToken = TextDeclarationToken;
 XmlToken.DocTypeStartToken = DocTypeStartToken;
 XmlToken.DocTypeEndToken = DocTypeEndToken;
 XmlToken.StartTagToken = StartTagToken;
+XmlToken.StartEntityToken = StartEntityToken;
 XmlToken.TagToken = TagToken;
 XmlToken.NotationToken = NotationToken;
 XmlToken.EntityToken = EntityToken;

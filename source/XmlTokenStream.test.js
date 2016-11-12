@@ -11,7 +11,7 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
-const EntityToken = XmlToken.EntityToken;
+const StartEntityToken = XmlToken.StartEntityToken;
 
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeLaxStream = testUtils.makeLaxStream;
@@ -2174,47 +2174,13 @@ describe('XmlTokenStream', () => {
 
          it('can parse attributes with an entity reference in the value', () => {
             const s = makeStrictExternalEntityStream('<elemName attr1="tw&quot;o">');
-            const start = new XmlToken(XmlToken.ENTITY_START, 'quot');
-            start.haveEntityData = true;
 
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  start,
-                  new XmlToken(XmlToken.TEXT, '"'),
+                  new StartEntityToken('quot', false),
                   new XmlToken(XmlToken.ENTITY_END, 'quot'),
-                  new XmlToken(XmlToken.TEXT, 'o')
-               ],
-               quoteType: '"'
-            } ]);
-         });
-
-         it('can parse attributes with an entity references in entity references', () => {
-            const s = makeStrictExternalEntityStream('<elemName attr1="tw&foo;o">');
-            s._entityManager.addEntity(new EntityToken('foo', '<bar>&one;</bar>'));   // WHITE BOX
-            s._entityManager.addEntity(new EntityToken('one', '&quot;&#x41;'));
-            const t = s.getNext();
-            const startFoo = new XmlToken(XmlToken.ENTITY_START, 'foo');
-            startFoo.haveEntityData = true;
-            const startOne = new XmlToken(XmlToken.ENTITY_START, 'one');
-            startOne.haveEntityData = true;
-            const startQuot = new XmlToken(XmlToken.ENTITY_START, 'quot');
-            startQuot.haveEntityData = true;
-
-            expect(t.attributes).toEqual([ {
-               name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  startFoo,
-                  new XmlToken(XmlToken.TEXT, '<bar>'),
-                  startOne,
-                  startQuot,
-                  new XmlToken(XmlToken.TEXT, '"'),
-                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
-                  new XmlToken(XmlToken.CHAR_REF, 'A'),
-                  new XmlToken(XmlToken.ENTITY_END, 'one'),
-                  new XmlToken(XmlToken.TEXT, '</bar>'),
-                  new XmlToken(XmlToken.ENTITY_END, 'foo'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
                quoteType: '"'
@@ -2224,13 +2190,11 @@ describe('XmlTokenStream', () => {
          it('will accept a reference to an unknown entity', () => {
             const s = makeStrictExternalEntityStream('<elemName attr1="tw&test;o">');
             const t = s.getNext();
-            const startTest = new XmlToken(XmlToken.ENTITY_START, 'test');
-            startTest.haveEntityData = false;
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  startTest,
+                  new StartEntityToken('test', false),
                   new XmlToken(XmlToken.ENTITY_END, 'test'),
                   new XmlToken(XmlToken.TEXT, 'o')
                ],
