@@ -17,13 +17,94 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
 11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
+11/8  Sprint 17: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL:
 
 KEEP READING ABOUT ENTITIES.
+KEEP READING ABOUT STREAMS
+
+58:S: Remove data prop on token, and make all token types more explicit
+	- Just get all the token types named and declared in XmlToken.
+		// looks like you can lose all the XmlToken.CONSTANT values
+		// XmlToken.CommentToken  could become XmlToken.Comment
+		// return value should be { Comment: Comment ... } etc
+		// Leave chunks
+		// XmlToken --> BaseXmlToken?
+105:S dtd declaration types must start including their chunks always.
+	- In essence, remove _pushTokenWrapper() and put its logic into _pushToken(). Add tests for each case if not already there.
+	- This will be expensive because of tests, but there aren't that many and many is already done.
+	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
+11:M: Provide some kind of internationalizable string catalog
+	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
+	in the process, might be good to give these numeric codes.
+	======================
+	- Start with a properties file (can generate it by a script from existing code)  locale/base.properties  locale/code.properties
+		BRACKETITEM_XTRA_SPACE_BEFORE = Must not have space before opening "[".
+	- use 
+		add grunt task which reads in the properties files synchronously  (everything in locale)
+		passes to node-properties-parser  (or something like ini? What about trailing space etc?)
+			Distinguish base and code.
+		Checks:
+			no dup values: codes
+			no dup values: base
+			keys identical: base & code
+				report missing in code
+				report extra in code
+		Remove keys in base and code with base.value OBSOLETE
+		for any other locale:
+			no dup values
+			keys identical: base and locale
+		write to derived/{name}.{code|string}.json
+		# Trailing space allows unicode.
+		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
+		// nice to have.  Allow context1.context2.SomeDetails  becomes CONTEXT1_CONTEXT2_SOME_DETAILS. or ini file format
+
+	- write StringBundle(stringSet)
+		_stringset is {locale: { key: value }}
+		preferredLocales // if undefined uses browser or nothing
+
+		lookupString([locale | localeArray])
+			for each locale try to look up. if available, success, otherwise go to next. if none, return base locale
+		lookupSubstitutedString(params, [locale | localeArray])
+			// {0} ...
+		Nice to haves: 
+		addLocale()	// nice to ahve
+		removeLocale() // nice to have
+			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
+			// Nice to have Need an escape  {{} and {}} ?
+	XmlErrorToken.ERROR = keys from the stringBundle
+	XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
+	XmlErrorToken.Construction will look up the right STRINg for the message
+		- it will barf if the id is undefined.  This will keep stale things from the code
+		- could also just so SyntaxError.id();
+	XmlErrorToken.id('BRACKETITEM_XTRA_SPACE_BEFORE') would barf if that doesn't exist? Use in tests?  Could even do ErrorId('BRACKETITEM_XTRA_SPACE_BEFORE')
+
+	GOAL
+	XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
+	var xError = new XmlError(id, code, message);
+		xError.message
+		xError.id
+		xError.code
+
+	SyntaxError extends XmlError extends Error
+	SyntaxError.ID.XMLDECL_NO_ATTRIBUTES = 'XMLDECL_NO_ATTRIBUTES'
+	SyntaxError.MSG.EN_US.XMLDECL_NO_ATTRIBUTES = "foo {}"	<- -why make MSG public?  Oh, so folks can add a locale dynamically.
+	var error = new SyntaxError(ID, params, place, context);
+		error.message is done in the current locale at construction time
+		error.getLocalizedMessage(locale) looks up.
+		error.id = 'XMLDECL_NO_ATTRIBUTES'
+		error.code = 123;
+
+	Steps
+		- pretty easy to create XmlError from Error
+		- probably not hard to rename XmlErrorToken to SyntaxError
+		- probably not had to rename code to id, STRING to MSG, and ERROR to ID
+		- harder to get codes
 
 
--- next: 142
+-- next: 144
 =============================================
 CLEANUP
+- We are doing NO testing of entityLoc in notation, not even that the value is there.
 - Need to finish up testing of XmlStream:
 	- need to test the obscure case explicitly
 	- put in the rest of the testing from XmlToken and XmlEntity
@@ -57,6 +138,10 @@ RESEARCH
 		[ TEXT ]
 
 BUILD
+11: Half of 11 is really build process
+143 Add check to make sure error constants all being used
+- Can we silence tasks out of the box in grunt?
+144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 127: Investigate why current node causes coverage to fail
 	- Find out version where it started failing (after 6.2.1 and before 6.4)
 	- Search on web
@@ -94,12 +179,8 @@ BUILD
 
 PROJECT
 --- technical debt [4m 13s]
-58:S: Remove data prop on token, and make all token types more explicit
-11:M: Provide some kind of internationalizable string catalog
-	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
-	in the process, might be good to give these numeric codes.
+S 142 move XmlErrorToken to XmlError and a subtype of Error
 87:S: Handle PEReferences and character references in entity values
-105:S dtd declaration types must start including their chunks always.
 117:S parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
 52:S: StringCursorSpeedup
 	- do performance test jsperf of regex vs hand parsing
@@ -120,7 +201,6 @@ PROJECT
 74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 
 --- Basic processing  [2S]
-Add the rest ofthe stream api
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 
@@ -1022,3 +1102,8 @@ I started work on this, and ended up with some lose ends. Significantly went ove
 Either way, this entity stuff is really killing me. This was originally an XL (10 units, sorta).  I've now been working on this for 5 sprints (25) and the end is nowhere near in sight.Estimate is at least 29.  Not quite sure how this got so long. I think I'm also getting tangled in too many lose ends.
 I'm also running into a lot of async issues, and since I'm expectingto switch over to node streams, that may change.
 I really need to do a more careful set of planning.
+
+Because I think the number of lose ends is getting too large, I'm going to suggest:
+- sprint 18 should just tackle technical debt
+- sprint 19 should pull in the node streams module
+- by sprint 20 we can be back to entity handling.  At least all of that is out of XmlTokenStream now.

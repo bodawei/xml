@@ -16,28 +16,58 @@ class XmlTokenStreamDtd {
 
     PARAM
     cursor: The cursor to read from
+    startChunk: The Chunk representing the <!
+    docTypeChunk: The chunk representing DOCTYPE
 
     RETURN
       {
+         startChunk: The opening <! of the declaration
+         docTypeChunk: The chunk representing the doctype
          nameChunk: The name of the notation
          postNameSpaceChunk: The space after the name
          externalId: The structure returned by getExternalId
          postExternalIdChunk: As it says.
-         hasInternalSubset: true if [ was found
-         postInternalSubsetSpaceChunk: as the name says
-         closeChunk: The chunk for the >.  Undefined if hasInternalSubset
+         startInternalSubsetChunk: Chunk
       }
     SYNTAX
       [28] doctypedecl ::= '<!DOCTYPE' S
          Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
    \**********************************************************************/
-   parseDocTypeStart(cursor) {
+   parseDocTypeStart(cursor, startChunk, docTypeChunk) {
       const results = {};
 
+      results.startChunk = startChunk;
+      results.docTypeChunk = docTypeChunk;
       results.nameChunk = cursor.getWord([ '[', '>' ]); // could look for quotes, too
       results.postNameSpaceChunk = cursor.getSpace();
       results.externalId = this._retrieveExternalId(cursor, [ '[', '>' ]);
       results.postExternalIdChunk = cursor.getSpace();
+      results.startInternalSubsetChunk = cursor.getMatch('[');
+
+      return results;
+   }
+
+   /**********************************************************************\
+    parseDocTypeClose extracts the closing 'S? > of a DOCTYPE.
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+      {
+         preCloseSpaceChunk: The optional space before the close
+         closeChunk: The chunk for the >
+      }
+    SYNTAX
+      end of:
+      [28] doctypedecl ::= '<!DOCTYPE' S
+         Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+   \**********************************************************************/
+   parseDocTypeClose(cursor) {
+      const results = {};
+
+      results.preCloseSpaceChunk = cursor.getSpace();
+      results.closeChunk = cursor.getMatch('>');
 
       return results;
    }
@@ -53,6 +83,8 @@ class XmlTokenStreamDtd {
 
     RETURN
       {
+         startChunk: The opening <! of the declaration
+         notationChunk: The chunk representing the doctype
          nameChunk: The name of the notation
          postNameSpaceChunk: The space after the name
          externalId: The structure returned by getExternalId
@@ -61,9 +93,11 @@ class XmlTokenStreamDtd {
       [82] NotationDecl ::=
          '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
    \**********************************************************************/
-   parseNotation(cursor) {
+   parseNotation(cursor, startChunk, notationChunk) {
       const results = {};
 
+      results.startChunk = startChunk;
+      results.notationChunk = notationChunk;
       results.nameChunk = cursor.getWord([ '>' ]);
       results.postNameSpaceChunk = cursor.getSpace();
       results.externalId = this._retrieveExternalId(cursor, [ '>' ]);

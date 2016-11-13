@@ -84,6 +84,20 @@ function doCDataNormalization(valueArray) {
    }
 }
 
+function locFromExternalId(externalId) {
+   if (!externalId) {
+      return;
+   }
+
+   const systemId = externalId.systemId ? externalId.systemId.literalChunk.text : undefined;
+   const publicId = externalId.publicId ? externalId.publicId.literalChunk.text : undefined;
+   return new EntityLocation(systemId, publicId);
+}
+
+function textOrBlank(chunk) {
+   return chunk ? chunk.text : '';
+}
+
 class XmlTokenStream extends XmlStream {
 
    constructor(cursor, entityManager, options) {
@@ -437,76 +451,27 @@ class XmlTokenStream extends XmlStream {
 
          switch (upperCaseType) {
             case 'DOCTYPE':
-               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor);
-               const externalId = parsedDocType.externalId;
-               let externalLoc;
+               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, declarationName);
+               this._validateStartDocType(parsedDocType);
 
-               this._assertSyntax(parsedDocType.nameChunk, ERRORS.DOCTYPE_NO_NAME);
-
-               if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
-                  this._reportSyntaxError(ERRORS.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
-               }
-
-               if (externalId) {
-                  this._validateExternalId(externalId, true);
-                  // EntityLocation could take the raw object and handle. note these still aren't quite right
-                  const systemId = externalId.systemId ? externalId.systemId.literalChunk.text : undefined;
-                  const publicId = externalId.publicId ? externalId.publicId.literalChunk.text : undefined;
-                  externalLoc = new EntityLocation(systemId, publicId);
-               }
-               const openDtd = this._cursor.getMatch('[');
-               const docToken = new DocTypeStartToken(parsedDocType.nameChunk ? parsedDocType.nameChunk.text : '',
-                  externalLoc);
-
-               if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
-                  if (this._state !== STATE.PROLOG_PREDOCTYPE) {
-                     this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
-                  }
-               } else {
-                  this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
-               }
-
+               const docToken = new DocTypeStartToken(textOrBlank(parsedDocType.nameChunk),
+                  locFromExternalId(parsedDocType.externalId));
                this._pushToken(docToken);
 
-               if (openDtd) {
+               if (parsedDocType.startInternalSubsetChunk) {
                   this._pushEnveloper(']', docToken);
                   this._state = STATE.IN_DTD;
                } else {
                   this._closeDocType();
                }
                return;
-            // [82] NotationDecl ::= '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
             case 'NOTATION':
-               const parsedNotation = this._dtdParser.parseNotation(this._cursor);
-               const notNameText = parsedNotation.nameChunk ? parsedNotation.nameChunk.text : '';
-               const couldBeName = notNameText === '' ||
-                  (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
+               const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, declarationName);
 
-               this._assertSyntax(parsedNotation.nameChunk, ERRORS.NOTATIONDECL_NO_NAME);
-               this._assertSyntax(couldBeName, ERRORS.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
-               this._assertSyntax(parsedNotation.postNameSpaceChunk,
-                  ERRORS.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
-               if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
-                  this._reportSyntaxError(ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
-               } else {
-                  this._validateExternalId(parsedNotation.externalId, false);
-               }
-               this._assertSyntax(parsedNotation.close, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
+               this._validateNotation(parsedNotation);
 
-               let notationToken;
-               if (parsedNotation.externalId) {
-                  const externalId = parsedNotation.externalId;
-                  /* eslint-disable no-console */
-                  const publicId = externalId.publicId ? externalId.publicId.text : undefined;
-                  const systemId = externalId.systemId ? externalId.systemId.text : undefined;
-                  notationToken = new NotationToken(notNameText, systemId, publicId);
-               } else {
-                  notationToken = new NotationToken(notNameText);
-               }
-
-               this._checkDeclarationState(start, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
-
-               this._pushToken(notationToken);
+               this._pushToken(new NotationToken(textOrBlank(parsedNotation.nameChunk),
+                  locFromExternalId(parsedNotation.externalId)));
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
             // find something unexpected (e.g. stuff after NDATA, or no ExternalId or EntityValue)
@@ -771,6 +736,50 @@ class XmlTokenStream extends XmlStream {
       this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
    }
 
+   _validateStartDocType(parsedDocType) {
+      const start = parsedDocType.startChunk;
+
+      this._assertSyntax(parsedDocType.nameChunk, ERRORS.DOCTYPE_NO_NAME);
+
+      if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
+         this._reportSyntaxError(ERRORS.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
+      }
+
+      if (parsedDocType.externalId) {
+         this._validateExternalId(parsedDocType.externalId, true);
+      }
+
+      if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
+         if (this._state !== STATE.PROLOG_PREDOCTYPE) {
+            this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
+         }
+      } else {
+         this._reportSyntaxError(ERRORS.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
+      }
+   }
+
+   _validateCloseDocType(parsedClose) {
+      this._assertSyntax(parsedClose.closeChunk, ERRORS.DOCTYPE_NO_CLOSE);
+   }
+
+   _validateNotation(parsedNotation) {
+      const notNameText = textOrBlank(parsedNotation.nameChunk);
+      const couldBeName = notNameText === '' ||
+         (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
+
+      this._assertSyntax(parsedNotation.nameChunk, ERRORS.NOTATIONDECL_NO_NAME);
+      this._assertSyntax(couldBeName, ERRORS.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
+      this._assertSyntax(parsedNotation.postNameSpaceChunk,
+         ERRORS.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
+      if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
+         this._reportSyntaxError(ERRORS.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
+      } else {
+         this._validateExternalId(parsedNotation.externalId, false);
+      }
+      this._assertSyntax(parsedNotation.close, ERRORS.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
+      this._checkDeclarationState(parsedNotation.startChunk, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
+   }
+
    _validateExternalId(externalId, systemRequired) {
       if (externalId.unknownType) {
          this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
@@ -815,9 +824,8 @@ class XmlTokenStream extends XmlStream {
    }
 
    _closeDocType() {
-      this._cursor.getSpace();
-      const doctypeClosing = this._cursor.getMatch('>');
-      this._assertSyntax(doctypeClosing, ERRORS.DOCTYPE_NO_CLOSE);
+      const parseResults = this._dtdParser.parseDocTypeClose(this._cursor);
+      this._validateCloseDocType(parseResults);
 
       if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
          this._state = STATE.PROLOG;

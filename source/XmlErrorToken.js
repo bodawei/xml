@@ -2,38 +2,33 @@
 
 'use strict';
 
-const XmlToken = require('./XmlToken.js');
+/**********************************************************************\
+ XmlErrorToken holds inforamtion about some kind of error.
 
-class XmlErrorToken extends XmlToken {
+   PARAM
+   type: The type of the token (ERROR)
+   code: The error code
+   message: A message about the error
+   place: an Offset describing where the error happened when parsing.
+   context: an array of Offsets, each describing where the start of a
+   syntactic element was when the error happened.  For example, if parsing
+   encountered
+         <blah error>
+   the first Offset would be the location of the <.  If this was in the
+   body of an entity being processed, the next Offset would be the start
+   of that entity reference, and if that, in turn, was in another, the
+   next Offset would be the start of that reference, and so on.
+\**********************************************************************/
 
-   /**********************************************************************\
-    XmlErrorToken holds inforamtion about some kind of error.
-
-    PARAM
-    type: The type of the token (ERROR)
-    code: The error code
-    message: A message about the error
-    place: an Offset describing where the error happened when parsing.
-    context: an array of Offsets, each describing where the start of a
-      syntactic element was when the error happened.  For example, if parsing
-      encountered
-            <blah error>
-      the first Offset would be the location of the <.  If this was in the
-      body of an entity being processed, the next Offset would be the start
-      of that entity reference, and if that, in turn, was in another, the
-      next Offset would be the start of that reference, and so on.
-   \**********************************************************************/
-
-   constructor(type, code, message, place, context) {
-      super(type, '');
-      this.type = type;
-      this.code = code;
-      this.message = message;
-      this.place = place;
-      this.context = context;
-   }
-
+function XmlErrorToken(type, code, message, place, context) {
+   this.type = type;
+   this.code = code;
+   this.message = message;
+   this.place = place;
+   this.context = context;
 }
+
+XmlErrorToken.prototype = new Error();
 
 XmlErrorToken.ERROR = {
    XMLDECL_NO_ATTRIBUTES: 'XMLDECL_NO_ATTRIBUTES',
@@ -130,7 +125,6 @@ XmlErrorToken.ERROR = {
    DOCTYPE_INVALID_EXTERNAL_CONTEXT: 'DOCTYPE_INVALID_EXTERNAL_CONTEXT',
 
    ENTITYDECL_NO_NAME: '.ENTITYDECL_NO_NAME',
-   EXTERNALID_INVALID_CASE: 'EXTERNALID_INVALID_CASE',
    ENTITYDECL_NAME_INVALID: 'ENTITYDECL_NAME_INVALID',
    ENTITYDECL_NAME_NO_TRAILING_SPACE: 'ENTITYDECL_NAME_NO_TRAILING_SPACE',
    ENTITYDECL_NDATA_NO_SPACE_BEFORE: 'ENTITYDECL_NDATA_NO_SPACE_BEFORE',
@@ -190,6 +184,7 @@ XmlErrorToken.ERROR = {
    NOTATIONDECL_INVALID_CONTEXT: 'NOTATIONDECL_INVALID_CONTEXT',
 
    EXTERNALID_UNKNOWN: 'EXTERNALID_UNKNOWN',
+   EXTERNALID_INVALID_CASE: 'EXTERNALID_INVALID_CASE',
    EXTERNALID_PUBLIC_NO_SPACE: 'EXTERNALID_PUBLIC_NO_SPACE',
    EXTERNALID_PUBLIC_NO_LEADING_SPACE: 'EXTERNALID_PUBLIC_NO_LEADING_SPACE',
    EXTERNALID_SYSTEM_NO_LEADING_SPACE: 'EXTERNALID_SYSTEM_NO_LEADING_SPACE',
