@@ -4,7 +4,6 @@
 
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
-const EntityToken = XmlToken.EntityToken;
 
 const DEFAULT_ENTITY = 'DefaultEntity';
 const INTERNAL_ENTITY = 'EntityDeclaredInInternalSubset';
@@ -24,11 +23,11 @@ class XmlEntityManager {
       this._entityMap = {};
       this._paramEntityMap = {};
 
-      this.addEntity(new XmlToken.EntityToken('lt', '&#60;'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityToken('gt', '>'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityToken('amp', '&#38;'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityToken('apos', '\''), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityToken('quot', '"'), DEFAULT_ENTITY);
+      this.addEntity(new XmlToken.EntityDeclaration('lt', '&#60;'), DEFAULT_ENTITY);
+      this.addEntity(new XmlToken.EntityDeclaration('gt', '>'), DEFAULT_ENTITY);
+      this.addEntity(new XmlToken.EntityDeclaration('amp', '&#38;'), DEFAULT_ENTITY);
+      this.addEntity(new XmlToken.EntityDeclaration('apos', '\''), DEFAULT_ENTITY);
+      this.addEntity(new XmlToken.EntityDeclaration('quot', '"'), DEFAULT_ENTITY);
    }
 
    /**********************************************************************\
@@ -197,7 +196,7 @@ class XmlEntityManager {
    \**********************************************************************/
 
    _internalAdd(token, type, isParameter) {
-      if (!token || !(token instanceof EntityToken)) {
+      if (!token || !(token instanceof XmlToken.EntityDeclaration)) {
          throw new Error('Must call with an entity declaration token.');
       }
 

@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const toEqualPropsMatcher = require('./beforeEach.jasmine.js').toEqualProps;
+const toBeInstanceOfMatcher = require('./beforeEach.jasmine.js').toBeInstanceOf;
 
 describe('toEqualProps()', () => {
 
@@ -55,6 +56,62 @@ describe('toEqualProps()', () => {
          expect(toEqualPropsMatcher({ equals: () => false }, () => true).compare({ a: 2 }, { a: 1 })).toEqual({
             pass: false,
             message: 'Expected {"a":2} to match {"a":1}.'
+         });
+      });
+
+   });
+
+});
+
+describe('toBeInstanceOf()', () => {
+
+   function Test() {
+   }
+
+   function Test2() {
+   }
+
+   describe('jasmine use', () => {
+
+      it('reports true when all the type matches', () => {
+         expect(new Test()).toBeInstanceOf(Test);
+      });
+
+      it('reports false when the specified types do not match', () => {
+         expect(new Test()).not.toBeInstanceOf(Test2);
+      });
+
+   });
+
+   describe('raw matcher', () => {
+
+      it('returns a compare function', () => {
+         expect(typeof toBeInstanceOfMatcher().compare === 'function').toEqual(true);
+      });
+
+      it('throws an error if not passed a function', () => {
+         expect(() => {
+            toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(new Test(), 55);
+         }).toThrowError('Must pass a function to the second argument of the .toBeInstanceOf() jasmine matcher.');
+      });
+
+      it('throws an error if not passed an object', () => {
+         expect(() => {
+            toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(55, Test);
+         }).toThrowError('Must pass an object to the first argument of the .toBeInstanceOf() jasmine matcher.');
+      });
+
+      it('returns a message indicating failure, on success, for the .not.toBeInstanceOf() case', () => {
+         expect(toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(new Test(), Test)).toEqual({
+            pass: true,
+            message: 'Expected Test instance not to be an instance of Test.'
+         });
+      });
+
+      it('returns a message indicating failure, on failure, for the .toEqualProps() case', () => {
+         expect(toBeInstanceOfMatcher({ equals: () => false }, () => true).compare(new Test(), Test2)).toEqual({
+            pass: false,
+            message: 'Expected Test instance to be an instance of Test2.'
          });
       });
 

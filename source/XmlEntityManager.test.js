@@ -44,54 +44,54 @@ describe('XmlEntityManager', () => {
 
       it('throws an exception if called with an invalid token type', () => {
          expect(() => {
-            manager.addEntity(new XmlToken.ElementDeclarationToken('test'));
+            manager.addEntity(new XmlToken.ElementDeclaration('test'));
          }).toThrowError('Must call with an entity declaration token.');
       });
 
       it('returns a cursor if it is called with a legitimate entity name', () => {
-         manager.addEntity(new XmlToken.EntityToken('bar', 'baz'));
+         manager.addEntity(new XmlToken.EntityDeclaration('bar', 'baz'));
 
          expect(extractEntityText(manager, 'bar').chunk.text).toBe('baz');
       });
 
       it('can add multiple internal entities, but only the first is returned', () => {
-         manager.addEntity(new XmlToken.EntityToken('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'test').chunk.text).toBe('one');
       });
 
       it('can add multiple extneral entities, but only the first is returned', () => {
-         manager.addEntity(new XmlToken.EntityToken('test', 'one'), XmlEntityManager.EXTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'two'), XmlEntityManager.EXTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'one'), XmlEntityManager.EXTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'two'), XmlEntityManager.EXTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'test').chunk.text).toBe('one');
       });
 
       it('can add internal and external entities, but only the first internal is returned', () => {
-         manager.addEntity(new XmlToken.EntityToken('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'alpha'), XmlEntityManager.EXTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'beta'), XmlEntityManager.EXTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'alpha'), XmlEntityManager.EXTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'beta'), XmlEntityManager.EXTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'test').chunk.text).toBe('one');
       });
 
       it('adds an external so it overrides the default', () => {
-         manager.addEntity(new XmlToken.EntityToken('amp', 'one'), XmlEntityManager.EXTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('amp', 'one'), XmlEntityManager.EXTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'amp').chunk.text).toBe('one');
       });
 
       it('adds an external so it overrides the default', () => {
-         manager.addEntity(new XmlToken.EntityToken('amp', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('amp', 'one'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'amp').chunk.text).toBe('one');
       });
 
       it('is unaffected by parameter entities', () => {
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addEntity(new XmlToken.EntityToken('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(extractEntityText(manager, 'test').chunk.text).toBe('one');
       });
@@ -103,21 +103,21 @@ describe('XmlEntityManager', () => {
       // whitebox.  Don't bother testing parameters, as code is the same with addEntity
 
       it('returns a cursor if it is called with a legitimate entity name', () => {
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('bar', 'baz'));
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('bar', 'baz'));
 
          expect(extractParamEntityText(manager, 'bar').chunk.text).toBe('baz');
       });
 
       it('can add multiple internal entities, but only the first is returned', () => {
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(extractParamEntityText(manager, 'test').chunk.text).toBe('one');
       });
 
       it('is unaffected by general entities', () => {
-         manager.addEntity(new XmlToken.EntityToken('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addEntity(new XmlToken.EntityDeclaration('test', 'one'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(extractParamEntityText(manager, 'test').chunk.text).toBe('two');
       });
@@ -137,7 +137,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns undefined if the requested entity has a notation name', () => {
-         const token = new XmlToken.EntityToken('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, undefined, 'fish');
          manager.addEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.getEntity('test')).toBeUndefined();
@@ -162,7 +162,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', () => {
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.getParameterEntity('test') instanceof XmlStringCursor).toBe(true);
       });
@@ -182,7 +182,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns a the token', () => {
-         const token = new XmlToken.EntityToken('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, undefined, 'fish');
          manager.addEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.getEntityToken('test')).toEqual(token);
@@ -203,7 +203,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', () => {
-         const token = new XmlToken.ParameterEntityToken('test', 'two');
+         const token = new XmlToken.PEntityDeclaration('test', 'two');
          manager.addParameterEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.getParameterEntityToken('test')).toBe(token);
@@ -228,7 +228,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns true when the entity is unparsed', () => {
-         const token = new XmlToken.EntityToken('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, undefined, 'fish');
          manager.addEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.isEntityUnparsed('test')).toBe(true);
@@ -245,7 +245,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns false when the entity is not unparsed', () => {
-         manager.addParameterEntity(new XmlToken.ParameterEntityToken('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
+         manager.addParameterEntity(new XmlToken.PEntityDeclaration('test', 'two'), XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.isParameterEntityUnparsed('test')).toEqual(false);
       });
@@ -255,7 +255,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns true when the entity is unparsed', () => {
-         const token = new XmlToken.ParameterEntityToken('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.PEntityDeclaration('test', 'two', undefined, undefined, 'fish');
          manager.addParameterEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.isParameterEntityUnparsed('test')).toBe(true);

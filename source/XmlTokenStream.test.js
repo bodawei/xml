@@ -11,7 +11,7 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlToken = require('./XmlToken.js');
-const StartEntityToken = XmlToken.StartEntityToken;
+const EntityStart = XmlToken.EntityStart;
 
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeLaxStream = testUtils.makeLaxStream;
@@ -45,7 +45,7 @@ describe('XmlTokenStream', () => {
 
    function compareAttribute(attr, name, value) {
       expect(attr.name).toEqual(name);
-      expect(attr.value).toEqual(value ? [ new XmlToken(XmlToken.TEXT, value) ] : []);
+      expect(attr.value).toEqual(value ? [ new XmlToken.Text(value) ] : []);
    }
 
    describe('construction', () => {
@@ -106,13 +106,13 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -131,16 +131,16 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             if (count === 0) {
                const next = s.getNext();
-               expect(next.type).toEqual(XmlToken.CHARDATA);
+               expect(next instanceof XmlToken.CharData).toEqual(true);
                count += 10;
             }
 
             switch (count) {
                case 10:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 11:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -178,16 +178,16 @@ describe('XmlTokenStream', () => {
          s.on('token', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
-                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  expect(data).toBeInstanceOf(XmlToken.TextDeclaration);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -205,19 +205,19 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
                   break;
                case 4:
-                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  expect(data).toBeInstanceOf(XmlToken.TextDeclaration);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -235,13 +235,13 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
@@ -262,7 +262,7 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 1:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
@@ -283,13 +283,13 @@ describe('XmlTokenStream', () => {
          s.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 1:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.TEXTDECL);
+                  expect(data).toBeInstanceOf(XmlToken.TextDeclaration);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -371,17 +371,10 @@ describe('XmlTokenStream', () => {
       it('retrieves all tokens', () => {
          const s = makeLaxExternalEntityStream('<one>foo</one>');
 
-         let token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_START);
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.CHARDATA);
-
-         token = s.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_END);
-
-         token = s.getNext();
-         expect(token).toBeUndefined();
+         expectTokenType(s, XmlToken.ElementStart);
+         expectTokenType(s, XmlToken.CharData);
+         expectTokenType(s, XmlToken.ElementEnd);
+         expect(s.getNext()).toBeUndefined();
       });
 
       it('will not start a subsequent async call if one is already in progress (whitebox)', () => {
@@ -400,7 +393,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if an error is found in a strict stream', () => {
          const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
 
-         ignoreToken(s, XmlToken.CHARDATA);
+         ignoreToken(s, XmlToken.CharData);
 
          expect(() => {
             s.getNext();
@@ -410,7 +403,7 @@ describe('XmlTokenStream', () => {
       it('throws no error if an error is found in a lax stream', () => {
          const s = makeLaxExternalEntityStream('foo<?XML encoding="ff"?>');
 
-         ignoreToken(s, XmlToken.CHARDATA);
+         ignoreToken(s, XmlToken.CharData);
 
          expect(() => {
             s.getNext();
@@ -420,7 +413,7 @@ describe('XmlTokenStream', () => {
       it('will deliver no other data after an exception in a strict stream', () => {
          const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
 
-         ignoreToken(s, XmlToken.CHARDATA);
+         ignoreToken(s, XmlToken.CharData);
          expect(() => {
             s.getNext();
          }).toThrowError('"xml" must be lower case. Found "XML".');
@@ -431,17 +424,17 @@ describe('XmlTokenStream', () => {
       it('will deliver other data after an exception in a lax stream', () => {
          const s = makeLaxExternalEntityStream('foo<?xml encoding="ff"?>');
 
-         ignoreToken(s, XmlToken.CHARDATA);
+         ignoreToken(s, XmlToken.CharData);
          ignoreError(s, XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
 
-         expectTokenType(s, XmlToken.TEXTDECL);
+         expectTokenType(s, XmlToken.TextDeclaration);
       });
 
       it('will deliver no other data after an exception in a strict stream with an error in the dtd', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo  [] ');
 
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.DOCTYPE_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.DocTypeStart);
          expect(() => {
             s.getNext();
          }).toThrowError('Missing closing ">" for in the document type.');
@@ -455,15 +448,15 @@ describe('XmlTokenStream', () => {
 
       it('retrieves a token of type SPACE', () => {
          const s = makeStrictStream('<?xml version="1.0"?> \n  ');
-         ignoreToken(s, XmlToken.XMLDECL);
+         ignoreToken(s, XmlToken.XmlDeclaration);
 
-         expectTokenType(s, XmlToken.SPACE);
+         expectTokenType(s, XmlToken.Space);
       });
 
       it('retrieves a token of type SPACE in a DTD context', () => {
          const s = makeStrictExternalSubsetStream(' \n  ');
 
-         expectTokenType(s, XmlToken.SPACE);
+         expectTokenType(s, XmlToken.Space);
       });
 
       it('retrieves the expected chunks', () => {
@@ -489,34 +482,34 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of the external subset', () => {
             const s = makeStrictExternalSubsetStream(' \t ');
 
-            expectTokenType(s, XmlToken.SPACE);
+            expectTokenType(s, XmlToken.Space);
          });
 
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream(' \t ');
 
-            expectTokenType(s, XmlToken.SPACE);
+            expectTokenType(s, XmlToken.Space);
          });
 
          it('can appear after the XML Declaration in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?> \t ');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
-            expectTokenType(s, XmlToken.SPACE);
+            expectTokenType(s, XmlToken.Space);
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?> \t ');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.SPACE);
+            expectTokenType(s, XmlToken.Space);
          });
 
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?> \t ');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.SPACE);
+            expectTokenType(s, XmlToken.Space);
          });
 
       });
@@ -528,29 +521,29 @@ describe('XmlTokenStream', () => {
       it('retrieves a token of type CHARDATA', () => {
          const s = makeStrictExternalEntityStream('wow zowie ');
 
-         expectTokenType(s, XmlToken.CHARDATA);
+         expectTokenType(s, XmlToken.CharData);
       });
 
       it('retrieves a token with the specified data', () => {
          const s = makeStrictExternalEntityStream('wow zowie ');
 
          const t = s.getNext();
-         expect(t.data).toEqual('wow zowie ');
+         expect(t.text).toEqual('wow zowie ');
       });
 
       it('retrieves a token with the specified data up to the markup', () => {
          const s = makeStrictExternalEntityStream('wow <zowie> ');
 
          const t = s.getNext();
-         expect(t.data).toEqual('wow ');
-         expectTokenType(s, XmlToken.ELEMENT_START);
+         expect(t.text).toEqual('wow ');
+         expectTokenType(s, XmlToken.ElementStart);
       });
 
       it('retrieves a token with the specified data up to a reference', () => {
          const s = makeStrictExternalEntityStream('wow &amp; ');
 
          const t = s.getNext();
-         expect(t.data).toEqual('wow ');
+         expect(t.text).toEqual('wow ');
       });
 
       it('throws an error token if there is a ]]> in the CharData', () => {
@@ -564,26 +557,26 @@ describe('XmlTokenStream', () => {
          const s = makeLaxExternalEntityStream('testing testing ]]>testing');
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
 
-         expect(s.getNext().data).toEqual('testing testing ');
-         expect(s.getNext().data).toEqual(']]>');
-         expect(s.getNext().data).toEqual('testing');
+         expect(s.getNext().text).toEqual('testing testing ');
+         expect(s.getNext().text).toEqual(']]>');
+         expect(s.getNext().text).toEqual('testing');
       });
 
       it('includes the "]]>" as char data in lax mode, even when there are no preceeding data', () => {
          const s = makeLaxExternalEntityStream(']]>testing');
          ignoreError(s, XmlErrorToken.ERROR.CHARDATA_INVALID_TEXT);
 
-         expect(s.getNext().data).toEqual(']]>');
-         expect(s.getNext().data).toEqual('testing');
+         expect(s.getNext().text).toEqual(']]>');
+         expect(s.getNext().text).toEqual('testing');
       });
 
       it('can read CharData not at the beginning of the cursor', () => {
          const s = makeStrictStream('<?xml version="1.0"?><start>testing testing </start>');
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.ElementStart);
 
          const t = s.getNext();
-         expect(t.data).toEqual('testing testing ');
+         expect(t.text).toEqual('testing testing ');
       });
 
       it('retrieves the expected chunks', () => {
@@ -618,12 +611,12 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('xxx');
 
-            expectTokenType(s, XmlToken.CHARDATA);
+            expectTokenType(s, XmlToken.CharData);
          });
 
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('xxx<?xml encoding="usascii"?>');
-            ignoreToken(s, XmlToken.CHARDATA);
+            ignoreToken(s, XmlToken.CharData);
 
             expect(() => {
                s.getNext();
@@ -632,7 +625,7 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if after the XML Declaration in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?>xxx');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
             expect(() => {
                s.getNext();
@@ -641,7 +634,7 @@ describe('XmlTokenStream', () => {
 
          it('can not appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?>xxx');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(() => {
                s.getNext();
@@ -650,22 +643,22 @@ describe('XmlTokenStream', () => {
 
          it('can appear after the Text Declaration of an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>xxx');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.CHARDATA);
+            expectTokenType(s, XmlToken.CharData);
          });
 
          it('can appear within elements in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?><one>xxx</one>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
 
-            expectTokenType(s, XmlToken.CHARDATA);
+            expectTokenType(s, XmlToken.CharData);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('xx<?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.CHARDATA);
+            ignoreToken(s, XmlToken.CharData);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -684,14 +677,14 @@ describe('XmlTokenStream', () => {
                code: XmlErrorToken.ERROR.CHARDATA_INVALID_DOC_CONTEXT,
                message: 'CharData must not be outside the content of the document entity. Found "xxx".'
             });
-            ignoreToken(s, XmlToken.CHARDATA);
+            ignoreToken(s, XmlToken.CharData);
 
             t = s.getNext();
             expect(t).toEqualProps({
                code: XmlErrorToken.ERROR.CHARDATA_INVALID_DOC_CONTEXT,
                message: 'CharData must not be outside the content of the document entity. Found "]]>".'
             });
-            ignoreToken(s, XmlToken.CHARDATA);
+            ignoreToken(s, XmlToken.CharData);
          });
 
       });
@@ -700,25 +693,24 @@ describe('XmlTokenStream', () => {
 
    describe('parsing character reference', () => {
 
-      it('retrieves a token of type CHAR_REF', () => {
+      it('retrieves a token of type CharRef', () => {
          const s = makeStrictExternalEntityStream('&#65;');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.CHAR_REF);
+         expectTokenType(s, XmlToken.CharRef);
       });
 
       it('produces a token with the specified character using a decimal reference', () => {
          const s = makeStrictExternalEntityStream('&#65;');
 
          const t = s.getNext();
-         expect(t.data).toEqual('A');
+         expect(t.text).toEqual('A');
       });
 
       it('produces a token with the specified character using a hex reference', () => {
          const s = makeStrictExternalEntityStream('&#x4E;');
 
          const t = s.getNext();
-         expect(t.data).toEqual('N');
+         expect(t.text).toEqual('N');
       });
 
       it('throws an error if there is a space after the &', () => {
@@ -781,15 +773,15 @@ describe('XmlTokenStream', () => {
          const s = makeLaxExternalEntityStream('&#4e;');
          ignoreError(s, XmlErrorToken.ERROR.CHARREF_INVALID_BASE);
 
-         expect(s.getNext().data).toEqual('N');
+         expect(s.getNext().text).toEqual('N');
       });
 
       it('can read when not at the beginning of the cursor', () => {
          const s = makeStrictExternalEntityStream('<start>&#65;</start>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          const t = s.getNext();
-         expect(t.data).toEqual('A');
+         expect(t.text).toEqual('A');
       });
 
       it('retrieves the expected chunks', () => {
@@ -828,12 +820,12 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&#50;');
 
-            expectTokenType(s, XmlToken.CHAR_REF);
+            expectTokenType(s, XmlToken.CharRef);
          });
 
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&#50;<?xml encoding="usascii"?>');
-            ignoreToken(s, XmlToken.CHAR_REF);
+            ignoreToken(s, XmlToken.CharRef);
 
             expect(() => {
                s.getNext();
@@ -842,7 +834,7 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if after the XML Declaration in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?>&#50;');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
             expect(() => {
                s.getNext();
@@ -851,7 +843,7 @@ describe('XmlTokenStream', () => {
 
          it('can not appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?>&#50;');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(() => {
                s.getNext();
@@ -860,22 +852,22 @@ describe('XmlTokenStream', () => {
 
          it('can appear after the Text Declaration of an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>&#50;');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.CHAR_REF);
+            expectTokenType(s, XmlToken.CharRef);
          });
 
          it('can appear within elements in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?><one>&#50;</one>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
 
-            expectTokenType(s, XmlToken.CHAR_REF);
+            expectTokenType(s, XmlToken.CharRef);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('&#50;<?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.CHAR_REF);
+            ignoreToken(s, XmlToken.CharRef);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -947,13 +939,13 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&amp;');
 
-            expectTokenType(s, XmlToken.ENTITY_START);
+            expectTokenType(s, XmlToken.EntityStart);
          });
 
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&amp;<?xml encoding="usascii"?>');
-            ignoreToken(s, XmlToken.ENTITY_START);
-            ignoreToken(s, XmlToken.ENTITY_END);
+            ignoreToken(s, XmlToken.EntityStart);
+            ignoreToken(s, XmlToken.EntityEnd);
 
             expect(() => {
                s.getNext();
@@ -962,7 +954,7 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if after the XML Declaration in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?>&amp;');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
             expect(() => {
                s.getNext();
@@ -971,7 +963,7 @@ describe('XmlTokenStream', () => {
 
          it('can not appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?>&amp;');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(() => {
                s.getNext();
@@ -980,23 +972,23 @@ describe('XmlTokenStream', () => {
 
          it('can appear after the Text Declaration of an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>&amp;');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.ENTITY_START);
+            expectTokenType(s, XmlToken.EntityStart);
          });
 
          it('can appear within elements in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?><one>&amp;</one>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
 
-            expectTokenType(s, XmlToken.ENTITY_START);
+            expectTokenType(s, XmlToken.EntityStart);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('&amp;<?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.ENTITY_START);
-            ignoreToken(s, XmlToken.ENTITY_END);
+            ignoreToken(s, XmlToken.EntityStart);
+            ignoreToken(s, XmlToken.EntityEnd);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1014,25 +1006,25 @@ describe('XmlTokenStream', () => {
       it('retrieves a token of type CDATA', () => {
          const s = makeStrictExternalEntityStream('<![CDATA[ blah ]]>');
 
-         expectTokenType(s, XmlToken.CDATA);
+         expectTokenType(s, XmlToken.CData);
       });
 
       it('retrieves the content of the CDATA ', () => {
          const s = makeStrictExternalEntityStream('<![CDATA[ test data ]]>');
 
-         expect(s.getNext().data).toEqual(' test data ');
+         expect(s.getNext().text).toEqual(' test data ');
       });
 
       it('retrieves the content of the CDATA, ignoring any embedded markup', () => {
          const s = makeStrictExternalEntityStream('<![CDATA[ test <?foo bar?> <!-- data --> <start></end> ]]>');
 
-         expect(s.getNext().data).toEqual(' test <?foo bar?> <!-- data --> <start></end> ');
+         expect(s.getNext().text).toEqual(' test <?foo bar?> <!-- data --> <start></end> ');
       });
 
       it('retrieves undefined as the value for an empty CDATA block', () => {
          const s = makeStrictExternalEntityStream('<![CDATA[]]>');
 
-         expect(s.getNext().data).toBeUndefined();
+         expect(s.getNext().text).toBeUndefined();
       });
 
       it('throws an error if EOF found in middle', () => {
@@ -1046,7 +1038,7 @@ describe('XmlTokenStream', () => {
          const s = makeLaxExternalEntityStream('<![CDATA[ junk cdata');
          ignoreError(s, XmlErrorToken.ERROR.CDATA_NO_CLOSE);
 
-         expect(s.getNext().data).toEqual(' junk cdata');
+         expect(s.getNext().text).toEqual(' junk cdata');
       });
 
       it('throws an error if space found before first square bracket', () => {
@@ -1121,21 +1113,21 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<![CDATA[ test ]]>');
 
-            expectTokenType(s, XmlToken.CDATA);
+            expectTokenType(s, XmlToken.CData);
          });
 
          it('can appear with element content in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><name><![CDATA[ test ]]></name>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
 
-            expectTokenType(s, XmlToken.CDATA);
+            expectTokenType(s, XmlToken.CData);
 
          });
 
          it('can not appear after the Text Declaration in the external subset', () => {
             const s = makeLaxExternalSubsetStream('<?xml encoding="foo"?><![CDATA[ test ]]>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1146,14 +1138,14 @@ describe('XmlTokenStream', () => {
 
          it('can not appear after the Text Declaration in an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><![CDATA[ test ]]>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.CDATA);
+            expectTokenType(s, XmlToken.CData);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('<![CDATA[ test ]]><?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.CDATA);
+            ignoreToken(s, XmlToken.CData);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1247,7 +1239,7 @@ describe('XmlTokenStream', () => {
       it('retrieves a token of type COMMENT', () => {
          const s = makeStrictExternalEntityStream('<!-- one -->');
 
-         expectTokenType(s, XmlToken.COMMENT);
+         expectTokenType(s, XmlToken.Comment);
       });
 
       it('retrieves the content of the comment', () => {
@@ -1321,40 +1313,40 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of the external subset', () => {
             const s = makeStrictExternalSubsetStream('<!-- testComment -->');
 
-            expectTokenType(s, XmlToken.COMMENT);
+            expectTokenType(s, XmlToken.Comment);
          });
 
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<!-- testComment -->');
 
-            expectTokenType(s, XmlToken.COMMENT);
+            expectTokenType(s, XmlToken.Comment);
          });
 
          it('can appear after the XML Declaration in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!-- testComment -->');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
-            expectTokenType(s, XmlToken.COMMENT);
+            expectTokenType(s, XmlToken.Comment);
 
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="foo"?><!-- testComment -->');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.COMMENT);
+            expectTokenType(s, XmlToken.Comment);
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><!-- testComment -->');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.COMMENT);
+            expectTokenType(s, XmlToken.Comment);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('<!-- testComment --><?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.COMMENT);
+            ignoreToken(s, XmlToken.Comment);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1365,7 +1357,7 @@ describe('XmlTokenStream', () => {
 
          it('changes state in an external subset to be in the DTD', () => {
             const s = makeLaxExternalSubsetStream('<!-- testComment --><name>');
-            ignoreToken(s, XmlToken.COMMENT);
+            ignoreToken(s, XmlToken.Comment);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1383,7 +1375,7 @@ describe('XmlTokenStream', () => {
       it('retrieves a token of type PI', () => {
          const s = makeStrictExternalEntityStream('<?foo blah blah boo boo !@#$%^&^*()_+?>');
 
-         expectTokenType(s, XmlToken.PI);
+         expectTokenType(s, XmlToken.ProcessingInstruction);
       });
 
       it('retrieves a token with the right target name', () => {
@@ -1491,40 +1483,40 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?foo bar?>');
 
-            expectTokenType(s, XmlToken.PI);
+            expectTokenType(s, XmlToken.ProcessingInstruction);
          });
 
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<?foo bar?>');
 
-            expectTokenType(s, XmlToken.PI);
+            expectTokenType(s, XmlToken.ProcessingInstruction);
          });
 
          it('can appear after the XML Declaration in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><?foo bar?>');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
-            expectTokenType(s, XmlToken.PI);
+            expectTokenType(s, XmlToken.ProcessingInstruction);
 
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="foo"?><?foo bar?>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.PI);
+            expectTokenType(s, XmlToken.ProcessingInstruction);
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><?foo bar?>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.PI);
+            expectTokenType(s, XmlToken.ProcessingInstruction);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('<?foo bar?><?xml encoding="foo"?>');
-            ignoreToken(s, XmlToken.PI);
+            ignoreToken(s, XmlToken.ProcessingInstruction);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1535,7 +1527,7 @@ describe('XmlTokenStream', () => {
 
          it('changes state in an external subset to be in the DTD', () => {
             const s = makeLaxExternalSubsetStream('<?foo bar?><name>');
-            ignoreToken(s, XmlToken.PI);
+            ignoreToken(s, XmlToken.ProcessingInstruction);
 
             const t = s.getNext();
             expect(t).toEqualProps({
@@ -1554,7 +1546,7 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
 
          const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.XMLDECL);
+         expect(t).toBeInstanceOf(XmlToken.XmlDeclaration);
       });
 
       it('retrieves the number of parameters in the declaration', () => {
@@ -1589,7 +1581,7 @@ describe('XmlTokenStream', () => {
          let t = s.getNext();
          expect(t.type).toEqual(XmlToken.SYNTAX_ERROR);
          t = s.getNext();
-         expect(t.type).toEqual(XmlToken.XMLDECL);
+         expect(t).toBeInstanceOf(XmlToken.XmlDeclaration);
       });
 
       it('throws an error if a space is between the <? and the target', () => {
@@ -1890,24 +1882,24 @@ describe('XmlTokenStream', () => {
          it('can be placed first in the document entity', () => {
             const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?>');
 
-            expectTokenType(s, XmlToken.XMLDECL);
+            expectTokenType(s, XmlToken.XmlDeclaration);
          });
 
          it('can be placed after illegal content, but errors will be thrown', () => {
             const s = makeLaxStream('<test></test><?xml version="1.1" encoding="usascii"?>');
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_INVALID_DOC_CONTEXT);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.ElementStart);
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_INVALID_DOC_CONTEXT);
-            ignoreToken(s, XmlToken.ELEMENT_END);
+            ignoreToken(s, XmlToken.ElementEnd);
 
-            expectTokenType(s, XmlToken.XMLDECL);
+            expectTokenType(s, XmlToken.XmlDeclaration);
          });
 
          it('changes the state to being in a the prolog', () => {
             const s = makeStrictStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE foo>');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
-            expectTokenType(s, XmlToken.DOCTYPE_START);
+            expectTokenType(s, XmlToken.DocTypeStart);
          });
 
       });
@@ -1919,8 +1911,7 @@ describe('XmlTokenStream', () => {
       it('can get a syntactically correct one', () => {
          const s = makeStrictExternalEntityStream('<?xml version="1.1" encoding="usascii"?>');
 
-         const t = s.getNext();
-         expect(t.type).toEqual(XmlToken.TEXTDECL);
+         expectTokenType(s, XmlToken.TextDeclaration);
       });
 
       it('retrieves the number of parameters in the declaration', () => {
@@ -1941,7 +1932,7 @@ describe('XmlTokenStream', () => {
       it('understands no version in the declaration', () => {
          const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>');
 
-         expect(s.getNext().type).toEqual(XmlToken.TEXTDECL);
+         expectTokenType(s, XmlToken.TextDeclaration);
       });
 
       it('throws an error if a standalone value is present', () => {
@@ -1965,21 +1956,21 @@ describe('XmlTokenStream', () => {
          it('can be placed first in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?><!NOTATION x PUBLIC "x">');
 
-            expect(s.getNext().type).toEqual(XmlToken.TEXTDECL);
-            ignoreToken(s, XmlToken.NOTATION_DECL);
+            expectTokenType(s, XmlToken.TextDeclaration);
+            ignoreToken(s, XmlToken.NotationDeclaration);
          });
 
          it('can be placed first in an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?><name>');
 
-            expect(s.getNext().type).toEqual(XmlToken.TEXTDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.TextDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
          });
 
          it('throws an error if the Text Declaration is not the first thing in the external entity', () => {
             const s = makeStrictExternalEntityStream('<test></test><?xml version="1.1" encoding="usascii"?>');
-            ignoreToken(s, XmlToken.ELEMENT_START);
-            ignoreToken(s, XmlToken.ELEMENT_END);
+            ignoreToken(s, XmlToken.ElementStart);
+            ignoreToken(s, XmlToken.ElementEnd);
 
             expect(() => {
                s.getNext(); // start element
@@ -1988,7 +1979,7 @@ describe('XmlTokenStream', () => {
 
          it('throws an error if the Text Declaration is not the first thing in the external subset', () => {
             const s = makeStrictExternalSubsetStream('<!ENTITY foo "bar"><?xml version="1.1" encoding="usascii"?>');
-            ignoreToken(s, XmlToken.ENTITY_DECL);
+            ignoreToken(s, XmlToken.EntityDeclaration);
 
             expect(() => {
                s.getNext(); // start element
@@ -1997,7 +1988,7 @@ describe('XmlTokenStream', () => {
 
          it('changes the state to being in a DTD in the external subset', () => {
             const s = makeLaxExternalSubsetStream('<?xml version="1.1" encoding="usascii"?><name>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.ELEMENT_INVALID_DTD_CONTEXT,
@@ -2007,7 +1998,7 @@ describe('XmlTokenStream', () => {
 
          it('changes the state to being in content in an external entity', () => {
             const s = makeLaxExternalEntityStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE foo>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
@@ -2024,7 +2015,7 @@ describe('XmlTokenStream', () => {
       it('retrieves a token of type START_ELEMENT', () => {
          const s = makeStrictExternalEntityStream('<name>');
 
-         expectTokenType(s, XmlToken.ELEMENT_START);
+         expectTokenType(s, XmlToken.ElementStart);
       });
 
       it('retrieves the name of the element', () => {
@@ -2092,11 +2083,11 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               value: [ new XmlToken.Text('one') ],
                quoteType: '"'
             }, {
                name: 'attr2',
-               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               value: [ new XmlToken.Text('two') ],
                quoteType: '"'
             } ]);
          });
@@ -2107,11 +2098,11 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               value: [ new XmlToken.Text('one') ],
                quoteType: '\''
             }, {
                name: 'attr2',
-               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               value: [ new XmlToken.Text('two') ],
                quoteType: '\''
             } ]);
          });
@@ -2122,11 +2113,11 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'one') ],
+               value: [ new XmlToken.Text('one') ],
                quoteType: '\''
             }, {
                name: 'attr2',
-               value: [ new XmlToken(XmlToken.TEXT, 'two') ],
+               value: [ new XmlToken.Text('two') ],
                quoteType: '"'
             } ]);
          });
@@ -2137,9 +2128,9 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new XmlToken(XmlToken.CHAR_REF, 'A'),
-                  new XmlToken(XmlToken.TEXT, 'o')
+               value: [ new XmlToken.Text('tw'),
+                  new XmlToken.CharRef('A'),
+                  new XmlToken.Text('o')
                ],
                quoteType: '"'
             } ]);
@@ -2152,8 +2143,8 @@ describe('XmlTokenStream', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [
-                  new XmlToken(XmlToken.CHAR_REF, 'A'),
-                  new XmlToken(XmlToken.TEXT, ' test')
+                  new XmlToken.CharRef('A'),
+                  new XmlToken.Text(' test')
                ],
                quoteType: '"'
             } ]);
@@ -2165,8 +2156,8 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new XmlToken(XmlToken.CHAR_REF, 'A')
+               value: [ new XmlToken.Text('tw'),
+                  new XmlToken.CharRef('A')
                ],
                quoteType: '"'
             } ]);
@@ -2178,10 +2169,10 @@ describe('XmlTokenStream', () => {
             const t = s.getNext();
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new StartEntityToken('quot', false),
-                  new XmlToken(XmlToken.ENTITY_END, 'quot'),
-                  new XmlToken(XmlToken.TEXT, 'o')
+               value: [ new XmlToken.Text('tw'),
+                  new EntityStart('quot', false),
+                  new XmlToken.EntityEnd('quot'),
+                  new XmlToken.Text('o')
                ],
                quoteType: '"'
             } ]);
@@ -2193,10 +2184,10 @@ describe('XmlTokenStream', () => {
 
             expect(t.attributes).toEqual([ {
                name: 'attr1',
-               value: [ new XmlToken(XmlToken.TEXT, 'tw'),
-                  new StartEntityToken('test', false),
-                  new XmlToken(XmlToken.ENTITY_END, 'test'),
-                  new XmlToken(XmlToken.TEXT, 'o')
+               value: [ new XmlToken.Text('tw'),
+                  new EntityStart('test', false),
+                  new XmlToken.EntityEnd('test'),
+                  new XmlToken.Text('o')
                ],
                quoteType: '"'
             } ]);
@@ -2446,7 +2437,7 @@ describe('XmlTokenStream', () => {
 
                expect(t.attributes).toEqual([ {
                   name: 'attr1',
-                  value: [ new XmlToken(XmlToken.TEXT, 'space: , tab: , newline: , cr: ') ],
+                  value: [ new XmlToken.Text('space: , tab: , newline: , cr: ') ],
                   quoteType: '"'
                } ]);
             });
@@ -2458,14 +2449,14 @@ describe('XmlTokenStream', () => {
                expect(t.attributes).toEqual([ {
                   name: 'attr1',
                   value: [
-                     new XmlToken(XmlToken.TEXT, 'space:'),
-                     new XmlToken(XmlToken.CHAR_REF, ' '),
-                     new XmlToken(XmlToken.TEXT, ', tab:'),
-                     new XmlToken(XmlToken.CHAR_REF, '\t'),
-                     new XmlToken(XmlToken.TEXT, ', newline:'),
-                     new XmlToken(XmlToken.CHAR_REF, '\n'),
-                     new XmlToken(XmlToken.TEXT, ', cr:'),
-                     new XmlToken(XmlToken.CHAR_REF, '\r')
+                     new XmlToken.Text('space:'),
+                     new XmlToken.CharRef(' '),
+                     new XmlToken.Text(', tab:'),
+                     new XmlToken.CharRef('\t'),
+                     new XmlToken.Text(', newline:'),
+                     new XmlToken.CharRef('\n'),
+                     new XmlToken.Text(', cr:'),
+                     new XmlToken.CharRef('\r')
                   ],
                   quoteType: '"'
                } ]);
@@ -2510,19 +2501,19 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<name> ');
 
-            expectTokenType(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.ElementStart);
          });
 
          it('can appear after the XML Declaration in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><name> ');
-            ignoreToken(s, XmlToken.XMLDECL);
+            ignoreToken(s, XmlToken.XmlDeclaration);
 
-            expectTokenType(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.ElementStart);
          });
 
          it('can not appear after the Text Declaration in the external subset', () => {
             const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><name>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.ELEMENT_INVALID_DTD_CONTEXT,
@@ -2532,15 +2523,15 @@ describe('XmlTokenStream', () => {
 
          it('can appear after the Text Declaration in an external entity', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?><name>');
-            ignoreToken(s, XmlToken.TEXTDECL);
+            ignoreToken(s, XmlToken.TextDeclaration);
 
-            expectTokenType(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.ElementStart);
          });
 
          it('can not appear inside the internal subset', () => {
             const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE one [<one>]>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.DOCTYPE_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.DocTypeStart);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.ELEMENT_INVALID_DTD_CONTEXT,
@@ -2550,26 +2541,26 @@ describe('XmlTokenStream', () => {
 
          it('can appear after the DOCTYPE in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE name><name> ');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.DOCTYPE_START);
-            ignoreToken(s, XmlToken.DOCTYPE_END);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.DocTypeStart);
+            ignoreToken(s, XmlToken.DocTypeEnd);
 
-            expectTokenType(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.ElementStart);
          });
 
          it('can appear after the DOCTYPE with an internal subset in a document entity', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE name [<!ENTITY entName "f">]><name> ');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.DOCTYPE_START);
-            ignoreToken(s, XmlToken.ENTITY_DECL);
-            ignoreToken(s, XmlToken.DOCTYPE_END);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.DocTypeStart);
+            ignoreToken(s, XmlToken.EntityDeclaration);
+            ignoreToken(s, XmlToken.DocTypeEnd);
 
-            expectTokenType(s, XmlToken.ELEMENT_START);
+            expectTokenType(s, XmlToken.ElementStart);
          });
 
          it('changes state in an external entity so that the Text Declaration can not then be used', () => {
             const s = makeLaxExternalEntityStream('<name><?xml encoding="usascii"?>');
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.ElementStart);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT,
@@ -2579,8 +2570,8 @@ describe('XmlTokenStream', () => {
 
          it('changes state in a document entity so that the DOCTYPE can not then be used', () => {
             const s = makeLaxStream('<?xml version="1.0"?><name><!DOCTYPE one>');
-            ignoreToken(s, XmlToken.XMLDECL);
-            ignoreToken(s, XmlToken.ELEMENT_START);
+            ignoreToken(s, XmlToken.XmlDeclaration);
+            ignoreToken(s, XmlToken.ElementStart);
 
             expect(s.getNext()).toEqualProps({
                code: XmlErrorToken.ERROR.DOCTYPE_INVALID_DOC_CONTEXT,
@@ -2594,10 +2585,10 @@ describe('XmlTokenStream', () => {
 
    describe('parsing empty element tags', () => {
 
-      it('retrieves a token of type ELEMENT_EMPTY', () => {
+      it('retrieves a token of type empty element', () => {
          const s = makeStrictExternalEntityStream('<name/>');
 
-         expectTokenType(s, XmlToken.ELEMENT_EMPTY);
+         expectTokenType(s, XmlToken.EmptyElement);
       });
 
       it('retrieves the name of the element', () => {
@@ -2686,7 +2677,7 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('<name/>');
 
-            expectTokenType(s, XmlToken.ELEMENT_EMPTY);
+            expectTokenType(s, XmlToken.EmptyElement);
          });
 
       });
@@ -2695,18 +2686,18 @@ describe('XmlTokenStream', () => {
 
    describe('parsing end element tags', () => {
 
-      it('retrieves a token of type ELEMENT_END', () => {
+      it('retrieves a token of type ElementEnd', () => {
          const s = makeStrictStream('<?xml version="1.0"?><name></name>');
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.ElementStart);
 
-         expectTokenType(s, XmlToken.ELEMENT_END);
+         expectTokenType(s, XmlToken.ElementEnd);
       });
 
       it('retrieves the name of the element', () => {
          const s = makeStrictStream('<?xml version="1.0"?><name></name>');
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.ElementStart);
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
@@ -2714,8 +2705,8 @@ describe('XmlTokenStream', () => {
 
       it('retrieves an empty name if there is no name in the end tag', () => {
          const s = makeLaxStream('<?xml version="1.0"?><name></>');
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.ElementStart);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_NO_NAME);
          ignoreError(s, XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
 
@@ -2725,8 +2716,8 @@ describe('XmlTokenStream', () => {
 
       it('allows space after the name', () => {
          const s = makeStrictStream('<?xml version="1.0"?><name></name     >');
-         ignoreToken(s, XmlToken.XMLDECL);
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.XmlDeclaration);
+         ignoreToken(s, XmlToken.ElementStart);
 
          const t = s.getNext();
          expect(t.name).toEqual('name');
@@ -2734,7 +2725,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if attributs found in the tag', () => {
          const s = makeLaxExternalEntityStream('<name></name attr1="one">');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(s.getNext()).toEqualProps({
             code: XmlErrorToken.ERROR.ELEMENT_NO_CLOSE,
@@ -2744,7 +2735,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if a space is found after the </', () => {
          const s = makeLaxExternalEntityStream('<name></ name>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(s.getNext()).toEqualProps({
             code: XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE,
@@ -2754,7 +2745,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error token if a space is found after the </', () => {
          const s = makeLaxExternalEntityStream('<name></ name>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(s.getNext()).toEqualProps({
             code: XmlErrorToken.ERROR.ELEMENT_XTRA_LEADING_SPACE,
@@ -2764,7 +2755,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if a it finds the wrong close', () => {
          const s = makeLaxExternalEntityStream('<name></name/>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(s.getNext()).toEqualProps({
             code: XmlErrorToken.ERROR.ELEMENT_END_INVALID_CLOSE,
@@ -2797,9 +2788,9 @@ describe('XmlTokenStream', () => {
 
       it('throws no error if the tag names match', () => {
          const s = makeStrictExternalEntityStream('<one><two></two></one>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreToken(s, XmlToken.ELEMENT_END);
+         ignoreToken(s, XmlToken.ElementStart);
+         ignoreToken(s, XmlToken.ElementStart);
+         ignoreToken(s, XmlToken.ElementEnd);
 
          expect(() => {
             s.getNext();
@@ -2808,7 +2799,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if the end element name does not match the start', () => {
          const s = makeStrictExternalEntityStream('<one></two>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(() => {
             s.getNext();
@@ -2817,10 +2808,10 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if the end element name does not match the start, even on deeper trees', () => {
          const s = makeStrictExternalEntityStream('<one><two><one></one></one></one>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreToken(s, XmlToken.ELEMENT_START);
-         ignoreToken(s, XmlToken.ELEMENT_END);
+         ignoreToken(s, XmlToken.ElementStart);
+         ignoreToken(s, XmlToken.ElementStart);
+         ignoreToken(s, XmlToken.ElementStart);
+         ignoreToken(s, XmlToken.ElementEnd);
 
          expect(() => {
             s.getNext();
@@ -2829,7 +2820,7 @@ describe('XmlTokenStream', () => {
 
       it('generates an error token if the end element name does not match the start', () => {
          const s = makeLaxExternalEntityStream('<one></two>');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          expect(s.getNext()).toEqualProps({
             code: XmlErrorToken.ERROR.ELEMENT_UNBALANCED,
@@ -2839,7 +2830,7 @@ describe('XmlTokenStream', () => {
 
       it('retrieves the expected chunks', () => {
          const s = makeStrictExternalEntityStream('<one></one >');
-         ignoreToken(s, XmlToken.ELEMENT_START);
+         ignoreToken(s, XmlToken.ElementStart);
 
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
@@ -2858,7 +2849,7 @@ describe('XmlTokenStream', () => {
             const s = makeLaxExternalEntityStream('</name>');
             ignoreError(s, XmlErrorToken.ERROR.ELEMENT_UNBALANCED);
 
-            expectTokenType(s, XmlToken.ELEMENT_END);
+            expectTokenType(s, XmlToken.ElementEnd);
          });
 
       });
@@ -2921,13 +2912,13 @@ describe('XmlTokenStream', () => {
 
       it('does not generate a S token between tags', () => {
          const s = makeStrictStream('<?xml version="1.1"?> <one> UNO </one> ');
-         ignoreToken(s, XmlToken.XMLDECL);
+         ignoreToken(s, XmlToken.XmlDeclaration);
 
-         expectTokenType(s, XmlToken.SPACE);
-         expectTokenType(s, XmlToken.ELEMENT_START);
-         expectTokenType(s, XmlToken.CHARDATA);
-         expectTokenType(s, XmlToken.ELEMENT_END);
-         expectTokenType(s, XmlToken.SPACE);
+         expectTokenType(s, XmlToken.Space);
+         expectTokenType(s, XmlToken.ElementStart);
+         expectTokenType(s, XmlToken.CharData);
+         expectTokenType(s, XmlToken.ElementEnd);
+         expectTokenType(s, XmlToken.Space);
       });
 
    });

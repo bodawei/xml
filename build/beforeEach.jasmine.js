@@ -39,12 +39,43 @@ function toEqualProps(util, customEqualityTesters) {
    };
 }
 
+function toBeInstanceOf() {
+   return {
+      compare: (actual, expected) => {
+         if (typeof expected !== 'function') {
+            throw new Error('Must pass a function to the second argument of the .toBeInstanceOf() jasmine matcher.');
+         }
+         if (typeof actual !== 'object') {
+            throw new Error('Must pass an object to the first argument of the .toBeInstanceOf() jasmine matcher.');
+         }
+
+         const pass = (actual instanceof expected);
+         let message;
+
+         if (pass) {
+            message = 'Expected ' + actual.constructor.name +
+               ' instance not to be an instance of ' + expected.name + '.';
+         } else {
+            message = 'Expected ' + actual.constructor.name +
+               ' instance to be an instance of ' + expected.name + '.';
+         }
+
+         return {
+            pass: pass,
+            message: message
+         };
+      }
+   };
+}
+
 beforeEach(() => {
    jasmine.addMatchers({
-      toEqualProps
+      toEqualProps,
+      toBeInstanceOf
    });
 });
 
 module.exports = {
-   toEqualProps
+   toEqualProps,
+   toBeInstanceOf
 };

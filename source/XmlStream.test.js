@@ -54,7 +54,7 @@ describe('XmlStream', () => {
       it('will not return a value if called after ended', () => {
          const s = makeStream();
          s._setEnded();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
 
          expect(s.getNext()).toBeUndefined();
       });
@@ -75,10 +75,10 @@ describe('XmlStream', () => {
 
       it('registers a "data" callback', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
          s.on('data', (error, data) => {
             if (count === 0) {
-               expect(data.type).toEqual(XmlToken.ELEMENT_START);
+               expect(data).toBeInstanceOf(XmlToken.ElementStart);
                expect(error).toBeUndefined();
             }
             dataItem = undefined;
@@ -91,10 +91,10 @@ describe('XmlStream', () => {
 
       it('registers a "token" callback', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
          s.on('token', (error, data) => {
             if (count === 0) {
-               expect(data.type).toEqual(XmlToken.ELEMENT_START);
+               expect(data).toBeInstanceOf(XmlToken.ElementStart);
                expect(error).toBeUndefined();
             }
             dataItem = undefined;
@@ -122,7 +122,7 @@ describe('XmlStream', () => {
 
       it('will not register the same callback multiple times', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
          function callback() {
             count++;
             if (count === 2) {
@@ -182,7 +182,7 @@ describe('XmlStream', () => {
 
       it('removes a "data" event handler', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
 
          function remove() {
             s.off('data', callback);
@@ -203,7 +203,7 @@ describe('XmlStream', () => {
 
       it('removes a "token" callback', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
 
          function remove() {
             s.off('token', callback);
@@ -268,7 +268,7 @@ describe('XmlStream', () => {
 
       it('throws no error if a callback that is not there is removed', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
          s.on('data', () => {});
 
          expect(() => {
@@ -279,7 +279,7 @@ describe('XmlStream', () => {
 
       it('can remove one handler without removing all (very whitebox)', () => {
          const s = makeStream();
-         dataItem = new XmlToken(XmlToken.ELEMENT_START);
+         dataItem = new XmlToken.ElementStart();
          let count = 0;
 
          function callback1() {

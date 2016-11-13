@@ -63,7 +63,12 @@ function ignoreError(stream, errorCode) {
 
 function ignoreToken(stream, tokenType) {
    const token = stream.getNext();
-   expect(token.type).toEqual(tokenType);
+
+   if (typeof tokenType === 'string') {
+      expect(token.type).toEqual(tokenType);
+   } else {
+      expect(token instanceof tokenType).toEqual(true);
+   }
 }
 
 function expectSyntaxError(entityType, input, code, message, place, context) {
@@ -130,9 +135,14 @@ function expectExternalSubsetSyntaxError(input, code, message, place, context) {
    }
 }
 
-function expectTokenType(stream, type) {
+function expectTokenType(stream, tokenType) {
    const t = stream.getNext();
-   expect(t.type).toEqual(type);
+
+   if (typeof tokenType === 'string') {
+      expect(t.type).toEqual(tokenType);
+   } else {
+      expect(t instanceof tokenType).toEqual(true);
+   }
 }
 
 function makeStringTokenArray(values, offset = 0) {

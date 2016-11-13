@@ -10,22 +10,6 @@ const XmlStream = require('./XmlStream.js');
 const XmlToken = require('./XmlToken.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 
-const CommentToken = XmlToken.CommentToken;
-const ProcessingInstructionToken = XmlToken.ProcessingInstructionToken;
-const SpaceToken = XmlToken.SpaceToken;
-const DeclarationToken = XmlToken.DeclarationToken;
-const TextDeclarationToken = XmlToken.TextDeclarationToken;
-const StartTagToken = XmlToken.StartTagToken;
-const StartEntityToken = XmlToken.StartEntityToken;
-const TagToken = XmlToken.TagToken;
-const DocTypeStartToken = XmlToken.DocTypeStartToken;
-const DocTypeEndToken = XmlToken.DocTypeEndToken;
-const NotationToken = XmlToken.NotationToken;
-const EntityToken = XmlToken.EntityToken;
-const ParameterEntityToken = XmlToken.ParameterEntityToken;
-const ElementDeclarationToken = XmlToken.ElementDeclarationToken;
-const AttributeListDeclarationToken = XmlToken.AttributeListDeclarationToken;
-
 const ERRORS = XmlErrorToken.ERROR;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
@@ -64,7 +48,7 @@ function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
    let value = valueChunk;
 
    if (!elementAttribute) {
-      value = valueChunk.length !== 0 ? valueChunk[0].data : undefined;
+      value = valueChunk.length !== 0 ? valueChunk[0].text : undefined;
    }
 
    return {
@@ -78,8 +62,8 @@ function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
 function doCDataNormalization(valueArray) {
    for (let index = 0; index < valueArray.length; index++) {
       const item = valueArray[index];
-      if (item.type === XmlToken.TEXT) {
-         item.data = item.data.replace(/[\n\r\t]/g, ' ');
+      if (item instanceof XmlToken.Text) {
+         item.text = item.text.replace(/[\n\r\t]/g, ' ');
       }
    }
 }
@@ -261,7 +245,7 @@ class XmlTokenStream extends XmlStream {
          this._assertSyntax(this._state !== STATE.START, ERRORS.SPACE_INVALID_CONTEXT, space.startOffset, space);
       }
 
-      this._pushToken(new SpaceToken(space.text, this._cursor.getRecentChunks()));
+      this._pushToken(new XmlToken.Space(space.text, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -279,7 +263,7 @@ class XmlTokenStream extends XmlStream {
             if (content.chunk) {
                this._checkContentState(content.chunk,
                   ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
-               this._pushTokenWrapper(XmlToken.CHARDATA, content.chunk.text);
+               this._pushToken(new XmlToken.CharData(content.chunk.text, this._cursor.getRecentChunks()));
             }
 
             content = {
@@ -292,7 +276,7 @@ class XmlTokenStream extends XmlStream {
 
          this._checkContentState(content.chunk,
             ERRORS.CHARDATA_INVALID_DOC_CONTEXT, ERRORS.CHARDATA_INVALID_SUBSET_CONTEXT);
-         this._pushTokenWrapper(XmlToken.CHARDATA, content.chunk.text);
+         this._pushToken(new XmlToken.CharData(content.chunk.text, this._cursor.getRecentChunks()));
       } while (content.terminator && content.terminator !== '<');
    }
 
@@ -324,10 +308,10 @@ class XmlTokenStream extends XmlStream {
          const character = this._getCharReference();
 
          if (inAttribute) {
-            return [ new XmlToken(XmlToken.CHAR_REF, character) ];
+            return [ new XmlToken.CharRef(character) ]; // no chunks. those belong to the attribute
          } else {
             this._checkContentState(start, ERRORS.CHARREF_INVALID_DOC_CONTEXT, ERRORS.CHARREF_INVALID_SUBSET_CONTEXT);
-            this._pushTokenWrapper(XmlToken.CHAR_REF, character);
+            this._pushToken(new XmlToken.CharRef(character, this._cursor.getRecentChunks()));
          }
       } else {
          const name = this._cursor.getWord([ ';' ]);
@@ -342,10 +326,10 @@ class XmlTokenStream extends XmlStream {
          this._assertSyntax(!afterSpace, ERRORS.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
          this._assertSyntax(closingSemicolon, ERRORS.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
-         const startToken = new StartEntityToken(entityName);
+         const startToken = new XmlToken.EntityStart(entityName);
 
          if (inAttribute) {
-            return [ startToken, new XmlToken(XmlToken.ENTITY_END, entityName) ];
+            return [ startToken, new XmlToken.EntityEnd(entityName) ];
          } else {
             startToken.chunks = this._cursor.getRecentChunks();
 
@@ -353,7 +337,7 @@ class XmlTokenStream extends XmlStream {
                ERRORS.REFERENCE_INVALID_DOC_CONTEXT, ERRORS.REFERENCE_INVALID_SUBSET_CONTEXT);
 
             this._pushToken(startToken);
-            this._pushTokenWrapper(XmlToken.ENTITY_END, entityName);
+            this._pushToken(new XmlToken.EntityEnd(entityName, this._cursor.getRecentChunks()));
          }
       }
    }
@@ -420,7 +404,7 @@ class XmlTokenStream extends XmlStream {
 
       const content = results.chunk ? results.chunk.text : undefined;
       this._checkPiAndCommentState(start, ERRORS.COMMENT_INVALID_CONTEXT);
-      this._pushToken(new CommentToken(content, this._cursor.getRecentChunks()));
+      this._pushToken(new XmlToken.Comment(content, this._cursor.getRecentChunks()));
    }
 
    _getBangItem(start) {
@@ -454,7 +438,7 @@ class XmlTokenStream extends XmlStream {
                const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, declarationName);
                this._validateStartDocType(parsedDocType);
 
-               const docToken = new DocTypeStartToken(textOrBlank(parsedDocType.nameChunk),
+               const docToken = new XmlToken.DocTypeStart(textOrBlank(parsedDocType.nameChunk),
                   locFromExternalId(parsedDocType.externalId));
                this._pushToken(docToken);
 
@@ -470,7 +454,7 @@ class XmlTokenStream extends XmlStream {
 
                this._validateNotation(parsedNotation);
 
-               this._pushToken(new NotationToken(textOrBlank(parsedNotation.nameChunk),
+               this._pushToken(new XmlToken.NotationDeclaration(textOrBlank(parsedNotation.nameChunk),
                   locFromExternalId(parsedNotation.externalId)));
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
@@ -520,13 +504,13 @@ class XmlTokenStream extends XmlStream {
                   ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
                this._assertSyntax(entityClosing, ERRORS.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
-               const entityToken = parsedEntity.isParameter ?
-                  new ParameterEntityToken(enNameText,
+               const EntityDeclaration = parsedEntity.isParameter ?
+                  new XmlToken.PEntityDeclaration(enNameText,
                      parsedEntity.valueChunk,
                      parsedEntity.externalId.systemLiteral,
                      parsedEntity.externalId.pubidLiteral,
                      notationDataName) :
-                  new EntityToken(enNameText,
+                  new XmlToken.EntityDeclaration(enNameText,
                      parsedEntity.valueChunk,
                      parsedEntity.externalId ? parsedEntity.externalId.systemLiteral : undefined,
                      parsedEntity.externalId ? parsedEntity.externalId.pubidLiteral : undefined,
@@ -534,7 +518,7 @@ class XmlTokenStream extends XmlStream {
 
                this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
 
-               this._pushToken(entityToken);
+               this._pushToken(EntityDeclaration);
                return;
             case 'ELEMENT':
                let contentText;
@@ -590,7 +574,7 @@ class XmlTokenStream extends XmlStream {
 
                this._checkDeclarationState(start, ERRORS.ELEMENTDECL_INVALID_CONTEXT);
 
-               this._pushToken(new ElementDeclarationToken(nameText, contentText));
+               this._pushToken(new XmlToken.ElementDeclaration(nameText, contentText));
                return;
             case 'ATTLIST':
                const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
@@ -728,7 +712,7 @@ class XmlTokenStream extends XmlStream {
 
                this._checkDeclarationState(start, ERRORS.ATTLISTDECL_INVALID_CONTEXT);
 
-               this._pushToken(new AttributeListDeclarationToken(elName, attributes));
+               this._pushToken(new XmlToken.AttrListDeclaration(elName, attributes));
                return;
          }
       }
@@ -830,7 +814,7 @@ class XmlTokenStream extends XmlStream {
       if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
          this._state = STATE.PROLOG;
       }
-      this._pushToken(new DocTypeEndToken());
+      this._pushToken(new XmlToken.DocTypeEnd());
    }
 
    _checkDeclarationState(start, error) {
@@ -871,7 +855,8 @@ class XmlTokenStream extends XmlStream {
 
          this._checkContentState(start, ERRORS.CDATA_INVALID_DOC_CONTEXT, ERRORS.CDATA_INVALID_SUBSET_CONTEXT);
 
-         this._pushTokenWrapper(XmlToken.CDATA, results.chunk ? results.chunk.text : undefined);
+         this._pushToken(new XmlToken.CData(results.chunk ? results.chunk.text : undefined,
+            this._cursor.getRecentChunks()));
       } else if (bracketItemType) {
          this._reportSyntaxError(ERRORS.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
@@ -921,7 +906,7 @@ class XmlTokenStream extends XmlStream {
 
          this._checkPiAndCommentState(start, ERRORS.PI_INVALID_CONTEXT);
 
-         this._pushToken(new ProcessingInstructionToken(targetName, content, this._cursor.getRecentChunks()));
+         this._pushToken(new XmlToken.ProcessingInstruction(targetName, content, this._cursor.getRecentChunks()));
       }
    }
 
@@ -1040,8 +1025,8 @@ class XmlTokenStream extends XmlStream {
       }
 
       this._pushToken(isXmlDecl ?
-         new DeclarationToken(params, this._cursor.getRecentChunks()) :
-         new TextDeclarationToken(params, this._cursor.getRecentChunks()));
+         new XmlToken.XmlDeclaration(params, this._cursor.getRecentChunks()) :
+         new XmlToken.TextDeclaration(params, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -1093,13 +1078,16 @@ class XmlTokenStream extends XmlStream {
          this._reportSyntaxError(ERRORS.ELEMENT_NO_CLOSE);
       }
 
-      const startType = isEmpty ? XmlToken.ELEMENT_EMPTY : XmlToken.ELEMENT_START;
       let xtoken;
 
       if (isStartOrEmpty) {
-         xtoken = new StartTagToken(startType, name ? name.text : '', attributes, this._cursor.getRecentChunks());
+         if (isEmpty) {
+            xtoken = new XmlToken.EmptyElement(name ? name.text : '', attributes, this._cursor.getRecentChunks());
+         } else {
+            xtoken = new XmlToken.ElementStart(name ? name.text : '', attributes, this._cursor.getRecentChunks());
+         }
       } else {
-         xtoken = new TagToken(XmlToken.ELEMENT_END, name ? name.text : '', this._cursor.getRecentChunks());
+         xtoken = new XmlToken.ElementEnd(name ? name.text : '', this._cursor.getRecentChunks());
       }
 
       if (isStartOrEmpty) {
@@ -1238,7 +1226,7 @@ class XmlTokenStream extends XmlStream {
 
             const word = this._cursor.getWord(terminators);
             if (word) {
-               value.push(new XmlToken(XmlToken.TEXT, word.text));
+               value.push(new XmlToken.Text(word.text));
             }
             const terminator = this._cursor.peekChar();
 
@@ -1308,7 +1296,7 @@ class XmlTokenStream extends XmlStream {
       while (!done) {
          const chunkInfo = this._cursor.getToTerminator(terminators);
          if (chunkInfo.chunk) {
-            result.value.push(new XmlToken(XmlToken.TEXT, chunkInfo.chunk.text));
+            result.value.push(new XmlToken.Text(chunkInfo.chunk.text));
          }
          done = true;
 
@@ -1364,13 +1352,6 @@ class XmlTokenStream extends XmlStream {
 
       const contextArray = context ? [ context.startOffset ] : undefined;
       this._pushToken(new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, contextArray));
-   }
-
-   _pushTokenWrapper(type, data) {
-      const xtoken = new XmlToken(type, data);
-      xtoken.chunks = this._cursor.getRecentChunks();
-
-      this._pushToken(xtoken);
    }
 
 }

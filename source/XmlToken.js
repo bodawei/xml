@@ -4,41 +4,95 @@
 
 class XmlToken {
 
-   constructor(type, data, chunks) {
-      this.type = type;
-      this.data = data;
+   constructor(chunks) {
       this.chunks = chunks;
    }
 
 }
 
-class SpaceToken extends XmlToken {
+class Space extends XmlToken {
 
    constructor(text, chunks) {
-      super(XmlToken.SPACE, undefined, chunks);
+      super(chunks);
 
       this.text = text;
    }
 
 }
 
-class CommentToken extends XmlToken {
+class Comment extends XmlToken {
 
    constructor(content, chunks) {
-      super(XmlToken.COMMENT, undefined, chunks);
+      super(chunks);
 
       this.content = content;
    }
 
 }
 
-class ProcessingInstructionToken extends XmlToken {
+class ProcessingInstruction extends XmlToken {
 
    constructor(target, content, chunks) {
-      super(XmlToken.PI, undefined, chunks);
+      super(chunks);
 
       this.target = target;
       this.content = content;
+   }
+
+}
+
+class EntityStart extends XmlToken {
+
+   constructor(name, haveEntityData, chunks) {
+      super(chunks);
+
+      this.name = name;
+      this.haveEntityData = haveEntityData || false;
+   }
+
+}
+
+class EntityEnd extends XmlToken {
+
+   constructor(name, chunks) {
+      super(chunks);
+      this.name = name;
+   }
+
+}
+
+class CharRef extends XmlToken {
+
+   constructor(char, chunks) {
+      super(chunks);
+      this.text = char;
+   }
+
+}
+
+class CharData extends XmlToken {
+
+   constructor(text, chunks) {
+      super(chunks);
+      this.text = text;
+   }
+
+}
+
+class CData extends XmlToken {
+
+   constructor(text, chunks) {
+      super(chunks);
+      this.text = text;
+   }
+
+}
+
+class Text extends XmlToken {
+
+   constructor(text, chunks) {
+      super(chunks);
+      this.text = text;
    }
 
 }
@@ -49,66 +103,62 @@ class ProcessingInstructionToken extends XmlToken {
  each object has a name and a value.
 \**********************************************************************/
 
-class DeclarationToken extends XmlToken {
+class XmlDeclaration extends XmlToken {
 
    constructor(params, chunks) {
-      super(XmlToken.XMLDECL, undefined, chunks);
+      super(chunks);
 
       this.params = params;
    }
 
 }
 
-/**********************************************************************\
- TextDeclarationToken is used to represent a TextDecl in an external
- entity.
-\**********************************************************************/
-
-class TextDeclarationToken extends XmlToken {
+class TextDeclaration extends XmlToken {
 
    constructor(params, chunks) {
-      super(XmlToken.TEXTDECL, undefined, chunks);
+      super(chunks);
 
       this.params = params;
    }
 
 }
 
-class TagToken extends XmlToken {
+class ElementEnd extends XmlToken {
 
-   constructor(type, name, chunks) {
-      super(type, undefined, chunks);
+   constructor(name, chunks) {
+      super(chunks);
 
       this.name = name;
    }
 
 }
 
-class StartTagToken extends TagToken {
+class ElementStart extends XmlToken {
 
-   constructor(type, name, attributes, chunks) {
-      super(type, name, chunks);
+   constructor(name, attributes, chunks) {
+      super(chunks);
 
+      this.name = name;
       this.attributes = attributes;
    }
 
 }
 
-class StartEntityToken extends XmlToken {
+class EmptyElement extends XmlToken {
 
-   constructor(name, haveEntityData, chunks) {
-      super(XmlToken.ENTITY_START, name, chunks);
+   constructor(name, attributes, chunks) {
+      super(chunks);
 
       this.name = name;
-      this.haveEntityData = haveEntityData || false;
+      this.attributes = attributes;
    }
 
 }
 
-class DocTypeStartToken extends XmlToken {
+class DocTypeStart extends XmlToken {
 
-   constructor(name, externalLocation) {
-      super(XmlToken.DOCTYPE_START, name);
+   constructor(name, externalLocation, chunks) {
+      super(chunks);
 
       this.name = name;
       this.externalLoc = externalLocation;
@@ -116,30 +166,24 @@ class DocTypeStartToken extends XmlToken {
 
 }
 
-class DocTypeEndToken extends XmlToken {
-
-   constructor() {
-      super(XmlToken.DOCTYPE_END);
-   }
-
+class DocTypeEnd extends XmlToken {
 }
 
-class NotationToken extends XmlToken {
+class NotationDeclaration extends XmlToken {
 
-   constructor(name, systemLiteral, pubidLiteral) {
-      super(XmlToken.NOTATION_DECL, name);
+   constructor(name, externalLocation, chunks) {
+      super(chunks);
 
       this.name = name;
-      this.systemLiteral = systemLiteral;
-      this.pubidLiteral = pubidLiteral;
+      this.externalLoc = externalLocation;
    }
 
 }
 
-class EntityToken extends XmlToken {
+class EntityDeclaration extends XmlToken {
 
-   constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
-      super(XmlToken.ENTITY_DECL, name);
+   constructor(name, value, systemLiteral, publicLiteral, notationDataName, chunks) {
+      super(chunks);
 
       this.name = name;
       this.value = value;
@@ -148,20 +192,13 @@ class EntityToken extends XmlToken {
 
 }
 
-class ParameterEntityToken extends EntityToken {
-
-   constructor(name, value, systemLiteral, publicLiteral, notationDataName) {
-      super(name, value, systemLiteral, publicLiteral, notationDataName);
-
-      this.type = XmlToken.PARAMETERENTITY_DECL;
-   }
-
+class PEntityDeclaration extends EntityDeclaration {
 }
 
-class ElementDeclarationToken extends XmlToken {
+class ElementDeclaration extends XmlToken {
 
-   constructor(name, contentType) {
-      super(XmlToken.ELEMENT_DECL);
+   constructor(name, contentType, chunks) {
+      super(chunks);
 
       this.name = name;
       this.contentType = contentType;
@@ -169,10 +206,10 @@ class ElementDeclarationToken extends XmlToken {
 
 }
 
-class AttributeListDeclarationToken extends XmlToken {
+class AttrListDeclaration extends XmlToken {
 
-   constructor(elementName, attributes) {
-      super(XmlToken.ATTLIST_DECL);
+   constructor(elementName, attributes, chunks) {
+      super(chunks);
 
       this.elementName = elementName;
       this.attributes = attributes;
@@ -180,47 +217,33 @@ class AttributeListDeclarationToken extends XmlToken {
 
 }
 
-XmlToken.SPACE = 'WhiteSpace';
-XmlToken.COMMENT = 'Comment';
-XmlToken.PI = 'ProcessingInstruction';
-
-XmlToken.XMLDECL = 'XmlDecl';
-XmlToken.TEXTDECL = 'TextDecl';
-XmlToken.DOCTYPE_START = 'DocTypeStart';
-XmlToken.DOCTYPE_END = 'DocTypeEnd';
-XmlToken.NOTATION_DECL = 'NotationDeclaration';
-XmlToken.ENTITY_DECL = 'EntityDeclaration';
-XmlToken.PARAMETERENTITY_DECL = 'ParameterEntityDeclaration';
-XmlToken.ELEMENT_DECL = 'ElementDeclaration';
-XmlToken.ATTLIST_DECL = 'AttributeListDeclaration';
-
-XmlToken.ELEMENT_START = 'ElementStartTag';
-XmlToken.ELEMENT_EMPTY = 'ElementEmptyTag';
-XmlToken.ELEMENT_END = 'ElementEndTag';
-XmlToken.ENTITY_START = 'EntityStartMarker';
-XmlToken.ENTITY_END = 'EntityEndMarker';
-
-XmlToken.CHAR_REF = 'CharacterReference';
-XmlToken.CHARDATA = 'CharData';
-XmlToken.CDATA = 'CData';
-XmlToken.TEXT = 'TextPiece';
-
 XmlToken.SYNTAX_ERROR = 'SyntaxError';
 
-XmlToken.CommentToken = CommentToken;
-XmlToken.ProcessingInstructionToken = ProcessingInstructionToken;
-XmlToken.SpaceToken = SpaceToken;
-XmlToken.DeclarationToken = DeclarationToken;
-XmlToken.TextDeclarationToken = TextDeclarationToken;
-XmlToken.DocTypeStartToken = DocTypeStartToken;
-XmlToken.DocTypeEndToken = DocTypeEndToken;
-XmlToken.StartTagToken = StartTagToken;
-XmlToken.StartEntityToken = StartEntityToken;
-XmlToken.TagToken = TagToken;
-XmlToken.NotationToken = NotationToken;
-XmlToken.EntityToken = EntityToken;
-XmlToken.ParameterEntityToken = ParameterEntityToken;
-XmlToken.ElementDeclarationToken = ElementDeclarationToken;
-XmlToken.AttributeListDeclarationToken = AttributeListDeclarationToken;
+XmlToken.Comment = Comment;
+XmlToken.ProcessingInstruction = ProcessingInstruction;
+XmlToken.Space = Space;
+
+XmlToken.XmlDeclaration = XmlDeclaration;
+XmlToken.TextDeclaration = TextDeclaration;
+
+XmlToken.DocTypeStart = DocTypeStart;
+XmlToken.DocTypeEnd = DocTypeEnd;
+XmlToken.NotationDeclaration = NotationDeclaration;
+XmlToken.EntityDeclaration = EntityDeclaration;
+XmlToken.PEntityDeclaration = PEntityDeclaration;
+XmlToken.ElementDeclaration = ElementDeclaration;
+XmlToken.AttrListDeclaration = AttrListDeclaration;
+
+XmlToken.ElementStart = ElementStart;
+XmlToken.EmptyElement = EmptyElement;
+XmlToken.ElementEnd = ElementEnd;
+
+XmlToken.EntityStart = EntityStart;
+XmlToken.EntityEnd = EntityEnd;
+
+XmlToken.CharRef = CharRef;
+XmlToken.CharData = CharData;
+XmlToken.CData = CData;
+XmlToken.Text = Text;
 
 module.exports = XmlToken;

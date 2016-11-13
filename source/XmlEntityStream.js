@@ -88,7 +88,7 @@ class AttributeContext extends Context {
       while (!piece && this.index < this.value.length) {
          this.data.push(this.value[this.index]);
 
-         if (this.value[this.index].type === XmlToken.ENTITY_START) {
+         if (this.value[this.index] instanceof XmlToken.EntityStart) {
             piece = this.value[this.index];
          }
 
@@ -101,7 +101,7 @@ class AttributeContext extends Context {
          return;
       }
 
-      const cursor = this.entityStream._entityManager.getEntity(piece.data);
+      const cursor = this.entityStream._entityManager.getEntity(piece.name);
 
       if (cursor) {
          piece.haveEntityData = true;
@@ -150,7 +150,7 @@ function reportError(id, token, context) {
    const offset = token.chunks ? token.chunks[0].startOffset : undefined;
    let message = XmlErrorToken.STRING[id];
 
-   message = message.replace('{0}', token.data);
+   message = message.replace('{0}', token.name);
 
    context.data.unshift(new XmlErrorToken(XmlToken.SYNTAX_ERROR,
       XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, message, offset, [ offset ]));
@@ -192,64 +192,59 @@ class XmlEntityStream extends XmlStream {
       if (currentContext.data.length > 0) {
          const token = currentContext.data.shift();
 
-         switch (token.type) {
-            case XmlToken.ENTITY_START:
-               const cursor = this._entityManager.getEntity(token.data);
+         if (token instanceof XmlToken.EntityStart) {
+            const cursor = this._entityManager.getEntity(token.name);
 
-               if (cursor) {
-                  const stream = new XmlTokenStream(cursor, this._entityManager, {
-                     entityType: 'EXTERNAL_ENTITY',
-                     lax: this._options.lax
-                  });
-                  const context = new ContentContext(cursor, stream, token);
-                  this._contexts.push(context);
-                  context.setupHandlers(stream, this);
-                  token.haveEntityData = true;
-               } else {
-                  reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
-               }
-               break;
-            case XmlToken.ELEMENT_START:
-            case XmlToken.ELEMENT_EMPTY:
-               let elementContext;
+            if (cursor) {
+               const stream = new XmlTokenStream(cursor, this._entityManager, {
+                  entityType: 'EXTERNAL_ENTITY',
+                  lax: this._options.lax
+               });
+               const context = new ContentContext(cursor, stream, token);
+               this._contexts.push(context);
+               context.setupHandlers(stream, this);
+               token.haveEntityData = true;
+            } else {
+               reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
+            }
+         } else if (token instanceof XmlToken.ElementStart || token instanceof XmlToken.EmptyElement) {
+            let elementContext;
 
-               for (let attrIndex = 0; attrIndex < token.attributes.length; attrIndex++) {
-                  const attribute = token.attributes[attrIndex];
-                  let startEntityIndex = -1;
+            for (let attrIndex = 0; attrIndex < token.attributes.length; attrIndex++) {
+               const attribute = token.attributes[attrIndex];
+               let startEntityIndex = -1;
 
-                  for (let index = 0; index < attribute.value.length; index++) {
-                     if (attribute.value[index].type === XmlToken.ENTITY_START) {
-                        startEntityIndex = index;
-                        break;
-                     }
-                  }
-
-                  if (startEntityIndex !== -1) {
-                     if (!elementContext) {
-                        elementContext = new ElementContext(token, currentContext);
-                        this._contexts.push(elementContext);
-                     }
-
-                     const attrContext = new AttributeContext(attribute, elementContext, this);
-                     elementContext.attrContexts.push(attrContext);
-                     attrContext.expandAttribute();
+               for (let index = 0; index < attribute.value.length; index++) {
+                  if (attribute.value[index] instanceof XmlToken.EntityStart) {
+                     startEntityIndex = index;
+                     break;
                   }
                }
 
-               if (elementContext) {
-                  return;
-               }
-               break;
-            case XmlToken.SYNTAX_ERROR:
-               // add the hierarchical context of the error.
-               const contexts = token.context;
+               if (startEntityIndex !== -1) {
+                  if (!elementContext) {
+                     elementContext = new ElementContext(token, currentContext);
+                     this._contexts.push(elementContext);
+                  }
 
-               // we don't need to look at index 0, as it will never have a start
-               for (let index = this._contexts.length - 1; index > 0; index--) {
-                  contexts.push(this._contexts[index].start.chunks[0].startOffset);
+                  const attrContext = new AttributeContext(attribute, elementContext, this);
+                  elementContext.attrContexts.push(attrContext);
+                  attrContext.expandAttribute();
                }
-               token.context = contexts;
-               break;
+            }
+
+            if (elementContext) {
+               return;
+            }
+         } else if (token.type === XmlToken.SYNTAX_ERROR) {
+            // add the hierarchical context of the error.
+            const contexts = token.context;
+
+            // we don't need to look at index 0, as it will never have a start
+            for (let index = this._contexts.length - 1; index > 0; index--) {
+               contexts.push(this._contexts[index].start.chunks[0].startOffset);
+            }
+            token.context = contexts;
          }
 
          return token;

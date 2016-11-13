@@ -156,7 +156,7 @@ class XmlTokenStreamDtd {
          this._getQuotedValue(cursor, valueQuote, { isEntityValue: true }, results);
          results.valueChunk = [ ];
          if (results.value[0]) {
-            results.valueChunk.push(new XmlToken(XmlToken.TEXT, results.value[0].text));
+            results.valueChunk.push(new XmlToken.Text(results.value[0].text));
          }
       } else {
          results.externalId = this._retrieveExternalId(cursor, [ '>' ], { isEntity: true });

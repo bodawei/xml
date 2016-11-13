@@ -10,26 +10,14 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlEntityStream = require('./XmlEntityStream.js');
 const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlToken = require('./XmlToken.js');
-const EntityToken = XmlToken.EntityToken;
-const StartEntityToken = XmlToken.StartEntityToken;
 
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeStrictStream = testUtils.makeStrictStream;
 const makeLaxStream = testUtils.makeLaxStream;
 const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
 const makeStringTokenArray = testUtils.makeStringTokenArray;
-
-function ignoreToken(newStream, type) {
-   const token = newStream.getNext();
-
-   expect(token.type).toEqual(type);
-}
-
-function expectToken(newStream, type) {
-   const token = newStream.getNext();
-
-   expect(token.type).toEqual(type);
-}
+const ignoreToken = testUtils.ignoreToken;
+const expectToken = testUtils.expectTokenType;
 
 describe('XmlEntityStream', () => {
    let count;
@@ -69,10 +57,10 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);
-         ignoreToken(es, XmlToken.CHARDATA);
-         ignoreToken(es, XmlToken.ELEMENT_END);
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);
+         ignoreToken(es, XmlToken.CharData);
+         ignoreToken(es, XmlToken.ElementEnd);
 
       });
 
@@ -85,8 +73,8 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);
 
          const token = es.getNext();
          expect(token.haveEntityData).toEqual(true);
@@ -98,16 +86,16 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);
-         ignoreToken(es, XmlToken.ENTITY_START);
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);
+         ignoreToken(es, XmlToken.EntityStart);
          jasmine.clock().tick(1); // Give the inner on()'s a chance to kick in
          const token = es.getNext();
 
-         expect(token.data).toEqual('"');
-         ignoreToken(es, XmlToken.ENTITY_END);
-         ignoreToken(es, XmlToken.CHARDATA);
-         ignoreToken(es, XmlToken.ELEMENT_END);
+         expect(token.text).toEqual('"');
+         ignoreToken(es, XmlToken.EntityEnd);
+         ignoreToken(es, XmlToken.CharData);
+         ignoreToken(es, XmlToken.ElementEnd);
       });
 
       it('delivers all tokens across both the outer and inner streams', () => {
@@ -115,75 +103,75 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         expectToken(es, XmlToken.XMLDECL);
-         expectToken(es, XmlToken.ELEMENT_START);
-         expectToken(es, XmlToken.ENTITY_START);
+         expectToken(es, XmlToken.XmlDeclaration);
+         expectToken(es, XmlToken.ElementStart);
+         expectToken(es, XmlToken.EntityStart);
          jasmine.clock().tick(1);
-         expectToken(es, XmlToken.CHARDATA);
-         expectToken(es, XmlToken.ENTITY_END);
-         expectToken(es, XmlToken.CHARDATA);
-         expectToken(es, XmlToken.ELEMENT_END);
+         expectToken(es, XmlToken.CharData);
+         expectToken(es, XmlToken.EntityEnd);
+         expectToken(es, XmlToken.CharData);
+         expectToken(es, XmlToken.ElementEnd);
       });
 
       it('recognizes entities within entities', () => {
          const ts = makeStrictStream('<?xml version="1.0"?><root>&level1;</root>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
-         es._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
-         es._entityManager.addEntity(new EntityToken('level2', '&quot;&#x41;'));
+         es._entityManager.addEntity(new XmlToken.EntityDeclaration('level1', '<child>&level2;</child>'));
+         es._entityManager.addEntity(new XmlToken.EntityDeclaration('level2', '&quot;&#x41;'));
          jasmine.clock().tick(1);
 
          let token = es.getNext();
-         expect(token.type).toEqual(XmlToken.XMLDECL);
+         expect(token).toBeInstanceOf(XmlToken.XmlDeclaration);
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(token).toBeInstanceOf(XmlToken.ElementStart);
          expect(token.name).toEqual('root');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('level1');
+         expect(token).toBeInstanceOf(XmlToken.EntityStart);
+         expect(token.name).toEqual('level1');
          jasmine.clock().tick(1);
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_START);
+         expect(token).toBeInstanceOf(XmlToken.ElementStart);
          expect(token.name).toEqual('child');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('level2');
+         expect(token).toBeInstanceOf(XmlToken.EntityStart);
+         expect(token.name).toEqual('level2');
          jasmine.clock().tick(1);
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_START);
-         expect(token.data).toEqual('quot');
+         expect(token).toBeInstanceOf(XmlToken.EntityStart);
+         expect(token.name).toEqual('quot');
          jasmine.clock().tick(1);
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.CHARDATA);
-         expect(token.data).toEqual('"');
+         expect(token).toBeInstanceOf(XmlToken.CharData);
+         expect(token.text).toEqual('"');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('quot');
+         expect(token).toBeInstanceOf(XmlToken.EntityEnd);
+         expect(token.name).toEqual('quot');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.CHAR_REF);
-         expect(token.data).toEqual('A');
+         expect(token).toBeInstanceOf(XmlToken.CharRef);
+         expect(token.text).toEqual('A');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('level2');
+         expect(token).toBeInstanceOf(XmlToken.EntityEnd);
+         expect(token.name).toEqual('level2');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_END);
+         expect(token).toBeInstanceOf(XmlToken.ElementEnd);
          expect(token.name).toEqual('child');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ENTITY_END);
-         expect(token.data).toEqual('level1');
+         expect(token).toBeInstanceOf(XmlToken.EntityEnd);
+         expect(token.name).toEqual('level1');
 
          token = es.getNext();
-         expect(token.type).toEqual(XmlToken.ELEMENT_END);
+         expect(token).toBeInstanceOf(XmlToken.ElementEnd);
          expect(token.name).toEqual('root');
       });
 
@@ -192,9 +180,9 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);
-         ignoreToken(es, XmlToken.ENTITY_START);
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);
+         ignoreToken(es, XmlToken.EntityStart);
          jasmine.clock().tick(1);
 
          let t = es.getNext();
@@ -214,9 +202,9 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager(), { lax: true });
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);
-         ignoreToken(es, XmlToken.ENTITY_START);
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);
+         ignoreToken(es, XmlToken.EntityStart);
          jasmine.clock().tick(1);
 
          const t = es.getNext();
@@ -231,16 +219,16 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager(), {
             lax: true
          });
-         es._entityManager.addEntity(new EntityToken('level1', '<child>&level2;</child>'));
-         es._entityManager.addEntity(new EntityToken('level2', '<!--bug'));
+         es._entityManager.addEntity(new XmlToken.EntityDeclaration('level1', '<child>&level2;</child>'));
+         es._entityManager.addEntity(new XmlToken.EntityDeclaration('level2', '<!--bug'));
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
-         ignoreToken(es, XmlToken.ELEMENT_START);   // root
-         ignoreToken(es, XmlToken.ENTITY_START); // level1
+         ignoreToken(es, XmlToken.XmlDeclaration);
+         ignoreToken(es, XmlToken.ElementStart);   // root
+         ignoreToken(es, XmlToken.EntityStart); // level1
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.ELEMENT_START); // child
-         ignoreToken(es, XmlToken.ENTITY_START); // level2
+         ignoreToken(es, XmlToken.ElementStart); // child
+         ignoreToken(es, XmlToken.EntityStart); // level2
          jasmine.clock().tick(1);
 
          const token = es.getNext();
@@ -257,26 +245,26 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
 
          const token = es.getNext();
-         expect(token.attributes[0].value).toEqual([ new XmlToken(XmlToken.TEXT, 'bar') ]);
+         expect(token.attributes[0].value).toEqual([ new XmlToken.Text('bar') ]);
       });
 
       it('inserts text from entity', () => {
          const ts = makeStrictStream('<?xml version="1.0"?><one foo="&amp;"></one>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
 
          es.getNext();
          jasmine.clock().tick(1);
          const token = es.getNext();
          clearChunks(token.attributes[0].value);
          expect(token.attributes[0].value).toEqual([
-            new StartEntityToken('amp', true),
-            new XmlToken(XmlToken.CHAR_REF, '&'),
-            new XmlToken(XmlToken.ENTITY_END, 'amp')
+            new XmlToken.EntityStart('amp', true),
+            new XmlToken.CharRef('&'),
+            new XmlToken.EntityEnd('amp')
          ]);
       });
 
@@ -291,15 +279,15 @@ describe('XmlEntityStream', () => {
          const ts = makeStrictStream('<?xml version="1.0"?><one foo="&frog;"></one>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
 
          es.getNext();
          jasmine.clock().tick(1);
          const token = es.getNext();
          clearChunks(token.attributes[0].value);
          expect(token.attributes[0].value).toEqual([
-            new StartEntityToken('frog', false),
-            new XmlToken(XmlToken.ENTITY_END, 'frog')
+            new XmlToken.EntityStart('frog', false),
+            new XmlToken.EntityEnd('frog')
          ]);
       });
 
@@ -307,7 +295,7 @@ describe('XmlEntityStream', () => {
          const ts = makeStrictStream('<?xml version="1.0"?><one foo="&amp;"></one>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
 
          es.getNext();
          jasmine.clock().tick(1);
@@ -321,30 +309,30 @@ describe('XmlEntityStream', () => {
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
 
-         expectToken(es, XmlToken.XMLDECL);
+         expectToken(es, XmlToken.XmlDeclaration);
          es.getNext();
          jasmine.clock().tick(1);
-         expectToken(es, XmlToken.ELEMENT_START);
-         expectToken(es, XmlToken.ELEMENT_END);
+         expectToken(es, XmlToken.ElementStart);
+         expectToken(es, XmlToken.ElementEnd);
       });
 
       it('inserts text from multiple entities in one attribute', () => {
          const ts = makeStrictStream('<?xml version="1.0"?><one foo="&amp;&amp;"></one>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
          es.getNext();
          jasmine.clock().tick(1);
 
          const token = es.getNext();
          clearChunks(token.attributes[0].value);
          expect(token.attributes[0].value).toEqual([
-            new StartEntityToken('amp', true),
-            new XmlToken(XmlToken.CHAR_REF, '&'),
-            new XmlToken(XmlToken.ENTITY_END, 'amp'),
-            new StartEntityToken('amp', true),
-            new XmlToken(XmlToken.CHAR_REF, '&'),
-            new XmlToken(XmlToken.ENTITY_END, 'amp')
+            new XmlToken.EntityStart('amp', true),
+            new XmlToken.CharRef('&'),
+            new XmlToken.EntityEnd('amp'),
+            new XmlToken.EntityStart('amp', true),
+            new XmlToken.CharRef('&'),
+            new XmlToken.EntityEnd('amp')
          ]);
       });
 
@@ -353,7 +341,7 @@ describe('XmlEntityStream', () => {
             'foo="&amp;&quot;" bar="&quot;&amp;"></one>');
          const es = new XmlEntityStream(ts, new XmlEntityManager());
          jasmine.clock().tick(1);
-         ignoreToken(es, XmlToken.XMLDECL);
+         ignoreToken(es, XmlToken.XmlDeclaration);
          es.getNext();
          jasmine.clock().tick(1);
 
@@ -361,57 +349,57 @@ describe('XmlEntityStream', () => {
          clearChunks(token.attributes[0].value);
          clearChunks(token.attributes[1].value);
          expect(token.attributes[0].value).toEqual([
-            new StartEntityToken('amp', true),
-            new XmlToken(XmlToken.CHAR_REF, '&'),
-            new XmlToken(XmlToken.ENTITY_END, 'amp'),
-            new StartEntityToken('quot', true),
-            new XmlToken(XmlToken.CHARDATA, '"'),
-            new XmlToken(XmlToken.ENTITY_END, 'quot')
+            new XmlToken.EntityStart('amp', true),
+            new XmlToken.CharRef('&'),
+            new XmlToken.EntityEnd('amp'),
+            new XmlToken.EntityStart('quot', true),
+            new XmlToken.CharData('"'),
+            new XmlToken.EntityEnd('quot')
          ]);
          expect(token.attributes[1].value).toEqual([
-            new StartEntityToken('quot', true),
-            new XmlToken(XmlToken.CHARDATA, '"'),
-            new XmlToken(XmlToken.ENTITY_END, 'quot'),
-            new StartEntityToken('amp', true),
-            new XmlToken(XmlToken.CHAR_REF, '&'),
-            new XmlToken(XmlToken.ENTITY_END, 'amp')
+            new XmlToken.EntityStart('quot', true),
+            new XmlToken.CharData('"'),
+            new XmlToken.EntityEnd('quot'),
+            new XmlToken.EntityStart('amp', true),
+            new XmlToken.CharRef('&'),
+            new XmlToken.EntityEnd('amp')
          ]);
       });
 
       // it('recognizes entities within entities', () => {
       //    const ts = makeStrictStream('<?xml version="1.0"?><root attr="&level1;">one</root>');
       //    const es = new XmlEntityStream(ts, new XmlEntityManager());
-      //    es._entityManager.addEntity(new EntityToken('level1', '(&level2;)'));
-      //    es._entityManager.addEntity(new EntityToken('level2', '&quot;&#x41;'));
+      //    es._entityManager.addEntity(new XmlToken.EntityDeclaration('level1', '(&level2;)'));
+      //    es._entityManager.addEntity(new XmlToken.EntityDeclaration('level2', '&quot;&#x41;'));
       //    jasmine.clock().tick(1);
 
-      //    ignoreToken(es, XmlToken.XMLDECL);
+      //    ignoreToken(es, XmlToken.XmlDeclaration);
       //    let token = es.getNext();
       //    jasmine.clock().tick(1);
 
       //    token = es.getNext();
-      //    expect(token.type).toEqual(XmlToken.ELEMENT_START);
+      //    expect(token).toBeInstanceOf(XmlToken.ElementStart);
       //    expect(token.name).toEqual('root');
       //    clearChunks(token.attributes[0].value);
       //    expect(token.attributes[0].value).toEqual([
-      //       new StartEntityToken('level1', true),
-      //       new XmlToken(XmlToken.CHARDATA, '('),
-      //       new StartEntityToken('level2', true),
-      //       new StartEntityToken('quot', true),
-      //       new XmlToken(XmlToken.CHARDATA, '"'),
-      //       new XmlToken(XmlToken.CHAR_REF, 'A'),
-      //       new XmlToken(XmlToken.ENTITY_END, 'quot'),
-      //       new XmlToken(XmlToken.ENTITY_END, 'level2'),
-      //       new XmlToken(XmlToken.CHARDATA, ')'),
-      //       new XmlToken(XmlToken.ENTITY_END, 'level1')
+      //       new XmlToken.EntityStart('level1', true),
+      //       new XmlToken.CharData('('),
+      //       new XmlToken.EntityStart('level2', true),
+      //       new XmlToken.EntityStart('quot', true),
+      //       new XmlToken.CharData('"'),
+      //       new XmlToken.CharRef('A'),
+      //       new XmlToken.EntityEnd('quot'),
+      //       new XmlToken.EntityEnd('level2'),
+      //       new XmlToken.CharData(')'),
+      //       new XmlToken.EntityEnd('level1')
       //    ]);
 
       //    token = es.getNext();
-      //    expect(token.type).toEqual(XmlToken.CHARDATA);
+      //    expect(token).toBeInstanceOf(XmlToken.CharData);
       //    expect(token.data).toEqual('one');
 
       //    token = es.getNext();
-      //    expect(token.type).toEqual(XmlToken.ELEMENT_END);
+      //    expect(token).toBeInstanceOf(XmlToken.ElementEnd);
       //    expect(token.name).toEqual('root');
       // });
 
@@ -426,13 +414,13 @@ describe('XmlEntityStream', () => {
          es.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
@@ -456,13 +444,13 @@ describe('XmlEntityStream', () => {
          es.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);
@@ -488,16 +476,16 @@ describe('XmlEntityStream', () => {
          es.on('data', (error, data) => {
             switch (count) {
                case 0:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_START);
+                  expect(data).toBeInstanceOf(XmlToken.ElementStart);
                   // force annother call to _tokenLoop, which is what we're really after in this strange test
                   es.on('data', () => {});
                   jasmine.clock().tick(1);
                   break;
                case 1:
-                  expect(data.type).toEqual(XmlToken.CHARDATA);
+                  expect(data).toBeInstanceOf(XmlToken.CharData);
                   break;
                case 2:
-                  expect(data.type).toEqual(XmlToken.ELEMENT_END);
+                  expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
                   expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_INVALID_CONTEXT);

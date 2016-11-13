@@ -40,23 +40,19 @@ KEEP READING ABOUT STREAMS
 	- Start with a properties file (can generate it by a script from existing code)  locale/base.properties  locale/code.properties
 		BRACKETITEM_XTRA_SPACE_BEFORE = Must not have space before opening "[".
 	- use 
-		add grunt task which reads in the properties files synchronously  (everything in locale)
-		passes to node-properties-parser  (or something like ini? What about trailing space etc?)
-			Distinguish base and code.
+		√ add grunt task which reads in the properties files synchronously  (everything in locale)
+		√ passes to node-properties-parser  (or something like ini? What about trailing space etc?)
+			√ Distinguish base and code.
 		Checks:
-			no dup values: codes
-			no dup values: base
-			keys identical: base & code
+			√ no dup values: codes
+			√ no dup values: base
+			√ keys identical: base & code
 				report missing in code
 				report extra in code
-		Remove keys in base and code with base.value OBSOLETE
-		for any other locale:
-			no dup values
-			keys identical: base and locale
-		write to derived/{name}.{code|string}.json
+		√ Remove keys in base and code with base.value OBSOLETE
+		√ write to derived/{name}.{code|string}.json
 		# Trailing space allows unicode.
 		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
-		// nice to have.  Allow context1.context2.SomeDetails  becomes CONTEXT1_CONTEXT2_SOME_DETAILS. or ini file format
 
 	- write StringBundle(stringSet)
 		_stringset is {locale: { key: value }}
@@ -104,6 +100,7 @@ KEEP READING ABOUT STREAMS
 -- next: 144
 =============================================
 CLEANUP
+- Need to pull out validation into another file
 - We are doing NO testing of entityLoc in notation, not even that the value is there.
 - Need to finish up testing of XmlStream:
 	- need to test the obscure case explicitly
@@ -138,8 +135,15 @@ RESEARCH
 		[ TEXT ]
 
 BUILD
-11: Half of 11 is really build process
 143 Add check to make sure error constants all being used
+		Support other locales
+			no dup values
+			keys identical: base and locale
+		Make a stand alone grunt task
+			test it
+		Can you switch to using ini file format?  Would be nice to say
+			[XmlDecl]
+			NoAttributes = Blah blah
 - Can we silence tasks out of the box in grunt?
 144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 127: Investigate why current node causes coverage to fail
