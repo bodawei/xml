@@ -452,7 +452,7 @@ class XmlTokenStream extends XmlStream {
                this._validateNotation(parsedNotation);
 
                this._pushToken(new XmlToken.NotationDeclaration(textOrBlank(parsedNotation.nameChunk),
-                  locFromExternalId(parsedNotation.externalId)));
+                  locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
                return;
             // Consume an entity declaration.  Note, that we are biased here if we
             // find something unexpected (e.g. stuff after NDATA, or no ExternalId or EntityValue)
@@ -474,6 +474,7 @@ class XmlTokenStream extends XmlStream {
                   const preNDataSpace = this._cursor.getSpace();
                   const ndataMarker = this._cursor.getWord([ '>' ]);
 
+                  // fix test in dtd-test (expected tokens)
                   if (ndataMarker) {
                      if (ndataMarker.text.toLocaleUpperCase() !== 'NDATA') {
                         this._cursor.unget(ndataMarker);
@@ -504,14 +505,14 @@ class XmlTokenStream extends XmlStream {
                const EntityDeclaration = parsedEntity.isParameter ?
                   new XmlToken.PEntityDeclaration(enNameText,
                      parsedEntity.valueChunk,
-                     parsedEntity.externalId.systemLiteral,
-                     parsedEntity.externalId.pubidLiteral,
-                     notationDataName) :
+                     new EntityLocation(parsedEntity.externalId.systemLiteral,
+                        parsedEntity.externalId.pubidLiteral),
+                     notationDataName, this._cursor.getRecentChunks()) :
                   new XmlToken.EntityDeclaration(enNameText,
                      parsedEntity.valueChunk,
-                     parsedEntity.externalId ? parsedEntity.externalId.systemLiteral : undefined,
-                     parsedEntity.externalId ? parsedEntity.externalId.pubidLiteral : undefined,
-                     notationDataName);
+                     new EntityLocation(parsedEntity.externalId ? parsedEntity.externalId.systemLiteral : undefined,
+                        parsedEntity.externalId ? parsedEntity.externalId.pubidLiteral : undefined),
+                     notationDataName, this._cursor.getRecentChunks());
 
                this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
 
@@ -571,7 +572,8 @@ class XmlTokenStream extends XmlStream {
 
                this._checkDeclarationState(start, ERRORS.ELEMENTDECL_INVALID_CONTEXT);
 
-               this._pushToken(new XmlToken.ElementDeclaration(nameText, contentText));
+               this._pushToken(new XmlToken.ElementDeclaration(nameText, contentText,
+                  this._cursor.getRecentChunks()));
                return;
             case 'ATTLIST':
                const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
@@ -709,7 +711,7 @@ class XmlTokenStream extends XmlStream {
 
                this._checkDeclarationState(start, ERRORS.ATTLISTDECL_INVALID_CONTEXT);
 
-               this._pushToken(new XmlToken.AttrListDeclaration(elName, attributes));
+               this._pushToken(new XmlToken.AttrListDeclaration(elName, attributes, this._cursor.getRecentChunks()));
                return;
          }
       }

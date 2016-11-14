@@ -161,7 +161,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo>');
+         const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "one" \'two\' [ ]>');
          ignoreToken(s, XmlToken.XmlDeclaration);
 
          const t = s.getNext();
@@ -169,12 +169,29 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('<!'),
             new TextChunk.WordChunk('DOCTYPE', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('foo', true, true)
+            new TextChunk.WordChunk('foo', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('PUBLIC', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('one', 'one'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('\''),
+            new TextChunk.WithSpaceChunk('two', 'two'),
+            new TextChunk.PlainChunk('\''),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('['),
          ], 21));
 
          expect(s.getNext().chunks).toEqual(makeStringTokenArray([
+            new TextChunk.WithSpaceChunk(' ', ' ')
+         ], 55));
+
+         expect(s.getNext().chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk(']'),
             new TextChunk.PlainChunk('>')
-         ], 34));
+         ], 56));
       });
 
       describe('state transitions', () => {
@@ -345,6 +362,27 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!NOTATION notationName PUBLIC "foo" ',
             SyntaxError.ERROR.NOTATIONDECL_NO_CLOSE,
             'Missing closing ">" in the notation declaration "notationName".');
+      });
+
+      it('retrieves the expected chunks', () => {
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!NOTATION note PUBLIC "ONE" >');
+         ignoreToken(s, XmlToken.TextDeclaration);
+
+         const t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.WordChunk('NOTATION', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('note', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('PUBLIC', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('ONE', 'ONE'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('>'),
+         ], 21));
       });
 
       describe('state transitions', () => {
@@ -583,6 +621,28 @@ describe('XmlTokenStream (dtd)', () => {
          expect(t.text).toEqual('junk  >');
       });
 
+      it('retrieves the expected chunks', () => {
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY myEntity "entityValue">');
+         ignoreToken(s, XmlToken.TextDeclaration);
+
+         const t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.WordChunk('ENTITY', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('myEntity', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('entityValue', 'entityValue'),
+            new TextChunk.PlainChunk('"'),
+//            new TextChunk.WithSpaceChunk(' ', ' '),
+ //           new TextChunk.WordChunk('NDATA', true, true),
+//            new TextChunk.WithSpaceChunk(' ', ' '),
+//            new TextChunk.WordChunk('frog', true, true),
+            new TextChunk.PlainChunk('>'),
+         ], 21));
+      });
+
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
@@ -678,6 +738,29 @@ describe('XmlTokenStream (dtd)', () => {
          expect(s.getNext().name).toEqual('paramEntityName');
       });
 
+      it('retrieves the expected chunks', () => {
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY % myPE SYSTEM "one" >');
+         ignoreToken(s, XmlToken.TextDeclaration);
+
+         const t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.WordChunk('ENTITY', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('%', false, false),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('myPE', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('SYSTEM', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('one', 'one'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('>'),
+         ], 21));
+      });
+
    });
 
    describe('parsing ELEMENT', () => {
@@ -734,6 +817,22 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
 
          expect(s.getNext().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
+      });
+
+      it('retrieves the expected chunks', () => {
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ELEMENT elName ANY>');
+         ignoreToken(s, XmlToken.TextDeclaration);
+
+         const t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.WordChunk('ELEMENT', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('elName', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('ANY', true, true),
+            new TextChunk.PlainChunk('>'),
+         ], 21));
       });
 
       it('reports a syntax error if notation is declared outside of a DTD context', () => {
@@ -1584,6 +1683,46 @@ describe('XmlTokenStream (dtd)', () => {
                [ new Offset(0, 0, 0) ]);
          });
 
+      });
+
+      it('retrieves the expected chunks', () => {
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ATTLIST elName ' +
+            ' at1 CDATA #REQUIRED' +
+            ' at2 NOTATION (foo| bar) #FIXED "argh"' +
+            '>');
+         ignoreToken(s, XmlToken.TextDeclaration);
+
+         const t = s.getNext();
+         expect(t.chunks).toEqual(makeStringTokenArray([
+            new TextChunk.PlainChunk('<!'),
+            new TextChunk.WordChunk('ATTLIST', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('elName', true, true),
+            new TextChunk.WithSpaceChunk('  ', '  '),
+            new TextChunk.WordChunk('at1', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('CDATA', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('#REQUIRED', false, false),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('at2', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('NOTATION', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('('),
+            new TextChunk.WordChunk('foo', true, true),
+            new TextChunk.PlainChunk('|'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('bar', true, true),
+            new TextChunk.PlainChunk(')'),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('#FIXED', false, false),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.WithSpaceChunk('argh', 'argh'),
+            new TextChunk.PlainChunk('"'),
+            new TextChunk.PlainChunk('>'),
+         ], 21));
       });
 
       describe('state transitions', () => {

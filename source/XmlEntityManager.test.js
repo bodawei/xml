@@ -137,7 +137,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns undefined if the requested entity has a notation name', () => {
-         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, 'fish');
          manager.addEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.getEntity('test')).toBeUndefined();
@@ -228,7 +228,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns true when the entity is unparsed', () => {
-         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.EntityDeclaration('test', 'two', undefined, 'fish');
          manager.addEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.isEntityUnparsed('test')).toBe(true);
@@ -255,7 +255,7 @@ describe('XmlEntityManager', () => {
       });
 
       it('returns true when the entity is unparsed', () => {
-         const token = new XmlToken.PEntityDeclaration('test', 'two', undefined, undefined, 'fish');
+         const token = new XmlToken.PEntityDeclaration('test', 'two', undefined, 'fish');
          manager.addParameterEntity(token, XmlEntityManager.INTERNAL_ENTITY);
 
          expect(manager.isParameterEntityUnparsed('test')).toBe(true);

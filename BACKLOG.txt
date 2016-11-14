@@ -72,6 +72,8 @@ KEEP READING ABOUT STREAMS
 	√ Test SyntaxError
 	√ XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
 
+
+
 	EXTRAS
 	- it will barf if the id is undefined.  This will keep stale things from the code
 	var xError = new XmlError(id, code, message);
