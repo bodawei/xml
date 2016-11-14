@@ -4,7 +4,7 @@
 
 /* eslint-env jasmine */
 
-const XmlErrorToken = require('./XmlErrorToken.js');
+const SyntaxError = require('./error/SyntaxError.js');
 const XmlStream = require('./XmlStream.js');
 const XmlToken = require('./XmlToken.js');
 
@@ -107,11 +107,11 @@ describe('XmlStream', () => {
 
       it('registers an "error" callback', () => {
          const s = makeStream();
-         dataItem = new XmlErrorToken('foo', XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
+         dataItem = new SyntaxError(SyntaxError.ERROR.XMLDECL_TARGET_INVALID_CASE);
          s.on('error', (error, data) => {
             if (count === 0) {
                expect(data).toBeUndefined();
-               expect(error.code).toEqual(XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
+               expect(error.code).toEqual(SyntaxError.ERROR.XMLDECL_TARGET_INVALID_CASE);
             }
             dataItem = undefined;
             count++;
@@ -223,7 +223,7 @@ describe('XmlStream', () => {
 
       it('removes an "error" callback', () => {
          const s = makeStream();
-         dataItem = new XmlErrorToken(XmlErrorToken.ERROR.XMLDECL_TARGET_INVALID_CASE);
+         dataItem = new SyntaxError(SyntaxError.ERROR.XMLDECL_TARGET_INVALID_CASE);
 
          function remove() {
             s.off('error', callback);

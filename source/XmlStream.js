@@ -2,7 +2,7 @@
 
 'use strict';
 
-const XmlErrorToken = require('./XmlErrorToken.js');
+const XmlError = require('./error/XmlError.js');
 
 const EVENT_NAMES = [ 'data', 'end', 'error', 'token' ];
 
@@ -43,7 +43,7 @@ class XmlStream {
 
       const token = this._innerGetNext();
 
-      if (token instanceof XmlErrorToken && !this._options.lax) {
+      if (token instanceof XmlError && !this._options.lax) {
          const e = new Error(token.message);
          e.details = token;
          this._errored = true;
@@ -160,7 +160,7 @@ class XmlStream {
          const token = this._innerGetNext();
 
          if (token) {
-            if (token instanceof XmlErrorToken) {
+            if (token instanceof XmlError) {
                this._notifyHandlers('data', token);
                this._notifyHandlers('error', token);
 

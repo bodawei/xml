@@ -217,33 +217,32 @@ class AttrListDeclaration extends XmlToken {
 
 }
 
-XmlToken.SYNTAX_ERROR = 'SyntaxError';
+module.exports = {
+   XmlToken,
+   Comment,
+   ProcessingInstruction,
+   Space,
 
-XmlToken.Comment = Comment;
-XmlToken.ProcessingInstruction = ProcessingInstruction;
-XmlToken.Space = Space;
+   XmlDeclaration,
+   TextDeclaration,
 
-XmlToken.XmlDeclaration = XmlDeclaration;
-XmlToken.TextDeclaration = TextDeclaration;
+   DocTypeStart,
+   DocTypeEnd,
+   NotationDeclaration,
+   EntityDeclaration,
+   PEntityDeclaration,
+   ElementDeclaration,
+   AttrListDeclaration,
 
-XmlToken.DocTypeStart = DocTypeStart;
-XmlToken.DocTypeEnd = DocTypeEnd;
-XmlToken.NotationDeclaration = NotationDeclaration;
-XmlToken.EntityDeclaration = EntityDeclaration;
-XmlToken.PEntityDeclaration = PEntityDeclaration;
-XmlToken.ElementDeclaration = ElementDeclaration;
-XmlToken.AttrListDeclaration = AttrListDeclaration;
+   ElementStart,
+   EmptyElement,
+   ElementEnd,
 
-XmlToken.ElementStart = ElementStart;
-XmlToken.EmptyElement = EmptyElement;
-XmlToken.ElementEnd = ElementEnd;
+   EntityStart,
+   EntityEnd,
 
-XmlToken.EntityStart = EntityStart;
-XmlToken.EntityEnd = EntityEnd;
-
-XmlToken.CharRef = CharRef;
-XmlToken.CharData = CharData;
-XmlToken.CData = CData;
-XmlToken.Text = Text;
-
-module.exports = XmlToken;
+   CharRef,
+   CharData,
+   CData,
+   Text
+};

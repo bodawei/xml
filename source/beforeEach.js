@@ -4,12 +4,12 @@
 
 /* eslint-env jasmine */
 
-const XmlToken = require('./XmlToken.js');
+const SyntaxError = require('./error/SyntaxError.js');
 
 function toBeSyntaxError() {
    return {
       compare: (actual, expected) => {
-         const typePass = actual.type === XmlToken.SYNTAX_ERROR;
+         const typePass = actual instanceof SyntaxError;
          const codePass = actual.code === expected;
          let message;
 

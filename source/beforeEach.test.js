@@ -4,8 +4,8 @@
 
 /* eslint-env jasmine */
 
-const XmlToken = require('./XmlToken.js');
-const XmlErrorToken = require('./XmlErrorToken.js');
+const SyntaxError = require('./error/SyntaxError.js');
+
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
 
 describe('toBeSyntaxError()', () => {
@@ -13,17 +13,17 @@ describe('toBeSyntaxError()', () => {
    describe('jasmine use', () => {
 
       it('reports pass when the error code is the expected error code', () => {
-         expect(new XmlErrorToken(XmlToken.SYNTAX_ERROR, 'FISH')).toBeSyntaxError('FISH');
+         expect(new SyntaxError('FISH')).toBeSyntaxError('FISH');
       });
 
       it('reports no pass when the error code is the expected error code', () => {
-         expect(new XmlErrorToken(XmlToken.SYNTAX_ERROR, 'TEST')).not.toBeSyntaxError('BOGUS');
+         expect(new SyntaxError('TEST')).not.toBeSyntaxError('BOGUS');
       });
 
    });
 
    describe('raw matcher', () => {
-      const actualError = new XmlErrorToken(XmlToken.SYNTAX_ERROR, 'TEST_CODE', 'message');
+      const actualError = new SyntaxError('TEST_CODE', 'message');
 
       it('returns a compare function', () => {
          expect(typeof toBeSyntaxErrorMatcher().compare === 'function').toEqual(true);

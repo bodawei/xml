@@ -3,14 +3,13 @@
 'use strict';
 
 const EntityLocation = require('./EntityLocation.js');
-const Offset = require('./Offset.js');
+const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./TextChunk.js');
-const XmlErrorToken = require('./XmlErrorToken.js');
 const XmlStream = require('./XmlStream.js');
 const XmlToken = require('./XmlToken.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 
-const ERRORS = XmlErrorToken.ERROR;
+const ERRORS = SyntaxError.ERROR;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -326,12 +325,10 @@ class XmlTokenStream extends XmlStream {
          this._assertSyntax(!afterSpace, ERRORS.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
          this._assertSyntax(closingSemicolon, ERRORS.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
-         const startToken = new XmlToken.EntityStart(entityName);
-
          if (inAttribute) {
-            return [ startToken, new XmlToken.EntityEnd(entityName) ];
+            return [ new XmlToken.EntityStart(entityName), new XmlToken.EntityEnd(entityName) ];
          } else {
-            startToken.chunks = this._cursor.getRecentChunks();
+            const startToken = new XmlToken.EntityStart(entityName, false, this._cursor.getRecentChunks());
 
             this._checkContentState(start,
                ERRORS.REFERENCE_INVALID_DOC_CONTEXT, ERRORS.REFERENCE_INVALID_SUBSET_CONTEXT);
@@ -439,7 +436,7 @@ class XmlTokenStream extends XmlStream {
                this._validateStartDocType(parsedDocType);
 
                const docToken = new XmlToken.DocTypeStart(textOrBlank(parsedDocType.nameChunk),
-                  locFromExternalId(parsedDocType.externalId));
+                  locFromExternalId(parsedDocType.externalId), this._cursor.getRecentChunks());
                this._pushToken(docToken);
 
                if (parsedDocType.startInternalSubsetChunk) {
@@ -814,7 +811,7 @@ class XmlTokenStream extends XmlStream {
       if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
          this._state = STATE.PROLOG;
       }
-      this._pushToken(new XmlToken.DocTypeEnd());
+      this._pushToken(new XmlToken.DocTypeEnd(this._cursor.getRecentChunks()));
    }
 
    _checkDeclarationState(start, error) {
@@ -1332,26 +1329,8 @@ class XmlTokenStream extends XmlStream {
    }
 
    _reportSyntaxError(code, params, place, context) {
-      let message = XmlErrorToken.STRING[code];
-
-      if (typeof params === 'object') {
-         if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
-            context = place;
-            place = params;
-            params = undefined;
-         } else {
-            for (let index = 0; index < params.length; index++) {
-               message = message.replace('{' + index + '}', params[index]);
-            }
-         }
-      }
-
-      if (place instanceof TextChunk.PlainChunk) {
-         place = place.endOffset;
-      }
-
       const contextArray = context ? [ context.startOffset ] : undefined;
-      this._pushToken(new XmlErrorToken(XmlToken.SYNTAX_ERROR, code, message, place, contextArray));
+      this._pushToken(new SyntaxError(code, params, place, contextArray));
    }
 
 }

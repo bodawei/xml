@@ -22,7 +22,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-58:S: Remove data prop on token, and make all token types more explicit
+√ 58:S: Remove data prop on token, and make all token types more explicit
 	- Just get all the token types named and declared in XmlToken.
 		// looks like you can lose all the XmlToken.CONSTANT values
 		// XmlToken.CommentToken  could become XmlToken.Comment
@@ -53,10 +53,12 @@ KEEP READING ABOUT STREAMS
 		√ write to derived/{name}.{code|string}.json
 		# Trailing space allows unicode.
 		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
+	√ XmlErrorToken.ERROR = keys from the stringBundle
+	√ XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
 
-	- write StringBundle(stringSet)
-		_stringset is {locale: { key: value }}
-		preferredLocales // if undefined uses browser or nothing
+	√ write StringBundle(stringSet)
+		√ _stringset is {locale: { key: value }}
+		√ preferredLocales // if undefined uses browser or nothing
 
 		lookupString([locale | localeArray])
 			for each locale try to look up. if available, success, otherwise go to next. if none, return base locale
@@ -67,20 +69,16 @@ KEEP READING ABOUT STREAMS
 		removeLocale() // nice to have
 			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
 			// Nice to have Need an escape  {{} and {}} ?
-	XmlErrorToken.ERROR = keys from the stringBundle
-	XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
-	XmlErrorToken.Construction will look up the right STRINg for the message
-		- it will barf if the id is undefined.  This will keep stale things from the code
-		- could also just so SyntaxError.id();
-	XmlErrorToken.id('BRACKETITEM_XTRA_SPACE_BEFORE') would barf if that doesn't exist? Use in tests?  Could even do ErrorId('BRACKETITEM_XTRA_SPACE_BEFORE')
+	√ Test SyntaxError
+	√ XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
 
-	GOAL
-	XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
+	EXTRAS
+	- it will barf if the id is undefined.  This will keep stale things from the code
 	var xError = new XmlError(id, code, message);
 		xError.message
 		xError.id
 		xError.code
-
+	XmlErrorToken.id('BRACKETITEM_XTRA_SPACE_BEFORE') would barf if that doesn't exist? Use in tests?  Could even do ErrorId('BRACKETITEM_XTRA_SPACE_BEFORE')
 	SyntaxError extends XmlError extends Error
 	SyntaxError.ID.XMLDECL_NO_ATTRIBUTES = 'XMLDECL_NO_ATTRIBUTES'
 	SyntaxError.MSG.EN_US.XMLDECL_NO_ATTRIBUTES = "foo {}"	<- -why make MSG public?  Oh, so folks can add a locale dynamically.
@@ -89,10 +87,9 @@ KEEP READING ABOUT STREAMS
 		error.getLocalizedMessage(locale) looks up.
 		error.id = 'XMLDECL_NO_ATTRIBUTES'
 		error.code = 123;
-
 	Steps
-		- pretty easy to create XmlError from Error
-		- probably not hard to rename XmlErrorToken to SyntaxError
+		√ pretty easy to create XmlError from Error
+		√ probably not hard to rename XmlErrorToken to SyntaxError
 		- probably not had to rename code to id, STRING to MSG, and ERROR to ID
 		- harder to get codes
 

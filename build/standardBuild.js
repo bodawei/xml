@@ -259,8 +259,10 @@ module.exports = function standardBuild(grunt) {
          }
       }
 
-      fs.mkdir(SOURCE_DERIVED_DIR);
-      fs.writeFileSync(SOURCE_DERIVED_DIR + 'base.json', JSON.stringify(jsonBase, undefined, 2));
+      if (!fs.existsSync(SOURCE_DERIVED_DIR)) {
+         fs.mkdirSync(SOURCE_DERIVED_DIR);
+      }
+      fs.writeFileSync(SOURCE_DERIVED_DIR + 'base.json', JSON.stringify({ base: jsonBase }, undefined, 2));
       fs.writeFileSync(SOURCE_DERIVED_DIR + 'code.json', JSON.stringify(jsonCode, undefined, 2));
    });
 

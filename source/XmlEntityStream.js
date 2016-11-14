@@ -2,7 +2,7 @@
 
 'use strict';
 
-const XmlErrorToken = require('./XmlErrorToken.js');
+const SyntaxError = require('./error/SyntaxError.js');
 const XmlStream = require('./XmlStream.js');
 const XmlToken = require('./XmlToken.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
@@ -113,7 +113,7 @@ class AttributeContext extends Context {
 
          this.setupHandlers(this.stream, this.entityStream);
       } else {
-         reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
+         reportError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
          // And continue processing.
          this.expandAttribute();
       }
@@ -148,12 +148,9 @@ class AttributeContext extends Context {
 
 function reportError(id, token, context) {
    const offset = token.chunks ? token.chunks[0].startOffset : undefined;
-   let message = XmlErrorToken.STRING[id];
 
-   message = message.replace('{0}', token.name);
-
-   context.data.unshift(new XmlErrorToken(XmlToken.SYNTAX_ERROR,
-      XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, message, offset, [ offset ]));
+   context.data.unshift(new SyntaxError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, [ token.name ],
+      offset, [ offset ]));
 }
 
 class XmlEntityStream extends XmlStream {
@@ -183,7 +180,7 @@ class XmlEntityStream extends XmlStream {
     undefined
 
     RETURN
-    XmlToken, XmlErrorToken or undefined
+    XmlToken, SyntaxError or undefined
    \**********************************************************************/
 
    _innerGetNext() {
@@ -205,7 +202,7 @@ class XmlEntityStream extends XmlStream {
                context.setupHandlers(stream, this);
                token.haveEntityData = true;
             } else {
-               reportError(XmlErrorToken.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
+               reportError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
             }
          } else if (token instanceof XmlToken.ElementStart || token instanceof XmlToken.EmptyElement) {
             let elementContext;
@@ -236,7 +233,7 @@ class XmlEntityStream extends XmlStream {
             if (elementContext) {
                return;
             }
-         } else if (token.type === XmlToken.SYNTAX_ERROR) {
+         } else if (token instanceof SyntaxError) {
             // add the hierarchical context of the error.
             const contexts = token.context;
 
