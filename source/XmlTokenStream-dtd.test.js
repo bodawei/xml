@@ -181,7 +181,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.WithSpaceChunk('two', 'two'),
             new TextChunk.PlainChunk('\''),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('['),
+            new TextChunk.PlainChunk('[')
          ], 21));
 
          expect(s.getNext().chunks).toEqual(makeStringTokenArray([
@@ -381,7 +381,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.WithSpaceChunk('ONE', 'ONE'),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('>'),
+            new TextChunk.PlainChunk('>')
          ], 21));
       });
 
@@ -635,7 +635,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('entityValue', 'entityValue'),
             new TextChunk.PlainChunk('"'),
-            new TextChunk.PlainChunk('>'),
+            new TextChunk.PlainChunk('>')
          ], 21));
       });
 
@@ -756,7 +756,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.WordChunk('NDATA', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.WordChunk('foo', true, true),
-            new TextChunk.PlainChunk('>'),
+            new TextChunk.PlainChunk('>')
          ], 21));
       });
 
@@ -830,7 +830,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.WordChunk('elName', true, true),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.WordChunk('ANY', true, true),
-            new TextChunk.PlainChunk('>'),
+            new TextChunk.PlainChunk('>')
          ], 21));
       });
 
@@ -1720,7 +1720,7 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('argh', 'argh'),
             new TextChunk.PlainChunk('"'),
-            new TextChunk.PlainChunk('>'),
+            new TextChunk.PlainChunk('>')
          ], 21));
       });
 

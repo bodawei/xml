@@ -60,11 +60,15 @@ CLEANUP
 
 BUILD
 143 Add check to make sure error constants all being used
-	- should read in all .js files (not .test.js) in source as raw strings.
+	√- should read in all .js files (not .test.js) in source as raw strings.
 		note-glob glob("**/*.js", options, function (er, files) {  glob.sync
-	- read in each base.js file. glob.sync("source/locale/**/base.properties) parse each.
-	- for each key, ignore OBSOLETE, search through all files. if find a use, declare it ok
-	- if find it not being used, report as an error
+	√- read in each base.js file. glob.sync("source/locale/**/base.properties) parse each.
+	√- for each key, ignore OBSOLETE, search through all files. if find a use, declare it ok
+	√- if find it not being used, report as an error
+	- Turn in to a proper task.  Recognize source files (using this.filesSrc)
+		src:
+		baseProps: GLOB // http://gruntjs.com/api/grunt.file
+	- Also, check out this.async on the task
 
 148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
 	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }

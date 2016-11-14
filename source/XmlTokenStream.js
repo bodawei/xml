@@ -116,9 +116,6 @@ class XmlTokenStream extends XmlStream {
       }
 
       this._entityType = this._options.entityType;
-
-      // ICK
-      this._pushToken = this._pushToken.bind(this);
    }
 
    _innerGetNext() {
@@ -468,7 +465,7 @@ class XmlTokenStream extends XmlStream {
 
                this._validateEntity(parsedEntity);
 
-               const entityClass = parsedEntity.isParameter? XmlToken.PEntityDeclaration : XmlToken.EntityDeclaration;
+               const entityClass = parsedEntity.isParameter ? XmlToken.PEntityDeclaration : XmlToken.EntityDeclaration;
 
                this._pushToken(new entityClass(textOrBlank(parsedEntity.nameChunk),
                   parsedEntity.valueChunk,

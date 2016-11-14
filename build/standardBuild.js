@@ -25,8 +25,8 @@ var DIST_NPM_DIR = DIST_DIR + '/npm/' + MODULE_NAME + '/';
 var DIST_FLAT_DIR = DIST_DIR + '/es5file/';
 
 var JS_SOURCE_FILE_GLOB = [
-   SOURCE_DIR + '/*.js',
-   '!' + SOURCE_DIR + '/*.test.js'
+   SOURCE_DIR + '**/*.js',
+   '!' + SOURCE_DIR + '**/*.test.js'
 ];
 var JS_FILE_GLOB = [
    BUILD_DIR + '**/*.js',
@@ -197,6 +197,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'jasmine_node:dist',
       'eslint',
+      'checkKeys',
       'testreport',
       'coveragereport',
       '_dist'
@@ -208,6 +209,40 @@ module.exports = function standardBuild(grunt) {
 
    grunt.registerTask('quietBuild', 'Report on tests', () => {
       require('./quiet-grunt-mod.js');
+   });
+
+   var glob = require('glob');
+
+   grunt.registerTask('checkKeys', 'Check key use', () => {
+      var baseStrings = fs.readFileSync(SOURCE_LOCALE_DIR + 'base.properties');
+      var baseObject = propertiesParser.parse(baseStrings);
+
+      var files = glob.sync(SOURCE_DIR + '/**/*.js');
+      var fileData = {};
+      var notFound = [];
+
+      for (var index = 0; index < files.length; index++) {
+         if (files[index].indexOf('.test.js') === -1) {
+            fileData[files[index]] = fs.readFileSync(files[index]);
+         }
+      }
+
+      for (var key in baseObject) {
+         var found = false;
+
+         for (var fileName in fileData) {
+            if (fileData[fileName].indexOf(key) !== -1) {
+               found = true;
+            }
+         }
+         if (!found) {
+            notFound.push(key);
+         }
+      }
+
+      if (notFound.length > 0) {
+         grunt.fail.fatal('These localization keys are not being used: ' + notFound.join(', '));
+      }
    });
 
    grunt.registerTask('_deriveSource', 'Derive source', () => {
