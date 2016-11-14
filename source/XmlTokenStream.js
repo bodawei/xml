@@ -18,6 +18,7 @@ const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
+
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
@@ -81,6 +82,10 @@ function textOrBlank(chunk) {
    return chunk ? chunk.text : '';
 }
 
+function textOrUndef(chunk) {
+   return chunk ? chunk.text : undefined;
+}
+
 class XmlTokenStream extends XmlStream {
 
    constructor(cursor, entityManager, options) {
@@ -111,6 +116,9 @@ class XmlTokenStream extends XmlStream {
       }
 
       this._entityType = this._options.entityType;
+
+      // ICK
+      this._pushToken = this._pushToken.bind(this);
    }
 
    _innerGetNext() {
@@ -433,6 +441,7 @@ class XmlTokenStream extends XmlStream {
          switch (upperCaseType) {
             case 'DOCTYPE':
                const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, declarationName);
+
                this._validateStartDocType(parsedDocType);
 
                const docToken = new XmlToken.DocTypeStart(textOrBlank(parsedDocType.nameChunk),
@@ -454,69 +463,17 @@ class XmlTokenStream extends XmlStream {
                this._pushToken(new XmlToken.NotationDeclaration(textOrBlank(parsedNotation.nameChunk),
                   locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
                return;
-            // Consume an entity declaration.  Note, that we are biased here if we
-            // find something unexpected (e.g. stuff after NDATA, or no ExternalId or EntityValue)
-            // to assume that the > is missing and report that, than to try to consume the whole
-            // rest of the document as junk content.
-            //
             case 'ENTITY':
-               const parsedEntity = this._dtdParser.parseEntity(this._cursor);
-               const enNameText = parsedEntity.nameChunk ? parsedEntity.nameChunk.text : '';
-               let notationDataName;
+               const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, declarationName);
 
-               this._assertSyntax(parsedEntity.nameChunk, ERRORS.ENTITYDECL_NO_NAME);
-               this._assertSyntax((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
-                  ERRORS.ENTITYDECL_NAME_INVALID, [ enNameText ]);
-               this._assertSyntax(parsedEntity.postNameSpaceChunk,
-                  ERRORS.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+               this._validateEntity(parsedEntity);
 
-               if (parsedEntity.externalId) {
-                  const preNDataSpace = this._cursor.getSpace();
-                  const ndataMarker = this._cursor.getWord([ '>' ]);
+               const entityClass = parsedEntity.isParameter? XmlToken.PEntityDeclaration : XmlToken.EntityDeclaration;
 
-                  // fix test in dtd-test (expected tokens)
-                  if (ndataMarker) {
-                     if (ndataMarker.text.toLocaleUpperCase() !== 'NDATA') {
-                        this._cursor.unget(ndataMarker);
-                     } else {
-                        this._cursor.getSpace(); // no need to check. either have space or no word next
-                        const ndataName = this._cursor.getWord([ '>' ]);
-
-                        this._assertSyntax(preNDataSpace, ERRORS.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
-                        this._assertSyntax(ndataMarker.text === 'NDATA',
-                           ERRORS.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, ndataMarker.text ]);
-
-                        if (ndataName) {
-                           notationDataName = ndataName.text;
-                        } else {
-                           this._reportSyntaxError(ERRORS.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
-                        }
-                     }
-                  }
-               }
-
-               this._cursor.getSpace();
-               const entityClosing = this._cursor.getMatch('>');
-
-               this._assertSyntax(parsedEntity.valueChunk || parsedEntity.externalId,
-                  ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
-               this._assertSyntax(entityClosing, ERRORS.ENTITYDECL_NO_CLOSE, [ enNameText ]);
-
-               const EntityDeclaration = parsedEntity.isParameter ?
-                  new XmlToken.PEntityDeclaration(enNameText,
-                     parsedEntity.valueChunk,
-                     new EntityLocation(parsedEntity.externalId.systemLiteral,
-                        parsedEntity.externalId.pubidLiteral),
-                     notationDataName, this._cursor.getRecentChunks()) :
-                  new XmlToken.EntityDeclaration(enNameText,
-                     parsedEntity.valueChunk,
-                     new EntityLocation(parsedEntity.externalId ? parsedEntity.externalId.systemLiteral : undefined,
-                        parsedEntity.externalId ? parsedEntity.externalId.pubidLiteral : undefined),
-                     notationDataName, this._cursor.getRecentChunks());
-
-               this._checkDeclarationState(start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
-
-               this._pushToken(EntityDeclaration);
+               this._pushToken(new entityClass(textOrBlank(parsedEntity.nameChunk),
+                  parsedEntity.valueChunk,
+                  locFromExternalId(parsedEntity.externalId),
+                  textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
                return;
             case 'ELEMENT':
                let contentText;
@@ -719,6 +676,17 @@ class XmlTokenStream extends XmlStream {
       this._reportSyntaxError(ERRORS.BANGITEM_UNKNOWN);
    }
 
+   _closeDocType() {
+      const parseResults = this._dtdParser.parseDocTypeClose(this._cursor);
+
+      this._validateCloseDocType(parseResults);
+
+      if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
+         this._state = STATE.PROLOG;
+      }
+      this._pushToken(new XmlToken.DocTypeEnd(this._cursor.getRecentChunks()));
+   }
+
    _validateStartDocType(parsedDocType) {
       const start = parsedDocType.startChunk;
 
@@ -763,6 +731,28 @@ class XmlTokenStream extends XmlStream {
       this._checkDeclarationState(parsedNotation.startChunk, ERRORS.NOTATIONDECL_INVALID_CONTEXT);
    }
 
+   _validateEntity(parsedEntity) {
+      const enNameText = textOrBlank(parsedEntity.nameChunk);
+
+      this._assertSyntax(parsedEntity.nameChunk, ERRORS.ENTITYDECL_NO_NAME);
+      this._assertSyntax((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
+         ERRORS.ENTITYDECL_NAME_INVALID, [ enNameText ]);
+      this._assertSyntax(parsedEntity.postNameSpaceChunk, ERRORS.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+
+      if (parsedEntity.nDataMarker) {
+         this._assertSyntax(parsedEntity.preNDataSpace, ERRORS.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
+         this._assertSyntax(parsedEntity.nDataMarker.text === 'NDATA',
+            ERRORS.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsedEntity.nDataMarker.text ]);
+         this._assertSyntax(parsedEntity.nDataName, ERRORS.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
+      }
+
+      this._assertSyntax(parsedEntity.valueChunk || parsedEntity.externalId,
+         ERRORS.ENTITYDECL_NO_VALUE, [ enNameText ]);
+      this._assertSyntax(parsedEntity.closeChunk, ERRORS.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+
+      this._checkDeclarationState(parsedEntity.start, ERRORS.ENTITYDECL_INVALID_CONTEXT);
+   }
+
    _validateExternalId(externalId, systemRequired) {
       if (externalId.unknownType) {
          this._reportSyntaxError(ERRORS.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
@@ -804,16 +794,6 @@ class XmlTokenStream extends XmlStream {
             this._assertSyntax(externalId.spaceAfterTypeChunk, ERRORS.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
          }
       }
-   }
-
-   _closeDocType() {
-      const parseResults = this._dtdParser.parseDocTypeClose(this._cursor);
-      this._validateCloseDocType(parseResults);
-
-      if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.IN_DTD) {
-         this._state = STATE.PROLOG;
-      }
-      this._pushToken(new XmlToken.DocTypeEnd(this._cursor.getRecentChunks()));
    }
 
    _checkDeclarationState(start, error) {

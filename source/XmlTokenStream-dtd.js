@@ -5,6 +5,9 @@
 const TextChunk = require('./TextChunk.js');
 const XmlToken = require('./XmlToken.js');
 
+/*
+ * Biases: If find something unexpected, assume the > is missing.
+ */
 class XmlTokenStreamDtd {
 
    /**********************************************************************\
@@ -118,12 +121,20 @@ class XmlTokenStreamDtd {
 
     RETURN
       {
+         start
+         entityChunk
          nameChunk: The chunk with the entity name
          isParameter: True if this is a parameter entry declaration
          postNameSpaceChunk: The space after the name, if any.
          valueQuoteChunk
          valueChunk
-         externalId
+         externalId,
+         preNDataSpace
+         nDataMarker
+         preNDataNameSpace
+         nDataName
+         preCloseSpace
+         closeChunk
       }
     SYNTAX
       // [70] EntityDecl  ::= GEDecl | PEDecl
@@ -135,8 +146,11 @@ class XmlTokenStreamDtd {
       //  [9] EntityValue ::= '"' ([^%&"] | PEReference | Reference)* '"' |
       //                      "'" ([^%&'] | PEReference | Reference)* "'"
    \**********************************************************************/
-   parseEntity(cursor) {
-      const results = {};
+   parseEntity(cursor, start, entityChunk) {
+      const results = {
+         start,
+         entityChunk
+      };
 
       results.nameChunk = cursor.getWord([ '>' ]);
 
@@ -147,8 +161,6 @@ class XmlTokenStreamDtd {
       }
 
       results.postNameSpaceChunk = cursor.getSpace();
-
-      // EntityDef or PEDef
 
       const valueQuote = cursor.peekChar();
       if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
@@ -161,6 +173,26 @@ class XmlTokenStreamDtd {
       } else {
          results.externalId = this._retrieveExternalId(cursor, [ '>' ], { isEntity: true });
       }
+
+      if (results.externalId) {
+         results.preNDataSpace = cursor.getSpace();
+         results.nDataMarker = cursor.getWord([ '>' ]);
+
+         if (results.nDataMarker) {
+            if (results.nDataMarker.text.toLocaleUpperCase() !== 'NDATA') {
+               cursor.unget(results.nDataMarker);
+               cursor.unget(results.preNDataSpace);
+               results.nDataMarker = undefined;
+               results.preNDataSpace = undefined;
+            } else {
+               results.preNDataNameSpace = cursor.getSpace(); // no need to check. either have space or no word next
+               results.nDataName = cursor.getWord([ '>' ]);
+            }
+         }
+      }
+
+      results.preCloseSpace = cursor.getSpace();
+      results.closeChunk = cursor.getMatch('>');
 
       return results;
    }

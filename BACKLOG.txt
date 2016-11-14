@@ -1,14 +1,14 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 6/16 Sprint 1: 196story points. Assumed: 7/sprint = 28 sprints. ACTUAL: 8
- 6/25 Sprint 2: 174story points. Avg: 8/sprint = 22 sprints. ACTUAL: 5
- 7/06 Sprint 3: 171story points. Avg: 7/sprint = 25 sprints. ACTUAL: 10
- 7/15 Sprint 4: 166sp [12XL 9M 19S]. Avg: 7/sprint = 24 sprints. ACTUAL: 7
- 7/22 Sprint 5: 159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6 see Note5
- 7/30 Sprint 6: 153sp [11XL 9M 16S]. Avg: 5/sprint = 31 sprints. ACTUAL: 5
- 9/22 Sprint 7: 144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6 see Note7
- 9/29 Sprint 8: 133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6 see Note8
-10/1  Sprint 9: 120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3 see Note9
+ 6/16 Sprint 1:  196story points. Assumed: 7/sprint = 28 sprints. ACTUAL: 8
+ 6/25 Sprint 2:  174story points. Avg: 8/sprint = 22 sprints. ACTUAL: 5
+ 7/06 Sprint 3:  171story points. Avg: 7/sprint = 25 sprints. ACTUAL: 10
+ 7/15 Sprint 4:  166sp [12XL 9M 19S]. Avg: 7/sprint = 24 sprints. ACTUAL: 7
+ 7/22 Sprint 5:  159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6 see Note5
+ 7/30 Sprint 6:  153sp [11XL 9M 16S]. Avg: 5/sprint = 31 sprints. ACTUAL: 5
+ 9/22 Sprint 7:  144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6 see Note7
+ 9/29 Sprint 8:  133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6 see Note8
+10/1  Sprint 9:  120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3 see Note9
 10/6  Sprint 10: 117sp [8XL 7M 16S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5 see Note10
 10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5 Note11
 10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2 Note 12
@@ -17,133 +17,68 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
 11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
-11/8  Sprint 17: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL:
+11/8  Sprint 17: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
+11/14 Sprint 18: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
 
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-√ 58:S: Remove data prop on token, and make all token types more explicit
-	- Just get all the token types named and declared in XmlToken.
-		// looks like you can lose all the XmlToken.CONSTANT values
-		// XmlToken.CommentToken  could become XmlToken.Comment
-		// return value should be { Comment: Comment ... } etc
-		// Leave chunks
-		// XmlToken --> BaseXmlToken?
-105:S dtd declaration types must start including their chunks always.
-	- In essence, remove _pushTokenWrapper() and put its logic into _pushToken(). Add tests for each case if not already there.
-	- This will be expensive because of tests, but there aren't that many and many is already done.
+S 145 Switch code to id in SyntaxError
+	- code partially done is stashed.
+	- XmlError should take code, id and params
+	- load codes and populate error
+	- add tests
+
+M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
 	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
-11:M: Provide some kind of internationalizable string catalog
-	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
-	in the process, might be good to give these numeric codes.
-	======================
-	- Start with a properties file (can generate it by a script from existing code)  locale/base.properties  locale/code.properties
-		BRACKETITEM_XTRA_SPACE_BEFORE = Must not have space before opening "[".
-	- use 
-		√ add grunt task which reads in the properties files synchronously  (everything in locale)
-		√ passes to node-properties-parser  (or something like ini? What about trailing space etc?)
-			√ Distinguish base and code.
-		Checks:
-			√ no dup values: codes
-			√ no dup values: base
-			√ keys identical: base & code
-				report missing in code
-				report extra in code
-		√ Remove keys in base and code with base.value OBSOLETE
-		√ write to derived/{name}.{code|string}.json
-		# Trailing space allows unicode.
-		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
-	√ XmlErrorToken.ERROR = keys from the stringBundle
-	√ XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
+		- need some way to signal for, say, attributes, that they have none
+			- pass an empty array?
+			- SyntaxError.ATTRCHUNK, SyntaxError.ELEMENTVALCHUNK
 
-	√ write StringBundle(stringSet)
-		√ _stringset is {locale: { key: value }}
-		√ preferredLocales // if undefined uses browser or nothing
+S 146 remove public SyntaxError.ERROR
+	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
+	SyntaxError constructor should barf if message is not found.
+	Then can replace ERROR
 
-		lookupString([locale | localeArray])
-			for each locale try to look up. if available, success, otherwise go to next. if none, return base locale
-		lookupSubstitutedString(params, [locale | localeArray])
-			// {0} ...
-		Nice to haves: 
-		addLocale()	// nice to ahve
-		removeLocale() // nice to have
-			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
-			// Nice to have Need an escape  {{} and {}} ?
-	√ Test SyntaxError
-	√ XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
+Extras:
+- Add to StringBundle:
+	addLocale()	// nice to ahve
+	removeLocale() // nice to have
+- Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
+- Write SyntaxError tests
 
 
-
-	EXTRAS
-	- it will barf if the id is undefined.  This will keep stale things from the code
-	var xError = new XmlError(id, code, message);
-		xError.message
-		xError.id
-		xError.code
-	XmlErrorToken.id('BRACKETITEM_XTRA_SPACE_BEFORE') would barf if that doesn't exist? Use in tests?  Could even do ErrorId('BRACKETITEM_XTRA_SPACE_BEFORE')
-	SyntaxError extends XmlError extends Error
-	SyntaxError.ID.XMLDECL_NO_ATTRIBUTES = 'XMLDECL_NO_ATTRIBUTES'
-	SyntaxError.MSG.EN_US.XMLDECL_NO_ATTRIBUTES = "foo {}"	<- -why make MSG public?  Oh, so folks can add a locale dynamically.
-	var error = new SyntaxError(ID, params, place, context);
-		error.message is done in the current locale at construction time
-		error.getLocalizedMessage(locale) looks up.
-		error.id = 'XMLDECL_NO_ATTRIBUTES'
-		error.code = 123;
-	Steps
-		√ pretty easy to create XmlError from Error
-		√ probably not hard to rename XmlErrorToken to SyntaxError
-		- probably not had to rename code to id, STRING to MSG, and ERROR to ID
-		- harder to get codes
-
-
--- next: 144
+-- next: 150
 =============================================
 CLEANUP
+- continue to pull out all parsing logic
 - Need to pull out validation into another file
-- We are doing NO testing of entityLoc in notation, not even that the value is there.
-- Need to finish up testing of XmlStream:
-	- need to test the obscure case explicitly
-	- put in the rest of the testing from XmlToken and XmlEntity
-
-- continue to pull out dtd related stuff into a separate code file (pave way for async?)
-   - do doctype parsing
-	- started
-	- big issue is dealing with all the externalID validation
-		- big issues remaining are:
-			- missing spaces
-			- quoteless values
-	- remove the entity retrieval code from XmlTokenStream (yay!)
-	- would be good to review the validation. 
-	- finish doctype extraction
-   - extract entity notationid extraction
-   - convert parsed externalId into an Entitylocation with entities and notations
-	- test 
-   - resolve what we're doing with values for entities and attdef.  Array of toekns, a chunk or what?
-   - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
 - Think about pulling the parse declaration, validation and tokenization of each type into a single file (for each type)
-- Eventually should turn off checks in reportError so tht we are sure every call is passing in the params
-
-RESEARCH
-- should we be expanding character references in attribute defaults?
-- ENTITIES, attribute values, and attrdef defaults
-	Note: Attributes coming out of XmlTokenStream will be
-		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]  // underlying cursor is over other.  Let's ignore that.
-	Internal Entity Values should be
-		[ TEXT, CHARREF, TEXT ]
-	External Entity Values should be essentially
-		[ TEXT ]
+- We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
+- Should review all the validation code given that we are making the parsing clearer
+- add place and context to all errors
 
 BUILD
 143 Add check to make sure error constants all being used
-		Support other locales
-			no dup values
-			keys identical: base and locale
-		Make a stand alone grunt task
-			test it
-		Can you switch to using ini file format?  Would be nice to say
-			[XmlDecl]
-			NoAttributes = Blah blah
-- Can we silence tasks out of the box in grunt?
+	- should read in all .js files (not .test.js) in source as raw strings.
+		note-glob glob("**/*.js", options, function (er, files) {  glob.sync
+	- read in each base.js file. glob.sync("source/locale/**/base.properties) parse each.
+	- for each key, ignore OBSOLETE, search through all files. if find a use, declare it ok
+	- if find it not being used, report as an error
+
+148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
+	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
+	Each has a base.properties and code.properties. Barf if missing
+		- base and code must match keys exactly
+		- code must have no dup values
+		- remove OBSOLETE
+		- each locale must match base keys exactly
+	assemble all into one big happy json which writes out as SyntaxError.json
+149 Make a proper grunt task and test it	
+??? Do we (can we?) change from all caps error codes in code?
+??? Can you switch to using ini file format?  Would be nice to say
+		[XmlDecl]
+		NoAttributes = Blah blah
 144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 127: Investigate why current node causes coverage to fail
 	- Find out version where it started failing (after 6.2.1 and before 6.4)
@@ -181,18 +116,10 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
---- technical debt [4m 13s]
-S 142 move XmlErrorToken to XmlError and a subtype of Error
-87:S: Handle PEReferences and character references in entity values
+--- technical debt [3m 4s]
 117:S parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
-52:S: StringCursorSpeedup
-	- do performance test jsperf of regex vs hand parsing
-		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
-	optimize getToTerminator for single terminator case
-	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
-		Note: Can't do regex from an offset without doing a substr. sigh.
-57:S: Consider adding something like an EOF flag to cursor so we could layer some future version on top?
-
+			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
+			// Nice to have Need an escape  {{} and {}} ?
 53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
 44:M:Enforce 1.0 vs 1.1 line ending changes
@@ -202,13 +129,24 @@ S 142 move XmlErrorToken to XmlError and a subtype of Error
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+? 147 Switch to Node streams
 
 --- Basic processing  [2S]
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 
 
---- Entity management [8M 5S] !!!
+--- Entity management [8M 6S] !!!
+- Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
+- should we be expanding character references in attribute defaults?
+- ENTITIES, attribute values, and attrdef defaults
+	Note: Attributes coming out of XmlTokenStream will be
+		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]  // underlying cursor is over other.  Let's ignore that.
+	Internal Entity Values should be
+		[ TEXT, CHARREF, TEXT ]
+	External Entity Values should be essentially
+		[ TEXT ]
+87:S: Handle PEReferences and character references in entity values
 Attributes with references that themselves have references should work
 Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
 Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
@@ -278,6 +216,13 @@ M 113: Node entity retriever. For now must be sync to get a string cursor. but t
 	-- in comment
 32:XL Run through standard test cases
 
+---- Not sure if is part of MVP Cursor asynchronization [1s]
+52:S: StringCursorSpeedup
+	- do performance test jsperf of regex vs hand parsing
+		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
+	optimize getToTerminator for single terminator case
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
+		Note: Can't do regex from an offset without doing a substr. sigh.
 
 ---- Extra (not part of MVP)
 85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
@@ -1097,6 +1042,16 @@ M 132 Set up architecture for attribute behavior
 		√ Too much duplicate
 		√ switch is getting too long
 		√ pave way for recursive case
+   - do doctype parsing
+	- started
+	- big issue is dealing with all the externalID validation
+		- big issues remaining are:
+			- missing spaces
+			- quoteless values
+	- remove the entity retrieval code from XmlTokenStream (yay!)
+	- would be good to review the validation. 
+	- finish doctype extraction
+   - extract entity notationid extraction
 
 Note17
 ------
@@ -1110,3 +1065,56 @@ Because I think the number of lose ends is getting too large, I'm going to sugge
 - sprint 18 should just tackle technical debt
 - sprint 19 should pull in the node streams module
 - by sprint 20 we can be back to entity handling.  At least all of that is out of XmlTokenStream now.
+
+Sprint 18
+=========
+√ 58:S: Remove data prop on token, and make all token types more explicit
+	- Just get all the token types named and declared in XmlToken.
+		// looks like you can lose all the XmlToken.CONSTANT values
+		// XmlToken.CommentToken  could become XmlToken.Comment
+		// return value should be { Comment: Comment ... } etc
+		// Leave chunks
+		// XmlToken --> BaseXmlToken?
+105:S dtd declaration types must start including their chunks always.
+	- In essence, remove _pushTokenWrapper() and put its logic into _pushToken(). Add tests for each case if not already there.
+	- This will be expensive because of tests, but there aren't that many and many is already done.
+11:M: Provide some kind of internationalizable string catalog
+	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
+	in the process, might be good to give these numeric codes.
+	======================
+	- Start with a properties file (can generate it by a script from existing code)  locale/base.properties  locale/code.properties
+		BRACKETITEM_XTRA_SPACE_BEFORE = Must not have space before opening "[".
+	- use 
+		√ add grunt task which reads in the properties files synchronously  (everything in locale)
+		√ passes to node-properties-parser  (or something like ini? What about trailing space etc?)
+			√ Distinguish base and code.
+		Checks:
+			√ no dup values: codes
+			√ no dup values: base
+			√ keys identical: base & code
+				report missing in code
+				report extra in code
+		√ Remove keys in base and code with base.value OBSOLETE
+		√ write to derived/{name}.{code|string}.json
+		# Trailing space allows unicode.
+		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
+	√ XmlErrorToken.ERROR = keys from the stringBundle
+	√ XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
+
+	√ write StringBundle(stringSet)
+		√ _stringset is {locale: { key: value }}
+		√ preferredLocales // if undefined uses browser or nothing
+
+		lookupString([locale | localeArray])
+			for each locale try to look up. if available, success, otherwise go to next. if none, return base locale
+		lookupSubstitutedString(params, [locale | localeArray])
+			// {0} ...
+		Nice to haves: 
+	√ Test SyntaxError
+	√ XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
+S 142 move XmlErrorToken to XmlError and a subtype of Error
+
+Note18
+------
+This was, thankfully, a much better sprint.  A big part of this was a lot more planning up front. A LOT MORE. the planning took something like 2 hours.
+There are still some holes in what I got done. some of the build system stuff for 11 isn't quite as elaborate as I'd like, but I met the letter of the requirements.  It does feel good to get a lot of this stuff cleaned up. The chunk testing feels really fragile to me.  in particular, the reporting is really lousy.  If we want to do a big overhaul of this, we should change some of the testing so that the reporting is more specified about what is wrong or different.  I got 142 for free, which is nice (partly because I also let 11 expand a bit into that area).

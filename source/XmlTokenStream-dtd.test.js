@@ -635,10 +635,6 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('entityValue', 'entityValue'),
             new TextChunk.PlainChunk('"'),
-//            new TextChunk.WithSpaceChunk(' ', ' '),
- //           new TextChunk.WordChunk('NDATA', true, true),
-//            new TextChunk.WithSpaceChunk(' ', ' '),
-//            new TextChunk.WordChunk('frog', true, true),
             new TextChunk.PlainChunk('>'),
          ], 21));
       });
@@ -739,7 +735,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY % myPE SYSTEM "one" >');
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY % myPE SYSTEM "one" NDATA foo>');
          ignoreToken(s, XmlToken.TextDeclaration);
 
          const t = s.getNext();
@@ -757,6 +753,9 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.WithSpaceChunk('one', 'one'),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('NDATA', true, true),
+            new TextChunk.WithSpaceChunk(' ', ' '),
+            new TextChunk.WordChunk('foo', true, true),
             new TextChunk.PlainChunk('>'),
          ], 21));
       });
