@@ -23,11 +23,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-S 145 Switch code to id in SyntaxError
+√ S 145 Switch code to id in SyntaxError
 	- code partially done is stashed.
 	- XmlError should take code, id and params
 	- load codes and populate error
-	- add tests
+√ error tests
+√ Write SyntaxError tests
+√ S 146 remove public SyntaxError.ERROR
+	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
+	SyntaxError constructor should barf if message is not found.
+	Then can replace ERROR
 
 M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
 	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
@@ -35,17 +40,12 @@ M 144 All token creation must report chunks  (this is a generous M.  But, 146 is
 			- pass an empty array?
 			- SyntaxError.ATTRCHUNK, SyntaxError.ELEMENTVALCHUNK
 
-S 146 remove public SyntaxError.ERROR
-	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
-	SyntaxError constructor should barf if message is not found.
-	Then can replace ERROR
 
 Extras:
 - Add to StringBundle:
 	addLocale()	// nice to ahve
 	removeLocale() // nice to have
 - Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
-- Write SyntaxError tests
 
 
 -- next: 150
@@ -78,6 +78,7 @@ BUILD
 		- remove OBSOLETE
 		- each locale must match base keys exactly
 	assemble all into one big happy json which writes out as SyntaxError.json
+- Why the heck is node jasmine_node not getting all the tests?
 149 Make a proper grunt task and test it	
 ??? Do we (can we?) change from all caps error codes in code?
 ??? Can you switch to using ini file format?  Would be nice to say

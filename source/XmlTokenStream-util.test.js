@@ -58,7 +58,7 @@ function makeStream(str, entityManager, options) {
 
 function ignoreError(stream, errorCode) {
    const token = stream.getNext();
-   expect(token.code).toEqual(errorCode);
+   expect(token.id).toEqual(errorCode);
 }
 
 function ignoreToken(stream, tokenType) {
@@ -145,6 +145,15 @@ function expectTokenType(stream, tokenType) {
    }
 }
 
+function expectError(stream, id, message) {
+   const t = stream.getNext();
+
+   expect(t).toEqualProps({
+      id: id,
+      message: message
+   });
+}
+
 function makeStringTokenArray(values, offset = 0) {
    const results = [];
 
@@ -164,6 +173,7 @@ module.exports = {
    expectSyntaxError,
    expectExternalSubsetSyntaxError,
    expectTokenType,
+   expectError,
    ignoreError,
    ignoreToken,
    makeStrictStream,

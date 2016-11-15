@@ -61,12 +61,14 @@ module.exports = function standardBuild(grunt) {
       /* eslint-disable camelcase */
       jasmine_node: {
          dist: {
-            src: [ '**/*.js' ],
+            src: [ SOURCE_DIR + 'error/*.js', SOURCE_DIR + 'util/*.js', '**/*.js' ],
             options: {
                forceExit: true,
                jasmine: {
                   spec_dir: './',
                   spec_files: [
+                     SOURCE_DIR + 'error/*.test.js',
+                     SOURCE_DIR + 'util/*.test.js',
                      SOURCE_DIR + '**/*.test.js',
                      BUILD_DIR + '**/*.test.js'
                   ],

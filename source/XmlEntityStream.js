@@ -113,7 +113,7 @@ class AttributeContext extends Context {
 
          this.setupHandlers(this.stream, this.entityStream);
       } else {
-         reportError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
+         reportError(SyntaxError.ID.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
          // And continue processing.
          this.expandAttribute();
       }
@@ -149,8 +149,8 @@ class AttributeContext extends Context {
 function reportError(id, token, context) {
    const offset = token.chunks ? token.chunks[0].startOffset : undefined;
 
-   context.data.unshift(new SyntaxError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, [ token.name ],
-      offset, [ offset ]));
+   context.data.unshift(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ token.name ],
+      offset, offset));
 }
 
 class XmlEntityStream extends XmlStream {
@@ -202,7 +202,7 @@ class XmlEntityStream extends XmlStream {
                context.setupHandlers(stream, this);
                token.haveEntityData = true;
             } else {
-               reportError(SyntaxError.ERROR.REFERENCE_NO_DECLARATION, token, currentContext);
+               reportError(SyntaxError.ID.REFERENCE_NO_DECLARATION, token, currentContext);
             }
          } else if (token instanceof XmlToken.ElementStart || token instanceof XmlToken.EmptyElement) {
             let elementContext;

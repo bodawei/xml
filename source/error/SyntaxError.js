@@ -7,6 +7,7 @@ const StringBundle = require('../util/StringBundle.js');
 const TextChunk = require('../TextChunk.js');
 const XmlError = require('./XmlError.js');
 const strings = require('../derive/base.json');
+const codes = require('../derive/code.json');
 
 const stringBuffer = new StringBundle(strings);
 
@@ -21,7 +22,7 @@ class SyntaxError extends XmlError {
     the specified code.
 
     PARAM
-    code: The error code
+    id: The error id
     params: Optional. An array of values that should be substituted into
        the message.
     place: An Offset or a TextChunk  (optional only for legacy purposes)
@@ -40,8 +41,8 @@ class SyntaxError extends XmlError {
        If a TextChunk is specified, its startOffset will be used. This
        is a shortcut for making a common calling case easier.
    \**********************************************************************/
-   constructor(code, params, place, context) {
-      super();
+   constructor(id, params, place, context) {
+      super(id);
 
       if (typeof params === 'object') {
          if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
@@ -57,22 +58,40 @@ class SyntaxError extends XmlError {
          place = place.endOffset;   // should be cloning
       }
 
-      if (context && context instanceof TextChunk.PlainChunk) {
-         context = [ context.startOffset ];
+      if (context) {
+         if (context instanceof TextChunk.PlainChunk) {
+            context = [ context.startOffset ];
+         }
+
+         if (context instanceof Offset) {
+            context = [ context ];
+         }
+
+         const newContext = [];
+         for (let index = 0; index < context.length; index++) {
+            newContext.push(context[index].clone());
+         }
+         context = newContext;
       }
 
-      this.code = code;
-      this.message = stringBuffer.substitute(code, params);
-      this.place = place;
+      if (!codes[id]) {
+         const message = 'The Error id "' + id + '" is not a legal id.';
+
+         throw Error(id ? message : 'No error id passed to SyntaxError.');
+      }
+
+      this.code = codes[id];
+      this.message = stringBuffer.substitute(id, params);
+      this.place = place ? place.clone() : undefined;
       this.context = context;
    }
 
 }
 
-SyntaxError.ERROR = {};
+SyntaxError.ID = {};
 
 for (const key in strings.base) {
-   SyntaxError.ERROR[key] = key;
+   SyntaxError.ID[key] = key;
 }
 
 module.exports = SyntaxError;

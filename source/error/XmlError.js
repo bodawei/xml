@@ -8,7 +8,8 @@
  marker for all Xml-related errors.
 \**********************************************************************/
 
-function XmlError() {
+function XmlError(id) {
+   this.id = id;
 }
 
 XmlError.prototype = new Error();

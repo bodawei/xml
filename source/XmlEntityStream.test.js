@@ -16,6 +16,7 @@ const makeStrictStream = testUtils.makeStrictStream;
 const makeLaxStream = testUtils.makeLaxStream;
 const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
 const makeStringTokenArray = testUtils.makeStringTokenArray;
+const expectError = testUtils.expectError;
 const ignoreToken = testUtils.ignoreToken;
 const expectToken = testUtils.expectTokenType;
 
@@ -207,11 +208,8 @@ describe('XmlEntityStream', () => {
          ignoreToken(es, XmlToken.EntityStart);
          jasmine.clock().tick(1);
 
-         const t = es.getNext();
-         expect(t).toEqualProps({
-            code: SyntaxError.ERROR.REFERENCE_NO_DECLARATION,
-            message: 'Missing declaration for entity "bogus".'
-         });
+         expectError(es, SyntaxError.ID.REFERENCE_NO_DECLARATION,
+            'Missing declaration for entity "bogus".');
       });
 
       it('reports the place and context of the error', () => {
@@ -423,7 +421,7 @@ describe('XmlEntityStream', () => {
                   expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
-                  expect(error.code).toEqual(SyntaxError.ERROR.XMLDECL_INVALID_CONTEXT);
+                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -453,7 +451,7 @@ describe('XmlEntityStream', () => {
                   expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
-                  expect(error.code).toEqual(SyntaxError.ERROR.XMLDECL_INVALID_CONTEXT);
+                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
@@ -488,7 +486,7 @@ describe('XmlEntityStream', () => {
                   expect(data).toBeInstanceOf(XmlToken.ElementEnd);
                   break;
                case 3:
-                  expect(error.code).toEqual(SyntaxError.ERROR.XMLDECL_INVALID_CONTEXT);
+                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
                   break;
                default:
                   expect(data).toEqual('this should not happen');
