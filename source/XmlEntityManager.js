@@ -2,12 +2,15 @@
 
 'use strict';
 
+const TextChunk = require('./TextChunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
-const XmlToken = require('./XmlToken.js');
+const tokens = require('./XmlToken.js');
 
 const DEFAULT_ENTITY = 'DefaultEntity';
 const INTERNAL_ENTITY = 'EntityDeclaredInInternalSubset';
 const EXTERNAL_ENTITY = 'EntityDeclaredInExternalSubset';
+
+const DEF_CHUNKS = [ new TextChunk.PlainChunk('default') ];
 
 /**********************************************************************\
   A cache of available entities.
@@ -23,11 +26,11 @@ class XmlEntityManager {
       this._entityMap = {};
       this._paramEntityMap = {};
 
-      this.addEntity(new XmlToken.EntityDeclaration('lt', '&#60;'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityDeclaration('gt', '>'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityDeclaration('amp', '&#38;'), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityDeclaration('apos', '\''), DEFAULT_ENTITY);
-      this.addEntity(new XmlToken.EntityDeclaration('quot', '"'), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('lt', '&#60;', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('gt', '>', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('amp', '&#38;', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('apos', '\'', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('quot', '"', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
    }
 
    /**********************************************************************\
@@ -196,7 +199,7 @@ class XmlEntityManager {
    \**********************************************************************/
 
    _internalAdd(token, type, isParameter) {
-      if (!token || !(token instanceof XmlToken.EntityDeclaration)) {
+      if (!token || !(token instanceof tokens.EntityDeclaration)) {
          throw new Error('Must call with an entity declaration token.');
       }
 

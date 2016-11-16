@@ -33,8 +33,7 @@ KEEP READING ABOUT STREAMS
 	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
 	SyntaxError constructor should barf if message is not found.
 	Then can replace ERROR
-
-M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
+√ M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
 	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
 		- need some way to signal for, say, attributes, that they have none
 			- pass an empty array?
@@ -48,7 +47,7 @@ Extras:
 - Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
 
 
--- next: 150
+-- next: 151
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -56,7 +55,7 @@ CLEANUP
 - Think about pulling the parse declaration, validation and tokenization of each type into a single file (for each type)
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
 - Should review all the validation code given that we are making the parsing clearer
-- add place and context to all errors
+	- add place and context to all errors while doing this
 
 BUILD
 143 Add check to make sure error constants all being used
@@ -128,18 +127,18 @@ PROJECT
 53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
 44:M:Enforce 1.0 vs 1.1 line ending changes
-45:S:Review various 1.0 standards with respect to Name (and Char definitions)
-	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-74:S: Just looked at erata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+45:S:Review various 1.0 standards with respect to Name (and Char definitions)
+	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 ? 147 Switch to Node streams
 
 --- Basic processing  [2S]
 69:S: Rework PI and Comment to be arrays of content, just like attributes
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
-
+	- Make this a wrapper stream
 
 --- Entity management [8M 6S] !!!
 - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens

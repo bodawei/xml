@@ -2,10 +2,21 @@
 
 'use strict';
 
+const ATTR_NO_CHUNKS = 'Attribute values have no chunks';
+const ENTITYVAL_NO_CHUNKS = 'At declaration time, entity values have no chunks';
+
 class XmlToken {
 
    constructor(chunks) {
-      this.chunks = chunks;
+      if (!chunks) {
+         throw new Error('Must provide a chunks value to the token you are constructing.');
+      }
+
+      this.chunks = undefined;
+
+      if (chunks !== ATTR_NO_CHUNKS && chunks !== ENTITYVAL_NO_CHUNKS) {
+         this.chunks = chunks;
+      }
    }
 
 }
@@ -219,6 +230,8 @@ class AttrListDeclaration extends XmlToken {
 }
 
 module.exports = {
+   ATTR_NO_CHUNKS,
+   ENTITYVAL_NO_CHUNKS,
    XmlToken,
    Comment,
    ProcessingInstruction,

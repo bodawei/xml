@@ -4,7 +4,7 @@
 
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlStream = require('./XmlStream.js');
-const XmlToken = require('./XmlToken.js');
+const tokens = require('./XmlToken.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
 class Context {
@@ -88,7 +88,7 @@ class AttributeContext extends Context {
       while (!piece && this.index < this.value.length) {
          this.data.push(this.value[this.index]);
 
-         if (this.value[this.index] instanceof XmlToken.EntityStart) {
+         if (this.value[this.index] instanceof tokens.EntityStart) {
             piece = this.value[this.index];
          }
 
@@ -189,7 +189,7 @@ class XmlEntityStream extends XmlStream {
       if (currentContext.data.length > 0) {
          const token = currentContext.data.shift();
 
-         if (token instanceof XmlToken.EntityStart) {
+         if (token instanceof tokens.EntityStart) {
             const cursor = this._entityManager.getEntity(token.name);
 
             if (cursor) {
@@ -204,7 +204,7 @@ class XmlEntityStream extends XmlStream {
             } else {
                reportError(SyntaxError.ID.REFERENCE_NO_DECLARATION, token, currentContext);
             }
-         } else if (token instanceof XmlToken.ElementStart || token instanceof XmlToken.EmptyElement) {
+         } else if (token instanceof tokens.ElementStart || token instanceof tokens.EmptyElement) {
             let elementContext;
 
             for (let attrIndex = 0; attrIndex < token.attributes.length; attrIndex++) {
@@ -212,7 +212,7 @@ class XmlEntityStream extends XmlStream {
                let startEntityIndex = -1;
 
                for (let index = 0; index < attribute.value.length; index++) {
-                  if (attribute.value[index] instanceof XmlToken.EntityStart) {
+                  if (attribute.value[index] instanceof tokens.EntityStart) {
                      startEntityIndex = index;
                      break;
                   }

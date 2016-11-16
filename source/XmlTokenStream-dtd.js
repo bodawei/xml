@@ -3,7 +3,7 @@
 'use strict';
 
 const TextChunk = require('./TextChunk.js');
-const XmlToken = require('./XmlToken.js');
+const tokens = require('./XmlToken.js');
 
 /*
  * Biases: If find something unexpected, assume the > is missing.
@@ -168,7 +168,7 @@ class XmlTokenStreamDtd {
          this._getQuotedValue(cursor, valueQuote, { isEntityValue: true }, results);
          results.valueChunk = [ ];
          if (results.value[0]) {
-            results.valueChunk.push(new XmlToken.Text(results.value[0].text));
+            results.valueChunk.push(new tokens.Text(results.value[0].text, tokens.ENTITYVAL_NO_CHUNKS));
          }
       } else {
          results.externalId = this._retrieveExternalId(cursor, [ '>' ], { isEntity: true });
