@@ -121,19 +121,19 @@ BUILD
 
 PROJECT
 --- technical debt [3m 4s]
+44:M:Enforce 1.0 vs 1.1 line ending changes
 117:S parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
 			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
 			// Nice to have Need an escape  {{} and {}} ?
 53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
-44:M:Enforce 1.0 vs 1.1 line ending changes
+? 147 Switch to Node streams
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
 74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 45:S:Review various 1.0 standards with respect to Name (and Char definitions)
 	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
-? 147 Switch to Node streams
 
 --- Basic processing  [2S]
 69:S: Rework PI and Comment to be arrays of content, just like attributes
