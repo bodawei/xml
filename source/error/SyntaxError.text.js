@@ -124,4 +124,32 @@ describe('SyntaxError', () => {
       });
    });
 
+   describe('addLocale', () => {
+
+      it('adds a locale', () => {
+         const locale = {};
+         locale[SyntaxError.ID.XMLDECL_NO_CLOSE] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
+         SyntaxError.setPreferredLocale('de');
+         SyntaxError.addLocale('de', locale);
+
+         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE).message)
+            .toEqual('Fehlende Schließung "?>" In einer XML- oder Textdeklaration.');
+      });
+
+   });
+
+
+   describe('removeLocale()', () => {
+
+      it('returns the remove locale', () => {
+         const locale = {};
+         locale[SyntaxError.ID.XMLDECL_NO_CLOSE] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
+         SyntaxError.setPreferredLocale('de');
+         SyntaxError.addLocale('de', locale);
+
+         expect(SyntaxError.removeLocale('de')).toEqual(locale);
+      });
+
+   });
+
 });

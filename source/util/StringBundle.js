@@ -118,6 +118,51 @@ class StringBundle {
 
       return message;
    }
+
+   /**********************************************************************\
+    addLocale() Adds strings for a locale. Will replace any existing
+    data for that locale
+
+    PARAM
+    localeName: the name of the locale.
+    localeStrings: An object of locale strings.  It need not have all
+      the keys.  The base local will be used if that string is not present.
+
+    RETURN
+    None
+   \**********************************************************************/
+
+   addLocale(localeName, localeStrings) {
+      if (typeof localeName !== 'string') {
+         throw new Error('Must pass in the name of a locale.');
+      }
+      if (typeof localeStrings !== 'object') {
+         throw new Error('Must pass an object of key/strings.');
+      }
+
+      this._strings[localeName] = localeStrings;
+   }
+
+   /**********************************************************************\
+    removeLocale() Removes and returns any strings for the specified locale
+
+    PARAM
+    localeName: the name of the locale.
+
+    RETURN
+    The strings for that locale
+   \**********************************************************************/
+
+   removeLocale(localeName) {
+      if (typeof localeName !== 'string') {
+         throw new Error('Must pass in the name of a locale.');
+      }
+
+      const temp = this._strings[localeName];
+      delete this._strings[localeName];
+
+      return temp;
+   }
 }
 
 module.exports = StringBundle;

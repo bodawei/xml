@@ -127,7 +127,21 @@ PROJECT
 			// Nice to have Need an escape  {{} and {}} ?
 53:M: use xml decl encoding to change input if needed
 54:M:use xml decl version to change processing
-? 147 Switch to Node streams
+? 147 Switch to Node streams  (See branch streams_
+	- Have XmlTokenStream acting as a Readable stream. Seems pretty straightforward.
+		x The existing stream infrastructure needs some fiddling if we want to preserve it,
+		What we already have seems to mesh well
+			I think the semantics around ending is not right
+	- Two concerns:
+		- code coverage will be messed up (minor)
+		- A trivial test takes more than 40ms rather than 1
+			They are overriding setTimeout and doing a lot of crap when doing a push().
+			Next steps:
+				- replace a couple more tests and see if this persists on each
+				- Is the time before I start getting events, during or after?
+				- Try a real-world case.  Do you get the same time, even for real streams
+				- read their code, figure out what the heck is going on.
+					- Why doesn't jasmine override their override?
 46:S:Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs

@@ -2842,14 +2842,14 @@ describe('XmlTokenStream', () => {
 
    });
 
-   describe('_reportSyntaxError()', () => {
+   describe('_report()', () => {
 
       it('includes an error token in the error', () => {
          const s = makeStrictStream('');
          const expected = new SyntaxError(SyntaxError.ID.BANGITEM_UNKNOWN);
          expected.message = 'Unkown "<!" item.';
 
-         s._reportSyntaxError(SyntaxError.ID.BANGITEM_UNKNOWN, []);
+         s._report(SyntaxError.ID.BANGITEM_UNKNOWN, []);
 
          try {
             s.getNext();
@@ -2863,7 +2863,7 @@ describe('XmlTokenStream', () => {
          const expected = new SyntaxError(SyntaxError.ID.BANGITEM_UNKNOWN,
             'Unkown "<!" item.');
 
-         s._reportSyntaxError(SyntaxError.ID.BANGITEM_UNKNOWN);
+         s._report(SyntaxError.ID.BANGITEM_UNKNOWN);
 
          expect(s.getNext()).toEqual(expected);
       });
@@ -2871,7 +2871,7 @@ describe('XmlTokenStream', () => {
       it('replaces parameters', () => {
          const s = makeLaxStream('');
 
-         s._reportSyntaxError(SyntaxError.ID.BANGITEM_NAME_INVALID_CASE, [ 'one', 'two' ]);
+         s._report(SyntaxError.ID.BANGITEM_NAME_INVALID_CASE, [ 'one', 'two' ]);
 
          expect(s.getNext().message).toEqual('"one" must be upper case. Found "two".');
       });
@@ -2879,7 +2879,7 @@ describe('XmlTokenStream', () => {
       it('replaces only the parameters provided', () => {
          const s = makeLaxStream('');
 
-         s._reportSyntaxError(SyntaxError.ID.BANGITEM_NAME_INVALID_CASE, [ 'one' ]);
+         s._report(SyntaxError.ID.BANGITEM_NAME_INVALID_CASE, [ 'one' ]);
 
          expect(s.getNext().message).toEqual('"one" must be upper case. Found "{1}".');
       });

@@ -94,4 +94,16 @@ for (const key in strings.base) {
    SyntaxError.ID[key] = key;
 }
 
+SyntaxError.setPreferredLocale = function(localeName) {
+   stringBuffer.preferredLocale = localeName;
+}
+
+SyntaxError.addLocale = function(localeName, strings) {
+   stringBuffer.addLocale(localeName, strings);
+}
+
+SyntaxError.removeLocale = function(localeName) {
+   return stringBuffer.removeLocale(localeName);
+}
+
 module.exports = SyntaxError;

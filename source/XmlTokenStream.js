@@ -246,7 +246,7 @@ class XmlTokenStream extends XmlStream {
       const space = this._cursor.getSpace();
 
       if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
-         this._assertSyntax(this._state !== STATE.START, SEID.SPACE_INVALID_CONTEXT, space.startOffset, space);
+         this._assert(this._state !== STATE.START, SEID.SPACE_INVALID_CONTEXT, space.startOffset, space);
       }
 
       this._pushToken(new tokens.Space(space.text, this._cursor.getRecentChunks()));
@@ -262,7 +262,7 @@ class XmlTokenStream extends XmlStream {
          content = this._cursor.getToTerminator([ '<', '&', ']]>' ]);
 
          if (content.terminator === ']]>') {
-            this._reportSyntaxError(SEID.CHARDATA_INVALID_TEXT);
+            this._report(SEID.CHARDATA_INVALID_TEXT);
 
             if (content.chunk) {
                this._checkContentState(content.chunk,
@@ -287,7 +287,7 @@ class XmlTokenStream extends XmlStream {
    _checkContentState(chunk, docError, subsetError) {
       switch (this._entityType) {
          case ENTITY_TYPE.DOCUMENT_ENTITY:
-            this._assertSyntax(this._state === STATE.IN_CONTENT, docError,
+            this._assert(this._state === STATE.IN_CONTENT, docError,
                [ chunk.text ], chunk.startOffset, chunk);
             break;
          case ENTITY_TYPE.EXTERNAL_ENTITY:
@@ -296,7 +296,7 @@ class XmlTokenStream extends XmlStream {
             }
             break;
          case ENTITY_TYPE.EXTERNAL_SUBSET:
-            this._reportSyntaxError(subsetError, [ chunk.text ], chunk.startOffset, chunk);
+            this._report(subsetError, [ chunk.text ], chunk.startOffset, chunk);
             break;
       }
    }
@@ -305,7 +305,7 @@ class XmlTokenStream extends XmlStream {
       const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
 
-      this._assertSyntax(!space, SEID.REFERENCE_XTRA_SPACE);
+      this._assert(!space, SEID.REFERENCE_XTRA_SPACE);
 
       if (next.text === '#') {
          this._cursor.getChar();
@@ -324,11 +324,11 @@ class XmlTokenStream extends XmlStream {
          const closingSemicolon = this._cursor.getMatch(';');
 
          if (!entityName) {
-            this._reportSyntaxError(SEID.REFERENCE_NO_NAME);
+            this._report(SEID.REFERENCE_NO_NAME);
          }
 
-         this._assertSyntax(!afterSpace, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
-         this._assertSyntax(closingSemicolon, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
+         this._assert(!afterSpace, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+         this._assert(closingSemicolon, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
          if (inAttribute) {
             return [ new tokens.EntityStart(entityName, false, tokens.ATTR_NO_CHUNKS),
@@ -351,10 +351,10 @@ class XmlTokenStream extends XmlStream {
       const space = this._cursor.getSpace();
       const nextChar = this._cursor.peekChar();
 
-      this._assertSyntax(!space, SEID.CHARREF_XTRA_SPACE);
+      this._assert(!space, SEID.CHARREF_XTRA_SPACE);
 
       if (nextChar.text.toLocaleLowerCase() === 'x') {
-         this._assertSyntax(nextChar.text === 'x', SEID.CHARREF_INVALID_HEX_CASE);
+         this._assert(nextChar.text === 'x', SEID.CHARREF_INVALID_HEX_CASE);
 
          isHex = true;
          this._cursor.getChar();
@@ -365,21 +365,21 @@ class XmlTokenStream extends XmlStream {
       const afterDigitsSpace = this._cursor.getSpace();
       const semicolon = this._cursor.getMatch(';');
 
-      this._assertSyntax(!afterSpace, SEID.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
+      this._assert(!afterSpace, SEID.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
 
       if (!digits) {
-         this._reportSyntaxError(SEID.CHARREF_NO_DIGITS);
+         this._report(SEID.CHARREF_NO_DIGITS);
       } else {
          if (!isHex && !digits.isDecimal) {
-            this._reportSyntaxError(SEID.CHARREF_INVALID_BASE, [ digits.text ]);
+            this._report(SEID.CHARREF_INVALID_BASE, [ digits.text ]);
             isHex = true;
          }
 
          character = String.fromCharCode(parseInt(digits.text, isHex ? 16 : 10));
       }
 
-      this._assertSyntax(!afterDigitsSpace, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
-      this._assertSyntax(semicolon, SEID.CHARREF_NO_SEMICOLON);
+      this._assert(!afterDigitsSpace, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
+      this._assert(semicolon, SEID.CHARREF_NO_SEMICOLON);
 
       return character;
    }
@@ -393,7 +393,7 @@ class XmlTokenStream extends XmlStream {
       const results = this._cursor.getToTerminator([ '-->' ]);
 
       if (!results.terminator) {
-         this._reportSyntaxError(SEID.COMMENT_NO_CLOSE, results.chunk || start, start);
+         this._report(SEID.COMMENT_NO_CLOSE, results.chunk || start, start);
       } else {
          this._cursor.getMatch('-->');
 
@@ -401,7 +401,7 @@ class XmlTokenStream extends XmlStream {
             const place = results.chunk.endOffset.clone();
             place.index --;
             place.column --;
-            this._reportSyntaxError(SEID.COMMENT_ENDS_WITH_HYPHEN, place, start);
+            this._report(SEID.COMMENT_ENDS_WITH_HYPHEN, place, start);
          }
       }
 
@@ -416,7 +416,7 @@ class XmlTokenStream extends XmlStream {
       const bracket = this._cursor.getMatch('[');
 
       if (bracket) {
-         this._assertSyntax(!leadingSpace, SEID.BRACKETITEM_XTRA_SPACE_BEFORE);
+         this._assert(!leadingSpace, SEID.BRACKETITEM_XTRA_SPACE_BEFORE);
 
          this._getBracketItem(start);
          return;
@@ -425,16 +425,16 @@ class XmlTokenStream extends XmlStream {
       const declarationName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
       const postDeclarationSpace = this._cursor.getSpace();
 
-      this._assertSyntax(!leadingSpace, SEID.BANGITEM_NAME_XTRA_SPACE_BEFORE);
+      this._assert(!leadingSpace, SEID.BANGITEM_NAME_XTRA_SPACE_BEFORE);
 
       if (!declarationName) {
-         this._reportSyntaxError(SEID.BANGITEM_NO_NAME);
+         this._report(SEID.BANGITEM_NO_NAME);
       } else {
          const type = declarationName.text;
          const upperCaseType = type.toLocaleUpperCase();
 
-         this._assertSyntax(type === upperCaseType, SEID.BANGITEM_NAME_INVALID_CASE, [ upperCaseType, type ]);
-         this._assertSyntax(postDeclarationSpace, SEID.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
+         this._assert(type === upperCaseType, SEID.BANGITEM_NAME_INVALID_CASE, [ upperCaseType, type ]);
+         this._assert(postDeclarationSpace, SEID.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
 
          switch (upperCaseType) {
             case 'DOCTYPE':
@@ -480,50 +480,50 @@ class XmlTokenStream extends XmlStream {
                const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
 
                if (nameText === '') {
-                  this._reportSyntaxError(SEID.ELEMENTDECL_NO_NAME);
+                  this._report(SEID.ELEMENTDECL_NO_NAME);
                }
 
-               this._assertSyntax(nameText === '' || parsedEl.elementName.couldBeName,
+               this._assert(nameText === '' || parsedEl.elementName.couldBeName,
                   SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
 
                if (!parsedEl.contentChunk && !parsedEl.list) {
-                  this._reportSyntaxError(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
+                  this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
                } else if (parsedEl.list) {
                   contentText = [];
 
-                  this._assertSyntax(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
+                  this._assert(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
                      SEID.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
-                  this._assertSyntax(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
+                  this._assert(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
                      SEID.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
-                  this._assertSyntax(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
+                  this._assert(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
 
                   for (let index = 0; index < parsedEl.list.length; index++) {
                      const item = parsedEl.list[index];
 
                      if (item.text.toLocaleUpperCase() === '#PCDATA') {
-                        this._assertSyntax(item.text === '#PCDATA',
+                        this._assert(item.text === '#PCDATA',
                            SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
-                        this._assertSyntax(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
+                        this._assert(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
 
                         contentText.push('#PCDATA');
                      } else {
-                        this._assertSyntax(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
+                        this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
                         contentText.push(item.text);
                      }
                   }
-                  this._assertSyntax(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
+                  this._assert(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
                } else {
                   contentText = parsedEl.contentChunk.text;
                   const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
 
-                  this._assertSyntax(upperText === 'ANY' || upperText === 'EMPTY',
+                  this._assert(upperText === 'ANY' || upperText === 'EMPTY',
                      SEID.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
-                  this._assertSyntax(upperText === contentText,
+                  this._assert(upperText === contentText,
                      SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
                   contentText = upperText;
                }
 
-               this._assertSyntax(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+               this._assert(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
 
                this._checkDeclarationState(start, SEID.ELEMENTDECL_INVALID_CONTEXT);
 
@@ -541,9 +541,9 @@ class XmlTokenStream extends XmlStream {
                const elName = elNameChunk ? elNameChunk.text : '';
                const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
 
-               this._assertSyntax(elName !== '', SEID.ATTLISTDECL_NO_NAME);
-               this._assertSyntax(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
-               this._assertSyntax(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
+               this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
+               this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
+               this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
 
                for (let index = 0; index < rawAttrs.length; index++) {
                   const attr = rawAttrs[index];
@@ -552,20 +552,20 @@ class XmlTokenStream extends XmlStream {
                   let attrType = '';
                   let attrDefault;
 
-                  this._assertSyntax(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
+                  this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
 
                   if (!attr.type) {
-                     this._reportSyntaxError(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
+                     this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
                   } else {
                      attrType = attr.type.text;
 
                      const upper = attrType.toLocaleUpperCase();
                      const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
 
-                     this._assertSyntax(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
+                     this._assert(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
 
                      if (known && attrType !== upper) {
-                        this._reportSyntaxError(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
+                        this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
                         attrType = upper;
                      }
 
@@ -574,42 +574,42 @@ class XmlTokenStream extends XmlStream {
                         list = [];
 
                         if (attrType === 'NOTATION') {
-                           this._assertSyntax(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
+                           this._assert(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
                               [ elName ]);
                         }
 
                         if (attrType === 'ENUMERATION') {
-                           this._assertSyntax(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
+                           this._assert(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
                               [ elName ], attr.name, start);
                         }
-                        this._assertSyntax(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
+                        this._assert(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
 
                         for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
                            if (attrType === 'NOTATION') {
-                              this._assertSyntax(attrList[listIndex].couldBeName,
+                              this._assert(attrList[listIndex].couldBeName,
                                  SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
                            } else {
-                              this._assertSyntax(attrList[listIndex].couldBeNmToken,
+                              this._assert(attrList[listIndex].couldBeNmToken,
                                  SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
                            }
 
                            list.push(attrList[listIndex].text);
                         }
 
-                        this._assertSyntax(attr.missingOr === 0,
+                        this._assert(attr.missingOr === 0,
                            SEID.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
-                        this._assertSyntax(attr.missingCount === 0,
+                        this._assert(attr.missingCount === 0,
                            SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
 
                         if (!attr.close) {
-                           this._reportSyntaxError(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
+                           this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
                               SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
                         }
                      }
                   }
 
                   if (!attr.default && !attr.value) {
-                     this._assertSyntax(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
+                     this._assert(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
                   }
 
                   if (attr.default) {
@@ -619,30 +619,30 @@ class XmlTokenStream extends XmlStream {
                      const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
 
                      if (!known) {
-                        this._assertSyntax(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
+                        this._assert(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
                      } else {
-                        this._assertSyntax(upper === attrDefault,
+                        this._assert(upper === attrDefault,
                            SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
                         attrDefault = upper;
 
                         if (attrDefault === '#FIXED') {
                            if (attr.value) {
-                              this._assertSyntax(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                              this._assert(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
                            }
-                           this._assertSyntax(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
+                           this._assert(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
                               attr.default, start);
                         }
                      }
                   }
 
                   if (attr.value || attr.default) {
-                     this._assertSyntax(attr.preDefaultSpace,
+                     this._assert(attr.preDefaultSpace,
                         SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
 
                      if (attr.value) {
-                        this._assertSyntax(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
+                        this._assert(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
                         if (!attr.aborted) {
-                           this._assertSyntax(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
+                           this._assert(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
                         }
                      }
                   }
@@ -662,7 +662,7 @@ class XmlTokenStream extends XmlStream {
                   });
                }
 
-               this._assertSyntax(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
+               this._assert(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
 
                this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
 
@@ -671,7 +671,7 @@ class XmlTokenStream extends XmlStream {
          }
       }
 
-      this._reportSyntaxError(SEID.BANGITEM_UNKNOWN);
+      this._report(SEID.BANGITEM_UNKNOWN);
    }
 
    _closeDocType() {
@@ -688,10 +688,10 @@ class XmlTokenStream extends XmlStream {
    _validateStartDocType(parsedDocType) {
       const start = parsedDocType.startChunk;
 
-      this._assertSyntax(parsedDocType.nameChunk, SEID.DOCTYPE_NO_NAME);
+      this._assert(parsedDocType.nameChunk, SEID.DOCTYPE_NO_NAME);
 
       if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
-         this._reportSyntaxError(SEID.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
+         this._report(SEID.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
       }
 
       if (parsedDocType.externalId) {
@@ -700,15 +700,15 @@ class XmlTokenStream extends XmlStream {
 
       if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
          if (this._state !== STATE.PROLOG_PREDOCTYPE) {
-            this._reportSyntaxError(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
+            this._report(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
          }
       } else {
-         this._reportSyntaxError(SEID.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
+         this._report(SEID.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
       }
    }
 
    _validateCloseDocType(parsedClose) {
-      this._assertSyntax(parsedClose.closeChunk, SEID.DOCTYPE_NO_CLOSE);
+      this._assert(parsedClose.closeChunk, SEID.DOCTYPE_NO_CLOSE);
    }
 
    _validateNotation(parsedNotation) {
@@ -716,80 +716,80 @@ class XmlTokenStream extends XmlStream {
       const couldBeName = notNameText === '' ||
          (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
 
-      this._assertSyntax(parsedNotation.nameChunk, SEID.NOTATIONDECL_NO_NAME);
-      this._assertSyntax(couldBeName, SEID.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
-      this._assertSyntax(parsedNotation.postNameSpaceChunk,
+      this._assert(parsedNotation.nameChunk, SEID.NOTATIONDECL_NO_NAME);
+      this._assert(couldBeName, SEID.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
+      this._assert(parsedNotation.postNameSpaceChunk,
          SEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
       if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
-         this._reportSyntaxError(SEID.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
+         this._report(SEID.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
       } else {
          this._validateExternalId(parsedNotation.externalId, false);
       }
-      this._assertSyntax(parsedNotation.close, SEID.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
+      this._assert(parsedNotation.close, SEID.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
       this._checkDeclarationState(parsedNotation.startChunk, SEID.NOTATIONDECL_INVALID_CONTEXT);
    }
 
    _validateEntity(parsedEntity) {
       const enNameText = textOrBlank(parsedEntity.nameChunk);
 
-      this._assertSyntax(parsedEntity.nameChunk, SEID.ENTITYDECL_NO_NAME);
-      this._assertSyntax((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
+      this._assert(parsedEntity.nameChunk, SEID.ENTITYDECL_NO_NAME);
+      this._assert((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
          SEID.ENTITYDECL_NAME_INVALID, [ enNameText ]);
-      this._assertSyntax(parsedEntity.postNameSpaceChunk, SEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+      this._assert(parsedEntity.postNameSpaceChunk, SEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
       if (parsedEntity.nDataMarker) {
-         this._assertSyntax(parsedEntity.preNDataSpace, SEID.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
-         this._assertSyntax(parsedEntity.nDataMarker.text === 'NDATA',
+         this._assert(parsedEntity.preNDataSpace, SEID.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
+         this._assert(parsedEntity.nDataMarker.text === 'NDATA',
             SEID.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsedEntity.nDataMarker.text ]);
-         this._assertSyntax(parsedEntity.nDataName, SEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
+         this._assert(parsedEntity.nDataName, SEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
       }
 
-      this._assertSyntax(parsedEntity.valueChunk || parsedEntity.externalId,
+      this._assert(parsedEntity.valueChunk || parsedEntity.externalId,
          SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
-      this._assertSyntax(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+      this._assert(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
       this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
    }
 
    _validateExternalId(externalId, systemRequired) {
       if (externalId.unknownType) {
-         this._reportSyntaxError(SEID.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
+         this._report(SEID.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
          return;
       }
 
-      this._assertSyntax(externalId.uppercaseTypeText === externalId.typeText,
+      this._assert(externalId.uppercaseTypeText === externalId.typeText,
          SEID.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
 
       if (externalId.uppercaseTypeText === 'PUBLIC') {
-         this._assertSyntax(externalId.publicId, SEID.EXTERNALID_NO_PUBLIC);
+         this._assert(externalId.publicId, SEID.EXTERNALID_NO_PUBLIC);
       }
 
       if (externalId.publicId) {
          if (!externalId.publicId.quote) {
-            this._reportSyntaxError(SEID.EXTERNALID_PUBLIC_NO_QUOTE);
+            this._report(SEID.EXTERNALID_PUBLIC_NO_QUOTE);
          }
-         this._assertSyntax(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          const match = PUBID_CHARS.exec(externalId.publicId.literalChunk.text);
 
          if (externalId.publicId.literalChunk.text && (!match || match[0] !== externalId.publicId.literalChunk.text)) {
-            this._reportSyntaxError(SEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            this._report(SEID.EXTERNALID_PUBLIC_INVALID_CHARS,
                 [ externalId.publicId.literalChunk.text[match[0].length] ]);
          }
       }
 
       if (systemRequired) {
-         this._assertSyntax(externalId.systemId, SEID.EXTERNALID_NO_SYSTEM);
+         this._assert(externalId.systemId, SEID.EXTERNALID_NO_SYSTEM);
       }
 
       if (externalId.systemId) {
          if (!externalId.systemId.quote) {
-            this._reportSyntaxError(SEID.EXTERNALID_SYSTEM_NO_QUOTE);
+            this._report(SEID.EXTERNALID_SYSTEM_NO_QUOTE);
          }
 
          if (externalId.publicId) {
-            this._assertSyntax(externalId.betweenSpaceChunk, SEID.EXTERNALID_PUBLIC_NO_SPACE);
+            this._assert(externalId.betweenSpaceChunk, SEID.EXTERNALID_PUBLIC_NO_SPACE);
          } else {
-            this._assertSyntax(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+            this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
          }
       }
    }
@@ -798,7 +798,7 @@ class XmlTokenStream extends XmlStream {
       if (this._entityType === ENTITY_TYPE.EXTERNAL_SUBSET && this._state === STATE.START) {
          this._state = STATE.IN_DTD;
       }
-      this._assertSyntax(this._state === STATE.IN_DTD, error, start.startOffset, start);
+      this._assert(this._state === STATE.IN_DTD, error, start.startOffset, start);
    }
 
    _getBracketItem(start) {
@@ -807,8 +807,8 @@ class XmlTokenStream extends XmlStream {
       const postSpace = this._cursor.getSpace();
       const secondBracket = this._cursor.getMatch('[');
 
-      this._assertSyntax(bracketItemType, SEID.BRACKETITEM_NO_NAME);
-      this._assertSyntax(secondBracket, SEID.BRACKETITEM_NO_SECOND_BRACKET);
+      this._assert(bracketItemType, SEID.BRACKETITEM_NO_NAME);
+      this._assert(secondBracket, SEID.BRACKETITEM_NO_SECOND_BRACKET);
 
       /*
        * Retrieve a CData section
@@ -818,14 +818,14 @@ class XmlTokenStream extends XmlStream {
        *   [21] CDEnd   ::=  ']]>'
        */
       if (bracketItemType && bracketItemType.text.toLocaleLowerCase() === 'cdata') {
-         this._assertSyntax(!preSpace, SEID.CDATA_XTRA_SPACE_BEFORE);
-         this._assertSyntax(bracketItemType.text === 'CDATA', SEID.CDATA_INVALID_CASE, [ bracketItemType.text ]);
-         this._assertSyntax(!postSpace, SEID.CDATA_XTRA_SPACE_AFTER);
+         this._assert(!preSpace, SEID.CDATA_XTRA_SPACE_BEFORE);
+         this._assert(bracketItemType.text === 'CDATA', SEID.CDATA_INVALID_CASE, [ bracketItemType.text ]);
+         this._assert(!postSpace, SEID.CDATA_XTRA_SPACE_AFTER);
 
          const results = this._cursor.getToTerminator([ ']]>' ]);
 
          if (!results.terminator) {
-            this._reportSyntaxError(SEID.CDATA_NO_CLOSE);
+            this._report(SEID.CDATA_NO_CLOSE);
          } else {
             this._cursor.getMatch(']]>');
          }
@@ -835,7 +835,7 @@ class XmlTokenStream extends XmlStream {
          this._pushToken(new tokens.CData(results.chunk ? results.chunk.text : undefined,
             this._cursor.getRecentChunks()));
       } else if (bracketItemType) {
-         this._reportSyntaxError(SEID.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
+         this._report(SEID.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
       }
    }
 
@@ -855,16 +855,16 @@ class XmlTokenStream extends XmlStream {
       const space = this._cursor.getSpace();
       const target = this._cursor.getWord([ '?>' ]);
 
-      this._assertSyntax(!space, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
+      this._assert(!space, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
 
       if (!target) {
-         this._reportSyntaxError(SEID.PI_NO_TARGET, space || start, start);
+         this._report(SEID.PI_NO_TARGET, space || start, start);
       } else if (!target.couldBeName) {
-         this._reportSyntaxError(SEID.PI_TARGET_NAME_INVALID, [ target.text ], space || start, start);
+         this._report(SEID.PI_TARGET_NAME_INVALID, [ target.text ], space || start, start);
       }
 
       if (target && target.text.toLocaleLowerCase() === 'xml') {
-         this._assertSyntax(target.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE, [ target.text ],
+         this._assert(target.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE, [ target.text ],
             space || start, start);
          this._getXmlDecl(start);
       } else {
@@ -873,7 +873,7 @@ class XmlTokenStream extends XmlStream {
 
          // If we found no ?> (thus, really, end of file) report an error.
          if (!results.terminator) {
-            this._reportSyntaxError(SEID.PI_NO_CLOSE, results.chunk || optSpace || target || space || start, start);
+            this._report(SEID.PI_NO_CLOSE, results.chunk || optSpace || target || space || start, start);
          } else {
             this._cursor.getMatch('?>');
          }
@@ -891,7 +891,7 @@ class XmlTokenStream extends XmlStream {
       if (this._state === STATE.START) {
          switch (this._entityType) {
             case ENTITY_TYPE.DOCUMENT_ENTITY:
-               this._reportSyntaxError(error, start.startOffset, start);
+               this._report(error, start.startOffset, start);
                break;
             case ENTITY_TYPE.EXTERNAL_ENTITY:
                this._state = STATE.IN_CONTENT;
@@ -930,8 +930,8 @@ class XmlTokenStream extends XmlStream {
       let seenEncoding = false;
       let seenStandalone = false;
 
-      this._assertSyntax(close, SEID.XMLDECL_NO_CLOSE);
-      this._assertSyntax(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES);
+      this._assert(close, SEID.XMLDECL_NO_CLOSE);
+      this._assert(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES);
 
       // check that the parameters are in the right order and have the right values
       for (let index = 0; index < params.length; index++) {
@@ -939,50 +939,50 @@ class XmlTokenStream extends XmlStream {
          const lcName = param.name.toLocaleLowerCase();
 
          if (XML_DECL_PARAMS[lcName]) {
-            this._assertSyntax(param.name === lcName, SEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
+            this._assert(param.name === lcName, SEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
          }
 
          switch (lcName) {
             case 'version':
                seenVersion = true;
-               this._assertSyntax(index === 0, SEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
-               this._assertSyntax(param.value === '1.1' || param.value === '1.0',
+               this._assert(index === 0, SEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
+               this._assert(param.value === '1.1' || param.value === '1.0',
                   SEID.XMLDECL_VERSION_INVALD, [ param.value ]);
                break;
             case 'encoding':
                seenEncoding = true;
                if (isXmlDecl) {
-                  this._assertSyntax(seenVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
+                  this._assert(seenVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
                }
-               this._assertSyntax(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
+               this._assert(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
                   SEID.XMLDECL_ENCODING_INVALID, [ param.value ]);
                break;
             case 'standalone':
                if (!isXmlDecl) {
-                  this._reportSyntaxError(SEID.TEXTDECL_XTRA_STANDALONE);
+                  this._report(SEID.TEXTDECL_XTRA_STANDALONE);
                }
 
                const lcValue = param.value.toLocaleLowerCase();
 
                seenStandalone = true;
 
-               this._assertSyntax(seenVersion, SEID.XMLDECL_STANDALONE_INVALID_ORDER);
-               this._assertSyntax(param.value === lcValue,
+               this._assert(seenVersion, SEID.XMLDECL_STANDALONE_INVALID_ORDER);
+               this._assert(param.value === lcValue,
                   SEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, param.value ]);
 
                if (lcValue !== 'no' && lcValue !== 'yes') {
-                  this._reportSyntaxError(SEID.XMLDECL_STANDALONE_INVALID, [ param.value ]);
+                  this._report(SEID.XMLDECL_STANDALONE_INVALID, [ param.value ]);
                } else {
                   param.value = lcValue;
                }
                break;
             default:
-               this._reportSyntaxError(SEID.XMLDECL_ATTR_UNKNOWN, [ param.name ]);
+               this._report(SEID.XMLDECL_ATTR_UNKNOWN, [ param.name ]);
          }
       }
 
       if (!isXmlDecl) {
-         this._assertSyntax(seenEncoding, SEID.TEXTDECL_NO_ENCODING, start.startOffset, start);
+         this._assert(seenEncoding, SEID.TEXTDECL_NO_ENCODING, start.startOffset, start);
       }
 
       if (this._state === STATE.START) {
@@ -998,7 +998,7 @@ class XmlTokenStream extends XmlStream {
                break;
          }
       } else {
-         this._reportSyntaxError(SEID.XMLDECL_INVALID_CONTEXT);
+         this._report(SEID.XMLDECL_INVALID_CONTEXT);
       }
 
       this._pushToken(isXmlDecl ?
@@ -1038,21 +1038,21 @@ class XmlTokenStream extends XmlStream {
             if (isStartOrEmpty) {
                isEmpty = true;
             } else {
-               this._reportSyntaxError(SEID.ELEMENT_END_INVALID_CLOSE);
+               this._report(SEID.ELEMENT_END_INVALID_CLOSE);
             }
          }
       }
 
-      this._assertSyntax(!leadingSpace, SEID.ELEMENT_XTRA_LEADING_SPACE);
+      this._assert(!leadingSpace, SEID.ELEMENT_XTRA_LEADING_SPACE);
 
       if (!name) {
-         this._reportSyntaxError(SEID.ELEMENT_NO_NAME);
+         this._report(SEID.ELEMENT_NO_NAME);
       } else if (!name.couldBeName) {
-         this._reportSyntaxError(SEID.ELEMENT_NAME_INVALID, [ name.text ]);
+         this._report(SEID.ELEMENT_NAME_INVALID, [ name.text ]);
       }
 
       if (!close) {
-         this._reportSyntaxError(SEID.ELEMENT_NO_CLOSE);
+         this._report(SEID.ELEMENT_NO_CLOSE);
       }
 
       let xtoken;
@@ -1077,7 +1077,7 @@ class XmlTokenStream extends XmlStream {
          if (lastElement === xtoken.name) {
             this._elementNameStack.pop();
          } else {
-            this._reportSyntaxError(SEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
+            this._report(SEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
          }
       }
 
@@ -1087,20 +1087,20 @@ class XmlTokenStream extends XmlStream {
             if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
                this._state = STATE.IN_CONTENT;
             } else if (this._state === STATE.IN_DTD) {
-               this._reportSyntaxError(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+               this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
             } else if (this._state !== STATE.IN_CONTENT) {
-               this._reportSyntaxError(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
+               this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
             }
             break;
          case ENTITY_TYPE.EXTERNAL_ENTITY:
             if (this._state === STATE.START) {
                this._state = STATE.IN_CONTENT;
             }
-            this._assertSyntax(this._state === STATE.IN_CONTENT,
+            this._assert(this._state === STATE.IN_CONTENT,
                SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
             break;
          case ENTITY_TYPE.EXTERNAL_SUBSET:
-            this._reportSyntaxError(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+            this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
             break;
       }
 
@@ -1178,9 +1178,9 @@ class XmlTokenStream extends XmlStream {
          const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
          let value = [];
 
-         this._assertSyntax(lastSpace, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ], name.startOffset);
-         this._assertSyntax(name.couldBeName || !elementAttribute, SEID.ATTRIBUTE_INVALID_NAME, [ name.text ]);
-         this._assertSyntax(equal, SEID.ATTRIBUTE_NO_EQUAL, [ name.text ]);
+         this._assert(lastSpace, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ], name.startOffset);
+         this._assert(name.couldBeName || !elementAttribute, SEID.ATTRIBUTE_INVALID_NAME, [ name.text ]);
+         this._assert(equal, SEID.ATTRIBUTE_NO_EQUAL, [ name.text ]);
 
          if (gotQuote) {
             this._cursor.getChar();     // consume the quote
@@ -1189,7 +1189,7 @@ class XmlTokenStream extends XmlStream {
                isElementAttribute: elementAttribute
             }));
          } else if (!equal) {
-            this._reportSyntaxError(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
+            this._report(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
             attributes.push(makePair(name, value, undefined, elementAttribute));
 
             name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
@@ -1208,12 +1208,12 @@ class XmlTokenStream extends XmlStream {
             const terminator = this._cursor.peekChar();
 
             if (value.length === 0) {
-               this._reportSyntaxError(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
+               this._report(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
             } else {
-               this._reportSyntaxError(SEID.ATTRIBUTE_NO_QUOTE, [ name.text ]);
+               this._report(SEID.ATTRIBUTE_NO_QUOTE, [ name.text ]);
 
                if (terminator && terminator.text === '<') {
-                  this._reportSyntaxError(SEID.ATTRIBUTE_INVALID_VALUE, [ name.text ]);
+                  this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ name.text ]);
                   attributes.push(makePair(name, value, undefined, elementAttribute));
                   break;   // Stop processing of attributes
                }
@@ -1290,11 +1290,11 @@ class XmlTokenStream extends XmlStream {
                }
                break;
             case '<':
-               this._reportSyntaxError(SEID.ATTRIBUTE_INVALID_VALUE, [ options.attributeName ]);
+               this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ options.attributeName ]);
                result.abort = true;
                break;
             default: // no terminator
-               this._reportSyntaxError(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ options.attributeName ]);
+               this._report(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ options.attributeName ]);
                break;
          }
       }
@@ -1302,13 +1302,13 @@ class XmlTokenStream extends XmlStream {
       return result;
    }
 
-   _assertSyntax(condition, code, params, place, context) {
+   _assert(condition, code, params, place, context) {
       if (!condition) {
-         this._reportSyntaxError(code, params, place, context);
+         this._report(code, params, place, context);
       }
    }
 
-   _reportSyntaxError(code, params, place, context) {
+   _report(code, params, place, context) {
       this._pushToken(new SyntaxError(code, params, place, context));
    }
 

@@ -156,4 +156,74 @@ describe('StringBundle', () => {
 
    });
 
+   describe('addLocale()', () => {
+      let bundle;
+      let strings;
+
+      beforeEach(() => {
+         strings = {
+            base: {
+               TEST3: 'base got it {0} {1}',
+               TESTREVERSED: 'base got it backwards {1} {0}',
+               TESTMISSING: 'base got it missing {0} {2}'
+            },
+            'en-US': {
+               TEST2: 'en-us got it {0} {1}'
+            }
+         };
+         bundle = new StringBundle(strings);
+      });
+
+      it('throws an error if key is not a string', () => {
+         expect(() => {
+            bundle.addLocale(44);
+         }).toThrowError('Must pass in the name of a locale.');
+      });
+
+      it('throws an error if strings are not an object', () => {
+         expect(() => {
+            bundle.addLocale('fr-CA', 55);
+         }).toThrowError('Must pass an object of key/strings.');
+      });
+
+      it('adds the strings', () => {
+         bundle.addLocale('fr-CA', { TEST3: 'Je ne parlez pas francais!'});
+         bundle.preferredLocale = 'fr-CA';
+
+         expect(bundle.lookup('TEST3')).toEqual('Je ne parlez pas francais!');
+      });
+
+
+      describe('removeLocale()', () => {
+         let bundle;
+         let strings;
+
+         beforeEach(() => {
+            strings = {
+               base: {
+                  TEST3: 'base got it'
+               },
+               'en-US': {
+                  TEST2: 'en-us got it'
+               }
+            };
+            bundle = new StringBundle(strings);
+         });
+
+         it('throws an error if key is not a string', () => {
+            expect(() => {
+               bundle.removeLocale(44);
+            }).toThrowError('Must pass in the name of a locale.');
+         });
+
+
+         it('returns the strings', () => {
+            expect(bundle.removeLocale('en-US')).toEqual({
+               TEST2: 'en-us got it'
+            });
+         });
+
+      });
+   });
+
 });
