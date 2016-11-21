@@ -193,7 +193,6 @@ describe('StringBundle', () => {
          expect(bundle.lookup('TEST3')).toEqual('Je ne parlez pas francais!');
       });
 
-
       describe('removeLocale()', () => {
          let bundle;
          let strings;
@@ -215,7 +214,6 @@ describe('StringBundle', () => {
                bundle.removeLocale(44);
             }).toThrowError('Must pass in the name of a locale.');
          });
-
 
          it('returns the strings', () => {
             expect(bundle.removeLocale('en-US')).toEqual({

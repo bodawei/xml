@@ -369,11 +369,11 @@ class XmlStringCursor {
      RETURN
      An object with two properties. "chunk" includes all characters from
      the current position in the cursor up to, but not including, the
-     first termination string found in the input. If the cursor is at one
-     of those terminators, this will be undefined. Similarly, if at EOF,
-     this chunk will also be undefined. "terminator" is whiever terminator
-     was found to terminate the input string. This will be undefined if
-     at EOF.
+     first termination string found in the input. If the cursor is not at
+     one of those terminators, this will be undefined. Similarly, if at
+     EOF, this chunk will also be undefined. "terminator" is whiever
+     terminator was found to terminate the input string. This will be
+     undefined if at EOF.
    \**********************************************************************/
 
    getToTerminator(terminators) {

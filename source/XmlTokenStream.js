@@ -8,6 +8,7 @@ const TextChunk = require('./TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
+const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
 
 const SEID = SyntaxError.ID;
 
@@ -100,6 +101,7 @@ class XmlTokenStream extends XmlStream {
       this._entityManager = entityManager;
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
+      this._miscParser = new XmlTokenStreamMisc();
       this._state = STATE.START;
 
       this._options = {
@@ -390,24 +392,21 @@ class XmlTokenStream extends XmlStream {
     * PARAMS: The first token (currently not used)
     */
    _getComment(start) {
-      const results = this._cursor.getToTerminator([ '-->' ]);
+      const parsedComment = this._miscParser.parseComment(this._cursor, start);
 
-      if (!results.terminator) {
-         this._report(SEID.COMMENT_NO_CLOSE, results.chunk || start, start);
-      } else {
-         this._cursor.getMatch('-->');
-
-         if (results.chunk && results.chunk.text[results.chunk.text.length - 1] === '-') {
-            const place = results.chunk.endOffset.clone();
-            place.index --;
-            place.column --;
-            this._report(SEID.COMMENT_ENDS_WITH_HYPHEN, place, start);
-         }
+      if (!parsedComment.closeChunk) {
+         this._report(SEID.COMMENT_NO_CLOSE, parsedComment.commentChunk || start, start);
+      } else if (parsedComment.commentString &&
+         parsedComment.commentString[parsedComment.commentString.length - 1] === '-') {
+         const place = parsedComment.commentChunk.endOffset.clone();
+         place.index --;
+         place.column --;
+         this._report(SEID.COMMENT_ENDS_WITH_HYPHEN, place, start);
       }
 
-      const content = results.chunk ? results.chunk.text : undefined;
       this._checkPiAndCommentState(start, SEID.COMMENT_INVALID_CONTEXT);
-      this._pushToken(new tokens.Comment(content, this._cursor.getRecentChunks()));
+      this._pushToken(new tokens.Comment(parsedComment.commentString,
+         this._cursor.getRecentChunks()));
    }
 
    _getBangItem(start) {

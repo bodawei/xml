@@ -138,7 +138,6 @@ describe('SyntaxError', () => {
 
    });
 
-
    describe('removeLocale()', () => {
 
       it('returns the remove locale', () => {

@@ -17,34 +17,11 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
 11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
-11/8  Sprint 17: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
-11/14 Sprint 18: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
+11/8  Sprint 18: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
+11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
 
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
-
-√ S 145 Switch code to id in SyntaxError
-	- code partially done is stashed.
-	- XmlError should take code, id and params
-	- load codes and populate error
-√ error tests
-√ Write SyntaxError tests
-√ S 146 remove public SyntaxError.ERROR
-	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
-	SyntaxError constructor should barf if message is not found.
-	Then can replace ERROR
-√ M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
-	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
-		- need some way to signal for, say, attributes, that they have none
-			- pass an empty array?
-			- SyntaxError.ATTRCHUNK, SyntaxError.ELEMENTVALCHUNK
-
-
-Extras:
-- Add to StringBundle:
-	addLocale()	// nice to ahve
-	removeLocale() // nice to have
-- Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
 
 
 -- next: 151
@@ -1136,3 +1113,32 @@ Note18
 ------
 This was, thankfully, a much better sprint.  A big part of this was a lot more planning up front. A LOT MORE. the planning took something like 2 hours.
 There are still some holes in what I got done. some of the build system stuff for 11 isn't quite as elaborate as I'd like, but I met the letter of the requirements.  It does feel good to get a lot of this stuff cleaned up. The chunk testing feels really fragile to me.  in particular, the reporting is really lousy.  If we want to do a big overhaul of this, we should change some of the testing so that the reporting is more specified about what is wrong or different.  I got 142 for free, which is nice (partly because I also let 11 expand a bit into that area).
+
+Sprint 19
+=========
+√ S 145 Switch code to id in SyntaxError
+	- code partially done is stashed.
+	- XmlError should take code, id and params
+	- load codes and populate error
+√ error tests
+√ Write SyntaxError tests
+√ S 146 remove public SyntaxError.ERROR
+	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
+	SyntaxError constructor should barf if message is not found.
+	Then can replace ERROR
+√ M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
+	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
+		- need some way to signal for, say, attributes, that they have none
+			- pass an empty array?
+			- SyntaxError.ATTRCHUNK, SyntaxError.ELEMENTVALCHUNK
+√ Add to StringBundle:
+	addLocale()	// nice to ahve
+	removeLocale() // nice to have
+- Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
+
+Note19
+------
+Got all the stuff done with 1.5 hours to spare!
+Spent an hour looking into streams.  Very easy to do.  However, we get dramatic slow down. Must be investigated.
+
+Next sprint should be doing more technical debt.  And soon we need to investigate stream performance.
