@@ -12,6 +12,7 @@ var propertiesParser = require('node-properties-parser');
 
 var coverageReport = require('./coverageReport.js');
 var testReport = require('./testReport.js');
+var registerCheckKeys = require('./check-keys.js');
 
 var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
@@ -46,6 +47,7 @@ module.exports = function standardBuild(grunt) {
    jitGrunt(grunt);
    coverageReport(grunt);
    testReport(grunt);
+   registerCheckKeys(grunt);
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
@@ -187,6 +189,14 @@ module.exports = function standardBuild(grunt) {
          dist: {
             dir: OUT_DIR
          }
+      },
+      checkkeys: {
+         dist: {
+            src: JS_SOURCE_FILE_GLOB,
+            options: {
+               propFiles: [ SOURCE_LOCALE_DIR + '**/base.properties' ]
+            }
+         }
       }
    });
 
@@ -199,7 +209,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'jasmine_node:dist',
       'eslint',
-      'checkKeys',
+      'checkkeys',
       'testreport',
       'coveragereport',
       '_dist'
@@ -211,40 +221,6 @@ module.exports = function standardBuild(grunt) {
 
    grunt.registerTask('quietBuild', 'Report on tests', () => {
       require('./quiet-grunt-mod.js');
-   });
-
-   var glob = require('glob');
-
-   grunt.registerTask('checkKeys', 'Check key use', () => {
-      var baseStrings = fs.readFileSync(SOURCE_LOCALE_DIR + 'base.properties');
-      var baseObject = propertiesParser.parse(baseStrings);
-
-      var files = glob.sync(SOURCE_DIR + '/**/*.js');
-      var fileData = {};
-      var notFound = [];
-
-      for (var index = 0; index < files.length; index++) {
-         if (files[index].indexOf('.test.js') === -1) {
-            fileData[files[index]] = fs.readFileSync(files[index]);
-         }
-      }
-
-      for (var key in baseObject) {
-         var found = false;
-
-         for (var fileName in fileData) {
-            if (fileData[fileName].indexOf(key) !== -1) {
-               found = true;
-            }
-         }
-         if (!found) {
-            notFound.push(key);
-         }
-      }
-
-      if (notFound.length > 0) {
-         grunt.fail.fatal('These localization keys are not being used: ' + notFound.join(', '));
-      }
    });
 
    grunt.registerTask('_deriveSource', 'Derive source', () => {

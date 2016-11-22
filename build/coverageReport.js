@@ -39,6 +39,7 @@ function getSummaryPaths(dir, parentName, totals) {
 module.exports = (grunt) => {
 
    function coverageReport() {
+
       var exists = fs.existsSync(this.data.dir);
       if (!exists) {
          grunt.log.error('Could not find the directory to look for coverage reports: ' + this.data.dir);
