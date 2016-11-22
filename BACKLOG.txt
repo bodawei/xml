@@ -19,12 +19,32 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
 11/8  Sprint 18: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
 11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
+11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL:
 
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
+S 54 :use xml decl version to change processing
+	Passes version to StringCursor
+	All entities are 1.0 unless they specify their own entity
+	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
+		Fatal error if strange line endings in xmldecl!
 
--- next: 151
+S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
+	// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
+	// Nice to have Need an escape  {{} and {}} ?
+	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
+		otherwise does the {0}
+	WHen done does the {{} and {}}
+
+M 44 Enforce 1.0 vs 1.1 line ending changes
+	- this is not just in getS, but in all the routines which touch whitespace.
+	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
+
+44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
+
+
+-- next: 152
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -86,13 +106,18 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
---- technical debt [3m 4s]
-44:M:Enforce 1.0 vs 1.1 line ending changes
-117:S parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
-			// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
-			// Nice to have Need an escape  {{} and {}} ?
-53:M: use xml decl encoding to change input if needed
-54:M:use xml decl version to change processing
+--- technical debt [1m 4s]
+M 46 Improve handling of 1.0 vs. 1.1 control chars
+	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+	- The cost of this is touching each and every character and seeing if they are any of the invalid chars
+	- it also means checking those discouraged characters (this is a new class of error
+45:S:Review various 1.0 standards with respect to Name (and Char definitions)
+	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
+74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
+S 151 Add sniffing of version and encoding to StringCursor
+	Looks for <?xml, then extracts to ?>, can then find version and encoding and make a good guess.		
+S 53 use xml decl encoding to change input if needed
 ? 147 Switch to Node streams  (See branch streams_
 	- Have XmlTokenStream acting as a Readable stream. Seems pretty straightforward.
 		x The existing stream infrastructure needs some fiddling if we want to preserve it,
@@ -108,12 +133,6 @@ PROJECT
 				- Try a real-world case.  Do you get the same time, even for real streams
 				- read their code, figure out what the heck is going on.
 					- Why doesn't jasmine override their override?
-46:S:Improve handling of 1.0 vs. 1.1 control chars
-	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
-	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
-45:S:Review various 1.0 standards with respect to Name (and Char definitions)
-	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 
 --- Basic processing  [2S]
 69:S: Rework PI and Comment to be arrays of content, just like attributes
