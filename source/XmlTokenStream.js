@@ -930,7 +930,8 @@ class XmlTokenStream extends XmlStream {
       let seenStandalone = false;
 
       this._assert(close, SEID.XMLDECL_NO_CLOSE);
-      this._assert(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES);
+      this._assert(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES,
+         [ this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY ? SEID.NOUN_XMLDECL : SEID.NOUN_TEXTDECL ]);
 
       // check that the parameters are in the right order and have the right values
       for (let index = 0; index < params.length; index++) {

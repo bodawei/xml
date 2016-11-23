@@ -115,7 +115,11 @@ describe('StringBundle', () => {
             base: {
                TEST3: 'base got it {0} {1}',
                TESTREVERSED: 'base got it backwards {1} {0}',
-               TESTMISSING: 'base got it missing {0} {2}'
+               TESTMISSING: 'base got it missing {0} {2}',
+               KEY: 'frog',
+               TESTKEY: 'substituted value {0:key}',
+               TESTKEYBAD: 'substituted value {0:key} and {0}',
+               TESTESCAPED: 'escaped braces {{} {}}'
             },
             'en-US': {
                TEST2: 'en-us got it {0} {1}'
@@ -152,6 +156,18 @@ describe('StringBundle', () => {
 
       it('does not care if one of the passed values does not exist in the string template', () => {
          expect(bundle.substitute('TESTMISSING', [ 'zero', 'one', 'two' ])).toEqual('base got it missing zero two');
+      });
+
+      it('replaces escaped braces', () => {
+         expect(bundle.substitute('TESTESCAPED')).toEqual('escaped braces { }');
+      });
+
+      it('replaces a value with a key value', () => {
+         expect(bundle.substitute('TESTKEY', [ 'KEY' ])).toEqual('substituted value frog');
+      });
+
+      it('replaces a value with a key value and ignores an un-keyed value', () => {
+         expect(bundle.substitute('TESTKEYBAD', [ 'KEY' ])).toEqual('substituted value frog and {0}');
       });
 
    });

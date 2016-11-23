@@ -40,16 +40,12 @@ describe('checkKeys()', () => {
                switch (pathname) {
                   case './test/test1.properties':
                      return 'AAA = aaaa';
-                     break;
                   case './test/test2.properties':
                      return 'BBB= bbb';
-                     break;
                   case './source/one.js':
                      return 'blah blah';
-                     break;
                   case './source/two.js':
                      return 'AAA, BBBB';
-                     break;
                }
             }
          }
@@ -63,7 +59,7 @@ describe('checkKeys()', () => {
       };
 
       spyOn(mockGrunt.file, 'expand');
-   };
+   }
 
    it('reports an error if no property file defined', () => {
       setup();

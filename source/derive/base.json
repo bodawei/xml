@@ -1,6 +1,8 @@
 {
   "base": {
-    "XMLDECL_NO_ATTRIBUTES": "Missing version in an XML or Text Declaration.",
+    "NOUN_TEXTDECL": "a Text Declaration",
+    "NOUN_XMLDECL": "an XML Declaration",
+    "XMLDECL_NO_ATTRIBUTES": "Missing version in {0:key}.",
     "XMLDECL_NO_CLOSE": "Missing closing \"?>\" in an XML or Text Declaration.",
     "XMLDECL_ATTR_INVALID_CASE": "\"{0}\" must be lower case. Found \"{1}\".",
     "XMLDECL_ATTR_UNKNOWN": "Unknown XML Declaration parameter \"{0}\".",

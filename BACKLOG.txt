@@ -24,18 +24,18 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-S 54 :use xml decl version to change processing
-	Passes version to StringCursor
-	All entities are 1.0 unless they specify their own entity
-	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
-		Fatal error if strange line endings in xmldecl!
-
-S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
+√ S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
 	// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
 	// Nice to have Need an escape  {{} and {}} ?
 	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
 		otherwise does the {0}
 	WHen done does the {{} and {}}
+
+S 54 :use xml decl version to change processing
+	Passes version to StringCursor
+	All entities are 1.0 unless they specify their own entity
+	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
+		Fatal error if strange line endings in xmldecl!
 
 M 44 Enforce 1.0 vs 1.1 line ending changes
 	- this is not just in getS, but in all the routines which touch whitespace.

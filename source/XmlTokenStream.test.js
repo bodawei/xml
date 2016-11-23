@@ -1569,7 +1569,7 @@ describe('XmlTokenStream', () => {
       it('throws an error if no parameters are included', () => {
          expectSyntaxError('<?xml ?>',
             SyntaxError.ID.XMLDECL_NO_ATTRIBUTES,
-            'Missing version in an XML or Text Declaration.');
+            'Missing version in an XML Declaration.');
       });
 
       it('throws an error if an unknown parameter is provided', () => {

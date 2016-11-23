@@ -9,7 +9,7 @@ const XmlError = require('./XmlError.js');
 const strings = require('../derive/base.json');
 const codes = require('../derive/code.json');
 
-const stringBuffer = new StringBundle(strings);
+const stringBundle = new StringBundle(strings);
 
 /**********************************************************************\
  SyntaxError holds inforamtion about a syntax error
@@ -81,7 +81,7 @@ class SyntaxError extends XmlError {
       }
 
       this.code = codes[id];
-      this.message = stringBuffer.substitute(id, params);
+      this.message = stringBundle.substitute(id, params);
       this.place = place ? place.clone() : undefined;
       this.context = context;
    }
@@ -95,15 +95,15 @@ for (const key in strings.base) {
 }
 
 SyntaxError.setPreferredLocale = function setPreferredLocale(localeName) {
-   stringBuffer.preferredLocale = localeName;
+   stringBundle.preferredLocale = localeName;
 };
 
 SyntaxError.addLocale = function addLocale(localeName, strings) {
-   stringBuffer.addLocale(localeName, strings);
+   stringBundle.addLocale(localeName, strings);
 };
 
 SyntaxError.removeLocale = function removeLocale(localeName) {
-   return stringBuffer.removeLocale(localeName);
+   return stringBundle.removeLocale(localeName);
 };
 
 module.exports = SyntaxError;

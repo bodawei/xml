@@ -91,6 +91,14 @@ class StringBundle {
     then placeholders in the string (e.g. {0}) are replaced with the
     params, in the order they are specified.
 
+    You can also use {0:key} in which case the parameter will be used as
+    a key to look up a value in the string catalog. This is useful for
+    parameterizing a string with another chunk that should also be
+    internationalized.
+
+    Finally, you can use the strings {{} and {}} to escape a curly brace
+    that you might want to use.
+
     PARAM
     key: The key to look up.
     params: Optional. A single value, or an array of values to be
@@ -105,7 +113,7 @@ class StringBundle {
       let message = this.lookup(key, locales);
 
       if (!params || !message) {
-         return message;
+         return message ? unescapeBraces(message) : undefined;
       }
 
       if (!Array.isArray(params)) {
@@ -113,10 +121,16 @@ class StringBundle {
       }
 
       for (let index = 0; index < params.length; index++) {
-         message = message.replace('{' + index + '}', params[index]);
+         // jsperf says this is faster than just doing the two replaces
+         if (message.indexOf('{' + index + ':key}') !== -1) {
+            const substitute = this.lookup(params[index], locales);
+            message = message.replace('{' + index + ':key}', substitute);
+         } else {
+            message = message.replace('{' + index + '}', params[index]);
+         }
       }
 
-      return message;
+      return unescapeBraces(message);
    }
 
    /**********************************************************************\
@@ -163,6 +177,13 @@ class StringBundle {
 
       return temp;
    }
+}
+
+const BRACES = /\{([{}])\}/g;
+
+function unescapeBraces(message) {
+   // interestingly, this is usually much faster than 2 replaces.
+   return message.replace(BRACES, '$1');
 }
 
 module.exports = StringBundle;
