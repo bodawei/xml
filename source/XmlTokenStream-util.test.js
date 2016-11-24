@@ -5,7 +5,7 @@
 /* eslint-env jasmine */
 
 const Offset = require('./Offset.js');
-const ParseKind = require('./util/ParseKind.js');
+const EntityInfo = require('./util/EntityInfo.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
@@ -61,28 +61,28 @@ function ignoreToken(stream, tokenType) {
 }
 
 function expectSyntaxError(entityType, input, code, message, place, context) {
-   if (!ParseKind.ENTITY_TYPE[entityType]) {
+   if (!EntityInfo.ENTITY_TYPE[entityType]) {
       context = place;
       place = message;
       message = code;
       code = input;
       input = entityType;
-      entityType = ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY;
+      entityType = EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY;
    }
 
    let strictS;
    let laxS;
 
    switch (entityType) {
-      case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
+      case EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY:
          strictS = makeStrictStream(input);
          laxS = makeLaxStream(input);
          break;
-      case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
+      case EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY:
          strictS = makeStrictExternalEntityStream(input);
          laxS = makeLaxExternalEntityStream(input);
          break;
-      case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
+      case EntityInfo.ENTITY_TYPE.EXTERNAL_SUBSET:
          strictS = makeStrictExternalSubsetStream(input);
          laxS = makeLaxExternalSubsetStream(input);
          break;

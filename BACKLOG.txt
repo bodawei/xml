@@ -39,15 +39,22 @@ KEEP READING ABOUT STREAMS
 M 44 Enforce 1.0 vs 1.1 line ending changes
 	- this is not just in getS, but in all the routines which touch whitespace.
 	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
+	√ isSpace
+	√ peekChar  <-- review test cases
+	√ getToTerminator
+	√ getSpace
+	√ test getName and anything else, to make sure they show up correctly
+	- getToTerminator isn't incrementing lines correctly in the offsets.
 
 44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
 
 Some cleanup:
-- Parsekind has a weird name
-- Would like to bulletproof it more
+√ - Parsekind has a weird name  .  rename to EntityInfo
+* Need to resolve the 3 places this info comes in: in cursor, in the xml file, and options.
 - why is it throwing an exception. that's bad
-
-
+- is1point1() is1point0(),
+- wrap the whole thing so there are no values being passed around. setVersion1dot1() setKindDocumentEntity(), isDocumentEntityKind()
+- Why isn't the entity location in it?
 
 -- next: 152
 =============================================

@@ -2,11 +2,15 @@
 
 'use strict';
 
-const TextChunk = require('./TextChunk.js');
 const Offset = require('./Offset.js');
+const EntityInfo = require('./util/EntityInfo.js');
+const TextChunk = require('./TextChunk.js');
 
 const DECIMAL = 'DECIMAL';
 const HEX = 'HEX';
+
+const LINE_ENDING_REGEX10 = /(\r\n)|(\r)/g;
+const LINE_ENDING_REGEX11 = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 
 /**********************************************************************\
   An implementation of a cursor interface, where the source data for the
@@ -42,17 +46,18 @@ class XmlStringCursor {
       this._offset = new Offset(0, 0, 0);
       this._chunks = [];
       this._sourceLoc = sourceLocation;
+      this._entityInfo = new EntityInfo();
    }
 
    /**********************************************************************\
-    setParseKind() sets the parseKind value for this cursor.
+    setEntityInfo() sets the parseKind value for this cursor.
 
     PARAM
-    A ParseKind object.
+    A EntityInfo object.
    \**********************************************************************/
 
-   setParseKind(newKind) {
-      this._parseKind = newKind;
+   setEntityInfo(newKind) {
+      this._entityInfo = newKind;
    }
 
    /**********************************************************************\
@@ -91,6 +96,7 @@ class XmlStringCursor {
    peekChar() {
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
+      const is1dot1 =  this._entityInfo.versionIs1dot1();
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar) {
@@ -100,11 +106,15 @@ class XmlStringCursor {
       endOffset.index ++;
       endOffset.column ++;
 
-      if (nextChar === '\n' || nextChar === '\r') {
+      // Deal with section 2.11 of the standard for end of line handling
+      if (nextChar === '\n' || nextChar === '\r' ||
+         (is1dot1 && (nextChar === '\u0085' || nextChar === '\u2028'))) {
          endOffset.line ++;
          endOffset.column = 0;
+         const nextNextChar = this._source[this._offset.index + 1];
 
-         if (nextChar === '\r' && this._source[this._offset.index + 1] === '\n') {
+         if (nextChar === '\r' &&
+            (nextNextChar === '\n' || (is1dot1 && nextNextChar === '\u0085'))) {
             endOffset.index ++;
          }
 
@@ -127,6 +137,7 @@ class XmlStringCursor {
    getSpace() {
       let fixString = false;
       const startOffset = this._offset.clone();
+      const is1dot1 =  this._entityInfo.versionIs1dot1();
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar || !this._isSpace(nextChar)) {
@@ -135,16 +146,20 @@ class XmlStringCursor {
 
       while (nextChar && this._isSpace(nextChar)) {
          if (nextChar === '\r') {
+            const nextNextChar = this._source[this._offset.index + 1];
+
             nextChar = '\n';
-            if (this._source[this._offset.index + 1] === '\n') {
+
+            if (nextNextChar === '\n' || (is1dot1 && nextNextChar === '\u0085')) {
                this._offset.index ++;
             }
             this._offset.line ++;
             this._offset.column = 0;
             fixString = true;
-         } else if (nextChar === '\n') {
+         } else if (nextChar === '\n' || (is1dot1 && (nextChar === '\u0085' || nextChar === '\u2028'))) {
             this._offset.line ++;
             this._offset.column = 0;
+            fixString = true;
          } else {
             this._offset.column ++;
          }
@@ -157,8 +172,8 @@ class XmlStringCursor {
       let rawString = originalString;
 
       if (fixString) {
-         rawString = rawString.replace('\r\n', '\n');
-         rawString = rawString.replace('\r', '\n');
+         // Address section 2.11 (Line Ending). \r\u0085. \r\n, \r, \u0085 and \u2028 all exposed as \n
+         rawString = rawString.replace(is1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10, '\n');
       }
 
       return this._makeChunkWithSpace(rawString, originalString, startOffset);
@@ -418,11 +433,12 @@ class XmlStringCursor {
       }
 
       const originalString = this._source.substring(startOffset.index, this._offset.index);
+      const is1dot1 =  this._entityInfo.versionIs1dot1();
       let rawString = originalString;
+      const regex = is1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
 
-      if (rawString.indexOf('\r') !== -1) {
-         rawString = rawString.replace('\r\n', '\n');
-         rawString = rawString.replace('\r', '\n');
+      if (regex.exec(rawString)) {
+         rawString = rawString.replace(regex, '\n');
       }
 
       return {
@@ -478,7 +494,13 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _isSpace(aChar) {
-      return aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
+      const base = aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
+
+      if (this._entityInfo.versionIs1dot0()) {
+         return base;
+      }
+
+      return base || aChar === '\u0085' || aChar === '\u2028';
    }
 
    /**********************************************************************\
