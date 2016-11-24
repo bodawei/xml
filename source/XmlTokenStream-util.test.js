@@ -21,23 +21,23 @@ function makeStrictStream(str, options = {}) {
 
 function makeLaxExternalSubsetStream(str, options = {}) {
    options.lax = true;
-   options.entityType = 'EXTERNAL_SUBSET';
+   options.entityType = EntityInfo.TYPE.EXTERNALSUBSET;
    return makeStream(str, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalSubsetStream(str, options = {}) {
-   options.entityType = 'EXTERNAL_SUBSET';
+   options.entityType = EntityInfo.TYPE.EXTERNALSUBSET;
    return makeStream(str, new XmlEntityManager(), options);
 }
 
 function makeLaxExternalEntityStream(str, options = {}) {
    options.lax = true;
-   options.entityType = 'EXTERNAL_ENTITY';
+   options.entityType = EntityInfo.TYPE.EXTERNAL;
    return makeStream(str, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalEntityStream(str, options = {}) {
-   options.entityType = 'EXTERNAL_ENTITY';
+   options.entityType = EntityInfo.TYPE.EXTERNAL;
    return makeStream(str, new XmlEntityManager(), options);
 }
 
@@ -61,28 +61,28 @@ function ignoreToken(stream, tokenType) {
 }
 
 function expectSyntaxError(entityType, input, code, message, place, context) {
-   if (!EntityInfo.ENTITY_TYPE[entityType]) {
+   if (!EntityInfo.TYPE[entityType]) {
       context = place;
       place = message;
       message = code;
       code = input;
       input = entityType;
-      entityType = EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY;
+      entityType = EntityInfo.TYPE.DOCUMENT;
    }
 
    let strictS;
    let laxS;
 
    switch (entityType) {
-      case EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY:
+      case EntityInfo.TYPE.DOCUMENT:
          strictS = makeStrictStream(input);
          laxS = makeLaxStream(input);
          break;
-      case EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY:
+      case EntityInfo.TYPE.EXTERNAL:
          strictS = makeStrictExternalEntityStream(input);
          laxS = makeLaxExternalEntityStream(input);
          break;
-      case EntityInfo.ENTITY_TYPE.EXTERNAL_SUBSET:
+      case EntityInfo.TYPE.EXTERNALSUBSET:
          strictS = makeStrictExternalSubsetStream(input);
          laxS = makeLaxExternalSubsetStream(input);
          break;

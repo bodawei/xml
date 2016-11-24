@@ -96,7 +96,7 @@ class XmlStringCursor {
    peekChar() {
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
-      const is1dot1 =  this._entityInfo.versionIs1dot1();
+      const is1dot1 = this._entityInfo.versionIs1dot1;
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar) {
@@ -137,7 +137,7 @@ class XmlStringCursor {
    getSpace() {
       let fixString = false;
       const startOffset = this._offset.clone();
-      const is1dot1 =  this._entityInfo.versionIs1dot1();
+      const is1dot1 = this._entityInfo.versionIs1dot1;
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar || !this._isSpace(nextChar)) {
@@ -433,9 +433,8 @@ class XmlStringCursor {
       }
 
       const originalString = this._source.substring(startOffset.index, this._offset.index);
-      const is1dot1 =  this._entityInfo.versionIs1dot1();
       let rawString = originalString;
-      const regex = is1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
+      const regex = this._entityInfo.versionIs1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
 
       if (regex.exec(rawString)) {
          rawString = rawString.replace(regex, '\n');
@@ -496,7 +495,7 @@ class XmlStringCursor {
    _isSpace(aChar) {
       const base = aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
 
-      if (this._entityInfo.versionIs1dot0()) {
+      if (this._entityInfo.versionIs1dot0) {
          return base;
       }
 

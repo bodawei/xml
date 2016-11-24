@@ -44,7 +44,6 @@ M 44 Enforce 1.0 vs 1.1 line ending changes
 	√ getToTerminator
 	√ getSpace
 	√ test getName and anything else, to make sure they show up correctly
-	- getToTerminator isn't incrementing lines correctly in the offsets.
 
 44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
 
@@ -67,6 +66,7 @@ CLEANUP
 	- add place and context to all errors while doing this
 
 BUILD
+- lots of weird coverage errors in build output. probably why not getting some output
 148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
 	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
 	Each has a base.properties and code.properties. Barf if missing
@@ -119,6 +119,11 @@ BUILD
 
 PROJECT
 --- technical debt [1m 4s]
+- BUG getToTerminator isn't incrementing lines correctly in the offsets.
+- Entityinfo tweaks:
+	- Should pass EntityLocation into EntityInfo
+	- document that entityinfo lives in cursor
+	- user set version/revision overrides what is in xmldecl
 M 46 Improve handling of 1.0 vs. 1.1 control chars
 	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
 	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs

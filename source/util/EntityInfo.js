@@ -2,6 +2,9 @@
 
 'use strict';
 
+const LAST_1DOT0_REVISION = 5;
+const LAST_1DOT1_REVISION = 2;
+
 /**********************************************************************\
  EntityInfo holds values about an entity that will influence how we
  parse it
@@ -10,57 +13,108 @@
 class EntityInfo {
 
    constructor(entityType, xmlVersion, xmlRevision) {
-      this.entityType = entityType || EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY;
-      this.version = xmlVersion || EntityInfo.VERSION['1.0'];
-      this.revision = xmlRevision || EntityInfo.REVISION.R5;
+      this.type = entityType || EntityInfo.TYPE.DOCUMENT;
+      this.version = xmlVersion || 1.0;
+      this.revision = xmlRevision || (this.versionIs1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION);
    }
 
-   setVersion(newVersion) {
-      let newRevision;
+   /**********************************************************************\
+    type: When setting the type, make sure it is a legal value.
+   \**********************************************************************/
 
-      newVersion = newVersion || EntityInfo.VERSION['1.0'];
-
-      if (newVersion !== this.version) {
-         if (newVersion === EntityInfo.VERSION['1.1']) {
-            newRevision = EntityInfo.REVISION.R2;
-         } else if (newVersion === EntityInfo.VERSION['1.0']) {
-            newRevision = EntityInfo.REVISION.R5;
-         } else {
-            throw new Error('Unknown version passed to EntityInfo.setVersion().  Got "' + newVersion + '".');
-         }
-
-         this.version = newVersion;
-         this.revision = newRevision;
+   set type(newValue) {
+      if (EntityInfo.TYPE[newValue]) {
+         this._type = newValue;
+      } else {
+         throw new Error('Unknown type passed to EntityInfo.type.  Got "' + newValue + '".');
       }
    }
 
-   versionIs1dot0() {
-      return this.version === '1.0';
+   get type() {
+      return this._type;
    }
 
-   versionIs1dot1() {
-      return this.version === '1.1';
+   /**********************************************************************\
+    Shortcuts for getting the type
+   \**********************************************************************/
+
+   get isTypeDocument() {
+      return this.type === EntityInfo.TYPE.DOCUMENT;
+   }
+
+   get isTypeExternal() {
+      return this.type === EntityInfo.TYPE.EXTERNAL;
+   }
+
+   get isTypeExternalSubset() {
+      return this.type === EntityInfo.TYPE.EXTERNALSUBSET;
+   }
+
+   /**********************************************************************\
+    version: When setting the version, make sure it is a legal value, and
+    reset the revision to the last revision for that version.
+
+    Note that this does not change the revision is the version is not
+    changing.
+   \**********************************************************************/
+
+   set version(newValue) {
+      if (newValue === this._version) {
+         return;
+      }
+
+      if (newValue === 1.0) {
+         this._version = 1.0;
+         this.revision = LAST_1DOT0_REVISION;
+      } else if (newValue === 1.1) {
+         this._version = 1.1;
+         this.revision = LAST_1DOT1_REVISION;
+      } else {
+         throw new Error('Unknown version passed to EntityInfo.version.  Got "' + newValue + '".');
+      }
+   }
+
+   get version() {
+      return this._version;
+   }
+
+   /**********************************************************************\
+    Shortcuts for checking the version
+   \**********************************************************************/
+
+   get versionIs1dot0() {
+      return this.version === 1.0;
+   }
+
+   get versionIs1dot1() {
+      return this.version === 1.1;
+   }
+
+   /**********************************************************************\
+    revision: Sets the revision. Valid revisions depend on the value of
+    version. So, if you need to change both, change version first.
+   \**********************************************************************/
+
+   set revision(newValue) {
+      if ((this.version === 1.0 && newValue > 0 && newValue <= LAST_1DOT0_REVISION) ||
+         (this.version === 1.1 && newValue > 0 && newValue <= LAST_1DOT1_REVISION)) {
+         this._revision = newValue;
+      } else {
+         throw new Error('Version and revision do not match. Got "' +
+            this.version + '" and "' + newValue + '".');
+      }
+   }
+
+   get revision() {
+      return this._revision;
    }
 
 }
 
-EntityInfo.ENTITY_TYPE = {
-   DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
-   EXTERNAL_ENTITY: 'EXTERNAL_ENTITY',
-   EXTERNAL_SUBSET: 'EXTERNAL_SUBSET'
-};
-
-EntityInfo.VERSION = {
-   '1.0': '1.0',
-   1.1: '1.1'
-};
-
-EntityInfo.REVISION = {
-   R1: 'R1',
-   R2: 'R2',
-   R3: 'R3',
-   R4: 'R4',
-   R5: 'R5'
+EntityInfo.TYPE = {
+   DOCUMENT: 'DOCUMENT',
+   EXTERNAL: 'EXTERNAL',
+   EXTERNALSUBSET: 'EXTERNALSUBSET'
 };
 
 module.exports = EntityInfo;

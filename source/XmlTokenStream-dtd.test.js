@@ -192,7 +192,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
                '<!DOCTYPE one >',
                SyntaxError.ID.DOCTYPE_INVALID_DOC_CONTEXT,
                'A DOCTYPE must be declared once between the XML Declaration and the content.',
@@ -201,7 +201,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_SUBSET,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
                '<!DOCTYPE one >',
                SyntaxError.ID.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
                'A DOCTYPE must not be declared in an external entity.',
@@ -210,7 +210,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of an external entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
                '<!DOCTYPE one >',
                SyntaxError.ID.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
                'A DOCTYPE must not be declared in an external entity.',
@@ -368,7 +368,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
                '<!NOTATION frog PUBLIC "foo">',
                SyntaxError.ID.NOTATIONDECL_INVALID_CONTEXT,
                'A notation must not be declared outside of the internal or external subset.',
@@ -383,7 +383,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of an external entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
                '<!NOTATION frog PUBLIC "foo">',
                SyntaxError.ID.NOTATIONDECL_INVALID_CONTEXT,
                'A notation must not be declared outside of the internal or external subset.',
@@ -616,7 +616,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
                '<!ENTITY entityName PUBLIC "testentity" >',
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
@@ -631,7 +631,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of an external entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
                '<!ENTITY entityName PUBLIC "testentity" >',
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
@@ -932,7 +932,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
                '<!ELEMENT elementName ANY>',
                SyntaxError.ID.ELEMENTDECL_INVALID_CONTEXT,
                'An element must not be declared outside of the internal or external subset.',
@@ -947,7 +947,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of an external entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
                '<!ELEMENT elementName ANY>',
                SyntaxError.ID.ELEMENTDECL_INVALID_CONTEXT,
                'An element must not be declared outside of the internal or external subset.',
@@ -1689,7 +1689,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
                '<!ATTLIST elementName attrName CDATA #REQUIRED >',
                SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
                'An attribute list must not be declared outside of the internal or external subset.',
@@ -1704,7 +1704,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can not appear at the start of an external entity', () => {
-            expectSyntaxError(EntityInfo.ENTITY_TYPE.EXTERNAL_ENTITY,
+            expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
                '<!ATTLIST elementName attrName CDATA #REQUIRED >',
                SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
                'An attribute list must not be declared outside of the internal or external subset.',
