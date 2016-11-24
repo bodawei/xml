@@ -45,6 +45,17 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+    setParseKind() sets the parseKind value for this cursor.
+
+    PARAM
+    A ParseKind object.
+   \**********************************************************************/
+
+   setParseKind(newKind) {
+      this._parseKind = newKind;
+   }
+
+   /**********************************************************************\
     Returns the most likely type for the next token in the cursor. In some
     cases, the next token is ambiguous (e.g. is it a CHAR or a WORD or a
     STRING?). In those cases, this assumes STRING.

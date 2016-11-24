@@ -30,8 +30,7 @@ KEEP READING ABOUT STREAMS
 	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
 		otherwise does the {0}
 	WHen done does the {{} and {}}
-
-S 54 :use xml decl version to change processing
+√ S 54 :use xml decl version to change processing
 	Passes version to StringCursor
 	All entities are 1.0 unless they specify their own entity
 	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
@@ -42,6 +41,12 @@ M 44 Enforce 1.0 vs 1.1 line ending changes
 	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
 
 44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
+
+Some cleanup:
+- Parsekind has a weird name
+- Would like to bulletproof it more
+- why is it throwing an exception. that's bad
+
 
 
 -- next: 152

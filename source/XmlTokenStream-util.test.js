@@ -5,21 +5,10 @@
 /* eslint-env jasmine */
 
 const Offset = require('./Offset.js');
+const ParseKind = require('./util/ParseKind.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
-
-const ENTITY_TYPES = {
-   DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
-   EXTERNAL_ENTITY: 'EXTERNAL_ENTITY',
-   EXTERNAL_SUBSET: 'EXTERNAL_SUBSET'
-};
-
-const ENTITY_TYPES_ARRAY = [
-   ENTITY_TYPES.DOCUMENT_ENTITY,
-   ENTITY_TYPES.EXTERNAL_ENTITY,
-   ENTITY_TYPES.EXTERNAL_SUBSET
-];
 
 function makeLaxStream(str, options = {}) {
    options.lax = true;
@@ -72,28 +61,28 @@ function ignoreToken(stream, tokenType) {
 }
 
 function expectSyntaxError(entityType, input, code, message, place, context) {
-   if (ENTITY_TYPES_ARRAY.indexOf(entityType) === -1) {
+   if (!ParseKind.ENTITY_TYPE[entityType]) {
       context = place;
       place = message;
       message = code;
       code = input;
       input = entityType;
-      entityType = ENTITY_TYPES.DOCUMENT_ENTITY;
+      entityType = ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY;
    }
 
    let strictS;
    let laxS;
 
    switch (entityType) {
-      case ENTITY_TYPES.DOCUMENT_ENTITY:
+      case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
          strictS = makeStrictStream(input);
          laxS = makeLaxStream(input);
          break;
-      case ENTITY_TYPES.EXTERNAL_ENTITY:
+      case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
          strictS = makeStrictExternalEntityStream(input);
          laxS = makeLaxExternalEntityStream(input);
          break;
-      case ENTITY_TYPES.EXTERNAL_SUBSET:
+      case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
          strictS = makeStrictExternalSubsetStream(input);
          laxS = makeLaxExternalSubsetStream(input);
          break;
@@ -182,6 +171,5 @@ module.exports = {
    makeStrictExternalSubsetStream,
    makeLaxExternalEntityStream,
    makeStrictExternalEntityStream,
-   makeStringTokenArray,
-   ENTITY_TYPES
+   makeStringTokenArray
 };

@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const Offset = require('./Offset.js');
+const ParseKind = require('./util/ParseKind.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./TextChunk.js');
 const tokens = require('./XmlToken.js');
@@ -20,7 +21,6 @@ const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
 const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeStringTokenArray;
-const ENTITY_TYPE = require('./XmlTokenStream-util.test.js').ENTITY_TYPES;
 
 describe('XmlTokenStream (Misc)', () => {
 
@@ -45,7 +45,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if no --> found', () => {
-         expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+         expectSyntaxError(ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY,
             '<!--junk comment',
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
@@ -54,7 +54,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if no --> found immediately after the opening', () => {
-         expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+         expectSyntaxError(ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY,
             '<!--',
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
@@ -70,7 +70,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if comment ends with a -', () => {
-         expectSyntaxError(ENTITY_TYPE.EXTERNAL_ENTITY,
+         expectSyntaxError(ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY,
             '<!--junk comment--->',
             SyntaxError.ID.COMMENT_ENDS_WITH_HYPHEN,
             'Must not have a hyphen at end of a comment.',
@@ -92,7 +92,7 @@ describe('XmlTokenStream (Misc)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(ENTITY_TYPE.DOCUMENT_ENTITY,
+            expectSyntaxError(ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY,
                '<!-- testComment -->',
                SyntaxError.ID.COMMENT_INVALID_CONTEXT,
                'A comment must not be the first thing in the document entity.',

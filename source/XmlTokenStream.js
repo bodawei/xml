@@ -3,6 +3,7 @@
 'use strict';
 
 const EntityLocation = require('./EntityLocation.js');
+const ParseKind = require('./util/ParseKind.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./TextChunk.js');
 const XmlStream = require('./XmlStream.js');
@@ -23,12 +24,6 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
-
-const ENTITY_TYPE = {
-   DOCUMENT_ENTITY: 'DOCUMENT_ENTITY',
-   EXTERNAL_ENTITY: 'EXTERNAL_ENTITY',
-   EXTERNAL_SUBSET: 'EXTERNAL_SUBSET'
-};
 
 const STATE = {
    START: 'START',
@@ -107,7 +102,7 @@ class XmlTokenStream extends XmlStream {
       this._options = {
          lax: false,
          'lax:allowOpenAngleBracketsInAttributeValues': false,
-         entityType: ENTITY_TYPE.DOCUMENT_ENTITY
+         entityType: ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY
       };
 
       for (const name in options) {
@@ -117,7 +112,7 @@ class XmlTokenStream extends XmlStream {
          this._options[name] = options[name];
       }
 
-      this._entityType = this._options.entityType;
+      this._parseKind = new ParseKind(this._options.entityType, ParseKind.VERSION['1.0'], ParseKind.REVISION.R5);
    }
 
    _innerGetNext() {
@@ -247,7 +242,7 @@ class XmlTokenStream extends XmlStream {
    _getS() {
       const space = this._cursor.getSpace();
 
-      if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
+      if (this._parseKind.entityType === ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY) {
          this._assert(this._state !== STATE.START, SEID.SPACE_INVALID_CONTEXT, space.startOffset, space);
       }
 
@@ -287,17 +282,17 @@ class XmlTokenStream extends XmlStream {
    }
 
    _checkContentState(chunk, docError, subsetError) {
-      switch (this._entityType) {
-         case ENTITY_TYPE.DOCUMENT_ENTITY:
+      switch (this._parseKind.entityType) {
+         case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
             this._assert(this._state === STATE.IN_CONTENT, docError,
                [ chunk.text ], chunk.startOffset, chunk);
             break;
-         case ENTITY_TYPE.EXTERNAL_ENTITY:
+         case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
             if (this._state === STATE.START) {
                this._state = STATE.IN_CONTENT;
             }
             break;
-         case ENTITY_TYPE.EXTERNAL_SUBSET:
+         case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
             this._report(subsetError, [ chunk.text ], chunk.startOffset, chunk);
             break;
       }
@@ -697,7 +692,7 @@ class XmlTokenStream extends XmlStream {
          this._validateExternalId(parsedDocType.externalId, true);
       }
 
-      if (this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY) {
+      if (this._parseKind.entityType === ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY) {
          if (this._state !== STATE.PROLOG_PREDOCTYPE) {
             this._report(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
          }
@@ -794,7 +789,7 @@ class XmlTokenStream extends XmlStream {
    }
 
    _checkDeclarationState(start, error) {
-      if (this._entityType === ENTITY_TYPE.EXTERNAL_SUBSET && this._state === STATE.START) {
+      if (this._parseKind.entityType === ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET && this._state === STATE.START) {
          this._state = STATE.IN_DTD;
       }
       this._assert(this._state === STATE.IN_DTD, error, start.startOffset, start);
@@ -888,14 +883,14 @@ class XmlTokenStream extends XmlStream {
 
    _checkPiAndCommentState(start, error) {
       if (this._state === STATE.START) {
-         switch (this._entityType) {
-            case ENTITY_TYPE.DOCUMENT_ENTITY:
+         switch (this._parseKind.entityType) {
+            case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
                this._report(error, start.startOffset, start);
                break;
-            case ENTITY_TYPE.EXTERNAL_ENTITY:
+            case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
                this._state = STATE.IN_CONTENT;
                break;
-            case ENTITY_TYPE.EXTERNAL_SUBSET:
+            case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
                this._state = STATE.IN_DTD;
                break;
          }
@@ -924,14 +919,15 @@ class XmlTokenStream extends XmlStream {
    _getXmlDecl(start) {
       const params = this._getAttributes(false);
       const close = this._cursor.getMatch('?>');
-      const isXmlDecl = this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY;
-      let seenVersion = false;
+      const isXmlDecl = this._parseKind.entityType === ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY;
+      let foundVersion;
       let seenEncoding = false;
       let seenStandalone = false;
 
       this._assert(close, SEID.XMLDECL_NO_CLOSE);
       this._assert(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES,
-         [ this._entityType === ENTITY_TYPE.DOCUMENT_ENTITY ? SEID.NOUN_XMLDECL : SEID.NOUN_TEXTDECL ]);
+         [ this._parseKind.entityType === ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY ?
+            SEID.NOUN_XMLDECL : SEID.NOUN_TEXTDECL ]);
 
       // check that the parameters are in the right order and have the right values
       for (let index = 0; index < params.length; index++) {
@@ -944,15 +940,15 @@ class XmlTokenStream extends XmlStream {
 
          switch (lcName) {
             case 'version':
-               seenVersion = true;
                this._assert(index === 0, SEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
                this._assert(param.value === '1.1' || param.value === '1.0',
                   SEID.XMLDECL_VERSION_INVALD, [ param.value ]);
+               foundVersion = param.value;
                break;
             case 'encoding':
                seenEncoding = true;
                if (isXmlDecl) {
-                  this._assert(seenVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
+                  this._assert(foundVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
                }
                this._assert(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
                   SEID.XMLDECL_ENCODING_INVALID, [ param.value ]);
@@ -966,7 +962,7 @@ class XmlTokenStream extends XmlStream {
 
                seenStandalone = true;
 
-               this._assert(seenVersion, SEID.XMLDECL_STANDALONE_INVALID_ORDER);
+               this._assert(foundVersion, SEID.XMLDECL_STANDALONE_INVALID_ORDER);
                this._assert(param.value === lcValue,
                   SEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, param.value ]);
 
@@ -986,20 +982,23 @@ class XmlTokenStream extends XmlStream {
       }
 
       if (this._state === STATE.START) {
-         switch (this._entityType) {
-            case ENTITY_TYPE.DOCUMENT_ENTITY:
+         switch (this._parseKind.entityType) {
+            case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
                this._state = STATE.PROLOG_PREDOCTYPE;
                break;
-            case ENTITY_TYPE.EXTERNAL_ENTITY:
+            case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
                this._state = STATE.IN_CONTENT;
                break;
-            case ENTITY_TYPE.EXTERNAL_SUBSET:
+            case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
                this._state = STATE.IN_DTD;
                break;
          }
       } else {
          this._report(SEID.XMLDECL_INVALID_CONTEXT);
       }
+
+      this._parseKind.setVersion(ParseKind.VERSION[foundVersion]);
+      this._cursor.setParseKind(this._parseKind);
 
       this._pushToken(isXmlDecl ?
          new tokens.XmlDeclaration(params, this._cursor.getRecentChunks()) :
@@ -1082,8 +1081,8 @@ class XmlTokenStream extends XmlStream {
       }
 
       const nameText = name ? name.text : '';
-      switch (this._entityType) {
-         case ENTITY_TYPE.DOCUMENT_ENTITY:
+      switch (this._parseKind.entityType) {
+         case ParseKind.ENTITY_TYPE.DOCUMENT_ENTITY:
             if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
                this._state = STATE.IN_CONTENT;
             } else if (this._state === STATE.IN_DTD) {
@@ -1092,14 +1091,14 @@ class XmlTokenStream extends XmlStream {
                this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
             }
             break;
-         case ENTITY_TYPE.EXTERNAL_ENTITY:
+         case ParseKind.ENTITY_TYPE.EXTERNAL_ENTITY:
             if (this._state === STATE.START) {
                this._state = STATE.IN_CONTENT;
             }
             this._assert(this._state === STATE.IN_CONTENT,
                SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
             break;
-         case ENTITY_TYPE.EXTERNAL_SUBSET:
+         case ParseKind.ENTITY_TYPE.EXTERNAL_SUBSET:
             this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
             break;
       }
