@@ -19,43 +19,52 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
 11/8  Sprint 18: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
 11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
-11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL:
+11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 
 
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-√ S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
-	// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
-	// Nice to have Need an escape  {{} and {}} ?
-	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
-		otherwise does the {0}
-	WHen done does the {{} and {}}
-√ S 54 :use xml decl version to change processing
-	Passes version to StringCursor
-	All entities are 1.0 unless they specify their own entity
-	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
-		Fatal error if strange line endings in xmldecl!
+S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
+	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
+		- might be worth comparing with doing a regex which gives all the matches so we just count those
+S 153 Entityinfo tweaks:
+	- Should pass EntityLocation into EntityInfo - quick
+	- document that entityinfo lives in cursor - quick
+	- options override what is in cursor
+		- version: "1.1" or "1.0" or "1.1/2" Revision tied to version for keeping in synch
+		- overrides whatever is in cursor
+	- user set version/revision overrides what is in xmldecl - set some flags
 
-M 44 Enforce 1.0 vs 1.1 line ending changes
-	- this is not just in getS, but in all the routines which touch whitespace.
-	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
-	√ isSpace
-	√ peekChar  <-- review test cases
-	√ getToTerminator
-	√ getSpace
-	√ test getName and anything else, to make sure they show up correctly
+M 46 Improve handling of 1.0 vs. 1.1 control chars
+	In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+	The cost of this is touching each and every character and seeing if they are any of the invalid chars
+	it also means checking those discouraged characters (this is a new class of error
+	- check expansion of char refs
+		- use charKind, which becomes a utility routine. (could also do on int
+		- report error
+	- peekChar and getChar	- use charKind()
+		add reporting of errors
+		- This goes in validation. examines every parse result
+		- maybe just iterate through the parse result, and for each chunk check if there are bad, then accumulate and report error if so. This will be rare, but having a library routine will reduce testing.
 
-44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
+ISSUES
+	- how to report discouraged
+Extra
+	- check both invalid and discouraged (discouraged is a warning. how to do this?)
+	- getWord	- !use 'isSpace',use charKind() which returns space|normal|invalid|discouraged
+			- checkChar not so easy. Could combine with the name checks
+			- would it be faster to extract to the terminators, and then do a regex for name chars etc?
+	- getMatch?	- just check input?
+	- getToTerminator	- check inputs?
+		do a regex across the whole thing, if find a bad, then iterate
+	- In all cases, return an array on the chunk which says index of bad or discouraged chars
+	- have to report errors in every case (ugh)
+		
+	
 
-Some cleanup:
-√ - Parsekind has a weird name  .  rename to EntityInfo
-* Need to resolve the 3 places this info comes in: in cursor, in the xml file, and options.
-- why is it throwing an exception. that's bad
-- is1point1() is1point0(),
-- wrap the whole thing so there are no values being passed around. setVersion1dot1() setKindDocumentEntity(), isDocumentEntityKind()
-- Why isn't the entity location in it?
-
--- next: 152
+-- next: 153
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -66,7 +75,18 @@ CLEANUP
 	- add place and context to all errors while doing this
 
 BUILD
-- lots of weird coverage errors in build output. probably why not getting some output
+152 Build problems
+	- We are no longer getting code coverage info from node.  When did this break?  Why?
+		=> Found out when
+		=> can you identify the change?
+	- Test numbers are different in node and browser
+		=> investigate globs.
+	- Getting errors in html error reports (see web). evidently a clash between babel and browserify and istanbul
+		- when did this start?
+		=> find when (same as first?)
+	- Seems like a trazillion files are showing up in the verbose log when it goes to do node testing
+		- same as test numbers being different?
+		=> investigate globs
 148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
 	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
 	Each has a base.properties and code.properties. Barf if missing
@@ -118,23 +138,14 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
---- technical debt [1m 4s]
-- BUG getToTerminator isn't incrementing lines correctly in the offsets.
-- Entityinfo tweaks:
-	- Should pass EntityLocation into EntityInfo
-	- document that entityinfo lives in cursor
-	- user set version/revision overrides what is in xmldecl
-M 46 Improve handling of 1.0 vs. 1.1 control chars
-	- In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
-	- In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-	- The cost of this is touching each and every character and seeing if they are any of the invalid chars
-	- it also means checking those discouraged characters (this is a new class of error
+--- technical debt [3s]
+Note: 45, 53 and 74 really all need more review and planning.  53, in particular, seems big.
+
 45:S:Review various 1.0 standards with respect to Name (and Char definitions)
 	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
-S 151 Add sniffing of version and encoding to StringCursor
-	Looks for <?xml, then extracts to ?>, can then find version and encoding and make a good guess.		
 S 53 use xml decl encoding to change input if needed
+
 ? 147 Switch to Node streams  (See branch streams_
 	- Have XmlTokenStream acting as a Readable stream. Seems pretty straightforward.
 		x The existing stream infrastructure needs some fiddling if we want to preserve it,
@@ -1177,3 +1188,44 @@ Got all the stuff done with 1.5 hours to spare!
 Spent an hour looking into streams.  Very easy to do.  However, we get dramatic slow down. Must be investigated.
 
 Next sprint should be doing more technical debt.  And soon we need to investigate stream performance.
+
+Sprint 20
+=========
+
+√ S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
+	// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
+	// Nice to have Need an escape  {{} and {}} ?
+	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
+		otherwise does the {0}
+	WHen done does the {{} and {}}
+√ S 54 :use xml decl version to change processing
+	Passes version to StringCursor
+	All entities are 1.0 unless they specify their own entity
+	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
+		Fatal error if strange line endings in xmldecl!
+√ M 44 Enforce 1.0 vs 1.1 line ending changes
+	- this is not just in getS, but in all the routines which touch whitespace.
+	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
+	√ isSpace
+	√ peekChar  <-- review test cases
+	√ getToTerminator
+	√ getSpace
+	√ test getName and anything else, to make sure they show up correctly
+
+44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
+x S 151 Add sniffing of version and encoding to StringCursor -- not needed. Doing this in xmltokenstream is fine
+	Looks for <?xml, then extracts to ?>, can then find version and encoding and make a good guess.		
+
+Some cleanup:
+√ - Parsekind has a weird name  .  rename to EntityInfo
+√ * Need to resolve the 3 places this info comes in: in cursor, in the xml file, and options.
+√- why is it throwing an exception. that's bad
+√ - is1point1() is1point0(),
+√ - wrap the whole thing so there are no values being passed around. setVersion1dot1() setKindDocumentEntity(), isDocumentEntityKind()
+√ - Why isn't the entity location in it?
+
+Build just found more problems, so got nothing but investigation done.
+
+Note20
+------
+This sprint went pretty well.  Biggest note is that you started off with a sloppy EntityInfo, and it ended up costing the whole cleanup time to get it back to what it should have been.  Need to be more discipliend about api definitions.

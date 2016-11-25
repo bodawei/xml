@@ -25,7 +25,24 @@ function getSummaryPaths(dir, parentName, totals) {
       } else if (stats.isFile()) {
          if (files[index] === COVERAGE_FILENAME) {
             var coverageSummary = fs.readFileSync(fullPath, { encoding: 'utf8' });
-            var tls = JSON.parse(coverageSummary).total;
+            var jsonData = JSON.parse(coverageSummary);
+            var altTotalCovered = 0;
+            var altTotalLines = 0;
+            var altTotalSkipped = 0;
+            for (var key in jsonData) {
+               if (key === 'total') {
+                  continue;
+               }
+               //console.log(JSON.stringify(jsonData[key], undefined, 2));
+               //altTotalCovered += jsonData[key].lines.covered;
+               //altTotalLines += jsonData[key].lines.total;
+               //altTotalSkipped += jsonData[key].lines.skipped;
+               //
+               //console.log(altTotalLines);
+               //console.log(altTotalCovered);
+               //console.log(altTotalSkipped);
+            }
+            var tls = jsonData.total;
             var total = (tls.lines.pct + tls.statements.pct + tls.functions.pct + tls.branches.pct) / 4;
             var entry = totals[total] || [];
 
