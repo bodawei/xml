@@ -6,43 +6,41 @@
 
 const Offset = require('./Offset.js');
 const EntityInfo = require('./util/EntityInfo.js');
+const EntityLocation = require('./EntityLocation.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
+function makeStream(str, type, entityManager, options) {
+   const entityInfo = type ? new EntityInfo(type, 1.0, 5, new EntityLocation()) : undefined;
+   return new XmlTokenStream(new XmlStringCursor(str, entityInfo), entityManager, options);
+}
+
 function makeLaxStream(str, options = {}) {
    options.lax = true;
-   return makeStream(str, new XmlEntityManager(), options);
+   return makeStream(str, undefined, new XmlEntityManager(), options);
 }
 
 function makeStrictStream(str, options = {}) {
-   return makeStream(str, new XmlEntityManager(), options);
+   return makeStream(str, undefined, new XmlEntityManager(), options);
 }
 
 function makeLaxExternalSubsetStream(str, options = {}) {
    options.lax = true;
-   options.entityType = EntityInfo.TYPE.EXTERNALSUBSET;
-   return makeStream(str, new XmlEntityManager(), options);
+   return makeStream(str, EntityInfo.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalSubsetStream(str, options = {}) {
-   options.entityType = EntityInfo.TYPE.EXTERNALSUBSET;
-   return makeStream(str, new XmlEntityManager(), options);
+   return makeStream(str, EntityInfo.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
 }
 
 function makeLaxExternalEntityStream(str, options = {}) {
    options.lax = true;
-   options.entityType = EntityInfo.TYPE.EXTERNAL;
-   return makeStream(str, new XmlEntityManager(), options);
+   return makeStream(str, EntityInfo.TYPE.EXTERNAL, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalEntityStream(str, options = {}) {
-   options.entityType = EntityInfo.TYPE.EXTERNAL;
-   return makeStream(str, new XmlEntityManager(), options);
-}
-
-function makeStream(str, entityManager, options) {
-   return new XmlTokenStream(new XmlStringCursor(str), entityManager, options);
+   return makeStream(str, EntityInfo.TYPE.EXTERNAL, new XmlEntityManager(), options);
 }
 
 function ignoreError(stream, errorCode) {
@@ -150,6 +148,7 @@ function makeStringTokenArray(values, offset = 0) {
       const length = values[index].text.length;
       values[index].startOffset = new Offset(0, offset, offset);
       values[index].endOffset = new Offset(0, offset + length, offset + length);
+      values[index].entityLocation = new EntityLocation();
 
       results.push(values[index]);
       offset += length;

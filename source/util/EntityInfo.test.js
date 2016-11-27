@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const EntityInfo = require('./EntityInfo.js');
+const EntityLocation = require('../EntityLocation.js');
 
 describe('EntityInfo', () => {
 
@@ -24,6 +25,19 @@ describe('EntityInfo', () => {
       it('fills in the right revision for 1.1 if none specified', () => {
          const pk = new EntityInfo('DOCUMENT', 1.1);
          expect(pk.revision).toEqual(2);
+      });
+
+      it('sets the location that is passed in', () => {
+         const loc = new EntityLocation('http://here.com', '-//what//is//this');
+         const pk = new EntityInfo('DOCUMENT', 1.0, 4, loc);
+
+         expect(pk.location).toEqual(loc);
+      });
+
+      it('sets the overrideDocument value to false', () => {
+         const pk = new EntityInfo('DOCUMENT', 1.0, 4);
+
+         expect(pk.overrideDocument).toEqual(false);
       });
 
       it('throws an error if the version and revision do not match', () => {

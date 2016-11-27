@@ -82,6 +82,24 @@ function textOrUndef(chunk) {
    return chunk ? chunk.text : undefined;
 }
 
+/**********************************************************************\
+ A note about document versions.
+ An XML entity defaults to version 1.0 unless a version is explicitly
+ stated in the XML Declaration or the Text Declaration (1.1 line
+ endings are not allowed within those, even in a 1.1 entity. Basically,
+ the declarations are always 1.0 format). Ordinarily, this will use
+ that version to parse the entity.  However, in the exceedingly rare
+ case that you want to override the version in the document, when you
+ are constructing the cursor that will be passed to this, make sure to
+ set the overrideDocument flag in the associated EntityInfo that you
+ pass to the cursor to true. In that case, the version specified there
+ will be used in preferene to what is in the document.
+
+ Relatedly, this stream relies on the EntityInfo found in the cursor to
+ determine what version (and revision) and type of entity this is
+ parsing. This will modify that info only based on the version found
+ in the Declaration.
+\**********************************************************************/
 class XmlTokenStream extends XmlStream {
 
    constructor(cursor, entityManager, options) {
@@ -101,8 +119,7 @@ class XmlTokenStream extends XmlStream {
 
       this._options = {
          lax: false,
-         'lax:allowOpenAngleBracketsInAttributeValues': false,
-         entityType: EntityInfo.TYPE.DOCUMENT
+         'lax:allowOpenAngleBracketsInAttributeValues': false
       };
 
       for (const name in options) {
@@ -112,7 +129,7 @@ class XmlTokenStream extends XmlStream {
          this._options[name] = options[name];
       }
 
-      this._entityInfo = new EntityInfo(this._options.entityType, 1.0, 5);
+      this._entityInfo = this._cursor.entityInfo;
    }
 
    _innerGetNext() {
@@ -996,12 +1013,12 @@ class XmlTokenStream extends XmlStream {
          this._report(SEID.XMLDECL_INVALID_CONTEXT);
       }
 
-      if (foundVersion === '1.0') {
-         this._entityInfo.version = 1.0;
-         this._cursor.setEntityInfo(this._entityInfo);
-      } else if (foundVersion === '1.1') {
-         this._entityInfo.version = 1.1;
-         this._cursor.setEntityInfo(this._entityInfo);
+      if (!this._entityInfo.overrideDocument) {
+         if (foundVersion === '1.0') {
+            this._entityInfo.version = 1.0;
+         } else if (foundVersion === '1.1') {
+            this._entityInfo.version = 1.1;
+         }
       }
 
       this._pushToken(isXmlDecl ?

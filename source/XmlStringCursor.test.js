@@ -15,6 +15,13 @@ const XmlStringCursor = require('./XmlStringCursor.js');
 const TYPE = require('./TextChunk.js').TYPE;
 
 describe('XmlStringCursor', () => {
+   let defaultLoc;
+   let entityInfo1dot1;
+
+   beforeEach(() => {
+      defaultLoc = new EntityLocation();
+      entityInfo1dot1 = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
+   });
 
    describe('construction', () => {
 
@@ -35,6 +42,47 @@ describe('XmlStringCursor', () => {
          expect(() => {
             new XmlStringCursor(new String('5'));
          }).not.toThrow();
+      });
+
+      describe('location', () => {
+
+         it('accepts undefined as a value and produces a default EntityInfo', () => {
+            const c = new XmlStringCursor('hi');
+            const defaultEntityInfo = new EntityInfo();
+
+            expect(c.entityInfo).toEqual(defaultEntityInfo);
+         });
+
+         it('accepts a URL as a value and produces an otherwise default EntityInfo', () => {
+            const c = new XmlStringCursor('hi', 'http://test.com');
+            const loc = new EntityLocation('http://test.com');
+            const derivedEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
+
+            expect(c.entityInfo).toEqual(derivedEntityInfo);
+         });
+
+         it('accepts an EntityInfo as a value', () => {
+            const loc = new EntityLocation('http://foo.com');
+            const customEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
+            const c = new XmlStringCursor('hi', customEntityInfo);
+
+            expect(c.entityInfo).toEqual(customEntityInfo);
+         });
+
+         it('accepts an EntityLocation as a value and produces an otherwise default EntityInfo', () => {
+            const loc = new EntityLocation('http://foo.com');
+            const c = new XmlStringCursor('hi', loc);
+            const derivedEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
+
+            expect(c.entityInfo).toEqual(derivedEntityInfo);
+         });
+
+         it('throws an error if some unexpected value is passed in as the info', () => {
+            expect(() => {
+               new XmlStringCursor('hi', 44);
+            }).toThrowError('Must pass an EntityInfo, or something that can become one, into XmlStringCursor.');
+         });
+
       });
 
    });
@@ -72,19 +120,13 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns that \\u0085 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u0085');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('\u0085', entityInfo1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
 
       it('returns that \\u2028 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u2028');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('\u2028', entityInfo1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
@@ -134,7 +176,7 @@ describe('XmlStringCursor', () => {
       it('returns the next character', () => {
          const c = new XmlStringCursor('<foo>');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns undefined if there is no next character', () => {
@@ -146,71 +188,62 @@ describe('XmlStringCursor', () => {
       it('returns the next character even if it is a \\n', () => {
          const c = new XmlStringCursor('\n foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is a \\r', () => {
          const c = new XmlStringCursor('\r foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\u0085 if it is \\u0085 and this is 1.0', () => {
          const c = new XmlStringCursor('\u0085 foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\u0085', new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\u0085', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns the next character as \\u2028 iof it is \\u2028 and this is 1.0', () => {
          const c = new XmlStringCursor('\u2028 foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\u2028', new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\u2028', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is \\u0085 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u0085 foo');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('\u0085 foo', entityInfo1dot1);
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is \\u2028 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u2028 foo');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('\u2028 foo', entityInfo1dot1);
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is both a \\r\\n pair', () => {
          const c = new XmlStringCursor('\r\n foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
       });
 
       it('returns a \\n if next characters are \\r\\u0085 (and does not consume the latter) and this is 1.0', () => {
          const c = new XmlStringCursor('\r\u0085 foo');
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is a \\r\\u0085 if this is 1.1', () => {
-         const c = new XmlStringCursor('\r\u0085 foo');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('\r\u0085 foo', entityInfo1dot1);
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
       });
 
       it('returns the next character even when the cursor has incremented past start of string', () => {
          const c = new XmlStringCursor('x\r\n foo');
          c.getChar();
 
-         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3)));
+         expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
       });
 
       it('adds nothing to the recent chunks', () => {
@@ -227,7 +260,8 @@ describe('XmlStringCursor', () => {
       it('returns the next run of spaces', () => {
          const c = new XmlStringCursor('    hi');
 
-         expect(c.getSpace()).toEqual(new WithSpaceChunk('    ', '    ', new Offset(0, 0, 0), new Offset(0, 4, 4)));
+         expect(c.getSpace()).toEqual(new WithSpaceChunk('    ', '    ', new Offset(0, 0, 0),
+            new Offset(0, 4, 4), defaultLoc));
       });
 
       it('returns undefined if the first available character is ot a space', () => {
@@ -240,91 +274,83 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor(' \t \t hi');
 
          expect(c.getSpace()).toEqual(new WithSpaceChunk(' \t \t ', ' \t \t ',
-            new Offset(0, 0, 0), new Offset(0, 5, 5)));
+            new Offset(0, 0, 0), new Offset(0, 5, 5), defaultLoc));
       });
 
       it('returns the a mixture of tabs and spaces and newlines', () => {
          const c = new XmlStringCursor(' \n \t \n hi');
 
          expect(c.getSpace()).toEqual(new WithSpaceChunk(' \n \t \n ', ' \n \t \n ',
-            new Offset(0, 0, 0), new Offset(2, 1, 7)));
+            new Offset(0, 0, 0), new Offset(2, 1, 7), defaultLoc));
       });
 
       it('treats a CR like a LF', () => {
          const c = new XmlStringCursor(' \rhi');
-         const expected = new WithSpaceChunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2));
+         const expected = new WithSpaceChunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a CR LF like a LF', () => {
          const c = new XmlStringCursor(' \r\nhi');
-         const expected = new WithSpaceChunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3));
+         const expected = new WithSpaceChunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u0085 like non-space if this is 1.0', () => {
          const c = new XmlStringCursor(' \u0085hi');
-         const expected = new WithSpaceChunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1));
+         const expected = new WithSpaceChunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u2028 like a non-space if this is 1.0', () => {
          const c = new XmlStringCursor(' \u2028hi');
-         const expected = new WithSpaceChunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1));
+         const expected = new WithSpaceChunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u0085hi');
-         const expected = new WithSpaceChunk(' \n', ' \u0085', new Offset(0, 0, 0), new Offset(1, 0, 2));
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor(' \u0085hi', entityInfo1dot1);
+         const expected = new WithSpaceChunk(' \n', ' \u0085', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u2028 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u2028hi');
-         const expected = new WithSpaceChunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2));
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor(' \u2028hi', entityInfo1dot1);
+         const expected = new WithSpaceChunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a CR LF like a LF', () => {
          const c = new XmlStringCursor(' \r\nhi');
-         const expected = new WithSpaceChunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3));
+         const expected = new WithSpaceChunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a mixture of CRLF and CR and LF as just the right set of LF', () => {
          const c = new XmlStringCursor(' \r\n \n \r hi');
-         const expected = new WithSpaceChunk(' \n \n \n ', ' \r\n \n \r ', new Offset(0, 0, 0), new Offset(3, 1, 8));
+         const expected = new WithSpaceChunk(' \n \n \n ', ' \r\n \n \r ', new Offset(0, 0, 0),
+            new Offset(3, 1, 8), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\r\\u0085 like \\n\\u0085 if this is 1.0', () => {
          const c = new XmlStringCursor(' \r\u0085hi');
-         const expected = new WithSpaceChunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2));
+         const expected = new WithSpaceChunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\r\\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \r\u0085hi');
-         const expected = new WithSpaceChunk(' \n', ' \r\u0085', new Offset(0, 0, 0), new Offset(1, 0, 3));
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor(' \r\u0085hi', entityInfo1dot1);
+         const expected = new WithSpaceChunk(' \n', ' \r\u0085', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
@@ -339,7 +365,8 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('one twp');
          c.getWord([]);
 
-         expect(c.getSpace()).toEqual(new WithSpaceChunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4)));
+         expect(c.getSpace()).toEqual(new WithSpaceChunk(' ', ' ', new Offset(0, 3, 3),
+            new Offset(0, 4, 4), defaultLoc));
       });
 
       it('adds the space chunk to the recent chunks', () => {
@@ -347,7 +374,7 @@ describe('XmlStringCursor', () => {
          c.getSpace();
 
          expect(c.getRecentChunks()).toEqual([
-            new WithSpaceChunk(' \t\n', ' \t\n', new Offset(0, 0, 0), new Offset(1, 0, 3))
+            new WithSpaceChunk(' \t\n', ' \t\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc)
          ]);
       });
 
@@ -373,14 +400,14 @@ describe('XmlStringCursor', () => {
       it('returns the next space-terminated word', () => {
          const c = new XmlStringCursor('one two');
 
-         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
       it('returns the next word, even if a single letter', () => {
          const c = new XmlStringCursor('o two');
 
-         const expected = new WordChunk('o', true, true, new Offset(0, 0, 0), new Offset(0, 1, 1));
+         const expected = new WordChunk('o', true, true, new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
@@ -389,47 +416,43 @@ describe('XmlStringCursor', () => {
          c.getWord([]);
          c.getSpace();
 
-         const expected = new WordChunk('two', true, true, new Offset(0, 4, 4), new Offset(0, 7, 7));
+         const expected = new WordChunk('two', true, true, new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
       it('considers the word terminated at the specified terminator', () => {
          const c = new XmlStringCursor('oneX');
 
-         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getWord([ 'X' ])).toEqual(expected);
       });
 
       it('does not terminate at \\u0085 in 1.0', () => {
          const c = new XmlStringCursor('one\u0085X');
-         const expected = new WordChunk('one\u0085X', false, false, new Offset(0, 0, 0), new Offset(0, 5, 5));
+         const expected = new WordChunk('one\u0085X', false, false, new Offset(0, 0, 0),
+            new Offset(0, 5, 5), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does not terminate at \\u2028 in 1.0', () => {
          const c = new XmlStringCursor('one\u2028X');
-         const expected = new WordChunk('one\u2028X', false, false, new Offset(0, 0, 0), new Offset(0, 5, 5));
+         const expected = new WordChunk('one\u2028X', false, false, new Offset(0, 0, 0),
+            new Offset(0, 5, 5), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does terminate at \\u0085 in 1.1', () => {
-         const c = new XmlStringCursor('one\u0085X');
-         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('one\u0085X', entityInfo1dot1);
+         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does terminate at \\u2028 in 1.1', () => {
-         const c = new XmlStringCursor('one\u2028X');
-         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('one\u2028X', entityInfo1dot1);
+         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
@@ -439,7 +462,7 @@ describe('XmlStringCursor', () => {
          const c2 = new XmlStringCursor('one?');
          const c3 = new XmlStringCursor('one/]]>');
 
-         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c1.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
          expect(c2.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
          expect(c3.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
@@ -451,7 +474,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
          c.getSpace();
 
-         const expected = new WordChunk('two', true, true, new Offset(0, 5, 5), new Offset(0, 8, 8));
+         const expected = new WordChunk('two', true, true, new Offset(0, 5, 5), new Offset(0, 8, 8), defaultLoc);
          expect(c.getWord([ '>', 'X' ])).toEqual(expected);
       });
 
@@ -476,7 +499,7 @@ describe('XmlStringCursor', () => {
       it('adds the word chunk to the recent chunks', () => {
          const c = new XmlStringCursor('test ');
          c.getWord([]);
-         const expected = new WordChunk('test', true, true, new Offset(0, 0, 0), new Offset(0, 4, 4));
+         const expected = new WordChunk('test', true, true, new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([ expected ]);
       });
@@ -494,7 +517,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('one two');
 
             const firstWord = new WordChunk('one', true, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -503,7 +526,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('on.-8 two');
 
             const firstWord = new WordChunk('on.-8', true, true, new Offset(0, 0, 0),
-               new Offset(0, 5, 5));
+               new Offset(0, 5, 5), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -512,7 +535,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o\u00B7\u0310\u2040e two');
 
             const firstWord = new WordChunk('o\u00B7\u0310\u2040e', true, true,
-                new Offset(0, 0, 0), new Offset(0, 5, 5));
+                new Offset(0, 0, 0), new Offset(0, 5, 5), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -535,7 +558,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor(word + ' two');
 
             const firstWord = new WordChunk(word, true, true, new Offset(0, 0, 0),
-               new Offset(0, word.length, word.length));
+               new Offset(0, word.length, word.length), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -544,7 +567,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o\uFDF1e two');
 
             const firstWord = new WordChunk('o\uFDF1e', true, true,
-                new Offset(0, 0, 0), new Offset(0, 3, 3));
+                new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -553,7 +576,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o$e two');
 
             const expected = new WordChunk('o$e', false, false, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(expected);
          });
@@ -562,7 +585,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('9ne two');
 
             const firstWord = new WordChunk('9ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -571,7 +594,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('-ne two');
 
             const firstWord = new WordChunk('-ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -580,7 +603,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('.ne two');
 
             const firstWord = new WordChunk('.ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -589,7 +612,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u00B7ne two');
 
             const firstWord = new WordChunk('\u00B7ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -598,7 +621,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u0320ne two');
 
             const firstWord = new WordChunk('\u0320ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -607,7 +630,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u2040ne two');
 
             const firstWord = new WordChunk('\u2040ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -620,7 +643,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('one two');
 
             const firstWord = new WordChunk('one', true, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -629,7 +652,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('on.-8 two');
 
             const firstWord = new WordChunk('on.-8', true, true, new Offset(0, 0, 0),
-               new Offset(0, 5, 5));
+               new Offset(0, 5, 5), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -638,7 +661,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u00B7\u0310\u2040e two');
 
             const firstWord = new WordChunk('\u00B7\u0310\u2040e', false, true,
-                new Offset(0, 0, 0), new Offset(0, 4, 4));
+                new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -655,7 +678,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor(word + ' two');
 
             const firstWord = new WordChunk(word, true, true, new Offset(0, 0, 0),
-               new Offset(0, word.length, word.length));
+               new Offset(0, word.length, word.length), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -664,7 +687,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\uFDF1e two');
 
             const firstWord = new WordChunk('\uFDF1e', true, true,
-                new Offset(0, 0, 0), new Offset(0, 2, 2));
+                new Offset(0, 0, 0), new Offset(0, 2, 2), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -673,7 +696,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('o$e two');
 
             const expected = new WordChunk('o$e', false, false, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(expected);
          });
@@ -682,7 +705,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('9ne two');
 
             const firstWord = new WordChunk('9ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -691,7 +714,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('-ne two');
 
             const firstWord = new WordChunk('-ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -700,7 +723,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('.ne two');
 
             const firstWord = new WordChunk('.ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -709,7 +732,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u00B7ne two');
 
             const firstWord = new WordChunk('\u00B7ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -718,7 +741,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u0320ne two');
 
             const firstWord = new WordChunk('\u0320ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -727,7 +750,7 @@ describe('XmlStringCursor', () => {
             const c = new XmlStringCursor('\u2040ne two');
 
             const firstWord = new WordChunk('\u2040ne', false, true, new Offset(0, 0, 0),
-               new Offset(0, 3, 3));
+               new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
          });
@@ -741,21 +764,22 @@ describe('XmlStringCursor', () => {
       it('returns the next space-terminated set of decimal digits', () => {
          const c = new XmlStringCursor('123 ');
 
-         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
 
       it('returns the next space-terminated set of hex digits', () => {
          const c = new XmlStringCursor('12AbCdE3 ');
 
-         const expected = new DigitChunk('12AbCdE3', false, new Offset(0, 0, 0), new Offset(0, 8, 8));
+         const expected = new DigitChunk('12AbCdE3', false, new Offset(0, 0, 0), new Offset(0, 8, 8), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
 
       it('returns all the possible digits', () => {
          const c = new XmlStringCursor('0123456789AaBbCcDdEeFf');
 
-         const expected = new DigitChunk('0123456789AaBbCcDdEeFf', false, new Offset(0, 0, 0), new Offset(0, 22, 22));
+         const expected = new DigitChunk('0123456789AaBbCcDdEeFf', false, new Offset(0, 0, 0),
+            new Offset(0, 22, 22), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
 
@@ -774,13 +798,15 @@ describe('XmlStringCursor', () => {
       it('stops processing at a non-digit', () => {
          const c = new XmlStringCursor('12;');
 
-         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0), new Offset(0, 2, 2)));
+         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0),
+            new Offset(0, 2, 2), defaultLoc));
       });
 
       it('stops processing at EOF', () => {
          const c = new XmlStringCursor('12');
 
-         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0), new Offset(0, 2, 2)));
+         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0),
+            new Offset(0, 2, 2), defaultLoc));
       });
 
       it('returns the digits even when not at the start of the cursor', () => {
@@ -788,13 +814,14 @@ describe('XmlStringCursor', () => {
          c.getWord([]);
          c.getSpace();
 
-         expect(c.getDigits()).toEqual(new DigitChunk('123', true, new Offset(0, 4, 4), new Offset(0, 7, 7)));
+         expect(c.getDigits()).toEqual(new DigitChunk('123', true, new Offset(0, 4, 4),
+            new Offset(0, 7, 7), defaultLoc));
       });
 
       it('adds the digit chunk to the recent chunks', () => {
          const c = new XmlStringCursor('123 ');
          c.getDigits();
-         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3));
+         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([ expected ]);
       });
@@ -813,7 +840,7 @@ describe('XmlStringCursor', () => {
       it('returns the next character', () => {
          const c = new XmlStringCursor('<foo>');
 
-         expect(c.getChar()).toEqual(new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1)));
+         expect(c.getChar()).toEqual(new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns undefined if there are no more characters', () => {
@@ -825,26 +852,26 @@ describe('XmlStringCursor', () => {
       it('returns the next character even if it is a newline', () => {
          const c = new XmlStringCursor('\n foo');
 
-         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character even if it is a return', () => {
          const c = new XmlStringCursor('\r foo');
 
-         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1)));
+         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character even if it is both a return and newline pair', () => {
          const c = new XmlStringCursor('\r\n foo');
 
-         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2)));
+         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
       });
 
       it('returns the next character even when the cursor is not at the beginning', () => {
          const c = new XmlStringCursor('x\r\n foo');
          c.getChar();
 
-         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3)));
+         expect(c.getChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
       });
 
       it('adds the char chunk to the recent chunks', () => {
@@ -852,7 +879,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk('t', new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new PlainChunk('t', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
          ]);
       });
 
@@ -883,49 +910,49 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('<frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('<', new Offset(0, 0, 0),
-             new Offset(0, 1, 1)));
+             new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns a chunk with markup if the next is just &', () => {
          const c = new XmlStringCursor('&frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('&', new Offset(0, 0, 0),
-             new Offset(0, 1, 1)));
+             new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns a markup chunk if the next is </', () => {
          const c = new XmlStringCursor('</frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('</', new Offset(0, 0, 0),
-             new Offset(0, 2, 2)));
+             new Offset(0, 2, 2), defaultLoc));
       });
 
       it('returns a chunk with markup if the next is <!--', () => {
          const c = new XmlStringCursor('<!--frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('<!--', new Offset(0, 0, 0),
-             new Offset(0, 4, 4)));
+             new Offset(0, 4, 4), defaultLoc));
       });
 
       it('returns a chunk with markup if the next is <?', () => {
          const c = new XmlStringCursor('<?frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('<?', new Offset(0, 0, 0),
-             new Offset(0, 2, 2)));
+             new Offset(0, 2, 2), defaultLoc));
       });
 
       it('returns a chunk with markup if the next is <!', () => {
          const c = new XmlStringCursor('<!frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('<!', new Offset(0, 0, 0),
-             new Offset(0, 2, 2)));
+             new Offset(0, 2, 2), defaultLoc));
       });
 
       it('returns a chunk with markup if the next is </', () => {
          const c = new XmlStringCursor('</frog');
 
          expect(c.getMarkup()).toEqual(new PlainChunk('</', new Offset(0, 0, 0),
-             new Offset(0, 2, 2)));
+             new Offset(0, 2, 2), defaultLoc));
       });
 
       it('returns a chunk with markup from the middle of the source string', () => {
@@ -933,7 +960,7 @@ describe('XmlStringCursor', () => {
          c.getSpace();
 
          expect(c.getMarkup()).toEqual(new PlainChunk('</', new Offset(1, 2, 4),
-             new Offset(1, 4, 6)));
+             new Offset(1, 4, 6), defaultLoc));
       });
 
       it('adds the chunk with < markup to the recent chunks', () => {
@@ -941,7 +968,7 @@ describe('XmlStringCursor', () => {
          c.getMarkup();
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new PlainChunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
          ]);
       });
 
@@ -950,7 +977,7 @@ describe('XmlStringCursor', () => {
          c.getMarkup();
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk('&', new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new PlainChunk('&', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
          ]);
       });
 
@@ -981,14 +1008,14 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor(']frog');
 
          expect(c.getClose()).toEqual(new PlainChunk(']', new Offset(0, 0, 0),
-             new Offset(0, 1, 1)));
+             new Offset(0, 1, 1), defaultLoc));
       });
 
       it('returns a chunk with the coose if the next ]]>', () => {
          const c = new XmlStringCursor(']]>frog');
 
          expect(c.getClose()).toEqual(new PlainChunk(']]>', new Offset(0, 0, 0),
-             new Offset(0, 3, 3)));
+             new Offset(0, 3, 3), defaultLoc));
       });
 
       it('adds the chunk with ]]> close to the recent chunks', () => {
@@ -996,7 +1023,7 @@ describe('XmlStringCursor', () => {
          c.getClose();
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk(']]>', new Offset(0, 0, 0), new Offset(0, 3, 3))
+            new PlainChunk(']]>', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc)
          ]);
       });
 
@@ -1005,7 +1032,7 @@ describe('XmlStringCursor', () => {
          c.getClose();
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk(']', new Offset(0, 0, 0), new Offset(0, 1, 1))
+            new PlainChunk(']', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
          ]);
       });
 
@@ -1055,7 +1082,7 @@ describe('XmlStringCursor', () => {
       it('returns the matched string', () => {
          const c = new XmlStringCursor('frogD');
 
-         expect(c.getMatch('fro')).toEqual(new PlainChunk('fro', new Offset(0, 0, 0), new Offset(0, 3, 3)));
+         expect(c.getMatch('fro')).toEqual(new PlainChunk('fro', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc));
       });
 
       it('returns a nothing if the matched string is not found', () => {
@@ -1074,7 +1101,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('one');
          c.getChar();
 
-         expect(c.getMatch('ne')).toEqual(new PlainChunk('ne', new Offset(0, 1, 1), new Offset(0, 3, 3)));
+         expect(c.getMatch('ne')).toEqual(new PlainChunk('ne', new Offset(0, 1, 1), new Offset(0, 3, 3), defaultLoc));
       });
 
       it('adds the matched chunk to the recent chunks', () => {
@@ -1082,7 +1109,7 @@ describe('XmlStringCursor', () => {
          c.getMatch('Tes');
 
          expect(c.getRecentChunks()).toEqual([
-            new PlainChunk('Tes', new Offset(0, 0, 0), new Offset(0, 3, 3))
+            new PlainChunk('Tes', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc)
          ]);
       });
 
@@ -1125,7 +1152,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frogD');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
             terminator: 'D'
          });
       });
@@ -1143,7 +1170,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frog');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
             terminator: undefined
          });
       });
@@ -1152,7 +1179,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('frogDandD');
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4)),
+            chunk: new WithSpaceChunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
             terminator: 'D'
          });
       });
@@ -1160,7 +1187,7 @@ describe('XmlStringCursor', () => {
       it('returns the string with newlines appropriately adjusted', () => {
          const c = new XmlStringCursor('line1\nline2\rline3\r\nline4!');
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\nline2\rline3\r\nline4',
-            new Offset(0, 0, 0), new Offset(3, 4, 24));
+            new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);
 
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
@@ -1172,7 +1199,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!');
          const chunk = new WithSpaceChunk('line1\u0085line2\u2028line3\n\u0085line4',
             'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(1, 5, 24));
+            new Offset(0, 0, 0), new Offset(1, 5, 24), defaultLoc);
 
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
@@ -1181,13 +1208,10 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the string with \\u0085 and \\u2028 adjusted if this is 1.1', () => {
-         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!');
-         const pk = new EntityInfo();
-         pk.version = 1.1;
-         c.setEntityInfo(pk);
+         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!', entityInfo1dot1);
 
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(3, 4, 24));
+            new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
             terminator: '!'
@@ -1205,7 +1229,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
 
          expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new WithSpaceChunk('rog', 'rog', new Offset(0, 1, 1), new Offset(0, 4, 4)),
+            chunk: new WithSpaceChunk('rog', 'rog', new Offset(0, 1, 1), new Offset(0, 4, 4), defaultLoc),
             terminator: 'D'
          });
       });
@@ -1215,7 +1239,7 @@ describe('XmlStringCursor', () => {
          c.getToTerminator([ 'Tes' ]);
 
          expect(c.getRecentChunks()).toEqual([
-            new WithSpaceChunk('This is a ', 'This is a ', new Offset(0, 0, 0), new Offset(0, 10, 10))
+            new WithSpaceChunk('This is a ', 'This is a ', new Offset(0, 0, 0), new Offset(0, 10, 10), defaultLoc)
          ]);
       });
 
@@ -1274,12 +1298,12 @@ describe('XmlStringCursor', () => {
          c.getSpace();
          c.getWord([]);
 
-         const firstWord = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3));
-         const secondWord = new WordChunk('two', true, true, new Offset(0, 4, 4), new Offset(0, 7, 7));
+         const firstWord = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const secondWord = new WordChunk('two', true, true, new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([
             firstWord,
-            new WithSpaceChunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4)),
+            new WithSpaceChunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4), defaultLoc),
             secondWord
          ]);
       });

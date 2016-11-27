@@ -2,6 +2,8 @@
 
 'use strict';
 
+const EntityLocation = require('../EntityLocation.js');
+
 const LAST_1DOT0_REVISION = 5;
 const LAST_1DOT1_REVISION = 2;
 
@@ -12,10 +14,12 @@ const LAST_1DOT1_REVISION = 2;
 
 class EntityInfo {
 
-   constructor(entityType, xmlVersion, xmlRevision) {
+   constructor(entityType, xmlVersion, xmlRevision, location) {
       this.type = entityType || EntityInfo.TYPE.DOCUMENT;
       this.version = xmlVersion || 1.0;
       this.revision = xmlRevision || (this.versionIs1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION);
+      this.location = location || new EntityLocation();
+      this.overrideDocument = false;
    }
 
    /**********************************************************************\

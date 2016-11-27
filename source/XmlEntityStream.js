@@ -2,7 +2,6 @@
 
 'use strict';
 
-const EntityInfo = require('./util/EntityInfo.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
@@ -108,7 +107,6 @@ class AttributeContext extends Context {
          piece.haveEntityData = true;
          this.cursor = cursor;
          this.stream = new XmlTokenStream(cursor, this.entityStream._entityManager, {
-            entityType: EntityInfo.TYPE.EXTERNAL,
             lax: this.entityStream._options.lax
          });
 
@@ -195,7 +193,6 @@ class XmlEntityStream extends XmlStream {
 
             if (cursor) {
                const stream = new XmlTokenStream(cursor, this._entityManager, {
-                  entityType: EntityInfo.TYPE.EXTERNAL,
                   lax: this._options.lax
                });
                const context = new ContentContext(cursor, stream, token);

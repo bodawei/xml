@@ -2,6 +2,7 @@
 
 'use strict';
 
+const EntityInfo = require('./util/EntityInfo.js');
 const TextChunk = require('./TextChunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
@@ -160,17 +161,24 @@ class XmlEntityManager {
    \**********************************************************************/
 
    _internalGet(name, isParameter) {
-      const info = this._internalGetEntityInfo(name, isParameter);
+      const info = this._internalGetEntityData(name, isParameter);
 
       if (!info) {
          return;
       }
 
-      return info.token.notationDataName ? undefined : new XmlStringCursor(info.token.value);
+      if (info.token.notationDataName) {
+         return;
+      }
+
+      const cursor = new XmlStringCursor(info.token.value);
+      cursor.entityInfo.type = EntityInfo.TYPE.EXTERNAL;
+
+      return cursor;
    }
 
    _internalGetEntityToken(name, isParameter) {
-      const info = this._internalGetEntityInfo(name, isParameter);
+      const info = this._internalGetEntityData(name, isParameter);
 
       if (!info) {
          return;
@@ -179,7 +187,7 @@ class XmlEntityManager {
       return info.token;
    }
 
-   _internalGetEntityInfo(name, isParameter) {
+   _internalGetEntityData(name, isParameter) {
       if (!name) {
          throw new Error('Must call with the name of an entity.');
       }
@@ -190,7 +198,7 @@ class XmlEntityManager {
          return;
       }
 
-      return entityEntry.getBestEntityInfo();
+      return entityEntry.getBestEntityData();
    }
 
    /**********************************************************************\
@@ -206,7 +214,7 @@ class XmlEntityManager {
       const entityEntry = this._lookupEntityEntry(token.name, isParameter, true);
       const subInfo = entityEntry[type];
 
-      subInfo.push(new EntityInfo(token));
+      subInfo.push(new EntityData(token));
    }
 
    /**********************************************************************\
@@ -225,7 +233,7 @@ class XmlEntityManager {
          return false;
       }
 
-      const info = entityEntry.getBestEntityInfo();
+      const info = entityEntry.getBestEntityData();
 
       return !!info.token.notationDataName;
    }
@@ -255,7 +263,7 @@ class EntityEntry {
       this[EXTERNAL_ENTITY] = [];
    }
 
-   getBestEntityInfo() {
+   getBestEntityData() {
       if (this[INTERNAL_ENTITY].length > 0) {
          return this[INTERNAL_ENTITY][0];
       } else if (this[EXTERNAL_ENTITY].length > 0) {
@@ -267,7 +275,7 @@ class EntityEntry {
    }
 }
 
-class EntityInfo {
+class EntityData {
 
    constructor(token) {
       this.token = token;

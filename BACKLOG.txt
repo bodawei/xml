@@ -25,7 +25,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 KEEP READING ABOUT ENTITIES.
 KEEP READING ABOUT STREAMS
 
-S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
+√ S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
 	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
 		- might be worth comparing with doing a regex which gives all the matches so we just count those
 S 153 Entityinfo tweaks:
@@ -49,6 +49,8 @@ M 46 Improve handling of 1.0 vs. 1.1 control chars
 		- This goes in validation. examines every parse result
 		- maybe just iterate through the parse result, and for each chunk check if there are bad, then accumulate and report error if so. This will be rare, but having a library routine will reduce testing.
 
+CLEANUP
+- Review code changes for 153. I feel like we had to spread stuff all over the place. Can we straighten up?
 ISSUES
 	- how to report discouraged
 Extra
@@ -64,7 +66,7 @@ Extra
 		
 	
 
--- next: 153
+-- next: 155
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -228,6 +230,7 @@ M 112: Browser entity retriever. For now must be sync to get a string cursor
 M 113: Node entity retriever. For now must be sync to get a string cursor. but testing can test both
 	use https://github.com/node-nock/nock
 	This also needs to deal with files 
+S 154  Provide a cross environment "location" which StringCursor or EntityInfo or EntityLocation uses to default to either process.cwd() or window.location
 
 --- DTD [3XL]
 21:XL Read element content structure

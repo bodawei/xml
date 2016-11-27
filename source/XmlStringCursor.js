@@ -4,6 +4,7 @@
 
 const Offset = require('./Offset.js');
 const EntityInfo = require('./util/EntityInfo.js');
+const EntityLocation = require('./EntityLocation.js');
 const TextChunk = require('./TextChunk.js');
 
 const DECIMAL = 'DECIMAL';
@@ -30,23 +31,49 @@ const LINE_ENDING_REGEX11 = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 class XmlStringCursor {
 
    /**********************************************************************\
-    Constructs an instance with the specified source string.
+    Constructs an instance with the specified source string and entity
+    info.  Note that the second parameter ultimately turns into an
+    EntityInfo instance, but various alternate parameters can be provided
+    (this is so construction is as easy as possible for the caller).
+    If the paramter is
+       - an EntityInfo, it is used directly (not cloned).
+       - an EntityLocation, it is passed to an otherwise default-valued
+         EntityInfo instance.
+       - a String, it is assumed to be the URL locating the entity this
+         is processing, so is passed to an EntityLocation and then an
+         EntityInfo
+       - the undefined value, it is assumed we should use the default
+         location for the entity, and that is passed to an EntityLocation
+         and then EntityInfo.
 
     PARAM
     The string that this cursor should use.
-    SourceLocation: The EntityLocation that corresponds to the string
+    info: undefiend, a string (URL), EntityLocation, or an EntityInfo
    \**********************************************************************/
 
-   constructor(source, sourceLocation) {
+   constructor(source, info) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
+      }
+
+      if (!info || typeof info === 'string') {
+         info = new EntityLocation(info);
+      }
+
+      if (info instanceof EntityLocation) {
+         const temp = new EntityInfo();
+         temp.location = info;
+         info = temp;
+      }
+
+      if (!(info instanceof EntityInfo)) {
+         throw new Error('Must pass an EntityInfo, or something that can become one, into XmlStringCursor.');
       }
 
       this._source = source;
       this._offset = new Offset(0, 0, 0);
       this._chunks = [];
-      this._sourceLoc = sourceLocation;
-      this._entityInfo = new EntityInfo();
+      this._entityInfo = info;
    }
 
    /**********************************************************************\
@@ -56,8 +83,8 @@ class XmlStringCursor {
     A EntityInfo object.
    \**********************************************************************/
 
-   setEntityInfo(newKind) {
-      this._entityInfo = newKind;
+   get entityInfo() {
+      return this._entityInfo;
    }
 
    /**********************************************************************\
@@ -121,7 +148,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._sourceLoc);
+      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._entityInfo.location);
    }
 
    /**********************************************************************\
@@ -676,7 +703,7 @@ class XmlStringCursor {
 
    _makeChunkWithSpace(data, originalString, startOffset) {
       const chunk = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone(),
-         this._sourceLoc);
+         this._entityInfo.location);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -691,7 +718,7 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makePlainChunk(data, startOffset) {
-      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(), this._sourceLoc);
+      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(), this._entityInfo.location);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -710,7 +737,7 @@ class XmlStringCursor {
 
    _makeWordChunk(data, couldBeName, couldBeNmToken, startOffset) {
       const chunk = new TextChunk.WordChunk(data, couldBeName, couldBeNmToken, startOffset, this._offset.clone(),
-         this._sourceLoc);
+         this._entityInfo.location);
       this._chunks.push(chunk);
       return chunk;
    }
@@ -725,7 +752,8 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeDigitChunk(data, isDecimal, startOffset) {
-      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone(), this._sourceLoc);
+      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone(),
+         this._entityInfo.location);
       this._chunks.push(chunk);
       return chunk;
    }

@@ -6,6 +6,7 @@
 
 const Offset = require('./Offset.js');
 const EntityInfo = require('./util/EntityInfo.js');
+const EntityLocation = require('./EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
@@ -68,8 +69,7 @@ describe('XmlTokenStream', () => {
 
          expect(s._options).toEqual({
             lax: false,
-            'lax:allowOpenAngleBracketsInAttributeValues': false,
-            entityType: 'DOCUMENT'
+            'lax:allowOpenAngleBracketsInAttributeValues': false
          });
       });
 
@@ -448,16 +448,28 @@ describe('XmlTokenStream', () => {
    describe('cursor interaction', () => {
 
       it('sets the version on the cursor when the XmlDeclaration is found', () => {
-         const s = makeStrictStream('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
-         spyOn(s._cursor, 'setEntityInfo');
+         const entityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityInfo);
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
 
          s.getNext();
 
-         expect(s._cursor.setEntityInfo).toHaveBeenCalledWith(new EntityInfo(
+         expect(s._cursor.entityInfo).toEqual(new EntityInfo(
             EntityInfo.TYPE.DOCUMENT,
             1.1,
             2
          ));
+      });
+
+      it('does not set the version on the cursor if the cursor is marked as overriding the doc', () => {
+         const entityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
+         entityInfo.overrideDocument = true;
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityInfo);
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+
+         s.getNext();
+
+         expect(s._cursor.entityInfo).toEqual(entityInfo);
       });
 
    });
