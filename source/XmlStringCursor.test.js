@@ -1160,7 +1160,7 @@ describe('XmlStringCursor', () => {
       it('returns the string with newlines appropriately adjusted', () => {
          const c = new XmlStringCursor('line1\nline2\rline3\r\nline4!');
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\nline2\rline3\r\nline4',
-            new Offset(0, 0, 0), new Offset(0, 24, 24));
+            new Offset(0, 0, 0), new Offset(3, 4, 24));
 
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
@@ -1172,7 +1172,7 @@ describe('XmlStringCursor', () => {
          const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!');
          const chunk = new WithSpaceChunk('line1\u0085line2\u2028line3\n\u0085line4',
             'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(0, 24, 24));
+            new Offset(0, 0, 0), new Offset(1, 5, 24));
 
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
@@ -1187,7 +1187,7 @@ describe('XmlStringCursor', () => {
          c.setEntityInfo(pk);
 
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(0, 24, 24));
+            new Offset(0, 0, 0), new Offset(3, 4, 24));
          expect(c.getToTerminator([ '!' ])).toEqual({
             chunk: chunk,
             terminator: '!'

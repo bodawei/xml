@@ -435,9 +435,27 @@ class XmlStringCursor {
       const originalString = this._source.substring(startOffset.index, this._offset.index);
       let rawString = originalString;
       const regex = this._entityInfo.versionIs1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
+      let ctr = 0;
+      let lineCount = 0;
+      let lengthToEnd = rawString.length;
 
       if (regex.exec(rawString)) {
          rawString = rawString.replace(regex, '\n');
+
+         while (ctr !== -1) {
+            ctr = rawString.indexOf('\n', ctr);
+            if (ctr !== -1) {
+               ctr++; // skip over the match
+               lineCount++;
+               lengthToEnd = rawString.length - ctr;
+            }
+         }
+      }
+
+      // change the offset based on line endings we found in the string
+      if (lineCount > 0) {
+         this._offset.line += lineCount;
+         this._offset.column = lengthToEnd - 1; // length to index
       }
 
       return {

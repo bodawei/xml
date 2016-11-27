@@ -26,9 +26,9 @@ function getSummaryPaths(dir, parentName, totals) {
          if (files[index] === COVERAGE_FILENAME) {
             var coverageSummary = fs.readFileSync(fullPath, { encoding: 'utf8' });
             var jsonData = JSON.parse(coverageSummary);
-            var altTotalCovered = 0;
-            var altTotalLines = 0;
-            var altTotalSkipped = 0;
+//            var altTotalCovered = 0;
+//            var altTotalLines = 0;
+//            var altTotalSkipped = 0;
             for (var key in jsonData) {
                if (key === 'total') {
                   continue;
