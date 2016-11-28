@@ -6,6 +6,7 @@ const Offset = require('./Offset.js');
 const EntityInfo = require('./util/EntityInfo.js');
 const EntityLocation = require('./EntityLocation.js');
 const TextChunk = require('./TextChunk.js');
+const util = require('./util/util.js');
 
 const DECIMAL = 'DECIMAL';
 const HEX = 'HEX';
@@ -121,6 +122,7 @@ class XmlStringCursor {
    \*----------------------------------------------------------------------*/
 
    peekChar() {
+      let invalidChars;
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
       const is1dot1 = this._entityInfo.versionIs1dot1;
@@ -146,9 +148,18 @@ class XmlStringCursor {
          }
 
          nextChar = '\n';
+      } else {
+         const charKind = util.charKind(nextChar, this.entityInfo);
+
+         if (charKind === util.CHARKIND_INVALID) {
+            invalidChars = [ 0 ];
+         }
       }
 
-      return new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._entityInfo.location);
+      const chunk = new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._entityInfo.location);
+      chunk.invalidChars = invalidChars;
+
+      return chunk;
    }
 
    /**********************************************************************\

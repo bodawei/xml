@@ -417,7 +417,7 @@ class XmlTokenStream extends XmlStream {
       }
 
       this._checkPiAndCommentState(start, SEID.COMMENT_INVALID_CONTEXT);
-      this._pushToken(new tokens.Comment(parsedComment.commentString,
+      this._pushToken(new tokens.Comment(parsedComment.commentString || '',
          this._cursor.getRecentChunks()));
    }
 
@@ -890,7 +890,7 @@ class XmlTokenStream extends XmlStream {
          }
 
          const targetName = target ? target.text : '';
-         const content = results.chunk ? results.chunk.text : undefined;
+         const content = results.chunk ? results.chunk.text : '';
 
          this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
 

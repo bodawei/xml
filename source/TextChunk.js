@@ -9,6 +9,7 @@ class PlainChunk {
       this.startOffset = startOffset;
       this.endOffset = endOffset;
       this.entityLocation = entityLocation;
+      this.invalidChars = undefined;
    }
 
 }

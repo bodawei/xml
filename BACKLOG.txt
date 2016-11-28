@@ -28,13 +28,16 @@ KEEP READING ABOUT STREAMS
 √ S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
 	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
 		- might be worth comparing with doing a regex which gives all the matches so we just count those
-S 153 Entityinfo tweaks:
+√ S 153 Entityinfo tweaks:
 	- Should pass EntityLocation into EntityInfo - quick
 	- document that entityinfo lives in cursor - quick
 	- options override what is in cursor
 		- version: "1.1" or "1.0" or "1.1/2" Revision tied to version for keeping in synch
 		- overrides whatever is in cursor
 	- user set version/revision overrides what is in xmldecl - set some flags
+	[this took almost 80 mins!]
+[110]
+69:S: Rework PI and Comment to be arrays of content, just like attributes
 
 M 46 Improve handling of 1.0 vs. 1.1 control chars
 	In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
@@ -44,6 +47,7 @@ M 46 Improve handling of 1.0 vs. 1.1 control chars
 	- check expansion of char refs
 		- use charKind, which becomes a utility routine. (could also do on int
 		- report error
+		-- Oops, the invalidness is a well-formedness constraint, not syntax.  
 	- peekChar and getChar	- use charKind()
 		add reporting of errors
 		- This goes in validation. examines every parse result
@@ -51,9 +55,15 @@ M 46 Improve handling of 1.0 vs. 1.1 control chars
 
 CLEANUP
 - Review code changes for 153. I feel like we had to spread stuff all over the place. Can we straighten up?
+	- MAybe EntityInfo should be EntityMetaData (I'm serious)
+	- It should probably also be read-only, and ultimately passed down through the streams somehow (do they even care?)
+	- overrideDocument should be in the options to XmlTokenStream
+- Things like EntityInfo, EntityLocation, TextChunk and token  etc. perhaps belong in a common area? They underpin any cursor. util is the wrong name, and weird that EntityInfo is reaching up to EntityLocation
 ISSUES
 	- how to report discouraged
 Extra
+	- test that charRefs do not generate bad characters?
+	- remind yourself what D800-  are
 	- check both invalid and discouraged (discouraged is a warning. how to do this?)
 	- getWord	- !use 'isSpace',use charKind() which returns space|normal|invalid|discouraged
 			- checkChar not so easy. Could combine with the name checks
@@ -164,8 +174,7 @@ S 53 use xml decl encoding to change input if needed
 				- read their code, figure out what the heck is going on.
 					- Why doesn't jasmine override their override?
 
---- Basic processing  [2S]
-69:S: Rework PI and Comment to be arrays of content, just like attributes
+--- Basic processing  [1S]
 70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
 	- Make this a wrapper stream
 

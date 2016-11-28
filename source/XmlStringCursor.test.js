@@ -246,6 +246,89 @@ describe('XmlStringCursor', () => {
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
       });
 
+      it('adds an array of invalid character indexes when a bad character is found', () => {
+         const c = new XmlStringCursor('\u0000');
+
+         expect(c.peekChar().invalidChars).toEqual([ 0 ]);
+      });
+
+      it('adds the index for all invalid characters below 256 in 1.0', () => {
+         for (let index = 0; index <= 255; index++) {
+            const c = new XmlStringCursor(String.fromCharCode(index));
+            const expected = {
+               index: index.toString(16),  // to let failures be more understandable
+               result: undefined
+            };
+
+            if (index < 0x20 && index !== 0x09 && index !== 0x0A && index !== 0x0D) {
+               expected.result = [ 0 ];
+            }
+
+            expect({
+               index: index.toString(16),
+               result: c.peekChar().invalidChars
+            }).toEqual(expected);
+         }
+      });
+
+      it('adds the index for all invalid characters between D7FE and E001 in 1.0', () => {
+         for (let index = 0xFFFD; index <= 0xFFFF; index++) {
+            const c = new XmlStringCursor(String.fromCharCode(index));
+            const expected = {
+               index: index.toString(16),
+               result: undefined
+            };
+
+            if (index !== 0xFFFD) {
+               expected.result = [ 0 ];
+            }
+
+            expect({
+               index: index.toString(16),
+               result: c.peekChar().invalidChars
+            }).toEqual(expected);
+         }
+      });
+
+      it('adds the index for all invalid characters below 256 in 1.1', () => {
+         for (let index = 0; index <= 255; index++) {
+            const c = new XmlStringCursor(String.fromCharCode(index), new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2));
+            const expected = {
+               index: index.toString(16),  // to let failures be more understandable
+               result: undefined
+            };
+
+            if ((index < 0x20 && index !== 0x09 && index !== 0x0A && index !== 0x0D) ||
+               (index >= 0x7F && index <= 0x9F && index !== 0x85)) {
+               expected.result = [ 0 ];
+            }
+
+            expect({
+               index: index.toString(16),
+               result: c.peekChar().invalidChars
+            }).toEqual(expected);
+         }
+      });
+
+      it('adds the index for all invalid characters between D7FE and E001 in 1.0', () => {
+         for (let index = 0xFFFD; index <= 0xFFFF; index++) {
+            const c = new XmlStringCursor(String.fromCharCode(index), new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2));
+            const expected = {
+               index: index.toString(16),
+               result: undefined
+            };
+
+            if (index !== 0xFFFD) {
+               expected.result = [ 0 ];
+            }
+
+            expect({
+               index: index.toString(16),
+               result: c.peekChar().invalidChars
+            }).toEqual(expected);
+         }
+      });
+
       it('adds nothing to the recent chunks', () => {
          const c = new XmlStringCursor('h<foo>');
          c.peekChar();
@@ -890,6 +973,7 @@ describe('XmlStringCursor', () => {
          expect(c.getChar().entityLocation).toEqual(loc);
       });
 
+      // Whitebox: Not testing invalid character ranges.  this is covered in peekChar() which covers this
    });
 
    describe('getMarkup()', () => {

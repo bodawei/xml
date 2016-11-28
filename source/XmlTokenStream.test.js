@@ -744,6 +744,13 @@ describe('XmlTokenStream', () => {
          expect(t.text).toEqual('N');
       });
 
+      it('throws no errors when an invalid character is referenced', () => {
+         const s = makeStrictExternalEntityStream('&#x08;');
+
+         const t = s.getNext();
+         expect(t.text).toEqual(String.fromCharCode(8));
+      });
+
       it('throws an error if there is a space after the &', () => {
          expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
             '& #65;',
@@ -1280,14 +1287,14 @@ describe('XmlTokenStream', () => {
          const s = makeStrictExternalEntityStream('<?foo?>');
 
          const t = s.getNext();
-         expect(t.content).toBeUndefined();
+         expect(t.content).toEqual('');
       });
 
       it('allows whitespace but no content', () => {
          const s = makeStrictExternalEntityStream('<?foo    ?>');
 
          const t = s.getNext();
-         expect(t.content).toBeUndefined();
+         expect(t.content).toEqual('');
       });
 
       it('throws an error if no ?> found', () => {
@@ -2063,6 +2070,19 @@ describe('XmlTokenStream', () => {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
                   new tokens.CharRef('A', tokens.ATTR_NO_CHUNKS)
+               ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('can parse attributes with a character reference to an invalid value', () => {
+            const s = makeStrictExternalEntityStream('<elemName attr1="tw&#x8;">');
+
+            const t = s.getNext();
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
+                  new tokens.CharRef(String.fromCharCode(8), tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
             } ]);

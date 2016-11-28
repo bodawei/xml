@@ -41,7 +41,7 @@ describe('XmlTokenStream (Misc)', () => {
       it('retrieves undefined as the value for an empty comment', () => {
          const s = makeStrictExternalEntityStream('<!---->');
 
-         expect(s.getNext().content).toBeUndefined();
+         expect(s.getNext().content).toEqual('');
       });
 
       it('throws an error if no --> found', () => {

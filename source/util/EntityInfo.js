@@ -9,7 +9,13 @@ const LAST_1DOT1_REVISION = 2;
 
 /**********************************************************************\
  EntityInfo holds values about an entity that will influence how we
- parse it
+ parse it. This includes the type of the entity (document, external,
+ external subset), what version of the XML spec it conforms to, and
+ the location where it is found.
+
+ The revision of the spec is provided primarily because 1.0 had what
+ is really a non-compatible change made between revision 4 and 5,
+ so we need to be able to cope with that in parsing.
 \**********************************************************************/
 
 class EntityInfo {
