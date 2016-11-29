@@ -4,9 +4,9 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('./Offset.js');
+const Offset = require('./shared/Offset.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlEntityStream = require('./XmlEntityStream.js');
 const tokens = require('./XmlToken.js');

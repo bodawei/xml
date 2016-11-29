@@ -2,10 +2,10 @@
 
 'use strict';
 
-const EntityLocation = require('./EntityLocation.js');
-const EntityInfo = require('./util/EntityInfo.js');
+const EntityLocation = require('./shared/EntityLocation.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
@@ -88,17 +88,19 @@ function textOrUndef(chunk) {
  stated in the XML Declaration or the Text Declaration (1.1 line
  endings are not allowed within those, even in a 1.1 entity. Basically,
  the declarations are always 1.0 format). Ordinarily, this will use
- that version to parse the entity.  However, in the exceedingly rare
- case that you want to override the version in the document, when you
- are constructing the cursor that will be passed to this, make sure to
- set the overrideDocument flag in the associated EntityInfo that you
- pass to the cursor to true. In that case, the version specified there
- will be used in preferene to what is in the document.
+ that version to parse the entity.
 
- Relatedly, this stream relies on the EntityInfo found in the cursor to
- determine what version (and revision) and type of entity this is
- parsing. This will modify that info only based on the version found
- in the Declaration.
+ Relatedly, this stream relies on the EntityMetaData found in the
+ cursor to determine what version (and revision) and type of entity
+ this is parsing. This will modify that info only based on the version
+ found in the Declaration.
+
+ OPTIONS
+ ignoreDocumentVersion: In the exceedingly rare case that you want to
+ override the version in the document, specify the version you want to
+ use when creating the cursor that will be passed to this, and make
+ sure to set this flag. In that case, the version specified in the
+ cursor will be used in preferene to what is in the document.
 \**********************************************************************/
 class XmlTokenStream extends XmlStream {
 
@@ -119,7 +121,8 @@ class XmlTokenStream extends XmlStream {
 
       this._options = {
          lax: false,
-         'lax:allowOpenAngleBracketsInAttributeValues': false
+         'lax:allowOpenAngleBracketsInAttributeValues': false,
+         ignoreDocumentVersion: false
       };
 
       for (const name in options) {
@@ -129,7 +132,7 @@ class XmlTokenStream extends XmlStream {
          this._options[name] = options[name];
       }
 
-      this._entityInfo = this._cursor.entityInfo;
+      this._entityMd = this._cursor.entityMd;
    }
 
    _innerGetNext() {
@@ -259,7 +262,7 @@ class XmlTokenStream extends XmlStream {
    _getS() {
       const space = this._cursor.getSpace();
 
-      if (this._entityInfo.isTypeDocument) {
+      if (this._entityMd.isTypeDocument) {
          this._assert(this._state !== STATE.START, SEID.SPACE_INVALID_CONTEXT, space.startOffset, space);
       }
 
@@ -299,17 +302,17 @@ class XmlTokenStream extends XmlStream {
    }
 
    _checkContentState(chunk, docError, subsetError) {
-      switch (this._entityInfo.type) {
-         case EntityInfo.TYPE.DOCUMENT:
+      switch (this._entityMd.type) {
+         case EntityMetaData.TYPE.DOCUMENT:
             this._assert(this._state === STATE.IN_CONTENT, docError,
                [ chunk.text ], chunk.startOffset, chunk);
             break;
-         case EntityInfo.TYPE.EXTERNAL:
+         case EntityMetaData.TYPE.EXTERNAL:
             if (this._state === STATE.START) {
                this._state = STATE.IN_CONTENT;
             }
             break;
-         case EntityInfo.TYPE.EXTERNALSUBSET:
+         case EntityMetaData.TYPE.EXTERNALSUBSET:
             this._report(subsetError, [ chunk.text ], chunk.startOffset, chunk);
             break;
       }
@@ -709,7 +712,7 @@ class XmlTokenStream extends XmlStream {
          this._validateExternalId(parsedDocType.externalId, true);
       }
 
-      if (this._entityInfo.isTypeDocument) {
+      if (this._entityMd.isTypeDocument) {
          if (this._state !== STATE.PROLOG_PREDOCTYPE) {
             this._report(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
          }
@@ -806,7 +809,7 @@ class XmlTokenStream extends XmlStream {
    }
 
    _checkDeclarationState(start, error) {
-      if (this._entityInfo.isTypeExternalSubset && this._state === STATE.START) {
+      if (this._entityMd.isTypeExternalSubset && this._state === STATE.START) {
          this._state = STATE.IN_DTD;
       }
       this._assert(this._state === STATE.IN_DTD, error, start.startOffset, start);
@@ -900,14 +903,14 @@ class XmlTokenStream extends XmlStream {
 
    _checkPiAndCommentState(start, error) {
       if (this._state === STATE.START) {
-         switch (this._entityInfo.type) {
-            case EntityInfo.TYPE.DOCUMENT:
+         switch (this._entityMd.type) {
+            case EntityMetaData.TYPE.DOCUMENT:
                this._report(error, start.startOffset, start);
                break;
-            case EntityInfo.TYPE.EXTERNAL:
+            case EntityMetaData.TYPE.EXTERNAL:
                this._state = STATE.IN_CONTENT;
                break;
-            case EntityInfo.TYPE.EXTERNALSUBSET:
+            case EntityMetaData.TYPE.EXTERNALSUBSET:
                this._state = STATE.IN_DTD;
                break;
          }
@@ -936,7 +939,7 @@ class XmlTokenStream extends XmlStream {
    _getXmlDecl(start) {
       const params = this._getAttributes(false);
       const close = this._cursor.getMatch('?>');
-      const isXmlDecl = this._entityInfo.isTypeDocument;
+      const isXmlDecl = this._entityMd.isTypeDocument;
       let foundVersion;
       let seenEncoding = false;
       let seenStandalone = false;
@@ -998,14 +1001,14 @@ class XmlTokenStream extends XmlStream {
       }
 
       if (this._state === STATE.START) {
-         switch (this._entityInfo.type) {
-            case EntityInfo.TYPE.DOCUMENT:
+         switch (this._entityMd.type) {
+            case EntityMetaData.TYPE.DOCUMENT:
                this._state = STATE.PROLOG_PREDOCTYPE;
                break;
-            case EntityInfo.TYPE.EXTERNAL:
+            case EntityMetaData.TYPE.EXTERNAL:
                this._state = STATE.IN_CONTENT;
                break;
-            case EntityInfo.TYPE.EXTERNALSUBSET:
+            case EntityMetaData.TYPE.EXTERNALSUBSET:
                this._state = STATE.IN_DTD;
                break;
          }
@@ -1013,11 +1016,11 @@ class XmlTokenStream extends XmlStream {
          this._report(SEID.XMLDECL_INVALID_CONTEXT);
       }
 
-      if (!this._entityInfo.overrideDocument) {
+      if (!this._options.ignoreDocumentVersion) {
          if (foundVersion === '1.0') {
-            this._entityInfo.version = 1.0;
+            this._entityMd.version = 1.0;
          } else if (foundVersion === '1.1') {
-            this._entityInfo.version = 1.1;
+            this._entityMd.version = 1.1;
          }
       }
 
@@ -1102,8 +1105,8 @@ class XmlTokenStream extends XmlStream {
       }
 
       const nameText = name ? name.text : '';
-      switch (this._entityInfo.type) {
-         case EntityInfo.TYPE.DOCUMENT:
+      switch (this._entityMd.type) {
+         case EntityMetaData.TYPE.DOCUMENT:
             if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
                this._state = STATE.IN_CONTENT;
             } else if (this._state === STATE.IN_DTD) {
@@ -1112,14 +1115,14 @@ class XmlTokenStream extends XmlStream {
                this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
             }
             break;
-         case EntityInfo.TYPE.EXTERNAL:
+         case EntityMetaData.TYPE.EXTERNAL:
             if (this._state === STATE.START) {
                this._state = STATE.IN_CONTENT;
             }
             this._assert(this._state === STATE.IN_CONTENT,
                SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
             break;
-         case EntityInfo.TYPE.EXTERNALSUBSET:
+         case EntityMetaData.TYPE.EXTERNALSUBSET:
             this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
             break;
       }

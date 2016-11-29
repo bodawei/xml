@@ -4,23 +4,23 @@
 
 /* eslint-env jasmine */
 
-const EntityLocation = require('./EntityLocation.js');
-const Offset = require('./Offset.js');
-const EntityInfo = require('./util/EntityInfo.js');
-const PlainChunk = require('./TextChunk.js').PlainChunk;
-const WordChunk = require('./TextChunk.js').WordChunk;
-const WithSpaceChunk = require('./TextChunk.js').WithSpaceChunk;
-const DigitChunk = require('./TextChunk.js').DigitChunk;
+const EntityLocation = require('./shared/EntityLocation.js');
+const Offset = require('./shared/Offset.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
+const PlainChunk = require('./shared/TextChunk.js').PlainChunk;
+const WordChunk = require('./shared/TextChunk.js').WordChunk;
+const WithSpaceChunk = require('./shared/TextChunk.js').WithSpaceChunk;
+const DigitChunk = require('./shared/TextChunk.js').DigitChunk;
 const XmlStringCursor = require('./XmlStringCursor.js');
-const TYPE = require('./TextChunk.js').TYPE;
+const TYPE = require('./shared/TextChunk.js').TYPE;
 
 describe('XmlStringCursor', () => {
    let defaultLoc;
-   let entityInfo1dot1;
+   let EntityMetaData1dot1;
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();
-      entityInfo1dot1 = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
+      EntityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
    });
 
    describe('construction', () => {
@@ -46,41 +46,41 @@ describe('XmlStringCursor', () => {
 
       describe('location', () => {
 
-         it('accepts undefined as a value and produces a default EntityInfo', () => {
+         it('accepts undefined as a value and produces a default EntityMetaData', () => {
             const c = new XmlStringCursor('hi');
-            const defaultEntityInfo = new EntityInfo();
+            const defaultEntityMetaData = new EntityMetaData();
 
-            expect(c.entityInfo).toEqual(defaultEntityInfo);
+            expect(c.entityMd).toEqual(defaultEntityMetaData);
          });
 
-         it('accepts a URL as a value and produces an otherwise default EntityInfo', () => {
+         it('accepts a URL as a value and produces an otherwise default EntityMetaData', () => {
             const c = new XmlStringCursor('hi', 'http://test.com');
             const loc = new EntityLocation('http://test.com');
-            const derivedEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
+            const derivedEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
 
-            expect(c.entityInfo).toEqual(derivedEntityInfo);
+            expect(c.entityMd).toEqual(derivedEntityMetaData);
          });
 
-         it('accepts an EntityInfo as a value', () => {
+         it('accepts an EntityMetaData as a value', () => {
             const loc = new EntityLocation('http://foo.com');
-            const customEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
-            const c = new XmlStringCursor('hi', customEntityInfo);
+            const customEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
+            const c = new XmlStringCursor('hi', customEntityMetaData);
 
-            expect(c.entityInfo).toEqual(customEntityInfo);
+            expect(c.entityMd).toEqual(customEntityMetaData);
          });
 
-         it('accepts an EntityLocation as a value and produces an otherwise default EntityInfo', () => {
+         it('accepts an EntityLocation as a value and produces an otherwise default EntityMetaData', () => {
             const loc = new EntityLocation('http://foo.com');
             const c = new XmlStringCursor('hi', loc);
-            const derivedEntityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 5, loc);
+            const derivedEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
 
-            expect(c.entityInfo).toEqual(derivedEntityInfo);
+            expect(c.entityMd).toEqual(derivedEntityMetaData);
          });
 
          it('throws an error if some unexpected value is passed in as the info', () => {
             expect(() => {
                new XmlStringCursor('hi', 44);
-            }).toThrowError('Must pass an EntityInfo, or something that can become one, into XmlStringCursor.');
+            }).toThrowError('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
          });
 
       });
@@ -120,13 +120,13 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns that \\u0085 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u0085', entityInfo1dot1);
+         const c = new XmlStringCursor('\u0085', EntityMetaData1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
 
       it('returns that \\u2028 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u2028', entityInfo1dot1);
+         const c = new XmlStringCursor('\u2028', EntityMetaData1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
@@ -210,13 +210,13 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the next character as \\n if it is \\u0085 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u0085 foo', entityInfo1dot1);
+         const c = new XmlStringCursor('\u0085 foo', EntityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is \\u2028 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u2028 foo', entityInfo1dot1);
+         const c = new XmlStringCursor('\u2028 foo', EntityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
@@ -234,7 +234,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the next character as \\n if it is a \\r\\u0085 if this is 1.1', () => {
-         const c = new XmlStringCursor('\r\u0085 foo', entityInfo1dot1);
+         const c = new XmlStringCursor('\r\u0085 foo', EntityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
       });
@@ -292,7 +292,8 @@ describe('XmlStringCursor', () => {
 
       it('adds the index for all invalid characters below 256 in 1.1', () => {
          for (let index = 0; index <= 255; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index), new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2));
+            const c = new XmlStringCursor(String.fromCharCode(index),
+               new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2));
             const expected = {
                index: index.toString(16),  // to let failures be more understandable
                result: undefined
@@ -312,7 +313,8 @@ describe('XmlStringCursor', () => {
 
       it('adds the index for all invalid characters between D7FE and E001 in 1.0', () => {
          for (let index = 0xFFFD; index <= 0xFFFF; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index), new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.1, 2));
+            const c = new XmlStringCursor(String.fromCharCode(index),
+               new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2));
             const expected = {
                index: index.toString(16),
                result: undefined
@@ -396,14 +398,14 @@ describe('XmlStringCursor', () => {
       });
 
       it('treats a \\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u0085hi', entityInfo1dot1);
+         const c = new XmlStringCursor(' \u0085hi', EntityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \u0085', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u2028 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u2028hi', entityInfo1dot1);
+         const c = new XmlStringCursor(' \u2028hi', EntityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
@@ -432,7 +434,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('treats a \\r\\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \r\u0085hi', entityInfo1dot1);
+         const c = new XmlStringCursor(' \r\u0085hi', EntityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \r\u0085', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
@@ -527,14 +529,14 @@ describe('XmlStringCursor', () => {
       });
 
       it('does terminate at \\u0085 in 1.1', () => {
-         const c = new XmlStringCursor('one\u0085X', entityInfo1dot1);
+         const c = new XmlStringCursor('one\u0085X', EntityMetaData1dot1);
          const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does terminate at \\u2028 in 1.1', () => {
-         const c = new XmlStringCursor('one\u2028X', entityInfo1dot1);
+         const c = new XmlStringCursor('one\u2028X', EntityMetaData1dot1);
          const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
@@ -1292,7 +1294,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the string with \\u0085 and \\u2028 adjusted if this is 1.1', () => {
-         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!', entityInfo1dot1);
+         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!', EntityMetaData1dot1);
 
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\u0085line2\u2028line3\r\u0085line4',
             new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);

@@ -4,7 +4,7 @@
 
 /* eslint-env jasmine */
 
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');

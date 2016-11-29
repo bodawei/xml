@@ -4,9 +4,9 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('../Offset.js');
+const Offset = require('../shared/Offset.js');
 const SyntaxError = require('./SyntaxError.js');
-const TextChunk = require('../TextChunk.js');
+const TextChunk = require('../shared/TextChunk.js');
 
 describe('SyntaxError', () => {
 

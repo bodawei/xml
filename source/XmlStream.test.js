@@ -5,7 +5,7 @@
 /* eslint-env jasmine */
 
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const XmlToken = require('./XmlToken.js');
 

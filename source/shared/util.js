@@ -24,10 +24,10 @@ const CHARKIND_VALID = 'CHARKIND_VALID';
                             [#x7F-#x84] | [#x86-#x9F]
 \**********************************************************************/
 
-function charKind(char, entityInfo) {
+function charKind(char, entityMd) {
    const charCode = char.charCodeAt(0);
 
-   if (entityInfo.versionIs1dot0) {
+   if (entityMd.versionIs1dot0) {
       if (charCode > 0x1f && charCode < 0xd800) {
          return CHARKIND_VALID;
       }

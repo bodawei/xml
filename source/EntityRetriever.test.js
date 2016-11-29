@@ -5,7 +5,7 @@
 /* eslint-env jasmine */
 
 const EntityRetriever = require('./EntityRetriever.js');
-const EntityLocation = require('./EntityLocation.js');
+const EntityLocation = require('./shared/EntityLocation.js');
 const Promise = require('es6-promise');
 const XmlStringCursor = require('./XmlStringCursor.js');
 

@@ -2,8 +2,8 @@
 
 'use strict';
 
-const EntityInfo = require('./util/EntityInfo.js');
-const TextChunk = require('./TextChunk.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 
@@ -171,10 +171,7 @@ class XmlEntityManager {
          return;
       }
 
-      const cursor = new XmlStringCursor(info.token.value);
-      cursor.entityInfo.type = EntityInfo.TYPE.EXTERNAL;
-
-      return cursor;
+      return new XmlStringCursor(info.token.value, new EntityMetaData(EntityMetaData.TYPE.EXTERNAL));
    }
 
    _internalGetEntityToken(name, isParameter) {

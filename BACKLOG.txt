@@ -20,61 +20,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/8  Sprint 18: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
 11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
-11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 
-
-KEEP READING ABOUT ENTITIES.
-KEEP READING ABOUT STREAMS
-
-√ S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
-	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
-		- might be worth comparing with doing a regex which gives all the matches so we just count those
-√ S 153 Entityinfo tweaks:
-	- Should pass EntityLocation into EntityInfo - quick
-	- document that entityinfo lives in cursor - quick
-	- options override what is in cursor
-		- version: "1.1" or "1.0" or "1.1/2" Revision tied to version for keeping in synch
-		- overrides whatever is in cursor
-	- user set version/revision overrides what is in xmldecl - set some flags
-	[this took almost 80 mins!]
-[110]
-69:S: Rework PI and Comment to be arrays of content, just like attributes
-
-M 46 Improve handling of 1.0 vs. 1.1 control chars
-	In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
-	In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
-	The cost of this is touching each and every character and seeing if they are any of the invalid chars
-	it also means checking those discouraged characters (this is a new class of error
-	- check expansion of char refs
-		- use charKind, which becomes a utility routine. (could also do on int
-		- report error
-		-- Oops, the invalidness is a well-formedness constraint, not syntax.  
-	- peekChar and getChar	- use charKind()
-		add reporting of errors
-		- This goes in validation. examines every parse result
-		- maybe just iterate through the parse result, and for each chunk check if there are bad, then accumulate and report error if so. This will be rare, but having a library routine will reduce testing.
-
-CLEANUP
-- Review code changes for 153. I feel like we had to spread stuff all over the place. Can we straighten up?
-	- MAybe EntityInfo should be EntityMetaData (I'm serious)
-	- It should probably also be read-only, and ultimately passed down through the streams somehow (do they even care?)
-	- overrideDocument should be in the options to XmlTokenStream
-- Things like EntityInfo, EntityLocation, TextChunk and token  etc. perhaps belong in a common area? They underpin any cursor. util is the wrong name, and weird that EntityInfo is reaching up to EntityLocation
-ISSUES
-	- how to report discouraged
-Extra
-	- test that charRefs do not generate bad characters?
-	- remind yourself what D800-  are
-	- check both invalid and discouraged (discouraged is a warning. how to do this?)
-	- getWord	- !use 'isSpace',use charKind() which returns space|normal|invalid|discouraged
-			- checkChar not so easy. Could combine with the name checks
-			- would it be faster to extract to the terminators, and then do a regex for name chars etc?
-	- getMatch?	- just check input?
-	- getToTerminator	- check inputs?
-		do a regex across the whole thing, if find a bad, then iterate
-	- In all cases, return an array on the chunk which says index of bad or discouraged chars
-	- have to report errors in every case (ugh)
-		
-	
+11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
 
 -- next: 155
 =============================================
@@ -151,12 +97,31 @@ BUILD
 
 PROJECT
 --- technical debt [3s]
+ISSUES
+	- how to report discouraged - different error message
+Extra
+	add reporting of errors for parseChar
+	- test that charRefs do not generate bad characters?
+	- remind yourself what D800-  are
+	- check both invalid and discouraged (discouraged is a warning. how to do this?)
+	- getWord	- !use 'isSpace',use charKind() which returns space|normal|invalid|discouraged
+			- checkChar not so easy. Could combine with the name checks
+			- would it be faster to extract to the terminators, and then do a regex for name chars etc?
+	- getMatch?	- just check input?
+	- getToTerminator	- check inputs?
+		do a regex across the whole thing, if find a bad, then iterate
+	- In all cases, return an array on the chunk which says index of bad or discouraged chars
+	- have to report errors in every case (ugh)
+
 Note: 45, 53 and 74 really all need more review and planning.  53, in particular, seems big.
 
 45:S:Review various 1.0 standards with respect to Name (and Char definitions)
 	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
 74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
 S 53 use xml decl encoding to change input if needed
+* errors that are showing the chain of locations should be including the entity locations
+
+
 
 ? 147 Switch to Node streams  (See branch streams_
 	- Have XmlTokenStream acting as a Readable stream. Seems pretty straightforward.
@@ -173,10 +138,6 @@ S 53 use xml decl encoding to change input if needed
 				- Try a real-world case.  Do you get the same time, even for real streams
 				- read their code, figure out what the heck is going on.
 					- Why doesn't jasmine override their override?
-
---- Basic processing  [1S]
-70:S: Recognize char entities in PI and Commands (nonstandard.  needs flag)
-	- Make this a wrapper stream
 
 --- Entity management [8M 6S] !!!
 - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
@@ -268,6 +229,7 @@ S 154  Provide a cross environment "location" which StringCursor or EntityInfo o
 		Note: Can't do regex from an offset without doing a substr. sigh.
 
 ---- Extra (not part of MVP)
+70:S: Recognize char entities in PI and Commands with a special wrapper stream
 85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 I:XL Cursors can't be synchronous!
 15:M: Put a limit on how much read in in one chunk (pass in as option). 
@@ -1241,3 +1203,57 @@ Build just found more problems, so got nothing but investigation done.
 Note20
 ------
 This sprint went pretty well.  Biggest note is that you started off with a sloppy EntityInfo, and it ended up costing the whole cleanup time to get it back to what it should have been.  Need to be more discipliend about api definitions.
+
+
+Sprint 21
+=========
+√ S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
+	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
+		- might be worth comparing with doing a regex which gives all the matches so we just count those
+√ S 153 Entityinfo tweaks:
+	- Should pass EntityLocation into EntityInfo - quick
+	- document that entityinfo lives in cursor - quick
+	- options override what is in cursor
+		- version: "1.1" or "1.0" or "1.1/2" Revision tied to version for keeping in synch
+		- overrides whatever is in cursor
+	- user set version/revision overrides what is in xmldecl - set some flags
+	[this took almost 80 mins!]
+[110]
+69:S: Rework PI and Comment to be arrays of content, just like attributes
+
+M 46 Improve handling of 1.0 vs. 1.1 control chars
+	In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+	The cost of this is touching each and every character and seeing if they are any of the invalid chars
+	it also means checking those discouraged characters (this is a new class of error
+	- check expansion of char refs
+		- use charKind, which becomes a utility routine. (could also do on int
+		- report error
+		-- Oops, the invalidness is a well-formedness constraint, not syntax.  
+	- peekChar and getChar	- use charKind()
+		- This goes in validation. examines every parse result
+		- maybe just iterate through the parse result, and for each chunk check if there are bad, then accumulate and report error if so. This will be rare, but having a library routine will reduce testing.
+CLEANUP
+√ - entitydata in manager is weird
+√ - Maybe EntityInfo should be EntityMetaData (I'm serious)
+- It should probably also be read-only (except for version)
+√ - overrideDocument should be in the options to XmlTokenStream
+√ - Things like EntityInfo, EntityLocation, TextChunk and token  etc. perhaps belong in a common area? They underpin any cursor. util is the wrong name, and weird that EntityInfo is reaching up to EntityLocation
+√- readme, package and license could go into another subdirectory, too. moduleMetadata?  (may need build support)
+
+Note21
+------
+Stopped a bit early.  Threw 69 into the mix just because I had extra time.  Ended up not doing arrays, as I can't see any reason, even with 70.  Nonetheless, I changed one thing that had been bugging me which was that comments and processing instructions were returning undefined rather than ''.
+
+I was "smart" in that I think early on in the sprint, or maybe just as I was starting, I broke 46 into two parts, the getting started and "if I could get to it".
+I got the committed parts of 46 done, at least at the cursor level.
+However, we need more thinking about all of this at the stream level, and even more at the cursor level for things like to terminator. 
+I'm suggesting that rather than adding a lot of syntax error checking for every getChar and so on, that we have a library routine which walks through parse results and barfs if any chunks have invalidChars markers.
+The point is, this is more complex than I can be doing on the fly, it does need some consideration in planning.
+Second, in the last sprint, I created EntityInfo, and this sprint smoothed it out (153). I'm happy with the result, but by the time I was done I will spend a bunch of the cleanup time finishing polishing the work.  I'm a bit bothered at how long this took to settle down.
+Also, when I was deciding I was done even though there was 20 mins left, and I picked 69, I realized I don't have a long store of small thigns to grab when time is available.  Some of that is because I have been eating up the technical debt bit, but it is still a concern.
+Summary
+- STILL need to be better at planning (this showed up both for 46 and how much reworking around 153)
+- Need to have some more small backlog items. This could be prototyping the cursor async behavior or something. Either way, more planning.
+- I note that the other remaining things in technical debt are also all saying "read the specs more".
+So, the planning session is going to be long, I think.

@@ -4,11 +4,11 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('./Offset.js');
-const EntityInfo = require('./util/EntityInfo.js');
-const EntityLocation = require('./EntityLocation.js');
+const Offset = require('./shared/Offset.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
+const EntityLocation = require('./shared//EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
@@ -69,7 +69,8 @@ describe('XmlTokenStream', () => {
 
          expect(s._options).toEqual({
             lax: false,
-            'lax:allowOpenAngleBracketsInAttributeValues': false
+            'lax:allowOpenAngleBracketsInAttributeValues': false,
+            ignoreDocumentVersion: false
          });
       });
 
@@ -448,28 +449,27 @@ describe('XmlTokenStream', () => {
    describe('cursor interaction', () => {
 
       it('sets the version on the cursor when the XmlDeclaration is found', () => {
-         const entityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
-         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityInfo);
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityMd);
          const s = new XmlTokenStream(cursor, new XmlEntityManager());
 
          s.getNext();
 
-         expect(s._cursor.entityInfo).toEqual(new EntityInfo(
-            EntityInfo.TYPE.DOCUMENT,
+         expect(s._cursor.entityMd).toEqual(new EntityMetaData(
+            EntityMetaData.TYPE.DOCUMENT,
             1.1,
             2
          ));
       });
 
-      it('does not set the version on the cursor if the cursor is marked as overriding the doc', () => {
-         const entityInfo = new EntityInfo(EntityInfo.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
-         entityInfo.overrideDocument = true;
-         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityInfo);
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+      it('does not set the version on the cursor if ignoreDocumentVersion flag is set to true', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityMd);
+         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { ignoreDocumentVersion: true });
 
          s.getNext();
 
-         expect(s._cursor.entityInfo).toEqual(entityInfo);
+         expect(s._cursor.entityMd).toEqual(entityMd);
       });
 
    });
@@ -501,7 +501,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                ' \t ',
                SyntaxError.ID.SPACE_INVALID_CONTEXT,
                'The XML Declaration must appear before any content in the document entity.',
@@ -577,7 +577,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error token if there is a ]]> in the CharData', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             'testing testing ]]> testing',
             SyntaxError.ID.CHARDATA_INVALID_TEXT,
             '"]]>" must not appear in in character data.');
@@ -621,7 +621,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                'xxx',
                SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
                'CharData must not be outside the content of the document entity. Found "xxx".',
@@ -630,7 +630,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                'xxx',
                SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT,
                'CharData must not be in the external subset. Found "xxx".',
@@ -752,56 +752,56 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is a space after the &', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '& #65;',
             SyntaxError.ID.REFERENCE_XTRA_SPACE,
             'Must not have space in an entity reference.');
       });
 
       it('reports an error if there is a space after the #', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&# 65;',
             SyntaxError.ID.CHARREF_XTRA_SPACE,
             'Must not have a space after the "#" in a character reference.');
       });
 
       it('throws an error if the "x" in a hex reference is the wrong case', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#X41;',
             SyntaxError.ID.CHARREF_INVALID_HEX_CASE,
             '"x" in a hexadecimal character reference must be lower case.');
       });
 
       it('reports an error if a space is found after the  "x" in a hex reference', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#x 41;',
             SyntaxError.ID.CHARREF_XTRA_SPACE_BEFORE_DIGITS,
             'Must not have spaces before digits in a character reference.');
       });
 
       it('reports an error if no digits found in a character reference', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#;',
             SyntaxError.ID.CHARREF_NO_DIGITS,
             'Missing digits in a character reference.');
       });
 
       it('throws an error if space is found after digits in a character reference', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#12 ;',
             SyntaxError.ID.CHARREF_XTRA_SPACE_AFTER_DIGITS,
             'Must not have spaces after digits in a character reference.');
       });
 
       it('throws an error if no semicolon is found after digits in a character reference', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#12</end>',
             SyntaxError.ID.CHARREF_NO_SEMICOLON,
             'Must have a ";" after a character reference.');
       });
 
       it('reports an error if hex digits found in a decimal character reference', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '&#4e;',
             SyntaxError.ID.CHARREF_INVALID_BASE,
             'A decimal character reference must not contain hex digits. Found "4e".');
@@ -838,7 +838,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '&#50;',
                SyntaxError.ID.CHARREF_INVALID_DOC_CONTEXT,
                'A character reference must not be outside the content of the document entity.',
@@ -847,7 +847,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                '&#50;',
                SyntaxError.ID.CHARREF_INVALID_SUBSET_CONTEXT,
                'A character reference must not be in the external subset.',
@@ -918,7 +918,7 @@ describe('XmlTokenStream', () => {
    describe('parsing entity reference', () => {
 
       it('throws an error if there is no entity name', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
             '&;',
             SyntaxError.ID.REFERENCE_NO_NAME,
             'Missing name in entity reference.');
@@ -931,7 +931,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is no closing semicolon', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
             '&frog',
             SyntaxError.ID.REFERENCE_NO_SEMICOLON,
             'Missing semicolon after entity reference "frog".');
@@ -955,7 +955,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '&amp;',
                SyntaxError.ID.REFERENCE_INVALID_DOC_CONTEXT,
                'An entity reference must not be outside the content of the document entity.',
@@ -964,7 +964,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('throws an error if at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                '&amp;',
                SyntaxError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
                'An entity reference must not be in the external subset.',
@@ -1061,7 +1061,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if EOF found in middle', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<![CDATA[junk comment',
             SyntaxError.ID.CDATA_NO_CLOSE,
             'Missing closing "]]>" in CDATA section.');
@@ -1075,35 +1075,35 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if space found before first square bracket', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<! [CDATA[junk comment ]]>',
             SyntaxError.ID.BRACKETITEM_XTRA_SPACE_BEFORE,
             'Must not have space before opening "[".');
       });
 
       it('throws an error if space found before CDATA', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<![   CDATA[junk comment ]]>',
             SyntaxError.ID.CDATA_XTRA_SPACE_BEFORE,
             'Must not have space before CDATA.');
       });
 
       it('throws an error if space found after CDATA', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<![CDATA    [junk comment ]]>',
             SyntaxError.ID.CDATA_XTRA_SPACE_AFTER,
             'Must not have space after CDATA.');
       });
 
       it('throws an error if CDATA has wrong case', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<![cDaTa[junk comment ]]>',
             SyntaxError.ID.CDATA_INVALID_CASE,
             '"CDATA" must be capitalized. Found "cDaTa".');
       });
 
       it('generates an error token in lax mode if space found after CDATA', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<![cdata[junk comment ]]>',
             SyntaxError.ID.CDATA_INVALID_CASE,
             '"CDATA" must be capitalized. Found "cdata".');
@@ -1126,7 +1126,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '<![CDATA[ test ]]>',
                SyntaxError.ID.CDATA_INVALID_DOC_CONTEXT,
                'A CDATA must not be outside the content of the document entity.',
@@ -1135,7 +1135,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can not appear at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                '<![CDATA[ test ]]>',
                SyntaxError.ID.CDATA_INVALID_SUBSET_CONTEXT,
                'A CDATA must not be in the external subset.',
@@ -1298,7 +1298,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no ?> found', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?frog glorky',
             SyntaxError.ID.PI_NO_CLOSE,
             'Missing closing ?> in a processing instruction.',
@@ -1306,7 +1306,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no ?> found after space after target', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?frog ',
             SyntaxError.ID.PI_NO_CLOSE,
             'Missing closing ?> in a processing instruction.',
@@ -1314,7 +1314,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if no ?> found after target', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?frog',
             SyntaxError.ID.PI_NO_CLOSE,
             'Missing closing ?> in a processing instruction.',
@@ -1337,7 +1337,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a space is between the <? and the target', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<? foo glorky?>',
             SyntaxError.ID.PI_SPACE_BEFORE_TARGET,
             'Must not have a space before the target name.',
@@ -1345,7 +1345,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if the name does not match the name syntax', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?frog$ glorky?>',
             SyntaxError.ID.PI_TARGET_NAME_INVALID,
             'The target name must match the syntax for names. Found: "frog$".',
@@ -1353,7 +1353,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if there is no target', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<??>',
             SyntaxError.ID.PI_NO_TARGET,
             'Missing target name in a processing instruction.',
@@ -1376,7 +1376,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '<?foo bar?>',
                SyntaxError.ID.PI_INVALID_CONTEXT,
                'A processing instruction must not be the first thing in the document entity.',
@@ -1834,14 +1834,14 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a standalone value is present', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?xml version="1.1" standalone="NO" ?>',
             SyntaxError.ID.TEXTDECL_XTRA_STANDALONE,
             '"standalone" must not be in a Text Declaration.');
       });
 
       it('throws an error if a encoding is not present', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<?xml version="1.1" ?>',
             SyntaxError.ID.TEXTDECL_NO_ENCODING,
             '"encoding" must be in a Text Declaration.',
@@ -1961,21 +1961,21 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a space is found after the <', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '< name>',
             SyntaxError.ID.ELEMENT_XTRA_LEADING_SPACE,
             'Must not have space after opening "<" of an element tag.');
       });
 
       it('throws an error if the name is not a name', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<9name>',
             SyntaxError.ID.ELEMENT_NAME_INVALID,
             'The element tag name must match the syntax for names. Found: "9name".');
       });
 
       it('throws an error token if > is missing', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<name',
             SyntaxError.ID.ELEMENT_NO_CLOSE,
             'Missing closing of element tag.');
@@ -2406,7 +2406,7 @@ describe('XmlTokenStream', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '<name>',
                SyntaxError.ID.ELEMENT_INVALID_DOC_CONTEXT,
                'An element must not be before the Xml Declaration. Found "name".',
@@ -2415,7 +2415,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can not appear at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                '<name>',
                SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "name".',
@@ -2527,21 +2527,21 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if a space is found after the <', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '< name/>',
             SyntaxError.ID.ELEMENT_XTRA_LEADING_SPACE,
             'Must not have space after opening "<" of an element tag.');
       });
 
       it('throws an error if the name is not a name', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<9name/>',
             SyntaxError.ID.ELEMENT_NAME_INVALID,
             'The element tag name must match the syntax for names. Found: "9name".');
       });
 
       it('throws an error if /> is missing', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<name',
             SyntaxError.ID.ELEMENT_NO_CLOSE,
             'Missing closing of element tag.');
@@ -2572,7 +2572,7 @@ describe('XmlTokenStream', () => {
          // Whitebox: Most tests are not done here, as the code for open and empty tags is the same
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '<name/>',
                SyntaxError.ID.ELEMENT_INVALID_DOC_CONTEXT,
                'An element must not be before the Xml Declaration. Found "name".',
@@ -2581,7 +2581,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can not appear at the start of the external subset', () => {
-            expectSyntaxError(EntityInfo.TYPE.EXTERNALSUBSET,
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
                '<name/>',
                SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "name".',
@@ -2672,7 +2672,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if the name is not a name', () => {
          expectSyntaxError(
-            EntityInfo.TYPE.EXTERNAL,
+            EntityMetaData.TYPE.EXTERNAL,
             '</9name>',
             SyntaxError.ID.ELEMENT_NAME_INVALID,
             'The element tag name must match the syntax for names. Found: "9name".'
@@ -2681,7 +2681,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error token if the name is not a name', () => {
          expectSyntaxError(
-            EntityInfo.TYPE.EXTERNAL,
+            EntityMetaData.TYPE.EXTERNAL,
             '</name',
             SyntaxError.ID.ELEMENT_NO_CLOSE,
             'Missing closing of element tag.');

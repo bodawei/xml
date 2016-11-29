@@ -2,7 +2,7 @@
 
 'use strict';
 
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
 
 /*

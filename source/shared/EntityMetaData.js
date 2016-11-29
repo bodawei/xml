@@ -2,13 +2,13 @@
 
 'use strict';
 
-const EntityLocation = require('../EntityLocation.js');
+const EntityLocation = require('./EntityLocation.js');
 
 const LAST_1DOT0_REVISION = 5;
 const LAST_1DOT1_REVISION = 2;
 
 /**********************************************************************\
- EntityInfo holds values about an entity that will influence how we
+ EntityMetaData holds values about an entity that will influence how we
  parse it. This includes the type of the entity (document, external,
  external subset), what version of the XML spec it conforms to, and
  the location where it is found.
@@ -18,25 +18,24 @@ const LAST_1DOT1_REVISION = 2;
  so we need to be able to cope with that in parsing.
 \**********************************************************************/
 
-class EntityInfo {
+class EntityMetaData {
 
    constructor(entityType, xmlVersion, xmlRevision, location) {
-      this.type = entityType || EntityInfo.TYPE.DOCUMENT;
+      this._setType(entityType || EntityMetaData.TYPE.DOCUMENT);
       this.version = xmlVersion || 1.0;
-      this.revision = xmlRevision || (this.versionIs1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION);
+      this._setRevision(xmlRevision || (this.versionIs1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
-      this.overrideDocument = false;
    }
 
    /**********************************************************************\
     type: When setting the type, make sure it is a legal value.
    \**********************************************************************/
 
-   set type(newValue) {
-      if (EntityInfo.TYPE[newValue]) {
+   _setType(newValue) {
+      if (EntityMetaData.TYPE[newValue]) {
          this._type = newValue;
       } else {
-         throw new Error('Unknown type passed to EntityInfo.type.  Got "' + newValue + '".');
+         throw new Error('Unknown type passed to EntityMetaData.type.  Got "' + newValue + '".');
       }
    }
 
@@ -49,15 +48,15 @@ class EntityInfo {
    \**********************************************************************/
 
    get isTypeDocument() {
-      return this.type === EntityInfo.TYPE.DOCUMENT;
+      return this.type === EntityMetaData.TYPE.DOCUMENT;
    }
 
    get isTypeExternal() {
-      return this.type === EntityInfo.TYPE.EXTERNAL;
+      return this.type === EntityMetaData.TYPE.EXTERNAL;
    }
 
    get isTypeExternalSubset() {
-      return this.type === EntityInfo.TYPE.EXTERNALSUBSET;
+      return this.type === EntityMetaData.TYPE.EXTERNALSUBSET;
    }
 
    /**********************************************************************\
@@ -75,12 +74,12 @@ class EntityInfo {
 
       if (newValue === 1.0) {
          this._version = 1.0;
-         this.revision = LAST_1DOT0_REVISION;
+         this._setRevision(LAST_1DOT0_REVISION);
       } else if (newValue === 1.1) {
          this._version = 1.1;
-         this.revision = LAST_1DOT1_REVISION;
+         this._setRevision(LAST_1DOT1_REVISION);
       } else {
-         throw new Error('Unknown version passed to EntityInfo.version.  Got "' + newValue + '".');
+         throw new Error('Unknown version passed to EntityMetaData.version.  Got "' + newValue + '".');
       }
    }
 
@@ -105,7 +104,7 @@ class EntityInfo {
     version. So, if you need to change both, change version first.
    \**********************************************************************/
 
-   set revision(newValue) {
+   _setRevision(newValue) {
       if ((this.version === 1.0 && newValue > 0 && newValue <= LAST_1DOT0_REVISION) ||
          (this.version === 1.1 && newValue > 0 && newValue <= LAST_1DOT1_REVISION)) {
          this._revision = newValue;
@@ -121,10 +120,10 @@ class EntityInfo {
 
 }
 
-EntityInfo.TYPE = {
+EntityMetaData.TYPE = {
    DOCUMENT: 'DOCUMENT',
    EXTERNAL: 'EXTERNAL',
    EXTERNALSUBSET: 'EXTERNALSUBSET'
 };
 
-module.exports = EntityInfo;
+module.exports = EntityMetaData;

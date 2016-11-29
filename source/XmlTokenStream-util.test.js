@@ -4,16 +4,16 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('./Offset.js');
-const EntityInfo = require('./util/EntityInfo.js');
-const EntityLocation = require('./EntityLocation.js');
+const Offset = require('./shared/Offset.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
+const EntityLocation = require('./shared/EntityLocation.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
 function makeStream(str, type, entityManager, options) {
-   const entityInfo = type ? new EntityInfo(type, 1.0, 5, new EntityLocation()) : undefined;
-   return new XmlTokenStream(new XmlStringCursor(str, entityInfo), entityManager, options);
+   const entityMd = type ? new EntityMetaData(type, 1.0, 5, new EntityLocation()) : undefined;
+   return new XmlTokenStream(new XmlStringCursor(str, entityMd), entityManager, options);
 }
 
 function makeLaxStream(str, options = {}) {
@@ -27,20 +27,20 @@ function makeStrictStream(str, options = {}) {
 
 function makeLaxExternalSubsetStream(str, options = {}) {
    options.lax = true;
-   return makeStream(str, EntityInfo.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
+   return makeStream(str, EntityMetaData.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalSubsetStream(str, options = {}) {
-   return makeStream(str, EntityInfo.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
+   return makeStream(str, EntityMetaData.TYPE.EXTERNALSUBSET, new XmlEntityManager(), options);
 }
 
 function makeLaxExternalEntityStream(str, options = {}) {
    options.lax = true;
-   return makeStream(str, EntityInfo.TYPE.EXTERNAL, new XmlEntityManager(), options);
+   return makeStream(str, EntityMetaData.TYPE.EXTERNAL, new XmlEntityManager(), options);
 }
 
 function makeStrictExternalEntityStream(str, options = {}) {
-   return makeStream(str, EntityInfo.TYPE.EXTERNAL, new XmlEntityManager(), options);
+   return makeStream(str, EntityMetaData.TYPE.EXTERNAL, new XmlEntityManager(), options);
 }
 
 function ignoreError(stream, errorCode) {
@@ -59,28 +59,28 @@ function ignoreToken(stream, tokenType) {
 }
 
 function expectSyntaxError(entityType, input, code, message, place, context) {
-   if (!EntityInfo.TYPE[entityType]) {
+   if (!EntityMetaData.TYPE[entityType]) {
       context = place;
       place = message;
       message = code;
       code = input;
       input = entityType;
-      entityType = EntityInfo.TYPE.DOCUMENT;
+      entityType = EntityMetaData.TYPE.DOCUMENT;
    }
 
    let strictS;
    let laxS;
 
    switch (entityType) {
-      case EntityInfo.TYPE.DOCUMENT:
+      case EntityMetaData.TYPE.DOCUMENT:
          strictS = makeStrictStream(input);
          laxS = makeLaxStream(input);
          break;
-      case EntityInfo.TYPE.EXTERNAL:
+      case EntityMetaData.TYPE.EXTERNAL:
          strictS = makeStrictExternalEntityStream(input);
          laxS = makeLaxExternalEntityStream(input);
          break;
-      case EntityInfo.TYPE.EXTERNALSUBSET:
+      case EntityMetaData.TYPE.EXTERNALSUBSET:
          strictS = makeStrictExternalSubsetStream(input);
          laxS = makeLaxExternalSubsetStream(input);
          break;

@@ -35,8 +35,7 @@ var JS_FILE_GLOB = [
    './Gruntfile.js'
 ];
 var OTHER_FILE_GLOB = [
-   SOURCE_DIR + '/*',
-   '!' + SOURCE_DIR + '/*.js'
+   SOURCE_DIR + '/meta/*'
 ];
 
 var BABEL_PRESETS = 'es2015';

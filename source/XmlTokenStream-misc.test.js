@@ -4,10 +4,10 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('./Offset.js');
-const EntityInfo = require('./util/EntityInfo.js');
+const Offset = require('./shared/Offset.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./TextChunk.js');
+const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
 
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
@@ -45,7 +45,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if no --> found', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<!--junk comment',
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
@@ -54,7 +54,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if no --> found immediately after the opening', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<!--',
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
@@ -70,7 +70,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('throws an error if comment ends with a -', () => {
-         expectSyntaxError(EntityInfo.TYPE.EXTERNAL,
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
             '<!--junk comment--->',
             SyntaxError.ID.COMMENT_ENDS_WITH_HYPHEN,
             'Must not have a hyphen at end of a comment.',
@@ -92,7 +92,7 @@ describe('XmlTokenStream (Misc)', () => {
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
-            expectSyntaxError(EntityInfo.TYPE.DOCUMENT,
+            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
                '<!-- testComment -->',
                SyntaxError.ID.COMMENT_INVALID_CONTEXT,
                'A comment must not be the first thing in the document entity.',
