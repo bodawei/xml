@@ -62,14 +62,12 @@ module.exports = function standardBuild(grunt) {
       /* eslint-disable camelcase */
       jasmine_node: {
          dist: {
-            src: [ SOURCE_DIR + 'error/*.js', SOURCE_DIR + 'util/*.js', '**/*.js' ],
+            src: [ SOURCE_DIR + '**/*.js' ],
             options: {
                forceExit: true,
                jasmine: {
                   spec_dir: './',
                   spec_files: [
-                     SOURCE_DIR + 'error/*.test.js',
-                     SOURCE_DIR + 'util/*.test.js',
                      SOURCE_DIR + '**/*.test.js',
                      BUILD_DIR + '**/*.test.js'
                   ],
@@ -87,7 +85,7 @@ module.exports = function standardBuild(grunt) {
                coverage: {
                   reportDir: OUT_DIR + 'nodeCoverage/node ' + process.version +
                      ' (' + os.type() + ' ' + os.release() + ')/',
-                  excludes: [ '**/*.test.js' ],
+                  excludes: [ SOURCE_DIR + '**/*.test.js' ],
                   report: [
                      'lcov',
                      'json-summary',

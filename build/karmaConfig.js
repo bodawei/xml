@@ -26,6 +26,7 @@ module.exports = function karmaConfig(config) {
       singleRun: true,
       files: [
          BUILD_DIR + '**/*.jasmine*.js',
+         BUILD_DIR + '**/*.test.js',
          SOURCE_DIR + '**/*.js'
       ],
       exclude: [],
@@ -65,7 +66,9 @@ module.exports = function karmaConfig(config) {
 
    // Need to configure this "externally" for the dynamic key. note: Order matters
    config.preprocessors[SOURCE_DIR + '/**/*.js'] = [ 'browserify' ];
-   config.preprocessors[SOURCE_DIR + '*.js'] = [ 'coverage' ];
+   config.preprocessors[SOURCE_DIR + '/*.js'] = [ 'coverage' ];
+   config.preprocessors[SOURCE_DIR + '/error/*.js'] = [ 'coverage' ];
+   config.preprocessors[SOURCE_DIR + '/shared/*.js'] = [ 'coverage' ];
    config.preprocessors[BUILD_DIR + '/**/*.js'] = [ 'browserify' ];
    config.preprocessors[BUILD_DIR + '*.js'] = [ 'coverage' ];
 };

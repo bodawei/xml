@@ -22,7 +22,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
 
--- next: 155
+-- next: 156
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -33,18 +33,6 @@ CLEANUP
 	- add place and context to all errors while doing this
 
 BUILD
-152 Build problems
-	- We are no longer getting code coverage info from node.  When did this break?  Why?
-		=> Found out when
-		=> can you identify the change?
-	- Test numbers are different in node and browser
-		=> investigate globs.
-	- Getting errors in html error reports (see web). evidently a clash between babel and browserify and istanbul
-		- when did this start?
-		=> find when (same as first?)
-	- Seems like a trazillion files are showing up in the verbose log when it goes to do node testing
-		- same as test numbers being different?
-		=> investigate globs
 148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
 	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
 	Each has a base.properties and code.properties. Barf if missing
@@ -53,12 +41,13 @@ BUILD
 		- remove OBSOLETE
 		- each locale must match base keys exactly
 	assemble all into one big happy json which writes out as SyntaxError.json
-- Why the heck is node jasmine_node not getting all the tests?
 149 Make a proper grunt task and test it	
 ??? Do we (can we?) change from all caps error codes in code?
 ??? Can you switch to using ini file format?  Would be nice to say
 		[XmlDecl]
 		NoAttributes = Blah blah
+155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
+156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
 144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 127: Investigate why current node causes coverage to fail
 	- Find out version where it started failing (after 6.2.1 and before 6.4)
@@ -1240,6 +1229,18 @@ CLEANUP
 √ - overrideDocument should be in the options to XmlTokenStream
 √ - Things like EntityInfo, EntityLocation, TextChunk and token  etc. perhaps belong in a common area? They underpin any cursor. util is the wrong name, and weird that EntityInfo is reaching up to EntityLocation
 √- readme, package and license could go into another subdirectory, too. moduleMetadata?  (may need build support)
+152 Build problems
+	- We are no longer getting code coverage info from node.  When did this break?  Why?
+		=> Found out when
+		=> can you identify the change?
+	- Test numbers are different in node and browser
+		=> investigate globs.
+	- Getting errors in html error reports (see web). evidently a clash between babel and browserify and istanbul
+		- when did this start?
+		=> find when (same as first?)
+	- Seems like a trazillion files are showing up in the verbose log when it goes to do node testing
+		- same as test numbers being different?
+		=> investigate globs
 
 Note21
 ------

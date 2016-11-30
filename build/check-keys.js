@@ -36,7 +36,6 @@ module.exports = (grunt) => {
       if (!options.propFiles) {
          grunt.fail.fatal('Must specify a globbing pattern for "propFiles". ' +
             'e.g. checkkeys: { default: options: { propFiles: ./**/*.properties }}.');
-         return;
       }
       if (this.filesSrc.length === 0) {
          grunt.fail.fatal('Must specify source files to examine.');
