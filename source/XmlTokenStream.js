@@ -101,6 +101,13 @@ function textOrUndef(chunk) {
  use when creating the cursor that will be passed to this, and make
  sure to set this flag. In that case, the version specified in the
  cursor will be used in preferene to what is in the document.
+
+ ignoreDocumentEncoding: In the case that you do not want to let the
+ encoding specified in the document text (in the XML or Text
+ Declaration) influence the cursor's handling of that data, set this
+ flag to true.  Note that if you pass an encoding option to a cursor,
+ that is at cursor creation time specify the encoding of the data,
+ that will take precedence over what this stream tells the cursor.
 \**********************************************************************/
 class XmlTokenStream extends XmlStream {
 
@@ -122,7 +129,8 @@ class XmlTokenStream extends XmlStream {
       this._options = {
          lax: false,
          'lax:allowOpenAngleBracketsInAttributeValues': false,
-         ignoreDocumentVersion: false
+         ignoreDocumentVersion: false,
+         ignoreDocumentEncoding: false
       };
 
       for (const name in options) {
@@ -941,7 +949,7 @@ class XmlTokenStream extends XmlStream {
       const close = this._cursor.getMatch('?>');
       const isXmlDecl = this._entityMd.isTypeDocument;
       let foundVersion;
-      let seenEncoding = false;
+      let foundEncoding;
       let seenStandalone = false;
 
       this._assert(close, SEID.XMLDECL_NO_CLOSE);
@@ -965,7 +973,7 @@ class XmlTokenStream extends XmlStream {
                foundVersion = param.value;
                break;
             case 'encoding':
-               seenEncoding = true;
+               foundEncoding = param.value;
                if (isXmlDecl) {
                   this._assert(foundVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
                }
@@ -997,7 +1005,7 @@ class XmlTokenStream extends XmlStream {
       }
 
       if (!isXmlDecl) {
-         this._assert(seenEncoding, SEID.TEXTDECL_NO_ENCODING, start.startOffset, start);
+         this._assert(foundEncoding, SEID.TEXTDECL_NO_ENCODING, start.startOffset, start);
       }
 
       if (this._state === STATE.START) {
@@ -1022,6 +1030,10 @@ class XmlTokenStream extends XmlStream {
          } else if (foundVersion === '1.1') {
             this._entityMd.version = 1.1;
          }
+      }
+
+      if (!this._options.ignoreDocumentEncoding) {
+         this._cursor.specifiedEncoding = foundEncoding;
       }
 
       this._pushToken(isXmlDecl ?

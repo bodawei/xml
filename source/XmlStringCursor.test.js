@@ -85,6 +85,42 @@ describe('XmlStringCursor', () => {
 
       });
 
+      describe('options', () => {
+
+         it('sets _specifiedEncoding to undefined if no options provided', () => {
+            const c = new XmlStringCursor('hi');
+
+            expect(c._specifiedEncoding).toBeUndefined();
+         });
+
+         it('sets _specifiedEncoding to the value passed in through options', () => {
+            const c = new XmlStringCursor('hi', undefined, { encoding: 'UTF-8' });
+
+            expect(c._specifiedEncoding).toEqual('UTF-8');
+         });
+
+      });
+
+   });
+
+   describe('specifiedEncoding', () => {
+
+      it('changes the specified encoding', () => {
+         const c = new XmlStringCursor('<foo>');
+
+         c.specifiedEncoding = 'UTF-8';
+
+         expect(c._specifiedEncoding).toEqual('UTF-8');
+      });
+
+      it('does not change the specified encoding if it was already specified in the options', () => {
+         const c = new XmlStringCursor('<foo>', undefined, { encoding: 'UTF-16' });
+
+         c.specifiedEncoding = 'UTF-8';
+
+         expect(c._specifiedEncoding).toEqual('UTF-16');
+      });
+
    });
 
    describe('peekType()', () => {

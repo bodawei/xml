@@ -4,15 +4,15 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  6/25 Sprint 2:  174story points. Avg: 8/sprint = 22 sprints. ACTUAL: 5
  7/06 Sprint 3:  171story points. Avg: 7/sprint = 25 sprints. ACTUAL: 10
  7/15 Sprint 4:  166sp [12XL 9M 19S]. Avg: 7/sprint = 24 sprints. ACTUAL: 7
- 7/22 Sprint 5:  159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6 see Note5
+ 7/22 Sprint 5:  159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6
  7/30 Sprint 6:  153sp [11XL 9M 16S]. Avg: 5/sprint = 31 sprints. ACTUAL: 5
- 9/22 Sprint 7:  144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6 see Note7
- 9/29 Sprint 8:  133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6 see Note8
-10/1  Sprint 9:  120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3 see Note9
-10/6  Sprint 10: 117sp [8XL 7M 16S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5 see Note10
-10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5 Note11
-10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2 Note 12
-10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2 Note 13
+ 9/22 Sprint 7:  144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6
+ 9/29 Sprint 8:  133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
+10/1  Sprint 9:  120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3
+10/6  Sprint 10: 117sp [8XL 7M 16S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5
+10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5
+10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2
+10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2
 10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0
 10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
 11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
@@ -21,8 +21,28 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
+11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: Expanded all technical debt
+	Notes: Build 148 is on a critical path
+	Next planning should either break down streams in more detail, or work on entities
 
--- next: 156
+<names 1M>
+- What we have now is 1.1/* and 1.0/5
+- 1.0/1-4 has a very different production that is defined in vast tables in Appendix B
+M 161 try building these as regular expressions and checking each char, versus a manual check
+	- That is, we should use this as an opportunity to time this.
+	- Worth doing the suggestion from invalid chars, below, to extract and apply a regex across the whole thing
+	- The code here is pretty mechanical, but definitely involves jsperf!
+<encoding>
+√ S 162 Accept encoding option (overrides all autodetection)
+     - sets specifiedEncoding
+√ S 164 stream
+    - has ignoreDocumentEncoding
+    - otherwise passes encoding
+          - which sets specifiedEncoding (ifgnored if already set)
+
+?? Where is the error coming from if the byte order mark is not present?
+
+-- next: 175
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -34,6 +54,7 @@ CLEANUP
 
 BUILD
 148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
+	- Needed for errors in technical debt section
 	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
 	Each has a base.properties and code.properties. Barf if missing
 		- base and code must match keys exactly
@@ -85,50 +106,79 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
---- technical debt [3s]
-ISSUES
-	- how to report discouraged - different error message
-Extra
-	add reporting of errors for parseChar
-	- test that charRefs do not generate bad characters?
-	- remind yourself what D800-  are
-	- check both invalid and discouraged (discouraged is a warning. how to do this?)
-	- getWord	- !use 'isSpace',use charKind() which returns space|normal|invalid|discouraged
-			- checkChar not so easy. Could combine with the name checks
-			- would it be faster to extract to the terminators, and then do a regex for name chars etc?
-	- getMatch?	- just check input?
-	- getToTerminator	- check inputs?
-		do a regex across the whole thing, if find a bad, then iterate
-	- In all cases, return an array on the chunk which says index of bad or discouraged chars
-	- have to report errors in every case (ugh)
+--- technical debt [5M 11S]
 
-Note: 45, 53 and 74 really all need more review and planning.  53, in particular, seems big.
+<encoding 3s>
+NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
+S 163 Autodetect
+     - read in 4 bytes compare with each (see standard)
+     - sets autodetected format
+S 165 resolution
+	Autodetect:
+	A something that need conversion (utf16 etc)
+	B Something that looks no-conversion-needed/already-decoded  (ascii, unicode, etc)
+	C unknown
+	if specified is undefined and autodetect is C, barf
+	If specified is undefined and autodetect is B  done
+	if specified is undefined and autodetect is A then try to convert. barf if no lookup or fail
+	     specified could be a charset or name of a module which provides a conversion function
+	If specified is value and autoC, then match and convert, or not match and fail
+	If specified is value and autoB then if match done, if not match convert
+	If specified is value and autoA then convert
+	values for specified and autodetect: name (UTF-8 etc), x-noConversion, x-yaxt-xxxx-text-converter
+	Cursor exposes: dataConvertedFrom
+	     - only set once it has data enough to decide
+S 166 Actually do the convert
+	preserves bom
+	skips over it
+	Conversion always starts from current point
+	     - before read anything
+	     - by stream as soon as it finds an encoding
+	- there is a streaming option for use with streaming cursors. for string we can do all
+	- use iconv-lite. Can check if an encoding is there
 
-45:S:Review various 1.0 standards with respect to Name (and Char definitions)
-	in particular, I note 1.1's 1.3 says that 1.1 says whatever is not proscribed is allowed, implying 1.0 is different. but my 1.0 rev 5 looks the same as 1.0. I don't have earlier 1.0's right now and am offline.
-74:S: Just looked at errata of xml 1.1 and saw they've changed the reserved xml words on tokens and the like. Need to integrate into planning
-S 53 use xml decl encoding to change input if needed
-* errors that are showing the chain of locations should be including the entity locations
+<errata changes 1m>
+M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
+	- names in general before 1.0/5 (and 1.1) are not allowed to start with xml. in 1.0/5 that is ok.
+	- targets are now xml- only not xml
+	- element attribute names and elment names same
+	Pretty easy to do this, even per version.
+
+<invalid chars 1m 3s>
+S 167 report errors: suggest having routine which goes over parsing result recursively and reports generically
+	Error should say something like "at position X the character "0x0" was found.
+S 168 getToTerminator should check with a regex if there is any bad char
+	if so, then go across the whole thing in more detail to collect the bad indexes
+S 169 getMatch and getToTerminator add in comments that this doesn't check for invalid chars. Do the right thing
+M 170 getWord
+	Try out a different routine which returns  the most specific value
+		nameStart, nameChar, Char, discouragedChar, invalidChar
+	use this to set flags
+	- alternately, extract to terminator, then apply several regex
+
+<discouraged chars 1m 1s>
+S 171 new error type: Warning  extends XmlError
+M 172 add discouraged characters to tokens and error reporting
+
+<misc 1s>
+S 157 errors that are showing the chain of locations should be including the entity locations
+	- stash the entityinfo with each frame, and then add that to the info in the error.
+
+<WFC 2s>
+S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
+	In our current syntax errors, at last the misbalanced elements must be a WFCError
+	- Some of these require more knowledge in the stream parser than I'm happy with.
+	Need build support
+S 174 Need to sweep over existing errors and see if any look like errors
 
 
-
-? 147 Switch to Node streams  (See branch streams_
-	- Have XmlTokenStream acting as a Readable stream. Seems pretty straightforward.
-		x The existing stream infrastructure needs some fiddling if we want to preserve it,
-		What we already have seems to mesh well
-			I think the semantics around ending is not right
-	- Two concerns:
-		- code coverage will be messed up (minor)
-		- A trivial test takes more than 40ms rather than 1
-			They are overriding setTimeout and doing a lot of crap when doing a push().
-			Next steps:
-				- replace a couple more tests and see if this persists on each
-				- Is the time before I start getting events, during or after?
-				- Try a real-world case.  Do you get the same time, even for real streams
-				- read their code, figure out what the heck is going on.
-					- Why doesn't jasmine override their override?
+M 158 Make XmlTokenStream a node stream
+	- semantics around ending need attention (that's most the work). Modify tests since we can't use fake timeout
+S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
+M 160 Make XmlEntityStream a transforming stream
 
 --- Entity management [8M 6S] !!!
+- Note, eratta in 1.1/2 has an improved wording on 4.1
 - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
 - should we be expanding character references in attribute defaults?
 - ENTITIES, attribute values, and attrdef defaults
@@ -228,7 +278,7 @@ I:XL Cursors can't be synchronous!
 42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
 43:M:deal with references within comments and PI
 	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
-
+When doing a write out xml thing, don'g forget the errata for 1.1/2 which mentions the requirement to add a BOM in some cases
 =============================================
 BLOG IDEAS
 - Blog: assert (can we write a good one)

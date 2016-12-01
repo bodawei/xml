@@ -70,7 +70,8 @@ describe('XmlTokenStream', () => {
          expect(s._options).toEqual({
             lax: false,
             'lax:allowOpenAngleBracketsInAttributeValues': false,
-            ignoreDocumentVersion: false
+            ignoreDocumentVersion: false,
+            ignoreDocumentEncoding: false
          });
       });
 
@@ -470,6 +471,34 @@ describe('XmlTokenStream', () => {
          s.getNext();
 
          expect(s._cursor.entityMd).toEqual(entityMd);
+      });
+
+      it('sets the document encoding on the cursor by default', () => {
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+
+         s.getNext();
+
+         expect(s._cursor._specifiedEncoding).toEqual('usascii');
+      });
+
+      it('does not set the document encoding on the cursor if the cursor was created with an encoding', () => {
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', undefined,
+            { encoding: 'UTF-8' });
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+
+         s.getNext();
+
+         expect(s._cursor._specifiedEncoding).toEqual('UTF-8');
+      });
+
+      it('does not set the document encoding on the cursor if the ignoreDocumentEncoding flag is set', () => {
+         const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
+         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { ignoreDocumentEncoding: true });
+
+         s.getNext();
+
+         expect(s._cursor._specifiedEncoding).toBeUndefined();
       });
 
    });

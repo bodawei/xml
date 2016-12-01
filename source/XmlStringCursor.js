@@ -47,12 +47,72 @@ class XmlStringCursor {
          location for the entity, and that is passed to an EntityLocation
          and then EntityMetaData.
 
+    Encodings
+    Handling the encoding of the XML data can get to be complex.
+    Note: An unencoded string in JavaScript here is just called a
+    "Unicode string" (here, an 'a' is represented as an 'a'). In
+    contrast, an encoded string might represent an 'a' as '\u0000a'.
+
+    Factors to consider:
+      1. The XML entity itself may specify its own encoding in the
+         XML Declaration or Text Declaration (<?xml encoding="foo"?>
+      2. The cursor will try to examine the first few bytes of the
+         entity to see if it can recognize at least an approximation
+         of the encoding initially
+      3. The cursor has an option (called encoding) which will let you
+         explicitly state the encoding of the data in the string.
+      4. The XmlTokenStream has an option, ignoreDocumentEncoding, which
+         will tell it to not inform the cursor of the encoding specified
+         in the entity data.
+    Here are the most likely use cases:
+      A. You have an XML entity whose data you have already decoded into
+         a literal JavaScript string (e.g. you got it as a UTF-16
+         encoded string or buffer, and you converted it into a plain
+         unencoded string).
+            In this case, pass it to the cursor, and set
+            ignoreDocumentEncoding on the stream.
+      B. You have a string which is encoded, and you happen to know the
+         encoding (e.g. it is ISO-8859-2, whose lower 128 characters
+         look ASCII or a Unicode string, so #2 above will think it is
+         unencoded), and the XML document doesn't carry the encoding
+         name in it.
+            Pass the encoded string and encoding option to the cursor
+      C. You have a string which is encoded and looks like ASCII/Unicode/
+         etc), and the encoding is also stated in the XML or Text
+         Declaration.
+            Pass the encoded string to the cursor
+      D. You have an encoded string that is in UTF-16 (either LE or BE)
+         that has a byte order marker on it
+            If the encoding is also in the XML/Text Decl, same as C.
+            If the encoding is not, you can do either B or C
+               (the cursor can identify UTF-16 automatically)
+      E. Same as D, but no byte order mark.
+            Strictly, this is an error, since all UTF-16 must have a
+            byte order mark.  However, a lax XmlTokenStream will
+            continue.
+            If the encoding is in the Decl, you can do the same as C
+            If the encoding is not in the Decl, do the same as B.
+   Other notes:
+      - If the results of #2 and #1, or #2 and #3 are obviously
+         contradictory, the cursor will throw an Error (e.g. the
+         cursor looks at the string (#2) and concludes it is
+         ASCII/Unicode string, but the file says (#1) it is UTF-16)
+      - The encoding option to the cursor (#3), if specified, takes
+         precedence over the value specified in the document (#1).
+
     PARAM
     The string that this cursor should use.
     info: undefiend, a string (URL), EntityLocation, or an EntityMetaData
+    options: An object with any one or more of the following
+      encoding: The name of the encoding that the source string is in.
+         Generally, you should be making sure that the string is already
+         properly decoded to a normal JavaScript string. But if you have
+         a string that actually contains encoded data, and you specify
+         this encoding value with the name of that encoding, the cursor
+         will try to decode the string before processing it.
    \**********************************************************************/
 
-   constructor(source, info) {
+   constructor(source, info, options) {
       if (typeof source !== 'string' && !(source instanceof String)) {
          throw new Error('Must pass a string to a StringCursor.');
       }
@@ -75,10 +135,20 @@ class XmlStringCursor {
       this._offset = new Offset(0, 0, 0);
       this._chunks = [];
       this._entityMd = info;
+
+      this._specifiedEncoding = (options || {}).encoding;
    }
 
    get entityMd() {
       return this._entityMd;
+   }
+
+   set specifiedEncoding(value) {
+      if (this._specifiedEncoding) {
+         return;
+      }
+
+      this._specifiedEncoding = value;
    }
 
    /**********************************************************************\
