@@ -32,6 +32,16 @@ M 161 try building these as regular expressions and checking each char, versus a
 	- That is, we should use this as an opportunity to time this.
 	- Worth doing the suggestion from invalid chars, below, to extract and apply a regex across the whole thing
 	- The code here is pretty mechanical, but definitely involves jsperf!
+		So, some preliminary tests of this showed that a regex and getToTerminator solution for getWord was more than half the speed of the existing getWord!
+		But, it doesn't seem to be the fault of the regex.  It seems to be more getToTerminator.Which gets us back to wanting to do performance work on the cursor
+		That's out of scope for this sprint.
+		So:
+			- Take the existing getWord, and instead of relying on getToTerminator, replace the calls to isNameChar and isNameStart with a regex
+				- RegEx isn't slower.  Inlining probably a tiny bit faster, and cleaner.
+	- based on that, either switch to using regex, in which case convert the stuff in [84-89] into regex and use those
+				x or convert the stuff in 84-89 into functions.	
+[2 hours]
+
 <encoding>
 √ S 162 Accept encoding option (overrides all autodetection)
      - sets specifiedEncoding

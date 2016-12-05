@@ -16,11 +16,15 @@ const TYPE = require('./shared/TextChunk.js').TYPE;
 
 describe('XmlStringCursor', () => {
    let defaultLoc;
-   let EntityMetaData1dot1;
+   let entityMetaData1dot1;
+   let entityMetaData1dot0rev4;
+   let entityMetaData1dot0rev5;
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();
-      EntityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
+      entityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
+      entityMetaData1dot0rev4 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 4, defaultLoc);
+      entityMetaData1dot0rev5 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, defaultLoc);
    });
 
    describe('construction', () => {
@@ -156,13 +160,13 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns that \\u0085 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u0085', EntityMetaData1dot1);
+         const c = new XmlStringCursor('\u0085', entityMetaData1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
 
       it('returns that \\u2028 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u2028', EntityMetaData1dot1);
+         const c = new XmlStringCursor('\u2028', entityMetaData1dot1);
 
          expect(c.peekType()).toEqual(TYPE.SPACE);
       });
@@ -246,13 +250,13 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the next character as \\n if it is \\u0085 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u0085 foo', EntityMetaData1dot1);
+         const c = new XmlStringCursor('\u0085 foo', entityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
 
       it('returns the next character as \\n if it is \\u2028 and this is 1.1', () => {
-         const c = new XmlStringCursor('\u2028 foo', EntityMetaData1dot1);
+         const c = new XmlStringCursor('\u2028 foo', entityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
       });
@@ -270,7 +274,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the next character as \\n if it is a \\r\\u0085 if this is 1.1', () => {
-         const c = new XmlStringCursor('\r\u0085 foo', EntityMetaData1dot1);
+         const c = new XmlStringCursor('\r\u0085 foo', entityMetaData1dot1);
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
       });
@@ -434,14 +438,14 @@ describe('XmlStringCursor', () => {
       });
 
       it('treats a \\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u0085hi', EntityMetaData1dot1);
+         const c = new XmlStringCursor(' \u0085hi', entityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \u0085', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });
 
       it('treats a \\u2028 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \u2028hi', EntityMetaData1dot1);
+         const c = new XmlStringCursor(' \u2028hi', entityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
@@ -470,7 +474,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('treats a \\r\\u0085 like a \\n if this is 1.1', () => {
-         const c = new XmlStringCursor(' \r\u0085hi', EntityMetaData1dot1);
+         const c = new XmlStringCursor(' \r\u0085hi', entityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \r\u0085', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
@@ -565,14 +569,14 @@ describe('XmlStringCursor', () => {
       });
 
       it('does terminate at \\u0085 in 1.1', () => {
-         const c = new XmlStringCursor('one\u0085X', EntityMetaData1dot1);
+         const c = new XmlStringCursor('one\u0085X', entityMetaData1dot1);
          const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does terminate at \\u2028 in 1.1', () => {
-         const c = new XmlStringCursor('one\u2028X', EntityMetaData1dot1);
+         const c = new XmlStringCursor('one\u2028X', entityMetaData1dot1);
          const expected = new WordChunk('one', true, true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
@@ -756,6 +760,44 @@ describe('XmlStringCursor', () => {
             expect(c.getWord([])).toEqual(firstWord);
          });
 
+         it('marks a word as a name if it starts with a u03F4 in version 1.1', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot1);
+
+            expect(c.getWord([]).couldBeName).toEqual(true);
+         });
+
+         it('marks a word as a name if it starts with a u03F4 in version 1.0/5', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot0rev5);
+
+            expect(c.getWord([]).couldBeName).toEqual(true);
+         });
+
+         it('marks a word as a non-name if it starts with a u03F4 in version 1.0/4', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot0rev4);
+
+            expect(c.getWord([]).couldBeName).toEqual(false);
+         });
+
+         it('marks a word as a name if it has some bad 1.0 chars in version 1.1', () => {
+            const c = new XmlStringCursor('f\u0eceb two', entityMetaData1dot1);
+
+            const word = c.getWord([]);
+            expect(word.text).toEqual('f\u0eceb');
+            expect(word.couldBeName).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has some bad 1.0 chars in version 1.0/5', () => {
+            const c = new XmlStringCursor('f\u0eceb two', entityMetaData1dot0rev5);
+
+            expect(c.getWord([]).couldBeName).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has some bad 1.0 chars in version 1.0/4', () => {
+            const c = new XmlStringCursor('f\u0eceb two', entityMetaData1dot0rev4);
+
+            expect(c.getWord([]).couldBeName).toEqual(false);
+         });
+
       });
 
       describe('couldBeNmToken flag', () => {
@@ -874,6 +916,64 @@ describe('XmlStringCursor', () => {
                new Offset(0, 3, 3), defaultLoc);
 
             expect(c.getWord([])).toEqual(firstWord);
+         });
+
+         it('marks a word as a name token if it has a u03F4 in version 1.1', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot1);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has a u03F4 in version 1.0/5', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot0rev5);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a non-name token if it has a u03F4 in version 1.0/4', () => {
+            const c = new XmlStringCursor('\u03F4ne two', entityMetaData1dot0rev4);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(false);
+         });
+
+         it('marks a word as a name token if it has a bunch of questionable chars in version 1.1', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2Afoo two', entityMetaData1dot1);
+
+            const word = c.getWord([]);
+            expect(word.text).toEqual('9._-:你\u0A2Afoo');
+            expect(word.couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has a bunch of questionable chars in version 1.0/5', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2Afoo two', entityMetaData1dot0rev5);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has a bunch of questionable chars in version 1.0/4', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2Afoo two', entityMetaData1dot0rev4);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has some bad 1.0 chars in version 1.1', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2A\u0ecefoo two', entityMetaData1dot1);
+
+            const word = c.getWord([]);
+            expect(word.text).toEqual('9._-:你\u0A2A\u0ecefoo');
+            expect(word.couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has some bad 1.0 chars in version 1.0/5', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2A\u0ecefoo two', entityMetaData1dot0rev5);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(true);
+         });
+
+         it('marks a word as a name token if it has some bad 1.0 chars in version 1.0/4', () => {
+            const c = new XmlStringCursor('9._-:你\u0A2A\u0ecefoo two', entityMetaData1dot0rev4);
+
+            expect(c.getWord([]).couldBeNmToken).toEqual(false);
          });
 
       });
@@ -1330,7 +1430,7 @@ describe('XmlStringCursor', () => {
       });
 
       it('returns the string with \\u0085 and \\u2028 adjusted if this is 1.1', () => {
-         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!', EntityMetaData1dot1);
+         const c = new XmlStringCursor('line1\u0085line2\u2028line3\r\u0085line4!', entityMetaData1dot1);
 
          const chunk = new WithSpaceChunk('line1\nline2\nline3\nline4', 'line1\u0085line2\u2028line3\r\u0085line4',
             new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);
