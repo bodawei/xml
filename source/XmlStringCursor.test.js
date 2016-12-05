@@ -105,6 +105,112 @@ describe('XmlStringCursor', () => {
 
       });
 
+      describe('autodetection of encoding', () => {
+
+         it('makes no opinion on a string with no XML or Text Declaration', () => {
+            const c = new XmlStringCursor('e.g. an external entity');
+
+            expect(c._autodetectedEncoding).toBeUndefined();
+         });
+
+         it('identifies a non-encoded string as non-encoded', () => {
+            const c = new XmlStringCursor('<?xml version="1.0"?>');
+
+            expect(c._autodetectedEncoding).toBe('UNENCODED');
+         });
+
+         it('identifies a EBCDIC encoding', () => {
+            const c = new XmlStringCursor('\u004C\u006F\u00A7\u0094');
+
+            expect(c._autodetectedEncoding).toBe('EBCDIC');
+         });
+
+         it('identifies a UCS-4 big endian encoding', () => {
+            const c = new XmlStringCursor('\u0000\u0000\u0000\u003C');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4BE');
+         });
+
+         it('identifies a UCS-4 little endian encoding', () => {
+            const c = new XmlStringCursor('\u003C\u0000\u0000\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4LE');
+         });
+
+         it('identifies a UCS-4 unusual1 order encoding', () => {
+            const c = new XmlStringCursor('\u0000\u0000\u003C\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4UNUSUAL1');
+         });
+
+         it('identifies a UCS-4 unusual2 order encoding', () => {
+            const c = new XmlStringCursor('\u0000\u003C\u0000\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4UNUSUAL2');
+         });
+
+         it('identifies a UCS-4 big endian encoding', () => {
+            const c = new XmlStringCursor('\u0000\u0000\u0000\u003C');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4BE');
+         });
+
+         it('identifies a UTF-16 big endian encoding', () => {
+            const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
+
+            expect(c._autodetectedEncoding).toBe('UTF-16BE');
+         });
+
+         it('identifies a UTF-16 little endian encoding', () => {
+            const c = new XmlStringCursor('\u003C\u0000\u003F\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UTF-16LE');
+         });
+
+         it('identifies a UCS-4 big endian with BOM encoding', () => {
+            const c = new XmlStringCursor('\u0000\u0000\u00FE\u00FF');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4BE/BOM');
+         });
+
+         it('identifies a UCS-4 little endian with BOM encoding', () => {
+            const c = new XmlStringCursor('\u00FF\u00FE\u0000\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4LE/BOM');
+         });
+
+         it('identifies a UCS-4 unusal1 with BOM encoding', () => {
+            const c = new XmlStringCursor('\u0000\u0000\u00FF\u00FE');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4UNUSUAL1/BOM');
+         });
+
+         it('identifies a UCS-4 unusal2 with BOM encoding', () => {
+            const c = new XmlStringCursor('\u00FE\u00FF\u0000\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UCS-4UNUSUAL2/BOM');
+         });
+
+         it('identifies a UTF-16BE with BOM encoding', () => {
+            const c = new XmlStringCursor('\u00FE\u00FF\u0001\u0000');
+
+            expect(c._autodetectedEncoding).toBe('UTF-16BE/BOM');
+         });
+
+         it('identifies a UTF-16LE with BOM encoding', () => {
+            const c = new XmlStringCursor('\u00FF\u00FE\u0000\u0001');
+
+            expect(c._autodetectedEncoding).toBe('UTF-16LE/BOM');
+         });
+
+         it('identifies a UTF-16LE with BOM encoding', () => {
+            const c = new XmlStringCursor('\u00EF\u00BB\u00BFA');
+
+            expect(c._autodetectedEncoding).toBe('UTF-8/BOM');
+         });
+
+      });
+
    });
 
    describe('specifiedEncoding', () => {
