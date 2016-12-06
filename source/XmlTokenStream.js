@@ -496,199 +496,21 @@ class XmlTokenStream extends XmlStream {
                   textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
                return;
             case 'ELEMENT':
-               let contentText;
 
                const parsedEl = this._dtdParser.parseElement(this._cursor);
-               const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
 
-               if (nameText === '') {
-                  this._report(SEID.ELEMENTDECL_NO_NAME);
-               }
+               const contentText = this._validateElementDeclaration(parsedEl, start);
 
-               this._assert(nameText === '' || parsedEl.elementName.couldBeName,
-                  SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
-
-               if (!parsedEl.contentChunk && !parsedEl.list) {
-                  this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
-               } else if (parsedEl.list) {
-                  contentText = [];
-
-                  this._assert(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
-                     SEID.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
-                  this._assert(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
-                     SEID.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
-                  this._assert(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
-
-                  for (let index = 0; index < parsedEl.list.length; index++) {
-                     const item = parsedEl.list[index];
-
-                     if (item.text.toLocaleUpperCase() === '#PCDATA') {
-                        this._assert(item.text === '#PCDATA',
-                           SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
-                        this._assert(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
-
-                        contentText.push('#PCDATA');
-                     } else {
-                        this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
-                        contentText.push(item.text);
-                     }
-                  }
-                  this._assert(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
-               } else {
-                  contentText = parsedEl.contentChunk.text;
-                  const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
-
-                  this._assert(upperText === 'ANY' || upperText === 'EMPTY',
-                     SEID.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
-                  this._assert(upperText === contentText,
-                     SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
-                  contentText = upperText;
-               }
-
-               this._assert(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
-
-               this._checkDeclarationState(start, SEID.ELEMENTDECL_INVALID_CONTEXT);
-
-               this._pushToken(new tokens.ElementDeclaration(nameText, contentText,
+               this._pushToken(new tokens.ElementDeclaration(textOrBlank(parsedEl.elementName), contentText,
                   this._cursor.getRecentChunks()));
                return;
             case 'ATTLIST':
                const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
 
-               const elNameChunk = parseResults.elementNameChunk;
-               const rawAttrs = parseResults.attributes;
-               const attListClose = parseResults.closeChunk;
+               const attributes = this._validatAttList(parseResults, start);
 
-               const attributes = [];
-               const elName = elNameChunk ? elNameChunk.text : '';
-               const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
-
-               this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
-               this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
-               this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
-
-               for (let index = 0; index < rawAttrs.length; index++) {
-                  const attr = rawAttrs[index];
-                  const attrName = attr.name.text;
-                  let list;
-                  let attrType = '';
-                  let attrDefault;
-
-                  this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
-
-                  if (!attr.type) {
-                     this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
-                  } else {
-                     attrType = attr.type.text;
-
-                     const upper = attrType.toLocaleUpperCase();
-                     const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
-
-                     this._assert(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
-
-                     if (known && attrType !== upper) {
-                        this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
-                        attrType = upper;
-                     }
-
-                     if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
-                        const attrList = attr.list || [];
-                        list = [];
-
-                        if (attrType === 'NOTATION') {
-                           this._assert(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE,
-                              [ elName ]);
-                        }
-
-                        if (attrType === 'ENUMERATION') {
-                           this._assert(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
-                              [ elName ], attr.name, start);
-                        }
-                        this._assert(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
-
-                        for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
-                           if (attrType === 'NOTATION') {
-                              this._assert(attrList[listIndex].couldBeName,
-                                 SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
-                           } else {
-                              this._assert(attrList[listIndex].couldBeNmToken,
-                                 SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
-                           }
-
-                           list.push(attrList[listIndex].text);
-                        }
-
-                        this._assert(attr.missingOr === 0,
-                           SEID.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
-                        this._assert(attr.missingCount === 0,
-                           SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
-
-                        if (!attr.close) {
-                           this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
-                              SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
-                        }
-                     }
-                  }
-
-                  if (!attr.default && !attr.value) {
-                     this._assert(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
-                  }
-
-                  if (attr.default) {
-                     attrDefault = attr.default.text;
-
-                     const upper = attrDefault.toLocaleUpperCase();
-                     const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
-
-                     if (!known) {
-                        this._assert(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
-                     } else {
-                        this._assert(upper === attrDefault,
-                           SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
-                        attrDefault = upper;
-
-                        if (attrDefault === '#FIXED') {
-                           if (attr.value) {
-                              this._assert(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
-                           }
-                           this._assert(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
-                              attr.default, start);
-                        }
-                     }
-                  }
-
-                  if (attr.value || attr.default) {
-                     this._assert(attr.preDefaultSpace,
-                        SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
-
-                     if (attr.value) {
-                        this._assert(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
-                        if (!attr.aborted) {
-                           this._assert(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
-                        }
-                     }
-                  }
-
-                  if (attr.value) {
-                     for (let index = 0; index < attr.value.length; index++) {
-                        attr.value[index] = attr.value[index].text;
-                     }
-                  }
-
-                  attributes.push({
-                     name: attrName,
-                     type: attrType,
-                     list: list,
-                     flag: attrDefault,
-                     value: attr.value
-                  });
-               }
-
-               this._assert(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
-
-               this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
-
-               this._pushToken(new tokens.AttrListDeclaration(elName, attributes, this._cursor.getRecentChunks()));
+               this._pushToken(new tokens.AttrListDeclaration(textOrBlank(parseResults.elementNameChunk), attributes,
+                  this._cursor.getRecentChunks()));
                return;
          }
       }
@@ -773,6 +595,197 @@ class XmlTokenStream extends XmlStream {
       this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
    }
 
+   _validateElementDeclaration(parsedEl, start) {
+      const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
+      let contentText;
+
+      if (nameText === '') {
+         this._report(SEID.ELEMENTDECL_NO_NAME);
+      }
+
+      this._assert(nameText === '' || parsedEl.elementName.couldBeName,
+         SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
+
+      if (!parsedEl.contentChunk && !parsedEl.list) {
+         this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
+      } else if (parsedEl.list) {
+         contentText = [];
+
+         this._assert(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
+            SEID.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
+         this._assert(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
+            SEID.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
+         this._assert(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
+
+         for (let index = 0; index < parsedEl.list.length; index++) {
+            const item = parsedEl.list[index];
+
+            if (item.text.toLocaleUpperCase() === '#PCDATA') {
+               this._assert(item.text === '#PCDATA',
+                  SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
+               this._assert(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
+
+               contentText.push('#PCDATA');
+            } else {
+               this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
+               contentText.push(item.text);
+            }
+         }
+         this._assert(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
+      } else {
+         contentText = parsedEl.contentChunk.text;
+         const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
+
+         this._assert(upperText === 'ANY' || upperText === 'EMPTY',
+            SEID.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
+         this._assert(upperText === contentText,
+            SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
+         contentText = upperText;
+      }
+
+      this._assert(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+
+      this._checkDeclarationState(start, SEID.ELEMENTDECL_INVALID_CONTEXT);
+
+      return contentText;
+   }
+
+   _validatAttList(parseResults, start) {
+      const elNameChunk = parseResults.elementNameChunk;
+      const rawAttrs = parseResults.attributes;
+      const attListClose = parseResults.closeChunk;
+
+      const attributes = [];
+      const elName = elNameChunk ? elNameChunk.text : '';
+      const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
+
+      this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
+      this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
+      this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
+
+      for (let index = 0; index < rawAttrs.length; index++) {
+         const attr = rawAttrs[index];
+         const attrName = attr.name.text;
+         let list;
+         let attrType = '';
+         let attrDefault;
+
+         this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
+
+         if (!attr.type) {
+            this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
+         } else {
+            attrType = attr.type.text;
+
+            const upper = attrType.toLocaleUpperCase();
+            const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
+
+            this._assert(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
+
+            if (known && attrType !== upper) {
+               this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
+               attrType = upper;
+            }
+
+            if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
+               const attrList = attr.list || [];
+               list = [];
+
+               if (attrType === 'NOTATION') {
+                  this._assert(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
+               }
+
+               if (attrType === 'ENUMERATION') {
+                  this._assert(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
+                     [ elName ], attr.name, start);
+               }
+               this._assert(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
+
+               for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
+                  if (attrType === 'NOTATION') {
+                     this._assert(attrList[listIndex].couldBeName,
+                        SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
+                  } else {
+                     this._assert(attrList[listIndex].couldBeNmToken,
+                        SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
+                  }
+
+                  list.push(attrList[listIndex].text);
+               }
+
+               this._assert(attr.missingOr === 0,
+                  SEID.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
+               this._assert(attr.missingCount === 0,
+                  SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
+
+               if (!attr.close) {
+                  this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
+                     SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
+               }
+            }
+         }
+
+         if (!attr.default && !attr.value) {
+            this._assert(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
+         }
+
+         if (attr.default) {
+            attrDefault = attr.default.text;
+
+            const upper = attrDefault.toLocaleUpperCase();
+            const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
+
+            if (!known) {
+               this._assert(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
+            } else {
+               this._assert(upper === attrDefault,
+                  SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
+               attrDefault = upper;
+
+               if (attrDefault === '#FIXED') {
+                  if (attr.value) {
+                     this._assert(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                  }
+                  this._assert(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
+                     attr.default, start);
+               }
+            }
+         }
+
+         if (attr.value || attr.default) {
+            this._assert(attr.preDefaultSpace,
+               SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
+
+            if (attr.value) {
+               this._assert(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
+               if (!attr.aborted) {
+                  this._assert(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
+               }
+            }
+         }
+
+         if (attr.value) {
+            for (let index = 0; index < attr.value.length; index++) {
+               attr.value[index] = attr.value[index].text;
+            }
+         }
+
+         attributes.push({
+            name: attrName,
+            type: attrType,
+            list: list,
+            flag: attrDefault,
+            value: attr.value
+         });
+      }
+
+      this._assert(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
+
+      this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
+
+      return attributes;
+   }
+
    _validateExternalId(externalId, systemRequired) {
       if (externalId.unknownType) {
          this._report(SEID.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
@@ -813,6 +826,26 @@ class XmlTokenStream extends XmlStream {
          } else {
             this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
          }
+      }
+   }
+
+   _validateProcessingInstruction(parsedPI, start) {
+      this._assert(!parsedPI.postStartSpaceChunk, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
+
+      if (parsedPI.isXmlDecl) {
+         this._assert(parsedPI.targetChunk.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE,
+            [ parsedPI.targetChunk.text ], parsedPI.postStartSpaceChunk || start, start);
+      } else {
+         if (!parsedPI.targetChunk) {
+            this._report(SEID.PI_NO_TARGET, parsedPI.postStartSpaceChunk || start, start);
+         } else if (!parsedPI.targetChunk.couldBeName) {
+            this._report(SEID.PI_TARGET_NAME_INVALID, [ parsedPI.targetChunk.text ],
+               parsedPI.postStartSpaceChunk || start, start);
+         }
+
+         this._assert(parsedPI.closeChunk, SEID.PI_NO_CLOSE, parsedPI.instructionChunk || parsedPI.optSpaceChunk ||
+            parsedPI.targetChunk || parsedPI.optSpaceChunk || start, start);
+         this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
       }
    }
 
@@ -861,51 +894,16 @@ class XmlTokenStream extends XmlStream {
       }
    }
 
-   /*
-    * Parse Any processing instruction
-    *   [16] PI       ::= '<?' PITarget (S (Char* - (Char* '?>' Char*)))? '?>'
-    *   [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
-    * This assumes that something that calls this has already peeked and
-    * noticed the <?.
-    *
-    * PARAMS None. however, this assumes that the first token has already
-    *        been read
-    * RETURN None.  Does queue an XMLToken of type tokens.XMLDECL or
-    *        tokens.PI and possibly syntax error tokens.
-    */
    _getProcessingInstruction(start) {
-      const space = this._cursor.getSpace();
-      const target = this._cursor.getWord([ '?>' ]);
+      const parsedPI = this._miscParser.parseProcessingInstruction(this._cursor, start);
 
-      this._assert(!space, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
+      this._validateProcessingInstruction(parsedPI, start);
 
-      if (!target) {
-         this._report(SEID.PI_NO_TARGET, space || start, start);
-      } else if (!target.couldBeName) {
-         this._report(SEID.PI_TARGET_NAME_INVALID, [ target.text ], space || start, start);
-      }
-
-      if (target && target.text.toLocaleLowerCase() === 'xml') {
-         this._assert(target.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE, [ target.text ],
-            space || start, start);
+      if (parsedPI.isXmlDecl) {
          this._getXmlDecl(start);
       } else {
-         const optSpace = this._cursor.getSpace();   // optional space
-         const results = this._cursor.getToTerminator([ '?>' ]);
-
-         // If we found no ?> (thus, really, end of file) report an error.
-         if (!results.terminator) {
-            this._report(SEID.PI_NO_CLOSE, results.chunk || optSpace || target || space || start, start);
-         } else {
-            this._cursor.getMatch('?>');
-         }
-
-         const targetName = target ? target.text : '';
-         const content = results.chunk ? results.chunk.text : '';
-
-         this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
-
-         this._pushToken(new tokens.ProcessingInstruction(targetName, content, this._cursor.getRecentChunks()));
+         this._pushToken(new tokens.ProcessingInstruction(textOrBlank(parsedPI.targetChunk),
+            textOrBlank(parsedPI.instructionChunk), this._cursor.getRecentChunks()));
       }
    }
 

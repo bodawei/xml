@@ -58,6 +58,7 @@ class XmlTokenStreamMisc {
 
     RETURN
       {
+         isXmlDecl: True if this looks like it is actually an XML/Text Decl
          openChunk: The opening <? of the comment
          postStartSpaceChunk: any space after the opening
          targetChunk: The chunk representing the target of the processing
@@ -72,25 +73,24 @@ class XmlTokenStreamMisc {
     [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
    \**********************************************************************/
 
-   /*
    parseProcessingInstruction(cursor, startChunk) {
       const results = {};
 
+      results.openChunk = startChunk;
       results.postStartSpaceChunk = cursor.getSpace();
       results.targetChunk = cursor.getWord([ '?>' ]);
 
       if (results.targetChunk &&
          results.targetChunk.text.toLocaleLowerCase() === 'xml') {
-         //this._getXmlDecl(start);
+         results.isXmlDecl = true;
       } else {
-         results.optSpaceChunk = cursor.getSpace();   // optional space
-         results.instructionChunk = cursor.getToTerminator([ '?>' ]);
+         results.optSpaceChunk = cursor.getSpace();
+         results.instructionChunk = cursor.getToTerminator([ '?>' ]).chunk;
          results.closeChunk = cursor.getMatch('?>');
       }
 
       return results;
    }
-   */
 
 }
 

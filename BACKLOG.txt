@@ -21,7 +21,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
-11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: Expanded all technical debt
+11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
 	Notes: Build 148 is on a critical path
 	Next planning should either break down streams in more detail, or work on entities
 
@@ -40,7 +40,6 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 				- RegEx isn't slower.  Inlining probably a tiny bit faster, and cleaner.
 	- based on that, either switch to using regex, in which case convert the stuff in [84-89] into regex and use those
 				x or convert the stuff in 84-89 into functions.	
-
 <encoding>
 √ S 162 Accept encoding option (overrides all autodetection)
      - sets specifiedEncoding
@@ -48,8 +47,6 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
     - has ignoreDocumentEncoding
     - otherwise passes encoding
           - which sets specifiedEncoding (ifgnored if already set)
-[3 hours]
-
 √ S 163 Autodetect
      - read in 4 bytes compare with each (see standard)
      - sets autodetected format
@@ -123,10 +120,10 @@ PROJECT
 ?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
 	- What would the performance be?
 	- Even more to the point, could we extract this entirely out of the string cursor and put into the validation
-?? Where is the error coming from if the byte order mark is not present?
 
 <encoding 3s>
 NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
+	?? Where is the error coming from if the byte order mark is not present?
 S 165 resolution
 	Autodetect:
 	A something that need conversion (utf16 etc)
@@ -1322,3 +1319,8 @@ Summary
 - Need to have some more small backlog items. This could be prototyping the cursor async behavior or something. Either way, more planning.
 - I note that the other remaining things in technical debt are also all saying "read the specs more".
 So, the planning session is going to be long, I think.
+Planning for the next sprint was huge, as expanded all technical debt.
+
+Sprint 22
+=========
+Went over time by 15 minutes.  HAd pulled in 163 since got done half an hour early.
