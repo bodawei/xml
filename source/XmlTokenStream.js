@@ -309,23 +309,6 @@ class XmlTokenStream extends XmlStream {
       } while (content.terminator && content.terminator !== '<');
    }
 
-   _checkContentState(chunk, docError, subsetError) {
-      switch (this._entityMd.type) {
-         case EntityMetaData.TYPE.DOCUMENT:
-            this._assert(this._state === STATE.IN_CONTENT, docError,
-               [ chunk.text ], chunk.startOffset, chunk);
-            break;
-         case EntityMetaData.TYPE.EXTERNAL:
-            if (this._state === STATE.START) {
-               this._state = STATE.IN_CONTENT;
-            }
-            break;
-         case EntityMetaData.TYPE.EXTERNALSUBSET:
-            this._report(subsetError, [ chunk.text ], chunk.startOffset, chunk);
-            break;
-      }
-   }
-
    _getReference(start, inAttribute) {
       const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
@@ -529,333 +512,6 @@ class XmlTokenStream extends XmlStream {
       this._pushToken(new tokens.DocTypeEnd(this._cursor.getRecentChunks()));
    }
 
-   _validateStartDocType(parsedDocType) {
-      const start = parsedDocType.startChunk;
-
-      this._assert(parsedDocType.nameChunk, SEID.DOCTYPE_NO_NAME);
-
-      if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
-         this._report(SEID.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
-      }
-
-      if (parsedDocType.externalId) {
-         this._validateExternalId(parsedDocType.externalId, true);
-      }
-
-      if (this._entityMd.isTypeDocument) {
-         if (this._state !== STATE.PROLOG_PREDOCTYPE) {
-            this._report(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
-         }
-      } else {
-         this._report(SEID.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
-      }
-   }
-
-   _validateCloseDocType(parsedClose) {
-      this._assert(parsedClose.closeChunk, SEID.DOCTYPE_NO_CLOSE);
-   }
-
-   _validateNotation(parsedNotation) {
-      const notNameText = textOrBlank(parsedNotation.nameChunk);
-      const couldBeName = notNameText === '' ||
-         (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
-
-      this._assert(parsedNotation.nameChunk, SEID.NOTATIONDECL_NO_NAME);
-      this._assert(couldBeName, SEID.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
-      this._assert(parsedNotation.postNameSpaceChunk,
-         SEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
-      if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
-         this._report(SEID.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
-      } else {
-         this._validateExternalId(parsedNotation.externalId, false);
-      }
-      this._assert(parsedNotation.close, SEID.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
-      this._checkDeclarationState(parsedNotation.startChunk, SEID.NOTATIONDECL_INVALID_CONTEXT);
-   }
-
-   _validateEntity(parsedEntity) {
-      const enNameText = textOrBlank(parsedEntity.nameChunk);
-
-      this._assert(parsedEntity.nameChunk, SEID.ENTITYDECL_NO_NAME);
-      this._assert((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
-         SEID.ENTITYDECL_NAME_INVALID, [ enNameText ]);
-      this._assert(parsedEntity.postNameSpaceChunk, SEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
-
-      if (parsedEntity.nDataMarker) {
-         this._assert(parsedEntity.preNDataSpace, SEID.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
-         this._assert(parsedEntity.nDataMarker.text === 'NDATA',
-            SEID.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsedEntity.nDataMarker.text ]);
-         this._assert(parsedEntity.nDataName, SEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
-      }
-
-      this._assert(parsedEntity.valueChunk || parsedEntity.externalId,
-         SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
-      this._assert(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
-
-      this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
-   }
-
-   _validateElementDeclaration(parsedEl, start) {
-      const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
-      let contentText;
-
-      if (nameText === '') {
-         this._report(SEID.ELEMENTDECL_NO_NAME);
-      }
-
-      this._assert(nameText === '' || parsedEl.elementName.couldBeName,
-         SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
-
-      if (!parsedEl.contentChunk && !parsedEl.list) {
-         this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
-      } else if (parsedEl.list) {
-         contentText = [];
-
-         this._assert(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
-            SEID.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
-         this._assert(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
-            SEID.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
-         this._assert(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
-
-         for (let index = 0; index < parsedEl.list.length; index++) {
-            const item = parsedEl.list[index];
-
-            if (item.text.toLocaleUpperCase() === '#PCDATA') {
-               this._assert(item.text === '#PCDATA',
-                  SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
-               this._assert(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
-
-               contentText.push('#PCDATA');
-            } else {
-               this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
-               contentText.push(item.text);
-            }
-         }
-         this._assert(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
-      } else {
-         contentText = parsedEl.contentChunk.text;
-         const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
-
-         this._assert(upperText === 'ANY' || upperText === 'EMPTY',
-            SEID.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
-         this._assert(upperText === contentText,
-            SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
-         contentText = upperText;
-      }
-
-      this._assert(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
-
-      this._checkDeclarationState(start, SEID.ELEMENTDECL_INVALID_CONTEXT);
-
-      return contentText;
-   }
-
-   _validatAttList(parseResults, start) {
-      const elNameChunk = parseResults.elementNameChunk;
-      const rawAttrs = parseResults.attributes;
-      const attListClose = parseResults.closeChunk;
-
-      const attributes = [];
-      const elName = elNameChunk ? elNameChunk.text : '';
-      const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
-
-      this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
-      this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
-      this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
-
-      for (let index = 0; index < rawAttrs.length; index++) {
-         const attr = rawAttrs[index];
-         const attrName = attr.name.text;
-         let list;
-         let attrType = '';
-         let attrDefault;
-
-         this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
-
-         if (!attr.type) {
-            this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
-         } else {
-            attrType = attr.type.text;
-
-            const upper = attrType.toLocaleUpperCase();
-            const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
-
-            this._assert(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
-
-            if (known && attrType !== upper) {
-               this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
-               attrType = upper;
-            }
-
-            if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
-               const attrList = attr.list || [];
-               list = [];
-
-               if (attrType === 'NOTATION') {
-                  this._assert(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
-               }
-
-               if (attrType === 'ENUMERATION') {
-                  this._assert(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
-                     [ elName ], attr.name, start);
-               }
-               this._assert(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
-
-               for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
-                  if (attrType === 'NOTATION') {
-                     this._assert(attrList[listIndex].couldBeName,
-                        SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
-                  } else {
-                     this._assert(attrList[listIndex].couldBeNmToken,
-                        SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
-                  }
-
-                  list.push(attrList[listIndex].text);
-               }
-
-               this._assert(attr.missingOr === 0,
-                  SEID.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
-               this._assert(attr.missingCount === 0,
-                  SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
-
-               if (!attr.close) {
-                  this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
-                     SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
-               }
-            }
-         }
-
-         if (!attr.default && !attr.value) {
-            this._assert(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
-         }
-
-         if (attr.default) {
-            attrDefault = attr.default.text;
-
-            const upper = attrDefault.toLocaleUpperCase();
-            const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
-
-            if (!known) {
-               this._assert(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
-            } else {
-               this._assert(upper === attrDefault,
-                  SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
-               attrDefault = upper;
-
-               if (attrDefault === '#FIXED') {
-                  if (attr.value) {
-                     this._assert(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
-                  }
-                  this._assert(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
-                     attr.default, start);
-               }
-            }
-         }
-
-         if (attr.value || attr.default) {
-            this._assert(attr.preDefaultSpace,
-               SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
-
-            if (attr.value) {
-               this._assert(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
-               if (!attr.aborted) {
-                  this._assert(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
-               }
-            }
-         }
-
-         if (attr.value) {
-            for (let index = 0; index < attr.value.length; index++) {
-               attr.value[index] = attr.value[index].text;
-            }
-         }
-
-         attributes.push({
-            name: attrName,
-            type: attrType,
-            list: list,
-            flag: attrDefault,
-            value: attr.value
-         });
-      }
-
-      this._assert(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
-
-      this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
-
-      return attributes;
-   }
-
-   _validateExternalId(externalId, systemRequired) {
-      if (externalId.unknownType) {
-         this._report(SEID.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
-         return;
-      }
-
-      this._assert(externalId.uppercaseTypeText === externalId.typeText,
-         SEID.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
-
-      if (externalId.uppercaseTypeText === 'PUBLIC') {
-         this._assert(externalId.publicId, SEID.EXTERNALID_NO_PUBLIC);
-      }
-
-      if (externalId.publicId) {
-         if (!externalId.publicId.quote) {
-            this._report(SEID.EXTERNALID_PUBLIC_NO_QUOTE);
-         }
-         this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
-         const match = PUBID_CHARS.exec(externalId.publicId.literalChunk.text);
-
-         if (externalId.publicId.literalChunk.text && (!match || match[0] !== externalId.publicId.literalChunk.text)) {
-            this._report(SEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                [ externalId.publicId.literalChunk.text[match[0].length] ]);
-         }
-      }
-
-      if (systemRequired) {
-         this._assert(externalId.systemId, SEID.EXTERNALID_NO_SYSTEM);
-      }
-
-      if (externalId.systemId) {
-         if (!externalId.systemId.quote) {
-            this._report(SEID.EXTERNALID_SYSTEM_NO_QUOTE);
-         }
-
-         if (externalId.publicId) {
-            this._assert(externalId.betweenSpaceChunk, SEID.EXTERNALID_PUBLIC_NO_SPACE);
-         } else {
-            this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
-         }
-      }
-   }
-
-   _validateProcessingInstruction(parsedPI, start) {
-      this._assert(!parsedPI.postStartSpaceChunk, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
-
-      if (parsedPI.isXmlDecl) {
-         this._assert(parsedPI.targetChunk.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE,
-            [ parsedPI.targetChunk.text ], parsedPI.postStartSpaceChunk || start, start);
-      } else {
-         if (!parsedPI.targetChunk) {
-            this._report(SEID.PI_NO_TARGET, parsedPI.postStartSpaceChunk || start, start);
-         } else if (!parsedPI.targetChunk.couldBeName) {
-            this._report(SEID.PI_TARGET_NAME_INVALID, [ parsedPI.targetChunk.text ],
-               parsedPI.postStartSpaceChunk || start, start);
-         }
-
-         this._assert(parsedPI.closeChunk, SEID.PI_NO_CLOSE, parsedPI.instructionChunk || parsedPI.optSpaceChunk ||
-            parsedPI.targetChunk || parsedPI.optSpaceChunk || start, start);
-         this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
-      }
-   }
-
-   _checkDeclarationState(start, error) {
-      if (this._entityMd.isTypeExternalSubset && this._state === STATE.START) {
-         this._state = STATE.IN_DTD;
-      }
-      this._assert(this._state === STATE.IN_DTD, error, start.startOffset, start);
-   }
-
    _getBracketItem(start) {
       const preSpace = this._cursor.getSpace();
       const bracketItemType = this._cursor.getWord([ '[' ]);
@@ -920,6 +576,30 @@ class XmlTokenStream extends XmlStream {
                this._state = STATE.IN_DTD;
                break;
          }
+      }
+   }
+
+   _checkDeclarationState(start, error) {
+      if (this._entityMd.isTypeExternalSubset && this._state === STATE.START) {
+         this._state = STATE.IN_DTD;
+      }
+      this._assert(this._state === STATE.IN_DTD, error, start.startOffset, start);
+   }
+
+   _checkContentState(chunk, docError, subsetError) {
+      switch (this._entityMd.type) {
+         case EntityMetaData.TYPE.DOCUMENT:
+            this._assert(this._state === STATE.IN_CONTENT, docError,
+               [ chunk.text ], chunk.startOffset, chunk);
+            break;
+         case EntityMetaData.TYPE.EXTERNAL:
+            if (this._state === STATE.START) {
+               this._state = STATE.IN_CONTENT;
+            }
+            break;
+         case EntityMetaData.TYPE.EXTERNALSUBSET:
+            this._report(subsetError, [ chunk.text ], chunk.startOffset, chunk);
+            break;
       }
    }
 
@@ -1345,6 +1025,325 @@ class XmlTokenStream extends XmlStream {
       this._pushToken(new SyntaxError(code, params, place, context));
    }
 
+   _validateStartDocType(parsedDocType) {
+      const start = parsedDocType.startChunk;
+
+      this._assert(parsedDocType.nameChunk, SEID.DOCTYPE_NO_NAME);
+
+      if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
+         this._report(SEID.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
+      }
+
+      if (parsedDocType.externalId) {
+         this._validateExternalId(parsedDocType.externalId, true);
+      }
+
+      if (this._entityMd.isTypeDocument) {
+         if (this._state !== STATE.PROLOG_PREDOCTYPE) {
+            this._report(SEID.DOCTYPE_INVALID_DOC_CONTEXT, start.startOffset, start);
+         }
+      } else {
+         this._report(SEID.DOCTYPE_INVALID_EXTERNAL_CONTEXT, start.startOffset, start);
+      }
+   }
+
+   _validateCloseDocType(parsedClose) {
+      this._assert(parsedClose.closeChunk, SEID.DOCTYPE_NO_CLOSE);
+   }
+
+   _validateNotation(parsedNotation) {
+      const notNameText = textOrBlank(parsedNotation.nameChunk);
+      const couldBeName = notNameText === '' ||
+         (parsedNotation.nameChunk && parsedNotation.nameChunk.couldBeName);
+
+      this._assert(parsedNotation.nameChunk, SEID.NOTATIONDECL_NO_NAME);
+      this._assert(couldBeName, SEID.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
+      this._assert(parsedNotation.postNameSpaceChunk,
+         SEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
+      if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
+         this._report(SEID.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
+      } else {
+         this._validateExternalId(parsedNotation.externalId, false);
+      }
+      this._assert(parsedNotation.close, SEID.NOTATIONDECL_NO_CLOSE, [ notNameText ]);
+      this._checkDeclarationState(parsedNotation.startChunk, SEID.NOTATIONDECL_INVALID_CONTEXT);
+   }
+
+   _validateEntity(parsedEntity) {
+      const enNameText = textOrBlank(parsedEntity.nameChunk);
+
+      this._assert(parsedEntity.nameChunk, SEID.ENTITYDECL_NO_NAME);
+      this._assert((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
+         SEID.ENTITYDECL_NAME_INVALID, [ enNameText ]);
+      this._assert(parsedEntity.postNameSpaceChunk, SEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+
+      if (parsedEntity.nDataMarker) {
+         this._assert(parsedEntity.preNDataSpace, SEID.ENTITYDECL_NDATA_NO_SPACE_BEFORE, [ enNameText ]);
+         this._assert(parsedEntity.nDataMarker.text === 'NDATA',
+            SEID.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsedEntity.nDataMarker.text ]);
+         this._assert(parsedEntity.nDataName, SEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
+      }
+
+      this._assert(parsedEntity.valueChunk || parsedEntity.externalId,
+         SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
+      this._assert(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+
+      this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
+   }
+
+   _validateElementDeclaration(parsedEl, start) {
+      const nameText = parsedEl.elementName ? parsedEl.elementName.text : '';
+      let contentText;
+
+      if (nameText === '') {
+         this._report(SEID.ELEMENTDECL_NO_NAME);
+      }
+
+      this._assert(nameText === '' || parsedEl.elementName.couldBeName,
+         SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
+
+      if (!parsedEl.contentChunk && !parsedEl.list) {
+         this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
+      } else if (parsedEl.list) {
+         contentText = [];
+
+         this._assert(parsedEl.missingCount === 0 || parsedEl.list.length === 0,
+            SEID.ELEMENTDECL_SPEC_NO_NAMES, [ parsedEl.missingCount, nameText ]);
+         this._assert(parsedEl.missingOr === 0 || parsedEl.list.length <= 1,
+            SEID.ELEMENTDECL_SPEC_NO_ORS, [ parsedEl.missingOr, nameText ]);
+         this._assert(parsedEl.list.length > 0, SEID.ELEMENTDECL_SPEC_ITEMS_MISSING, [ nameText ]);
+
+         for (let index = 0; index < parsedEl.list.length; index++) {
+            const item = parsedEl.list[index];
+
+            if (item.text.toLocaleUpperCase() === '#PCDATA') {
+               this._assert(item.text === '#PCDATA',
+                  SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ '#PCDATA', item.text ]);
+               this._assert(index === 0, SEID.ELEMENTDECL_PCDATA_NOT_FIRST, [ nameText ]);
+
+               contentText.push('#PCDATA');
+            } else {
+               this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
+               contentText.push(item.text);
+            }
+         }
+         this._assert(parsedEl.close, SEID.ELEMENTDECL_NO_SPEC_CLOSE, [ nameText ]);
+      } else {
+         contentText = parsedEl.contentChunk.text;
+         const upperText = parsedEl.contentChunk.text.toLocaleUpperCase();
+
+         this._assert(upperText === 'ANY' || upperText === 'EMPTY',
+            SEID.ELEMENTDECL_SPEC_UNKNOWN, [ contentText ]);
+         this._assert(upperText === contentText,
+            SEID.ELEMENTDECL_SPEC_INVALID_CASE, [ upperText, contentText ]);
+         contentText = upperText;
+      }
+
+      this._assert(parsedEl.closeChunk, SEID.ELEMENTDECL_NO_CLOSE, [ nameText ]);
+
+      this._checkDeclarationState(start, SEID.ELEMENTDECL_INVALID_CONTEXT);
+
+      return contentText;
+   }
+
+   _validatAttList(parseResults, start) {
+      const elNameChunk = parseResults.elementNameChunk;
+      const rawAttrs = parseResults.attributes;
+      const attListClose = parseResults.closeChunk;
+
+      const attributes = [];
+      const elName = elNameChunk ? elNameChunk.text : '';
+      const nameValid = elName === '' || (elNameChunk && elNameChunk.couldBeName);
+
+      this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
+      this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
+      this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
+
+      for (let index = 0; index < rawAttrs.length; index++) {
+         const attr = rawAttrs[index];
+         const attrName = attr.name.text;
+         let list;
+         let attrType = '';
+         let attrDefault;
+
+         this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
+
+         if (!attr.type) {
+            this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
+         } else {
+            attrType = attr.type.text;
+
+            const upper = attrType.toLocaleUpperCase();
+            const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
+
+            this._assert(known, SEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ elName, attrType ]);
+
+            if (known && attrType !== upper) {
+               this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
+               attrType = upper;
+            }
+
+            if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
+               const attrList = attr.list || [];
+               list = [];
+
+               if (attrType === 'NOTATION') {
+                  this._assert(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
+               }
+
+               if (attrType === 'ENUMERATION') {
+                  this._assert(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
+                     [ elName ], attr.name, start);
+               }
+               this._assert(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
+
+               for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
+                  if (attrType === 'NOTATION') {
+                     this._assert(attrList[listIndex].couldBeName,
+                        SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
+                  } else {
+                     this._assert(attrList[listIndex].couldBeNmToken,
+                        SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, [ elName, attrList[listIndex].text ]);
+                  }
+
+                  list.push(attrList[listIndex].text);
+               }
+
+               this._assert(attr.missingOr === 0,
+                  SEID.ATTLISTDECL_ATTR_LIST_NO_ORS, [ attr.missingOr, elName ]);
+               this._assert(attr.missingCount === 0,
+                  SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
+
+               if (!attr.close) {
+                  this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
+                     SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
+               }
+            }
+         }
+
+         if (!attr.default && !attr.value) {
+            this._assert(attr.default, SEID.ATTLISTDECL_ATTR_NO_DEFAULT, [ attrName, elName ]);
+         }
+
+         if (attr.default) {
+            attrDefault = attr.default.text;
+
+            const upper = attrDefault.toLocaleUpperCase();
+            const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
+
+            if (!known) {
+               this._assert(known, SEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attrDefault, elName ]);
+            } else {
+               this._assert(upper === attrDefault,
+                  SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
+               attrDefault = upper;
+
+               if (attrDefault === '#FIXED') {
+                  if (attr.value) {
+                     this._assert(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
+                  }
+                  this._assert(attr.value, SEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ elName ],
+                     attr.default, start);
+               }
+            }
+         }
+
+         if (attr.value || attr.default) {
+            this._assert(attr.preDefaultSpace,
+               SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
+
+            if (attr.value) {
+               this._assert(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
+               if (!attr.aborted) {
+                  this._assert(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
+               }
+            }
+         }
+
+         if (attr.value) {
+            for (let index = 0; index < attr.value.length; index++) {
+               attr.value[index] = attr.value[index].text;
+            }
+         }
+
+         attributes.push({
+            name: attrName,
+            type: attrType,
+            list: list,
+            flag: attrDefault,
+            value: attr.value
+         });
+      }
+
+      this._assert(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
+
+      this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
+
+      return attributes;
+   }
+
+   _validateExternalId(externalId, systemRequired) {
+      if (externalId.unknownType) {
+         this._report(SEID.EXTERNALID_UNKNOWN, [ externalId.typeText ]);
+         return;
+      }
+
+      this._assert(externalId.uppercaseTypeText === externalId.typeText,
+         SEID.EXTERNALID_INVALID_CASE, [ externalId.uppercaseTypeText, externalId.typeText ]);
+
+      if (externalId.uppercaseTypeText === 'PUBLIC') {
+         this._assert(externalId.publicId, SEID.EXTERNALID_NO_PUBLIC);
+      }
+
+      if (externalId.publicId) {
+         if (!externalId.publicId.quote) {
+            this._report(SEID.EXTERNALID_PUBLIC_NO_QUOTE);
+         }
+         this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         const match = PUBID_CHARS.exec(externalId.publicId.literalChunk.text);
+
+         if (externalId.publicId.literalChunk.text && (!match || match[0] !== externalId.publicId.literalChunk.text)) {
+            this._report(SEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+                [ externalId.publicId.literalChunk.text[match[0].length] ]);
+         }
+      }
+
+      if (systemRequired) {
+         this._assert(externalId.systemId, SEID.EXTERNALID_NO_SYSTEM);
+      }
+
+      if (externalId.systemId) {
+         if (!externalId.systemId.quote) {
+            this._report(SEID.EXTERNALID_SYSTEM_NO_QUOTE);
+         }
+
+         if (externalId.publicId) {
+            this._assert(externalId.betweenSpaceChunk, SEID.EXTERNALID_PUBLIC_NO_SPACE);
+         } else {
+            this._assert(externalId.spaceAfterTypeChunk, SEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+         }
+      }
+   }
+
+   _validateProcessingInstruction(parsedPI, start) {
+      this._assert(!parsedPI.postStartSpaceChunk, SEID.PI_SPACE_BEFORE_TARGET, start.endOffset);
+
+      if (parsedPI.isXmlDecl) {
+         this._assert(parsedPI.targetChunk.text === 'xml', SEID.XMLDECL_TARGET_INVALID_CASE,
+            [ parsedPI.targetChunk.text ], parsedPI.postStartSpaceChunk || start, start);
+      } else {
+         if (!parsedPI.targetChunk) {
+            this._report(SEID.PI_NO_TARGET, parsedPI.postStartSpaceChunk || start, start);
+         } else if (!parsedPI.targetChunk.couldBeName) {
+            this._report(SEID.PI_TARGET_NAME_INVALID, [ parsedPI.targetChunk.text ],
+               parsedPI.postStartSpaceChunk || start, start);
+         }
+
+         this._assert(parsedPI.closeChunk, SEID.PI_NO_CLOSE, parsedPI.instructionChunk || parsedPI.optSpaceChunk ||
+            parsedPI.targetChunk || parsedPI.optSpaceChunk || start, start);
+         this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
+      }
+   }
 }
 
 module.exports = XmlTokenStream;

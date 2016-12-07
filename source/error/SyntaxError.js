@@ -6,8 +6,8 @@ const Offset = require('../shared/Offset.js');
 const StringBundle = require('../shared/StringBundle.js');
 const TextChunk = require('../shared/TextChunk.js');
 const XmlError = require('./XmlError.js');
-const strings = require('../derive/base.json');
-const codes = require('../derive/code.json');
+const strings = require('../derive/SyntaxError.json');
+const codes = require('../derive/SyntaxError-code.json');
 
 const stringBundle = new StringBundle(strings);
 

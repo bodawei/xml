@@ -6,13 +6,12 @@
 'use strict';
 
 var jitGrunt = require('jit-grunt');
-var fs = require('fs');
 var os = require('os');
-var propertiesParser = require('node-properties-parser');
 
 var coverageReport = require('./coverageReport.js');
 var testReport = require('./testReport.js');
 var registerCheckKeys = require('./check-keys.js');
+var registerDeriveLocale = require('./deriveLocale.js');
 
 var MODULE_NAME = 'xt4j';
 var BUILD_DIR = './build/';
@@ -46,6 +45,7 @@ module.exports = function standardBuild(grunt) {
    jitGrunt(grunt);
    coverageReport(grunt);
    testReport(grunt);
+   registerDeriveLocale(grunt);
    registerCheckKeys(grunt);
 
    // Figure out what browsers we should be able to run on the current platform.
@@ -194,6 +194,14 @@ module.exports = function standardBuild(grunt) {
                propFiles: [ SOURCE_LOCALE_DIR + '**/base.properties' ]
             }
          }
+      },
+      derivelocale: {
+         default: {
+            options: {
+               sourceDir: SOURCE_LOCALE_DIR,
+               destDir: SOURCE_DERIVED_DIR
+            }
+         }
       }
    });
 
@@ -202,7 +210,7 @@ module.exports = function standardBuild(grunt) {
    grunt.registerTask('default', [
       'quietBuild',
       'clean',
-      '_deriveSource',
+      'derivelocale',
       'test',
       'jasmine_node:dist',
       'eslint',
@@ -212,68 +220,12 @@ module.exports = function standardBuild(grunt) {
       '_dist'
    ]);
 
-   grunt.registerTask('dev', [ '_deriveSource', 'karma:dev' ]);
+   grunt.registerTask('dev', [ 'derivelocale', 'karma:dev' ]);
 
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
 
    grunt.registerTask('quietBuild', 'Report on tests', () => {
       require('./quiet-grunt-mod.js');
-   });
-
-   grunt.registerTask('_deriveSource', 'Derive source', () => {
-      var baseStrings = fs.readFileSync(SOURCE_LOCALE_DIR + 'base.properties');
-      var baseObject = propertiesParser.parse(baseStrings);
-      var codes = fs.readFileSync(SOURCE_LOCALE_DIR + 'code.properties');
-      var codesObject = propertiesParser.parse(codes);
-
-      var jsonBase = {};
-      var jsonCode = {};
-
-      function noDupValues(source, obj) {
-         var testObj = {};
-
-         for (var key in obj) {
-            var value = obj[key];
-
-            if (testObj[value]) {
-               grunt.log.fail('Duplicate value in ' + source + ': ' + value);
-            } else {
-               testObj[value] = true;
-            }
-         }
-      }
-
-      function compareKeys(a, aName, b, bName) {
-         for (key in a) {
-            if (!b[key]) {
-               grunt.log.fail('Missing key "' + key + '" in ' + bName);
-            }
-         }
-      }
-
-      function keysMatch(left, leftName, right, rightName) {
-         compareKeys(left, leftName, right, rightName);
-         compareKeys(right, rightName, left, leftName);
-      }
-
-      //noDupValues('base.properties', baseObject); Can't do this
-      noDupValues('code.properties', codesObject);
-      keysMatch(baseObject, 'base.properties', codesObject, 'code.properties');
-
-      for (var key in baseObject) {
-         var value = baseObject[key];
-
-         if (value !== 'OBSOLETE') {
-            jsonBase[key] = value;
-            jsonCode[key] = parseInt(codesObject[key], 10);
-         }
-      }
-
-      if (!fs.existsSync(SOURCE_DERIVED_DIR)) {
-         fs.mkdirSync(SOURCE_DERIVED_DIR);
-      }
-      fs.writeFileSync(SOURCE_DERIVED_DIR + 'base.json', JSON.stringify({ base: jsonBase }, undefined, 2));
-      fs.writeFileSync(SOURCE_DERIVED_DIR + 'code.json', JSON.stringify(jsonCode, undefined, 2));
    });
 
    grunt.registerTask('_testreport', 'Report on tests', () => {

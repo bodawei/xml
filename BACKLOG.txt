@@ -25,37 +25,15 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 	Notes: Build 148 is on a critical path
 	Next planning should either break down streams in more detail, or work on entities
 
-<names 1M>
-- What we have now is 1.1/* and 1.0/5
-- 1.0/1-4 has a very different production that is defined in vast tables in Appendix B
-√ M 161 try building these as regular expressions and checking each char, versus a manual check
-	- That is, we should use this as an opportunity to time this.
-	- Worth doing the suggestion from invalid chars, below, to extract and apply a regex across the whole thing
-	- The code here is pretty mechanical, but definitely involves jsperf!
-		So, some preliminary tests of this showed that a regex and getToTerminator solution for getWord was more than half the speed of the existing getWord!
-		But, it doesn't seem to be the fault of the regex.  It seems to be more getToTerminator.Which gets us back to wanting to do performance work on the cursor
-		That's out of scope for this sprint.
-		So:
-			- Take the existing getWord, and instead of relying on getToTerminator, replace the calls to isNameChar and isNameStart with a regex
-				- RegEx isn't slower.  Inlining probably a tiny bit faster, and cleaner.
-	- based on that, either switch to using regex, in which case convert the stuff in [84-89] into regex and use those
-				x or convert the stuff in 84-89 into functions.	
-<encoding>
-√ S 162 Accept encoding option (overrides all autodetection)
-     - sets specifiedEncoding
-√ S 164 stream
-    - has ignoreDocumentEncoding
-    - otherwise passes encoding
-          - which sets specifiedEncoding (ifgnored if already set)
-√ S 163 Autodetect
-     - read in 4 bytes compare with each (see standard)
-     - sets autodetected format
 
 
 -- next: 175
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
+	- next is xmldecl!
+	- Then space and comment validation should be extracted
+	- cdata, content, elements, references
 - Need to pull out validation into another file
 - Think about pulling the parse declaration, validation and tokenization of each type into a single file (for each type)
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
@@ -63,30 +41,6 @@ CLEANUP
 	- add place and context to all errors while doing this
 
 BUILD
-148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
-	- Needed for errors in technical debt section
-	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
-	Each has a base.properties and code.properties. Barf if missing
-		- base and code must match keys exactly
-		- code must have no dup values
-		- remove OBSOLETE
-		- each locale must match base keys exactly
-	assemble all into one big happy json which writes out as SyntaxError.json
-149 Make a proper grunt task and test it	
-??? Do we (can we?) change from all caps error codes in code?
-??? Can you switch to using ini file format?  Would be nice to say
-		[XmlDecl]
-		NoAttributes = Blah blah
-155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
-156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
-144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
-127: Investigate why current node causes coverage to fail
-	- Find out version where it started failing (after 6.2.1 and before 6.4)
-	- Search on web
-	- debug down to the problem
-128 Investigate the failures in cygwin shell: Looks like it is firefox
-111: Get Vivaldi to work
-58:L Build infrastructure for running xmlconf tests.
 126: Enhancements to the reporting
 - test reporter should report per browser
 - test reporter should complain on duplicate test names!
@@ -109,6 +63,17 @@ BUILD
 - coverage reporter should have a percent cutoff
 - coverage reporter should be able to exclude some files
 - name reporter better
+149 Test deriveLocale
+155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
+156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
+144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
+127: Investigate why current node causes coverage to fail
+	- Find out version where it started failing (after 6.2.1 and before 6.4)
+	- Search on web
+	- debug down to the problem
+128 Investigate the failures in cygwin shell: Looks like it is firefox
+111: Get Vivaldi to work
+58:L Build infrastructure for running xmlconf tests.
 38:L Rethink checkin process
 	Commit should do a test run and add report to comment.
 	include a time with percent change from previous commit
@@ -1324,3 +1289,43 @@ Planning for the next sprint was huge, as expanded all technical debt.
 Sprint 22
 =========
 Went over time by 15 minutes.  HAd pulled in 163 since got done half an hour early.
+
+<names 1M>
+- What we have now is 1.1/* and 1.0/5
+- 1.0/1-4 has a very different production that is defined in vast tables in Appendix B
+√ M 161 try building these as regular expressions and checking each char, versus a manual check
+	- That is, we should use this as an opportunity to time this.
+	- Worth doing the suggestion from invalid chars, below, to extract and apply a regex across the whole thing
+	- The code here is pretty mechanical, but definitely involves jsperf!
+		So, some preliminary tests of this showed that a regex and getToTerminator solution for getWord was more than half the speed of the existing getWord!
+		But, it doesn't seem to be the fault of the regex.  It seems to be more getToTerminator.Which gets us back to wanting to do performance work on the cursor
+		That's out of scope for this sprint.
+		So:
+			- Take the existing getWord, and instead of relying on getToTerminator, replace the calls to isNameChar and isNameStart with a regex
+				- RegEx isn't slower.  Inlining probably a tiny bit faster, and cleaner.
+	- based on that, either switch to using regex, in which case convert the stuff in [84-89] into regex and use those
+				x or convert the stuff in 84-89 into functions.	
+<encoding>
+√ S 162 Accept encoding option (overrides all autodetection)
+     - sets specifiedEncoding
+√ S 164 stream
+    - has ignoreDocumentEncoding
+    - otherwise passes encoding
+          - which sets specifiedEncoding (ifgnored if already set)
+√ S 163 Autodetect
+     - read in 4 bytes compare with each (see standard)
+     - sets autodetected format
+
+148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
+	- Needed for errors in technical debt section
+	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
+	Each has a base.properties and code.properties. Barf if missing
+		- base and code must match keys exactly
+		- code must have no dup values
+		- remove OBSOLETE
+		- each locale must match base keys exactly
+	assemble all into one big happy json which writes out as SyntaxError.json
+??? Do we (can we?) change from all caps error codes in code? -- not important enough
+??? Can you switch to using ini file format?  Would be nice to say -- not important enough.
+		[XmlDecl]
+		NoAttributes = Blah blah
