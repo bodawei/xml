@@ -5,6 +5,7 @@
 const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
+const XmlWarning = require('./error/XmlWarning.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
@@ -12,6 +13,7 @@ const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
 
 const SEID = SyntaxError.ID;
+const XWID = XmlWarning.ID;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -760,8 +762,14 @@ class XmlTokenStream extends XmlStream {
 
       if (!name) {
          this._report(SEID.ELEMENT_NO_NAME);
-      } else if (!name.couldBeName) {
-         this._report(SEID.ELEMENT_NAME_INVALID, [ name.text ]);
+      } else {
+         if (!name.couldBeName) {
+            this._report(SEID.ELEMENT_NAME_INVALID, [ name.text ]);
+         }
+
+         if (name.text.substring(0, 3).toLocaleLowerCase() === 'xml') {
+            this._warn(XWID.ELEMENT_NAME_XML_RESERVED, [ name.text ]);
+         }
       }
 
       if (!close) {
@@ -1023,6 +1031,10 @@ class XmlTokenStream extends XmlStream {
 
    _report(code, params, place, context) {
       this._pushToken(new SyntaxError(code, params, place, context));
+   }
+
+   _warn(code, params, place, context) {
+      this._pushToken(new XmlWarning(code, params, place, context));
    }
 
    _validateStartDocType(parsedDocType) {

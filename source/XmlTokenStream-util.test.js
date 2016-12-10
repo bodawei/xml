@@ -102,6 +102,50 @@ function expectSyntaxError(entityType, input, code, message, place, context) {
    }
 }
 
+function expectXmlWarning(entityType, input, code, message, place, context) {
+   if (!EntityMetaData.TYPE[entityType]) {
+      context = place;
+      place = message;
+      message = code;
+      code = input;
+      input = entityType;
+      entityType = EntityMetaData.TYPE.DOCUMENT;
+   }
+
+   let strictS;
+   let laxS;
+
+   switch (entityType) {
+      case EntityMetaData.TYPE.DOCUMENT:
+         strictS = makeStrictStream(input);
+         laxS = makeLaxStream(input);
+         break;
+      case EntityMetaData.TYPE.EXTERNAL:
+         strictS = makeStrictExternalEntityStream(input);
+         laxS = makeLaxExternalEntityStream(input);
+         break;
+      case EntityMetaData.TYPE.EXTERNALSUBSET:
+         strictS = makeStrictExternalSubsetStream(input);
+         laxS = makeLaxExternalSubsetStream(input);
+         break;
+   }
+
+   expect(() => {
+      strictS.getNext();
+   }).toThrowError(message);
+
+   const error = laxS.getNext();
+//   expect(error.type).toBeSyntaxError(code);
+
+   if (place) {
+      expect(error.place).toEqual(place);
+   }
+
+   if (context) {
+      expect(error.context).toEqual(context);
+   }
+}
+
 function expectExternalSubsetSyntaxError(input, code, message, place, context) {
    const strictS = makeStrictExternalSubsetStream(input);
    const laxS = makeLaxExternalSubsetStream(input);
@@ -159,6 +203,7 @@ function makeStringTokenArray(values, offset = 0) {
 
 module.exports = {
    expectSyntaxError,
+   expectXmlWarning,
    expectExternalSubsetSyntaxError,
    expectTokenType,
    expectError,

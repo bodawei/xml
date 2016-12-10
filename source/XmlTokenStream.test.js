@@ -8,6 +8,7 @@ const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared//EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
+const XmlWarning = require('./error/XmlWarning.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
@@ -23,6 +24,7 @@ const makeStrictExternalSubsetStream = testUtils.makeStrictExternalSubsetStream;
 const makeLaxExternalEntityStream = testUtils.makeLaxExternalEntityStream;
 const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
 const expectSyntaxError = testUtils.expectSyntaxError;
+const expectXmlWarning = testUtils.expectXmlWarning;
 const expectTokenType = testUtils.expectTokenType;
 const expectError = testUtils.expectError;
 const ignoreError = testUtils.ignoreError;
@@ -1837,6 +1839,13 @@ describe('XmlTokenStream', () => {
          expectSyntaxError('<>',
             SyntaxError.ID.ELEMENT_NO_NAME,
             'Missing name in element tag.');
+      });
+
+      it('reports a warning if the name starts with xml', () => {
+         expectXmlWarning(EntityMetaData.TYPE.EXTERNAL,
+            '<xmlFoo></xmlFoo>',
+            XmlWarning.ID.ELEMENT_NAME_XML_RESERVED,
+            'Element names should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
       });
 
       describe('with attributes', () => {

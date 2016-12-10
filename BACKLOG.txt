@@ -22,9 +22,44 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
 11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
-	Notes: Build 148 is on a critical path
-	Next planning should either break down streams in more detail, or work on entities
+12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: ?
 
+<errata changes 1m>
+M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
+	- names in general before 1.0/5 (and 1.1) are not allowed to start with xml. in 1.0/5 that is ok.
+	- targets are now xml- only not xml
+	- element attribute names and elment names same
+	Pretty easy to do this, even per version.
+	-- Need to extract common code from warning and syntax error
+	-expectXmlWarning and expectSyntaxError should be simplified
+	- if (!name.couldBeName should be an assert, could do an _assertWarn()
+
+<encoding 2s>
+NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
+	?? Where is the error coming from if the byte order mark is not present?
+S 165 resolution
+	Autodetect:
+	A something that need conversion (utf16 etc)
+	B Something that looks no-conversion-needed/already-decoded  (ascii, unicode, etc)
+	C unknown
+	if specified is undefined and autodetect is C, barf
+	If specified is undefined and autodetect is B  done
+	if specified is undefined and autodetect is A then try to convert. barf if no lookup or fail
+	     specified could be a charset or name of a module which provides a conversion function
+	If specified is value and autoC, then match and convert, or not match and fail
+	If specified is value and autoB then if match done, if not match convert
+	If specified is value and autoA then convert
+	values for specified and autodetect: name (UTF-8 etc), x-noConversion, x-yaxt-xxxx-text-converter
+	Cursor exposes: dataConvertedFrom
+	     - only set once it has data enough to decide
+S 166 Actually do the convert
+	preserves bom
+	skips over it
+	Conversion always starts from current point
+	     - before read anything
+	     - by stream as soon as it finds an encoding
+	- there is a streaming option for use with streaming cursors. for string we can do all
+	- use iconv-lite. Can check if an encoding is there
 
 
 -- next: 175
@@ -81,44 +116,10 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 PROJECT
---- technical debt [5M 11S]
+--- technical debt [4M 8S]
 ?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
 	- What would the performance be?
 	- Even more to the point, could we extract this entirely out of the string cursor and put into the validation
-
-<encoding 3s>
-NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
-	?? Where is the error coming from if the byte order mark is not present?
-S 165 resolution
-	Autodetect:
-	A something that need conversion (utf16 etc)
-	B Something that looks no-conversion-needed/already-decoded  (ascii, unicode, etc)
-	C unknown
-	if specified is undefined and autodetect is C, barf
-	If specified is undefined and autodetect is B  done
-	if specified is undefined and autodetect is A then try to convert. barf if no lookup or fail
-	     specified could be a charset or name of a module which provides a conversion function
-	If specified is value and autoC, then match and convert, or not match and fail
-	If specified is value and autoB then if match done, if not match convert
-	If specified is value and autoA then convert
-	values for specified and autodetect: name (UTF-8 etc), x-noConversion, x-yaxt-xxxx-text-converter
-	Cursor exposes: dataConvertedFrom
-	     - only set once it has data enough to decide
-S 166 Actually do the convert
-	preserves bom
-	skips over it
-	Conversion always starts from current point
-	     - before read anything
-	     - by stream as soon as it finds an encoding
-	- there is a streaming option for use with streaming cursors. for string we can do all
-	- use iconv-lite. Can check if an encoding is there
-
-<errata changes 1m>
-M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
-	- names in general before 1.0/5 (and 1.1) are not allowed to start with xml. in 1.0/5 that is ok.
-	- targets are now xml- only not xml
-	- element attribute names and elment names same
-	Pretty easy to do this, even per version.
 
 <invalid chars 1m 3s>
 S 167 report errors: suggest having routine which goes over parsing result recursively and reports generically
@@ -149,40 +150,82 @@ S 174 Need to sweep over existing errors and see if any look like errors
 
 
 M 158 Make XmlTokenStream a node stream
+	- getNext
+		calls read and throws error if it is an error token
+	- read
+	- on data
+	- on error
+	all of these return both tokens and errors, unless we set syntaxErrorAsError
+	- easy to substitute in and have XmlTokenStream call push and for the _read to call _innerGetNext?
+		our getNext() should call read() and then throw an exception if appropriate.
 	- semantics around ending need attention (that's most the work). Modify tests since we can't use fake timeout
+	- ending
+		if error, then we set ended
+		if erorred on getNext or looping
+			errored set in getNext if an error is found
+		- in short, in our push routine, if we are strict, and we find an error, we push undefined/null
+		and the puzzling thing is that in innnerGetNext, we say if we don't get a token, then we must be done.
+			This works for the moment, but won't work for async.
+	Work
+		- rip out XmlStream and put in Node stream
+		- Finding an error pushes the error token and then pushes undefined/null if in strict
+		- no result in innerGetNext pushes null
+		- our pushing
+			- tries to push into stream, but if an error queues that.
+			- next _read will need to check if there are pending things and push those.
 S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
+	- should just need a _transform() which passes all through except comments which it modifies and then pushes through
+
 M 160 Make XmlEntityStream a transforming stream
+	here, _transform() will respond to entityStart and element start and syntax error.
+		Note that this may be async since we have a callback function to call to notify of finishing
+		I dont think we actually have any async working yet, so we just need existing tests to pass.
 
 --- Entity management [8M 6S] !!!
+Assumptions
+	- entityValues are always strings from the parser. we do no sub-examination
+	- attribute values and attribute values in declarations are parsed for char refs and entity refs, but those are not expanded
+
+PLANNING
+1) Review Entity stuff in standard https://www.w3.org/TR/2006/REC-xml11-20060816/#sec-physical-struct
+2) Review streams https://nodejs.org/api/stream.html#stream_implementing_a_transform_stream
 - Note, eratta in 1.1/2 has an improved wording on 4.1
 - Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
-- should we be expanding character references in attribute defaults?
+- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+- Why do we need to call getNext multiple times is ugly. can we stop that?
+
+is this what we are doing?
 - ENTITIES, attribute values, and attrdef defaults
 	Note: Attributes coming out of XmlTokenStream will be
 		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]  // underlying cursor is over other.  Let's ignore that.
 	Internal Entity Values should be
-		[ TEXT, CHARREF, TEXT ]
+		[ TEXT ]
 	External Entity Values should be essentially
 		[ TEXT ]
-87:S: Handle PEReferences and character references in entity values
+
+Fix XmlTokenStream handling of entities and attributes
+	?
+x S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
+
+Fix EntityManager cursor returns
+	- Need cursors that can read internal entities
+	- need cursors that can read external entities
+	- Probably need a caching cursor so we don't have to refresh
+M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
+M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
+
+Fix EntityStream's consumption of entities
+	- need a special token stream if this is for attributes, since we shouldn't be parsing elements etc here.
+M 133 Need a special token stream which reads entity values for attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class.
 Attributes with references that themselves have references should work
 Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
-Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
 Need to test error handling for attribute references
-Why do we need to call getNext multiple times is ugly. can we stop that?
-
 S 138 EntityStream test that we are, in fact, unsubscribing from child streams.
 S 139 EntityStream test subentry stream is lax or not
 S 140 EntityStream should be unsubscribing in case of error too?
 S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top in entity stream
 
-
-M 133 Need a special token stream which reads entity values for attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class. 
-
-S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
-M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
-M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
-
+Enhance entityManager to do retrieval
 S 121 add EntityRetriever to EntityManager
 	change EntityRetriever to:
 	get(location, callback(error, success))
@@ -193,6 +236,7 @@ S 123 get should turn around and retrieve again if eager on
             should put a callback in structure so that can call back if proper
 S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
 M 125 Extract entity replacement from XmlTokenStream into EntityStream
+M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
 M 115 Advanced XmlEntityStream
 	When it encounters: DOCTYPE or entityDecl with an externalID Sets up info in EntityManager
@@ -202,7 +246,6 @@ M 115 Advanced XmlEntityStream
 	returns a stream
 		This will be a dummy stream if we have already retrieve the whole thing.
 
-M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
 M 112: Browser entity retriever. For now must be sync to get a string cursor
 	PLAN THIS -- note: node will be unhappy for a bit.  in fact, code coverage is going to be a big problem because of the conditional nature here.
@@ -216,6 +259,7 @@ M 113: Node entity retriever. For now must be sync to get a string cursor. but t
 	use https://github.com/node-nock/nock
 	This also needs to deal with files 
 S 154  Provide a cross environment "location" which StringCursor or EntityInfo or EntityLocation uses to default to either process.cwd() or window.location
+87:S: Handle PEReferences and character references in entity values
 
 --- DTD [3XL]
 21:XL Read element content structure
