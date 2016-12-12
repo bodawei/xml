@@ -763,12 +763,15 @@ class XmlTokenStream extends XmlStream {
       if (!name) {
          this._report(SEID.ELEMENT_NO_NAME);
       } else {
-         if (!name.couldBeName) {
-            this._report(SEID.ELEMENT_NAME_INVALID, [ name.text ]);
-         }
+         const isV1R5 = this._entityMd.versionIs1dot0 && this._entityMd.revision === 5;
+         this._assert(name.couldBeName, SEID.ELEMENT_NAME_INVALID, [ name.text ]);
 
-         if (name.text.substring(0, 3).toLocaleLowerCase() === 'xml') {
-            this._warn(XWID.ELEMENT_NAME_XML_RESERVED, [ name.text ]);
+         if (isStartOrEmpty) {
+            if (isV1R5 && name.text.substring(0, 4) === 'xml-') {
+               this._warn(XWID.ELEMENT_NAME_XMLDASH_RESERVED, [ name.text ]);
+            } else if (!isV1R5 && name.text.substring(0, 3).toLocaleLowerCase() === 'xml') {
+               this._warn(XWID.ELEMENT_NAME_XML_RESERVED, [ name.text ]);
+            }
          }
       }
 
@@ -1113,6 +1116,14 @@ class XmlTokenStream extends XmlStream {
 
       this._assert(nameText === '' || parsedEl.elementName.couldBeName,
          SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
+
+      const isV1R5 = this._entityMd.versionIs1dot0 && this._entityMd.revision === 5;
+
+      if (isV1R5 && nameText.substring(0, 4) === 'xml-') {
+         this._warn(XWID.ELEMENTDECL_NAME_XMLDASH_RESERVED, [ nameText ]);
+      } else if (!isV1R5 && nameText.substring(0, 3).toLocaleLowerCase() === 'xml') {
+         this._warn(XWID.ELEMENTDECL_NAME_XML_RESERVED, [ nameText ]);
+      }
 
       if (!parsedEl.contentChunk && !parsedEl.list) {
          this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);

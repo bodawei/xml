@@ -128,7 +128,8 @@ describe('XmlWarning', () => {
 
       it('adds a locale', () => {
          const locale = {};
-         locale[XmlWarning.ID.ELEMENT_NAME_XML_RESERVED] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
+         locale[XmlWarning.ID.ELEMENT_NAME_XML_RESERVED] =
+            'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
          XmlWarning.setPreferredLocale('de');
          XmlWarning.addLocale('de', locale);
 
@@ -142,7 +143,8 @@ describe('XmlWarning', () => {
 
       it('returns the remove locale', () => {
          const locale = {};
-         locale[XmlWarning.ID.ELEMENT_NAME_XML_RESERVED] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
+         locale[XmlWarning.ID.ELEMENT_NAME_XML_RESERVED] =
+            'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
          XmlWarning.setPreferredLocale('de');
          XmlWarning.addLocale('de', locale);
 

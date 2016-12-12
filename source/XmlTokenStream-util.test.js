@@ -209,6 +209,7 @@ module.exports = {
    expectError,
    ignoreError,
    ignoreToken,
+   makeStream,
    makeStrictStream,
    makeLaxStream,
    makeLaxExternalSubsetStream,

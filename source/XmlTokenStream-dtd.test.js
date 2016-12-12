@@ -8,6 +8,10 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
+const XmlEntityManager = require('./XmlEntityManager.js');
+const XmlStringCursor = require('./XmlStringCursor.js');
+const XmlTokenStream = require('./XmlTokenStream.js');
+const XmlWarning = require('./error/XmlWarning.js');
 const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
 
@@ -17,6 +21,7 @@ const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').mak
 const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
 const makeLaxExternalEntityStream = require('./XmlTokenStream-util.test.js').makeLaxExternalEntityStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
+const expectXmlWarning = require('./XmlTokenStream-util.test.js').expectXmlWarning;
 const expectError = require('./XmlTokenStream-util.test.js').expectError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
@@ -814,6 +819,42 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!ELEMENT >',
             SyntaxError.ID.ELEMENTDECL_NO_NAME,
             'Missing name for an element declaration.');
+      });
+
+      it('reports a warning if the element name starts with "xml-"', () => {
+         expectXmlWarning('<!ELEMENT xml-test ( #PCDATA )>',
+            XmlWarning.ID.ELEMENTDECL_NAME_XMLDASH_RESERVED,
+            'Element names should not start with "xml-". Found "xml-test".');
+      });
+
+      it('reports no warning if the element name starts with just "xml"', () => {
+         const s = makeStrictExternalSubsetStream('<!ELEMENT xmlTest ANY>');
+
+         expectTokenType(s, tokens.ElementDeclaration);
+      });
+
+      it('reports no warning if the element name starts with "XML-"', () => {
+         const s = makeStrictExternalSubsetStream('<!ELEMENT XML-test ANY>');
+
+         expectTokenType(s, tokens.ElementDeclaration);
+      });
+
+      it('reports a warning if the element name starts with "xml and this is 1.1/2"', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2, new EntityLocation());
+         const cursor = new XmlStringCursor('<!ELEMENT xmlTest ANY>', entityMd);
+         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { lax: true });
+
+         expectError(s, XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
+            'Element names should not start with [Xx][Mm][Ll]. Found "xmlTest".');
+      });
+
+      it('reports a warning if the element name starts with "xml and this is 1.0/4"', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4, new EntityLocation());
+         const cursor = new XmlStringCursor('<!ELEMENT xmlTest ANY>', entityMd);
+         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { lax: true });
+
+         expectError(s, XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
+            'Element names should not start with [Xx][Mm][Ll]. Found "xmlTest".');
       });
 
       it('reports a syntax error if there is no content spec', () => {

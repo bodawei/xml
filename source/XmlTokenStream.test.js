@@ -1841,11 +1841,59 @@ describe('XmlTokenStream', () => {
             'Missing name in element tag.');
       });
 
-      it('reports a warning if the name starts with xml', () => {
+      it('reports a warning if the name starts with xml- in 1.0/5', () => {
          expectXmlWarning(EntityMetaData.TYPE.EXTERNAL,
-            '<xmlFoo></xmlFoo>',
+            '<xml-foo></xml-foo>',
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED,
-            'Element names should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
+            'Element names should not start with "xml-". Found "xml-foo".');
+      });
+
+      it('allows a name to start with "XML-" if this is 1.0/5', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<XML-Foo></XML-Foo>', entityMd), new XmlEntityManager());
+
+         expectTokenType(s, tokens.ElementStart);
+         const t = s.getNext();
+         expect(t.name).toEqual('XML-Foo');
+      });
+
+      it('allows a name to start with just "xml" if this is 1.0/5', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xmlFoo>', entityMd), new XmlEntityManager());
+
+         expectTokenType(s, tokens.ElementStart);
+         const t = s.getNext();
+         expect(t.name).toEqual('xmlFoo');
+      });
+
+      it('does not allow a name to start with just "xml" if this is 1.0/4', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 4, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xmlFoo>', entityMd), new XmlEntityManager(),
+            { lax: true });
+
+         const t = s.getNext();
+         expect(t.id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+         expect(t.message).toEqual('Element names should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
+      });
+
+      it('does not allow a name to start with just "xml" if this is 1.1/2', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.1, 2, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xmlFoo>', entityMd), new XmlEntityManager(),
+            { lax: true });
+
+         const t = s.getNext();
+         expect(t.id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+         expect(t.message).toEqual('Element names should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
+      });
+
+      it('does not allow a name to start with just "XMl" if this is 1.1/2', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.1, 2, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<XMlFoo></XMlFoo>', entityMd), new XmlEntityManager(),
+            { lax: true });
+
+         const t = s.getNext();
+         expect(t.id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+         expect(t.message).toEqual('Element names should not start with [Xx][Mm][Ll]. Found "XMlFoo".');
       });
 
       describe('with attributes', () => {
@@ -2416,6 +2464,27 @@ describe('XmlTokenStream', () => {
             'Missing name in element tag.');
       });
 
+      it('reports a warning if the name starts with xml- in 1.0/5', () => {
+         expectXmlWarning(EntityMetaData.TYPE.EXTERNAL,
+            '<xml-foo/>',
+            XmlWarning.ID.ELEMENT_NAME_XML_RESERVED,
+            'Element names should not start with "xml-". Found "xml-foo".');
+      });
+
+      it('allows a name to start with "XML-" if this is 1.0/5', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<XML-Foo/>', entityMd), new XmlEntityManager());
+
+         expectTokenType(s, tokens.EmptyElement);
+      });
+
+      it('allows a name to start with just "xml" if this is 1.0/5', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo/>', entityMd), new XmlEntityManager());
+
+         expectTokenType(s, tokens.EmptyElement);
+      });
+
       it('retrieves the expected chunks', () => {
          const s = makeStrictExternalEntityStream('<one />');
 
@@ -2592,6 +2661,19 @@ describe('XmlTokenStream', () => {
 
          expectError(s, SyntaxError.ID.ELEMENT_UNBALANCED,
             'Expected end tag "one". Found "two".');
+      });
+
+      // do not report warnings. If this balances, they already got a warning on start
+      it('reports no warning if the name starts with xml- in 1.0/5', () => {
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xml-foo>', entityMd), new XmlEntityManager(),
+            { lax: true });
+
+         expectTokenType(s, tokens.ElementStart);
+         expectError(s, SyntaxError.ID.ELEMENT_UNBALANCED,
+            'Expected end tag "xmlFoo". Found "xml-foo".');
+         const t = s.getNext();
+         expect(t.name).toEqual('xml-foo');
       });
 
       it('retrieves the expected chunks', () => {
