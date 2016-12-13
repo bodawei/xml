@@ -140,36 +140,36 @@ describe('EntityMetaData', () => {
 
    });
 
-   describe('versionIs1dot0', () => {
+   describe('isVersion1dot0', () => {
 
       it('returns true when is 1.0', () => {
          const pk = new EntityMetaData();
 
-         expect(pk.versionIs1dot0).toEqual(true);
+         expect(pk.isVersion1dot0).toEqual(true);
       });
 
       it('returns false when is 1.1', () => {
          const pk = new EntityMetaData();
          pk.version = 1.1;
 
-         expect(pk.versionIs1dot0).toEqual(false);
+         expect(pk.isVersion1dot0).toEqual(false);
       });
 
    });
 
-   describe('versionIs1dot1', () => {
+   describe('isVersion1dot1', () => {
 
       it('returns false when is 1.0', () => {
          const pk = new EntityMetaData();
 
-         expect(pk.versionIs1dot1).toEqual(false);
+         expect(pk.isVersion1dot1).toEqual(false);
       });
 
       it('returns true when is 1.1', () => {
          const pk = new EntityMetaData();
          pk.version = 1.1;
 
-         expect(pk.versionIs1dot1).toEqual(true);
+         expect(pk.isVersion1dot1).toEqual(true);
       });
 
    });

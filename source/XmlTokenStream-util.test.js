@@ -10,19 +10,34 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
+const XmlWarning = require('./error/XmlWarning.js');
+const SyntaxError = require('./error/SyntaxError.js');
 
 function makeStream(str, type, entityManager, options) {
-   const entityMd = type ? new EntityMetaData(type, 1.0, 5, new EntityLocation()) : undefined;
-   return new XmlTokenStream(new XmlStringCursor(str, entityMd), entityManager, options);
+   if (typeof type === 'string') {
+      type = new EntityMetaData(type, 1.0, 5, new EntityLocation());
+   }
+
+   return new XmlTokenStream(new XmlStringCursor(str, type), entityManager, options);
 }
 
-function makeLaxStream(str, options = {}) {
+function makeLaxStream(str, type, options = {}) {
+   if (!(type instanceof EntityMetaData)) {
+      options = type || {};
+      type = new EntityMetaData();
+   }
+
    options.lax = true;
-   return makeStream(str, undefined, new XmlEntityManager(), options);
+   return makeStream(str, type, new XmlEntityManager(), options);
 }
 
-function makeStrictStream(str, options = {}) {
-   return makeStream(str, undefined, new XmlEntityManager(), options);
+function makeStrictStream(str, type, options = {}) {
+   if (!(type instanceof EntityMetaData)) {
+      options = type || {};
+      type = new EntityMetaData();
+   }
+
+   return makeStream(str, type, new XmlEntityManager(), options);
 }
 
 function makeLaxExternalSubsetStream(str, options = {}) {
@@ -58,40 +73,29 @@ function ignoreToken(stream, tokenType) {
    }
 }
 
-function expectSyntaxError(entityType, input, code, message, place, context) {
-   if (!EntityMetaData.TYPE[entityType]) {
+function expectProblem(entityType, input, id, message, place, context) {
+   if (!EntityMetaData.TYPE[entityType] && !(entityType instanceof EntityMetaData)) {
       context = place;
       place = message;
-      message = code;
-      code = input;
+      message = id;
+      id = input;
       input = entityType;
       entityType = EntityMetaData.TYPE.DOCUMENT;
    }
 
-   let strictS;
-   let laxS;
-
-   switch (entityType) {
-      case EntityMetaData.TYPE.DOCUMENT:
-         strictS = makeStrictStream(input);
-         laxS = makeLaxStream(input);
-         break;
-      case EntityMetaData.TYPE.EXTERNAL:
-         strictS = makeStrictExternalEntityStream(input);
-         laxS = makeLaxExternalEntityStream(input);
-         break;
-      case EntityMetaData.TYPE.EXTERNALSUBSET:
-         strictS = makeStrictExternalSubsetStream(input);
-         laxS = makeLaxExternalSubsetStream(input);
-         break;
+   if (EntityMetaData.TYPE[entityType]) {
+      entityType = new EntityMetaData(entityType);
    }
+
+   const strictS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), {});
+   const laxS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), { lax: true });
 
    expect(() => {
       strictS.getNext();
    }).toThrowError(message);
 
    const error = laxS.getNext();
-   expect(error).toBeSyntaxError(code);
+   expect(error.id).toEqual(id);
 
    if (place) {
       expect(error.place).toEqual(place);
@@ -100,50 +104,20 @@ function expectSyntaxError(entityType, input, code, message, place, context) {
    if (context) {
       expect(error.context).toEqual(context);
    }
+
+   return error;
 }
 
-function expectXmlWarning(entityType, input, code, message, place, context) {
-   if (!EntityMetaData.TYPE[entityType]) {
-      context = place;
-      place = message;
-      message = code;
-      code = input;
-      input = entityType;
-      entityType = EntityMetaData.TYPE.DOCUMENT;
-   }
+function expectSyntaxError(entityType, input, id, message, place, context) {
+   const error = expectProblem(entityType, input, id, message, place, context);
 
-   let strictS;
-   let laxS;
+   expect(error instanceof SyntaxError).toEqual(true);
+}
 
-   switch (entityType) {
-      case EntityMetaData.TYPE.DOCUMENT:
-         strictS = makeStrictStream(input);
-         laxS = makeLaxStream(input);
-         break;
-      case EntityMetaData.TYPE.EXTERNAL:
-         strictS = makeStrictExternalEntityStream(input);
-         laxS = makeLaxExternalEntityStream(input);
-         break;
-      case EntityMetaData.TYPE.EXTERNALSUBSET:
-         strictS = makeStrictExternalSubsetStream(input);
-         laxS = makeLaxExternalSubsetStream(input);
-         break;
-   }
+function expectXmlWarning(entityType, input, id, message, place, context) {
+   const error = expectProblem(entityType, input, id, message, place, context);
 
-   expect(() => {
-      strictS.getNext();
-   }).toThrowError(message);
-
-   const error = laxS.getNext();
-//   expect(error.type).toBeSyntaxError(code);
-
-   if (place) {
-      expect(error.place).toEqual(place);
-   }
-
-   if (context) {
-      expect(error.context).toEqual(context);
-   }
+   expect(error instanceof XmlWarning).toEqual(true);
 }
 
 function expectExternalSubsetSyntaxError(input, code, message, place, context) {
@@ -209,7 +183,6 @@ module.exports = {
    expectError,
    ignoreError,
    ignoreToken,
-   makeStream,
    makeStrictStream,
    makeLaxStream,
    makeLaxExternalSubsetStream,

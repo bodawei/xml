@@ -23,7 +23,7 @@ class EntityMetaData {
    constructor(entityType, xmlVersion, xmlRevision, location) {
       this._setType(entityType || EntityMetaData.TYPE.DOCUMENT);
       this.version = xmlVersion || 1.0;
-      this._setRevision(xmlRevision || (this.versionIs1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION));
+      this._setRevision(xmlRevision || (this.isVersion1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
    }
 
@@ -91,11 +91,11 @@ class EntityMetaData {
     Shortcuts for checking the version
    \**********************************************************************/
 
-   get versionIs1dot0() {
+   get isVersion1dot0() {
       return this.version === 1.0;
    }
 
-   get versionIs1dot1() {
+   get isVersion1dot1() {
       return this.version === 1.1;
    }
 

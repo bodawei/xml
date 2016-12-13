@@ -8,9 +8,6 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const XmlEntityManager = require('./XmlEntityManager.js');
-const XmlStringCursor = require('./XmlStringCursor.js');
-const XmlTokenStream = require('./XmlTokenStream.js');
 const XmlWarning = require('./error/XmlWarning.js');
 const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
@@ -840,20 +837,16 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('reports a warning if the element name starts with "xml and this is 1.1/2"', () => {
-         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2, new EntityLocation());
-         const cursor = new XmlStringCursor('<!ELEMENT xmlTest ANY>', entityMd);
-         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { lax: true });
-
-         expectError(s, XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
+         expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2, new EntityLocation()),
+            '<!ELEMENT xmlTest ANY>',
+            XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
             'Element names should not start with [Xx][Mm][Ll]. Found "xmlTest".');
       });
 
       it('reports a warning if the element name starts with "xml and this is 1.0/4"', () => {
-         const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4, new EntityLocation());
-         const cursor = new XmlStringCursor('<!ELEMENT xmlTest ANY>', entityMd);
-         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { lax: true });
-
-         expectError(s, XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
+         expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4, new EntityLocation()),
+            '<!ELEMENT xmlTest ANY>',
+            XmlWarning.ID.ELEMENTDECL_NAME_XML_RESERVED,
             'Element names should not start with [Xx][Mm][Ll]. Found "xmlTest".');
       });
 

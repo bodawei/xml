@@ -27,7 +27,7 @@ const CHARKIND_VALID = 'CHARKIND_VALID';
 function charKind(char, entityMd) {
    const charCode = char.charCodeAt(0);
 
-   if (entityMd.versionIs1dot0) {
+   if (entityMd.isVersion1dot0) {
       if (charCode > 0x1f && charCode < 0xd800) {
          return CHARKIND_VALID;
       }

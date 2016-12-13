@@ -763,7 +763,7 @@ class XmlTokenStream extends XmlStream {
       if (!name) {
          this._report(SEID.ELEMENT_NO_NAME);
       } else {
-         const isV1R5 = this._entityMd.versionIs1dot0 && this._entityMd.revision === 5;
+         const isV1R5 = this._entityMd.isVersion1dot0 && this._entityMd.revision === 5;
          this._assert(name.couldBeName, SEID.ELEMENT_NAME_INVALID, [ name.text ]);
 
          if (isStartOrEmpty) {
@@ -1117,7 +1117,7 @@ class XmlTokenStream extends XmlStream {
       this._assert(nameText === '' || parsedEl.elementName.couldBeName,
          SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
 
-      const isV1R5 = this._entityMd.versionIs1dot0 && this._entityMd.revision === 5;
+      const isV1R5 = this._entityMd.isVersion1dot0 && this._entityMd.revision === 5;
 
       if (isV1R5 && nameText.substring(0, 4) === 'xml-') {
          this._warn(XWID.ELEMENTDECL_NAME_XMLDASH_RESERVED, [ nameText ]);

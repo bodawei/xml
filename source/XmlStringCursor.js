@@ -239,7 +239,7 @@ class XmlStringCursor {
       let invalidChars;
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
-      const is1dot1 = this._entityMd.versionIs1dot1;
+      const is1dot1 = this._entityMd.isVersion1dot1;
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar) {
@@ -289,7 +289,7 @@ class XmlStringCursor {
    getSpace() {
       let fixString = false;
       const startOffset = this._offset.clone();
-      const is1dot1 = this._entityMd.versionIs1dot1;
+      const is1dot1 = this._entityMd.isVersion1dot1;
       let nextChar = this._source[this._offset.index];
 
       if (!nextChar || !this._isSpace(nextChar)) {
@@ -357,8 +357,8 @@ class XmlStringCursor {
          return;
       }
 
-      const use11Names = this._entityMd.versionIs1dot1 ||
-         (this._entityMd.versionIs1dot0 && this._entityMd.revision === 5);
+      const use11Names = this._entityMd.isVersion1dot1 ||
+         (this._entityMd.isVersion1dot0 && this._entityMd.revision === 5);
       const nameStartRegEx = use11Names ? NAMESTART_REGEX11 : NAMESTART_REGEX10;
       const nameRegEx = use11Names ? NAME_REGEX11 : NAME_REGEX10;
 
@@ -591,7 +591,7 @@ class XmlStringCursor {
 
       const originalString = this._source.substring(startOffset.index, this._offset.index);
       let rawString = originalString;
-      const regex = this._entityMd.versionIs1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
+      const regex = this._entityMd.isVersion1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
       let ctr = 0;
       let lineCount = 0;
       let lengthToEnd = rawString.length;
@@ -670,7 +670,7 @@ class XmlStringCursor {
    _isSpace(aChar) {
       const base = aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
 
-      if (this._entityMd.versionIs1dot0) {
+      if (this._entityMd.isVersion1dot0) {
          return base;
       }
 
