@@ -481,7 +481,7 @@ describe('XmlTokenStream', () => {
 
          s.getNext();
 
-         expect(s._cursor._specifiedEncoding).toEqual('usascii');
+         expect(s._cursor._encoding.specifiedEncoding).toEqual('usascii');
       });
 
       it('does not set the document encoding on the cursor if the cursor was created with an encoding', () => {
@@ -491,7 +491,7 @@ describe('XmlTokenStream', () => {
 
          s.getNext();
 
-         expect(s._cursor._specifiedEncoding).toEqual('UTF-8');
+         expect(s._cursor._encoding.specifiedEncoding).toEqual('UTF-8');
       });
 
       it('does not set the document encoding on the cursor if the ignoreDocumentEncoding flag is set', () => {
@@ -500,7 +500,7 @@ describe('XmlTokenStream', () => {
 
          s.getNext();
 
-         expect(s._cursor._specifiedEncoding).toBeUndefined();
+         expect(s._cursor._encoding.specifiedEncoding).toBeUndefined();
       });
 
    });

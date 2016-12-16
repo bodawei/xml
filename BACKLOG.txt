@@ -41,6 +41,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 	√ better expectXmlWarning in XmlTokenStream given that we need to specify a version.
 	√ exposed a lot of types in dtd test that didn't need to before
 	√ indeed, everything related to this needs some refactoring
+[2h20]
 
 <encoding 2s>
 NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
