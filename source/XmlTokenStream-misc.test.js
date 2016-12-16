@@ -9,6 +9,7 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
+const XmlWarning = require('./error/XmlWarning.js');
 
 const makeStrictStream = require('./XmlTokenStream-util.test.js').makeStrictStream;
 const makeStrictExternalEntityStream = require('./XmlTokenStream-util.test.js').makeStrictExternalEntityStream;
@@ -16,6 +17,7 @@ const makeLaxExternalSubsetStream = require('./XmlTokenStream-util.test.js').mak
 const makeStrictExternalSubsetStream = require('./XmlTokenStream-util.test.js').makeStrictExternalSubsetStream;
 const makeLaxExternalEntityStream = require('./XmlTokenStream-util.test.js').makeLaxExternalEntityStream;
 const expectSyntaxError = require('./XmlTokenStream-util.test.js').expectSyntaxError;
+const expectXmlWarning = require('./XmlTokenStream-util.test.js').expectXmlWarning;
 const expectError = require('./XmlTokenStream-util.test.js').expectError;
 const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
@@ -264,6 +266,47 @@ describe('XmlTokenStream (Misc)', () => {
             new TextChunk.WithSpaceChunk('blah blah', 'blah blah'),
             new TextChunk.PlainChunk('?>')
          ]));
+      });
+
+      describe('discuraged target', () => {
+
+         it('allows a target to start with "XML-" if this is 1.0/5', () => {
+            const s = makeStrictStream('<?XML-Foo foo?>',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.target).toEqual('XML-Foo');
+         });
+
+         it('allows a name to start with just "xml" if this is 1.0/5', () => {
+            const s = makeStrictStream('<?xmlFoo blah ?>',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.target).toEqual('xmlFoo');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.0/4', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4),
+               '<?xmlFoo foo?>',
+               XmlWarning.ID.PI_TARGET_XML_RESERVED,
+               'Processing instruction targets should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<?xmlFoo foo?>',
+               XmlWarning.ID.PI_TARGET_XML_RESERVED,
+               'Processing instruction targets should not start with [Xx][Mm][Ll]. Found "xmlFoo".');
+         });
+
+         it('does not allow a name to start with just "XMl" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<?XmLFoo foo?>',
+               XmlWarning.ID.PI_TARGET_XML_RESERVED,
+               'Processing instruction targets should not start with [Xx][Mm][Ll]. Found "XmLFoo".');
+         });
+
       });
 
       describe('state transitions', () => {

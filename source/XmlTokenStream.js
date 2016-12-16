@@ -9,6 +9,7 @@ const XmlWarning = require('./error/XmlWarning.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
+const util = require('./shared/util.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
 
@@ -763,15 +764,12 @@ class XmlTokenStream extends XmlStream {
       if (!name) {
          this._report(SEID.ELEMENT_NO_NAME);
       } else {
-         const isV1R5 = this._entityMd.isVersion1dot0 && this._entityMd.revision === 5;
          this._assert(name.couldBeName, SEID.ELEMENT_NAME_INVALID, [ name.text ]);
 
          if (isStartOrEmpty) {
-            if (isV1R5 && name.text.substring(0, 4) === 'xml-') {
-               this._warn(XWID.ELEMENT_NAME_XMLDASH_RESERVED, [ name.text ]);
-            } else if (!isV1R5 && name.text.substring(0, 3).toLocaleLowerCase() === 'xml') {
-               this._warn(XWID.ELEMENT_NAME_XML_RESERVED, [ name.text ]);
-            }
+            const error = util.checkNameRecommendations(name.text, this._entityMd, XWID.ELEMENT_NAME_XMLDASH_RESERVED,
+               XWID.ELEMENT_NAME_XML_RESERVED);
+            this._checkWarn(!error, error, [ name.text ]);
          }
       }
 
@@ -1040,6 +1038,12 @@ class XmlTokenStream extends XmlStream {
       this._pushToken(new XmlWarning(code, params, place, context));
    }
 
+   _checkWarn(condition, code, params, place, context) {
+      if (!condition) {
+         this._warn(code, params, place, context);
+      }
+   }
+
    _validateStartDocType(parsedDocType) {
       const start = parsedDocType.startChunk;
 
@@ -1048,6 +1052,7 @@ class XmlTokenStream extends XmlStream {
       if (parsedDocType.nameChunk && !parsedDocType.nameChunk.couldBeName) {
          this._report(SEID.DOCTYPE_NAME_INVALID, [ parsedDocType.nameChunk.text ]);
       }
+      // We do not check for whether the name uses xml in an invalid way, as if it is, other places will arn
 
       if (parsedDocType.externalId) {
          this._validateExternalId(parsedDocType.externalId, true);
@@ -1073,8 +1078,10 @@ class XmlTokenStream extends XmlStream {
 
       this._assert(parsedNotation.nameChunk, SEID.NOTATIONDECL_NO_NAME);
       this._assert(couldBeName, SEID.NOTATIONDECL_NAME_INVALID, [ notNameText ]);
-      this._assert(parsedNotation.postNameSpaceChunk,
-         SEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
+      const error = util.checkNameRecommendations(notNameText, this._entityMd,
+         XWID.NOTATIONDECL_NAME_XMLDASH_RESERVED, XWID.NOTATIONDECL_NAME_XML_RESERVED);
+      this._checkWarn(!error, error, [ notNameText ]);
+      this._assert(parsedNotation.postNameSpaceChunk, SEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ notNameText ]);
       if (!parsedNotation.externalId || parsedNotation.externalId.unknownType) {
          this._report(SEID.NOTATIONDECL_NO_EXTERNALID, [ notNameText ]);
       } else {
@@ -1090,6 +1097,9 @@ class XmlTokenStream extends XmlStream {
       this._assert(parsedEntity.nameChunk, SEID.ENTITYDECL_NO_NAME);
       this._assert((parsedEntity.nameChunk && parsedEntity.nameChunk.couldBeName) || enNameText === '',
          SEID.ENTITYDECL_NAME_INVALID, [ enNameText ]);
+      const error = util.checkNameRecommendations(enNameText, this._entityMd,
+         XWID.ENTITYDECL_NAME_XMLDASH_RESERVED, XWID.ENTITYDECL_NAME_XML_RESERVED);
+      this._checkWarn(!error, error, [ enNameText ]);
       this._assert(parsedEntity.postNameSpaceChunk, SEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
       if (parsedEntity.nDataMarker) {
@@ -1117,13 +1127,9 @@ class XmlTokenStream extends XmlStream {
       this._assert(nameText === '' || parsedEl.elementName.couldBeName,
          SEID.ELEMENTDECL_NAME_INVALID, [ nameText ]);
 
-      const isV1R5 = this._entityMd.isVersion1dot0 && this._entityMd.revision === 5;
-
-      if (isV1R5 && nameText.substring(0, 4) === 'xml-') {
-         this._warn(XWID.ELEMENTDECL_NAME_XMLDASH_RESERVED, [ nameText ]);
-      } else if (!isV1R5 && nameText.substring(0, 3).toLocaleLowerCase() === 'xml') {
-         this._warn(XWID.ELEMENTDECL_NAME_XML_RESERVED, [ nameText ]);
-      }
+      const error = util.checkNameRecommendations(nameText, this._entityMd, XWID.ELEMENTDECL_NAME_XMLDASH_RESERVED,
+         XWID.ELEMENTDECL_NAME_XML_RESERVED);
+      this._checkWarn(!error, error, [ nameText ]);
 
       if (!parsedEl.contentChunk && !parsedEl.list) {
          this._report(SEID.ELEMENTDECL_NO_SPEC, [ nameText ]);
@@ -1147,6 +1153,7 @@ class XmlTokenStream extends XmlStream {
                contentText.push('#PCDATA');
             } else {
                this._assert(item.couldBeName, SEID.ELEMENTDECL_SPEC_NAME_INVALID, [ item.text ]);
+               // We do not check if this is misusing 'xml" in the name, as those will be caught elsewhere
                contentText.push(item.text);
             }
          }
@@ -1181,6 +1188,7 @@ class XmlTokenStream extends XmlStream {
       this._assert(elName !== '', SEID.ATTLISTDECL_NO_NAME);
       this._assert(nameValid, SEID.ATTLISTDECL_NAME_INVALID, [ elName ]);
       this._assert(rawAttrs.length > 0, SEID.ATTLISTDECL_NO_ATTRIBUTES, [ elName ]);
+      // we don't check if the name is misusing xml in some way, as that will be reported elsewhere.
 
       for (let index = 0; index < rawAttrs.length; index++) {
          const attr = rawAttrs[index];
@@ -1190,6 +1198,9 @@ class XmlTokenStream extends XmlStream {
          let attrDefault;
 
          this._assert(attr.name.couldBeName, SEID.ATTLISTDECL_ATTR_NAME_INVALID, [ attrName ]);
+         const error = util.checkNameRecommendations(attrName, this._entityMd,
+            XWID.ATTRLISTDECL_NAME_XMLDASH_RESERVED, XWID.ATTRLISTDECL_NAME_XML_RESERVED);
+         this._checkWarn(!error, error, [ attrName ]);
 
          if (!attr.type) {
             this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
@@ -1222,6 +1233,7 @@ class XmlTokenStream extends XmlStream {
 
                for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
                   if (attrType === 'NOTATION') {
+                     // we also do not check for xml usage in the name, as that will be caught elsewhere.
                      this._assert(attrList[listIndex].couldBeName,
                         SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, [ elName, attrList[listIndex].text ]);
                   } else {
@@ -1357,9 +1369,14 @@ class XmlTokenStream extends XmlStream {
       } else {
          if (!parsedPI.targetChunk) {
             this._report(SEID.PI_NO_TARGET, parsedPI.postStartSpaceChunk || start, start);
-         } else if (!parsedPI.targetChunk.couldBeName) {
-            this._report(SEID.PI_TARGET_NAME_INVALID, [ parsedPI.targetChunk.text ],
-               parsedPI.postStartSpaceChunk || start, start);
+         } else {
+            if (!parsedPI.targetChunk.couldBeName) {
+               this._report(SEID.PI_TARGET_NAME_INVALID, [ parsedPI.targetChunk.text ],
+                  parsedPI.postStartSpaceChunk || start, start);
+            }
+            const error = util.checkNameRecommendations(parsedPI.targetChunk.text, this._entityMd,
+               XWID.PI_TARGET_XMLDASH_RESERVED, XWID.PI_TARGET_XML_RESERVED);
+            this._checkWarn(!error, error, [ parsedPI.targetChunk.text ]);
          }
 
          this._assert(parsedPI.closeChunk, SEID.PI_NO_CLOSE, parsedPI.instructionChunk || parsedPI.optSpaceChunk ||

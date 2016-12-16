@@ -25,7 +25,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: ?
 
 <errata changes 1m>
-M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
+√ M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
 	√ - names in general before 1.0/5 (and 1.1) are not allowed to start with xml. in 1.0/5 that is ok.
 	- need a checkName(name, metaData, v1r5Error, otherError); in util
 	==> Actually, it turns out any time we check couldBeName we should be checking for this.
@@ -41,7 +41,6 @@ M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][
 	√ better expectXmlWarning in XmlTokenStream given that we need to specify a version.
 	√ exposed a lot of types in dtd test that didn't need to before
 	√ indeed, everything related to this needs some refactoring
-	- need to add other error types.
 
 <encoding 2s>
 NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
@@ -78,6 +77,10 @@ CLEANUP
 	- next is xmldecl!
 	- Then space and comment validation should be extracted
 	- cdata, content, elements, references
+- need to add other error types
+	- generalize stuff in XmlError and XmlWarning.
+		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem
+- cleaning up util would be nice
 - Need to pull out validation into another file
 - Think about pulling the parse declaration, validation and tokenization of each type into a single file (for each type)
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.

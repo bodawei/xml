@@ -367,6 +367,47 @@ describe('XmlTokenStream (dtd)', () => {
          ], 21));
       });
 
+      describe('discuraged names', () => {
+
+         it('allows a notation name to start with "XML-" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!NOTATION XML-name PUBLIC "foo" >',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.name).toEqual('XML-name');
+         });
+
+         it('allows a name to start with just "xml" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!NOTATION xmlName PUBLIC "foo">',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.name).toEqual('xmlName');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.0/4', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4),
+               '<!NOTATION xmlName PUBLIC "foo">',
+               XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED,
+               'Notation names should not start with [Xx][Mm][Ll]. Found "xmlName".');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!NOTATION xmlName PUBLIC "foo">',
+               XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED,
+               'Notation names should not start with [Xx][Mm][Ll]. Found "xmlName".');
+         });
+
+         it('does not allow a name to start with just "XMl" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!NOTATION XMlName PUBLIC "foo">',
+               XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED,
+               'Notation names should not start with [Xx][Mm][Ll]. Found "XMlName".');
+         });
+
+      });
+
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
@@ -613,6 +654,54 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('"'),
             new TextChunk.PlainChunk('>')
          ], 21));
+      });
+
+      describe('discuraged names', () => {
+
+         it('allows a notation name to start with "XML-" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!ENTITY XML-entity PUBLIC "testentity" >',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.name).toEqual('XML-entity');
+         });
+
+         it('allows a name to start with just "xml" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!ENTITY xmlEntity PUBLIC "testentity" >',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.name).toEqual('xmlEntity');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.0/4', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4),
+               '<!ENTITY xmlEntity PUBLIC "testentity" >',
+               XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED,
+               'Entity names should not start with [Xx][Mm][Ll]. Found "xmlEntity".');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.0/5', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5),
+               '<!ENTITY xml-Entity PUBLIC "testentity" >',
+               XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+               'Entity names should not start with "xml-". Found "xml-Entity".');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!ENTITY xmlEntity PUBLIC "testentity" >',
+               XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED,
+               'Entity names should not start with [Xx][Mm][Ll]. Found "xmlEntity".');
+         });
+
+         it('does not allow a name to start with just "XMl" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!ENTITY XMlEntity PUBLIC "testentity" >',
+               XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED,
+               'Entity names should not start with [Xx][Mm][Ll]. Found "XMlEntity".');
+         });
+
       });
 
       describe('state transitions', () => {
@@ -1541,6 +1630,54 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!ATTLIST elemName attrName CDATA "test >',
             SyntaxError.ID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE,
             'Missing closing quote in the attribute list declaration for "elemName".');
+      });
+
+      describe('discuraged names', () => {
+
+         it('allows a notation name to start with "XML-" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!ATTLIST elementName XML-attr CDATA #REQUIRED>',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.attributes[0].name).toEqual('XML-attr');
+         });
+
+         it('allows a name to start with just "xml" if this is 1.0/5', () => {
+            const s = makeStrictStream('<!ATTLIST elementName xmlAttr CDATA #REQUIRED >',
+               new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+            const t = s.getNext();
+            expect(t.attributes[0].name).toEqual('xmlAttr');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.0/4', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4),
+               '<!ATTLIST elementName xmlAttr CDATA #REQUIRED >',
+               XmlWarning.ID.ATTRLISTDECL_NAME_XML_RESERVED,
+               'Attribute names should not start with [Xx][Mm][Ll]. Found "xmlAttr".');
+         });
+
+         it('does not allow a name to start with just "xml-" if this is 1.0/5', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5),
+               '<!ATTLIST elementName xml-Attr CDATA #REQUIRED >',
+               XmlWarning.ID.ATTRLISTDECL_NAME_XMLDASH_RESERVED,
+               'Attribute names should not start with "xml-". Found "xml-Attr".');
+         });
+
+         it('does not allow a name to start with just "xml" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!ATTLIST elementName xmlAttr CDATA #REQUIRED >',
+               XmlWarning.ID.ATTRLISTDECL_NAME_XML_RESERVED,
+               'Attribute names should not start with [Xx][Mm][Ll]. Found "xmlAttr".');
+         });
+
+         it('does not allow a name to start with just "XMl" if this is 1.1/2', () => {
+            expectXmlWarning(new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2),
+               '<!ATTLIST elementName xMlAttr CDATA #REQUIRED >',
+               XmlWarning.ID.ATTRLISTDECL_NAME_XML_RESERVED,
+               'Attribute names should not start with [Xx][Mm][Ll]. Found "xMlAttr".');
+         });
+
       });
 
       describe('enumeration type', () => {
