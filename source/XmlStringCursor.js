@@ -2,6 +2,8 @@
 
 'use strict';
 
+//const iconvLite = require('iconv-lite');
+
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared/EntityLocation.js');
@@ -49,6 +51,10 @@ const ENCODING = {
    UNENCODED: 'UNENCODED',
    UTF8: 'UTF-8',
    UTF8_BOM: 'UTF-8/BOM',
+   UTF16BE: 'UTF-16BE',
+   UTF16BE_BOM: 'UTF-16BE/BOM',
+   UTF16LE: 'UTF-16LE',
+   UTF16LE_BOM: 'UTF-16LE/BOM',
    UCS4BE: 'UCS-4BE',
    UCS4BE_BOM: 'UCS-4BE/BOM',
    UCS4LE: 'UCS-4LE',
@@ -57,10 +63,6 @@ const ENCODING = {
    UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
    UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
    UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
-   UTF16BE: 'UTF-16BE',
-   UTF16BE_BOM: 'UTF-16BE/BOM',
-   UTF16LE: 'UTF-16LE',
-   UTF16LE_BOM: 'UTF-16LE/BOM',
    EBCDIC: 'EBCDIC'
 };
 
@@ -192,7 +194,7 @@ class XmlStringCursor {
       };
       this._encoding.currentEncoding = this._encoding.autodetectedEncoding;
 
-      this._decodeSource();
+      // this._decodeSource();
    }
 
    get entityMd() {
@@ -205,89 +207,69 @@ class XmlStringCursor {
       }
 
       this._encoding.specifiedEncoding = value;
-      this._decodeSource();
+      // this._decodeSource();
    }
 
    // Two ways into this:
-      // At startup time, in which case we may convert from what we were given to something else
-      // After reading the XML Declaration. We may already have a converted (by autoconvert) so we may want to re-convert the source
-         // so if we convert from the autoDetected, we need to keep the original around just in case
-   _decodeSource() {
-      if (this._encoding.autodetectedEncoding === ENCODING.UNENCODED &&
-         this._encoding.specifiedEncoding === ENCODING.UNENCODED) {
-         this._encoding.currentEncoding = ENCODING.UNENCODED;
-         return;
-      }
-
-      // set BOM flag
-
-      const canConvertToTarget = true;
-
-      if (!this._encoding.specifiedEncoding) {
-         // preserve the source. this only happens at startup time
-
-         // We could detect no encoding or it was seen to be unencoded, assume unencoded
-         if (!this._encoding.autodetectedEncoding ||
-            this._encoding.autodetectedEncoding === ENCODING.UNENCODED) {
-            this._encoding.currentEncoding = ENCODING.UNENCODED;
-         } else {
-            // Otherwise, convert the input to the encoding we discovered
-            const targetEncoding = this._bestEncoding(this._encoding.autodetectedEncoding);
-            if (canConvertToTarget) {
-               // convert.  Deal with new offsets?
-               this._encoding.currentEncoding = ENCODING.UNENCODED;
-            } else {
-               throw new Error('1');
-            }
-         }
-         return;
-      }
-
-      // This only happens at startup or at setSpecifiedEncoding
-      const targetEncoding = this._bestEncoding(this._encoding.specifiedEncoding);
-      if (canConvertToTarget) {
-         // convert.  Deal with new offsets?
-         this._encoding.currentEncoding = ENCODING.UNENCODED;
-      } else {
-         throw new Error('2');
-      }
-   }
-
-   _bestEncoding(encoding) {
-      switch (encoding) {
-         case ENCODING.UTF8:
-         case ENCODING.UTF8_BOM:
-            return ENCODING.UTF8;
-         case ENCODING.UCS4BE:
-         case ENCODING.UCS4BE_BOM:
-            return ENCODING.UCS4BE;
-         case ENCODING.UCS4BE:
-         case ENCODING.UCS4BE_BOM:
-            return ENCODING.UCS4BE;
-         case ENCODING.UCS4LE:
-         case ENCODING.UCS4LE_BOM:
-            return ENCODING.UCS4LE;
-         case ENCODING.UCS4LE:
-         case ENCODING.UCS4LE_BOM:
-            return ENCODING.UCS4LE;
-         case ENCODING.UCS4UNUSUAL1:
-         case ENCODING.UCS4UNUSUAL1_BOM:
-            return ENCODING.UCS4UNUSUAL1;
-         case ENCODING.UCS4UNUSUAL2:
-         case ENCODING.UCS4UNUSUAL2_BOM:
-            return ENCODING.UCS4UNUSUAL2;
-         case ENCODING.UTF16BE:
-         case ENCODING.UTF16BE_BOM:
-            return ENCODING.UTF16BE;
-         case ENCODING.UTF16LE:
-         case ENCODING.UTF16LE_BOM:
-            return ENCODING.UTF16LE;
-      }
-
-      return encoding;
-   }
-
-
+   // At startup time, in which case we may convert from what we were given to something else
+   // After reading the XML Declaration. We may already have a converted (by autoconvert) so we may want to re-convert
+   // the source so if we convert from the autoDetected, we need to keep the original around just in case
+   //   _decodeSource() {
+   //      if (!this._encoding.autodetectedEncoding ||
+   //         (this._encoding.autodetectedEncoding === ENCODING.UNENCODED &&
+   //         (this._encoding.specifiedEncoding === ENCODING.UNENCODED || !this._encoding.specifiedEncoding))) {
+   //         this._encoding.currentEncoding = ENCODING.UNENCODED;
+   //         return;
+   //      }
+   //
+   //      const encoding = this._encoding.specifiedEncoding || this._encoding.autodetectedEncoding;
+   //
+   //      // preserve the source. this only happens at startup time
+   //      // This only happens once at startup or at setSpecifiedEncoding
+   //      const targetEncoding = this._bestEncoding(encoding);
+   //      const canConvertToTarget = iconvLite.encodingExists(targetEncoding);
+   //
+   //      if (canConvertToTarget) {
+   //         this._source = iconvLite.decode(this._source, targetEncoding, { stripBOM: false });
+   //         this._encoding.currentEncoding = ENCODING.UNENCODED;
+   //      } else {
+   //         throw new Error('2');
+   //      }
+   //   }
+   //
+   //   _bestEncoding(encoding) {
+   //      switch (encoding) {
+   //         case ENCODING.UTF8:
+   //         case ENCODING.UTF8_BOM:
+   //            return ENCODING.UTF8;
+   //         case ENCODING.UCS4BE:
+   //         case ENCODING.UCS4BE_BOM:
+   //            return ENCODING.UCS4BE;
+   //         case ENCODING.UCS4BE:
+   //         case ENCODING.UCS4BE_BOM:
+   //            return ENCODING.UCS4BE;
+   //         case ENCODING.UCS4LE:
+   //         case ENCODING.UCS4LE_BOM:
+   //            return ENCODING.UCS4LE;
+   //         case ENCODING.UCS4LE:
+   //         case ENCODING.UCS4LE_BOM:
+   //            return ENCODING.UCS4LE;
+   //         case ENCODING.UCS4UNUSUAL1:
+   //         case ENCODING.UCS4UNUSUAL1_BOM:
+   //            return ENCODING.UCS4UNUSUAL1;
+   //         case ENCODING.UCS4UNUSUAL2:
+   //         case ENCODING.UCS4UNUSUAL2_BOM:
+   //            return ENCODING.UCS4UNUSUAL2;
+   //         case ENCODING.UTF16BE:
+   //         case ENCODING.UTF16BE_BOM:
+   //            return ENCODING.UTF16BE;
+   //         case ENCODING.UTF16LE:
+   //         case ENCODING.UTF16LE_BOM:
+   //            return ENCODING.UTF16LE;
+   //      }
+   //
+   //      return encoding;
+   //   }
 
    /**********************************************************************\
     Returns the most likely type for the next token in the cursor. In some

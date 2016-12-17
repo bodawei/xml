@@ -233,6 +233,50 @@ describe('XmlStringCursor', () => {
 
    });
 
+//const ENCODING = {
+//   UNENCODED: 'UNENCODED',
+//   AUTO UTF8: 'UTF-8',
+//   √AUTO: UTF8_BOM: 'UTF-8/BOM',
+//   √AUTO: UTF16BE: 'UTF-16BE',
+//   √AUTO: UTF16BE_BOM: 'UTF-16BE/BOM',
+//    AUTO UTF16LE: 'UTF-16LE',
+//    AUTO UTF16LE_BOM: 'UTF-16LE/BOM',
+//   UCS4BE: 'UCS-4BE',
+//   UCS4BE_BOM: 'UCS-4BE/BOM',
+//   UCS4LE: 'UCS-4LE',
+//   UCS4LE_BOM: 'UCS-4LE/BOM',
+//   UCS4UNUSUAL1: 'UCS-4UNUSUAL1',
+//   UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
+//   UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
+//   UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
+//   EBCDIC: 'EBCDIC'
+//};
+//
+   xdescribe('(encodings)', () => {
+
+      it('automatically recognizes UTF-8 with a BOM', () => {
+         const c = new XmlStringCursor('ï»¿<?xml version="1.0"?>');
+
+         expect(c.getChar().text).toEqual('\uFEFF');
+         expect(c.getChar().text).toEqual('<');
+      });
+
+      it('automatically recognizes UTF-16 with a BOM', () => {
+         const c = new XmlStringCursor('\ufeff\u003c\u003f\u0078\u006d\u006c');
+
+         expect(c.getChar().text).toEqual('\uFEFF');
+         expect(c.getChar().text).toEqual('<');
+      });
+
+      it('automatically recognizes UTF-16 without a BOM', () => {
+         const c = new XmlStringCursor('\u003c\u003f\u0078\u006d\u006c');
+
+         expect(c.getChar().text).toEqual('<');
+         expect(c.getChar().text).toEqual('?');
+      });
+
+   });
+
    describe('peekType()', () => {
 
       it('returns MARKUP if there is a < next', () => {

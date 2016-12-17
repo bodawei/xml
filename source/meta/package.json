@@ -4,5 +4,8 @@
   "description": "A standards compliant XML to JavaScript processor",
   "main": "lib/index.js",
   "author": "柏大衛",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "iconv-lite": "0.4.15"
+  }
 }

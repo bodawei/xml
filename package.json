@@ -20,6 +20,7 @@
     "grunt-exorcise": "2.1.1",
     "grunt-jasmine-node-coverage": "1.1.1",
     "grunt-karma": "2.0.0",
+    "iconv-lite": "^0.4.15",
     "isparta": "4.0.0",
     "jasmine": "2.5.2",
     "jit-grunt": "0.10.0",
