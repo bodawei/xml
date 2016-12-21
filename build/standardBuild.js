@@ -184,7 +184,10 @@ module.exports = function standardBuild(grunt) {
       },
       coveragereport:  {
          dist: {
-            dir: OUT_DIR
+            options: {
+               filesToSkip: [],
+               dir: OUT_DIR
+            }
          }
       },
       checkkeys: {

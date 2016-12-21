@@ -40,13 +40,15 @@ class XmlWarning extends XmlError {
        context may or may not be the same as place.
        If a TextChunk is specified, its startOffset will be used. This
        is a shortcut for making a common calling case easier.
+    entityLocation: The EntityLocation where this error occurred  Will
+       be made part of the context.
    \**********************************************************************/
-   constructor(id, params, place, context) {
+   constructor(id, params, place, contextOffset, entityLocation) {
       super(id);
 
       if (typeof params === 'object') {
          if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
-            context = place;
+            contextOffset = place;
             place = params;
             params = [];
          }
@@ -58,20 +60,12 @@ class XmlWarning extends XmlError {
          place = place.endOffset;   // should be cloning
       }
 
-      if (context) {
-         if (context instanceof TextChunk.PlainChunk) {
-            context = [ context.startOffset ];
+      if (contextOffset) {
+         if (contextOffset instanceof TextChunk.PlainChunk) {
+            contextOffset = contextOffset.startOffset.clone();
+         } else if (contextOffset instanceof Offset) {
+            contextOffset = contextOffset.clone();
          }
-
-         if (context instanceof Offset) {
-            context = [ context ];
-         }
-
-         const newContext = [];
-         for (let index = 0; index < context.length; index++) {
-            newContext.push(context[index].clone());
-         }
-         context = newContext;
       }
 
       if (!codes[id]) {
@@ -83,7 +77,10 @@ class XmlWarning extends XmlError {
       this.code = codes[id];
       this.message = stringBundle.substitute(id, params);
       this.place = place ? place.clone() : undefined;
-      this.context = context;
+      this.context = [ {
+         offset: contextOffset,
+         location: entityLocation
+      } ];
    }
 
 }

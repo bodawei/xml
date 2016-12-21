@@ -22,7 +22,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
 11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
-12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: ?
+12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
 
 S 166 Actually do the convert
 	preserves bom
@@ -39,12 +39,26 @@ S 166 Actually do the convert
 	- test several cases
 	- we do not need currentEncoding
 
+<misc 1s>
+√ S 157 errors that are showing the chain of locations should be including the entity locations
+	- stash the entityinfo with each frame, and then add that to the info in the error.
+
+<WFC 2s>
+S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
+	In our current syntax errors, at last the misbalanced elements must be a WFCError
+	- Some of these require more knowledge in the stream parser than I'm happy with.
+	Need build support
+S 174 Need to sweep over existing errors and see if any look like errors
+
 
 -- next: 175
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
 	- next is xmldecl!
+		- Need to walk through parsing and probably regularize what is being returned.
+			- Note that getValue is quite different for an attribute than for xmldecl
+			- 
 	- Then space and comment validation should be extracted
 	- cdata, content, elements, references
 - need to add other error types
@@ -58,6 +72,7 @@ CLEANUP
 	- add place and context to all errors while doing this
 
 BUILD
+- We are getting errors in the output again
 126: Enhancements to the reporting
 - test reporter should report per browser
 - test reporter should complain on duplicate test names!
@@ -78,7 +93,7 @@ BUILD
 	https://github.com/sindresorhus/time-grunt/issues/15
 	https://github.com/sindresorhus/time-grunt/commits/76850c2e5c942fb21e09926fe5ac7ffe0b8e78bc
 - coverage reporter should have a percent cutoff
-- coverage reporter should be able to exclude some files
+- coverage reporter should be able to exclude some files: Have crude.
 - name reporter better
 149 Test deriveLocale
 155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
@@ -102,6 +117,7 @@ PROJECT
 ?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
 	- What would the performance be?
 	- Even more to the point, could we extract this entirely out of the string cursor and put into the validation
+? Who reports the absence or presence of a bom as an error?
 
 <invalid chars 1m 3s>
 S 167 report errors: suggest having routine which goes over parsing result recursively and reports generically
@@ -118,18 +134,6 @@ M 170 getWord
 <discouraged chars 1m 1s>
 S 171 new error type: Warning  extends XmlError
 M 172 add discouraged characters to tokens and error reporting
-
-<misc 1s>
-S 157 errors that are showing the chain of locations should be including the entity locations
-	- stash the entityinfo with each frame, and then add that to the info in the error.
-
-<WFC 2s>
-S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
-	In our current syntax errors, at last the misbalanced elements must be a WFCError
-	- Some of these require more knowledge in the stream parser than I'm happy with.
-	Need build support
-S 174 Need to sweep over existing errors and see if any look like errors
-
 
 M 158 Make XmlTokenStream a node stream
 	- getNext

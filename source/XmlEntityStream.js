@@ -2,6 +2,7 @@
 
 'use strict';
 
+const XmlError = require('./error/XmlError.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
@@ -167,7 +168,7 @@ class XmlEntityStream extends XmlStream {
 
       this._entityManager = entityManager;
       this._contexts = [
-         new ContentContext(undefined, tokenStream)
+         new ContentContext(tokenStream._cursor, tokenStream)
       ];
       this._options = options || tokenStream._options;   // EEW
 
@@ -231,13 +232,16 @@ class XmlEntityStream extends XmlStream {
             if (elementContext) {
                return;
             }
-         } else if (token instanceof SyntaxError) {
+         } else if (token instanceof XmlError) {
             // add the hierarchical context of the error.
-            const contexts = token.context;
+            const contexts = token.context.slice(0);
 
             // we don't need to look at index 0, as it will never have a start
             for (let index = this._contexts.length - 1; index > 0; index--) {
-               contexts.push(this._contexts[index].start.chunks[0].startOffset);
+               contexts.push({
+                  offset: this._contexts[index].start.chunks[0].startOffset,
+                  location: this._contexts[index - 1].cursor.entityMd.location
+               });
             }
             token.context = contexts;
          }

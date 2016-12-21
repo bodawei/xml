@@ -4,6 +4,7 @@
 
 /* eslint-env jasmine */
 
+const EntityLocation = require('../shared/EntityLocation.js');
 const Offset = require('../shared/Offset.js');
 const SyntaxError = require('./SyntaxError.js');
 const TextChunk = require('../shared/TextChunk.js');
@@ -82,23 +83,33 @@ describe('SyntaxError', () => {
             .not.toBe(place);
       });
 
-      it('sets the context', () => {
-         const context = [ new Offset(0, 1, 2) ];
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], new Offset(0, 1, 2), context).context)
-            .toEqual(context);
+      it('sets the context with a location', () => {
+         const contextOffset = new Offset(0, 1, 2);
+         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], new Offset(0, 1, 2), contextOffset,
+            new EntityLocation('system', 'public')).context)
+            .toEqual([ {
+               offset: contextOffset,
+               location: new EntityLocation('system', 'public')
+            } ]);
       });
 
       it('wraps the context if just an Offset is passed', () => {
          const place = new Offset(0, 1, 2);
          expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place, place).context)
-            .toEqual([ place ]);
+            .toEqual([ {
+               offset: place,
+               location: undefined
+            } ]);
       });
 
       it('wraps the context if just an TextChunk is passed', () => {
          const place = new Offset(0, 1, 2);
          const textChunk = new TextChunk.PlainChunk('foo', place, new Offset(0, 3, 4));
          expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place, textChunk).context)
-            .toEqual([ place ]);
+            .toEqual([ {
+               offset: place,
+               location: undefined
+            } ]);
       });
 
       it('clones the context', () => {
@@ -108,19 +119,13 @@ describe('SyntaxError', () => {
             .not.toBe(place);
       });
 
-      it('clones a multi-value context', () => {
-         const place1 = new Offset(0, 1, 2);
-         const place2 = new Offset(0, 4, 5);
-         const context = [ place1, place2 ];
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place1, context).context)
-            .toEqual(context);
-      });
-
       it('sets the context even when params omitted', () => {
          const place = new Offset(0, 1, 2);
-         const context = [ place ];
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, place, context).context)
-            .toEqual([ place ]);
+         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, place, place).context)
+            .toEqual([ {
+               offset: place,
+               location: undefined
+            } ]);
       });
    });
 

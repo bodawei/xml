@@ -69,6 +69,7 @@ module.exports = function karmaConfig(config) {
    config.preprocessors[SOURCE_DIR + '/*.js'] = [ 'coverage' ];
    config.preprocessors[SOURCE_DIR + '/error/*.js'] = [ 'coverage' ];
    config.preprocessors[SOURCE_DIR + '/shared/*.js'] = [ 'coverage' ];
+   config.preprocessors[SOURCE_DIR + '/meta/*.js'] = [ 'coverage' ];
    config.preprocessors[BUILD_DIR + '/**/*.js'] = [ 'browserify' ];
    config.preprocessors[BUILD_DIR + '*.js'] = [ 'coverage' ];
 };

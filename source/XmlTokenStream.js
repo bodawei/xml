@@ -1031,16 +1031,16 @@ class XmlTokenStream extends XmlStream {
    }
 
    _report(code, params, place, context) {
-      this._pushToken(new SyntaxError(code, params, place, context));
+      this._pushToken(new SyntaxError(code, params, place, context, this._entityMd.location));
    }
 
    _warn(code, params, place, context) {
-      this._pushToken(new XmlWarning(code, params, place, context));
+      this._pushToken(new XmlWarning(code, params, place, context, this._entityMd.location));
    }
 
    _checkWarn(condition, code, params, place, context) {
       if (!condition) {
-         this._warn(code, params, place, context);
+         this._warn(code, params, place, context, this._entityMd.location);
       }
    }
 
@@ -1384,6 +1384,7 @@ class XmlTokenStream extends XmlStream {
          this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
       }
    }
+
 }
 
 module.exports = XmlTokenStream;

@@ -4,6 +4,7 @@
 /* eslint-disable no-var, prefer-spread, no-console */
 
 var fs = require('fs');
+var process = require('process');
 
 var COVERAGE_FILENAME = 'coverage-summary.json';
 var OS_REGEX = /^(.*) \(.*\)$/;
@@ -13,7 +14,19 @@ function stripOs(name) {
    return results[1];
 }
 
-function getSummaryPaths(dir, parentName, totals) {
+function getSummaryPaths(dir, parentName, filesToSkip, totalsAccumulator) {
+   var totals = {
+      lines: 0,
+      statements: 0,
+      functions: 0,
+      branches: 0
+   };
+   var covered = {
+      lines: 0,
+      statements: 0,
+      functions: 0,
+      branches: 0
+   };
    var files = fs.readdirSync(dir);
 
    for (var index = 0; index < files.length; index++) {
@@ -21,60 +34,90 @@ function getSummaryPaths(dir, parentName, totals) {
       var stats = fs.statSync(fullPath);
 
       if (stats.isDirectory()) {
-         getSummaryPaths(fullPath, files[index], totals);
+         getSummaryPaths(fullPath, files[index], filesToSkip, totalsAccumulator);
       } else if (stats.isFile()) {
          if (files[index] === COVERAGE_FILENAME) {
             var coverageSummary = fs.readFileSync(fullPath, { encoding: 'utf8' });
             var jsonData = JSON.parse(coverageSummary);
-//            var altTotalCovered = 0;
-//            var altTotalLines = 0;
-//            var altTotalSkipped = 0;
+
             for (var key in jsonData) {
-               if (key === 'total') {
+
+               if (key === 'total' || filesToSkip.includes(key)) {
                   continue;
                }
-               //console.log(JSON.stringify(jsonData[key], undefined, 2));
-               //altTotalCovered += jsonData[key].lines.covered;
-               //altTotalLines += jsonData[key].lines.total;
-               //altTotalSkipped += jsonData[key].lines.skipped;
-               //
-               //console.log(altTotalLines);
-               //console.log(altTotalCovered);
-               //console.log(altTotalSkipped);
-            }
-            var tls = jsonData.total;
-            var total = (tls.lines.pct + tls.statements.pct + tls.functions.pct + tls.branches.pct) / 4;
-            var entry = totals[total] || [];
 
-            entry.push(stripOs(parentName));
-            totals[total] = entry;
+               totals.lines += jsonData[key].lines.total;
+               covered.lines += jsonData[key].lines.covered;
+
+               totals.statements += jsonData[key].statements.total;
+               covered.statements += jsonData[key].statements.covered;
+
+               totals.functions += jsonData[key].functions.total;
+               covered.functions += jsonData[key].functions.covered;
+
+               totals.branches += jsonData[key].branches.total;
+               covered.branches += jsonData[key].branches.covered;
+            }
+            totalsAccumulator[stripOs(parentName)] = {
+               totals: totals,
+               covered: covered
+            };
          }
       }
    }
 }
 
+function calculatePercentage(info) {
+   var total = 0;
+   for (var key in info.totals) {
+      total += (info.totals[key] / info.covered[key]);
+   }
+
+   return (total / 4) * 100;
+}
+
 module.exports = (grunt) => {
-
    function coverageReport() {
-
-      var exists = fs.existsSync(this.data.dir);
+      var options = this.options();
+      var exists = fs.existsSync(options.dir);
       if (!exists) {
-         grunt.log.error('Could not find the directory to look for coverage reports: ' + this.data.dir);
+         grunt.log.error('Could not find the directory to look for coverage reports: ' + options.dir);
          return;
+      }
+
+      var filesToSkip = [];
+
+      if (options.filesToSkip) {
+         filesToSkip = grunt.file.expand(options.filesToSkip);
+         var newSkip = [];
+
+         for (var ctr = 0; ctr < filesToSkip.length; ctr++) {
+            newSkip.push(filesToSkip[ctr].replace('./', ''));
+            newSkip.push(process.cwd() + '/' + filesToSkip[ctr].replace('./', ''));
+         }
+         filesToSkip = newSkip;
+         console.log(filesToSkip);
       }
 
       var totals = {};
 
-      getSummaryPaths(this.data.dir, this.data.dir, totals);
+      getSummaryPaths(options.dir, options.dir, filesToSkip, totals);
 
       var keys = Object.keys(totals);
       var failed = false;
 
       for (var index = 0; index < keys.length; index++) {
-         if (keys[index] !== '100') {
+         var browserName = keys[index];
+         var percentage = calculatePercentage(totals[browserName]);
+         if (percentage !== 100) {
             failed = true;
          }
-         process.passthroughWrite(keys[index] + '%: ' + totals[keys[index]].join(', ') + '\n');
+
+         if (process.passthroughWrite) {
+            process.passthroughWrite(percentage + '%: ' + browserName + '\n');
+         } else {
+            console.log(percentage + '%: ' + browserName);
+         }
       }
 
       if (failed) {

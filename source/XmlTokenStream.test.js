@@ -537,7 +537,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.SPACE_INVALID_CONTEXT,
                'The XML Declaration must appear before any content in the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -657,7 +660,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
                'CharData must not be outside the content of the document entity. Found "xxx".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('throws an error if at the start of the external subset', () => {
@@ -666,7 +672,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT,
                'CharData must not be in the external subset. Found "xxx".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {
@@ -874,7 +883,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CHARREF_INVALID_DOC_CONTEXT,
                'A character reference must not be outside the content of the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('throws an error if at the start of the external subset', () => {
@@ -883,7 +895,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CHARREF_INVALID_SUBSET_CONTEXT,
                'A character reference must not be in the external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {
@@ -991,7 +1006,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.REFERENCE_INVALID_DOC_CONTEXT,
                'An entity reference must not be outside the content of the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('throws an error if at the start of the external subset', () => {
@@ -1000,7 +1018,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
                'An entity reference must not be in the external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {
@@ -1162,7 +1183,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CDATA_INVALID_DOC_CONTEXT,
                'A CDATA must not be outside the content of the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can not appear at the start of the external subset', () => {
@@ -1171,7 +1195,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.CDATA_INVALID_SUBSET_CONTEXT,
                'A CDATA must not be in the external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {
@@ -1700,7 +1727,10 @@ describe('XmlTokenStream', () => {
             SyntaxError.ID.TEXTDECL_NO_ENCODING,
             '"encoding" must be in a Text Declaration.',
             new Offset(0, 0, 0),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('retrieves the expected chunks', () => {
@@ -2311,7 +2341,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.ELEMENT_INVALID_DOC_CONTEXT,
                'An element must not be before the Xml Declaration. Found "name".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can not appear at the start of the external subset', () => {
@@ -2320,7 +2353,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "name".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {
@@ -2498,7 +2534,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.ELEMENT_INVALID_DOC_CONTEXT,
                'An element must not be before the Xml Declaration. Found "name".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can not appear at the start of the external subset', () => {
@@ -2507,7 +2546,10 @@ describe('XmlTokenStream', () => {
                SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "name".',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of an external entity', () => {

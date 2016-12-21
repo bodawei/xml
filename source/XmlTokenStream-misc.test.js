@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const Offset = require('./shared/Offset.js');
+const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./shared/TextChunk.js');
@@ -52,7 +53,10 @@ describe('XmlTokenStream (Misc)', () => {
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
             new Offset(0, 16, 16),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('throws an error if no --> found immediately after the opening', () => {
@@ -61,7 +65,10 @@ describe('XmlTokenStream (Misc)', () => {
             SyntaxError.ID.COMMENT_NO_CLOSE,
             'Missing closing --> in a comment.',
             new Offset(0, 4, 4),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('returns the content up to eof if eof in middle of comment', () => {
@@ -77,7 +84,10 @@ describe('XmlTokenStream (Misc)', () => {
             SyntaxError.ID.COMMENT_ENDS_WITH_HYPHEN,
             'Must not have a hyphen at end of a comment.',
             new Offset(0, 16, 16),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('retrieves the expected chunks', () => {
@@ -99,7 +109,10 @@ describe('XmlTokenStream (Misc)', () => {
                SyntaxError.ID.COMMENT_INVALID_CONTEXT,
                'A comment must not be the first thing in the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -317,7 +330,10 @@ describe('XmlTokenStream (Misc)', () => {
                SyntaxError.ID.PI_INVALID_CONTEXT,
                'A processing instruction must not be the first thing in the document entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {

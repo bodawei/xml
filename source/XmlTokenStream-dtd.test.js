@@ -199,7 +199,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.DOCTYPE_INVALID_DOC_CONTEXT,
                'A DOCTYPE must be declared once between the XML Declaration and the content.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can not appear at the start of the external subset', () => {
@@ -208,7 +211,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
                'A DOCTYPE must not be declared in an external entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can not appear at the start of an external entity', () => {
@@ -217,7 +223,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.DOCTYPE_INVALID_EXTERNAL_CONTEXT,
                'A DOCTYPE must not be declared in an external entity.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear after the XML Declaration in a document entity', () => {
@@ -416,7 +425,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.NOTATIONDECL_INVALID_CONTEXT,
                'A notation must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -431,7 +443,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.NOTATIONDECL_INVALID_CONTEXT,
                'A notation must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear in the DOCTYPE of a document entity', () => {
@@ -712,7 +727,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -727,7 +745,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear in the DOCTYPE of a document entity', () => {
@@ -898,7 +919,10 @@ describe('XmlTokenStream (dtd)', () => {
             SyntaxError.ID.ELEMENTDECL_INVALID_CONTEXT,
             'An element must not be declared outside of the internal or external subset.',
             new Offset(0, 0, 0),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -1060,7 +1084,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ELEMENTDECL_INVALID_CONTEXT,
                'An element must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -1075,7 +1102,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ELEMENTDECL_INVALID_CONTEXT,
                'An element must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear in the DOCTYPE of a document entity', () => {
@@ -1425,7 +1455,10 @@ describe('XmlTokenStream (dtd)', () => {
             SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
             'An attribute list must not be declared outside of the internal or external subset.',
             new Offset(0, 0, 0),
-            [ new Offset(0, 0, 0) ]);
+            [ {
+               offset: new Offset(0, 0, 0),
+               location: new EntityLocation()
+            } ]);
       });
 
       it('reports a syntax error if there is no element name', () => {
@@ -1747,7 +1780,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
                'Must have a space before enumeration in attribute declaration for "e".',
                new Offset(0, 20, 20),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
@@ -1812,7 +1848,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
                'Must have a value after #FIXED in attribute declaration for "e".',
                new Offset(0, 33, 33),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
       });
@@ -1865,7 +1904,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
                'An attribute list must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear at the start of the external subset', () => {
@@ -1880,7 +1922,10 @@ describe('XmlTokenStream (dtd)', () => {
                SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
                'An attribute list must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
-               [ new Offset(0, 0, 0) ]);
+               [ {
+                  offset: new Offset(0, 0, 0),
+                  location: new EntityLocation()
+               } ]);
          });
 
          it('can appear in the DOCTYPE of a document entity', () => {

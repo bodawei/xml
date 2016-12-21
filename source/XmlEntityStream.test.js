@@ -4,6 +4,8 @@
 
 /* eslint-env jasmine */
 
+const EntityLocation = require('./shared/EntityLocation.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
 const Offset = require('./shared/Offset.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./shared/TextChunk.js');
@@ -217,14 +219,15 @@ describe('XmlEntityStream', () => {
       });
 
       it('reports the place and context of the error', () => {
-         const ts = makeLaxStream('<?xml version="1.0"?><root>&level1;</root>');
+         const ts = makeLaxStream('<?xml version="1.0"?><root>&level1;</root>',
+            new EntityMetaData(undefined, undefined, undefined, new EntityLocation('systemId', 'publicId')));
          const es = new XmlEntityStream(ts, new XmlEntityManager(), {
             lax: true
          });
          es._entityManager.addEntity(
             new tokens.EntityDeclaration('level1', '<child>&level2;</child>', undefined, undefined, TEST_CHUNKS));
          es._entityManager.addEntity(
-            new tokens.EntityDeclaration('level2', '<!--bug', undefined, undefined, TEST_CHUNKS));
+            new tokens.EntityDeclaration('level2', '<!--bugNoEnd', undefined, undefined, TEST_CHUNKS));
          jasmine.clock().tick(1);
 
          ignoreToken(es, tokens.XmlDeclaration);
@@ -236,8 +239,17 @@ describe('XmlEntityStream', () => {
          jasmine.clock().tick(1);
 
          const token = es.getNext();
-         expect(token.place).toEqual(new Offset(0, 7, 7));
-         expect(token.context).toEqual([ new Offset(0, 0, 0), new Offset(0, 7, 7), new Offset(0, 27, 27) ]);
+         expect(token.place).toEqual(new Offset(0, 12, 12));
+         expect(token.context).toEqual([ {
+            offset: new Offset(0, 0, 0),
+            location: new EntityLocation('', undefined)
+         }, {
+            offset: new Offset(0, 7, 7),
+            location: new EntityLocation('', undefined)
+         }, {
+            offset: new Offset(0, 27, 27),
+            location: new EntityLocation('systemId', 'publicId')
+         } ]);
       });
 
    });
