@@ -23,6 +23,11 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
 11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
 12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
+12/20 Sprint 24: ???sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: ?
+
+<misc 1s>
+√ S 157 errors that are showing the chain of locations should be including the entity locations
+	- stash the entityinfo with each frame, and then add that to the info in the error.
 
 S 166 Actually do the convert
 	preserves bom
@@ -38,10 +43,6 @@ S 166 Actually do the convert
 	- do the convert
 	- test several cases
 	- we do not need currentEncoding
-
-<misc 1s>
-√ S 157 errors that are showing the chain of locations should be including the entity locations
-	- stash the entityinfo with each frame, and then add that to the info in the error.
 
 <WFC 2s>
 S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.

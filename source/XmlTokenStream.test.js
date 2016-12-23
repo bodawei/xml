@@ -9,6 +9,7 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared//EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
+const WellFormednessError = require('./error/WellFormednessError.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
@@ -2586,7 +2587,7 @@ describe('XmlTokenStream', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreToken(s, tokens.ElementStart);
          ignoreError(s, SyntaxError.ID.ELEMENT_NO_NAME);
-         ignoreError(s, SyntaxError.ID.ELEMENT_UNBALANCED);
+         ignoreError(s, WellFormednessError.ID.ELEMENT_UNBALANCED);
 
          const t = s.getNext();
          expect(t.name).toEqual('');
@@ -2692,7 +2693,7 @@ describe('XmlTokenStream', () => {
          const s = makeLaxExternalEntityStream('<one></two>');
          ignoreToken(s, tokens.ElementStart);
 
-         expectError(s, SyntaxError.ID.ELEMENT_UNBALANCED,
+         expectError(s, WellFormednessError.ID.ELEMENT_UNBALANCED,
             'Expected end tag "one". Found "two".');
       });
 
@@ -2702,7 +2703,7 @@ describe('XmlTokenStream', () => {
          const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xml-foo>', entityMd), new XmlEntityManager(),
             { lax: true });
          expectTokenType(s, tokens.ElementStart);
-         expectError(s, SyntaxError.ID.ELEMENT_UNBALANCED,
+         expectError(s, WellFormednessError.ID.ELEMENT_UNBALANCED,
             'Expected end tag "xmlFoo". Found "xml-foo".');
          const t = s.getNext();
 
@@ -2728,7 +2729,7 @@ describe('XmlTokenStream', () => {
 
          it('can appear at the start of an external entity', () => {
             const s = makeLaxExternalEntityStream('</name>');
-            ignoreError(s, SyntaxError.ID.ELEMENT_UNBALANCED);
+            ignoreError(s, WellFormednessError.ID.ELEMENT_UNBALANCED);
 
             expectTokenType(s, tokens.ElementEnd);
          });

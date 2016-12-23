@@ -6,6 +6,7 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
+const WellFormednessError = require('./error/WellFormednessError.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
@@ -15,6 +16,7 @@ const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
 
 const SEID = SyntaxError.ID;
 const XWID = XmlWarning.ID;
+const WFEID = WellFormednessError.ID;
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -799,7 +801,7 @@ class XmlTokenStream extends XmlStream {
          if (lastElement === xtoken.name) {
             this._elementNameStack.pop();
          } else {
-            this._report(SEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
+            this._reportWFError(WFEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
          }
       }
 
@@ -1032,6 +1034,10 @@ class XmlTokenStream extends XmlStream {
 
    _report(code, params, place, context) {
       this._pushToken(new SyntaxError(code, params, place, context, this._entityMd.location));
+   }
+
+   _reportWFError(code, params, place, context) {
+      this._pushToken(new WellFormednessError(code, params, place, context, this._entityMd.location));
    }
 
    _warn(code, params, place, context) {
