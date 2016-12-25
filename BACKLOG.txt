@@ -28,6 +28,15 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 <misc 1s>
 √ S 157 errors that are showing the chain of locations should be including the entity locations
 	- stash the entityinfo with each frame, and then add that to the info in the error.
+<WFC 2s>
+√ S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
+	In our current syntax errors, at last the misbalanced elements must be a WFCError
+	- Some of these require more knowledge in the stream parser than I'm happy with.
+	Need build support
+√ S 174 Need to sweep over existing errors and see if any look like errors
+
+[85 - 2hr 5min]
++ at least half an hour of planning
 
 S 166 Actually do the convert
 	preserves bom
@@ -43,13 +52,6 @@ S 166 Actually do the convert
 	- do the convert
 	- test several cases
 	- we do not need currentEncoding
-
-<WFC 2s>
-S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
-	In our current syntax errors, at last the misbalanced elements must be a WFCError
-	- Some of these require more knowledge in the stream parser than I'm happy with.
-	Need build support
-S 174 Need to sweep over existing errors and see if any look like errors
 
 
 -- next: 175
