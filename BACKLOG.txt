@@ -46,13 +46,48 @@ S 166 Actually do the convert
 	     - by stream as soon as it finds an encoding
 	there is a streaming option for use with streaming cursors. for string we can do all
 	use iconv-lite. Can check if an encoding is there
-	- Install iconv-lite: need both in build and in shipping!
+	√ Install iconv-lite: need both in build and in shipping!
 		- build changes
-	- Check if conversion allowed, if not throw an error
-	- do the convert
-	- test several cases
-	- we do not need currentEncoding
+	√ Check if conversion allowed, if not throw an error
+	√ do the convert
+	√ fix existing tests (they will have to be failing, because we lack the conversions)
+	√ remove currentEncoding
+	x test that an auto-detected utf8 string is converted -- no such detection
+	√ test that an auto-detected utf8bom string is converted
+	√ test that an auto-detected utf16be string is converted
+	√ test that an auto-detected utf16BEbom string is converted
+	√ test that an auto-detected utf16le string is converted
+	√ test that an auto-detected utf16LEbom string is converted
+	√ test other autodetections fail because iconvlite is dumb.
+	- test that a specified value passed in takes precedence over autodetection?
+		√ autodetect discovers UTF16, but specified is unencoded.
+			- we'll do no conversion, and get gibberish
+**		√ - autodetect discovers UTF16, but specified is utf8.
+			- we'll try to convert to utf8 and get gibberish
+**		√- autodetect discovers unencoded, but specified is utf16 (and it is not)
+			- we'll get an error in conversion
+		√ - autodetect discovers unencoded, but specified is utf8 (and it is)
+			- we'll decode
+	- test from document
+		√- autodetect says is unencoded
+			- doc says utf8
+			- decodes to utf8
+		√- autodetect says is unencoded, pass in is unencoded
+			- doc says utf8, but is ignored because of pass in
+			- we get some gibberish
+		?- autodetect says utf16, no specified
+			- doc says utf8
+			- we have a conflict. we've already done a conversion which worked this far.
 
+If we have time, do added detail:
+- Collapse errors together into XmlError. 
+	- type is SyntaxError, Warning, WellFormednessError etc
+	- have a flag for non-fatal?
+	- XmlError.ID.SYNTAX_ERROR etc.
+	- add XmlError.installTypeInfo(stringBundle, codes);
+	- add XmlError.preferredLocale(localeName);
+	- XmlError.TYPE.SYNTAX_ERROR:StringBundle
+		
 
 -- next: 175
 =============================================
@@ -169,48 +204,76 @@ M 160 Make XmlEntityStream a transforming stream
 	here, _transform() will respond to entityStart and element start and syntax error.
 		Note that this may be async since we have a callback function to call to notify of finishing
 		I dont think we actually have any async working yet, so we just need existing tests to pass.
+- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+- Why do we need to call getNext multiple times is ugly. can we stop that?
 
 --- Entity management [8M 6S] !!!
-Assumptions
-	- entityValues are always strings from the parser. we do no sub-examination
-	- attribute values and attribute values in declarations are parsed for char refs and entity refs, but those are not expanded
-
 PLANNING
 1) Review Entity stuff in standard https://www.w3.org/TR/2006/REC-xml11-20060816/#sec-physical-struct
 2) Review streams https://nodejs.org/api/stream.html#stream_implementing_a_transform_stream
 - Note, eratta in 1.1/2 has an improved wording on 4.1
-- Entity examination of the externalId isn't very good. not sure the quotedValue makes sens
-- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
-- Why do we need to call getNext multiple times is ugly. can we stop that?
 
-is this what we are doing?
-- ENTITIES, attribute values, and attrdef defaults
-	Note: Attributes coming out of XmlTokenStream will be
-		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]  // underlying cursor is over other.  Let's ignore that.
-	Internal Entity Values should be
-		[ TEXT ]
-	External Entity Values should be essentially
-		[ TEXT ]
+HIGH LEVEL
+0: We assume we've switched to Node Streams by the time we get here
+1: Make sure we're sure what we are getting entity and attribute values back consistently:
+   *** NEED TO VALIDATE WHICH WE NEED TO CHANGE
+	Attributes coming out of XmlTokenStream will be
+		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]
+	AttDecl default values should be like the attributes.  But we need the offsets on the chunks
+	Internal Entity Values should be  (note: need offsets on each)
+		external subset: [TEXT]
+		internal subset: [ TEXT, CHARREF, TEXT ]
+	External Entity Values should be a string cursor directly
+2: Add new cursors and streams
+	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.  This is used internally when entitystream is filling in an attribute
+	- a cursor which has a different offset (for consuming entity values)
+	- a cursor which deals with the internal subset mess
+3: Adding the above to entity stream
+4: Resume work on EntityManager
+5: Resource retrieval
 
-Fix XmlTokenStream handling of entities and attributes
-	?
-x S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
+It seems like it would be best to do this in vertical slices, rather than the horizontal ones this describes.  e.g.
+- Make entity stream handle entity refs in attributes
+	- create the tokenstream
+	- wire into entitystream
+	- test with some special entity values
+- Make sure entity stream can handle a bunch of attributes on one element
+- Make entity manager handle external entity values
+	- need some kind of retrieval. Could probably fake it.
+- Make entity manager handle external subset entity values
+	- cursor needs to be able to handle offsets
+- make entity manager handle internal subset entity values
+	- need special cursor
+- Build out better retrieval (could do this earlier depending on build support)
+
+
+
+PHASE 1
+S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
+
 
 Fix EntityManager cursor returns
-	- Need cursors that can read internal entities
-	- need cursors that can read external entities
-	- Probably need a caching cursor so we don't have to refresh
-M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
-M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
+	- Reminder: wehn adding to the entity manager, always adds EntityDeclaration token
 
+	- external entity: just wrap an ordinary cursor around it.  Need to pass the entity location there
+		- entityLocation needs to be included when adding
+		- Probably need a caching cursor so we don't have to refresh
+	- internal/external subset entity: wrap cursor around it.  Will need artifical offset here
+		- entityLocation needs to be included when adding
+	- internal/internal subset: need special cursor
 Fix EntityStream's consumption of entities
 	- need a special token stream if this is for attributes, since we shouldn't be parsing elements etc here.
-M 133 Need a special token stream which reads entity values for attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class.
-Attributes with references that themselves have references should work
-Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
-Need to test error handling for attribute references
+
+
+M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
+M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
+M 133 Need a special token stream for EntityStream which inserts entity values in attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class.
+	Attributes with references that themselves have references should work
+	Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
+	Need to test error handling for attribute references
+
 S 138 EntityStream test that we are, in fact, unsubscribing from child streams.
-S 139 EntityStream test subentry stream is lax or not
+S 139 EntityStream - doesn't care if source is lax or strict
 S 140 EntityStream should be unsubscribing in case of error too?
 S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top in entity stream
 
@@ -223,8 +286,6 @@ S 121 add EntityRetriever to EntityManager
 S 122 addEntity should start fetching if eager flag on
 S 123 get should turn around and retrieve again if eager on
             should put a callback in structure so that can call back if proper
-S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
-M 125 Extract entity replacement from XmlTokenStream into EntityStream
 M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
 
 M 115 Advanced XmlEntityStream
@@ -935,7 +996,7 @@ Sprint 13
 		I don't think so.
 61:M: Build a reporter for coverage which just reports the final summaries
 		√ NS: Need documentation for coverage reporter plugins
-			see /Users/bodawei/active/電/xml/node_modules/istanbul/lib/report/index.js
+			see /Users/bodawei/active/é›»/xml/node_modules/istanbul/lib/report/index.js
 		√ Put a dummy reporter in that matches the api. Give it some config params in karma config
 			then emulate text.js and see if it can access the param and write "foo" to disk
 		√ Figure out how to abstract the summaries and report 'PhantomJS coverage: 100%"
@@ -1409,3 +1470,9 @@ Notes23
 -------
 Sprint went reasonably well.  74 was a bit bigger than I realized at first, as when I started doing this I realized every name needed to be checked.
 I started on 166 but didn't get it done.  In particular need to plan out the testing work better, and need to think about coping with the types it seems there's no support for converting.
+
+
+Sprint 24
+=========
+√S 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
+√M 125 Extract entity replacement from XmlTokenStream into EntityStream

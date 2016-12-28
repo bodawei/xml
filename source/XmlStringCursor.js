@@ -2,7 +2,7 @@
 
 'use strict';
 
-//const iconvLite = require('iconv-lite');
+const iconvLite = require('iconv-lite');
 
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
@@ -102,55 +102,62 @@ class XmlStringCursor {
 
     Encodings
     Handling the encoding of the XML data can get to be complex.
-    Note: An unencoded string in JavaScript here is just called a
-    "Unicode string" (here, an 'a' is represented as an 'a'). In
-    contrast, an encoded string might represent an 'a' as '\u0000a'.
+    Note: An unencoded string in JavaScript here is a string where and 'a'
+    is represented as an 'a' (or \u0061). In contrast, in UTF-16 it would
+    get to us as \u0000\u0061.  You can get this if you get a sequence of
+    bytes and read each byte into one string character.
 
     Factors to consider:
       1. The XML entity itself may specify its own encoding in the
-         XML Declaration or Text Declaration (<?xml encoding="foo"?>
+         XML Declaration or Text Declaration (<?xml encoding="UTF-8"?>
       2. The cursor will try to examine the first few bytes of the
          entity to see if it can recognize at least an approximation
-         of the encoding initially
-      3. The cursor has an option (called encoding) which will let you
-         explicitly state the encoding of the data in the string.
+         of the encoding.
+      3. The cursor has an option (called encoding) which you can pass
+         that will let you explicitly state the encoding of the data in
+         the string.
       4. The XmlTokenStream has an option, ignoreDocumentEncoding, which
          will tell it to not inform the cursor of the encoding specified
          in the entity data.
+
     Here are the most likely use cases:
-      A. You have an XML entity whose data you have already decoded into
-         a literal JavaScript string (e.g. you got it as a UTF-16
-         encoded string or buffer, and you converted it into a plain
-         unencoded string).
-            In this case, pass it to the cursor, and set
-            ignoreDocumentEncoding on the stream.
-      B. You have a string which is encoded, and you happen to know the
-         encoding (e.g. it is ISO-8859-2, whose lower 128 characters
-         look ASCII or a Unicode string, so #2 above will think it is
-         unencoded), and the XML document doesn't carry the encoding
-         name in it.
-            Pass the encoded string and encoding option to the cursor
-      C. You have a string which is encoded and looks like ASCII/Unicode/
-         etc), and the encoding is also stated in the XML or Text
-         Declaration.
-            Pass the encoded string to the cursor
+      A. You have a string which you have already decoded (e.g. you got
+         it as a UTF-16 encoded string or buffer, and you converted it
+         into a plain unencoded string).
+            In this case, pass it to the cursor, do NOT set the encoding
+            option on the cursor, and set ignoreDocumentEncoding option
+            on the stream.
+      B. You have a string which is encoded, you know the encoding, and
+         the XML document doesn't carry the encoding name in it.
+         (e.g. it is ISO-8859-2, whose lower 128 characters look like
+         ASCII so by #2 the cursor will conclude it is unencoded).
+            Pass the string and encoding option to the cursor
+      C. You have a string which is encoded but looks like ASCII, and
+         the encoding is also stated in the XML or Text Declaration.
+            Pass the encoded string to the cursor. Do nothing else.
       D. You have an encoded string that is in UTF-16 (either LE or BE)
          that has a byte order marker on it
-            If the encoding is also in the XML/Text Decl, same as C.
-            If the encoding is not, you can do either B or C
+            If the encoding is not there, you can do either B or C
                (the cursor can identify UTF-16 automatically)
-      E. Same as D, but no byte order mark.
+            Note that if there is an XML or Text Declaration that is
+            different, then you should set the ignoreDocumentEncoding
+            option.
+      E. Same as D, but no byte order mark
             Strictly, this is an error, since all UTF-16 must have a
-            byte order mark.  However, a lax XmlTokenStream will
+            byte order mark (4.3.3).  However, a lax XmlTokenStream will
             continue.
-            If the encoding is in the Decl, you can do the same as C
-            If the encoding is not in the Decl, do the same as B.
+            If there is an XML or Text Declaration, the cursor can
+            auto-detect the character set and convert (if these specify
+            another encoding, you should set ignoreDocumentEncoding)
+            If there is no XML or Text Declaration, you must specify
+            and encoding option as in B.
    Other notes:
-      - If the results of #2 and #1, or #2 and #3 are obviously
-         contradictory, the cursor will throw an Error (e.g. the
-         cursor looks at the string (#2) and concludes it is
-         ASCII/Unicode string, but the file says (#1) it is UTF-16)
-      - The encoding option to the cursor (#3), if specified, takes
+      -  This uses iconv-lite to do the character decoding. This
+         library is very forgiving of errors. So, if you have passed
+         the wrong character set to convert, you will get gibberish
+         and errors coming out of XmlTokenStream rather than errors
+         at conversion time.
+      -  The encoding option to the cursor (#3), if specified, takes
          precedence over the value specified in the document (#1).
 
     PARAM
@@ -192,9 +199,8 @@ class XmlStringCursor {
          specifiedEncoding: (options || {}).encoding,
          autodetectedEncoding: this._autodetectEncoding()
       };
-      this._encoding.currentEncoding = this._encoding.autodetectedEncoding;
 
-      // this._decodeSource();
+      this._decodeSource();
    }
 
    get entityMd() {
@@ -207,69 +213,96 @@ class XmlStringCursor {
       }
 
       this._encoding.specifiedEncoding = value;
-      // this._decodeSource();
+      this._decodeSource(true);
    }
 
-   // Two ways into this:
-   // At startup time, in which case we may convert from what we were given to something else
-   // After reading the XML Declaration. We may already have a converted (by autoconvert) so we may want to re-convert
-   // the source so if we convert from the autoDetected, we need to keep the original around just in case
-   //   _decodeSource() {
-   //      if (!this._encoding.autodetectedEncoding ||
-   //         (this._encoding.autodetectedEncoding === ENCODING.UNENCODED &&
-   //         (this._encoding.specifiedEncoding === ENCODING.UNENCODED || !this._encoding.specifiedEncoding))) {
-   //         this._encoding.currentEncoding = ENCODING.UNENCODED;
-   //         return;
-   //      }
-   //
-   //      const encoding = this._encoding.specifiedEncoding || this._encoding.autodetectedEncoding;
-   //
-   //      // preserve the source. this only happens at startup time
-   //      // This only happens once at startup or at setSpecifiedEncoding
-   //      const targetEncoding = this._bestEncoding(encoding);
-   //      const canConvertToTarget = iconvLite.encodingExists(targetEncoding);
-   //
-   //      if (canConvertToTarget) {
-   //         this._source = iconvLite.decode(this._source, targetEncoding, { stripBOM: false });
-   //         this._encoding.currentEncoding = ENCODING.UNENCODED;
-   //      } else {
-   //         throw new Error('2');
-   //      }
-   //   }
-   //
-   //   _bestEncoding(encoding) {
-   //      switch (encoding) {
-   //         case ENCODING.UTF8:
-   //         case ENCODING.UTF8_BOM:
-   //            return ENCODING.UTF8;
-   //         case ENCODING.UCS4BE:
-   //         case ENCODING.UCS4BE_BOM:
-   //            return ENCODING.UCS4BE;
-   //         case ENCODING.UCS4BE:
-   //         case ENCODING.UCS4BE_BOM:
-   //            return ENCODING.UCS4BE;
-   //         case ENCODING.UCS4LE:
-   //         case ENCODING.UCS4LE_BOM:
-   //            return ENCODING.UCS4LE;
-   //         case ENCODING.UCS4LE:
-   //         case ENCODING.UCS4LE_BOM:
-   //            return ENCODING.UCS4LE;
-   //         case ENCODING.UCS4UNUSUAL1:
-   //         case ENCODING.UCS4UNUSUAL1_BOM:
-   //            return ENCODING.UCS4UNUSUAL1;
-   //         case ENCODING.UCS4UNUSUAL2:
-   //         case ENCODING.UCS4UNUSUAL2_BOM:
-   //            return ENCODING.UCS4UNUSUAL2;
-   //         case ENCODING.UTF16BE:
-   //         case ENCODING.UTF16BE_BOM:
-   //            return ENCODING.UTF16BE;
-   //         case ENCODING.UTF16LE:
-   //         case ENCODING.UTF16LE_BOM:
-   //            return ENCODING.UTF16LE;
-   //      }
-   //
-   //      return encoding;
-   //   }
+   /*
+    * Decode the string either:
+    *  - At startup time, in which case we use either the autodetection
+    *    or the encoding option to decode, or
+    *  - After reading the XML Declaration, we may have the specifiedEncoding
+    *    set, which, if the encoding option was not set, will force us to
+    *    reconsider re-encoding. Se the overall class comment for more general
+    *    details.
+    */
+   _decodeSource(fromSetSpecifiedEncoding) {
+      /*
+       * Do not decode if no indication of any decoding that is needed
+       *     (auto and specified are undefined)
+       * or if the specified is forcing that there is no decoding to do,
+       * or if autodetection said there was no encoding and nothing was specified
+       */
+      if ((!this._encoding.autodetectedEncoding && !this._encoding.specifiedEncoding) ||
+         this._encoding.specifiedEncoding === ENCODING.UNENCODED ||
+         (this._encoding.autodetectedEncoding === ENCODING.UNENCODED && !this._encoding.specifiedEncoding)) {
+         return;
+      }
+
+      const encoding = this._encoding.specifiedEncoding || this._encoding.autodetectedEncoding;
+      const targetEncoding = this._bestEncoding(encoding);
+
+      // This can only happen when called from set specifiedEncoding
+      // since currentEncoding will be undefined otherwise.
+      if (targetEncoding === this._encoding.currentEncoding) {
+         this._sourceBackup = undefined;
+         return;
+      }
+
+      const canConvertToTarget = iconvLite.encodingExists(targetEncoding);
+
+      if (canConvertToTarget) {
+         iconvLite.skipDecodeWarning = true;
+         const toConvert = this._sourceBackup || this._source;
+
+         // Store the decoded string in case set specifiedEncoding comes in with a better value
+         this._sourceBackup = fromSetSpecifiedEncoding ? undefined : this._source;
+         this._source = iconvLite.decode(toConvert, targetEncoding, { stripBOM: false });
+
+         // In the case we are re-encoding, try to adjust character offsets
+         if (fromSetSpecifiedEncoding) {
+            if (targetEncoding === ENCODING.UTF8 &&
+               (this._encoding.currentEncoding === ENCODING.UTF16LE ||
+                  this._encoding.currentEncoding === ENCODING.UTF16BE)) {
+               this._offset.index = this._offset.index * 2;
+            }
+         }
+         this._encoding.currentEncoding = targetEncoding;
+      } else {
+         throw new Error('Can not decode a string in ' + targetEncoding + ' encoding.');
+      }
+   }
+
+   /*
+    * Convert our internal identifiers to ones that iconv-lite likes.
+    * It doesn't know about our BOM information.
+    */
+   _bestEncoding(encoding) {
+      switch (encoding) {
+         case ENCODING.UTF8:
+         case ENCODING.UTF8_BOM:
+            return ENCODING.UTF8;
+         case ENCODING.UCS4BE:
+         case ENCODING.UCS4BE_BOM:
+            return ENCODING.UCS4BE;
+         case ENCODING.UCS4LE:
+         case ENCODING.UCS4LE_BOM:
+            return ENCODING.UCS4LE;
+         case ENCODING.UCS4UNUSUAL1:
+         case ENCODING.UCS4UNUSUAL1_BOM:
+            return ENCODING.UCS4UNUSUAL1;
+         case ENCODING.UCS4UNUSUAL2:
+         case ENCODING.UCS4UNUSUAL2_BOM:
+            return ENCODING.UCS4UNUSUAL2;
+         case ENCODING.UTF16BE:
+         case ENCODING.UTF16BE_BOM:
+            return ENCODING.UTF16BE;
+         case ENCODING.UTF16LE:
+         case ENCODING.UTF16LE_BOM:
+            return ENCODING.UTF16LE;
+      }
+
+      return encoding;
+   }
 
    /**********************************************************************\
     Returns the most likely type for the next token in the cursor. In some

@@ -85,7 +85,8 @@ describe('WellFormednessError', () => {
 
       it('sets the context with a location', () => {
          const contextOffset = new Offset(0, 1, 2);
-         expect(new WellFormednessError(WellFormednessError.ID.ELEMENT_UNBALANCED, [], new Offset(0, 1, 2), contextOffset,
+         expect(new WellFormednessError(WellFormednessError.ID.ELEMENT_UNBALANCED, [],
+            new Offset(0, 1, 2), contextOffset,
             new EntityLocation('system', 'public')).context)
             .toEqual([ {
                offset: contextOffset,

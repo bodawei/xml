@@ -4,6 +4,8 @@
 
 /* eslint-env jasmine */
 
+const iconvLite = require('iconv-lite');
+
 const EntityLocation = require('./shared/EntityLocation.js');
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
@@ -120,39 +122,51 @@ describe('XmlStringCursor', () => {
          });
 
          it('identifies a EBCDIC encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u004C\u006F\u00A7\u0094');
 
             expect(c._encoding.autodetectedEncoding).toBe('EBCDIC');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('EBCDIC');
          });
 
          it('identifies a UCS-4 big endian encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u0000\u0000\u003C');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
          });
 
          it('identifies a UCS-4 little endian encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u003C\u0000\u0000\u0000');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4LE');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4LE');
          });
 
          it('identifies a UCS-4 unusual1 order encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u0000\u003C\u0000');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL1');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL1');
          });
 
          it('identifies a UCS-4 unusual2 order encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u003C\u0000\u0000');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL2');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL2');
          });
 
          it('identifies a UCS-4 big endian encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u0000\u0000\u003C');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
          });
 
          it('identifies a UTF-16 big endian encoding', () => {
@@ -168,27 +182,35 @@ describe('XmlStringCursor', () => {
          });
 
          it('identifies a UCS-4 big endian with BOM encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u0000\u00FE\u00FF');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE/BOM');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
          });
 
          it('identifies a UCS-4 little endian with BOM encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u00FF\u00FE\u0000\u0000');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4LE/BOM');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4LE');
          });
 
          it('identifies a UCS-4 unusal1 with BOM encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u0000\u0000\u00FF\u00FE');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL1/BOM');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL1');
          });
 
          it('identifies a UCS-4 unusal2 with BOM encoding', () => {
+            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
             const c = new XmlStringCursor('\u00FE\u00FF\u0000\u0000');
 
             expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL2/BOM');
+            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL2');
          });
 
          it('identifies a UTF-16BE with BOM encoding', () => {
@@ -203,10 +225,116 @@ describe('XmlStringCursor', () => {
             expect(c._encoding.autodetectedEncoding).toBe('UTF-16LE/BOM');
          });
 
-         it('identifies a UTF-16LE with BOM encoding', () => {
+         it('identifies a UTF-8 with BOM encoding', () => {
             const c = new XmlStringCursor('\u00EF\u00BB\u00BFA');
 
             expect(c._encoding.autodetectedEncoding).toBe('UTF-8/BOM');
+         });
+
+      });
+
+      describe('decoding', () => {
+
+         it('decodes a UTF-8/BOM into a decoded string', () => {
+            const c = new XmlStringCursor('\u00EF\u00BB\u00BF<?xml version="1.0"?>');
+
+            expect(c.getChar().text).toEqual('\uFEFF');
+            expect(c.getChar().text).toEqual('<');
+         });
+
+         it('decodes a UTF-16BE into a decoded string', () => {
+            const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
+
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+         });
+
+         it('decodes a UTF-16BE/BOM into a decoded string', () => {
+            const c = new XmlStringCursor('\u00FE\u00FF\u0000\u003C\u0000\u003F');
+
+            expect(c.getChar().text).toEqual('\uFEFF');
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+         });
+
+         it('decodes a UTF-16LE into a decoded string', () => {
+            const c = new XmlStringCursor('\u003C\u0000\u003F\u0000');
+
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+         });
+
+         it('decodes a UTF-16LE/BOM into a decoded string', () => {
+            const c = new XmlStringCursor('\u00FF\u00FE\u003C\u0000\u003F\u0000');
+
+            expect(c.getChar().text).toEqual('\uFEFF');
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+         });
+
+         it('can not decode a UCS-4LE string', () => {
+            expect(() => {
+               new XmlStringCursor('\u00FF\u00FE\u0000\u0000');
+            }).toThrowError('Can not decode a string in UCS-4LE encoding.');
+         });
+
+         // Seems like an error, but the cursor can't prove that this isn't actually OK
+         it('does not decode a UTF-16BE string when encoding is specified as UNENCODED', () => {
+            const c = new XmlStringCursor('\u0000\u003C\u0000\u003F', undefined, {
+               encoding: 'UNENCODED'
+            });
+
+            expect(c.getChar().text).toEqual('\u0000');
+            expect(c.getChar().text).toEqual('\u003C');
+         });
+
+         /*
+          * This seems like an error, but technically could be correct,
+          * except for the fact that the sequence \u00EF\u00BB is an incomplete
+          * UTF-8 character. Really, this should be more of an error, but
+          * iconv-lite just gives us a 'bad char' rather than a big complaint
+          */
+         it('does a butchering job of decoding a UTF-16BE as UTF-8 if encoding is specified as UTF-8', () => {
+            const c = new XmlStringCursor('\u0000\u003C\u0000\u003F\u00EF\u00BB', undefined, {
+               encoding: 'UTF-8'
+            });
+
+            expect(c.getChar().text).toEqual('\u0000');
+            expect(c.getChar().text).toEqual('\u003C');
+            expect(c.getChar().text).toEqual('\u0000');
+            expect(c.getChar().text).toEqual('\u003F');
+            expect(c.getChar().text).toEqual('\uFFFD');
+         });
+
+         // Seems like an error, but technically we can't prove it isn't UTF-16
+         it('forces decoding an unencoded string to UTF-16BE with a UTF-16BE encoding', () => {
+            const c = new XmlStringCursor('<?xml version="1.0"?>', undefined, {
+               encoding: 'UTF-16BE'
+            });
+
+            expect(c.getChar().text).toEqual('\u3C3F');
+         });
+
+         it('does no decoding in what looks like an unecoded string (but is actually UTF-8 encoded)', () => {
+            const c = new XmlStringCursor('<?xm\u00e4\u00bd\u00a0'); // e4bda0 is 你 in utf8
+
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+            expect(c.getChar().text).toEqual('x');
+            expect(c.getChar().text).toEqual('m');
+            expect(c.getChar().text).toEqual('ä');
+         });
+
+         it('forces decoding what looks like an unecoded string as UTF-8 with a UTF-8 encoding', () => {
+            const c = new XmlStringCursor('<?xm\u00e4\u00bd\u00a0', undefined, { // e4bda0 is 你 in utf8
+               encoding: 'UTF-8'
+            });
+
+            expect(c.getChar().text).toEqual('<');
+            expect(c.getChar().text).toEqual('?');
+            expect(c.getChar().text).toEqual('x');
+            expect(c.getChar().text).toEqual('m');
+            expect(c.getChar().text).toEqual('你');
          });
 
       });
@@ -215,64 +343,62 @@ describe('XmlStringCursor', () => {
 
    describe('specifiedEncoding', () => {
 
-      it('changes the specified encoding', () => {
-         const c = new XmlStringCursor('<foo>');
-
-         c.specifiedEncoding = 'UTF-8';
-
-         expect(c._encoding.specifiedEncoding).toEqual('UTF-8');
-      });
-
-      it('does not change the specified encoding if it was already specified in the options', () => {
-         const c = new XmlStringCursor('<foo>', undefined, { encoding: 'UTF-16' });
-
-         c.specifiedEncoding = 'UTF-8';
-
-         expect(c._encoding.specifiedEncoding).toEqual('UTF-16');
-      });
-
-   });
-
-//const ENCODING = {
-//   UNENCODED: 'UNENCODED',
-//   AUTO UTF8: 'UTF-8',
-//   √AUTO: UTF8_BOM: 'UTF-8/BOM',
-//   √AUTO: UTF16BE: 'UTF-16BE',
-//   √AUTO: UTF16BE_BOM: 'UTF-16BE/BOM',
-//    AUTO UTF16LE: 'UTF-16LE',
-//    AUTO UTF16LE_BOM: 'UTF-16LE/BOM',
-//   UCS4BE: 'UCS-4BE',
-//   UCS4BE_BOM: 'UCS-4BE/BOM',
-//   UCS4LE: 'UCS-4LE',
-//   UCS4LE_BOM: 'UCS-4LE/BOM',
-//   UCS4UNUSUAL1: 'UCS-4UNUSUAL1',
-//   UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
-//   UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
-//   UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
-//   EBCDIC: 'EBCDIC'
-//};
-//
-   xdescribe('(encodings)', () => {
-
-      it('automatically recognizes UTF-8 with a BOM', () => {
-         const c = new XmlStringCursor('ï»¿<?xml version="1.0"?>');
-
-         expect(c.getChar().text).toEqual('\uFEFF');
-         expect(c.getChar().text).toEqual('<');
-      });
-
-      it('automatically recognizes UTF-16 with a BOM', () => {
-         const c = new XmlStringCursor('\ufeff\u003c\u003f\u0078\u006d\u006c');
-
-         expect(c.getChar().text).toEqual('\uFEFF');
-         expect(c.getChar().text).toEqual('<');
-      });
-
-      it('automatically recognizes UTF-16 without a BOM', () => {
-         const c = new XmlStringCursor('\u003c\u003f\u0078\u006d\u006c');
+      it('decodes as UTF-8 if specified as UTF-8', () => {
+         const c = new XmlStringCursor('<?xm\u00e4\u00bd\u00a0');
 
          expect(c.getChar().text).toEqual('<');
          expect(c.getChar().text).toEqual('?');
+         expect(c.getChar().text).toEqual('x');
+         expect(c.getChar().text).toEqual('m');
+
+         c.specifiedEncoding = 'UTF-8';
+
+         expect(c.getChar().text).toEqual('你');
+      });
+
+      it('does not decode to UTF-8 if specified as UTF-8, but encoding parameter was UNENCODED', () => {
+         const c = new XmlStringCursor('<?xm\u00e4\u00bd\u00a0', undefined, { encoding: 'UNENCODED' });
+
+         expect(c.getChar().text).toEqual('<');
+         expect(c.getChar().text).toEqual('?');
+         expect(c.getChar().text).toEqual('x');
+         expect(c.getChar().text).toEqual('m');
+
+         c.specifiedEncoding = 'UTF-8';
+
+         expect(c.getChar().text).toEqual('\u00e4');
+      });
+
+      /*
+       * This feels like it should be an error. First, we autodetected
+       * UTF-16, so UTF-8 seems contradictory, yet the UTF-16 could conceivably
+       * be legit UTF-8. Note: this is a malformed XML document because 0x00 is
+       * not allowed. However, That's beyond the scope of the cursor to know.
+       */
+      it('decodes as UTF-8 if specified as UTF-8', () => {
+         const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
+
+         expect(c.getChar().text).toEqual('<');
+
+         c.specifiedEncoding = 'UTF-8';
+
+         /*
+          * First we converted the text from utf16, and then read the
+          * first character. Then, we converted the original from UTF-8
+          * and readjusted offsets.
+          */
+         expect(c.getChar().text).toEqual('\u0000');
+      });
+
+      it('does not re-decode a UTF-16 string since it was converted at start time (whitebox)', () => {
+         const c = new XmlStringCursor('\u003C\u0000\u003F\u0000');
+         expect(c.getChar().text).toEqual('<');
+
+         spyOn(iconvLite, 'decode');
+
+         c.specifiedEncoding = 'UTF-16LE';
+
+         expect(iconvLite.decode).not.toHaveBeenCalled();
       });
 
    });

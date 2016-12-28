@@ -356,7 +356,9 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!NOTATION note PUBLIC "ONE" >');
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!NOTATION note PUBLIC "ONE" >', {
+            ignoreDocumentEncoding: true
+         });
          ignoreToken(s, tokens.TextDeclaration);
 
          const t = s.getNext();
@@ -654,7 +656,9 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY myEntity "entityValue">');
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY myEntity "entityValue">', {
+            ignoreDocumentEncoding: true
+         });
          ignoreToken(s, tokens.TextDeclaration);
 
          const t = s.getNext();
@@ -815,7 +819,9 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY % myPE SYSTEM "one" NDATA foo>');
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ENTITY % myPE SYSTEM "one" NDATA foo>', {
+            ignoreDocumentEncoding: true
+         });
          ignoreToken(s, tokens.TextDeclaration);
 
          const t = s.getNext();
@@ -899,7 +905,9 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ELEMENT elName ANY>');
+         const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ELEMENT elName ANY>', {
+            ignoreDocumentEncoding: true
+         });
          ignoreToken(s, tokens.TextDeclaration);
 
          const t = s.getNext();
@@ -1860,7 +1868,9 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<?xml encoding="xx"?><!ATTLIST elName ' +
             ' at1 CDATA #REQUIRED' +
             ' at2 NOTATION (foo| bar) #FIXED "argh"' +
-            '>');
+            '>', {
+               ignoreDocumentEncoding: true
+            });
          ignoreToken(s, tokens.TextDeclaration);
 
          const t = s.getNext();

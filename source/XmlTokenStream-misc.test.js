@@ -136,21 +136,21 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<?xml encoding="foo"?><!-- testComment -->');
+            const s = makeStrictExternalSubsetStream('<?xml encoding="UTF-8"?><!-- testComment -->');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.Comment);
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><!-- testComment -->');
+            const s = makeStrictExternalEntityStream('<?xml encoding="UTF-8"?><!-- testComment -->');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.Comment);
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('<!-- testComment --><?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('<!-- testComment --><?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.Comment);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -357,21 +357,21 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<?xml encoding="foo"?><?foo bar?>');
+            const s = makeStrictExternalSubsetStream('<?xml encoding="UTF-8"?><?foo bar?>');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.ProcessingInstruction);
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><?foo bar?>');
+            const s = makeStrictExternalEntityStream('<?xml encoding="UTF-8"?><?foo bar?>');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.ProcessingInstruction);
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('<?foo bar?><?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('<?foo bar?><?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.ProcessingInstruction);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,

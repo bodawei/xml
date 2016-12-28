@@ -397,7 +397,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws an error if an error is found in a strict stream', () => {
-         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
+         const s = makeStrictExternalEntityStream('foo<?XML encoding="UTF-8"?>');
 
          ignoreToken(s, tokens.CharData);
 
@@ -407,7 +407,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('throws no error if an error is found in a lax stream', () => {
-         const s = makeLaxExternalEntityStream('foo<?XML encoding="ff"?>');
+         const s = makeLaxExternalEntityStream('foo<?XML encoding="UTF-8"?>');
 
          ignoreToken(s, tokens.CharData);
 
@@ -417,7 +417,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('will deliver no other data after an exception in a strict stream', () => {
-         const s = makeStrictExternalEntityStream('foo<?XML encoding="ff"?>');
+         const s = makeStrictExternalEntityStream('foo<?XML encoding="UTF-8"?>');
 
          ignoreToken(s, tokens.CharData);
          expect(() => {
@@ -428,7 +428,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('will deliver other data after an exception in a lax stream', () => {
-         const s = makeLaxExternalEntityStream('foo<?xml encoding="ff"?>');
+         const s = makeLaxExternalEntityStream('foo<?xml encoding="UTF-8"?>');
 
          ignoreToken(s, tokens.CharData);
          ignoreError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
@@ -728,7 +728,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('xx<?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('xx<?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.CharData);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -951,7 +951,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('&#50;<?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('&#50;<?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.CharRef);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -1075,7 +1075,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('&amp;<?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('&amp;<?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.EntityStart);
             ignoreToken(s, tokens.EntityEnd);
 
@@ -1218,7 +1218,7 @@ describe('XmlTokenStream', () => {
          });
 
          it('can not appear after the Text Declaration in the external subset', () => {
-            const s = makeLaxExternalSubsetStream('<?xml encoding="foo"?><![CDATA[ test ]]>');
+            const s = makeLaxExternalSubsetStream('<?xml encoding="UTF-8"?><![CDATA[ test ]]>');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectError(s, SyntaxError.ID.CDATA_INVALID_SUBSET_CONTEXT,
@@ -1226,14 +1226,14 @@ describe('XmlTokenStream', () => {
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="foo"?><![CDATA[ test ]]>');
+            const s = makeStrictExternalEntityStream('<?xml encoding="UTF-8"?><![CDATA[ test ]]>');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.CData);
          });
 
          it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('<![CDATA[ test ]]><?xml encoding="foo"?>');
+            const s = makeLaxExternalEntityStream('<![CDATA[ test ]]><?xml encoding="UTF-8"?>');
             ignoreToken(s, tokens.CData);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -1381,7 +1381,8 @@ describe('XmlTokenStream', () => {
       it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
          const s = makeStream('<?xml version="1.1" encoding="frog<"?>', new XmlEntityManager(), {
             lax: true,
-            'lax:allowOpenAngleBracketsInAttributeValues': false
+            'lax:allowOpenAngleBracketsInAttributeValues': false,
+            ignoreDocumentEncoding: true
          });
 
          expect(s.getNext().id).toEqual(SyntaxError.ID.XMLDECL_ENCODING_INVALID);
@@ -1569,35 +1570,50 @@ describe('XmlTokenStream', () => {
 
       describe('encoding parameter', () => {
 
-         it('accepts a value of "usascii0"', () => {
-            const s = makeStrictStream('<?xml version="1.1"   encoding="usascii0"?>');
+         it('accepts a value of "usascii"', () => {
+            const s = makeStrictStream('<?xml version="1.1"   encoding="usascii"?>');
 
             const t = s.getNext();
-            compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii0');
+            compareXmlDeclAttribute(t.params[1], 'encoding', 'usascii');
          });
 
          it('throws a syntax error if encoding is not rightly encoded', () => {
-            expectSyntaxError('<?xml version="1.1" encoding="bogus$"?>',
-               SyntaxError.ID.XMLDECL_ENCODING_INVALID,
-               '"encoding" must be alphanumeric. Found "bogus$".');
+            const s = makeLaxStream('<?xml version="1.1"   encoding="bogus$"?>', {
+               ignoreDocumentEncoding: true
+            });
+
+            const t = s.getNext();
+
+            expect(t.id).toEqual(SyntaxError.ID.XMLDECL_ENCODING_INVALID);
+            expect(t.message).toEqual('"encoding" must be alphanumeric. Found "bogus$".');
          });
 
          it('throws a syntax error if encoding starts with a bad character', () => {
-            expectSyntaxError('<?xml version="1.1" encoding="0usascii"?>',
-               SyntaxError.ID.XMLDECL_ENCODING_INVALID,
-               '"encoding" must be alphanumeric. Found "0usascii".');
+            const s = makeLaxStream('<?xml version="1.1"   encoding="0usascii"?>', {
+               ignoreDocumentEncoding: true
+            });
+
+            const t = s.getNext();
+
+            expect(t.id).toEqual(SyntaxError.ID.XMLDECL_ENCODING_INVALID);
+            expect(t.message).toEqual('"encoding" must be alphanumeric. Found "0usascii".');
          });
 
          it('throws an error if encoding found in the wrong position', () => {
-            expectSyntaxError('<?xml encoding="frog" version="1.1" ?>',
+            expectSyntaxError('<?xml encoding="UTF-8" version="1.1" ?>',
                SyntaxError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                '"encoding" must be after "version" and before "standalone".');
          });
 
          it('throws a syntax error if is not the right case', () => {
-            expectSyntaxError('<?xml version="1.1" EnCoDiNG="bogys" ?>',
-               SyntaxError.ID.XMLDECL_ATTR_INVALID_CASE,
-               '"encoding" must be lower case. Found "EnCoDiNG".');
+            const s = makeLaxStream('<?xml version="1.1"   EnCoDiNG="bogys"?>', {
+               ignoreDocumentEncoding: true
+            });
+
+            const t = s.getNext();
+
+            expect(t.id).toEqual(SyntaxError.ID.XMLDECL_ATTR_INVALID_CASE);
+            expect(t.message).toEqual('"encoding" must be lower case. Found "EnCoDiNG".');
          });
 
       });
