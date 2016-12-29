@@ -2,6 +2,9 @@
 
 'use strict';
 
+const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
+
 /**********************************************************************\
  XmlTokenStreamMisc provides a set of routines for parsing the "misc"
  production. Indirectly, this includes the XML and Text Declarations,
@@ -92,112 +95,81 @@ class XmlTokenStreamMisc {
       return results;
    }
 
-//   parseXmlDecl(cursor, startChunk) {
-//      const results = {};
-//
-//      results.startChunk = startChunk;
-//      results.params = this._getAttributes(cursor, false);
-//      results.closeChunk = cursor.getMatch('?>');
-//
-//      return results;
-//   }
-//
-//   _getAttributes(cursor, elementAttribute, options) {
-//      const nameTerminators = elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS;
-//      let valueTerminators = elementAttribute ? ATTRIBUTE_VALUE_TERMINATORS : XMLDECL_VALUE_TERMINATORS;
-//      const attributes = [];
-//      let attribute;
-//
-//      if (elementAttribute && options['lax:allowOpenAngleBracketsInAttributeValues']) {
-//         valueTerminators = ATTRIBUTE_VALUE_TERMINATORS_LAX;
-//      }
-//
-//
-//      let lastSpace = cursor.getSpace();
-//      let name = this._cursor.getWord(nameTerminators);
-//
-//      while (name) {
-//         attribute = {
-//            preNameSpaceChunk: lastSpace,
-//            nameChunk: name,
-//            postNameSpaceChunk: cursor.getSpace(),    // optional
-//            equalChunk: cursor.getMatch('='),
-//            postEqualSpaceChunk: cursor.getSpace()    // optional
-//         };
-//
-//         const quote = cursor.peekChar();
-//         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
-//         let value = [];
-//
-//         if (gotQuote) {
-//            attribute.quoteChunk = cursor.getChar();     // consume the quote
-//            const chunkInfo = cursor.getToTerminator([ quote.text ]);
-//
-//            if (chunkInfo.chunk) {
-//               value.push(new tokens.Text(chunkInfo.chunk.text, tokens.ATTR_NO_CHUNKS));
-//            }
-//
-//            const nextChar = cursor.peekChar();
-//            if (nextChar && nextChar.text === quote.text) {
-//               attribute.postValueQuoteChunk = cursor.getChar();
-//            }
-//         } else if (!attribute.equalChunk) {
-//            attribute.extracted = makePair(name, value, undefined, elementAttribute);
-//            name = cursor.getWord(nameTerminators);
-//            continue;   // without a quote, we assume there is no value and treat any following as a name
-//         } else {
-//            attribute.valueChunk = cursor.getWord(valueTerminators);
-//            if (attribute.valueChunk) {
-//               value.push(new tokens.Text(attribute.valueChunk.text, tokens.ATTR_NO_CHUNKS));
-//            }
-//            const terminator = cursor.peekChar();
-//
-//            if (value.length !== 0) {
-//               if (terminator && terminator.text === '<') {
-//                  attribute.extracted = makePair(name, value, undefined, elementAttribute);
-//                  break;   // Stop processing of attributes
-//               }
-//            }
-//         }
-//
-//         if (elementAttribute) {
-//            doCDataNormalization(value);
-//         }
-//         attribute.extracted = makePair(name, value, quote, elementAttribute);
-//
-//         if (!abort) {
-//            lastSpace = cursor.getSpace();
-//            name = cursor.getWord(nameTerminators);
-//         }
-//      }
-//
-//      return attributes;
-//   }
+   /**********************************************************************\
+    parseXmlDecl parses an XML Declaration which has the following format:
+
+      [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
+      [77] TextDecl     ::= '<?xml' VersionInfo? EncodingDecl S? '?>'
+      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                            '"' VersionNum '"')
+      [25] Eq           ::= S? '=' S?
+      [26] VersionNum   ::= '1.1' | '1.0'
+      [27] Misc         ::= Comment | PI | S
+      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                            "'" EncName "'" )
+      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
+                            ('"' ('yes' | 'no') '"'))
+      [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+   \**********************************************************************/
+   parseXmlDecl(cursor, startChunk) {
+      const results = {};
+
+      results.startChunk = startChunk;
+      results.postTargetSpace = cursor.getSpace();
+      results.params = this._getAttributes(cursor);
+      results.closeChunk = cursor.getMatch('?>');
+
+      return results;
+   }
+
+   /**********************************************************************\
+    Parses the attributes of an XML or Text Declaration.
+    Tolerates a missing = and value, or a missing value, or an unquoted
+    value.
+   \**********************************************************************/
+   _getAttributes(cursor) {
+      const attributes = [];
+      let attribute;
+
+      let name = cursor.getWord(XMLDECL_NAME_TERMINATORS);
+
+      while (name) {
+         attribute = {
+            nameChunk: name,
+            postNameSpaceChunk: cursor.getSpace(),
+            equalChunk: cursor.getMatch('='),
+            postEqualSpaceChunk: cursor.getSpace()
+         };
+
+         const quote = cursor.peekChar();
+         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
+
+         if (gotQuote) {
+            attribute.quoteChunk = cursor.getChar();
+            const chunkInfo = cursor.getToTerminator([ quote.text ]);
+
+            if (chunkInfo.chunk) {
+               attribute.valueChunk = chunkInfo.chunk;
+            }
+
+            attribute.postValueQuoteChunk = cursor.getMatch(quote.text);
+            attribute.trailingSpaceChunk = cursor.getSpace();
+         } else if (attribute.equalChunk) {
+            attribute.valueChunk = cursor.getWord(XMLDECL_VALUE_TERMINATORS);
+            attribute.trailingSpaceChunk = cursor.getSpace();
+         } else {
+            attribute.trailingSpaceChunk = attribute.postNameSpaceChunk;
+            delete attribute.postNameSpaceChunk;
+         }
+
+         attributes.push(attribute);
+
+         name = cursor.getWord(XMLDECL_NAME_TERMINATORS);
+      }
+
+      return attributes;
+   }
 
 }
-
-//function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
-//   let value = valueChunk;
-//
-//   if (!elementAttribute) {
-//      value = valueChunk.length !== 0 ? valueChunk[0].text : undefined;
-//   }
-//
-//   return {
-//      name: nameChunk.text,
-//      value: value,
-//      quoteType: quoteToken ? quoteToken.text : undefined
-//   };
-//}
-//
-//// See §3.3.3 Attribute-Value Normalization
-//function doCDataNormalization(valueArray) {
-//   for (let index = 0; index < valueArray.length; index++) {
-//      const item = valueArray[index];
-//      if (item instanceof tokens.Text) {
-//         item.text = item.text.replace(/[\n\r\t]/g, ' ');
-//      }
-//   }
-//}
 
 module.exports = XmlTokenStreamMisc;

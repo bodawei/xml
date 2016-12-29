@@ -18,8 +18,6 @@ const SEID = SyntaxError.ID;
 const XWID = XmlWarning.ID;
 const WFEID = WellFormednessError.ID;
 
-const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
-const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
 const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
@@ -45,12 +43,8 @@ const XML_DECL_PARAMS = {
    standalone: 'standalone'
 };
 
-function makePair(nameChunk, valueChunk, quoteToken, elementAttribute) {
-   let value = valueChunk;
-
-   if (!elementAttribute) {
-      value = valueChunk.length !== 0 ? valueChunk[0].text : undefined;
-   }
+function makePair(nameChunk, valueChunk, quoteToken) {
+   const value = valueChunk;
 
    return {
       name: nameChunk.text,
@@ -608,83 +602,90 @@ class XmlTokenStream extends XmlStream {
       }
    }
 
-   /**********************************************************************\
-    _getXmlDecl parses an XML Declaration which has the following format:
-
-      [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
-      [77] TextDecl     ::= '<?xml' VersionInfo? EncodingDecl S? '?>'
-      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
-                            '"' VersionNum '"')
-      [25] Eq           ::= S? '=' S?
-      [26] VersionNum   ::= '1.1' | '1.0'
-      [27] Misc         ::= Comment | PI | S
-      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
-                            "'" EncName "'" )
-      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
-                            ('"' ('yes' | 'no') '"'))
-      [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
-
-    RETURN
-    None. Adds an XMLDECL token, and possibly errors, to the queue.
-   \**********************************************************************/
    _getXmlDecl(start) {
-      const params = this._getAttributes(false);
-      const close = this._cursor.getMatch('?>');
+      const parsed = this._miscParser.parseXmlDecl(this._cursor, start);
       const isXmlDecl = this._entityMd.isTypeDocument;
       let foundVersion;
       let foundEncoding;
       let seenStandalone = false;
+      const attributes = [];
 
-      this._assert(close, SEID.XMLDECL_NO_CLOSE);
-      this._assert(params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES,
+      this._assert(parsed.closeChunk, SEID.XMLDECL_NO_CLOSE);
+      this._assert(parsed.params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES,
          [ isXmlDecl ? SEID.NOUN_XMLDECL : SEID.NOUN_TEXTDECL ]);
 
       // check that the parameters are in the right order and have the right values
-      for (let index = 0; index < params.length; index++) {
-         const param = params[index];
-         const lcName = param.name.toLocaleLowerCase();
+      for (let index = 0; index < parsed.params.length; index++) {
+         const param = parsed.params[index];
+         const lcName = param.nameChunk.text.toLocaleLowerCase();
+         let valueText = textOrUndef(param.valueChunk);
+         const nameText = textOrBlank(param.nameChunk);
+
+         if (index === 0) {
+            this._assert(parsed.postTargetSpace, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ],
+               param.nameChunk.startOffset);
+         } else {
+            this._assert(parsed.params[index - 1].trailingSpaceChunk, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
+               [ nameText ], param.nameChunk.startOffset);
+         }
+
+         this._assert(param.nameChunk.couldBeName, SEID.ATTRIBUTE_INVALID_NAME, [ nameText ]);
+         this._assert(param.equalChunk, SEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+         if (param.valueChunk) {
+            this._assert(param.quoteChunk, SEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+         }
+         this._assert(param.valueChunk, SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
 
          if (XML_DECL_PARAMS[lcName]) {
-            this._assert(param.name === lcName, SEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, param.name ]);
+            this._assert(param.nameChunk.text === lcName, SEID.XMLDECL_ATTR_INVALID_CASE,
+               [ lcName, param.nameChunk.text ]);
          }
 
          switch (lcName) {
             case 'version':
+               foundVersion = valueText;
                this._assert(index === 0, SEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
-               this._assert(param.value === '1.1' || param.value === '1.0',
-                  SEID.XMLDECL_VERSION_INVALD, [ param.value ]);
-               foundVersion = param.value;
+               this._assert(valueText === '1.1' || valueText === '1.0',
+                  SEID.XMLDECL_VERSION_INVALD, [ valueText ]);
                break;
             case 'encoding':
-               foundEncoding = param.value;
+               foundEncoding = valueText;
                if (isXmlDecl) {
                   this._assert(foundVersion && !seenStandalone, SEID.XMLDECL_ENCODING_INVALID_ORDER);
                }
-               this._assert(param.value.match(/^[A-Za-z][-A-Za-z0-9._]*$/),
-                  SEID.XMLDECL_ENCODING_INVALID, [ param.value ]);
+               if (valueText) {
+                  this._assert(valueText.match(/^[A-Za-z][-A-Za-z0-9._]*$/), SEID.XMLDECL_ENCODING_INVALID,
+                     [ valueText ]);
+               }
                break;
             case 'standalone':
                if (!isXmlDecl) {
                   this._report(SEID.TEXTDECL_XTRA_STANDALONE);
                }
 
-               const lcValue = param.value.toLocaleLowerCase();
+               const lcValue = textOrBlank(param.valueChunk).toLocaleLowerCase();
 
                seenStandalone = true;
 
                this._assert(foundVersion, SEID.XMLDECL_STANDALONE_INVALID_ORDER);
-               this._assert(param.value === lcValue,
-                  SEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, param.value ]);
+               this._assert(valueText === lcValue,
+                  SEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
 
                if (lcValue !== 'no' && lcValue !== 'yes') {
-                  this._report(SEID.XMLDECL_STANDALONE_INVALID, [ param.value ]);
+                  this._report(SEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
+                  valueText = param.valueChunk ? lcValue : undefined;
                } else {
-                  param.value = lcValue;
+                  valueText = lcValue;
                }
                break;
             default:
-               this._report(SEID.XMLDECL_ATTR_UNKNOWN, [ param.name ]);
+               this._report(SEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
          }
+
+         attributes.push({
+            name: param.nameChunk.text,
+            value: valueText
+         });
       }
 
       if (!isXmlDecl) {
@@ -720,8 +721,8 @@ class XmlTokenStream extends XmlStream {
       }
 
       this._pushToken(isXmlDecl ?
-         new tokens.XmlDeclaration(params, this._cursor.getRecentChunks()) :
-         new tokens.TextDeclaration(params, this._cursor.getRecentChunks()));
+         new tokens.XmlDeclaration(attributes, this._cursor.getRecentChunks()) :
+         new tokens.TextDeclaration(attributes, this._cursor.getRecentChunks()));
    }
 
    /*
@@ -741,7 +742,7 @@ class XmlTokenStream extends XmlStream {
       const name = this._cursor.getWord([ '>', '/>' ]);
 
       if (isStartOrEmpty) {
-         attributes = this._getAttributes(true);
+         attributes = this._getAttributes();
       } else {
          this._cursor.getSpace();
       }
@@ -880,19 +881,16 @@ class XmlTokenStream extends XmlStream {
     * seemed safer to be biased towards the case that would consume less
     * (all of these, after all, are syntax errors to start with).
     *
-    * PARAM
-    * elementAttribute: true if these are attributes for an element, and
-    * false if for an XMLDecl.
     * RETURN
     * An array of attributes. Each element has a name (string), a value
     * (array of XMLTokens) and a quoteType, which is either " or ' The
     * latter is only useful for reproducing the original quote type.
     */
-   _getAttributes(elementAttribute) {
+   _getAttributes() {
       const attributes = [];
       let abort = false;
       let lastSpace = this._cursor.getSpace();
-      let name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+      let name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
 
       while (name && !abort) {
          this._cursor.getSpace();    // optional
@@ -903,25 +901,24 @@ class XmlTokenStream extends XmlStream {
          let value = [];
 
          this._assert(lastSpace, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ], name.startOffset);
-         this._assert(name.couldBeName || !elementAttribute, SEID.ATTRIBUTE_INVALID_NAME, [ name.text ]);
+         this._assert(name.couldBeName, SEID.ATTRIBUTE_INVALID_NAME, [ name.text ]);
          this._assert(equal, SEID.ATTRIBUTE_NO_EQUAL, [ name.text ]);
 
          if (gotQuote) {
             this._cursor.getChar();     // consume the quote
             ({value, abort} = this._getQuotedValue(quote, {
-               attributeName: name.text,
-               isElementAttribute: elementAttribute
+               attributeName: name.text
             }));
          } else if (!equal) {
             this._report(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
-            attributes.push(makePair(name, value, undefined, elementAttribute));
+            attributes.push(makePair(name, value, undefined));
 
-            name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+            name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
             continue;   // without a quote, we assume there is no value and treat any following as a name
          } else {
-            let terminators = elementAttribute ? ATTRIBUTE_VALUE_TERMINATORS : XMLDECL_VALUE_TERMINATORS;
+            let terminators = ATTRIBUTE_VALUE_TERMINATORS;
 
-            if (elementAttribute && this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+            if (this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
                terminators = ATTRIBUTE_VALUE_TERMINATORS_LAX;
             }
 
@@ -938,20 +935,18 @@ class XmlTokenStream extends XmlStream {
 
                if (terminator && terminator.text === '<') {
                   this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ name.text ]);
-                  attributes.push(makePair(name, value, undefined, elementAttribute));
+                  attributes.push(makePair(name, value, undefined));
                   break;   // Stop processing of attributes
                }
             }
          }
 
-         if (elementAttribute) {
-            doCDataNormalization(value);
-         }
-         attributes.push(makePair(name, value, quote, elementAttribute));
+         doCDataNormalization(value);
+         attributes.push(makePair(name, value, quote));
 
          if (!abort) {
             lastSpace = this._cursor.getSpace();
-            name = this._cursor.getWord(elementAttribute ? ATTRIBUTE_NAME_TERMINATORS : XMLDECL_NAME_TERMINATORS);
+            name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
          }
       }
 
@@ -966,7 +961,6 @@ class XmlTokenStream extends XmlStream {
     PARAMS
     quoteChunk is the TextChunk containing the quote that opened the value
     options is an Object containing these values:
-      isElementAttribute: true if this is an element attribute's value
       nameChunk: If this is an element or xmldecl attribute value, this
                  the name of the attribute must be provided here.
 
@@ -984,14 +978,10 @@ class XmlTokenStream extends XmlStream {
          abort: false
       };
       let done = false;
-      const terminators = [ quoteChunk.text ];
+      const terminators = [ quoteChunk.text, '&' ];
 
-      if (options.isElementAttribute) {
-         terminators.push('&');
-
-         if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
-            terminators.push('<');
-         }
+      if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
+         terminators.push('<');
       }
 
       while (!done) {

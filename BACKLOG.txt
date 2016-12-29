@@ -94,9 +94,9 @@ If we have time, do added detail:
 CLEANUP
 - continue to pull out all parsing logic
 	- next is xmldecl!
-		- Need to walk through parsing and probably regularize what is being returned.
-			- Note that getValue is quite different for an attribute than for xmldecl
-			- 
+		- Comment -misc for the xml decl
+		- separate the parsing from the validation from the token building in xmltokenstream
+		- think about merging getPI and parsing the xml token so it does not take two calls.
 	- Then space and comment validation should be extracted
 	- cdata, content, elements, references
 - need to add other error types
