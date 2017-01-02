@@ -95,7 +95,7 @@ describe('XmlEntityManager', () => {
          expect(extractEntityText(manager, 'amp').chunk.text).toBe('one');
       });
 
-      it('adds an external so it overrides the default', () => {
+      it('adds an internal so it overrides the default', () => {
          manager.addEntity(new tokens.EntityDeclaration('amp', 'one', undefined, undefined, TEST_CHUNKS),
             XmlEntityManager.INTERNAL_ENTITY);
 

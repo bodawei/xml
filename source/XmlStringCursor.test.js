@@ -161,14 +161,6 @@ describe('XmlStringCursor', () => {
             expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL2');
          });
 
-         it('identifies a UCS-4 big endian encoding', () => {
-            spyOn(XmlStringCursor.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new XmlStringCursor('\u0000\u0000\u0000\u003C');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
-         });
-
          it('identifies a UTF-16 big endian encoding', () => {
             const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
 
@@ -375,7 +367,7 @@ describe('XmlStringCursor', () => {
        * be legit UTF-8. Note: this is a malformed XML document because 0x00 is
        * not allowed. However, That's beyond the scope of the cursor to know.
        */
-      it('decodes as UTF-8 if specified as UTF-8', () => {
+      it('decodes as UTF-16 if specified as UTF-8', () => {
          const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
 
          expect(c.getChar().text).toEqual('<');
@@ -627,7 +619,7 @@ describe('XmlStringCursor', () => {
          }
       });
 
-      it('adds the index for all invalid characters between D7FE and E001 in 1.0', () => {
+      it('adds the index for all invalid characters between D7FE and E001 in 1.1/2', () => {
          for (let index = 0xFFFD; index <= 0xFFFF; index++) {
             const c = new XmlStringCursor(String.fromCharCode(index),
                new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2));
@@ -723,13 +715,6 @@ describe('XmlStringCursor', () => {
       it('treats a \\u2028 like a \\n if this is 1.1', () => {
          const c = new XmlStringCursor(' \u2028hi', entityMetaData1dot1);
          const expected = new WithSpaceChunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a CR LF like a LF', () => {
-         const c = new XmlStringCursor(' \r\nhi');
-         const expected = new WithSpaceChunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
 
          expect(c.getSpace()).toEqual(expected);
       });

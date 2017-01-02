@@ -557,7 +557,7 @@ describe('XmlTokenStream', () => {
             expectTokenType(s, tokens.Space);
          });
 
-         it('can appear at the start of an external entity', () => {
+         it('can appear at the start of an external entity after the Text Declaration', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?> \t ');
             ignoreToken(s, tokens.TextDeclaration);
 

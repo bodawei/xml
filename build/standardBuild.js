@@ -213,6 +213,7 @@ module.exports = function standardBuild(grunt) {
    grunt.registerTask('default', [
       'quietBuild',
       'clean',
+      'mkout',
       'derivelocale',
       'test',
       'jasmine_node:dist',
@@ -229,6 +230,10 @@ module.exports = function standardBuild(grunt) {
 
    grunt.registerTask('quietBuild', 'Report on tests', () => {
       require('./quiet-grunt-mod.js');
+   });
+
+   grunt.registerTask('mkout', 'Make the output directory', () => {
+      grunt.file.mkdir(OUT_DIR);
    });
 
    grunt.registerTask('_testreport', 'Report on tests', () => {

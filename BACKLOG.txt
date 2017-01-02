@@ -94,8 +94,8 @@ If we have time, do added detail:
 CLEANUP
 - continue to pull out all parsing logic
 	- next is xmldecl!
-		- Comment -misc for the xml decl
 		- separate the parsing from the validation from the token building in xmltokenstream
+		- Comment -misc for the xml decl (in particular, return structure)
 		- think about merging getPI and parsing the xml token so it does not take two calls.
 	- Then space and comment validation should be extracted
 	- cdata, content, elements, references
@@ -111,10 +111,13 @@ CLEANUP
 
 BUILD
 - We are getting errors in the output again
+	- The number of errors seems to reduce if we turn off the djb reporter.
 126: Enhancements to the reporting
-- test reporter should report per browser
-- test reporter should complain on duplicate test names!
-- test reporter should dump all tests plus summary
+√ test reporter should report per browser
+√ test reporter should complain on duplicate test names!
+√ test reporter should dump all tests plus summary
+- test json reporter and turn into a module. Check it in for now
+- Change test reporter to look at new json files per browser
 - can write out all tests into output rather than dots if you don't want to see them
 - fork quiet-grunt
 	- silent by default
@@ -133,6 +136,7 @@ BUILD
 - coverage reporter should have a percent cutoff
 - coverage reporter should be able to exclude some files: Have crude.
 - name reporter better
+
 149 Test deriveLocale
 155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
 156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
