@@ -1,13 +1,10 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
 /* eslint-env jasmine */
 
-const EntityLocation = require('../shared/EntityLocation.js');
-const Offset = require('../shared/Offset.js');
 const SyntaxError = require('./SyntaxError.js');
-const TextChunk = require('../shared/TextChunk.js');
 
 describe('SyntaxError', () => {
 
@@ -33,12 +30,6 @@ describe('SyntaxError', () => {
          }).toThrowError('The Error id "BOGUS" is not a legal id.');
       });
 
-      it('throws an error if the code is unknown', () => {
-         expect(() => {
-            new SyntaxError();
-         }).toThrowError('No error id passed to SyntaxError.');
-      });
-
       it('sets the id', () => {
          expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE).id)
             .toEqual(SyntaxError.ID.XMLDECL_NO_CLOSE);
@@ -52,106 +43,6 @@ describe('SyntaxError', () => {
       it('sets the message', () => {
          expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE).message)
             .toEqual('Missing closing "?>" in an XML or Text Declaration.');
-      });
-
-      // This is mostly tested in stringbundle. just making sure basic case works
-      it('fills in values in the message', () => {
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_ATTR_INVALID_CASE, [ 'one', 'ONE' ]).message)
-            .toEqual('"one" must be lower case. Found "ONE".');
-      });
-
-      it('sets the place', () => {
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], new Offset(0, 1, 2)).place)
-            .toEqual(new Offset(0, 1, 2));
-      });
-
-      it('sets the place even if a TextChunk is passed', () => {
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [],
-            new TextChunk.PlainChunk('foo', new Offset(0, 1, 2), new Offset(0, 3, 4))).place)
-            .toEqual(new Offset(0, 3, 4));
-      });
-
-      it('clones the place', () => {
-         const place = new Offset(0, 1, 2);
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place).place)
-            .not.toBe(place);
-      });
-
-      it('sets the place even when params omitted', () => {
-         const place = new Offset(0, 1, 2);
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, place).place)
-            .not.toBe(place);
-      });
-
-      it('sets the context with a location', () => {
-         const contextOffset = new Offset(0, 1, 2);
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], new Offset(0, 1, 2), contextOffset,
-            new EntityLocation('system', 'public')).context)
-            .toEqual([ {
-               offset: contextOffset,
-               location: new EntityLocation('system', 'public')
-            } ]);
-      });
-
-      it('wraps the context if just an Offset is passed', () => {
-         const place = new Offset(0, 1, 2);
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place, place).context)
-            .toEqual([ {
-               offset: place,
-               location: undefined
-            } ]);
-      });
-
-      it('wraps the context if just an TextChunk is passed', () => {
-         const place = new Offset(0, 1, 2);
-         const textChunk = new TextChunk.PlainChunk('foo', place, new Offset(0, 3, 4));
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place, textChunk).context)
-            .toEqual([ {
-               offset: place,
-               location: undefined
-            } ]);
-      });
-
-      it('clones the context', () => {
-         const place = new Offset(0, 1, 2);
-         const context = [ place ];
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, [], place, context).context[0])
-            .not.toBe(place);
-      });
-
-      it('sets the context even when params omitted', () => {
-         const place = new Offset(0, 1, 2);
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE, place, place).context)
-            .toEqual([ {
-               offset: place,
-               location: undefined
-            } ]);
-      });
-   });
-
-   describe('addLocale', () => {
-
-      it('adds a locale', () => {
-         const locale = {};
-         locale[SyntaxError.ID.XMLDECL_NO_CLOSE] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
-         SyntaxError.setPreferredLocale('de');
-         SyntaxError.addLocale('de', locale);
-
-         expect(new SyntaxError(SyntaxError.ID.XMLDECL_NO_CLOSE).message)
-            .toEqual('Fehlende Schließung "?>" In einer XML- oder Textdeklaration.');
-      });
-
-   });
-
-   describe('removeLocale()', () => {
-
-      it('returns the remove locale', () => {
-         const locale = {};
-         locale[SyntaxError.ID.XMLDECL_NO_CLOSE] = 'Fehlende Schließung "?>" In einer XML- oder Textdeklaration.';
-         SyntaxError.setPreferredLocale('de');
-         SyntaxError.addLocale('de', locale);
-
-         expect(SyntaxError.removeLocale('de')).toEqual(locale);
       });
 
    });
