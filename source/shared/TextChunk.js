@@ -15,12 +15,6 @@ class PlainChunk {
 }
 
 class WordChunk extends PlainChunk {
-
-   constructor(text, couldBeName, couldBeNmToken, startOffset, endOffset, entityLocation) {
-      super(text, startOffset, endOffset, entityLocation);
-      this.couldBeName = couldBeName;
-      this.couldBeNmToken = couldBeNmToken;
-   }
 }
 
 class WithSpaceChunk extends PlainChunk {

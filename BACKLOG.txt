@@ -56,45 +56,72 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 	=== New plan
 		√ Refactor all logic into XmlError
 
-Later
-	- Build build code to auto generate the other errors
-
-
 Overall proposal:
-M - Pull all character checking out of string, and put in validators
+Pull all character checking out of cursor, and put in validators
 	- cost of doing these scans is unknown.
 	- 1 call getWord 1million times as now
 	- 2 call it 1million times with no character flagging
 	- 3 call it 1million times and then do validation via regex in caller
 	=> If cost of 3 and 1 is the same, this is probably better given our plan to turn this off, and makes cursor smarter.
 		- check cost of reworked getWord
-	-- not part of this sprint
+		-- It's notably faster to be doing this in the validate, rather than in the cursor.
 	=> if 1 and 3 are same, then we should move invalid and discouraged characters to regex's as well and in validation. Then we just need the generic parsing solution (167).  This is at least a M since we need to build the error reporting.
 	=> May result in getWord being reworked (see 170)
+----------------
+// 100,000 times
+---> With full cursor work
+LOG: 5122
+LOG: 5293
+LOG: 4834
+LOG: 5327
+LOG: 5383
+LOG: 5073
+LOG: 5405
+---
+With check removed in cursor
+LOG: 4493
+LOG: 4626
+LOG: 4620
+=========
+With check removed in cursor and big regex in XmlTokenSteram
+LOG: 4754
+LOG: 4655
+LOG: 4644
+LOG: 4587
+LOG: 4548
+LOG: 4564
+LOG: 4413
+--- Conclusion
 
-
-?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
-	- What would the performance be?
-	- Even more to the point, could we extract this entirely out of the string cursor and put into the validation
-<invalid chars 1m 3s>
-S 167 report errors: suggest having routine which goes over parsing result recursively and reports generically
-	Error should say something like "at position X the character "0x0" was found.
-S 168 getToTerminator should check with a regex if there is any bad char
-	if so, then go across the whole thing in more detail to collect the bad indexes
-S 169 getMatch and getToTerminator add in comments that this doesn't check for invalid chars. Do the right thing
-M 170 getWord
+x S 171 new error type: Warning  extends XmlError
+x M 170 getWord
 	Try out a different routine which returns  the most specific value
 		nameStart, nameChar, Char, discouragedChar, invalidChar
 	use this to set flags
 	- alternately, extract to terminator, then apply several regex
+x S 168 getToTerminator should check with a regex if there is any bad char
+	if so, then go across the whole thing in more detail to collect the bad indexes
+x S 169 getMatch and getToTerminator add in comments that this doesn't check for invalid chars. Do the right thing
+	--- these no longer check for any kind of chars
 
-<discouraged chars 1m 1s>
-S 171 new error type: Warning  extends XmlError
-M 172 add discouraged characters to tokens and error reporting
+[2.25hr]
+M - Pull all character checking out of cursor, and put in validators
+	√ ?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
+	- biggest impact is going to be the testing of StringCursor.
+	- We probably need to move a bunch of those tests to some prototypical place in the testing in, say, dtd testing.
+	- remove checks in cursor.
+
+- Build build code to auto generate the other errors
+- Note sure need WordChunk
+S getToTerminator and getWord have a lot of commonality. Could combine. Probably clobber _makeTerminatorCheckFunction in the process
+	- it only needs to return the end index.
+M 167 report errors: suggest having routine which goes over parsing result recursively and reports generically
+	Error should say something like "at position X the character "0x0" was found.
+S 172 add discouraged characters to tokens and error reporting
 
 	
 
--- next: 175
+-- next: 177
 =============================================
 CLEANUP
 - continue to pull out all parsing logic

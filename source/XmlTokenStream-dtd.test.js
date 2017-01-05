@@ -1544,7 +1544,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('reports a syntax error if notation values are not names', () => {
          expectSyntaxError('<!ATTLIST e attrName NOTATION ( $bad ) #REQUIRED >',
             SyntaxError.ID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID,
-            'The name in the attribute declaration for "e" must match the syntax for names. Found "$bad".');
+            'The name in the attribute declaration must match the syntax for names. Found "$bad".');
       });
 
       it('reports a syntax error if notation has no space between NOTATION and list', () => {
@@ -1812,7 +1812,7 @@ describe('XmlTokenStream (dtd)', () => {
          it('reports a syntax error if the enumeration values is not an NmToken', () => {
             expectSyntaxError('<!ATTLIST e attrName ( $bad ) #REQUIRED>',
                SyntaxError.ID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID,
-               'The value in the enumeration in the attribute declaration for "e" must match the syntax for ' +
+               'The value in the enumeration in the attribute declaration must match the syntax for ' +
                   'nmtokens. Found "$bad".');
          });
 

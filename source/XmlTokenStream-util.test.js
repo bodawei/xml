@@ -146,7 +146,7 @@ function expectTokenType(stream, tokenType) {
    if (typeof tokenType === 'string') {
       expect(t.type).toEqual(tokenType);
    } else {
-      const result = (t instanceof tokenType) ? tokenType.name : 'Unexpected Type in expectTokenType()';
+      const result = (t instanceof tokenType) ? tokenType.name : 'Unexpected Type in expectTokenType(). Found: ' + t;
       expect(result).toEqual(tokenType.name);
    }
 }
