@@ -87,6 +87,7 @@ module.exports = (grunt) => {
       const codesObject = propertiesParser.parse(codes);
       const jsonBase = {};
       const jsonCode = {};
+      const names = {};
 
       noDupValues(codesObject, CODE_FILE);
       keysMatch(baseObject, BASE_FILE, codesObject, CODE_FILE);
@@ -97,6 +98,7 @@ module.exports = (grunt) => {
          if (value !== 'OBSOLETE') {
             jsonBase[key] = value;
             jsonCode[key] = parseInt(codesObject[key], 10);
+            names[key] = key;
          }
       }
 
@@ -108,6 +110,19 @@ module.exports = (grunt) => {
          }
       }
 
+      //const fileContents = '/* Copyright ® 2016-2017 by David John Burrowes.
+      // All rights reserved. */\n' +
+      //   '\'use strict\';\n' +
+      //   'const StringBundle = require(\'../shared/StringBundle.js\');\n' +
+      //   'const XmlError = require(\'../error/XmlError.js\');\n' +
+      //   'class ' + setName + ' extends XmlError {}\n' +
+      //   setName + '.ID = ' + JSON.stringify(names, undefined, 3) + ';\n' +
+      //   setName + '.CODE = ' + JSON.stringify(jsonCode, undefined, 3) + ';\n' +
+      //   setName + '.STRING = new StringBundle(' +
+      // JSON.stringify({ base: jsonBase }, undefined, 3) + ');\n' +
+      //   'module.exports = ' + setName + ';\n';
+      //
+      //fs.writeFileSync(destDir + '/' + setName + '.js', fileContents);
       fs.writeFileSync(destDir + '/' + setName + '.json', JSON.stringify({ base: jsonBase }, undefined, 2));
       fs.writeFileSync(destDir + '/' + setName + '-code.json', JSON.stringify(jsonCode, undefined, 2));
    }

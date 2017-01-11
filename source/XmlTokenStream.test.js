@@ -493,263 +493,6 @@ describe('XmlTokenStream', () => {
 
    });
 
-   describe('parsing whitespace', () => {
-
-      it('retrieves a token of type SPACE', () => {
-         const s = makeStrictStream('<?xml version="1.0"?> \n  ');
-         ignoreToken(s, tokens.XmlDeclaration);
-
-         expectTokenType(s, tokens.Space);
-      });
-
-      it('retrieves a token of type SPACE in a DTD context', () => {
-         const s = makeStrictExternalSubsetStream(' \n  ');
-
-         expectTokenType(s, tokens.Space);
-      });
-
-      it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalEntityStream(' \t ');
-
-         const t = s.getNext();
-         expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.WithSpaceChunk(' \t ', ' \t ')
-         ]));
-      });
-
-      describe('state transitions', () => {
-
-         it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
-               ' \t ',
-               SyntaxError.ID.SPACE_INVALID_CONTEXT,
-               'The XML Declaration must appear before any content in the document entity.',
-               new Offset(0, 0, 0),
-               [ {
-                  offset: new Offset(0, 0, 0),
-                  location: new EntityLocation()
-               } ]);
-         });
-
-         it('can appear at the start of the external subset', () => {
-            const s = makeStrictExternalSubsetStream(' \t ');
-
-            expectTokenType(s, tokens.Space);
-         });
-
-         it('can appear at the start of an external entity', () => {
-            const s = makeStrictExternalEntityStream(' \t ');
-
-            expectTokenType(s, tokens.Space);
-         });
-
-         it('can appear after the XML Declaration in a document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0"?> \t ');
-            ignoreToken(s, tokens.XmlDeclaration);
-
-            expectTokenType(s, tokens.Space);
-         });
-
-         it('can appear after the Text Declaration in the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?> \t ');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expectTokenType(s, tokens.Space);
-         });
-
-         it('can appear at the start of an external entity after the Text Declaration', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?> \t ');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expectTokenType(s, tokens.Space);
-         });
-
-      });
-
-   });
-
-   describe('parsing CharData', () => {
-
-      it('retrieves a token of type CHARDATA', () => {
-         const s = makeStrictExternalEntityStream('wow zowie ');
-
-         expectTokenType(s, tokens.CharData);
-      });
-
-      it('retrieves a token with the specified data', () => {
-         const s = makeStrictExternalEntityStream('wow zowie ');
-
-         const t = s.getNext();
-         expect(t.text).toEqual('wow zowie ');
-      });
-
-      it('retrieves a token with the specified data up to the markup', () => {
-         const s = makeStrictExternalEntityStream('wow <zowie> ');
-
-         const t = s.getNext();
-         expect(t.text).toEqual('wow ');
-         expectTokenType(s, tokens.ElementStart);
-      });
-
-      it('retrieves a token with the specified data up to a reference', () => {
-         const s = makeStrictExternalEntityStream('wow &amp; ');
-
-         const t = s.getNext();
-         expect(t.text).toEqual('wow ');
-      });
-
-      it('throws an error token if there is a ]]> in the CharData', () => {
-         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
-            'testing testing ]]> testing',
-            SyntaxError.ID.CHARDATA_INVALID_TEXT,
-            '"]]>" must not appear in in character data.');
-      });
-
-      it('includes the "]]>" as char data in lax mode', () => {
-         const s = makeLaxExternalEntityStream('testing testing ]]>testing');
-         ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
-
-         expect(s.getNext().text).toEqual('testing testing ');
-         expect(s.getNext().text).toEqual(']]>');
-         expect(s.getNext().text).toEqual('testing');
-      });
-
-      it('includes the "]]>" as char data in lax mode, even when there are no preceeding data', () => {
-         const s = makeLaxExternalEntityStream(']]>testing');
-         ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
-
-         expect(s.getNext().text).toEqual(']]>');
-         expect(s.getNext().text).toEqual('testing');
-      });
-
-      it('can read CharData not at the beginning of the cursor', () => {
-         const s = makeStrictStream('<?xml version="1.0"?><start>testing testing </start>');
-         ignoreToken(s, tokens.XmlDeclaration);
-         ignoreToken(s, tokens.ElementStart);
-
-         const t = s.getNext();
-         expect(t.text).toEqual('testing testing ');
-      });
-
-      it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalEntityStream('wow zowie ');
-
-         const t = s.getNext();
-         expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.WithSpaceChunk('wow zowie ', 'wow zowie ')
-         ]));
-      });
-
-      describe('state transitions', () => {
-
-         it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
-               'xxx',
-               SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
-               'CharData must not be outside the content of the document entity. Found "xxx".',
-               new Offset(0, 0, 0),
-               [ {
-                  offset: new Offset(0, 0, 0),
-                  location: new EntityLocation()
-               } ]);
-         });
-
-         it('throws an error if at the start of the external subset', () => {
-            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
-               'xxx',
-               SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT,
-               'CharData must not be in the external subset. Found "xxx".',
-               new Offset(0, 0, 0),
-               [ {
-                  offset: new Offset(0, 0, 0),
-                  location: new EntityLocation()
-               } ]);
-         });
-
-         it('can appear at the start of an external entity', () => {
-            const s = makeStrictExternalEntityStream('xxx');
-
-            expectTokenType(s, tokens.CharData);
-         });
-
-         it('transitions to after Text Declaration if appears at the start of an external entity', () => {
-            const s = makeStrictExternalEntityStream('xxx<?xml encoding="usascii"?>');
-            ignoreToken(s, tokens.CharData);
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('An XML or Text Declaration must be the first thing in the entity.');
-         });
-
-         it('throws an error if after the XML Declaration in the document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0"?>xxx');
-            ignoreToken(s, tokens.XmlDeclaration);
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('CharData must not be outside the content of the document entity. Found "xxx".');
-         });
-
-         it('can not appear after the Text Declaration in the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?>xxx');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expect(() => {
-               s.getNext();
-            }).toThrowError('CharData must not be in the external subset. Found "xxx".');
-         });
-
-         it('can appear after the Text Declaration of an external entity', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>xxx');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expectTokenType(s, tokens.CharData);
-         });
-
-         it('can appear within elements in the document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?><one>xxx</one>');
-            ignoreToken(s, tokens.XmlDeclaration);
-            ignoreToken(s, tokens.ElementStart);
-
-            expectTokenType(s, tokens.CharData);
-         });
-
-         it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('xx<?xml encoding="UTF-8"?>');
-            ignoreToken(s, tokens.CharData);
-
-            expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
-               'An XML or Text Declaration must be the first thing in the entity.');
-         });
-
-         // Whitebox: don't check all the other possible cases, aside from below, since the report logic is common.
-         it('throws an error if found along with "]]>" at the start of the document entity', () => {
-            const s = makeLaxStream('xxx]]>');
-            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
-
-            expectError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
-               'CharData must not be outside the content of the document entity. Found "xxx".');
-            ignoreToken(s, tokens.CharData);
-
-            expectError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
-               'CharData must not be outside the content of the document entity. Found "]]>".');
-            ignoreToken(s, tokens.CharData);
-         });
-
-         it('retrieves the expected chunks when it finds "]]>"', () => {
-            const s = makeLaxExternalEntityStream('wow]]>');
-
-            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
-            ignoreToken(s, tokens.CharData);
-            const t = s.getNext();
-            expect(t.chunks).toEqual(makeStringTokenArray([
-               new TextChunk.PlainChunk(']]>', ']]>')
-            ], 3));
-         });
-      });
-
-   });
-
    describe('parsing character reference', () => {
 
       it('retrieves a token of type CharRef', () => {
@@ -977,7 +720,7 @@ describe('XmlTokenStream', () => {
          let t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('&'),
-            new TextChunk.WordChunk('lt', true, true),
+            new TextChunk.PlainChunk('lt'),
             new TextChunk.PlainChunk(';')
          ]));
 
@@ -1156,7 +899,7 @@ describe('XmlTokenStream', () => {
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('['),
-            new TextChunk.WordChunk('CDATA', true, true),
+            new TextChunk.PlainChunk('CDATA'),
             new TextChunk.PlainChunk('['),
             new TextChunk.WithSpaceChunk(' one ', ' one '),
             new TextChunk.PlainChunk(']]>')
@@ -1828,7 +1571,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
-            new TextChunk.WordChunk('one', true, true),
+            new TextChunk.PlainChunk('one'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('>')
          ]));
@@ -2019,7 +1762,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<'),
-            new TextChunk.WordChunk('one', true, true),
+            new TextChunk.PlainChunk('one'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('/>')
          ]));
@@ -2217,7 +1960,7 @@ describe('XmlTokenStream', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('</'),
-            new TextChunk.WordChunk('one', true, true),
+            new TextChunk.PlainChunk('one'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('>')
          ], 5));

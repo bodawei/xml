@@ -14,9 +14,6 @@ class PlainChunk {
 
 }
 
-class WordChunk extends PlainChunk {
-}
-
 class WithSpaceChunk extends PlainChunk {
 
    constructor(text, originalText, startOffset, endOffset, entityLocation) {
@@ -35,7 +32,6 @@ class DigitChunk extends PlainChunk {
 
 module.exports = {
    PlainChunk: PlainChunk,
-   WordChunk: WordChunk,
    WithSpaceChunk: WithSpaceChunk,
    DigitChunk: DigitChunk,
    TYPE: {

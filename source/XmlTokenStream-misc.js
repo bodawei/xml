@@ -35,6 +35,7 @@ class XmlTokenStreamMisc {
     SYNTAX
     [15] Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
    \**********************************************************************/
+
    parseComment(cursor, startChunk) {
       const results = {};
       const commentContent = cursor.getToTerminator([ '-->' ]);
@@ -98,6 +99,15 @@ class XmlTokenStreamMisc {
    /**********************************************************************\
     parseXmlDecl parses an XML Declaration which has the following format:
 
+    RETURN
+      {
+         startChunk: The <? chunk
+         postTargetSpace: The space after the 'xml'
+         params: an params defined here
+         closeChunk: The closing ?>, or undefined if not found
+      }
+
+    SYNTAX
       [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
       [77] TextDecl     ::= '<?xml' VersionInfo? EncodingDecl S? '?>'
       [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
@@ -116,18 +126,44 @@ class XmlTokenStreamMisc {
 
       results.startChunk = startChunk;
       results.postTargetSpace = cursor.getSpace();
-      results.params = this._getAttributes(cursor);
+      results.params = this._getParams(cursor);
       results.closeChunk = cursor.getMatch('?>');
 
       return results;
    }
 
    /**********************************************************************\
-    Parses the attributes of an XML or Text Declaration.
+    Parses whitespace
+
+    RETURN
+      {
+         spaceChunk: The space
+      }
+   \**********************************************************************/
+   parseSpace(cursor) {
+      return {
+         spaceChunk: cursor.getSpace()
+      };
+   }
+
+   /**********************************************************************\
+    Parses the params of an XML or Text Declaration.
     Tolerates a missing = and value, or a missing value, or an unquoted
     value.
+
+    RETURN
+      [{
+         nameChunk: The name of the attribute. Never undefined
+         postNameSpaceChunk: Optional space after the name
+         equalChunk: The chunk representing the = after the name
+         postEqualSpaceChunk: Space after the =
+         quoteChunk: The chunk for the quote after the equal
+         valueChunk: Chunk of the value in the quotes. Note that this
+            may be present if a quote is not present.
+         trailingSpaceChunk: Any space after the closing quote or value
+      }]
    \**********************************************************************/
-   _getAttributes(cursor) {
+   _getParams(cursor) {
       const attributes = [];
       let attribute;
 

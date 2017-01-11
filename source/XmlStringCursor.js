@@ -421,25 +421,15 @@ class XmlStringCursor {
       this._assertValuesHaveNoSpaces(terminators);
 
       const startOffset = this._offset.clone();
-      const atTerminator = this._makeTerminatorCheckFunction(terminators, true);
-      let nextChar = this._source[this._offset.index];
 
-      if (!nextChar || atTerminator()) {
+      this._findToTerminator(terminators, true);
+
+      if (startOffset.index === this._offset.index) {
          return;
       }
 
-      let index = this._offset.index + 1;
-
-      while (nextChar && !atTerminator()) {
-         this._offset.index ++;
-         this._offset.column ++;
-
-         nextChar = this._source[index];
-         index++;
-      }
-
-      const rawString = this._source.substring(startOffset.index, index - 1);
-      return this._makeWordChunk(rawString, startOffset);
+      const rawString = this._source.substring(startOffset.index, this._offset.index);
+      return this._makePlainChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -624,30 +614,14 @@ class XmlStringCursor {
       if (!terminators || terminators.length === 0) {
          throw new Error('Must pass a non-empty array of terminators to getToTerminator().');
       }
-      this._assertValuesHaveNoSpaces(terminators);
-
-      const atTerminator = this._makeTerminatorCheckFunction(terminators, false);
       const startOffset = this._offset.clone();
-      let nextChar = this._source[this._offset.index];
-      let terminator;
+      const terminator = this._findToTerminator(terminators, false);
 
-      terminator = atTerminator();
-      if (!nextChar || terminator) {
+      if (startOffset.index === this._offset.index) {
          return {
             chunk: undefined,
             terminator: terminator
          };
-      }
-
-      let index = this._offset.index + 1;
-
-      while (nextChar && !terminator) {
-         this._offset.index ++;
-         this._offset.column ++;
-
-         nextChar = this._source[index];
-         terminator = atTerminator();
-         index++;
       }
 
       const originalString = this._source.substring(startOffset.index, this._offset.index);
@@ -739,21 +713,23 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
+     Searches from the current point in the source string either to the
+     first terminator in the terminators array, the first space, or
+     the end of the input.
+
      PARAM
      terminators: An array of strings that could be considered terminators
      checkSpace: true if we should also check for whitespace as terminator
 
      RETURN
-     A function that will return undefined if the cursor is not at one of
-     the specified terminators, and otherwise return the terminator that
-     the cursor is at.
-     A function is returned so that a pre-calculation to make the check
-     more efficient is done first.
+     The terminator found, or undefined.  This has the side effect of
+     incrementing the offset in the string.
    \**********************************************************************/
 
-   _makeTerminatorCheckFunction(terminators, checkSpace) {
+   _findToTerminator(terminators, checkSpace) {
+      this._assertValuesHaveNoSpaces(terminators);
+
       let maxLen = 0;
-      const self = this;
 
       for (let index = 0; index < terminators.length; index++) {
          const len = terminators[index].length;
@@ -762,19 +738,45 @@ class XmlStringCursor {
          }
       }
 
-      return function atTerminator() {
-         if (checkSpace && self._isSpace(self._source[self._offset.index])) {
-            return self._source[self._offset.index];
-         }
+      let nextChar = this._source[this._offset.index];
+      let terminator = this._atTerminator(terminators, maxLen, checkSpace);
 
-         const nextSeg = self._source.substr(self._offset.index, maxLen);
+      while (nextChar && !terminator) {
+         this._offset.index ++;
+         this._offset.column ++;
 
-         for (let index = 0; index < terminators.length; index++) {
-            if (nextSeg.indexOf(terminators[index]) === 0) {
-               return terminators[index];
-            }
+         nextChar = this._source[this._offset.index];
+         terminator = this._atTerminator(terminators, maxLen, checkSpace);
+      }
+
+      return terminator;
+   }
+
+   /**********************************************************************\
+     Identify whether we are at a terminator at the current position in
+     the input.
+
+     PARAM
+     terminators: An array of strings that could be considered terminators
+     maxLen: The length of the longest of the terminators
+     checkSpace: true if we should also check for whitespace as terminator
+
+     RETURN
+     The terminating string, from the current position, or undefined
+   \**********************************************************************/
+
+   _atTerminator(terminators, maxLen, checkSpace) {
+      if (checkSpace && this._isSpace(this._source[this._offset.index])) {
+         return this._source[this._offset.index];
+      }
+
+      const nextSeg = this._source.substr(this._offset.index, maxLen);
+
+      for (let index = 0; index < terminators.length; index++) {
+         if (nextSeg.indexOf(terminators[index]) === 0) {
+            return terminators[index];
          }
-      };
+      }
    }
 
    /**********************************************************************\
@@ -924,24 +926,6 @@ class XmlStringCursor {
 
    _makePlainChunk(data, startOffset) {
       const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(), this._entityMd.location);
-      this._chunks.push(chunk);
-      return chunk;
-   }
-
-   /**********************************************************************\
-     PARAM
-     data for a word chunk, whether it could be a name, and the start offset.
-     couldBeName boolean flag could this be a name (production 5)
-     couldBeNmToken boolean flag could this be a nmtoken (production 7)
-     startOffset Offset data structure where this word started
-
-     RETURN
-     a word chunk using the parameters and the current cursor offset.
-     Note this also pushes the chunk into the set of recent chunks.
-   \**********************************************************************/
-
-   _makeWordChunk(data, startOffset) {
-      const chunk = new TextChunk.WordChunk(data, startOffset, this._offset.clone(), this._entityMd.location);
       this._chunks.push(chunk);
       return chunk;
    }

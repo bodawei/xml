@@ -164,11 +164,11 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('DOCTYPE', true, true),
+            new TextChunk.PlainChunk('DOCTYPE'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('foo', true, true),
+            new TextChunk.PlainChunk('foo'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('PUBLIC', true, true),
+            new TextChunk.PlainChunk('PUBLIC'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('one', 'one'),
@@ -364,11 +364,11 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('NOTATION', true, true),
+            new TextChunk.PlainChunk('NOTATION'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('note', true, true),
+            new TextChunk.PlainChunk('note'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('PUBLIC', true, true),
+            new TextChunk.PlainChunk('PUBLIC'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('ONE', 'ONE'),
@@ -664,9 +664,9 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('ENTITY', true, true),
+            new TextChunk.PlainChunk('ENTITY'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('myEntity', true, true),
+            new TextChunk.PlainChunk('myEntity'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('entityValue', 'entityValue'),
@@ -827,21 +827,21 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('ENTITY', true, true),
+            new TextChunk.PlainChunk('ENTITY'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('%', false, false),
+            new TextChunk.PlainChunk('%'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('myPE', true, true),
+            new TextChunk.PlainChunk('myPE'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('SYSTEM', true, true),
+            new TextChunk.PlainChunk('SYSTEM'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('one', 'one'),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('NDATA', true, true),
+            new TextChunk.PlainChunk('NDATA'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('foo', true, true),
+            new TextChunk.PlainChunk('foo'),
             new TextChunk.PlainChunk('>')
          ], 21));
       });
@@ -913,11 +913,11 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('ELEMENT', true, true),
+            new TextChunk.PlainChunk('ELEMENT'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('elName', true, true),
+            new TextChunk.PlainChunk('elName'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('ANY', true, true),
+            new TextChunk.PlainChunk('ANY'),
             new TextChunk.PlainChunk('>')
          ], 21));
       });
@@ -1876,28 +1876,28 @@ describe('XmlTokenStream (dtd)', () => {
          const t = s.getNext();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
-            new TextChunk.WordChunk('ATTLIST', true, true),
+            new TextChunk.PlainChunk('ATTLIST'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('elName', true, true),
+            new TextChunk.PlainChunk('elName'),
             new TextChunk.WithSpaceChunk('  ', '  '),
-            new TextChunk.WordChunk('at1', true, true),
+            new TextChunk.PlainChunk('at1'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('CDATA', true, true),
+            new TextChunk.PlainChunk('CDATA'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('#REQUIRED', false, false),
+            new TextChunk.PlainChunk('#REQUIRED'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('at2', true, true),
+            new TextChunk.PlainChunk('at2'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('NOTATION', true, true),
+            new TextChunk.PlainChunk('NOTATION'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('('),
-            new TextChunk.WordChunk('foo', true, true),
+            new TextChunk.PlainChunk('foo'),
             new TextChunk.PlainChunk('|'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('bar', true, true),
+            new TextChunk.PlainChunk('bar'),
             new TextChunk.PlainChunk(')'),
             new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WordChunk('#FIXED', false, false),
+            new TextChunk.PlainChunk('#FIXED'),
             new TextChunk.WithSpaceChunk(' ', ' '),
             new TextChunk.PlainChunk('"'),
             new TextChunk.WithSpaceChunk('argh', 'argh'),

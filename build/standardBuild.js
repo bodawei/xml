@@ -185,7 +185,7 @@ module.exports = function standardBuild(grunt) {
       coveragereport:  {
          dist: {
             options: {
-               filesToSkip: [],
+               filesToSkip: [ ], // SOURCE_DIR + '/**/util.js', ...
                dir: OUT_DIR
             }
          }

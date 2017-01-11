@@ -70,7 +70,14 @@ function getSummaryPaths(dir, parentName, filesToSkip, totalsAccumulator) {
 function calculatePercentage(info) {
    var total = 0;
    for (var key in info.totals) {
+      if (info.covered[key] === 0) {
+         continue;
+      }
       total += (info.totals[key] / info.covered[key]);
+   }
+
+   if (total === 0) {
+      return 100;
    }
 
    return (total / 4) * 100;
@@ -96,7 +103,6 @@ module.exports = (grunt) => {
             newSkip.push(process.cwd() + '/' + filesToSkip[ctr].replace('./', ''));
          }
          filesToSkip = newSkip;
-         console.log(filesToSkip);
       }
 
       var totals = {};

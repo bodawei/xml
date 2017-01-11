@@ -380,7 +380,7 @@ class XmlTokenStreamDtd {
 
     RETURN
     An object with these properties:
-      list: An array of 0 or more WordChunks, each one representing a name
+      list: An array of 0 or more TextChunks, each one representing a name
          found in the ist
       missingCount: The number of names missing from the list (e.g. empty
          space between "|"'s)

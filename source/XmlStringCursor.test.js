@@ -10,7 +10,6 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const PlainChunk = require('./shared/TextChunk.js').PlainChunk;
-const WordChunk = require('./shared/TextChunk.js').WordChunk;
 const WithSpaceChunk = require('./shared/TextChunk.js').WithSpaceChunk;
 const DigitChunk = require('./shared/TextChunk.js').DigitChunk;
 const XmlStringCursor = require('./XmlStringCursor.js');
@@ -782,14 +781,14 @@ describe('XmlStringCursor', () => {
       it('returns the next space-terminated word', () => {
          const c = new XmlStringCursor('one two');
 
-         const expected = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
       it('returns the next word, even if a single letter', () => {
          const c = new XmlStringCursor('o two');
 
-         const expected = new WordChunk('o', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
+         const expected = new PlainChunk('o', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
@@ -798,20 +797,20 @@ describe('XmlStringCursor', () => {
          c.getWord([]);
          c.getSpace();
 
-         const expected = new WordChunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
+         const expected = new PlainChunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
          expect(c.getWord([])).toEqual(expected);
       });
 
       it('considers the word terminated at the specified terminator', () => {
          const c = new XmlStringCursor('oneX');
 
-         const expected = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getWord([ 'X' ])).toEqual(expected);
       });
 
       it('does not terminate at \\u0085 in 1.0', () => {
          const c = new XmlStringCursor('one\u0085X');
-         const expected = new WordChunk('one\u0085X', new Offset(0, 0, 0),
+         const expected = new PlainChunk('one\u0085X', new Offset(0, 0, 0),
             new Offset(0, 5, 5), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
@@ -819,7 +818,7 @@ describe('XmlStringCursor', () => {
 
       it('does not terminate at \\u2028 in 1.0', () => {
          const c = new XmlStringCursor('one\u2028X');
-         const expected = new WordChunk('one\u2028X', new Offset(0, 0, 0),
+         const expected = new PlainChunk('one\u2028X', new Offset(0, 0, 0),
             new Offset(0, 5, 5), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
@@ -827,14 +826,14 @@ describe('XmlStringCursor', () => {
 
       it('does terminate at \\u0085 in 1.1', () => {
          const c = new XmlStringCursor('one\u0085X', entityMetaData1dot1);
-         const expected = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
 
       it('does terminate at \\u2028 in 1.1', () => {
          const c = new XmlStringCursor('one\u2028X', entityMetaData1dot1);
-         const expected = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getWord([ ])).toEqual(expected);
       });
@@ -844,7 +843,7 @@ describe('XmlStringCursor', () => {
          const c2 = new XmlStringCursor('one?');
          const c3 = new XmlStringCursor('one/]]>');
 
-         const expected = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c1.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
          expect(c2.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
          expect(c3.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
@@ -856,7 +855,7 @@ describe('XmlStringCursor', () => {
          c.getChar();
          c.getSpace();
 
-         const expected = new WordChunk('two', new Offset(0, 5, 5), new Offset(0, 8, 8), defaultLoc);
+         const expected = new PlainChunk('two', new Offset(0, 5, 5), new Offset(0, 8, 8), defaultLoc);
          expect(c.getWord([ '>', 'X' ])).toEqual(expected);
       });
 
@@ -881,7 +880,7 @@ describe('XmlStringCursor', () => {
       it('adds the word chunk to the recent chunks', () => {
          const c = new XmlStringCursor('test ');
          c.getWord([]);
-         const expected = new WordChunk('test', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc);
+         const expected = new PlainChunk('test', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([ expected ]);
       });
@@ -1435,8 +1434,8 @@ describe('XmlStringCursor', () => {
          c.getSpace();
          c.getWord([]);
 
-         const firstWord = new WordChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         const secondWord = new WordChunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
+         const firstWord = new PlainChunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const secondWord = new PlainChunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([
             firstWord,
