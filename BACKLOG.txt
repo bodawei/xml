@@ -25,128 +25,18 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
 12/20 Sprint 24: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
  1/1  Sprint 25: 123sp [7XL 14M 11S]. Avg: 5/sprint = 25 sprints. ACTUAL: 6
+ 1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
+ 1/24 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
-√ S Note sure need WordChunk
-√ S getToTerminator and getWord have a lot of commonality. Could combine. Probably clobber _makeTerminatorCheckFunction in the process
-	- it only needs to return the end index.
-
-The following actually needs planning:
-
-M 167 report bad chars: suggest having routine which goes over parsing result recursively and reports generically
-	Error should say something like "at position X the character "0x0" was found.
-	- 1.1
-		only via escapes: [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
-		--> For each return type
-			check for 0x00 anywhere
-			check for any of the above in a non char ref
-	1.0/5
-		not even via escapes. only ok: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
-		- check for any of the non-above in literals
-		- check for any of the non-above in charrefs
-
-
-S 172 add discouraged characters to tokens and error reporting
-	1.1
-[#x1-#x8], [#xB-#xC], [#xE-#x1F], [#x7F-#x84], [#x86-#x9F],
- [#xFDD0-#xFDDF],  <--- note endchange
-[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
-[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
-[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
-[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
-[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
-[#x10FFFE-#x10FFFF].
-
-1.1/1 & 1.0/3 /4  (missing a bunch of x's)
-[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF],
-[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
-[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
-[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
-[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
-[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
-[#x10FFFE-#x10FFFF].
-
-1.0/5
-[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDEF],  <-- fixed via errata
-[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
-[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
-[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
-[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
-[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
-[#x10FFFE-#x10FFFF].
-
-1.0/2 and /1 has none
-		- check for these in literals or charrefs
-			- report warning
-
-√ Comments:
-	- just commentChunk
-
-For each below, test: (could do both in one test)
-	- get a bad error
-	- get a discouraged error
-One of these should do a more thorough test (probably revise comment to do these)
-	- bad in 1.1 and 1.0
-		- chars not accepted in either
-		- chars accepted in 1.0 but not 1.1
-	- discouraged
-		- the variations between FDDF and FDFEF
-		- high surrogates
-		- 1 and 2 wich have none
-	- test multiple errors in one input
-	- test all chars???
-
-
-PI
-√	targetChunk
-√	instructionChunk
-
-xml decl
-	params
-√		nameChunk
-√		valueChunk
-
-doctype
-√	nameChunk
-√	(external id values)
-
-√ notation
-	nameChunk
-	externalId
-√ entity
-	nameChunk
-	valueChunk
-	externalId
-	nDataName
-x element
-	elenentName
-	list (array)
-
-attrList
-	elementNameChunk
-	attributes
-		name
-		type
-		default *
-			#fixed 
-		value
-√ externalid
-	publicId
-		literalChunk
-	systemId
-		literalChunk
-
-And others as we extract them.
-	- prototypical test now in entity parsing reports invalid and discouraged characters in the NDATA value
+Cleanup - next extraction
+Build: Work on json reporter: Add failure on duplicate tests
 	
-
-BUG: Can't validate text of entity value, as there are no chunks there.
-BUG: need to deal with attrlist stuff when we do that
-
 -- next: 178
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- cdata, content, elements, references
+	- bangitem, content, elements, references
+	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
 - need to add other error types
 	- generalize stuff in XmlError and XmlWarning.
 		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem
@@ -199,8 +89,17 @@ BUILD
 
 
 PROJECT
---- technical debt [2M 1S]
-? Who reports the absence or presence of a bom as an error?
+--- technical debt [3M 2S]
+S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
+M 179 Consider doing a thorough test of the invalid and discouraged characters.
+	- Turn the comment testing into the prototypical case (entity NDATA value)
+	- make a whole separate set of tests just for this
+		- revisit error text
+		- check explicitly one character invalid, and multiple
+		- check all the characters in 1.1 and 1.0
+			Maybe just have a comment with all the characters in it, and get the right indices
+				- try with all 7 versions
+		- test all the discouraged characters in all 5 versions
 
 M 158 Make XmlTokenStream a node stream
 	- getNext
@@ -275,7 +174,7 @@ It seems like it would be best to do this in vertical slices, rather than the ho
 	- need special cursor
 - Build out better retrieval (could do this earlier depending on build support)
 
-
+Note: Don't forget to revisit all of the validateText as you rework the values.
 
 PHASE 1
 S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
@@ -1666,3 +1565,106 @@ Notes25
 -------
 Sprint went pretty well. the wildcards with respect to the unknown things turned out to happen quickly.
 And in the process of doing the pulling of character checking out of cursor, we really paved the way for getting rid of a lot of other things, so 168-170 just vanished in this process, nicely. Those don't really count, but they'd make it look like this sprint went exceedingly well.
+
+
+Sprint 26
+=========
+√ 177 S Note sure need WordChunk
+√ S getToTerminator and getWord have a lot of commonality. Could combine. Probably clobber _makeTerminatorCheckFunction in the process
+	- it only needs to return the end index.
+
+The following actually needs planning:
+
+M 167 report bad chars: suggest having routine which goes over parsing result recursively and reports generically
+	Error should say something like "at position X the character "0x0" was found.
+	- 1.1
+		only via escapes: [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+		--> For each return type
+			check for 0x00 anywhere
+			check for any of the above in a non char ref
+	1.0/5
+		not even via escapes. only ok: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+		- check for any of the non-above in literals
+		- check for any of the non-above in charrefs
+
+
+S 172 add discouraged characters to tokens and error reporting
+	1.1
+[#x1-#x8], [#xB-#xC], [#xE-#x1F], [#x7F-#x84], [#x86-#x9F],
+ [#xFDD0-#xFDDF],  <--- note endchange
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.1/1 & 1.0/3 /4  (missing a bunch of x's)
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF],
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/5
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDEF],  <-- fixed via errata
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/2 and /1 has none
+		- check for these in literals or charrefs
+			- report warning
+
+√ Comments:
+	- just commentChunk
+
+PI
+√	targetChunk
+√	instructionChunk
+
+xml decl
+	params
+√		nameChunk
+√		valueChunk
+
+doctype
+√	nameChunk
+√	(external id values)
+
+√ notation
+	nameChunk
+	externalId
+√ entity
+	nameChunk
+	valueChunk
+	externalId
+	nDataName
+x element
+	elenentName
+	list (array)
+
+attrList
+	elementNameChunk
+	attributes
+		name
+		type
+		default *
+			#fixed 
+		value
+√ externalid
+	publicId
+		literalChunk
+	systemId
+		literalChunk
+
+
+Notes26
+-------
+This was a very distracted sprint between job hunting and hazel arrival.  Nonetheless, we did some good cleanup with the tweaks to cursor embodied in 177, and laid the groundwork for dealing with illegal and discouraged characters.  This is only checking in the routines where we have separated validation, and ignores some of the entity and attribute declaration value stuff as those are scheduled to be revisited and are a bit of a mess.
+An open question I left is what kinds of testing should be being done for the full range of discouraged and illegal characters. Should every character be being tested?

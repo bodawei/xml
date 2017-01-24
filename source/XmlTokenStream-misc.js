@@ -133,6 +133,51 @@ class XmlTokenStreamMisc {
    }
 
    /**********************************************************************\
+    parseBracketItem() extracts the start of a bracket item ( <![name[ )
+
+    PARAM
+    cursor: The cursor to read from
+    startChunk: The Chunk representing the <!
+
+    RETURN
+      {
+         openChunk: The start chunk. <!
+         preTypeSpaceChunk: Space before the type
+         typeChunk: The name
+         typeString: The name or a blank
+         postTypeSpaceChunk: Space after the name
+         bracketTwoChunk: The second [
+         contentChunk: In the case of a CDATA section, the contents
+         closeChunk: The closing ]]>
+      }
+
+    SYNTAX
+      [18] CDSect  ::=  CDStart CData CDEnd
+      [19] CDStart ::=  '<![CDATA['
+      [20] CData   ::=  (Char* - (Char* ']]>' Char*))
+      [21] CDEnd   ::=  ']]>'
+   \**********************************************************************/
+
+   parseBracketItem(cursor, startChunk) {
+      const results = {};
+
+      results.openChunk = startChunk;
+      // no bracket right now
+      results.preTypeSpaceChunk = cursor.getSpace();
+      results.typeChunk = cursor.getWord([ '[' ]);
+      results.postTypeSpaceChunk = cursor.getSpace();
+      results.bracketTwoChunk = cursor.getMatch('[');
+      results.typeString = results.typeChunk ? results.typeChunk.text : '';
+
+      const contents = cursor.getToTerminator([ ']]>' ]);
+
+      results.contentChunk = contents.chunk;
+      results.closeChunk = cursor.getMatch(']]>');
+
+      return results;
+   }
+
+   /**********************************************************************\
     Parses whitespace
 
     RETURN

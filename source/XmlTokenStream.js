@@ -540,40 +540,12 @@ class XmlTokenStream extends XmlStream {
    }
 
    _getBracketItem(start) {
-      const preSpace = this._cursor.getSpace();
-      const bracketItemType = this._cursor.getWord([ '[' ]);
-      const postSpace = this._cursor.getSpace();
-      const secondBracket = this._cursor.getMatch('[');
+      const parsed = this._miscParser.parseBracketItem(this._cursor, start);
 
-      this._checkSyntax(bracketItemType, SEID.BRACKETITEM_NO_NAME);
-      this._checkSyntax(secondBracket, SEID.BRACKETITEM_NO_SECOND_BRACKET);
+      this._validateBracketItem(parsed, start);
 
-      /*
-       * Retrieve a CData section
-       *   [18] CDSect  ::=  CDStart CData CDEnd
-       *   [19] CDStart ::=  '<![CDATA['
-       *   [20] CData   ::=  (Char* - (Char* ']]>' Char*))
-       *   [21] CDEnd   ::=  ']]>'
-       */
-      if (bracketItemType && bracketItemType.text.toLocaleLowerCase() === 'cdata') {
-         this._checkSyntax(!preSpace, SEID.CDATA_XTRA_SPACE_BEFORE);
-         this._checkSyntax(bracketItemType.text === 'CDATA', SEID.CDATA_INVALID_CASE, [ bracketItemType.text ]);
-         this._checkSyntax(!postSpace, SEID.CDATA_XTRA_SPACE_AFTER);
-
-         const results = this._cursor.getToTerminator([ ']]>' ]);
-
-         if (!results.terminator) {
-            this._report(SEID.CDATA_NO_CLOSE);
-         } else {
-            this._cursor.getMatch(']]>');
-         }
-
-         this._checkContentState(start, SEID.CDATA_INVALID_DOC_CONTEXT, SEID.CDATA_INVALID_SUBSET_CONTEXT);
-
-         this._pushToken(new tokens.CData(results.chunk ? results.chunk.text : undefined,
-            this._cursor.getRecentChunks()));
-      } else if (bracketItemType) {
-         this._report(SEID.BRACKETITEM_UNKNOWN, [ bracketItemType.text ]);
+      if (parsed.typeString.toLocaleLowerCase() === 'cdata') {
+         this._pushToken(new tokens.CData(textOrUndef(parsed.contentChunk), this._cursor.getRecentChunks()));
       }
    }
 
@@ -1418,6 +1390,23 @@ class XmlTokenStream extends XmlStream {
          this._checkSyntax(parsedPI.closeChunk, SEID.PI_NO_CLOSE, parsedPI.instructionChunk || parsedPI.optSpaceChunk ||
             parsedPI.targetChunk || parsedPI.optSpaceChunk || start, start);
          this._checkPiAndCommentState(start, SEID.PI_INVALID_CONTEXT);
+      }
+   }
+
+   _validateBracketItem(parsed, start) {
+      this._checkSyntax(parsed.typeChunk, SEID.BRACKETITEM_NO_NAME);
+      this._checkSyntax(parsed.bracketTwoChunk, SEID.BRACKETITEM_NO_SECOND_BRACKET);
+
+      if (parsed.typeString.toLocaleLowerCase() === 'cdata') {
+         this._checkSyntax(!parsed.preTypeSpaceChunk, SEID.CDATA_XTRA_SPACE_BEFORE);
+         this._checkSyntax(parsed.typeString === 'CDATA', SEID.CDATA_INVALID_CASE, [ parsed.typeString ]);
+         this._checkSyntax(!parsed.postTypeSpaceChunk, SEID.CDATA_XTRA_SPACE_AFTER);
+
+         this._validateText(parsed.contentChunk);
+         this._checkSyntax(parsed.closeChunk, SEID.CDATA_NO_CLOSE);
+         this._checkContentState(start, SEID.CDATA_INVALID_DOC_CONTEXT, SEID.CDATA_INVALID_SUBSET_CONTEXT);
+      } else if (parsed.typeChunk) {
+         this._report(SEID.BRACKETITEM_UNKNOWN, [ parsed.typeString ]);
       }
    }
 
