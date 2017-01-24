@@ -34,7 +34,113 @@ The following actually needs planning:
 
 M 167 report bad chars: suggest having routine which goes over parsing result recursively and reports generically
 	Error should say something like "at position X the character "0x0" was found.
+	- 1.1
+		only via escapes: [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+		--> For each return type
+			check for 0x00 anywhere
+			check for any of the above in a non char ref
+	1.0/5
+		not even via escapes. only ok: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+		- check for any of the non-above in literals
+		- check for any of the non-above in charrefs
+
+
 S 172 add discouraged characters to tokens and error reporting
+	1.1
+[#x1-#x8], [#xB-#xC], [#xE-#x1F], [#x7F-#x84], [#x86-#x9F],
+ [#xFDD0-#xFDDF],  <--- note endchange
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.1/1 & 1.0/3 /4  (missing a bunch of x's)
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF],
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/5
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDEF],  <-- fixed via errata
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/2 and /1 has none
+		- check for these in literals or charrefs
+			- report warning
+
+√ Comments:
+	- just commentChunk
+
+For each below, test: (could do both in one test)
+	- get a bad error
+	- get a discouraged error
+One of these should do a more thorough test (probably revise comment to do these)
+	- bad in 1.1 and 1.0
+		- chars not accepted in either
+		- chars accepted in 1.0 but not 1.1
+	- discouraged
+		- the variations between FDDF and FDFEF
+		- high surrogates
+		- 1 and 2 wich have none
+	- test multiple errors in one input
+	- test all chars???
+
+
+PI
+√	targetChunk
+√	instructionChunk
+
+xml decl
+	params
+√		nameChunk
+√		valueChunk
+
+doctype
+√	nameChunk
+√	(external id values)
+
+√ notation
+	nameChunk
+	externalId
+√ entity
+	nameChunk
+	valueChunk
+	externalId
+	nDataName
+x element
+	elenentName
+	list (array)
+
+attrList
+	elementNameChunk
+	attributes
+		name
+		type
+		default *
+			#fixed 
+		value
+√ externalid
+	publicId
+		literalChunk
+	systemId
+		literalChunk
+
+And others as we extract them.
+	- prototypical test now in entity parsing reports invalid and discouraged characters in the NDATA value
+	
+
+BUG: Can't validate text of entity value, as there are no chunks there.
+BUG: need to deal with attrlist stuff when we do that
 
 -- next: 178
 =============================================

@@ -157,6 +157,14 @@ describe('XmlTokenStream (dtd)', () => {
          expect(t.text).toEqual('fish>');
       });
 
+      it('reports invalid characters in the name of the document type', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE f\u0000oo>');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, SyntaxError.ID.DOCTYPE_NAME_INVALID,
+            'The document type name must match the syntax for names. Found: "f\u0000oo".');
+      });
+
       it('retrieves the expected chunks', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "one" \'two\' [ ]>');
          ignoreToken(s, tokens.XmlDeclaration);
@@ -560,6 +568,16 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY paramEntityName PUBLIC "testentity">');
 
          expect(s.getNext().notationDataName).toBeUndefined();
+      });
+
+      it('reports invalid and discouraged characters in the NDATA value', () => {
+         const s = makeLaxExternalSubsetStream(
+            '<!ENTITY myEntity PUBLIC "testpublic" NDATA nd\u0001ata\uD83F\uDFFEvalue">');
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Illegal characters found in XML document at indexes: 46.');
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Discouraged characters found in XML document at indexes: 51.');
       });
 
       it('reports a syntax error if there is no name', () => {
@@ -2170,6 +2188,38 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!DOCTYPE testType PUBLIC [ ] >',
             SyntaxError.ID.EXTERNALID_NO_PUBLIC,
             'Missing public literal.');
+      });
+
+      it('reports invalid characters in the public literal', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "blah\u0000blah>');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, SyntaxError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found "\u0000".');
+      });
+
+      it('reports discouraged characters in the value of a public liternal', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "blah\uFDD0>');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, SyntaxError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            'The public literal has invalid charaters. Found "\uFDD0".');
+      });
+
+      it('reports bad characters in the value of a system literal', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "blah\u0000blah>');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Illegal characters found in XML document at indexes: 47.');
+      });
+
+      it('reports discouraged characters in the value of a system literal', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "blah\uFDD0>');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Discouraged characters found in XML document at indexes: 47.');
       });
 
    });

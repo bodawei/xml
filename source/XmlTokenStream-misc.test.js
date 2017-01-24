@@ -175,6 +175,74 @@ describe('XmlTokenStream (Misc)', () => {
                'An element must not be in the internal or external subset. Found "name".');
          });
 
+         describe('characters', () => {
+
+            it('reports an error if an invalid character appears in a comment', () => {
+               const s = makeLaxExternalSubsetStream('<!-- \u0001 -->');
+
+               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+                  'Illegal characters found in XML document at indexes: 5.');
+            });
+
+            it('accepts 0x7F in a comment in 1.0/5', () => {
+               const s = makeLaxExternalSubsetStream('<!-- \u007F -->');
+
+               expectTokenType(s, tokens.Comment);
+            });
+
+            it('reports an error if 0x7F found in a comment in 1.1/2', () => {
+               const s = makeLaxStream('<!--\u007F -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2));
+
+               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+                  'Illegal characters found in XML document at indexes: 4.');
+            });
+
+            it('reports a warning if a discouraged character appears in a comment in 1.0/5', () => {
+               const s = makeLaxExternalSubsetStream('<!-- \uFDD0 -->');
+
+               expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+                  'Discouraged characters found in XML document at indexes: 5.');
+            });
+
+            it('reports no warnings if an ordinarily discouraged character appears in a 1.0/1 comment', () => {
+               const s = makeLaxStream('<!-- \uFDD0 -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 1));
+
+               expectTokenType(s, tokens.Comment);
+            });
+
+            it('reports no warnings if an ordinarily discouraged character appears in a 1.0/2 comment', () => {
+               const s = makeLaxStream('<!-- \uFDD0 -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 2));
+
+               expectTokenType(s, tokens.Comment);
+            });
+
+            it('reports a warning if uFDEE character appears in a comment in 1.0/5', () => {
+               const s = makeLaxStream('<!-- \uFDEE -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+               expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+                  'Discouraged characters found in XML document at indexes: 5.');
+            });
+
+            it('reports no warning if uFDEE character appears in a comment in 1.0/4', () => {
+               const s = makeLaxStream('<!-- \uFDEE -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4));
+
+               expectTokenType(s, tokens.Comment);
+            });
+
+            it('reports no warning if uFDEE character appears in a comment in 1.0/3', () => {
+               const s = makeLaxStream('<!-- \uFDEE -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 3));
+
+               expectTokenType(s, tokens.Comment);
+            });
+
+         });
+
       });
 
    });
@@ -289,6 +357,27 @@ describe('XmlTokenStream (Misc)', () => {
             new TextChunk.WithSpaceChunk('blah blah', 'blah blah'),
             new TextChunk.PlainChunk('?>')
          ]));
+      });
+
+      it('reports invalid characters in the target', () => {
+         const s = makeLaxStream('<?f\uFDD1o\u0000o blah ?>');
+
+         expectError(s, SyntaxError.ID.PI_TARGET_NAME_INVALID,
+            'The target name must match the syntax for names. Found: "f\uFDD1o\u0000o".');
+      });
+
+      it('reports discouraged characters in the content', () => {
+         const s = makeLaxStream('<?foo b\u0001l\u0000ah ?>');
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Illegal characters found in XML document at indexes: 7, 9.');
+      });
+
+      it('reports discouraged characters in the content', () => {
+         const s = makeLaxStream('<?foo b\uFDD1l\uFDD2ah ?>');
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Discouraged characters found in XML document at indexes: 7, 9.');
       });
 
       describe('discuraged target', () => {
@@ -465,6 +554,33 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          expect(s.getNext().id).toEqual(SyntaxError.ID.XMLDECL_ENCODING_INVALID);
+      });
+
+      it('reports invalid characters in the name of an attribute', () => {
+         const s = makeLaxStream('<?xml version="1.1" enc\u0000oding="xxxx" ?>', {
+            ignoreDocumentEncoding: true
+         });
+
+         expectError(s, SyntaxError.ID.ATTRIBUTE_INVALID_NAME,
+            'The attribute name must match the syntax for names. Found: "enc\u0000oding".');
+      });
+
+      it('reports invalid characters in the value of an attribute', () => {
+         const s = makeLaxStream('<?xml version="1.1" encoding="xx\u0000xx" ?>', {
+            ignoreDocumentEncoding: true
+         });
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Illegal characters found in XML document at indexes: 32.');
+      });
+
+      it('reports discouraged characters in the value of an attribute', () => {
+         const s = makeLaxStream('<?xml version="1.1" encoding="xx\uFDD1lx" ?>', {
+            ignoreDocumentEncoding: true
+         });
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Discouraged characters found in XML document at indexes: 32.');
       });
 
       describe('"attribute" equal signs', () => {
