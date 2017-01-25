@@ -366,18 +366,13 @@ describe('XmlTokenStream (Misc)', () => {
             'The target name must match the syntax for names. Found: "f\uFDD1o\u0000o".');
       });
 
-      it('reports discouraged characters in the content', () => {
-         const s = makeLaxStream('<?foo b\u0001l\u0000ah ?>');
+      it('reports invalid and discouraged characters in the content', () => {
+         const s = makeLaxStream('<?foo b\u0001x\u0000x\uFDD1x\uFDD2xx ?>');
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
             'Illegal characters found in XML document at indexes: 7, 9.');
-      });
-
-      it('reports discouraged characters in the content', () => {
-         const s = makeLaxStream('<?foo b\uFDD1l\uFDD2ah ?>');
-
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 7, 9.');
+            'Discouraged characters found in XML document at indexes: 11, 13.');
       });
 
       describe('discuraged target', () => {

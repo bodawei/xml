@@ -51,7 +51,7 @@ BUILD
 126: Enhancements to the reporting
 - Change test reporter to look at new json files per browser
 	- add your own totals to make sure they are the same
-	- fail on duplicate tests
+	√ - fail on duplicate tests
 	- totals and percents should come from it.
 - fork quiet-grunt
 	- silent by default

@@ -54,7 +54,7 @@ function DJBJsonReporter(baseReporterDecorator, config) {
 function onRunComplete(browsers, results) {
    const directory = this._config.outputDir || '.';
    const fileName = this._config.outputFile || 'json-summary.json';
-   const path = directory + '/' + fileName;
+   const path = directory + '/all-' + fileName;
 
    if (!fs.statSync(directory)) {
       fs.mkdirSync(directory);

@@ -1056,13 +1056,13 @@ describe('XmlTokenStream (dtd)', () => {
             'Missing items in the content spec in element declaration "testElement".');
       });
 
-      it('reports a syntax error if content spec is the wrong case', () => {
+      it('reports a syntax error if content spec is the wrong case with ANY', () => {
          expectSyntaxError('<!ELEMENT testElement anY>',
             SyntaxError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
             'The content spec must be "ANY". Found "anY".');
       });
 
-      it('reports a syntax error if content spec is the wrong case', () => {
+      it('reports a syntax error if content spec is the wrong case with EMPTY', () => {
          expectSyntaxError('<!ELEMENT testElement empty   >',
             SyntaxError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
             'The content spec must be "EMPTY". Found "empty".');
@@ -1505,7 +1505,7 @@ describe('XmlTokenStream (dtd)', () => {
             'The element name must match the syntax for names. Found "bad$name".');
       });
 
-      it('reports a syntax error if the element name is invalid', () => {
+      it('reports a syntax error if the attribute name invalid', () => {
          expectSyntaxError('<!ATTLIST elemName attr$name >',
             SyntaxError.ID.ATTLISTDECL_ATTR_NAME_INVALID,
             'The attribute name must match the syntax for names. Found "attr$name".');
@@ -1533,12 +1533,6 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!ATTLIST elemName attrName IDREF #implied >',
             SyntaxError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
             'The default "#IMPLIED" must be upper case in the attribute declaration for "elemName". Found "#implied".');
-      });
-
-      it('reports a syntax error if there is an unknown attribute flag', () => {
-         expectSyntaxError('<!ATTLIST elemName attrName IDREF #FROG >',
-            SyntaxError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
-            'The default "#FROG" must be one of the specified default values in attribute declaration for "elemName".');
       });
 
       it('reports a syntax error if there is an unknown attribute flag', () => {
@@ -1812,7 +1806,7 @@ describe('XmlTokenStream (dtd)', () => {
                } ]);
          });
 
-         it('extracts the expected notation names if a vertical bar between enumeration names is omitted', () => {
+         it('extracts the expected notation names if there is no space before the enumeration', () => {
             const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName( name ) #REQUIRED>');
             ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE);
 

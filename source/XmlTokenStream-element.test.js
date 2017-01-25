@@ -141,13 +141,6 @@ describe('XmlTokenStream (element)', () => {
          expectTokenType(s, tokens.ElementStart);
       });
 
-      it('rejects an element name as a legal name if it has u03F4 in version 1.0/4', () => {
-         expectSyntaxError(entityMetaData1dot0rev4,
-            '<\u03F4ne></\u03F4ne>',
-            SyntaxError.ID.ELEMENT_NAME_INVALID,
-            'The element tag name must match the syntax for names. Found: "\u03F4ne".');
-      });
-
       it('rejects an element name that starts with some bad 1.0 characters in version 1.0/4', () => {
          expectSyntaxError(entityMetaData1dot0rev4,
             '<f\u0eceb></f\u0eceb>',
@@ -282,18 +275,6 @@ describe('XmlTokenStream (element)', () => {
 
       it('accepts a nmToken if it has a bunch of questionable chars in version 1.0/4', () => {
          const s = makeLaxStream('<!ATTLIST e attrName ( 9._-:你\u0A2Afoo ) #REQUIRED >', entityMetaData1dot0rev4);
-
-         expectTokenType(s, tokens.AttrListDeclaration);
-      });
-
-      it('accepts a nmToken if it has a bunch of questionable chars in version 1.0/5', () => {
-         const s = makeLaxStream('<!ATTLIST e attrName ( 9._-:你\u0A2Afoo ) #REQUIRED >', entityMetaData1dot0rev5);
-
-         expectTokenType(s, tokens.AttrListDeclaration);
-      });
-
-      it('accepts a nmToken if it has a bunch of questionable chars in version 1.1', () => {
-         const s = makeLaxStream('<!ATTLIST e attrName ( 9._-:你\u0A2Afoo ) #REQUIRED >', entityMetaData1dot1);
 
          expectTokenType(s, tokens.AttrListDeclaration);
       });

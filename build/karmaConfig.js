@@ -50,7 +50,7 @@ module.exports = function karmaConfig(config) {
       },
       djbReporter: {
          outputDir: OUT_DIR + 'testResults',
-         outputFile: 'total-summary.json'
+         outputFile: 'test-summary.json'
       },
       // https://github.com/karma-runner/karma-coverage
       coverageReporter: {
