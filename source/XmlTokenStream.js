@@ -2,15 +2,17 @@
 
 'use strict';
 
+const stream = require('readable-stream');
+
 const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
 const WellFormednessError = require('./error/WellFormednessError.js');
 const TextChunk = require('./shared/TextChunk.js');
-const XmlStream = require('./XmlStream.js');
 const tokens = require('./XmlToken.js');
 const util = require('./shared/util.js');
+const XmlError = require('./error/XmlError.js');
 const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
 const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
 
@@ -152,10 +154,12 @@ function textOrUndef(chunk) {
  that is at cursor creation time specify the encoding of the data,
  that will take precedence over what this stream tells the cursor.
 \**********************************************************************/
-class XmlTokenStream extends XmlStream {
+class XmlTokenStream extends stream.Readable {
 
    constructor(cursor, entityManager, options) {
-      super();
+      super({
+         objectMode: true
+      });
       if (!entityManager) {
          throw Error('Must provide an XmlEntityManager instance.');
       }
@@ -186,36 +190,6 @@ class XmlTokenStream extends XmlStream {
       this._entityMd = this._cursor.entityMd;
    }
 
-   _innerGetNext() {
-      let token;
-
-      if (this._pendingTokens.length > 0) {
-         token = this._pendingTokens.shift();
-
-         return token;
-      }
-
-      this._nextToken();
-
-      token = this._pendingTokens.shift();
-
-      if (!token) {
-         this._setEnded();
-      }
-
-      return token;
-   }
-
-   _pushToken(token) {
-      this._pendingTokens.push(token);
-      this._getting = false;
-      this._tokenLoop();
-   }
-
-   _noEnvelopers() {
-      return this._envelopers.length === 0;
-   }
-
    _pushEnveloper(close, token) {
       this._envelopers.push({
          close: close,
@@ -231,82 +205,92 @@ class XmlTokenStream extends XmlStream {
       return this._envelopers.pop();
    }
 
-   _nextToken() {
-      if (this._getting) {
+   _pushToken(token) {
+      this.push(token);
+   }
+
+   getNext() {
+      if (this._errored) {
          return;
       }
-      this._getting = true;
 
-      this._innerNext();
+      const token = this.read();
+
+      if (token instanceof XmlError && !this._options.lax) {
+         const e = new Error(token.message);
+         e.details = token;
+         this._errored = true;
+         throw e;
+      }
+
+      return token;
    }
 
    // This is separate from _nextToken to support a pseudo-async test case until we get full async capabilities in
-   _innerNext() {
-      let type;
-      let finished = false;
+   _read() {
+      const type = this._cursor.peekType();
 
-      while (!finished) {
-         type = this._cursor.peekType();
+      if (!type) {
+         this.push(null);
+         return;
+      }
 
-         switch (type) {
-            case TextChunk.TYPE.MARKUP:
-               const markupToken = this._cursor.getMarkup();
+      switch (type) {
+         case TextChunk.TYPE.MARKUP:
+            const markupToken = this._cursor.getMarkup();
 
-               switch (markupToken.text) {
-                  case '&':
-                     this._getReference(markupToken);
-                     break;
-                  case '<':
-                     this._getTag(markupToken, true);
-                     break;
-                  case '</':
-                     this._getTag(markupToken, false);
-                     break;
-                  case '<?':
-                     this._getProcessingInstruction(markupToken);
-                     break;
-                  case '<!':
-                     this._getBangItem(markupToken);
-                     break;
-                  case '<!--':
-                     this._getComment(markupToken);
-                     break;
-               }
-               break;
-            case TextChunk.TYPE.SPACE:
-               // only recognize spaces when we aren't between tags
-               if (this._elementNameStack.length === 0) {
-                  this._getS();
-               } else {
-                  this._getContent();
-               }
-               break;
-            case TextChunk.TYPE.CLOSE:
-               const pendingClose = this._peekEnveloper();
-               let close;
-
-               if (pendingClose) {
-                  close = this._cursor.getClose();
-
-                  if (close.text !== pendingClose.close) {
-                     this._cursor.unget(close);
-                     close = undefined;
-                  } else {
-                     this._closeDocType();
-                     this._popEnveloper();
-                  }
-               }
-
-               if (!close) {
-                  this._getContent();
-               }
-               break;
-            case TextChunk.TYPE.STRING:
+            switch (markupToken.text) {
+               case '&':
+                  this._getReference(markupToken);
+                  break;
+               case '<':
+                  this._getTag(markupToken, true);
+                  break;
+               case '</':
+                  this._getTag(markupToken, false);
+                  break;
+               case '<?':
+                  this._getProcessingInstruction(markupToken);
+                  break;
+               case '<!':
+                  this._getBangItem(markupToken);
+                  break;
+               case '<!--':
+                  this._getComment(markupToken);
+                  break;
+            }
+            break;
+         case TextChunk.TYPE.SPACE:
+            // only recognize spaces when we aren't between tags
+            if (this._elementNameStack.length === 0) {
+               this._getS();
+            } else {
                this._getContent();
-               break;
-         }
+            }
+            break;
+         case TextChunk.TYPE.CLOSE:
+            const pendingClose = this._peekEnveloper();
+            let close;
 
-         finished = this._noEnvelopers();
+            if (pendingClose) {
+               close = this._cursor.getClose();
+
+               if (close.text !== pendingClose.close) {
+                  this._cursor.unget(close);
+                  close = undefined;
+               } else {
+                  this._closeDocType();
+                  this._popEnveloper();
+               }
+            }
+
+            if (!close) {
+               this._getContent();
+            }
+            break;
+         case TextChunk.TYPE.STRING:
+            this._getContent();
+            break;
       }
    }
 

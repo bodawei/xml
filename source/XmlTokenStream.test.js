@@ -82,21 +82,12 @@ describe('XmlTokenStream', () => {
    });
 
    describe('event delivery', () => {
-      let count;
 
-      beforeEach(() => {
-         jasmine.clock().install();
-         count = 0;
-      });
-
-      afterEach(() => {
-         jasmine.clock().uninstall();
-      });
-
-      it('delivers all tokens', () => {
+      it('delivers all tokens', (done) => {
          const s = makeLaxExternalEntityStream('<one>foo</one>');
+         let count = 0;
 
-         s.on('data', (error, data) => {
+         s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.ElementStart);
@@ -106,69 +97,21 @@ describe('XmlTokenStream', () => {
                   break;
                case 2:
                   expect(data).toBeInstanceOf(tokens.ElementEnd);
+                  done();
                   break;
                default:
-                  expect(data).toEqual('this should not happen');
+                  throw new Error('Got an extra call in test. ' + JSON.stringify(data));
             }
 
             count++;
          });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(3);
       });
 
-      it('can have a read done while in the handler', () => {
-         const s = makeLaxExternalEntityStream('<one>foo</one>');
-
-         s.on('data', (error, data) => {
-            if (count === 0) {
-               const next = s.getNext();
-               expect(next instanceof tokens.CharData).toEqual(true);
-               count += 10;
-            }
-
-            switch (count) {
-               case 10:
-                  expect(data).toBeInstanceOf(tokens.ElementStart);
-                  break;
-               case 11:
-                  expect(data).toBeInstanceOf(tokens.ElementEnd);
-                  break;
-               default:
-                  expect(data).toEqual('this should not happen');
-            }
-
-            count++;
-         });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(12);
-      });
-
-      it('delivers only errors to "error" handler', () => {
+      it('delivers tokens and errors to "data" handler in a lax stream', (done) => {
          const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+         let count = 0;
 
-         s.on('error', (error) => {
-            switch (count) {
-               case 0:
-                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
-                  break;
-               default:
-                  expect(error).toEqual('this should not happen');
-            }
-
-            count++;
-         });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(1);
-      });
-
-      it('delivers only tokens to "token" handler', () => {
-         const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-
-         s.on('token', (error, data) => {
+         s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.ElementStart);
@@ -180,52 +123,24 @@ describe('XmlTokenStream', () => {
                   expect(data).toBeInstanceOf(tokens.ElementEnd);
                   break;
                case 3:
-                  expect(data).toBeInstanceOf(tokens.TextDeclaration);
-                  break;
-               default:
-                  expect(data).toEqual('this should not happen');
-            }
-            count++;
-         });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(4);
-      });
-
-      it('delivers tokens and errors to "data" handler in a lax stream', () => {
-         const s = makeLaxExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-
-         s.on('data', (error, data) => {
-            switch (count) {
-               case 0:
-                  expect(data).toBeInstanceOf(tokens.ElementStart);
-                  break;
-               case 1:
-                  expect(data).toBeInstanceOf(tokens.CharData);
-                  break;
-               case 2:
-                  expect(data).toBeInstanceOf(tokens.ElementEnd);
-                  break;
-               case 3:
-                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
                   break;
                case 4:
                   expect(data).toBeInstanceOf(tokens.TextDeclaration);
+                  done();
                   break;
                default:
-                  expect(data).toEqual('this should not happen');
+                  throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));
             }
             count++;
          });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(5);
       });
 
-      it('delivers tokens and errors to "data" handler in a strict stream without throwing an exception', () => {
+      it('delivers tokens and errors to "data" handler in a strict stream without throwing an exception', (done) => {
          const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
+         let count = 0;
 
-         s.on('data', (error, data) => {
+         s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.ElementStart);
@@ -237,122 +152,92 @@ describe('XmlTokenStream', () => {
                   expect(data).toBeInstanceOf(tokens.ElementEnd);
                   break;
                case 3:
-                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  break;
+               case 4:
+                  expect(data).toBeInstanceOf(tokens.TextDeclaration);
+                  done();
                   break;
                default:
-                  expect(data).toEqual('this should not happen');
+                  throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));
             }
             count++;
          });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(4);
       });
 
-      it('delivers no data after an error token with a strit stream', () => {
+      it('delivers no data after an error token with a strit stream', (done) => {
          const s = makeStrictExternalEntityStream('foo<?xml encoding="utf-8"?>');
+         let count = 0;
 
-         s.on('data', (error, data) => {
+         s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.CharData);
                   break;
                case 1:
-                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  done();
+                  break;
+               case 2:
+                  expect(data instanceof tokens.TextDeclaration).toEqual(true);
+                  done();
                   break;
                default:
-                  expect(data).toEqual('this should not happen');
+                  throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));
             }
             count++;
          });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(2);
       });
 
-      it('delivers data after an error token with a lax stream', () => {
+      it('delivers data after an error token with a lax stream', (done) => {
          const s = makeLaxExternalEntityStream('foo<?xml encoding="utf-8"?>');
+         let count = 0;
 
-         s.on('data', (error, data) => {
+         s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.CharData);
                   break;
                case 1:
-                  expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
                   break;
                case 2:
                   expect(data).toBeInstanceOf(tokens.TextDeclaration);
+                  done();
                   break;
                default:
-                  expect(data).toEqual('this should not happen');
+                  throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));
             }
             count++;
          });
-         jasmine.clock().tick(1);
-
-         expect(count).toEqual(3);
       });
 
       describe('end', () => {
 
-         it('delivers an "end" event when all tokens consumed', () => {
-            const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-            let endCount = 0;
+         it('delivers an "end" event when all tokens consumed', (done) => {
+            const s = makeStrictExternalEntityStream('<?xml encoding="utf-8"?><one>foo</one>');
+            let count = 0;
 
             s.on('data', () => {
                count++;
             });
             s.on('end', () => {
                expect(count).toEqual(4);
-               endCount++;
+               done();
             });
-            jasmine.clock().tick(1);
-
-            expect(count).toEqual(4);
-            expect(endCount).toEqual(1);
          });
 
-         it('delivers an "end" event after "error" in a strict stream', () => {
+         xit('delivers an "end" event after "error" in a strict stream', (done) => {
             const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-            let endCount = 0;
+            let count = 0;
 
             s.on('error', () => {
                count++;
             });
             s.on('end', () => {
                expect(count).toEqual(1);
-               endCount++;
+               done();
             });
-            jasmine.clock().tick(1);
-
-            expect(count).toEqual(1);
-            expect(endCount).toEqual(1);
-         });
-
-         it('delivers an "end" event after throwing an exception in a getNext()', () => {
-            const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-            let endCount = 0;
-
-            s.on('data', () => {
-               s.getNext();   // consume foo
-               s.getNext();   // consume </one>
-               try {
-                  s.getNext();   // get the error
-               } catch (e) {
-                  // do nothing.
-               }
-               count++;
-               expect(endCount).toEqual(0);
-            });
-            s.on('end', () => {
-               expect(count).toEqual(1);
-               endCount++;
-            });
-            jasmine.clock().tick(1);
-
-            expect(count).toEqual(1);
-            expect(endCount).toEqual(1);
          });
 
       });
@@ -367,20 +252,19 @@ describe('XmlTokenStream', () => {
          expectTokenType(s, tokens.ElementStart);
          expectTokenType(s, tokens.CharData);
          expectTokenType(s, tokens.ElementEnd);
-         expect(s.getNext()).toBeUndefined();
+         expect(s.getNext()).toEqual(null);
       });
 
       it('will not start a subsequent async call if one is already in progress (whitebox)', () => {
          const s = makeLaxExternalEntityStream('<one>foo</one>');
          // We have to fake async behavior because the stream isn't fully async-capable yet.
-         spyOn(s, '_innerNext');
-         spyOn(s, '_setEnded');
+         spyOn(s, '_read');
 
          const token = s.getNext();
-         expect(token).toBeUndefined();
+         expect(token).toEqual(null);
 
          s.getNext();
-         expect(s._innerNext.calls.count()).toEqual(1);
+         expect(s._read.calls.count()).toEqual(1);
       });
 
       it('throws an error if an error is found in a strict stream', () => {

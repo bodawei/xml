@@ -24,7 +24,7 @@ const expectToken = testUtils.expectTokenType;
 
 const TEST_CHUNKS = [ new TextChunk.PlainChunk('from test') ];
 
-describe('XmlEntityStream', () => {
+xdescribe('XmlEntityStream', () => {
    let count;
 
    beforeEach(() => {
