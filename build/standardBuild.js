@@ -185,7 +185,7 @@ module.exports = function standardBuild(grunt) {
       coveragereport:  {
          dist: {
             options: {
-               filesToSkip: [ ], // SOURCE_DIR + '/**/util.js', ...
+               filesToSkip: [ SOURCE_DIR + '/XmlEntityStream.js', SOURCE_DIR + '/XmlStream.js' ],
                dir: OUT_DIR
             }
          }

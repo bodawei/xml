@@ -958,7 +958,8 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('reports a warning if the element name starts with "xml-"', () => {
-         expectXmlWarning('<!ELEMENT xml-test ( #PCDATA )>',
+         expectXmlWarning(EntityMetaData.TYPE.EXTERNALSUBSET,
+            '<!ELEMENT xml-test ( #PCDATA )>',
             XmlWarning.ID.ELEMENTDECL_NAME_XMLDASH_RESERVED,
             'Element names should not start with "xml-". Found "xml-test".');
       });

@@ -136,37 +136,9 @@ describe('XmlTokenStream', () => {
          });
       });
 
-      it('delivers tokens and errors to "data" handler in a strict stream without throwing an exception', (done) => {
-         const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
-         let count = 0;
-
-         s.on('data', (data) => {
-            switch (count) {
-               case 0:
-                  expect(data).toBeInstanceOf(tokens.ElementStart);
-                  break;
-               case 1:
-                  expect(data).toBeInstanceOf(tokens.CharData);
-                  break;
-               case 2:
-                  expect(data).toBeInstanceOf(tokens.ElementEnd);
-                  break;
-               case 3:
-                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
-                  break;
-               case 4:
-                  expect(data).toBeInstanceOf(tokens.TextDeclaration);
-                  done();
-                  break;
-               default:
-                  throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));
-            }
-            count++;
-         });
-      });
-
-      it('delivers no data after an error token with a strit stream', (done) => {
+      it('delivers no data after an error token with a strict stream', (done) => {
          const s = makeStrictExternalEntityStream('foo<?xml encoding="utf-8"?>');
+         s.on('error', () => {}); // silence immediate error reporting
          let count = 0;
 
          s.on('data', (data) => {
@@ -176,10 +148,6 @@ describe('XmlTokenStream', () => {
                   break;
                case 1:
                   expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
-                  done();
-                  break;
-               case 2:
-                  expect(data instanceof tokens.TextDeclaration).toEqual(true);
                   done();
                   break;
                default:
@@ -191,6 +159,7 @@ describe('XmlTokenStream', () => {
 
       it('delivers data after an error token with a lax stream', (done) => {
          const s = makeLaxExternalEntityStream('foo<?xml encoding="utf-8"?>');
+         s.on('error', () => {}); // silence immediate error reporting
          let count = 0;
 
          s.on('data', (data) => {
@@ -227,13 +196,14 @@ describe('XmlTokenStream', () => {
             });
          });
 
-         xit('delivers an "end" event after "error" in a strict stream', (done) => {
+         it('delivers an "end" event after "error" in a strict stream', (done) => {
             const s = makeStrictExternalEntityStream('<one>foo</one><?xml encoding="utf-8"?>');
             let count = 0;
 
             s.on('error', () => {
                count++;
             });
+            s.on('data', () => {});
             s.on('end', () => {
                expect(count).toEqual(1);
                done();
@@ -252,7 +222,7 @@ describe('XmlTokenStream', () => {
          expectTokenType(s, tokens.ElementStart);
          expectTokenType(s, tokens.CharData);
          expectTokenType(s, tokens.ElementEnd);
-         expect(s.getNext()).toEqual(null);
+         expect(s.getNext()).toBeUndefined();
       });
 
       it('will not start a subsequent async call if one is already in progress (whitebox)', () => {
@@ -261,7 +231,7 @@ describe('XmlTokenStream', () => {
          spyOn(s, '_read');
 
          const token = s.getNext();
-         expect(token).toEqual(null);
+         expect(token).toBeUndefined();
 
          s.getNext();
          expect(s._read.calls.count()).toEqual(1);
@@ -647,6 +617,7 @@ describe('XmlTokenStream', () => {
 
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&amp;<?xml encoding="usascii"?>');
+            s.on('error', () => {}); // silence immediate error reporting
             ignoreToken(s, tokens.EntityStart);
             ignoreToken(s, tokens.EntityEnd);
 
@@ -1638,6 +1609,7 @@ describe('XmlTokenStream', () => {
          const s = makeStrictStream('');
          const expected = new SyntaxError(SyntaxError.ID.BANGITEM_UNKNOWN);
          expected.message = 'Unkown "<!" item.';
+         s.on('error', () => {}); // silence immediate error reporting
 
          s._report(SyntaxError.ID.BANGITEM_UNKNOWN, []);
 

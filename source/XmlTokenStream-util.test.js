@@ -89,6 +89,7 @@ function expectProblem(entityType, input, id, message, place, context) {
 
    const strictS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), {});
    const laxS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), { lax: true });
+   strictS.on('error', () => {}); // swallow errors and let the getNext() encounter them.
 
    expect(() => {
       strictS.getNext();
