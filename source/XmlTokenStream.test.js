@@ -347,6 +347,34 @@ describe('XmlTokenStream', () => {
 
    });
 
+   describe('character set validation', () => {
+
+      it('reports an error if given a UTF-16 stream without a BOM', () => {
+         // The following is UTF16 version of '<?xml version="1.1"?>' without a BOM
+         const cursor = new XmlStringCursor('\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020' +
+            '\u0000\u0076\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d' +
+            '\u0000\u0022\u0000\u0031\u0000\u002e\u0000\u0031\u0000\u0022\u0000\u003f\u0000\u003e');
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+
+         expect(() => {
+            s.getNext();
+         }).toThrowError('Missing BOM in UTF-16 input.');
+      });
+
+      it('reports no error if given a UTF-16 stream with a BOM', () => {
+         // The following is UTF16 version of '<?xml version="1.1"?>' WITH a BOM
+         const cursor = new XmlStringCursor('\u00FE\u00FF\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c' +
+            '\u0000\u0020\u0000\u0076\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e' +
+            '\u0000\u003d\u0000\u0022\u0000\u0031\u0000\u002e\u0000\u0031\u0000\u0022\u0000\u003f\u0000\u003e');
+         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+
+         expect(() => {
+            s.getNext();
+         }).not.toThrow();
+      });
+
+   });
+
    describe('parsing character reference', () => {
 
       it('retrieves a token of type CharRef', () => {

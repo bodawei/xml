@@ -170,6 +170,34 @@ class XmlStringCursor {
       };
 
       this._decodeSource();
+
+      if (this.hasBOM) {
+         this._offset.index ++;
+         this._offset.column ++;
+      }
+   }
+
+   get isUTF16() {
+      switch (this._encoding.autodetectedEncoding) {
+         case ENCODING.UTF16BE:
+         case ENCODING.UTF16BE_BOM:
+         case ENCODING.UTF16LE:
+         case ENCODING.UTF16LE_BOM:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   get hasBOM() {
+      switch (this._encoding.autodetectedEncoding) {
+         case ENCODING.UTF8_BOM:
+         case ENCODING.UTF16BE_BOM:
+         case ENCODING.UTF16LE_BOM:
+            return true;
+         default:
+            return false;
+      }
    }
 
    get entityMd() {

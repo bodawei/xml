@@ -225,7 +225,12 @@ describe('XmlStringCursor', () => {
          it('decodes a UTF-8/BOM into a decoded string', () => {
             const c = new XmlStringCursor('\u00EF\u00BB\u00BF<?xml version="1.0"?>');
 
-            expect(c.getChar().text).toEqual('\uFEFF');
+            expect(c.getChar().text).toEqual('<');
+         });
+
+         it('consumes the BOM from the start of the string', () => {
+            const c = new XmlStringCursor('\u00EF\u00BB\u00BF<?xml version="1.0"?>');
+
             expect(c.getChar().text).toEqual('<');
          });
 
@@ -239,7 +244,6 @@ describe('XmlStringCursor', () => {
          it('decodes a UTF-16BE/BOM into a decoded string', () => {
             const c = new XmlStringCursor('\u00FE\u00FF\u0000\u003C\u0000\u003F');
 
-            expect(c.getChar().text).toEqual('\uFEFF');
             expect(c.getChar().text).toEqual('<');
             expect(c.getChar().text).toEqual('?');
          });
@@ -254,7 +258,6 @@ describe('XmlStringCursor', () => {
          it('decodes a UTF-16LE/BOM into a decoded string', () => {
             const c = new XmlStringCursor('\u00FF\u00FE\u003C\u0000\u003F\u0000');
 
-            expect(c.getChar().text).toEqual('\uFEFF');
             expect(c.getChar().text).toEqual('<');
             expect(c.getChar().text).toEqual('?');
          });
@@ -386,6 +389,86 @@ describe('XmlStringCursor', () => {
          c.specifiedEncoding = 'UTF-16LE';
 
          expect(iconvLite.decode).not.toHaveBeenCalled();
+      });
+
+   });
+
+   describe('isUTF16', () => {
+
+      it('is false with a plain string', () => {
+         const c = new XmlStringCursor('e.g. an external entity');
+
+         expect(c.isUTF16).toBe(false);
+      });
+
+      it('is true with a UTF-16 big endian encoding', () => {
+         const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
+
+         expect(c.isUTF16).toBe(true);
+      });
+
+      it('is true with a UTF-16 little endian encoding', () => {
+         const c = new XmlStringCursor('\u003C\u0000\u003F\u0000');
+
+         expect(c.isUTF16).toBe(true);
+      });
+
+      it('is true with a UTF-16BE with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00FE\u00FF\u0001\u0000');
+
+         expect(c.isUTF16).toBe(true);
+      });
+
+      it('is true with a UTF-16LE with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00FF\u00FE\u0000\u0001');
+
+         expect(c.isUTF16).toBe(true);
+      });
+
+      it('is false a UTF-8 with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00EF\u00BB\u00BFA');
+
+         expect(c.isUTF16).toBe(false);
+      });
+
+   });
+
+   describe('hasBOM', () => {
+
+      it('is false with a plain string', () => {
+         const c = new XmlStringCursor('e.g. an external entity');
+
+         expect(c.hasBOM).toBe(false);
+      });
+
+      it('is false with a UTF-16 big endian encoding', () => {
+         const c = new XmlStringCursor('\u0000\u003C\u0000\u003F');
+
+         expect(c.hasBOM).toBe(false);
+      });
+
+      it('is false with a UTF-16 little endian encoding', () => {
+         const c = new XmlStringCursor('\u003C\u0000\u003F\u0000');
+
+         expect(c.hasBOM).toBe(false);
+      });
+
+      it('is true with a UTF-16BE with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00FE\u00FF\u0001\u0000');
+
+         expect(c.hasBOM).toBe(true);
+      });
+
+      it('is true with a UTF-16LE with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00FF\u00FE\u0000\u0001');
+
+         expect(c.hasBOM).toBe(true);
+      });
+
+      it('is true a UTF-8 with BOM encoding', () => {
+         const c = new XmlStringCursor('\u00EF\u00BB\u00BFA');
+
+         expect(c.hasBOM).toBe(true);
       });
 
    });

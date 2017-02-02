@@ -210,6 +210,8 @@ class XmlTokenStream extends stream.Readable {
          return;
       }
 
+      this._validateCharset();
+
       if (token instanceof XmlError && !this._options.lax) {
          this.emit('error', token);
          this.push(token); // Remove this when all tests are fixed.
@@ -240,7 +242,7 @@ class XmlTokenStream extends stream.Readable {
       const type = this._cursor.peekType();
 
       if (!type) {
-         this.push(null);
+         this._pushToken(null);
          return;
       }
 
@@ -915,6 +917,17 @@ class XmlTokenStream extends stream.Readable {
 
       this._pushToken(new SyntaxError(code, [ textOrBlank(nameChunk) ], nameChunk.startOffset,
          context, this._entityMd.location));
+   }
+
+   _validateCharset() {
+      if (this._validatedCharset) {
+         return;
+      }
+
+      this._validatedCharset = true;
+      if (this._cursor.isUTF16 && !this._cursor.hasBOM) {
+         this._report(SEID.CHARSET_UTF16_NO_BOM);
+      }
    }
 
    _validateXmlDecl(start, parsed) {

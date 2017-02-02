@@ -65,11 +65,7 @@ M 158 Make XmlTokenStream a node stream
 	-- eh: delivers an "end" event after "error" in a strict stream
 √ S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
 	- should just need a _transform() which passes all through except comments which it modifies and then pushes through
-
-
-
-
-S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
+√ S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
 	- sets a flag, which tokenstream validates
 
 
