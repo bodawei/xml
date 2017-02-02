@@ -225,18 +225,6 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   getNext() {
-      const token = this.read();
-
-      if (token instanceof XmlError && !this._options.lax) {
-         const e = new Error(token.message);
-         e.details = token;
-         throw e;
-      }
-
-      return token || undefined;
-   }
-
    // This is separate from _nextToken to support a pseudo-async test case until we get full async capabilities in
    _read() {
       const type = this._cursor.peekType();

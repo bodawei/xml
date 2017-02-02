@@ -59,12 +59,12 @@ function makeStrictExternalEntityStream(str, options = {}) {
 }
 
 function ignoreError(stream, errorCode) {
-   const token = stream.getNext();
+   const token = stream.read();
    expect(token.id).toEqual(errorCode);
 }
 
 function ignoreToken(stream, tokenType) {
-   const token = stream.getNext();
+   const token = stream.read();
 
    if (typeof tokenType === 'string') {
       expect(token.type).toEqual(tokenType);
@@ -89,13 +89,18 @@ function expectProblem(entityType, input, id, message, place, context) {
 
    const strictS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), {});
    const laxS = new XmlTokenStream(new XmlStringCursor(input, entityType), new XmlEntityManager(), { lax: true });
-   strictS.on('error', () => {}); // swallow errors and let the getNext() encounter them.
+   let strictError;
 
-   expect(() => {
-      strictS.getNext();
-   }).toThrowError(message);
+   strictS.on('error', (err) => {
+      if (!strictError) {
+         strictError = err;
+      }
+   });
 
-   const error = laxS.getNext();
+   strictS.read();
+   expect(strictError.message).toEqual(message);
+
+   const error = laxS.read();
    expect(error.id).toEqual(id);
 
    if (place) {
@@ -124,12 +129,18 @@ function expectXmlWarning(entityType, input, id, message, place, context) {
 function expectExternalSubsetSyntaxError(input, code, message, place, context) {
    const strictS = makeStrictExternalSubsetStream(input);
    const laxS = makeLaxExternalSubsetStream(input);
+   let strictError;
 
-   expect(() => {
-      strictS.getNext();
-   }).toThrowError(message);
+   strictS.on('error', (err) => {
+      if (!strictError) {
+         strictError = err;
+      }
+   });
 
-   const error = laxS.getNext();
+   strictS.read();
+   expect(strictError.message).toEqual(message);
+
+   const error = laxS.read();
    expect(error).toBeSyntaxError(code);
 
    if (place) {
@@ -142,7 +153,7 @@ function expectExternalSubsetSyntaxError(input, code, message, place, context) {
 }
 
 function expectTokenType(stream, tokenType) {
-   const t = stream.getNext();
+   const t = stream.read();
 
    if (typeof tokenType === 'string') {
       expect(t.type).toEqual(tokenType);
@@ -153,7 +164,7 @@ function expectTokenType(stream, tokenType) {
 }
 
 function expectError(stream, id, message) {
-   const t = stream.getNext();
+   const t = stream.read();
 
    expect(t).toEqualProps({
       id: id,

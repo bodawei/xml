@@ -40,35 +40,35 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().name).toEqual('testType');
+         expect(s.read().name).toEqual('testType');
       });
 
       it('retrieves an empty internal subset if there is none specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeStart);
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeEnd);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
       });
 
       it('retrieves an empty internal subset if an empty one is specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeStart);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeEnd);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
       });
 
       it('retrieves an a simple internal subset', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeStart);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext()).toBeInstanceOf(tokens.EntityDeclaration);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeEnd);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.EntityDeclaration);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
       });
 
       it('does not cause problems if a close appears when none expected', () => {
@@ -76,7 +76,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t).toBeInstanceOf(tokens.CharData);
          expect(t.text).toEqual(']');
       });
@@ -86,22 +86,22 @@ describe('XmlTokenStream (dtd)', () => {
             '<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ] ><testType></testType>');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeStart);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext()).toBeInstanceOf(tokens.EntityDeclaration);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeEnd);
-         expect(s.getNext().name).toEqual('testType');
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.EntityDeclaration);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
+         expect(s.read().name).toEqual('testType');
       });
 
       it('parses the end of the DOCTYPE element when there is no internal subset', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType > <testType></testType>');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeStart);
-         expect(s.getNext()).toBeInstanceOf(tokens.DocTypeEnd);
-         expect(s.getNext()).toBeInstanceOf(tokens.Space);
-         expect(s.getNext().name).toEqual('testType');
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
+         expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read().name).toEqual('testType');
       });
 
       it('does not cause problems if the wrong kind of close is encountered', () => {
@@ -114,7 +114,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t).toBeInstanceOf(tokens.CharData);
          expect(t.text).toEqual(']]>');
       });
@@ -153,7 +153,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.DocTypeEnd);
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.text).toEqual('fish>');
       });
 
@@ -169,7 +169,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "one" \'two\' [ ]>');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('DOCTYPE'),
@@ -189,11 +189,11 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('[')
          ], 21));
 
-         expect(s.getNext().chunks).toEqual(makeStringTokenArray([
+         expect(s.read().chunks).toEqual(makeStringTokenArray([
             new TextChunk.WithSpaceChunk(' ', ' ')
          ], 55));
 
-         expect(s.getNext().chunks).toEqual(makeStringTokenArray([
+         expect(s.read().chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk(']'),
             new TextChunk.PlainChunk('>')
          ], 56));
@@ -310,7 +310,7 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the name of the notation with a system externalID', () => {
          const s = makeStrictExternalSubsetStream('<!NOTATION notationName SYSTEM "foo">');
 
-         expect(s.getNext().name).toEqual('notationName');
+         expect(s.read().name).toEqual('notationName');
       });
 
       it('reports a syntax error if there is no notation name', () => {
@@ -325,17 +325,17 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.NOTATIONDECL_NO_SPACE_AFTER_NAME);
          ignoreError(s, SyntaxError.ID.NOTATIONDECL_NO_EXTERNALID);
 
-         expect(s.getNext().name).toEqual('');
+         expect(s.read().name).toEqual('');
       });
 
       it('auto-terminates the notation token when the > is not found as expected', () => {
          const s = makeLaxExternalSubsetStream('<!NOTATION myNotation fish>');
          ignoreError(s, SyntaxError.ID.NOTATIONDECL_NO_EXTERNALID);
          ignoreError(s, SyntaxError.ID.NOTATIONDECL_NO_CLOSE);
-         let t = s.getNext(); // get the notation token
+         let t = s.read(); // get the notation token
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT);
 
-         t = s.getNext();
+         t = s.read();
          expect(t.text).toEqual('fish>');
       });
 
@@ -369,7 +369,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
          ignoreToken(s, tokens.TextDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('NOTATION'),
@@ -392,7 +392,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!NOTATION XML-name PUBLIC "foo" >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.name).toEqual('XML-name');
          });
 
@@ -400,7 +400,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!NOTATION xmlName PUBLIC "foo">',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.name).toEqual('xmlName');
          });
 
@@ -505,69 +505,69 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the name of the entity', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 
-         expect(s.getNext().name).toEqual('entityName');
+         expect(s.read().name).toEqual('entityName');
       });
 
       it('retrieves the value of the entity in double quotes', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value">');
 
-         expect(s.getNext().value).toEqual([ new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS) ]);
+         expect(s.read().value).toEqual([ new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS) ]);
       });
 
       it('retrieves the value of the entity in single quotes', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName \'value\'>');
 
-         expect(s.getNext().value).toEqual([ new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS) ]);
+         expect(s.read().value).toEqual([ new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS) ]);
       });
 
       it('accepts a value with no contents', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName "">');
 
-         expect(s.getNext().value).toEqual([ ]);
+         expect(s.read().value).toEqual([ ]);
       });
 
       it('does not expand entity references in the value', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value&amp;">');
 
-         expect(s.getNext().value).toEqual([ new tokens.Text('value&amp;', tokens.ENTITYVAL_NO_CHUNKS) ]);
+         expect(s.read().value).toEqual([ new tokens.Text('value&amp;', tokens.ENTITYVAL_NO_CHUNKS) ]);
       });
 
       it('sets the value to undefined if none specified', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 
-         expect(s.getNext().value).toBeUndefined();
+         expect(s.read().value).toBeUndefined();
       });
 
       it('retrieves the NDATA name when a two value PUBLIC is specified', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testPublic" "system" NDATA testData>');
 
-         expect(s.getNext().notationDataName).toEqual('testData');
+         expect(s.read().notationDataName).toEqual('testData');
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified ', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
 
-         expect(s.getNext().notationDataName).toEqual('testData');
+         expect(s.read().notationDataName).toEqual('testData');
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
 
-         expect(s.getNext().notationDataName).toEqual('testData');
+         expect(s.read().notationDataName).toEqual('testData');
       });
 
       it('retrieves an undefined NDATA name if no name included', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" "system" NDATA  >');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NDATA_NO_NAME);
 
-         expect(s.getNext().notationDataName).toBeUndefined();
+         expect(s.read().notationDataName).toBeUndefined();
       });
 
       it('sets the notation data name to undefined if none specified', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY paramEntityName PUBLIC "testentity">');
 
-         expect(s.getNext().notationDataName).toBeUndefined();
+         expect(s.read().notationDataName).toBeUndefined();
       });
 
       it('reports invalid and discouraged characters in the NDATA value', () => {
@@ -598,7 +598,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE);
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NO_VALUE);
 
-         expect(s.getNext().name).toEqual('');
+         expect(s.read().name).toEqual('');
       });
 
       it('reports a syntax error if there is no closing angle bracket', () => {
@@ -646,30 +646,30 @@ describe('XmlTokenStream (dtd)', () => {
       it('reports a missing ">" syntax error if there is junk after the SYSTEM', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" found junk  >');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NO_CLOSE);
-         let t = s.getNext(); // get the entity token
+         let t = s.read(); // get the entity token
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT);
 
-         t = s.getNext();
+         t = s.read();
          expect(t.text).toEqual('found junk  >');
       });
 
       it('reports a missing ">" syntax error if there is junk after the PUBLIC', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName PUBLIC "one" "foo" extra  >');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NO_CLOSE);
-         let t = s.getNext(); // get the entity token
+         let t = s.read(); // get the entity token
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT);
 
-         t = s.getNext();
+         t = s.read();
          expect(t.text).toEqual('extra  >');
       });
 
       it('reports a missing ">" syntax error if there is junk after the NDATA', () => {
          const s = makeLaxExternalSubsetStream('<!ENTITY theName SYSTEM "foo" NDATA found junk  >');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NO_CLOSE);
-         let t = s.getNext(); // get the entity token
+         let t = s.read(); // get the entity token
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_SUBSET_CONTEXT);
 
-         t = s.getNext();
+         t = s.read();
          expect(t.text).toEqual('junk  >');
       });
 
@@ -679,7 +679,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
          ignoreToken(s, tokens.TextDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('ENTITY'),
@@ -699,7 +699,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!ENTITY XML-entity PUBLIC "testentity" >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.name).toEqual('XML-entity');
          });
 
@@ -707,7 +707,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!ENTITY xmlEntity PUBLIC "testentity" >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.name).toEqual('xmlEntity');
          });
 
@@ -821,19 +821,19 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream(
             '<!ENTITY % paramEntityName PUBLIC "testentity" "system" NDATA testData>');
 
-         expect(s.getNext().notationDataName).toEqual('testData');
+         expect(s.read().notationDataName).toEqual('testData');
       });
 
       it('sets the notation data name to undefined if none specified on a parameter entity', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
-         expect(s.getNext().notationDataName).toBeUndefined();
+         expect(s.read().notationDataName).toBeUndefined();
       });
 
       it('retrieves the name of the parameter entity', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
 
-         expect(s.getNext().name).toEqual('paramEntityName');
+         expect(s.read().name).toEqual('paramEntityName');
       });
 
       it('retrieves the expected chunks', () => {
@@ -842,7 +842,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
          ignoreToken(s, tokens.TextDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('ENTITY'),
@@ -877,49 +877,49 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the name of the element', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ANY>');
 
-         expect(s.getNext().name).toEqual('testElement');
+         expect(s.read().name).toEqual('testElement');
       });
 
       it('retrieves an ANY content spec', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ANY>');
 
-         expect(s.getNext().contentType).toEqual('ANY');
+         expect(s.read().contentType).toEqual('ANY');
       });
 
       it('retrieves an EMPTY content spec', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement EMPTY>');
 
-         expect(s.getNext().contentType).toEqual('EMPTY');
+         expect(s.read().contentType).toEqual('EMPTY');
       });
 
       it('retrieves a #PCDATA content spec', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (#PCDATA)>');
 
-         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+         expect(s.read().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('retrieves a #PCDATA content spec padded with spaces', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (    #PCDATA    )  >');
 
-         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+         expect(s.read().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('retrieves multiple names from the content spec', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (#PCDATA | one|two |three)>');
 
-         expect(s.getNext().contentType).toEqual([ '#PCDATA', 'one', 'two', 'three' ]);
+         expect(s.read().contentType).toEqual([ '#PCDATA', 'one', 'two', 'three' ]);
       });
 
       it('retrieves names from the content spec regardless of spaces around "|"s', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement (zero | one|two |three)>');
 
-         expect(s.getNext().contentType).toEqual([ 'zero', 'one', 'two', 'three' ]);
+         expect(s.read().contentType).toEqual([ 'zero', 'one', 'two', 'three' ]);
       });
 
       it('retrieves names from the content spec preserving their case', () => {
          const s = makeStrictExternalSubsetStream('<!ELEMENT testElement ( lower | CAPS | Initial | VaRIous )>');
 
-         expect(s.getNext().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
+         expect(s.read().contentType).toEqual([ 'lower', 'CAPS', 'Initial', 'VaRIous' ]);
       });
 
       it('retrieves the expected chunks', () => {
@@ -928,7 +928,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
          ignoreToken(s, tokens.TextDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('ELEMENT'),
@@ -1006,7 +1006,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ELEMENT testElement ( #pcdata )>');
          ignoreError(s, SyntaxError.ID.ELEMENTDECL_SPEC_INVALID_CASE);
 
-         expect(s.getNext().contentType).toEqual([ '#PCDATA' ]);
+         expect(s.read().contentType).toEqual([ '#PCDATA' ]);
       });
 
       it('reports a syntax error if #PCDATA is not in the first position', () => {
@@ -1030,11 +1030,11 @@ describe('XmlTokenStream (dtd)', () => {
       it('reports a syntax error if any names do not match the syntax for names', () => {
          const s = makeLaxExternalSubsetStream('<!ELEMENT testElement ( one | $bogus | bogus2! )>');
 
-         let t = s.getNext();
+         let t = s.read();
          expect(t.id).toEqual(SyntaxError.ID.ELEMENTDECL_SPEC_NAME_INVALID);
          expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "$bogus".');
 
-         t = s.getNext();
+         t = s.read();
          expect(t.id).toEqual(SyntaxError.ID.ELEMENTDECL_SPEC_NAME_INVALID);
          expect(t.message).toEqual('Names in content spec must match the syntax for names. Found "bogus2!".');
       });
@@ -1073,7 +1073,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ELEMENT testElement empty   >');
          ignoreError(s, SyntaxError.ID.ELEMENTDECL_SPEC_INVALID_CASE);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.contentType).toEqual('EMPTY');
       });
 
@@ -1088,7 +1088,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.ELEMENTDECL_NO_NAME);
          ignoreError(s, SyntaxError.ID.ELEMENTDECL_NO_SPEC);
 
-         expect(s.getNext().name).toEqual('');
+         expect(s.read().name).toEqual('');
       });
 
       it('reports a syntax error if the actual name is not a name', () => {
@@ -1181,13 +1181,13 @@ describe('XmlTokenStream (dtd)', () => {
       it('retrieves the name of the element the attributes are associated with', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
 
-         expect(s.getNext().elementName).toEqual('elementName');
+         expect(s.read().elementName).toEqual('elementName');
       });
 
       it('retrieves the an attribute definition', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName attrName CDATA #REQUIRED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
@@ -1201,7 +1201,7 @@ describe('XmlTokenStream (dtd)', () => {
                'attrName CDATA #REQUIRED ' +
                'attrName2 IDREF #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
@@ -1220,7 +1220,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #REQUIRED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1239,7 +1239,7 @@ describe('XmlTokenStream (dtd)', () => {
                'NmTokenName NMTOKEN #IMPLIED ' +
                'NmTokensName NMTOKENS #IMPLIED >');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'IdName',
             type: 'ID',
             list: undefined,
@@ -1288,7 +1288,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION  ( one ) #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one' ],
@@ -1301,7 +1301,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION  ( one|two | three) #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
@@ -1314,7 +1314,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'NotationName NOTATION (one|two|three) #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'NotationName',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
@@ -1328,7 +1328,7 @@ describe('XmlTokenStream (dtd)', () => {
                'First NOTATION \n\t( one|two | three) #IMPLIED ' +
                'Second NOTATION ( test1 | test2\t|\t\n test3) #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'First',
             type: 'NOTATION',
             list: [ 'one', 'two', 'three' ],
@@ -1347,7 +1347,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #IMPLIED>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1360,7 +1360,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "this is a test value">');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1373,7 +1373,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA \'this is a test value\'>');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1386,7 +1386,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "">');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1399,7 +1399,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "one &amp;">');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1412,7 +1412,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA #FIXED "this is a test value">');
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1426,7 +1426,7 @@ describe('XmlTokenStream (dtd)', () => {
                'CDataName cdata #REQUIRED>');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_TYPE_INVALID);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1440,7 +1440,7 @@ describe('XmlTokenStream (dtd)', () => {
                'CDataName CDATA #required>');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1454,7 +1454,7 @@ describe('XmlTokenStream (dtd)', () => {
                'CDataName CDATA #implied>');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1468,7 +1468,7 @@ describe('XmlTokenStream (dtd)', () => {
                'CDataName CDATA #FiXeD "foo">');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'CDataName',
             type: 'CDATA',
             list: undefined,
@@ -1576,7 +1576,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName NOTATION ( name name2 ) #REQUIRED >');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_LIST_NO_ORS);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'NOTATION',
             list: [ 'name', 'name2' ],
@@ -1651,7 +1651,7 @@ describe('XmlTokenStream (dtd)', () => {
                   'lax:allowOpenAngleBracketsInAttributeValues': true
                });
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
@@ -1666,7 +1666,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_INVALID);
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_NO_CLOSE);
 
-         expect(s.getNext().attributes).toEqual([ {
+         expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
@@ -1692,7 +1692,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!ATTLIST elementName XML-attr CDATA #REQUIRED>',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.attributes[0].name).toEqual('XML-attr');
          });
 
@@ -1700,7 +1700,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<!ATTLIST elementName xmlAttr CDATA #REQUIRED >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
-            const t = s.getNext();
+            const t = s.read();
             expect(t.attributes[0].name).toEqual('xmlAttr');
          });
 
@@ -1740,7 +1740,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                   'EnumerationName ( one ) #IMPLIED>');
 
-            expect(s.getNext().attributes).toEqual([ {
+            expect(s.read().attributes).toEqual([ {
                name: 'EnumerationName',
                type: 'ENUMERATION',
                list: [ 'one' ],
@@ -1756,7 +1756,7 @@ describe('XmlTokenStream (dtd)', () => {
                   'Third \n\t( one|two | three) #IMPLIED ' +
                   'Fourth ( test1 | test2\t|\t\n test3) #IMPLIED>');
 
-            expect(s.getNext().attributes).toEqual([ {
+            expect(s.read().attributes).toEqual([ {
                name: 'First',
                type: 'CDATA',
                list: undefined,
@@ -1787,7 +1787,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                   'EnumerationName ( -one ) #IMPLIED>');
 
-            expect(s.getNext().attributes).toEqual([ {
+            expect(s.read().attributes).toEqual([ {
                name: 'EnumerationName',
                type: 'ENUMERATION',
                list: [ '-one' ],
@@ -1811,7 +1811,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName( name ) #REQUIRED>');
             ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE);
 
-            expect(s.getNext().attributes).toEqual([ {
+            expect(s.read().attributes).toEqual([ {
                name: 'attrName',
                type: 'ENUMERATION',
                list: [ 'name' ],
@@ -1845,7 +1845,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeLaxExternalSubsetStream('<!ATTLIST e attrName ( name name2 ) #REQUIRED >');
             ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_LIST_NO_ORS);
 
-            expect(s.getNext().attributes).toEqual([ {
+            expect(s.read().attributes).toEqual([ {
                name: 'attrName',
                type: 'ENUMERATION',
                list: [ 'name', 'name2' ],
@@ -1886,7 +1886,7 @@ describe('XmlTokenStream (dtd)', () => {
             });
          ignoreToken(s, tokens.TextDeclaration);
 
-         const t = s.getNext();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('<!'),
             new TextChunk.PlainChunk('ATTLIST'),
@@ -1993,14 +1993,14 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM "./system.xml" [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml'));
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral when PUBLIC specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "public" "./system.xml" [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, and an internal dtd is specified', () => {
@@ -2008,35 +2008,35 @@ describe('XmlTokenStream (dtd)', () => {
             '<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" [ <!ENTITY foo "bar">] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
       });
 
       it('retrieves the public and system literals when PUBLIC is specified, no internal dtd is specified', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "./public.xml" "./system.xml" >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml', './public.xml'));
       });
 
       it('retrieves a systemLiteral in single quotes', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType SYSTEM \'./system.xml\' [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml'));
       });
 
       it('retrieves both a systemLiteral and a pubidLiteral in single quotes', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC \'public\' \'./system.xml\' [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('./system.xml', 'public'));
       });
 
       it('retrieves zero length publicID and system literals', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType PUBLIC "" "" [ ] >');
          ignoreToken(s, tokens.XmlDeclaration);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('', ''));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('', ''));
       });
 
       it('reports a syntax error if the pubidLiteral is not quoted', () => {
@@ -2057,7 +2057,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.EXTERNALID_PUBLIC_NO_QUOTE);
          ignoreError(s, SyntaxError.ID.EXTERNALID_SYSTEM_NO_QUOTE);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('two', 'one'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('two', 'one'));
       });
 
       it('reports a syntax error if the public id has illegal characters', () => {
@@ -2077,7 +2077,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreError(s, SyntaxError.ID.EXTERNALID_PUBLIC_INVALID_CHARS);
 
-         expect(s.getNext().externalLoc.publicId).toEqual('ABCDE{');
+         expect(s.read().externalLoc.publicId).toEqual('ABCDE{');
       });
 
       it('throws no error if the public id has all legal characters', () => {
@@ -2086,7 +2086,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expect(() => {
-            s.getNext();
+            s.read();
          }).not.toThrowError();
       });
 
@@ -2101,7 +2101,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreError(s, SyntaxError.ID.EXTERNALID_INVALID_CASE);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('two', 'ABCDE'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('two', 'ABCDE'));
       });
 
       it('reports a syntax error if SYSTEM is the wrong case', () => {
@@ -2115,7 +2115,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreError(s, SyntaxError.ID.EXTERNALID_INVALID_CASE);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('ABCDE'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('ABCDE'));
       });
 
       it('reports a syntax error if no space between the pubid and system', () => {
@@ -2141,7 +2141,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreError(s, SyntaxError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('one'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('one'));
       });
 
       it('retrieves the publicID and system literals even when spaces missing', () => {
@@ -2150,7 +2150,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreError(s, SyntaxError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
          ignoreError(s, SyntaxError.ID.EXTERNALID_PUBLIC_NO_SPACE);
 
-         expect(s.getNext().externalLoc).toEqual(new EntityLocation('two', 'one'));
+         expect(s.read().externalLoc).toEqual(new EntityLocation('two', 'one'));
       });
 
       it('reports a syntax error if there is an unknown type of external id', () => {
@@ -2169,7 +2169,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeStrictExternalSubsetStream('<!NOTATION testType PUBLIC "pubid" >');
 
          expect(() => {
-            s.getNext();
+            s.read();
          }).not.toThrowError();
       });
 
