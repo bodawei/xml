@@ -70,6 +70,7 @@ function onRunComplete(browsers, results) {
 }
 
 function onSpecComplete(browser, result) {
+//   console.log(JSON.stringify(result, undefined, 2));
    const browserName = browser.name;
    const fullTestName = result.suite.join(' • ') + ' • ' + result.description;
 
