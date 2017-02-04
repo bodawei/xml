@@ -1136,18 +1136,11 @@ describe('XmlTokenStream (Misc)', () => {
          expect(t.text).toEqual('wow ');
       });
 
-      it('throws an error token if there is a ]]> in the CharData', () => {
-         expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
-            'testing testing ]]> testing',
-            SyntaxError.ID.CHARDATA_INVALID_TEXT,
-            '"]]>" must not appear in in character data.');
-      });
-
       it('includes the "]]>" as char data in lax mode', () => {
          const s = makeLaxExternalEntityStream('testing testing ]]>testing');
-         ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
 
          expect(s.read().text).toEqual('testing testing ');
+         ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
          expect(s.read().text).toEqual(']]>');
          expect(s.read().text).toEqual('testing');
       });
@@ -1254,6 +1247,7 @@ describe('XmlTokenStream (Misc)', () => {
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('xx<?xml encoding="UTF-8"?>');
+
             ignoreToken(s, tokens.CharData);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -1263,12 +1257,11 @@ describe('XmlTokenStream (Misc)', () => {
          // Whitebox: don't check all the other possible cases, aside from below, since the report logic is common.
          it('throws an error if found along with "]]>" at the start of the document entity', () => {
             const s = makeLaxStream('xxx]]>');
-            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
-
             expectError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
                'CharData must not be outside the content of the document entity. Found "xxx".');
             ignoreToken(s, tokens.CharData);
 
+            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
             expectError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT,
                'CharData must not be outside the content of the document entity. Found "]]>".');
             ignoreToken(s, tokens.CharData);
@@ -1276,9 +1269,9 @@ describe('XmlTokenStream (Misc)', () => {
 
          it('retrieves the expected chunks when it finds "]]>"', () => {
             const s = makeLaxExternalEntityStream('wow]]>');
-
-            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
             ignoreToken(s, tokens.CharData);
+            ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
+
             const t = s.read();
             expect(t.chunks).toEqual(makeStringTokenArray([
                new TextChunk.PlainChunk(']]>', ']]>')

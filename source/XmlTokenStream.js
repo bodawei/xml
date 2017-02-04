@@ -310,36 +310,18 @@ class XmlTokenStream extends stream.Readable {
          this._cursor.getRecentChunks()));
    }
 
-   /*
-    *   [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
-    */
    _getContent() {
-      let content;
+      const parseResults = this._miscParser.parseContent(this._cursor);
 
-      do {
-         content = this._cursor.getToTerminator([ '<', '&', ']]>' ]);
+      for (let index = 0; index < parseResults.chunks.length; index++) {
+         const chunk = parseResults.chunks[index];
 
-         if (content.terminator === ']]>') {
-            this._report(SEID.CHARDATA_INVALID_TEXT);
+         this._validateContent(chunk);
 
-            if (content.chunk) {
-               this._checkContentState(content.chunk,
-                  SEID.CHARDATA_INVALID_DOC_CONTEXT, SEID.CHARDATA_INVALID_SUBSET_CONTEXT);
-               this._pushToken(new tokens.CharData(content.chunk.text, this._cursor.getRecentChunks()));
-            }
+         this._pushToken(new tokens.CharData(chunk.text, [ chunk ]));
+      }
 
-            content = {
-               chunk: this._cursor.getMatch(']]>')
-            };
-
-         } else if (!content.chunk || content.chunk.text === '') {
-            return;
-         }
-
-         this._checkContentState(content.chunk,
-            SEID.CHARDATA_INVALID_DOC_CONTEXT, SEID.CHARDATA_INVALID_SUBSET_CONTEXT);
-         this._pushToken(new tokens.CharData(content.chunk.text, this._cursor.getRecentChunks()));
-      } while (content.terminator && content.terminator !== '<');
+      this._cursor.getRecentChunks();  // flush the recent chunks
    }
 
    _getReference(start, inAttribute) {
@@ -916,6 +898,13 @@ class XmlTokenStream extends stream.Readable {
       if (this._cursor.isUTF16 && !this._cursor.hasBOM) {
          this._report(SEID.CHARSET_UTF16_NO_BOM);
       }
+   }
+
+   _validateContent(chunk) {
+      this._checkSyntax(chunk.text !== ']]>', SEID.CHARDATA_INVALID_TEXT);
+
+      this._checkContentState(chunk,
+         SEID.CHARDATA_INVALID_DOC_CONTEXT, SEID.CHARDATA_INVALID_SUBSET_CONTEXT);
    }
 
    _validateXmlDecl(start, parsed) {

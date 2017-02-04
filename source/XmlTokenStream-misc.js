@@ -17,6 +17,48 @@ const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
 class XmlTokenStreamMisc {
 
    /**********************************************************************\
+    parseContent() extracts CharData from the input.  Note that this will
+    extract a ]]> found in that content and return it in the array of
+    chunks, if that is found. Technically illegal, but we need to provide
+    enough information for a strict case
+
+    PARAM
+    cursor: The cursor to read from
+
+    RETURN
+      {
+         chunks: An array of zero or more chunks
+      }
+
+    SYNTAX
+    [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
+   \**********************************************************************/
+
+   parseContent(cursor) {
+      const results = [];
+      let content;
+      let keepGoing = true;
+
+      do {
+         content = cursor.getToTerminator([ '<', '&', ']]>' ]);
+
+         if (content.chunk && content.chunk.text !== '') {
+            results.push(content.chunk);
+            keepGoing = false;
+         }
+
+         if (content.terminator === ']]>') {
+            results.push(cursor.getMatch(']]>'));
+         }
+
+      } while (keepGoing && content.terminator && content.terminator !== '<');
+
+      return {
+         chunks: results
+      };
+   }
+
+   /**********************************************************************\
     parseComment() does the parsing to extract a comment.
 
     PARAM

@@ -26,54 +26,18 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 12/20 Sprint 24: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
  1/1  Sprint 25: 123sp [7XL 14M 11S]. Avg: 5/sprint = 25 sprints. ACTUAL: 6
  1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
- 1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
+ 1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 
-
-M 158 Make XmlTokenStream a node stream
-	- getNext
-		calls read and throws error if it is an error token
-	- read
-	- on data
-	- on error
-	all of these return both tokens and errors, unless we set syntaxErrorAsError
-	- easy to substitute in and have XmlTokenStream call push and for the _read to call _innerGetNext?
-		our getNext() should call read() and then throw an exception if appropriate.
-	- semantics around ending need attention (that's most the work). Modify tests since we can't use fake timeout
-	- ending
-		if error, then we set ended
-		if erorred on getNext or looping
-			errored set in getNext if an error is found
-		- in short, in our push routine, if we are strict, and we find an error, we push undefined/null
-		and the puzzling thing is that in innnerGetNext, we say if we don't get a token, then we must be done.
-			This works for the moment, but won't work for async.
-	Work
-		- Set up mapping or a separate file to load readable-stream in browser and stream in node
-		- subtype XmlTokenStream from ReadableStream
-		- _innerNext() becomes _read()
-			- if cursor says there is nothing, we push null
-			- I don't understand our while loop here.
-		- pushToken() should just call push()
-			- getting and tokenLoop should be removed
-			- needs to queue the token if the read buffer is full and then push the next time called
-			- if strict mode, then pushing an error should then push undefined/null
-		- getNext() moves back into XmlTokenStream
-			- it does a read()
-			- throws exception if there is an error
-	--
-√ Basic support present.  However, not sure we actually end after seeing an error.  Need to test this
-			- if strict mode, then pushing an error should then push undefined/null
-	-- eh: delivers an "end" event after "error" in a strict stream
-√ S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
-	- should just need a _transform() which passes all through except comments which it modifies and then pushes through
-√ S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
-	- sets a flag, which tokenstream validates
-
+√ Cleanup: more extraction
+Build: Finish up moving to the json reporter for our reporting.
+	Get test numbers (skipped and failures)
+	100%: 1002/1002 Tests on MacOS X 123.45: Chrome 55.0.2883/ ...
 
 -- next: 178
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- bangitem, content, elements, references
+	- bangitem, elements, references
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
 - need to add other error types
 	- generalize stuff in XmlError and XmlWarning.
@@ -1679,3 +1643,47 @@ Notes26
 -------
 This was a very distracted sprint between job hunting and hazel arrival.  Nonetheless, we did some good cleanup with the tweaks to cursor embodied in 177, and laid the groundwork for dealing with illegal and discouraged characters.  This is only checking in the routines where we have separated validation, and ignores some of the entity and attribute declaration value stuff as those are scheduled to be revisited and are a bit of a mess.
 An open question I left is what kinds of testing should be being done for the full range of discouraged and illegal characters. Should every character be being tested?
+
+Sprint 27
+=========
+M 158 Make XmlTokenStream a node stream
+	- getNext
+		calls read and throws error if it is an error token
+	- read
+	- on data
+	- on error
+	all of these return both tokens and errors, unless we set syntaxErrorAsError
+	- easy to substitute in and have XmlTokenStream call push and for the _read to call _innerGetNext?
+		our getNext() should call read() and then throw an exception if appropriate.
+	- semantics around ending need attention (that's most the work). Modify tests since we can't use fake timeout
+	- ending
+		if error, then we set ended
+		if erorred on getNext or looping
+			errored set in getNext if an error is found
+		- in short, in our push routine, if we are strict, and we find an error, we push undefined/null
+		and the puzzling thing is that in innnerGetNext, we say if we don't get a token, then we must be done.
+			This works for the moment, but won't work for async.
+	Work
+		- Set up mapping or a separate file to load readable-stream in browser and stream in node
+		- subtype XmlTokenStream from ReadableStream
+		- _innerNext() becomes _read()
+			- if cursor says there is nothing, we push null
+			- I don't understand our while loop here.
+		- pushToken() should just call push()
+			- getting and tokenLoop should be removed
+			- needs to queue the token if the read buffer is full and then push the next time called
+			- if strict mode, then pushing an error should then push undefined/null
+		- getNext() moves back into XmlTokenStream
+			- it does a read()
+			- throws exception if there is an error
+	--
+√ Basic support present.  However, not sure we actually end after seeing an error.  Need to test this
+			- if strict mode, then pushing an error should then push undefined/null
+	-- eh: delivers an "end" event after "error" in a strict stream
+√ S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
+	- should just need a _transform() which passes all through except comments which it modifies and then pushes through
+√ S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
+	- sets a flag, which tokenstream validates
+
+Notes27
+-------
