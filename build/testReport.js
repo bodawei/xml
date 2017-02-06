@@ -30,22 +30,22 @@ module.exports = (grunt) => {
       const results = {
          failure: false,
          os: osName(browserFilePath),
-         testsRun: 0,
-         testsPassed: 0,
-         testsSkipped: 0,
-         totalTime: 0,
+         run: 0,
+         passed: 0,
+         skipped: 0,
+         time: 0,
          name: browserName(browserFilePath)
       };
 
       for (const key in summary.test) {
-         results.testsRun++;
-         results.totalTime += summary.test[key].time;
+         results.run++;
+         results.time += summary.test[key].time;
 
          if (summary.test[key].result) {
-            results.testsPassed++;
+            results.passed++;
          }
          if (summary.test[key].skipped) {
-            results.testsSkipped ++;
+            results.skipped ++;
          }
       }
 
@@ -54,7 +54,7 @@ module.exports = (grunt) => {
          results.failure = true;
       }
 
-      if (results.testsRun !== results.testsPassed) {
+      if (results.run !== results.passed) {
          results.failure = true;
       }
 
@@ -62,8 +62,6 @@ module.exports = (grunt) => {
    }
 
    function testReport() {
-      grunt.log.write('wtf');
-
       var exists = fs.existsSync(this.data.dir);
       if (!exists) {
          grunt.log.error('Could not find the directory to look for coverage reports: ' + this.data.dir);
@@ -106,9 +104,9 @@ module.exports = (grunt) => {
          for (let index = 0; index < byOs[key].length; index++) {
             const browserInfo = byOs[key][index];
             process.passthroughWrite(`\t${formatName(browserInfo.name)}: ` +
-               `${(browserInfo.testsPassed / browserInfo.testsRun) * 100}% : ` +
-               `${browserInfo.testsPassed}/${browserInfo.testsRun} in ${browserInfo.totalTime}ms ` +
-               `(Skipped ${browserInfo.testsSkipped})\n`);
+               `${(browserInfo.passed / browserInfo.run) * 100}% : ` +
+               `${browserInfo.passed}/${browserInfo.run} in ${browserInfo.time}ms ` +
+               `(Skipped ${browserInfo.skipped})\n`);
          }
       }
 

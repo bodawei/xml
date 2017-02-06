@@ -111,6 +111,15 @@ describe('XmlTokenStream (Misc)', () => {
          ]));
       });
 
+      it('reports invalid and discouraged characters in the content', () => {
+         const s = makeLaxStream('<!-- b\u0001x\u0000x\uFDD1x\uFDD2xx -->');
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Characters that do not match the syntax for XML document found at: 6, 8.');
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Characters that are disouraged in XML documents found at: 10, 12.');
+      });
+
       describe('state transitions', () => {
 
          it('can not appear at the start of a document entity', () => {
@@ -173,74 +182,6 @@ describe('XmlTokenStream (Misc)', () => {
 
             expectError(s, SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "name".');
-         });
-
-         describe('characters', () => {
-
-            it('reports an error if an invalid character appears in a comment', () => {
-               const s = makeLaxExternalSubsetStream('<!-- \u0001 -->');
-
-               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-                  'Illegal characters found in XML document at indexes: 5.');
-            });
-
-            it('accepts 0x7F in a comment in 1.0/5', () => {
-               const s = makeLaxExternalSubsetStream('<!-- \u007F -->');
-
-               expectTokenType(s, tokens.Comment);
-            });
-
-            it('reports an error if 0x7F found in a comment in 1.1/2', () => {
-               const s = makeLaxStream('<!--\u007F -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.1, 2));
-
-               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-                  'Illegal characters found in XML document at indexes: 4.');
-            });
-
-            it('reports a warning if a discouraged character appears in a comment in 1.0/5', () => {
-               const s = makeLaxExternalSubsetStream('<!-- \uFDD0 -->');
-
-               expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-                  'Discouraged characters found in XML document at indexes: 5.');
-            });
-
-            it('reports no warnings if an ordinarily discouraged character appears in a 1.0/1 comment', () => {
-               const s = makeLaxStream('<!-- \uFDD0 -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 1));
-
-               expectTokenType(s, tokens.Comment);
-            });
-
-            it('reports no warnings if an ordinarily discouraged character appears in a 1.0/2 comment', () => {
-               const s = makeLaxStream('<!-- \uFDD0 -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 2));
-
-               expectTokenType(s, tokens.Comment);
-            });
-
-            it('reports a warning if uFDEE character appears in a comment in 1.0/5', () => {
-               const s = makeLaxStream('<!-- \uFDEE -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
-
-               expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-                  'Discouraged characters found in XML document at indexes: 5.');
-            });
-
-            it('reports no warning if uFDEE character appears in a comment in 1.0/4', () => {
-               const s = makeLaxStream('<!-- \uFDEE -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4));
-
-               expectTokenType(s, tokens.Comment);
-            });
-
-            it('reports no warning if uFDEE character appears in a comment in 1.0/3', () => {
-               const s = makeLaxStream('<!-- \uFDEE -->',
-                  new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 3));
-
-               expectTokenType(s, tokens.Comment);
-            });
-
          });
 
       });
@@ -370,9 +311,9 @@ describe('XmlTokenStream (Misc)', () => {
          const s = makeLaxStream('<?foo b\u0001x\u0000x\uFDD1x\uFDD2xx ?>');
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-            'Illegal characters found in XML document at indexes: 7, 9.');
+            'Characters that do not match the syntax for XML document found at: 7, 9.');
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 11, 13.');
+            'Characters that are disouraged in XML documents found at: 11, 13.');
       });
 
       describe('discuraged target', () => {
@@ -566,7 +507,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-            'Illegal characters found in XML document at indexes: 32.');
+            'Characters that do not match the syntax for XML document found at: 32.');
       });
 
       it('reports discouraged characters in the value of an attribute', () => {
@@ -575,7 +516,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 32.');
+            'Characters that are disouraged in XML documents found at: 32.');
       });
 
       describe('"attribute" equal signs', () => {
@@ -1436,9 +1377,9 @@ describe('XmlTokenStream (Misc)', () => {
          const s = makeLaxStream('<![CDATA[cd\u0001ata\uD83F\uDFFEtest">');
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-            'Illegal characters found in XML document at indexes: 11.');
+            'Characters that do not match the syntax for XML document found at: 11.');
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 16.');
+            'Characters that are disouraged in XML documents found at: 16.');
       });
 
       it('retrieves the expected chunks', () => {
@@ -1519,6 +1460,313 @@ describe('XmlTokenStream (Misc)', () => {
                'An XML or Text Declaration must be the first thing in the entity.');
          });
 
+      });
+
+   });
+
+   describe('invalid characters', () => {
+
+      it('reports no errors if a comment has no questionable characters', () => {
+         const s = makeLaxExternalSubsetStream('<!-- all good -->');
+
+         expectTokenType(s, tokens.Comment);
+      });
+
+      it('reports an error if an invalid character appears in a comment', () => {
+         const s = makeLaxExternalSubsetStream('<!-- \u0001 -->');
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Characters that do not match the syntax for XML document found at: 5.');
+      });
+
+      it('reports an error if multiple invalid character appears in a comment', () => {
+         const s = makeLaxExternalSubsetStream('<!-- \u0001  \u0002 -->');
+
+         expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+            'Characters that do not match the syntax for XML document found at: 5, 8.');
+      });
+
+      describe('in range', () => {
+         const versions = [ {
+            version: 1.0,
+            rev: 1
+         }, {
+            version: 1.0,
+            rev: 2
+         }, {
+            version: 1.0,
+            rev: 3
+         }, {
+            version: 1.0,
+            rev: 4
+         }, {
+            version: 1.0,
+            rev: 5
+         }, {
+            version: 1.1,
+            rev: 1
+         }, {
+            version: 1.1,
+            rev: 2
+         } ];
+         const v10Indices = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+            28, 29, 30, 31 ];
+         const v11Indices = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+            28, 29, 30, 31, 0x7f, 0x80, 0x81, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e,
+            0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e, 0x9f ];
+         versions[0].indices = v10Indices;
+         versions[1].indices = v10Indices;
+         versions[2].indices = v10Indices;
+         versions[3].indices = v10Indices;
+         versions[4].indices = v10Indices;
+         versions[5].indices = v11Indices;
+         versions[6].indices = v11Indices;
+
+         const chars = [];
+
+         for (let index = 0; index < 256; index++) {
+            chars.push(String.fromCharCode(index));
+         }
+
+         const input = `<!-- ${chars.join('')} -->`;
+
+         function buildTestForVersion(entry) {
+            it('0-255 in version ' + entry.version + '/' + entry.rev, () => {
+               const s = makeLaxStream(input,
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, entry.version, entry.rev));
+               const newIndices = entry.indices.map((num) => num + 5); // adjust indices to account for <!--
+
+               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+                  `Characters that do not match the syntax for XML document found at: ${newIndices.join(', ')}.`);
+            });
+
+            it('at 0xFFFE and FF in version ' + entry.version + '/' + entry.rev, () => {
+               const s = makeLaxStream('<!-- \uFFFE \uFFFD \uFFFF \uFFFC -->',
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, entry.version, entry.rev));
+
+               expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
+                  'Characters that do not match the syntax for XML document found at: 5, 9.');
+            });
+
+         }
+
+         for (let index = 0; index < versions.length; index++) {
+            buildTestForVersion(versions[index]);
+         }
+
+      });
+
+   });
+
+   describe('discouraged characters', () => {
+
+      it('reports a warning if a discouraged character appears in a comment', () => {
+         const s = makeLaxExternalSubsetStream('<!-- \uFDD0 -->');
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Characters that are disouraged in XML documents found at: 5.');
+      });
+
+      it('reports a warning if multiple discouraged characters appear in a comment', () => {
+         const s = makeLaxExternalSubsetStream('<!-- \uFDD0  \uFDD0 -->');
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Characters that are disouraged in XML documents found at: 5, 8.');
+      });
+
+      describe('in range', () => {
+         const versions = [ {
+            version: 1.0,
+            rev: 1
+         }, {
+            version: 1.0,
+            rev: 2
+         }, {
+            version: 1.0,
+            rev: 3
+         }, {
+            version: 1.0,
+            rev: 4
+         }, {
+            version: 1.0,
+            rev: 5
+         }, {
+            version: 1.1,
+            rev: 1
+         }, {
+            version: 1.1,
+            rev: 2
+         } ];
+         const v10r12LowIndices = [];
+         const v10r345LowIndices = [ 0x7f, 0x80, 0x81, 0x82, 0x83, 0x84, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d,
+            0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9c, 0x9d, 0x9e,
+            0x9f ];
+         const v11r12LowIndices = []; // There are discouraged chars, but all are also restricted.
+         versions[0].lowIndices = v10r12LowIndices;
+         versions[1].lowIndices = v10r12LowIndices;
+         versions[2].lowIndices = v10r345LowIndices;
+         versions[3].lowIndices = v10r345LowIndices;
+         versions[4].lowIndices = v10r345LowIndices;
+         versions[5].lowIndices = v11r12LowIndices;
+         versions[6].lowIndices = v11r12LowIndices;
+
+         const v10r12MidIndices = [];
+         const d0ToDf = [ 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDa, 0xDb, 0xDc, 0xDd, 0xDe,
+            0xDf ];
+         const d0ToEf = d0ToDf.concat([ 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEa, 0xEb, 0xEc,
+            0xEd, 0xEe, 0xEf ]);
+         versions[0].midIndices = v10r12MidIndices;
+         versions[1].midIndices = v10r12MidIndices;
+         versions[2].midIndices = d0ToDf;
+         versions[3].midIndices = d0ToDf;
+         versions[4].midIndices = d0ToEf; // note the change in 1.0/5!
+         versions[5].midIndices = d0ToDf;
+         versions[6].midIndices = d0ToDf;
+
+         const v10r12HighIndices = [];
+         const otherHighIndices = [];
+         let offset = 0;
+         for (let index = 0x10000; index < 0x110000; index += 0x10000) {
+            otherHighIndices.push(offset + 3);  // first char of each 2 surrogate pair
+            otherHighIndices.push(offset + 5);
+            offset += 8;
+         }
+         versions[0].highIndices = v10r12HighIndices;
+         versions[1].highIndices = v10r12HighIndices;
+         versions[2].highIndices = otherHighIndices;
+         versions[3].highIndices = otherHighIndices;
+         versions[4].highIndices = otherHighIndices;
+         versions[5].highIndices = otherHighIndices;
+         versions[6].highIndices = otherHighIndices;
+
+         // from http://www.2ality.com/2013/09/javascript-unicode.html
+         function toSurrogates(codePoint) {
+            const TEN_BITS = parseInt('1111111111', 2);
+            function u(codeUnit) {
+               return String.fromCharCode(codeUnit);
+            }
+
+            if (codePoint <= 0xFFFF) {
+               return u(codePoint);
+            }
+            codePoint -= 0x10000;
+
+            // Shift right to get to most significant 10 bits
+            const leadSurrogate = 0xD800 + (codePoint >> 10);
+
+            // Mask to get least significant 10 bits
+            const tailSurrogate = 0xDC00 + (codePoint & TEN_BITS);
+
+            return u(leadSurrogate) + u(tailSurrogate);
+         }
+
+         const chars = [];
+         const midChars = [];
+         const highChars = [];
+
+         for (let index = 0; index < 255; index++) {
+            chars.push(String.fromCharCode(index));
+         }
+
+         for (let index = 0xFD00; index <= 0xFE00; index++) {
+            midChars.push(String.fromCharCode(index));
+         }
+
+         // now characters around 0xFFFE/0xFFFF on each of several planes
+         for (let index = 0x10000; index < 0x110000; index += 0x10000) {
+            highChars.push(toSurrogates(index + 0xFFFD));
+            highChars.push(toSurrogates(index + 0xFFFE));
+            highChars.push(toSurrogates(index + 0xFFFF));
+            highChars.push(toSurrogates(index + 0x10000));
+         }
+
+         const input = `<!-- ${chars.join('')} -->`;
+         const midInput = `<!-- ${midChars.join('')} -->`;
+         const highInput = `<!-- ${highChars.join('')} -->`;
+
+         function buildTestForVersion(entry) {
+            it('0-255 are reported in version ' + entry.version + '/' + entry.rev, () => {
+               const s = makeLaxStream(input,
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, entry.version, entry.rev));
+               const newIndices = entry.lowIndices.map((num) => num + 5); // adjust indices to account for <!--
+               const t = s.read();
+               expect(t.id).toEqual(SyntaxError.ID.CHARDATA_INVALID_CHAR);
+
+               if (entry.lowIndices.length === 0) {
+                  expectTokenType(s, tokens.Comment);
+               } else {
+                  expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+                     `Characters that are disouraged in XML documents found at: ${newIndices.join(', ')}.`);
+               }
+            });
+
+            it('high 16bits are reported in version ' + entry.version + '/' + entry.rev, () => {
+               const s = makeLaxStream(midInput,
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, entry.version, entry.rev));
+               const newIndices = entry.midIndices.map((num) => num + 5); // adjust indices to account for <!--
+
+               if (entry.midIndices.length === 0) {
+                  expectTokenType(s, tokens.Comment);
+               } else {
+                  expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+                     `Characters that are disouraged in XML documents found at: ${newIndices.join(', ')}.`);
+               }
+            });
+
+            it('astral characters are reported in version ' + entry.version + '/' + entry.rev, () => {
+               const s = makeLaxStream(highInput,
+                  new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, entry.version, entry.rev));
+               const newIndices = entry.highIndices.map((num) => num + 5); // adjust indices to account for <!--
+
+               if (entry.midIndices.length === 0) {
+                  expectTokenType(s, tokens.Comment);
+               } else {
+                  expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+                     `Characters that are disouraged in XML documents found at: ${newIndices.join(', ')}.`);
+               }
+            });
+         }
+
+         for (let index = 0; index < versions.length; index++) {
+            buildTestForVersion((versions[index]));
+         }
+
+      });
+
+      it('reports no warnings if an ordinarily discouraged character appears in a 1.0/1 comment', () => {
+         const s = makeLaxStream('<!-- \uFDD0 -->',
+            new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 1));
+
+         expectTokenType(s, tokens.Comment);
+      });
+
+      it('reports no warnings if an ordinarily discouraged character appears in a 1.0/2 comment', () => {
+         const s = makeLaxStream('<!-- \uFDD0 -->',
+            new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 2));
+
+         expectTokenType(s, tokens.Comment);
+      });
+
+      it('reports a warning if uFDEE character appears in a comment in 1.0/5', () => {
+         const s = makeLaxStream('<!-- \uFDEE -->',
+            new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
+
+         expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+            'Characters that are disouraged in XML documents found at: 5.');
+      });
+
+      it('reports no warning if uFDEE character appears in a comment in 1.0/4', () => {
+         const s = makeLaxStream('<!-- \uFDEE -->',
+            new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 4));
+
+         expectTokenType(s, tokens.Comment);
+      });
+
+      it('reports no warning if uFDEE character appears in a comment in 1.0/3', () => {
+         const s = makeLaxStream('<!-- \uFDEE -->',
+            new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 3));
+
+         expectTokenType(s, tokens.Comment);
       });
 
    });

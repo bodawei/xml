@@ -575,9 +575,9 @@ describe('XmlTokenStream (dtd)', () => {
             '<!ENTITY myEntity PUBLIC "testpublic" NDATA nd\u0001ata\uD83F\uDFFEvalue">');
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-            'Illegal characters found in XML document at indexes: 46.');
+            'Characters that do not match the syntax for XML document found at: 46.');
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 51.');
+            'Characters that are disouraged in XML documents found at: 51.');
       });
 
       it('reports a syntax error if there is no name', () => {
@@ -2206,7 +2206,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expectError(s, SyntaxError.ID.CHARDATA_INVALID_CHAR,
-            'Illegal characters found in XML document at indexes: 47.');
+            'Characters that do not match the syntax for XML document found at: 47.');
       });
 
       it('reports discouraged characters in the value of a system literal', () => {
@@ -2214,7 +2214,7 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expectError(s, XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
-            'Discouraged characters found in XML document at indexes: 47.');
+            'Characters that are disouraged in XML documents found at: 47.');
       });
 
    });
