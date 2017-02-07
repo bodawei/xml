@@ -138,17 +138,17 @@ describe('XmlTokenStream', () => {
 
       it('delivers no data after an error token with a strict stream', (done) => {
          const s = makeStrictExternalEntityStream('foo<?xml encoding="utf-8"?>');
-         s.on('error', () => {}); // silence immediate error reporting
          let count = 0;
+
+         s.on('error', (error) => {
+            expect(error.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
+            done();
+         });
 
          s.on('data', (data) => {
             switch (count) {
                case 0:
                   expect(data).toBeInstanceOf(tokens.CharData);
-                  break;
-               case 1:
-                  expect(data.id).toEqual(SyntaxError.ID.XMLDECL_INVALID_CONTEXT);
-                  done();
                   break;
                default:
                   throw new Error('Got an extra call in test. Call #' + count + ' ' + JSON.stringify(data));

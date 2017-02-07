@@ -97,18 +97,22 @@ M 160 Make XmlEntityStream a transforming stream
 
 	---
 	Process
-		- resolve question about errors
-		- Rebuild basic XmlEntityStream transform with BaseStreamHandler
-			- transform() calls .add()
-			- BaseStreamHandler does a callback
+		√- resolve question about errors
+		√- Rebuild basic XmlEntityStream transform with BaseStreamHandler
+			√- transform() calls .add()
+			√- BaseStreamHandler does a callback
 				for now, we just pass through. don't check errors or starts
-			- callback checks with current stack (use shift and unshift, therefore we can always check at [0])
-			- how does end/close/finish work?
-			- does error in source work?  (e.g. strict)
+			√- callback checks with current stack (use shift and unshift, therefore we can always check at [0])
+			√- how does end/close/finish work?
+			√- does error in source work?  (e.g. strict)
 		- Build EntityStreamHandler
 			- add case in standard handler.
 			- deal with errors
 			- test close with the case where the entitystreamhandler ends after the base would be done
+		-- code cleanup
+		--> We need to be firing close
+		-- if source stream is strict, then the substreams we create should be strict
+		-- test read() interface
 		- add hierarchical error handling
 		- Build ElementStreamHandler
 			- does nothing. just passthrough.

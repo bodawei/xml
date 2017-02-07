@@ -214,7 +214,6 @@ class XmlTokenStream extends stream.Readable {
 
       if (token instanceof XmlError && !this._options.lax) {
          this.emit('error', token);
-         this.push(token); // Remove this when all tests are fixed.
 
          if (!(token instanceof XmlWarning)) {
             this._errored = true;
