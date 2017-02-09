@@ -27,7 +27,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  1/1  Sprint 25: 123sp [7XL 14M 11S]. Avg: 5/sprint = 25 sprints. ACTUAL: 6
  1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
  1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
- 2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 
+ 2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
 
 √ M 179 Consider doing a thorough test of the invalid and discouraged characters.
 	√- Turn the comment testing into the prototypical case (entity NDATA value)
@@ -126,8 +126,12 @@ M 160 Make XmlEntityStream a transforming stream
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
+	- Beginning to extract elements
+		- have attribute code mostly extracted and cleaned up
+		- need to fix comments, and then extract element and test
 	- bangitem, elements, references
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
+		- especially char references
 - need to add other error types
 	- generalize stuff in XmlError and XmlWarning.
 		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem

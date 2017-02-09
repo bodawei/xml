@@ -561,6 +561,7 @@ class XmlTokenStream extends stream.Readable {
       const name = this._cursor.getWord([ '>', '/>' ]);
 
       if (isStartOrEmpty) {
+         // best if this ate the space before getting attributes
          attributes = this._getAttributes();
       } else {
          this._cursor.getSpace();
