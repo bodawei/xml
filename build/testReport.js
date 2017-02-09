@@ -73,42 +73,66 @@ module.exports = (grunt) => {
       const failure = browserResults.reduce((soFar, result) => { return result.failure || soFar; }, false);
 
       if (failure) {
-         grunt.fail.fatal('Test result failure.');
+         grunt.fail.fatal('Tests failed.');
       }
 
-      const byOs = {};
+      const maxLengths = {};
+      const sortedNames = [];
+      const byBrowserName = {};
+
       browserResults.map((result) => {
-         byOs[result.os] = byOs[result.os] || [];
-         byOs[result.os].push(result);
+         for (const name in result) {
+            maxLengths[name] = maxLengths[name] || 0;
+            maxLengths[name] = Math.max(result[name].length, maxLengths[name]);
+         }
+         var browserMatch = /([A-Za-z]+) ([0-9\.]+)/.exec(result.name);
+         var osMatch = /^([^0-9]+) ([0-9\.]+)/.exec(result.os);
+         result.browserName = browserMatch[1];
+         result.browserVersion = browserMatch[2];
+         result.osName = osMatch[1];
+         result.osVersion = osMatch[2];
+
+         sortedNames.push(result.name);
+         byBrowserName[result.name] = result;
       });
 
-      let maxLength = 0;
-      for (const key in byOs) {
-         for (let index = 0; index < byOs[key].length; index++) {
-            const browserInfo = byOs[key][index];
-            maxLength = Math.max(browserInfo.name.length, maxLength);
-         }
-      }
-
-      function formatName(name) {
-         let nameResult = name;
-         for (let paddingSpace = name.length - 1; paddingSpace < maxLength; paddingSpace++) {
+      function padValue(value, columnWidth) {
+         let nameResult = value;
+         for (let paddingSpace = value.length - 1; paddingSpace < columnWidth; paddingSpace++) {
             nameResult += ' ';
          }
 
          return nameResult;
       }
 
-      for (const key in byOs) {
-         process.passthroughWrite(key + '\n');
-         for (let index = 0; index < byOs[key].length; index++) {
-            const browserInfo = byOs[key][index];
-            process.passthroughWrite(`\t${formatName(browserInfo.name)}: ` +
-               `${(browserInfo.passed / browserInfo.run) * 100}% : ` +
-               `${browserInfo.passed}/${browserInfo.run} in ${browserInfo.time}ms ` +
-               `(Skipped ${browserInfo.skipped})\n`);
+      sortedNames.sort();
+
+      for (let index = 0; index < sortedNames.length; index++) {
+         const name = sortedNames[index];
+         const value = [];
+         value.push(padValue((byBrowserName[name].passed / byBrowserName[name].run) * 100, maxLengths.time) + '%');
+         value.push(padValue(byBrowserName[name].browserName, maxLengths.browserName));
+         value.push(padValue(byBrowserName[name].browserVersion, maxLengths.browserVersion));
+         value.push(padValue(byBrowserName[name].osName, maxLengths.osName));
+         value.push(padValue(byBrowserName[name].osVersion, maxLengths.osVersion));
+         value.push(padValue(byBrowserName[name].time / 1000, maxLengths.time) + 'ms');
+         value.push(padValue(`${byBrowserName[name].passed}/${byBrowserName[name].run}`, maxLengths.time));
+         if (byBrowserName[name].skipped) {
+            value.push(`Skipped ${byBrowserName[name].skipped}`);
          }
+         process.passthroughWrite(value.join(' │ ') + '\n');
       }
+
+//      for (const key in byOs) {
+//         process.passthroughWrite(key + '\n');
+//         for (let index = 0; index < byOs[key].length; index++) {
+//            const browserInfo = byOs[key][index];
+//            process.passthroughWrite(`\t${formatName(browserInfo.name)}: ` +
+//               `${(browserInfo.passed / browserInfo.run) * 100}% : ` +
+//               `${browserInfo.passed}/${browserInfo.run} in ${browserInfo.time}ms ` +
+//               `(Skipped ${browserInfo.skipped})\n`);
+//         }
+//      }
 
       // where did disconnected etc come from?
       //      var testSummary = fs.readFileSync(this.data.dir +

@@ -137,6 +137,7 @@ class XmlTokenStreamElement {
    //   }
    //}
    //
+   // @ @@@@ why don't we abort when we find any unexpected terminator?
    //_getOneWordValue(cursor, options) {
    //   const allowAngleBracket = options['lax:allowOpenAngleBracketsInAttributeValues'];
    //   const terminators = allowAngleBracket ? ATTRIBUTE_VALUE_TERMINATORS_LAX : ATTRIBUTE_VALUE_TERMINATORS;

@@ -148,11 +148,14 @@ BUILD
 - Change test reporter to look at new json files per browser
 	√ add your own totals to make sure they are the same
 	√ totals and percents should come from it.
-	- Do not actually need to be counting per test, as are in the summary, as we are accumulating the same values in the reporter
+	√ - Do not actually need to be counting per test, as are in the summary, as we are accumulating the same values in the reporter
+		duh. summary IS our counting
 	- could summarize the failing tests along with the duplicates, however.
 	- Format result better. Sort by percent, then browser
 		Percent | Browser | Version | OS | Count/Count | Time | Skipped
-	- Where are the disconnected and error/failure in the overall summary coming from
+	√- Where are the disconnected and error/failure in the overall summary coming from
+		- No idea what error versus failed does.
+	- would be good to test out onBrowserComplete once some of this is done.
 	- what happened to node reporting?
 	- Aren't we supposed to be writing this to a file and then displaying it at the end on success?
 - fork quiet-grunt
