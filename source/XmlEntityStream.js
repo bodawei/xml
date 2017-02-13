@@ -4,13 +4,18 @@
 
 const stream = require('readable-stream');
 
+const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
-class EntityStreamHandler {
+
+class StreamHandler {
 
    constructor(listener, entityManager, entityStartToken) {
       this._listener = listener;
+      this._entityManager = entityManager;
+      this._entityStartToken = entityStartToken;
+
       this._queue = [];
       this._errorQueue = [];
       this._onData = this._onData.bind(this);
@@ -18,22 +23,51 @@ class EntityStreamHandler {
       this._onEnd = this._onEnd.bind(this);
 
       this.ended = false;
+   }
 
-      const cursor = entityManager.getEntity(entityStartToken.name); // don't we need to clean this up?
+   start() {
+
+      const cursor = this._entityManager.getEntity(this._entityStartToken.name); // don't we need to clean this up?
 
       if (cursor) {
-         this._stream = new XmlTokenStream(cursor, entityManager, {
+         this._stream = new XmlTokenStream(cursor, this._entityManager, {
             lax: true   // this may not be right.
          });
          this._stream.addListener('data', this._onData);
          this._stream.addListener('error', this._onError);
          this._stream.addListener('end', this._onEnd);
-
-         entityStartToken.haveEntityData = true;
+         this._entityStartToken.haveEntityData = true;
       } else {
-         //this._errorQueue.push(SyntaxError.ID.REFERENCE_NO_DECLARATION, entityStartToken); // context
+         const firstChunk = this._entityStartToken.chunks[0];
+         this._errorQueue.push(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ this._entityStartToken.name ],
+            firstChunk, firstChunk, firstChunk.entityLocation));
          this.ended = true;
       }
+   }
+
+   _onEnd() {
+      this._stream.removeListener('data', this._onData);
+      this._stream.removeListener('error', this._onError);
+      this._stream.removeListener('end', this._onEnd);
+      delete this._stream;
+      this.ended = true;
+      this._listener.handlerChange(this); // repetiation
+   }
+
+   getNextError() {
+      return this._errorQueue.shift();
+   }
+
+   getNext() {
+      return this._queue.shift();   // beware may be undefined
+   }
+
+}
+
+class EntityStreamHandler extends StreamHandler {
+
+   constructor(listener, entityManager, entityStartToken) {
+      super(listener, entityManager, entityStartToken)
    }
 
    _onData(token) {
@@ -48,24 +82,8 @@ class EntityStreamHandler {
       this._listener.handlerChange(this);
    }
 
-   _onEnd() {
-      this._stream.removeListener('data', this._onData);
-      this._stream.removeListener('error', this._onError);
-      this._stream.removeListener('end', this._onEnd);
-      delete this._stream;
-      this.ended = true;
-      this._listener.handlerChange(this); // repetiation
-   }
-
-   getNextError() {
-      return this._errorQueue.pop();
-   }
-
-   getNext() {
-      this._pending = this._queue.pop();  // check and error
-      return this._pending ? this._pending.token : undefined;   // beware may be undefined
-   }
 }
+
 
 class BaseStreamHandler {
    constructor(listener) {
@@ -83,13 +101,12 @@ class BaseStreamHandler {
    }
 
    getNext() {
-      this._pending = this._queue.pop();  // check and error
-      return this._pending ? this._pending.token : undefined;   // beware may be undefined
-   }
+      if (this._pending) {
+         this._pending.callback();
+      }
+      this._pending = this._queue.shift();  // check and error
 
-   cleanup() {
-      this._pending.callback();
-      delete this._pending;
+      return this._pending ? this._pending.token : undefined;
    }
 }
 
@@ -114,9 +131,13 @@ class XmlEntityStream extends stream.Transform {
    }
 
    handlerChange(handler) {
+      if (this._inprogress) {
+         return;
+      }
       if (handler !== this._handlerStack[0]) {
          return;
       }
+      this._inprogress = true;
 
       if (handler.getNextError) {
          let nextError = handler.getNextError();
@@ -128,16 +149,22 @@ class XmlEntityStream extends stream.Transform {
 
       let nextToken = handler.getNext();
       while (nextToken) {
+         let skipPush = false;
          if (nextToken instanceof tokens.EntityStart) {
-            this._handlerStack.unshift(new EntityStreamHandler(this, this._entityManager, nextToken));
-            this.push(nextToken);
-            break;   // think about weird conditions you get the start. Maybe this hsould be return
+            // I probably don't need to be doing the separate create and start here
+            handler = new EntityStreamHandler(this, this._entityManager, nextToken);
+            this._handlerStack.unshift(handler);
+            handler.start();
+         } else if (nextToken instanceof tokens.ElementStart && !nextToken.__hack_working) {
+            nextToken.__hack_working = true;
+            skipPush = true;
+            handler = new ElementStreamHandler(this, this._entityManager, nextToken);
+            this._handlerStack.unshift(handler);
+            handler.start();
          }
 
-         this.push(nextToken);
-
-         if (handler.cleanup) {
-            handler.cleanup();
+         if (!skipPush) {
+            this.push(nextToken);
          }
 
          nextToken = handler.getNext();
@@ -147,16 +174,117 @@ class XmlEntityStream extends stream.Transform {
          this._handlerStack.shift();
          const handler = this._handlerStack[0];
 
-         if (handler.cleanup) {
-            handler.cleanup();
-         }
-
+         this._inprogress = false;  // can we turn this into an inner loop?
          this.handlerChange(handler);
       }
+
+      this._inprogress = false;
    }
+
 }
 
 module.exports = XmlEntityStream;
+
+
+
+
+class ElementStreamHandler {
+
+   constructor(listener, entityManager, startElementToken) {
+      this._listener = listener;
+      this._entityManager = entityManager;
+      this._queue = [];
+
+      this.ended = false;
+
+      this.startElementToken = startElementToken;
+      this._working = {};
+      this._workingCount = 0;
+
+      this._endedCount = 0;
+   }
+
+   start() {
+      let elementContext;
+
+      for (let attrIndex = 0; attrIndex < this.startElementToken.attributes.length; attrIndex++) {
+         const attribute = this.startElementToken.attributes[attrIndex];
+
+         for (let index = 0; index < attribute.value.length; index++) {
+            if (attribute.value[index] instanceof tokens.EntityStart) {
+               const handler = new AttributeEntityStreamHandler(this, this._entityManager, attribute.value[index]);
+               this._working[attrIndex + '.' + index] = handler;
+               this._workingCount ++;
+               handler.start();
+            }
+         }
+      }
+
+      if (this._workingCount === 0) {
+         this._allDone();
+      }
+   }
+
+   handlerChange(handler) {
+      this._workingCount --;
+
+      if (this._workingCount === 0) {
+         this._allDone();
+      }
+   }
+
+   _allDone() {
+      for (let attrIndex = 0; attrIndex < this.startElementToken.attributes.length; attrIndex++) {
+         const attribute = this.startElementToken.attributes[attrIndex];
+         const newAttributeValue = [];
+
+         for (let index = 0; index < attribute.value.length; index++) {
+            const valuePiece = attribute.value[index];
+
+            newAttributeValue.push(valuePiece);
+
+            if (valuePiece instanceof tokens.EntityStart) {
+               const handler = this._working[attrIndex + '.' + index];
+               // @@@errors
+               let piece = handler.getNext();
+               while (piece) {
+                  newAttributeValue.push(piece);
+                  piece = handler.getNext();
+               }
+            }
+         }
+
+         attribute.value = newAttributeValue;
+      }
+
+      this.ended = true;
+      this._queue.push(this.startElementToken);
+      this._listener.handlerChange(this); // repetiation
+   }
+
+   getNext() {
+      return this._queue.shift();   // beware may be undefined
+   }
+
+}
+
+class AttributeEntityStreamHandler extends StreamHandler {
+
+   constructor(listener, entityManager, entityStartToken) {
+      super(listener, entityManager, entityStartToken)
+   }
+
+   _onData(token) {
+      this._queue.push(token);
+   }
+
+   _onError(error) {
+      this._errorQueue.push(error);
+   }
+
+}
+
+
 
 //class Context {
 //

@@ -106,18 +106,20 @@ M 160 Make XmlEntityStream a transforming stream
 			√- how does end/close/finish work?
 			√- does error in source work?  (e.g. strict)
 		- Build EntityStreamHandler
-			- add case in standard handler.
-			- deal with errors
-			- test close with the case where the entitystreamhandler ends after the base would be done
-		-- code cleanup
-		--> We need to be firing close
-		-- if source stream is strict, then the substreams we create should be strict
-		-- test read() interface
-		- add hierarchical error handling
+			√- add case in standard handler.
+			√- deal with errors
 		- Build ElementStreamHandler
 			- does nothing. just passthrough.
 			- AttributeStreamHandler  : probably related to EntityStreamHandler
 				notifies when sub streams done
+		- add hierarchical error handling
+		- mix errors and data in queues so we can tell when the error occurred
+		-- code cleanup
+		- test close in with the case where the entitystreamhandler ends after the base would be done
+		--> We need to be firing close
+		-- if source stream is strict, then the substreams we create should be strict
+		-- test read() interface
+		- should be emitting errors based on strictness
 	<I thought this would be a small sized M, but now think it is a big one. A LOT of code reshuffling>
 	< Note the attempt to make the main body of code simpler by pushing things to handlers.  And ultimately keep the interactions simpler and semantics simpler> 
 
