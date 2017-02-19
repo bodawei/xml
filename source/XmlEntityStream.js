@@ -6,216 +6,337 @@ const stream = require('readable-stream');
 
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
+const XmlError = require('./error/XmlError.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 
+/**********************************************************************\
+ An XmlEntityStream is a Transform stream that accepts XmlTokens and
+ Errors, and passes them through with these modifications:
+   -  If a StartEntity is found in the incoming stream, this will
+      attempt to expand that entity.
+   -  If a StartElement or EmptyElement is found, and its attributes
+      contain StartEntity tokens, attempt to expand those entities.
+   -  Modify any XmlErrors to give more context about where they were
+      found (relevant because an error may be found in an entity
+      references from an entity referenced from ... the document.
+\**********************************************************************/
+
+class XmlEntityStream extends stream.Transform {
+
+   constructor(entityManager, options = {}) {
+      super({
+         objectMode: true
+      });
+
+      if (!entityManager) {
+         throw Error('Must provide an XmlEntityManager instance.');
+      }
+
+      this._options = {
+         lax: options.lax || false
+      };
+
+      // baseStreamHandler will handle tokens written to this stream
+      this._baseStreamHandler = new BaseStreamHandler();
+      // Build a streamTreee handler which will process the tree of entities in the document
+      this._streamTree = new TreeStreamHandler(this, this._baseStreamHandler, entityManager);
+   }
+
+   // Pass tokens written to use to the baseStreamHandler
+   _transform(token, encoding, callback) {
+      this._baseStreamHandler.add(token, callback);
+   }
+
+   // When the streamTree changes, pull out any tokens and pass them on.
+   change(handler) {
+      if (this._errored) {
+         return;
+      }
+      let nextToken = handler.getNext();
+      while (nextToken) {
+         if (!this._options.lax && (nextToken instanceof Error || nextToken instanceof XmlError)) {
+            this.emit('error', nextToken);
+            this.push(null);
+            this._errored = true;
+            return;
+         } else {
+            this.push(nextToken);
+            nextToken = handler.getNext();
+         }
+      }
+   }
+
+}
+
+/**********************************************************************\
+ A StreamHandler provides common functionality for handling streams
+ of tokens and errors (data).
+ 
+ All StreamHandlers:
+   -  have a queue of 0 or more data items
+   -  have an "ended" flag which is true when no more data will be
+      delivered to the handler and the queue has been drained.
+   -  will notify its "listener" by calling change() any time it
+      queues something new into the available queue.
+   -  will have getNext() called after the last data has been
+      returned.
+
+ Note: These are not implemented as Transform streams, though there
+ are some significant similarities. The main reason is that for some
+ StreamHandlers, we want to be able to gather all data before
+ declaring any change. In other cases, we are merging a complex
+ collection of other streams.
+\**********************************************************************/
 
 class StreamHandler {
 
-   constructor(listener, entityManager, entityStartToken) {
+   constructor(listener) {
       this._listener = listener;
-      this._entityManager = entityManager;
-      this._entityStartToken = entityStartToken;
-
       this._queue = [];
-      this._errorQueue = [];
-      this._onData = this._onData.bind(this);
-      this._onError = this._onError.bind(this);
-      this._onEnd = this._onEnd.bind(this);
-
-      this.ended = false;
+      this._ended = false;
    }
 
-   start() {
+   get ended() {
+      return this._ended && this._queue.length === 0;
+   }
 
-      const cursor = this._entityManager.getEntity(this._entityStartToken.name); // don't we need to clean this up?
+   getNext() {
+      return this._queue.shift();
+   }
+
+}
+
+/**********************************************************************\
+ A BaseStreamHandler provides a Stream Handler that queues data from
+ the EntityStreamHandler's input, and makes them available to its
+ listener (which, in this context, is a TreeStreamHandler. Note that
+ data from the EntityStreamHandler must have a callback called for
+ each data item delivered.  This calls the callback, if present,
+ when getNext() is called.
+\**********************************************************************/
+
+class BaseStreamHandler extends StreamHandler {
+
+   constructor(listener) {
+      super(listener);
+
+      this._pending = undefined;
+   }
+
+   setListener(newListener) {
+      this._listener = newListener;
+   }
+
+   add(token, callback) {
+      if (!token) {
+         this._ended = true;
+      } else {
+         this._queue.push({
+            token,
+            callback
+         });
+      }
+
+      this._listener.change(this);
+   }
+
+   // override parent's getNext()
+   getNext() {
+      if (this._pending && this._pending.callback) {
+         this._pending.callback();
+         // note: it is not uncommon for add() to be called while in callback()
+      }
+      this._pending = this._queue.shift();
+
+      return this._pending ? this._pending.token : undefined;
+   }
+}
+
+/**********************************************************************\
+ TreeStreamHandler is a very special stream handler, which also
+ provides the heart of the functionality needed by the XmlEntityStream.
+ 
+ It listens to N different StreamHandlers at the same time. You can
+ think of the data emerging from a StreamHandler as a node in a tree.
+ Some of the data items in each node may be EntityStart or ElementStart
+ and so form a branch on the tree.  This does a depth-first traversal
+ of those nodes (and sequential processing of the data items in a
+ node).  The result is a stream of data items where each entity,
+ for example, has been expanded in place.
+ 
+ For this to work, this keeps a stack of StreamHandler's, with each
+ node in the stack processing independently. This allows us to
+ parallel process several potentially asynchrounously retrieved
+ external entities.
+ 
+ The key point is that as each StreamHandler changes, it notifies this
+ handler, and this will only respond to that change if it is the
+ leafmost node at the current moment in processing. Otherwise, it
+ ignores the change, letting the data be queued and it will retrieve
+ those when it eventually pops back down to that StreamHandler.
+\**********************************************************************/
+class TreeStreamHandler extends StreamHandler {
+
+   constructor(listener, firstHandler, entityManager) {
+      super(listener);
+      this._entityManager = entityManager;
+      this._handlerStack = [ new HandlerContext(firstHandler) ];
+      firstHandler.setListener(this);
+   }
+
+   get finished() {
+      return this._handlerStack.length === 0;
+   }
+
+   change(handler) {
+      /*
+       * Some stream handlers may change while we are in the middle of processing them.
+       * Do not respond at this time.
+       */
+      if (this._inProgress || handler !== this._handlerStack[0].handler) {
+         return;
+      }
+      this._inProgress = true;
+
+      let nextToken = handler.getNext();
+      while (nextToken) {
+         if (nextToken === this._handlerStack[0].firstToken) {
+            // delete this._handlerStack[0].firstToken;
+         } else if (nextToken instanceof tokens.EntityStart) {
+            handler = new QueuedStreamHandler(this, this._entityManager, nextToken);
+            this._handlerStack.unshift(new HandlerContext(handler, nextToken));
+            nextToken = handler.getNext();
+            continue;
+         } else if (nextToken instanceof tokens.ElementStart || nextToken instanceof tokens.EmptyElement) {
+            handler = new ElementStreamHandler(this, this._entityManager, nextToken);
+            this._handlerStack.unshift(new HandlerContext(handler, nextToken));
+            nextToken = handler.getNext();
+            continue;
+         } else if (nextToken instanceof XmlError) {
+            // add the hierarchical context of the error.
+            const contexts = nextToken.context.slice(0);
+
+            // we don't need to look at the farthest index
+            for (let index = 0; index < this._handlerStack.length - 1; index++) {
+               if (this._handlerStack[index].firstToken.chunks) {
+                  contexts.push({
+                     offset: this._handlerStack[index].firstToken.chunks[0].startOffset,
+                     location: this._handlerStack[index].firstToken.chunks[0].location
+                  });
+               }
+            }
+            nextToken.context = contexts;
+         }
+
+         this._queue.push(nextToken);
+         this._listener.change(this);
+
+         nextToken = handler.getNext();
+      }
+
+      this._inProgress = false;
+
+      if (handler.ended) {
+         this._handlerStack.shift();
+
+         if (this._handlerStack.length > 0) {
+            this.change(this._handlerStack[0].handler);
+         } else {
+            this._ended = true;
+            // notify our parent handler that we might be done.
+            this._listener.change(this);
+         }
+      }
+   }
+
+}
+
+class HandlerContext {
+
+   constructor(handler, firstToken) {
+      this.handler = handler;
+      this.firstToken = firstToken;
+   }
+
+}
+
+/**********************************************************************\
+ A QueuedStreamHandler uses the information in the provided
+ EntityStart token to retrieve the specified entity, and start parsing
+ its data into this handler's queue. If any errors are encountered,
+ they are also added to the queue at the time that they are found.
+ 
+ NOTE: This assumes it takes over the delivery of the EntityStart
+ token.  This allows us to insert any errors if we can't find the
+ entity before the start token is delivered.
+\**********************************************************************/
+class QueuedStreamHandler extends StreamHandler {
+
+   constructor(listener, entityManager, entityStartToken) {
+      super(listener);
+      this._entityStartToken = entityStartToken;
+
+      this._onData = this._onData.bind(this);
+      this._onEnd = this._onEnd.bind(this);
+
+      const cursor = entityManager.getEntity(this._entityStartToken.name);
 
       if (cursor) {
-         this._stream = new XmlTokenStream(cursor, this._entityManager, {
-            lax: true   // this may not be right.
+         this._stream = new XmlTokenStream(cursor, entityManager, {
+            lax: true
          });
          this._stream.addListener('data', this._onData);
-         this._stream.addListener('error', this._onError);
+         this._stream.addListener('error', this._onData);
          this._stream.addListener('end', this._onEnd);
          this._entityStartToken.haveEntityData = true;
       } else {
-         if (!this._entityStartToken.chunks) {
-            return;
-         }
-         const firstChunk = this._entityStartToken.chunks[0];
-         this._errorQueue.push(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ this._entityStartToken.name ],
-            firstChunk, firstChunk, firstChunk.entityLocation));
-         this.ended = true;
+         this._queue.push(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ this._entityStartToken.name ]));
+         this._ended = true;
       }
+
+      this._queue.push(this._entityStartToken);
    }
 
    _onEnd() {
       this._stream.removeListener('data', this._onData);
-      this._stream.removeListener('error', this._onError);
+      this._stream.removeListener('error', this._onData);
       this._stream.removeListener('end', this._onEnd);
       delete this._stream;
-      this.ended = true;
-      this._listener.handlerChange(this); // repetiation
-   }
-
-   getNextError() {
-      return this._errorQueue.shift();
-   }
-
-   getNext() {
-      return this._queue.shift();   // beware may be undefined
-   }
-
-}
-
-function handlerChange(handler) {
-   if (!handler) {
-      this._listener.done();
-      // notify owner that this is done
-   }
-
-   if (this._inprogress || handler !== this._handlerStack[0]) {
-      return;
-   }
-   this._inprogress = true;
-
-   let didWork = true;
-
-   while (didWork) {
-         didWork = false;
-
-         let nextError = handler.getNextError();
-         while (nextError) {
-            didWork = true;
-            this.emit('error', nextError);
-            nextError = handler.getNextError();
-         }
-
-         let nextToken = handler.getNext();
-         while (nextToken) {
-            didWork = true;
-            if (nextToken instanceof tokens.EntityStart) {
-               // I probably don't need to be doing the separate create and start here
-               handler = new EntityStreamHandler(this, this._entityManager, nextToken);
-               this._handlerStack.unshift(handler);
-               handler.start();
-               // what if an error here? we'll miss it
-            } else if (nextToken instanceof tokens.ElementStart && !nextToken.__hack_working) {
-               nextToken.__hack_working = true;
-               handler = new ElementStreamHandler(this, this._entityManager, nextToken);
-               this._handlerStack.unshift(handler);
-               handler.start();
-               nextToken = handler.getNext();
-               continue;
-            }
-
-            this._deliver(nextToken);
-            nextToken = handler.getNext();
-         }
-
-      if (handler.ended) {
-         this._handlerStack.shift();
-         handler = this._handlerStack[0];
-         didWork = true;
-         if (!handler) {
-               return;
-         }
-      }
-   }
-
-   this._inprogress = false;
-}
-
-class EntityStreamHandler extends StreamHandler {
-
-   constructor(listener, entityManager, entityStartToken) {
-      super(listener, entityManager, entityStartToken)
+      this._ended = true;
+      this._listener.change(this);
    }
 
    _onData(token) {
       this._queue.push(token);
 
-      this._listener.handlerChange(this);
+      this._listener.change(this);
    }
-
-   _onError(error) {
-      this._errorQueue.push(error);
-
-      this._listener.handlerChange(this);
-   }
-
 }
 
-class AttributeEntityStreamHandler extends StreamHandler {
-
-   constructor(listener, entityManager, entityStartToken) {
-      super(listener, entityManager, entityStartToken)
-      this._handlerStack = [ this ];
-
-      this.handlerChange = handlerChange;
-      this._finalQueue = [];
-      this._deliver = this.finalResult.bind(this);
-   }
-
-   finalResult(item) {
-      this._finalQueue.push(item);
-   }
-
-   _onEnd() {
-      this._stream.removeListener('data', this._onData);
-      this._stream.removeListener('error', this._onError);
-      this._stream.removeListener('end', this._onEnd);
-      delete this._stream;
-      this.ended = true;
-      this.handlerChange(this); // repetiation
-   }
-
-   _onData(token) {
-      this._finalQueue.push(token);
-      this.handlerChange(this);
-   }
-
-   _onError(error) {
-      this._errorQueue.push(error);
-      this.handlerChange(this);
-   }
-
-   getNext() {
-      if (this._queue.length === 0 && this.ended) {
-         this._listener.handlerChange(this);
-      }
-      return this._queue.shift();   // beware may be undefined
-   }
-
-}
-
-class ElementStreamHandler {
+/**********************************************************************\
+ A StreamQueue maintains a queues of all data returned...
+\**********************************************************************/
+class ElementStreamHandler extends StreamHandler {
 
    constructor(listener, entityManager, startElementToken) {
-      this._listener = listener;
-      this._entityManager = entityManager;
-      this._queue = [];
-
-      this.ended = false;
+      super(listener);
 
       this.startElementToken = startElementToken;
+
       this._working = {};
       this._workingCount = 0;
-
-      this._endedCount = 0;
-   }
-
-   start() {
-      let elementContext;
 
       for (let attrIndex = 0; attrIndex < this.startElementToken.attributes.length; attrIndex++) {
          const attribute = this.startElementToken.attributes[attrIndex];
 
          for (let index = 0; index < attribute.value.length; index++) {
             if (attribute.value[index] instanceof tokens.EntityStart) {
-               const handler = new AttributeEntityStreamHandler(this, this._entityManager, attribute.value[index]);
-               this._working[attrIndex + '.' + index] = handler;
+               const simpleHandler = new BaseStreamHandler();
+               const handler = new TreeStreamHandler(this, simpleHandler, entityManager);
+               simpleHandler.add(attribute.value[index]);
+               simpleHandler.add(null);
+               this._working[mkKey(attrIndex, index)] = handler;
                this._workingCount ++;
-               handler.start();
             }
          }
       }
@@ -225,11 +346,13 @@ class ElementStreamHandler {
       }
    }
 
-   handlerChange(handler) {
-      this._workingCount --;
+   change(handler) {
+      if (handler.finished) {
+         this._workingCount --;
 
-      if (this._workingCount === 0) {
-         this._allDone();
+         if (this._workingCount === 0) {
+            this._allDone()
+         }
       }
    }
 
@@ -241,352 +364,47 @@ class ElementStreamHandler {
          for (let index = 0; index < attribute.value.length; index++) {
             const valuePiece = attribute.value[index];
 
-            newAttributeValue.push(valuePiece);
-
             if (valuePiece instanceof tokens.EntityStart) {
-               const handler = this._working[attrIndex + '.' + index];
-               // @@@errors
+               const handler = this._working[mkKey(attrIndex, index)];
                let piece = handler.getNext();
                while (piece) {
-                  newAttributeValue.push(piece);
+                  if (piece instanceof Error) {
+                     this._queue.push(piece);
+                  } else {
+                     newAttributeValue.push(piece);
+                  }
                   piece = handler.getNext();
                }
+            } else {
+               newAttributeValue.push(valuePiece);
             }
          }
 
          attribute.value = newAttributeValue;
       }
 
-      this.ended = true;
+      this._ended = true;
       this._queue.push(this.startElementToken);
-      this._listener.handlerChange(this); // repetiation
-   }
-
-   getNextError() {
-      return;
-   }
-
-   getNext() {
-      return this._queue.shift();   // beware may be undefined
-   }
-
-}
-
-class BaseStreamHandler {
-   constructor(listener, entityManager, deliver) {
-      this._listener = listener;
-      this._entityManager = entityManager;
-      this._deliver = deliver;
-      this._handlerStack = [ this ];
-      this._queue = [];
-
-      this.handlerChange = handlerChange
-   }
-
-   add(token, callback) {
-      this._queue.push({
-         token,
-         callback
-      });
-
-      this.handlerChange(this);
-   }
-
-   getNextError() {
-      return;
-   }
-
-   getNext() {
-      if (this._pending) {
-         this._pending.callback();
-      }
-      this._pending = this._queue.shift();  // check and error
-
-      return this._pending ? this._pending.token : undefined;
+      this._listener.change(this); // repetiation
    }
 }
 
-class XmlEntityStream extends stream.Transform {
-
-   constructor(entityManager) {
-      super({
-         objectMode: true
-      });
-
-      if (!entityManager) {
-         throw Error('Must provide an XmlEntityManager instance.');
-      }
-
-      this._entityManager = entityManager; // remove. just needed for a few tests
-      this._baseStreamHandler = new BaseStreamHandler(this, entityManager, this.push.bind(this));
-   }
-
-   _transform(token, encoding, callback) {
-      this._baseStreamHandler.add(token, callback);
-   }
-
-   // could/should be passing to base stream handler, or should not be passing push to it
-   _done() {
-      // do nothing. will automatically end when client ends. (true??? read)
-   }
-
+function mkKey(attributeIndex, tokenIndex) {
+   return attributeIndex + '.' + tokenIndex;
 }
+
 
 module.exports = XmlEntityStream;
 
 
-//class Context {
-//
-//   constructor() {
-//      this.data = [];
-//      this.ended = false;
-//   }
-//
-//   respondToEnd() {
-//      // by default, a no-op
-//   }
-//
-//   setupHandlers(stream, entityStream) {
-//      const self = this;
-//
-//      function dataHandler(error, data) {
-//         self.data.push(error || data);
-//
-//         entityStream._tokenLoop();
-//      }
-//
-//      function endHandler() {
-//         self.ended = true;
-//         self.respondToEnd();
-//
-//         stream.off('data', dataHandler);
-//         stream.off('end', endHandler);
-//      }
-//
-//      stream.on('data', dataHandler);
-//      stream.on('end', endHandler);
-//   }
-//
-//}
-//
-//class ContentContext extends Context {
-//
-//   constructor(cursor, stream, startToken) {
-//      super();
-//
-//      this.cursor = cursor;
-//      this.stream = stream;
-//      this.start = startToken;
-//   }
-//
-//}
-//
-//class ElementContext extends Context {
-//
-//   constructor(startElementToken, contentContext) {
-//      super();
-//
-//      this.token = startElementToken;
-//      this.attrContexts = [];
-//      this.contentContext = contentContext;
-//   }
-//
-//}
-//
-//class AttributeContext extends Context {
-//
-//   constructor(attribute, elementContext, entityStream) {
-//      super();
-//
-//      this.attribute = attribute;
-//      this.value = attribute.value;
-//      this.index = 0;
-//      this.elementContext = elementContext;
-//      this.entityStream = entityStream;
-//   }
-//
-//   /*
-//    * Walk through attribute until we find an entity, then set up
-//    * potentially async retrieval of that entity. If no entity declaration
-//    * found, add an error. if no entities wrap up
-//    */
-//   expandAttribute() {
-//      let piece;
-//
-//      while (!piece && this.index < this.value.length) {
-//         this.data.push(this.value[this.index]);
-//
-//         if (this.value[this.index] instanceof tokens.EntityStart) {
-//            piece = this.value[this.index];
-//         }
-//
-//         this.index ++;
-//      }
-//
-//      if (this.index >= this.value.length) {
-//         this.ended = true;
-//         this.finallyDone();
-//         return;
-//      }
-//
-//      const cursor = this.entityStream._entityManager.getEntity(piece.name);
-//
-//      if (cursor) {
-//         piece.haveEntityData = true;
-//         this.cursor = cursor;
-//         this.stream = new XmlTokenStream(cursor, this.entityStream._entityManager, {
-//            lax: this.entityStream._options.lax
-//         });
-//
-//         this.setupHandlers(this.stream, this.entityStream);
-//      } else {
-//         reportError(SyntaxError.ID.REFERENCE_NO_DECLARATION, piece, this.elementContext.contentContext);
-//         // And continue processing.
-//         this.expandAttribute();
-//      }
-//   }
-//
-//   respondToEnd() {
-//      this.expandAttribute();
-//   }
-//
-//   finallyDone() {
-////      let attrContextStillWorking = false;
-//
-//      this.cursor = undefined;
-//      this.stream = undefined;
-//
-//      this.attribute.value = this.data;
-//
-//      for (let index = 0; index < this.elementContext.attrContexts.length; index++) {
-//         //         const attrContext = this.elementContext.attrContexts[index];
-//         // if (!attrContext.ended) {
-//         //    attrContextStillWorking = true;
-//         // }
-//      }
-//
-//      // if (!attrContextStillWorking) {
-//      this.elementContext.ended = true;
-//      this.entityStream._tokenLoop();
-//      // }
-//   }
-//
-//}
-//
-//function reportError(id, token, context) {
-//   const offset = token.chunks ? token.chunks[0].startOffset : undefined;
-//
-//   context.data.unshift(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ token.name ],
-//      offset, offset));
-//}
-//
-//class XmlEntityStreamOld extends XmlStream {
-//
-//   // This will inherit the laxness of the tokenStream, unless options is specified
-//   constructor(tokenStream, entityManager, options) {
-//      super(options);
-//
-//      if (!tokenStream || !tokenStream.on) {
-//         throw Error('The tokenStream must have an on() function.');
-//      }
-//      if (!entityManager) {
-//         throw Error('Must provide an XmlEntityManager instance.');
-//      }
-//
-//      this._entityManager = entityManager;
-//      this._contexts = [
-//         new ContentContext(tokenStream._cursor, tokenStream)
-//      ];
-//      this._options = options || tokenStream._options;   // EEW
-//
-//      this._contexts[0].setupHandlers(tokenStream, this);
-//   }
-//
-//   /**********************************************************************\
-//    getNext() returns the next data (token or error), if any, or returns
-//    undefined
-//
-//    RETURN
-//    XmlToken, SyntaxError or undefined
-//   \**********************************************************************/
-//
-//   _innerGetNext() {
-//      const currentContext = this._contexts[this._contexts.length - 1];
-//
-//      if (currentContext.data.length > 0) {
-//         const token = currentContext.data.shift();
-//
-//         if (token instanceof tokens.EntityStart) {
-//            const cursor = this._entityManager.getEntity(token.name);
-//
-//            if (cursor) {
-//               const stream = new XmlTokenStream(cursor, this._entityManager, {
-//                  lax: this._options.lax
-//               });
-//               const context = new ContentContext(cursor, stream, token);
-//               this._contexts.push(context);
-//               context.setupHandlers(stream, this);
-//               token.haveEntityData = true;
-//            } else {
-//               reportError(SyntaxError.ID.REFERENCE_NO_DECLARATION, token, currentContext);
-//            }
-//         } else if (token instanceof tokens.ElementStart || token instanceof tokens.EmptyElement) {
-//            let elementContext;
-//
-//            for (let attrIndex = 0; attrIndex < token.attributes.length; attrIndex++) {
-//               const attribute = token.attributes[attrIndex];
-//               let startEntityIndex = -1;
-//
-//               for (let index = 0; index < attribute.value.length; index++) {
-//                  if (attribute.value[index] instanceof tokens.EntityStart) {
-//                     startEntityIndex = index;
-//                     break;
-//                  }
-//               }
-//
-//               if (startEntityIndex !== -1) {
-//                  if (!elementContext) {
-//                     elementContext = new ElementContext(token, currentContext);
-//                     this._contexts.push(elementContext);
-//                  }
-//
-//                  const attrContext = new AttributeContext(attribute, elementContext, this);
-//                  elementContext.attrContexts.push(attrContext);
-//                  attrContext.expandAttribute();
-//               }
-//            }
-//
-//            if (elementContext) {
-//               return;
-//            }
-//         } else if (token instanceof XmlError) {
-//            // add the hierarchical context of the error.
-//            const contexts = token.context.slice(0);
-//
-//            // we don't need to look at index 0, as it will never have a start
-//            for (let index = this._contexts.length - 1; index > 0; index--) {
-//               contexts.push({
-//                  offset: this._contexts[index].start.chunks[0].startOffset,
-//                  location: this._contexts[index - 1].cursor.entityMd.location
-//               });
-//            }
-//            token.context = contexts;
-//         }
-//
-//         return token;
-//      } else if (currentContext.ended) {
-//         if (currentContext instanceof ElementContext) {
-//            this._contexts.pop();
-//            return currentContext.token;
-//         }
-//
-//         this._contexts.pop();
-//         if (this._contexts.length > 0) {
-//            return this._innerGetNext();
-//         } else {
-//            this._setEnded();
-//         }
-//      }
-//   }
-//
-//}
+
+/*
+TODO
+√ - extract common stuff from tests
+√ - deal with strict
+- Add error context adding
+- Finish documentation
+- pass callbacks around rather than a class with a particular method name
+- test read()
+- need special token stream for attributes
+*/
