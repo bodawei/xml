@@ -343,7 +343,7 @@ describe('XmlEntityStream', () => {
          ts.pipe(es);
       });
 
-      xit('reports the place and context of the error', (done) => {
+      it('reports the place and context of the error', (done) => {
          const ts = makeLaxStream('<?xml version="1.0"?><root>&level1;</root>',
             new EntityMetaData(undefined, undefined, undefined, new EntityLocation('systemId', 'publicId')));
          const es = new XmlEntityStream(new XmlEntityManager(), {
@@ -429,7 +429,7 @@ describe('XmlEntityStream', () => {
          ts.pipe(es);
       });
 
-      xit('reports an error if an entity is not found', () => {
+      it('reports an error if an entity is not found', () => {
          const ts = makeLaxStream('<?xml version="1.0"?><one foo="&bogus;"></one>');
          const es = new XmlEntityStream(new XmlEntityManager());
          const results = [];

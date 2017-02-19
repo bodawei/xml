@@ -38,6 +38,9 @@ class StreamHandler {
          this._stream.addListener('end', this._onEnd);
          this._entityStartToken.haveEntityData = true;
       } else {
+         if (!this._entityStartToken.chunks) {
+            return;
+         }
          const firstChunk = this._entityStartToken.chunks[0];
          this._errorQueue.push(new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ this._entityStartToken.name ],
             firstChunk, firstChunk, firstChunk.entityLocation));
@@ -64,6 +67,64 @@ class StreamHandler {
 
 }
 
+function handlerChange(handler) {
+   if (!handler) {
+      this._listener.done();
+      // notify owner that this is done
+   }
+
+   if (this._inprogress || handler !== this._handlerStack[0]) {
+      return;
+   }
+   this._inprogress = true;
+
+   let didWork = true;
+
+   while (didWork) {
+         didWork = false;
+
+         let nextError = handler.getNextError();
+         while (nextError) {
+            didWork = true;
+            this.emit('error', nextError);
+            nextError = handler.getNextError();
+         }
+
+         let nextToken = handler.getNext();
+         while (nextToken) {
+            didWork = true;
+            if (nextToken instanceof tokens.EntityStart) {
+               // I probably don't need to be doing the separate create and start here
+               handler = new EntityStreamHandler(this, this._entityManager, nextToken);
+               this._handlerStack.unshift(handler);
+               handler.start();
+               // what if an error here? we'll miss it
+            } else if (nextToken instanceof tokens.ElementStart && !nextToken.__hack_working) {
+               nextToken.__hack_working = true;
+               handler = new ElementStreamHandler(this, this._entityManager, nextToken);
+               this._handlerStack.unshift(handler);
+               handler.start();
+               nextToken = handler.getNext();
+               continue;
+            }
+
+            this._deliver(nextToken);
+            nextToken = handler.getNext();
+         }
+
+      if (handler.ended) {
+         this._handlerStack.shift();
+         handler = this._handlerStack[0];
+         didWork = true;
+         if (!handler) {
+               return;
+         }
+      }
+   }
+
+   this._inprogress = false;
+}
+
 class EntityStreamHandler extends StreamHandler {
 
    constructor(listener, entityManager, entityStartToken) {
@@ -84,109 +145,48 @@ class EntityStreamHandler extends StreamHandler {
 
 }
 
+class AttributeEntityStreamHandler extends StreamHandler {
 
-class BaseStreamHandler {
-   constructor(listener) {
-      this._listener = listener;
-      this._queue = [];
+   constructor(listener, entityManager, entityStartToken) {
+      super(listener, entityManager, entityStartToken)
+      this._handlerStack = [ this ];
+
+      this.handlerChange = handlerChange;
+      this._finalQueue = [];
+      this._deliver = this.finalResult.bind(this);
    }
 
-   add(token, callback) {
-      this._queue.push({
-         token,
-         callback
-      });
+   finalResult(item) {
+      this._finalQueue.push(item);
+   }
 
-      this._listener.handlerChange(this);
+   _onEnd() {
+      this._stream.removeListener('data', this._onData);
+      this._stream.removeListener('error', this._onError);
+      this._stream.removeListener('end', this._onEnd);
+      delete this._stream;
+      this.ended = true;
+      this.handlerChange(this); // repetiation
+   }
+
+   _onData(token) {
+      this._finalQueue.push(token);
+      this.handlerChange(this);
+   }
+
+   _onError(error) {
+      this._errorQueue.push(error);
+      this.handlerChange(this);
    }
 
    getNext() {
-      if (this._pending) {
-         this._pending.callback();
+      if (this._queue.length === 0 && this.ended) {
+         this._listener.handlerChange(this);
       }
-      this._pending = this._queue.shift();  // check and error
-
-      return this._pending ? this._pending.token : undefined;
-   }
-}
-
-class XmlEntityStream extends stream.Transform {
-
-   constructor(entityManager) {
-      super({
-         objectMode: true
-      });
-
-      if (!entityManager) {
-         throw Error('Must provide an XmlEntityManager instance.');
-      }
-
-      this._entityManager = entityManager;
-      this._baseStreamHandler = new BaseStreamHandler(this);
-      this._handlerStack = [ this._baseStreamHandler ];
-   }
-
-   _transform(token, encoding, callback) {
-      this._baseStreamHandler.add(token, callback);
-   }
-
-   handlerChange(handler) {
-      if (this._inprogress) {
-         return;
-      }
-      if (handler !== this._handlerStack[0]) {
-         return;
-      }
-      this._inprogress = true;
-
-      if (handler.getNextError) {
-         let nextError = handler.getNextError();
-         while (nextError) {
-            this.emit('error', nextError);
-            nextError = handler.getNextError();
-         }
-      }
-
-      let nextToken = handler.getNext();
-      while (nextToken) {
-         let skipPush = false;
-         if (nextToken instanceof tokens.EntityStart) {
-            // I probably don't need to be doing the separate create and start here
-            handler = new EntityStreamHandler(this, this._entityManager, nextToken);
-            this._handlerStack.unshift(handler);
-            handler.start();
-         } else if (nextToken instanceof tokens.ElementStart && !nextToken.__hack_working) {
-            nextToken.__hack_working = true;
-            skipPush = true;
-            handler = new ElementStreamHandler(this, this._entityManager, nextToken);
-            this._handlerStack.unshift(handler);
-            handler.start();
-         }
-
-         if (!skipPush) {
-            this.push(nextToken);
-         }
-
-         nextToken = handler.getNext();
-      }
-
-      if (handler.ended) {
-         this._handlerStack.shift();
-         const handler = this._handlerStack[0];
-
-         this._inprogress = false;  // can we turn this into an inner loop?
-         this.handlerChange(handler);
-      }
-
-      this._inprogress = false;
+      return this._queue.shift();   // beware may be undefined
    }
 
 }
-
-module.exports = XmlEntityStream;
-
-
-
 
 class ElementStreamHandler {
 
@@ -262,28 +262,77 @@ class ElementStreamHandler {
       this._listener.handlerChange(this); // repetiation
    }
 
+   getNextError() {
+      return;
+   }
+
    getNext() {
       return this._queue.shift();   // beware may be undefined
    }
 
 }
 
-class AttributeEntityStreamHandler extends StreamHandler {
+class BaseStreamHandler {
+   constructor(listener, entityManager, deliver) {
+      this._listener = listener;
+      this._entityManager = entityManager;
+      this._deliver = deliver;
+      this._handlerStack = [ this ];
+      this._queue = [];
 
-   constructor(listener, entityManager, entityStartToken) {
-      super(listener, entityManager, entityStartToken)
+      this.handlerChange = handlerChange
    }
 
-   _onData(token) {
-      this._queue.push(token);
+   add(token, callback) {
+      this._queue.push({
+         token,
+         callback
+      });
+
+      this.handlerChange(this);
    }
 
-   _onError(error) {
-      this._errorQueue.push(error);
+   getNextError() {
+      return;
+   }
+
+   getNext() {
+      if (this._pending) {
+         this._pending.callback();
+      }
+      this._pending = this._queue.shift();  // check and error
+
+      return this._pending ? this._pending.token : undefined;
+   }
+}
+
+class XmlEntityStream extends stream.Transform {
+
+   constructor(entityManager) {
+      super({
+         objectMode: true
+      });
+
+      if (!entityManager) {
+         throw Error('Must provide an XmlEntityManager instance.');
+      }
+
+      this._entityManager = entityManager; // remove. just needed for a few tests
+      this._baseStreamHandler = new BaseStreamHandler(this, entityManager, this.push.bind(this));
+   }
+
+   _transform(token, encoding, callback) {
+      this._baseStreamHandler.add(token, callback);
+   }
+
+   // could/should be passing to base stream handler, or should not be passing push to it
+   _done() {
+      // do nothing. will automatically end when client ends. (true??? read)
    }
 
 }
 
+module.exports = XmlEntityStream;
 
 
 //class Context {
