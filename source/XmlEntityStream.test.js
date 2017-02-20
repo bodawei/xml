@@ -16,18 +16,14 @@ const tokens = require('./XmlToken.js');
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeStrictStream = testUtils.makeStrictStream;
 const makeLaxStream = testUtils.makeLaxStream;
-const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
 const makeStringTokenArray = testUtils.makeStringTokenArray;
-const expectError = testUtils.expectError;
-const ignoreToken = testUtils.ignoreToken;
-const expectToken = testUtils.expectTokenType;
 
 const TEST_CHUNKS = [ new TextChunk.PlainChunk('from test') ];
 
 function expectTokenTypes(tokenArray, typeArray) {
    if (tokenArray.length !== typeArray.length) {
       throw new Error('Lengths in expectTokenTypes() do not match: tokenArray.length=' + tokenArray.length + ', ' +
-      'typeArray.length=' + typeArray.length)
+      'typeArray.length=' + typeArray.length);
    }
 
    for (let index = 0; index < tokenArray.length; index++) {
@@ -41,7 +37,7 @@ function expectTokenTypes(tokenArray, typeArray) {
 function expectTokenDetails(tokenArray, detailsArray) {
    if (tokenArray.length !== detailsArray.length) {
       throw new Error('Lengths in expectTokenDetails() do not match: tokenArray.length=' + tokenArray.length + ', ' +
-      'detailsArray.length=' + detailsArray.length)
+      'detailsArray.length=' + detailsArray.length);
    }
 
    for (let index = 0; index < tokenArray.length; index++) {
@@ -58,8 +54,13 @@ function expectTokenDetails(tokenArray, detailsArray) {
    }
 }
 
-function pipeAndTest(inputString, done, endHandler, manager, errorHandler, strictMode) {
-   const ts = makeLaxStream(inputString);
+function pipeAndTest(inputString, done, endHandler, other = {}) {
+   const manager = other.manager;
+   const errorHandler = other.errorHandler;
+   const strictMode = other.strictMode;
+   const entityMd = other.entityMd;
+
+   const ts = makeLaxStream(inputString, entityMd);
    const es = new XmlEntityStream(manager || new XmlEntityManager(), {
       lax: !strictMode
    });
@@ -68,7 +69,7 @@ function pipeAndTest(inputString, done, endHandler, manager, errorHandler, stric
    es.on('data', (token) => {
       results.push(token);
    });
-   es.on('error', errorHandler || function errHandler(error) { throw error });
+   es.on('error', errorHandler || function errHandler(error) { throw error; });
    es.on('end', () => {
       endHandler(results);
       done();
@@ -85,6 +86,40 @@ describe('XmlEntityStream', () => {
          expect(() => {
             new XmlEntityStream();
          }).toThrowError('Must provide an XmlEntityManager instance.');
+      });
+
+   });
+
+   describe('read()', () => {
+
+      it('retrieves all the tokens from the underlying stream', (done) => {
+         const ts = makeLaxStream('<?xml version="1.0"?><one>data</one>');
+         const es = new XmlEntityStream(new XmlEntityManager(), {
+            lax: true
+         });
+
+         ts.pipe(es);
+         let count = 0;
+         es.on('readable', () => {
+            switch (count) {
+               case 0:
+                  expect(es.read() instanceof tokens.XmlDeclaration).toEqual(true);
+                  break;
+               case 1:
+                  expect(es.read() instanceof tokens.ElementStart).toEqual(true);
+                  break;
+               case 2:
+                  expect(es.read() instanceof tokens.CharData).toEqual(true);
+                  break;
+               case 3:
+                  expect(es.read() instanceof tokens.ElementEnd).toEqual(true);
+                  done();
+                  break;
+               default:
+                  break;
+            }
+            count++;
+         });
       });
 
    });
@@ -232,50 +267,49 @@ describe('XmlEntityStream', () => {
          manager.addEntity(new tokens.EntityDeclaration('l1', '<ch>&level2;</ch>', undefined, undefined, TEST_CHUNKS));
          manager.addEntity(new tokens.EntityDeclaration('level2', '&quot;&#x41;', undefined, undefined, TEST_CHUNKS));
 
-         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, manager);
+         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, { manager: manager });
 
          function evaluate(results) {
             expectTokenDetails(results, [ {
-                  constFunc: tokens.XmlDeclaration
-               }, {
-                  constFunc: tokens.ElementStart,
-                  name: 'root'
-               }, {
-                  constFunc: tokens.EntityStart,
-                  name: 'l1'
-               }, {
-                  constFunc: tokens.ElementStart,
-                  name: 'ch'
-               }, {
-                  constFunc: tokens.EntityStart,
-                  name: 'level2'
-               }, {
-                  constFunc: tokens.EntityStart,
-                  name: 'quot'
-               }, {
-                  constFunc: tokens.CharData,
-                  text: '"'
-               }, {
-                  constFunc: tokens.EntityEnd,
-                  name: 'quot'
-               }, {
-                  constFunc: tokens.CharRef,
-                  text: 'A'
-               }, {
-                  constFunc: tokens.EntityEnd,
-                  name: 'level2'
-               }, {
-                  constFunc: tokens.ElementEnd,
-                  name: 'ch'
-               }, {
-                  constFunc: tokens.EntityEnd,
-                  name: 'l1'
-               }, {
-                  constFunc: tokens.ElementEnd,
-                  name: 'root'
-               }
-            ]);
-         };
+               constFunc: tokens.XmlDeclaration
+            }, {
+               constFunc: tokens.ElementStart,
+               name: 'root'
+            }, {
+               constFunc: tokens.EntityStart,
+               name: 'l1'
+            }, {
+               constFunc: tokens.ElementStart,
+               name: 'ch'
+            }, {
+               constFunc: tokens.EntityStart,
+               name: 'level2'
+            }, {
+               constFunc: tokens.EntityStart,
+               name: 'quot'
+            }, {
+               constFunc: tokens.CharData,
+               text: '"'
+            }, {
+               constFunc: tokens.EntityEnd,
+               name: 'quot'
+            }, {
+               constFunc: tokens.CharRef,
+               text: 'A'
+            }, {
+               constFunc: tokens.EntityEnd,
+               name: 'level2'
+            }, {
+               constFunc: tokens.ElementEnd,
+               name: 'ch'
+            }, {
+               constFunc: tokens.EntityEnd,
+               name: 'l1'
+            }, {
+               constFunc: tokens.ElementEnd,
+               name: 'root'
+            } ]);
+         }
       });
 
       it('retrieves the expected chunks', (done) => {
@@ -316,7 +350,10 @@ describe('XmlEntityStream', () => {
 
       it('reports an error to the error handler in strict mode', (done) => {
          let gotError = false;
-         pipeAndTest('<?xml version="1.0"?><root>&bogus101;</root>', done, evaluate, undefined, errorHandler, true);
+         pipeAndTest('<?xml version="1.0"?><root>&bogus101;</root>', done, evaluate, {
+            errorHandler: errorHandler,
+            strictMode: true
+         });
 
          function errorHandler(error) {
             gotError = true;
@@ -327,34 +364,141 @@ describe('XmlEntityStream', () => {
          function evaluate(results) {
             expectTokenTypes(results, [
                tokens.XmlDeclaration,
-               tokens.ElementStart,
+               tokens.ElementStart
             ]);
             expect(gotError).toEqual(true);
-         };
+         }
       });
 
       it('reports the place and context of the error', (done) => {
          const manager = new XmlEntityManager();
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5,
+            new EntityLocation('theSystem', 'thePublic'));
          manager.addEntity(new tokens.EntityDeclaration('l1', '<ch>&level2;</ch>', undefined, undefined, TEST_CHUNKS));
          manager.addEntity(new tokens.EntityDeclaration('level2', '<!--bugNoEnd', undefined, undefined, TEST_CHUNKS));
 
-         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, manager);
+         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, {
+            manager: manager,
+            entityMd: entityMd
+         });
 
          function evaluate(results) {
-            const token = results[5];
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               SyntaxError,
+               tokens.Comment,
+               tokens.EntityEnd,
+               tokens.ElementEnd,
+               tokens.EntityEnd,
+               tokens.ElementEnd
+            ]);
 
+            const token = results[5];
             expect(token.place).toEqual(new Offset(0, 12, 12));   // location of the point of the error after bugNoEnd
             expect(token.context).toEqual([ {
                offset: new Offset(0, 0, 0),  // location of start of comment in level2
                location: new EntityLocation('', undefined)
             }, {
                offset: new Offset(0, 4, 4),  // location of level2 reference in l1
-               location: undefined // new EntityLocation('', undefined)
+               location: new EntityLocation('', undefined)
             }, {
                offset: new Offset(0, 27, 27),   // location of the l2 reference in document
-               location: undefined //new EntityLocation('systemId', 'publicId')
+               location: new EntityLocation('theSystem', 'thePublic')
             } ]);
-         };
+         }
+      });
+
+      it('reports the place and context of the error in start of an entity reference', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(new tokens.EntityDeclaration('l1', '<ch>&level2;</ch>', undefined, undefined, TEST_CHUNKS));
+         manager.addEntity(new tokens.EntityDeclaration('level2', 'stuff&badRef;', undefined, undefined, TEST_CHUNKS));
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5,
+            new EntityLocation('theSystem2', 'thePublic2'));
+         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, {
+            manager: manager,
+            entityMd: entityMd
+         });
+
+         function evaluate(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               tokens.CharData,
+               SyntaxError,
+               tokens.EntityStart,
+               tokens.EntityEnd,
+               tokens.EntityEnd,
+               tokens.ElementEnd,
+               tokens.EntityEnd,
+               tokens.ElementEnd
+            ]);
+
+            const token = results[6];
+            expect(token.place).toEqual(new Offset(0, 5, 5));   // location of the point of the error after bugNoEnd
+            expect(token.context).toEqual([ {
+               offset: new Offset(0, 5, 5),  // location of start of comment in level2
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 4, 4),  // location of level2 reference in l1
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 27, 27),   // location of the l2 reference in document
+               location: new EntityLocation('theSystem2', 'thePublic2')
+            } ]);
+         }
+      });
+
+      it('reports the place and context of the error in start of an element', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(new tokens.EntityDeclaration('l1', '<ch>&level2;</ch>', undefined, undefined, TEST_CHUNKS));
+         manager.addEntity(new tokens.EntityDeclaration('level2', 'stuff<bo\u0014gus>foo</bo\u0014gus>',
+            undefined, undefined, TEST_CHUNKS));
+         const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5,
+            new EntityLocation('theSystem2', 'thePublic2'));
+         pipeAndTest('<?xml version="1.0"?><root>&l1;</root>', done, evaluate, {
+            manager: manager,
+            entityMd: entityMd
+         });
+
+         function evaluate(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               tokens.ElementStart,
+               tokens.EntityStart,
+               tokens.CharData,
+               SyntaxError,
+               tokens.ElementStart,
+               tokens.CharData,
+               SyntaxError,
+               tokens.ElementEnd,
+               tokens.EntityEnd,
+               tokens.ElementEnd,
+               tokens.EntityEnd,
+               tokens.ElementEnd
+            ]);
+
+            const token = results[6];
+            expect(token.place).toEqual(new Offset(0, 6, 6));   // location of the point of the error in the name
+            expect(token.context).toEqual([ {
+               offset: new Offset(0, 5, 5),  // location of start of comment in level2
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 4, 4),  // location of level2 reference in l1
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 27, 27),   // location of the l2 reference in document
+               location: new EntityLocation('theSystem2', 'thePublic2')
+            } ]);
+         }
       });
 
    });
@@ -412,7 +556,10 @@ describe('XmlEntityStream', () => {
 
       it('reports an error to the error handler in strict mode', (done) => {
          let gotError = false;
-         pipeAndTest('<?xml version="1.0"?><root foo="&bogus99;"></root>', done, evaluate, undefined, errorHandler, true);
+         pipeAndTest('<?xml version="1.0"?><root foo="&bogus99;"></root>', done, evaluate, {
+            errorHandler: errorHandler,
+            strictMode: true
+         });
 
          function errorHandler(error) {
             gotError = true;
@@ -425,7 +572,7 @@ describe('XmlEntityStream', () => {
                tokens.XmlDeclaration
             ]);
             expect(gotError).toEqual(true);
-         };
+         }
       });
 
       it('marks entity start as having data when the entity is defined', (done) => {
@@ -495,7 +642,7 @@ describe('XmlEntityStream', () => {
          manager.addEntity(new tokens.EntityDeclaration('level1', '(&level2;)', undefined, undefined, TEST_CHUNKS));
          manager.addEntity(new tokens.EntityDeclaration('level2', '&quot;&#x41;', undefined, undefined, TEST_CHUNKS));
 
-         pipeAndTest('<?xml version="1.0"?><root attr="&level1;">one</root>', done, evaluate, manager);
+         pipeAndTest('<?xml version="1.0"?><root attr="&level1;">one</root>', done, evaluate, { manager: manager });
 
          function evaluate(results) {
             const attrPieces = results[1].attributes[0].value;
@@ -519,7 +666,7 @@ describe('XmlEntityStream', () => {
          manager.addEntity(new tokens.EntityDeclaration('level1', '(&level2;)', undefined, undefined, TEST_CHUNKS));
          manager.addEntity(new tokens.EntityDeclaration('level2', '&quot;&#x41;', undefined, undefined, TEST_CHUNKS));
 
-         pipeAndTest('<?xml version="1.0"?><root attr="&level1;"/>', done, evaluate, manager);
+         pipeAndTest('<?xml version="1.0"?><root attr="&level1;"/>', done, evaluate, { manager: manager });
 
          function evaluate(results) {
             const attrPieces = results[1].attributes[0].value;
@@ -536,7 +683,34 @@ describe('XmlEntityStream', () => {
                tokens.EntityEnd
             ]);
          }
-       });
+      });
+
+      it('reports the place and context of the error', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(new tokens.EntityDeclaration('l1', 'stuff&level2;', undefined, undefined, TEST_CHUNKS));
+         manager.addEntity(new tokens.EntityDeclaration('level2', 'foo&badRef;', undefined, undefined, TEST_CHUNKS));
+
+         pipeAndTest('<?xml version="1.0"?><root attr="&l1;"></root>', done, evaluate, {
+            manager: manager,
+            entityMd: new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, new EntityLocation('sys3', 'pub3'))
+         });
+
+         function evaluate(results) {
+            const token = results[1];
+
+            expect(token.place).toEqual(new Offset(0, 3, 3));   // location of the point of the error at &badRef;
+            expect(token.context).toEqual([ {
+               offset: new Offset(0, 3, 3),  // location of start of the bad ref in level2
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 5, 5),  // location of level2 reference in l1
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 21, 21),   // location of the root element start
+               location: new EntityLocation('sys3', 'pub3')
+            } ]);
+         }
+      });
 
    });
 

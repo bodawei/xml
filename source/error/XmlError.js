@@ -51,6 +51,7 @@ function XmlError(id, params, place, contextOffset, entityLocation) {
 
    if (place instanceof TextChunk.PlainChunk) {
       place = place.endOffset;   // should be cloning
+      entityLocation = entityLocation || place.entityLocation;
    }
 
    if (contextOffset) {

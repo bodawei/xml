@@ -199,6 +199,7 @@ BUILD
 
 PROJECT
 --- technical debt [2M]
+- need special token stream for attributes
 M 179 Consider doing a thorough test of the invalid and discouraged characters.
 	- Turn the comment testing into the prototypical case (entity NDATA value)
 	- make a whole separate set of tests just for this
