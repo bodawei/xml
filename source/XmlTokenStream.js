@@ -13,8 +13,9 @@ const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
 const util = require('./shared/util.js');
 const XmlError = require('./error/XmlError.js');
-const XmlTokenStreamDtd = require('./XmltokenStream-dtd.js');
-const XmlTokenStreamMisc = require('./XmltokenStream-misc.js');
+const XmlTokenStreamDtd = require('./XmlTokenStream-dtd.js');
+const XmlTokenStreamElement = require('./XmlTokenStream-element.js');
+const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
 
 const SEID = SyntaxError.ID;
 const XWID = XmlWarning.ID;
@@ -171,6 +172,7 @@ class XmlTokenStream extends stream.Readable {
       this._envelopers = [];
       this._dtdParser = new XmlTokenStreamDtd();
       this._miscParser = new XmlTokenStreamMisc();
+      this._elementParser = new XmlTokenStreamElement();
       this._state = STATE.START;
 
       this._options = {
@@ -555,6 +557,101 @@ class XmlTokenStream extends stream.Readable {
     * RETURN none
     */
    _getTag(start, isStartOrEmpty) {
+//      let parsedTag;
+//
+//      if (isStartOrEmpty) {
+//         parsedTag = this._elementParser.parseStartTag(this._cursor, start, this._options);
+//      } else {
+//         parsedTag = this._elementParser.parseEndTag(this._cursor, start);
+//      }
+//
+//      if (!isStartOrEmpty) {
+//         if (parsedTag.closeChunk && parsedTag.closeChunk.text === '/>') {
+//            this._report(SEID.ELEMENT_END_INVALID_CLOSE);
+//         }
+//      }
+//
+//      this._checkSyntax(!parsedTag.preNameSpaceChunk, SEID.ELEMENT_XTRA_LEADING_SPACE);
+//
+//      if (!parsedTag.nameChunk) {
+//         this._report(SEID.ELEMENT_NO_NAME);
+//      } else {
+//         this._checkNameValid(parsedTag.nameChunk, SEID.ELEMENT_NAME_INVALID, start);
+//
+//         if (isStartOrEmpty) {
+//            const error = util.checkNameRecommendations(parsedTag.nameChunk.text, this._entityMd,
+//               XWID.ELEMENT_NAME_XMLDASH_RESERVED,
+//               XWID.ELEMENT_NAME_XML_RESERVED);
+//            this._checkWarn(!error, error, [ parsedTag.nameChunk.text ]);
+//         }
+//      }
+//
+//      if (!close) {
+//         this._report(SEID.ELEMENT_NO_CLOSE);
+//      }
+//
+//      let xtoken;
+//
+//      if (isStartOrEmpty) {
+//         // @@@ FIX THIS?
+//         const attrs = parsedTag.attributes.map((attribute) => {
+//            return {
+//               name: textOrUndef(attribute.name),
+//               value: attribute.value,
+//               quoteType: textOrUndef(attribute.quote)
+//            };
+//         });
+//         if (parsedTag.isEmpty) {
+//            xtoken = new tokens.EmptyElement(textOrBlank(parsedTag.nameChunk), parsedTag.attributes,
+//              this._cursor.getRecentChunks());
+//         } else {
+//            xtoken = new tokens.ElementStart(textOrBlank(parsedTag.nameChunk), parsedTag.attributes,
+//             this._cursor.getRecentChunks());
+//         }
+//      } else {
+//         xtoken = new tokens.ElementEnd(textOrBlank(parsedTag.nameChunk), this._cursor.getRecentChunks());
+//      }
+//
+//      if (isStartOrEmpty) {
+//         if (!parsedTag.isEmpty) {
+//            this._elementNameStack.push(xtoken.name);
+//         }
+//      } else {
+//         const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
+//
+//         if (lastElement === xtoken.name) {
+//            this._elementNameStack.pop();
+//         } else {
+//            this._reportWFError(WFEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
+//         }
+//      }
+//
+//      const nameText = textOrBlank(parsedTag.nameChunk);
+//      switch (this._entityMd.type) {
+//         case EntityMetaData.TYPE.DOCUMENT:
+//            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
+//               this._state = STATE.IN_CONTENT;
+//            } else if (this._state === STATE.IN_DTD) {
+//               this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+//            } else if (this._state !== STATE.IN_CONTENT) {
+//               this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
+//            }
+//            break;
+//         case EntityMetaData.TYPE.EXTERNAL:
+//            if (this._state === STATE.START) {
+//               this._state = STATE.IN_CONTENT;
+//            }
+//            this._checkSyntax(this._state === STATE.IN_CONTENT,
+//               SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
+//            break;
+//         case EntityMetaData.TYPE.EXTERNALSUBSET:
+//            this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
+//            break;
+//      }
+//
+//
+//      this._pushToken(xtoken);
+//      return;
       let attributes = [];
 
       const leadingSpace = this._cursor.getSpace();

@@ -28,103 +28,10 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
  1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
-
-√ M 179 Consider doing a thorough test of the invalid and discouraged characters.
-	√- Turn the comment testing into the prototypical case (entity NDATA value)
-	- make a whole separate set of tests just for this
-		√- revisit error text
-		√- check explicitly one character invalid, and multiple
-		x - do the prototypical case with both error and discouraged text
-
-		- check all the characters in 1.1/1,2 and 1.0/1-5
-			do this in several chunks.  The invalid indexes are the most important.
-				√The first 256 chars
-				then selected chunks thereafter.
-			
-M 160 Make XmlEntityStream a transforming stream
-	here, _transform() will respond to entityStart and element start and syntax error.
-		Note that this may be async since we have a callback function to call to notify of finishing
-		I dont think we actually have any async working yet, so we just need existing tests to pass.
-	- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
-	- Why do we need to call getNext multiple times is ugly. can we stop that?
-	----
-	Question: What happens when an error happens in the first stream?
-	Question: what does transform() get when underlying stream ends? I assume it automatically calls flush and ends. Presumably waiting for the callback call first.
-
-	- on start: create a BaseStreamHandler
-	- on each transform,
-		baseStreamHandler.add(data, callback)
-	- StreamHandler
-		StreamHandler(notifiee)	<-- notifies when queued, errors or finished
-		start()	<-- need to keep processing from starting in constructor
-		getQueued()
-		getErrors()
-		isFinished()
-		[doCleanup()]
-		
-		+ BaseStreamHandler
-			gets .add() as above
-			notifies on each add
-			has a doCleanup()
-		+ EntityStreamHandler
-			it is handed the start token, and creates its own steram
-			gets .on('error", "data" and "finish"
-			notifies on each new data
-			this gets passed 
-		+ ElementStreamHandler
-			handed the start token and does its own thing
-			creates multiple streams
-				each is an entityStreamHandler, I think.
-			doesn't notify until all are done
-			pushes start into queue
-	- XmlEntityHandler
-		gets a notification from a streamhandler
-			if it is the current/topmost handler, then process
-			otherwise ignore
-
-		standardHandling(token)  (this is innerGetNext)
-			for the element in the queue, do the following
- 				if error
-					modify and push
-				if start
-					create context
-					push
-				if elementStart
-					create context
-				else push
-			if this handler is finished, then pop the stack and call doCleanup if present
-			otherwise, call doCleanup() if present (no need to call when we added a frame).  (only baseStreamHandler has cleanup)
-
-	---
-	Process
-		√- resolve question about errors
-		√- Rebuild basic XmlEntityStream transform with BaseStreamHandler
-			√- transform() calls .add()
-			√- BaseStreamHandler does a callback
-				for now, we just pass through. don't check errors or starts
-			√- callback checks with current stack (use shift and unshift, therefore we can always check at [0])
-			√- how does end/close/finish work?
-			√- does error in source work?  (e.g. strict)
-		- Build EntityStreamHandler
-			√- add case in standard handler.
-			√- deal with errors
-		- Build ElementStreamHandler
-			- does nothing. just passthrough.
-			- AttributeStreamHandler  : probably related to EntityStreamHandler
-				notifies when sub streams done
-		- add hierarchical error handling
-		- mix errors and data in queues so we can tell when the error occurred
-		-- code cleanup
-		- test close in with the case where the entitystreamhandler ends after the base would be done
-		--> We need to be firing close
-		-- if source stream is strict, then the substreams we create should be strict
-		-- test read() interface
-		- should be emitting errors based on strictness
-	<I thought this would be a small sized M, but now think it is a big one. A LOT of code reshuffling>
-	< Note the attempt to make the main body of code simpler by pushing things to handlers.  And ultimately keep the interactions simpler and semantics simpler> 
+ 2/21 Sprint 29: 100sp [7XL 8M 6S]. Avg: 5/sprint = 20 sprints. ACTUAL: 3
 
 
--- next: 178
+-- next: 180
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -198,25 +105,7 @@ BUILD
 
 
 PROJECT
---- technical debt [2M]
-- need special token stream for attributes
-M 179 Consider doing a thorough test of the invalid and discouraged characters.
-	- Turn the comment testing into the prototypical case (entity NDATA value)
-	- make a whole separate set of tests just for this
-		- revisit error text
-		- check explicitly one character invalid, and multiple
-		- check all the characters in 1.1 and 1.0
-			Maybe just have a comment with all the characters in it, and get the right indices
-				- try with all 7 versions
-		- test all the discouraged characters in all 5 versions
-M 160 Make XmlEntityStream a transforming stream
-	here, _transform() will respond to entityStart and element start and syntax error.
-		Note that this may be async since we have a callback function to call to notify of finishing
-		I dont think we actually have any async working yet, so we just need existing tests to pass.
-- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
-- Why do we need to call getNext multiple times is ugly. can we stop that?
-
-
+--- technical debt []
 
 --- Entity management [8M 6S] !!!
 PLANNING
@@ -262,6 +151,7 @@ Note: Don't forget to revisit all of the validateText as you rework the values.
 PHASE 1
 S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
 
+- need special token stream for attributes
 
 Fix EntityManager cursor returns
 	- Reminder: wehn adding to the entity manager, always adds EntityDeclaration token
@@ -1800,3 +1690,125 @@ Build: Finish up moving to the json reporter for our reporting.
 
 Notes27
 -------
+None
+
+Spring 28
+=========
+M 179 Consider doing a thorough test of the invalid and discouraged characters.
+	- Turn the comment testing into the prototypical case (entity NDATA value)
+	- make a whole separate set of tests just for this
+		- revisit error text
+		- check explicitly one character invalid, and multiple
+		- check all the characters in 1.1 and 1.0
+			Maybe just have a comment with all the characters in it, and get the right indices
+				- try with all 7 versions
+		- test all the discouraged characters in all 5 versions
+M 160 Make XmlEntityStream a transforming stream
+	here, _transform() will respond to entityStart and element start and syntax error.
+		Note that this may be async since we have a callback function to call to notify of finishing
+		I dont think we actually have any async working yet, so we just need existing tests to pass.
+- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+- Why do we need to call getNext multiple times is ugly. can we stop that?
+
+√ M 179 Consider doing a thorough test of the invalid and discouraged characters.
+	√- Turn the comment testing into the prototypical case (entity NDATA value)
+	- make a whole separate set of tests just for this
+		√- revisit error text
+		√- check explicitly one character invalid, and multiple
+		x - do the prototypical case with both error and discouraged text
+
+		- check all the characters in 1.1/1,2 and 1.0/1-5
+			do this in several chunks.  The invalid indexes are the most important.
+				√The first 256 chars
+				then selected chunks thereafter.
+			
+M 160 Make XmlEntityStream a transforming stream
+	here, _transform() will respond to entityStart and element start and syntax error.
+		Note that this may be async since we have a callback function to call to notify of finishing
+		I dont think we actually have any async working yet, so we just need existing tests to pass.
+	- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+	- Why do we need to call getNext multiple times is ugly. can we stop that?
+	----
+	Question: What happens when an error happens in the first stream?
+	Question: what does transform() get when underlying stream ends? I assume it automatically calls flush and ends. Presumably waiting for the callback call first.
+
+	- on start: create a BaseStreamHandler
+	- on each transform,
+		baseStreamHandler.add(data, callback)
+	- StreamHandler
+		StreamHandler(notifiee)	<-- notifies when queued, errors or finished
+		start()	<-- need to keep processing from starting in constructor
+		getQueued()
+		getErrors()
+		isFinished()
+		[doCleanup()]
+		
+		+ BaseStreamHandler
+			gets .add() as above
+			notifies on each add
+			has a doCleanup()
+		+ EntityStreamHandler
+			it is handed the start token, and creates its own steram
+			gets .on('error", "data" and "finish"
+			notifies on each new data
+			this gets passed 
+		+ ElementStreamHandler
+			handed the start token and does its own thing
+			creates multiple streams
+				each is an entityStreamHandler, I think.
+			doesn't notify until all are done
+			pushes start into queue
+	- XmlEntityHandler
+		gets a notification from a streamhandler
+			if it is the current/topmost handler, then process
+			otherwise ignore
+
+		standardHandling(token)  (this is innerGetNext)
+			for the element in the queue, do the following
+ 				if error
+					modify and push
+				if start
+					create context
+					push
+				if elementStart
+					create context
+				else push
+			if this handler is finished, then pop the stack and call doCleanup if present
+			otherwise, call doCleanup() if present (no need to call when we added a frame).  (only baseStreamHandler has cleanup)
+
+	---
+	Process
+		√- resolve question about errors
+		√- Rebuild basic XmlEntityStream transform with BaseStreamHandler
+			√- transform() calls .add()
+			√- BaseStreamHandler does a callback
+				for now, we just pass through. don't check errors or starts
+			√- callback checks with current stack (use shift and unshift, therefore we can always check at [0])
+			√- how does end/close/finish work?
+			√- does error in source work?  (e.g. strict)
+		- Build EntityStreamHandler
+			√- add case in standard handler.
+			√- deal with errors
+		- Build ElementStreamHandler
+			- does nothing. just passthrough.
+			- AttributeStreamHandler  : probably related to EntityStreamHandler
+				notifies when sub streams done
+		- add hierarchical error handling
+		- mix errors and data in queues so we can tell when the error occurred
+		-- code cleanup
+		- test close in with the case where the entitystreamhandler ends after the base would be done
+		--> We need to be firing close
+		-- if source stream is strict, then the substreams we create should be strict
+		-- test read() interface
+		- should be emitting errors based on strictness
+	<I thought this would be a small sized M, but now think it is a big one. A LOT of code reshuffling>
+	< Note the attempt to make the main body of code simpler by pushing things to handlers.  And ultimately keep the interactions simpler and semantics simpler> 
+
+Notes28
+-------
+This sprint started out OK and then went to beyond disaster.
+179, I thought was closer to an S than a M, but it took close to 2 hours.  That was OK, becauseI didn't think 160 would actually take that long (though, I figured it was probably a long M and wouldn't get done).  however, 160 turned out to be much, much bigger than I was estimating.  It probably took the equivalent of 2-3 sprints to do.  In fact, after the time for 28 ended, I said "well, f'it, I have to do this anyway, lets get it done. That coupled with a couple times forgetting to turn on/off the punchin/out timer meant I didn't get an accurate time.
+The post-mortem for this is that 179 took longer than I expected because the tedium of writing the tests are more than I expected.  That's within the realm of "ok".  However, 160 is squarely because I was just casually saying "yeah, the logic will be the same".
+While broadly that is true, there was more change than I expected, and even once I had done that I discovered it had been left off in an incomplete state.  Some tests were turned off (I forget which) and this didn't support entities in side of entities in element attributes.  I ended up getting a version kinda working, but the logic was horrible and twisted.  I then essentially re-wrote it with cleaner abstractions.
+With this done, however, it finally gets me back to dealing with entities for real.  Which means the next planning session is going to be really important.
+
