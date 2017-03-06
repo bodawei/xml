@@ -4,6 +4,7 @@
 
 const ATTR_NO_CHUNKS = 'Attribute values have no chunks';
 const ENTITYVAL_NO_CHUNKS = 'At declaration time, entity values have no chunks';
+const SUBSET_NO_CHUNKS = 'Subset tokens never have chunks';
 
 class XmlToken {
 
@@ -14,7 +15,7 @@ class XmlToken {
 
       this.chunks = undefined;
 
-      if (chunks !== ATTR_NO_CHUNKS && chunks !== ENTITYVAL_NO_CHUNKS) {
+      if (chunks !== ATTR_NO_CHUNKS && chunks !== ENTITYVAL_NO_CHUNKS && chunks !== SUBSET_NO_CHUNKS) {
          this.chunks = chunks;
       }
    }
@@ -177,6 +178,22 @@ class DocTypeStart extends XmlToken {
 
 }
 
+class InternalSubsetStart extends XmlToken {
+
+   constructor() {
+      super(SUBSET_NO_CHUNKS);
+   }
+
+}
+
+class InternalSubsetEnd extends XmlToken {
+
+   constructor() {
+      super(SUBSET_NO_CHUNKS);
+   }
+
+}
+
 class DocTypeEnd extends XmlToken {
 }
 
@@ -242,6 +259,8 @@ module.exports = {
 
    DocTypeStart,
    DocTypeEnd,
+   InternalSubsetStart,
+   InternalSubsetEnd,
    NotationDeclaration,
    EntityDeclaration,
    PEntityDeclaration,

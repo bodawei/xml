@@ -907,6 +907,7 @@ describe('XmlTokenStream (element)', () => {
             const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE one [<one>]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectError(s, SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT,
                'An element must not be in the internal or external subset. Found "one".');
@@ -925,7 +926,9 @@ describe('XmlTokenStream (element)', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE name [<!ENTITY entName "f">]><name> ');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
             ignoreToken(s, tokens.EntityDeclaration);
+            ignoreToken(s, tokens.InternalSubsetEnd);
             ignoreToken(s, tokens.DocTypeEnd);
 
             expectTokenType(s, tokens.ElementStart);

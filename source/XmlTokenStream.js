@@ -154,6 +154,9 @@ function textOrUndef(chunk) {
  flag to true.  Note that if you pass an encoding option to a cursor,
  that is at cursor creation time specify the encoding of the data,
  that will take precedence over what this stream tells the cursor.
+
+ NOTE: things may still be available to be read when an error is
+ emitted. These are still from "before" the error.
 \**********************************************************************/
 class XmlTokenStream extends stream.Readable {
 
@@ -279,6 +282,7 @@ class XmlTokenStream extends stream.Readable {
                   this._cursor.unget(close);
                   close = undefined;
                } else {
+                  this._pushToken(new tokens.InternalSubsetEnd());
                   this._closeDocType();
                   this._popEnveloper();
                }
@@ -445,6 +449,7 @@ class XmlTokenStream extends stream.Readable {
                this._pushToken(docToken);
 
                if (parsedDocType.startInternalSubsetChunk) {
+                  this._pushToken(new tokens.InternalSubsetStart());
                   this._pushEnveloper(']', docToken);
                   this._state = STATE.IN_DTD;
                } else {

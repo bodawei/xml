@@ -269,12 +269,15 @@ describe('XmlTokenStream', () => {
 
       it('will deliver no other data after an exception in a strict stream with an error in the dtd', () => {
          const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE foo  [] ');
-
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreToken(s, tokens.DocTypeStart);
+
          expect(() => {
             s.read();
          }).toThrowError('Missing closing ">" for in the document type.');
+
+         ignoreToken(s, tokens.InternalSubsetStart);
+         ignoreToken(s, tokens.InternalSubsetEnd);
 
          expect(s.read()).toBeNull();
       });

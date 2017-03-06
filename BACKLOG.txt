@@ -28,7 +28,17 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
  1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
- 2/21 Sprint 29: 100sp [7XL 8M 6S]. Avg: 5/sprint = 20 sprints. ACTUAL: 3
+ 2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: ?
+
+
+√ 180: S: Turn internal subset into a separate start/end token within document type
+	T: Rework
+	CHECK
+
+M Change entity ref start/end to just entityref. Let entitystream turn into start/end
+	T: Rework
+
+
 
 
 -- next: 180
@@ -36,8 +46,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 CLEANUP
 - continue to pull out all parsing logic
 	- Beginning to extract elements
-		- have attribute code mostly extracted and cleaned up
-		- need to fix comments, and then extract element and test
+		- attributes seem to be going into an infinite loop.
+			- suggest commenting back in, and then adding one "with attributes" at a time
 	- bangitem, elements, references
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
 		- especially char references
@@ -107,110 +117,113 @@ BUILD
 PROJECT
 --- technical debt []
 
---- Entity management [8M 6S] !!!
-PLANNING
-1) Review Entity stuff in standard https://www.w3.org/TR/2006/REC-xml11-20060816/#sec-physical-struct
-2) Review streams https://nodejs.org/api/stream.html#stream_implementing_a_transform_stream
-- Note, eratta in 1.1/2 has an improved wording on 4.1
+--- Entity management [3L 7M 3S] !!!  [39]
 
-HIGH LEVEL
-0: We assume we've switched to Node Streams by the time we get here
-1: Make sure we're sure what we are getting entity and attribute values back consistently:
-   *** NEED TO VALIDATE WHICH WE NEED TO CHANGE
-	Attributes coming out of XmlTokenStream will be
-		[ TEXT, ENTITY_START, ENTITY_END, TEXT, CHARREF ]
-	AttDecl default values should be like the attributes.  But we need the offsets on the chunks
-	Internal Entity Values should be  (note: need offsets on each)
-		external subset: [TEXT]
-		internal subset: [ TEXT, CHARREF, TEXT ]
-	External Entity Values should be a string cursor directly
-2: Add new cursors and streams
+WALKTHROUGH
+* No GE or PE's
+- xml token stream
+- possible external-subset adder
+- entity stream does nothing (no error expansion)
+* GE's declared in internal and external. Used in content and attributes and attdecl's
+- xml token stream
+	- just identifies refs in content, entity values, attributes, and attdecl's
+- external subset brings in the external subset
+	- also identiies refs in all cases
+- entity stream
+	- will expand entities in
+		- content
+		- attributes
+		- attdecl's!!! @@@
+		- entity values
+	@ remember there are cases where you want to be able to reasonably process without anything external.  
+* GE's and PE's declared in both
+- xml token does the same
+- external subset brings in external subet
+- entity stream
+	- will expand each sequentially
+	- including PE's in @@@@
+		- content 
+		- free-floating in dtd
+		- in entity values (sounds like can not in internal?)
+		- in attr defs (sounds like can not in internal?)
+		- in any markup (in external)
+	- Both PE and GE can be quite recursive.  However, PE's will have been expanded in any internal subset before we get to anything that consumes them.
+* External subset
+	- Same as above. but not that PE's can appear in markup
+	- should be parsed ok by entity stream
+* External entity
+	- no PE's
+	- do not need to do ANY parsing of these at load time. Will be consumed by entity stream properly when it comes up
+
+RESEARCH
+- Must design PERef inline
+	- surrounded by spaces unless in entity value!
+	- strongly looks like these can't be in attrlist defaults
+	- so, how do you find the end if you find a PERef in markup?  I suggest a scan for > but that is smart enough to deal with quotes since > might be in a quoted value in some of these cases.
+	- so all markup parsers need to be re-entrant with more complete data, namely the expanded peref (cursor?) and the unparsed text.
+- When cleanup done, rather than a flag to xmltoken, we should have a separate stream type?
+	-- yes.  I t seems like a good idea to have multiple stream types once we have finished the cleanup separation
+		- note that this means a bunch of the tests will fail.  :-|
+
+
+M: Entity Stream identifies entity declarations and adds to entity manager
+	- It will create its own entity manager unless handed one in options
+		- breaks tests
+
+M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
+	- does token stream parse this correctly and barf if context is wrong?
+
+L F need a single interface for both browser and node
+	- EntityLocations need to know enough info so that the entity manager can call the right retriever
+M E need entity manager to retrieve remote entities
+	- external entities (can just wrap a cursor. may need to think about entity locations -- caching cursor?  but don't cache if too big!)
+	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)
+
+S: I Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
+	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
+
+--- All the below is needed, but depends on cleanup work
+
+L: Do a common parser for entity values, attribute decls and attributes
+	T: Rework
+	DEPENDS on cleanup of references
+	- finds references.
+		- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
+		- do we actually want to identify GRefs in entity values?  I don't think so.
+		- has to barf for the < in attributes and attrdecl
+
+M: Add parsing to entity values
+	T: Rework
+	DEPENDS on L
+	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
+		- @@@ need to think about the cursor that will need to consume these. 
+	- Biggest effort here is going to be cleaning up tests
+
+M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+	T: Rework
+	DEPENDS on cleanup
+	DEPENDS on L
+	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
+
+S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+	T: Rework
+	DEPENDS on L
+	- Biggest effort here is going to be cleaning up tests
+
+
+M: A Entity manager will insert arbitrary markup tokens into attributes
+	DEPENDS on cleanup with references
 	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.  This is used internally when entitystream is filling in an attribute
+
+
+L: B We need to deal with the internal entities that have character references in them (NEEDS PLANNING)
+	DEPENDS on reworked entity values
 	- a cursor which has a different offset (for consuming entity values)
 	- a cursor which deals with the internal subset mess
-3: Adding the above to entity stream
-4: Resume work on EntityManager
-5: Resource retrieval
+	- it needs to cope with the result of PERefs in there too. they'll ahve been expanded, but tokens still there
 
-It seems like it would be best to do this in vertical slices, rather than the horizontal ones this describes.  e.g.
-- Make entity stream handle entity refs in attributes
-	- create the tokenstream
-	- wire into entitystream
-	- test with some special entity values
-- Make sure entity stream can handle a bunch of attributes on one element
-- Make entity manager handle external entity values
-	- need some kind of retrieval. Could probably fake it.
-- Make entity manager handle external subset entity values
-	- cursor needs to be able to handle offsets
-- make entity manager handle internal subset entity values
-	- need special cursor
-- Build out better retrieval (could do this earlier depending on build support)
+- If we pass something through entity stream multiple times, how to avoid adding context onto errors repeatedly?  How do we keep from manglign errors that happen in the document?: it's OK, because it looks at the stack
 
-Note: Don't forget to revisit all of the validateText as you rework the values.
-
-PHASE 1
-S 135 Modify entity declaration code so for internal entities get [ TEXT, CHARREF, TEXT] but external just [TEXT]
-
-- need special token stream for attributes
-
-Fix EntityManager cursor returns
-	- Reminder: wehn adding to the entity manager, always adds EntityDeclaration token
-
-	- external entity: just wrap an ordinary cursor around it.  Need to pass the entity location there
-		- entityLocation needs to be included when adding
-		- Probably need a caching cursor so we don't have to refresh
-	- internal/external subset entity: wrap cursor around it.  Will need artifical offset here
-		- entityLocation needs to be included when adding
-	- internal/internal subset: need special cursor
-Fix EntityStream's consumption of entities
-	- need a special token stream if this is for attributes, since we shouldn't be parsing elements etc here.
-
-
-M 136 Entity manager will wrap an XmlStringCursor around text. String cursor will need a special offset and entitylocation for this in its options
-M 134 Entity manager will wrap an XmlStringCursorWrapper around [TEXT, CHARREF, TEXT]. It will actually cache a TEXT version of the those concatenated together. Ordinary string cursor can then be used, but this then doctors the chunks that are returned.
-M 133 Need a special token stream for EntityStream which inserts entity values in attributes. This just looks for text, and references. This actually shouldn't be too hard to do as a separate class.
-	Attributes with references that themselves have references should work
-	Attributes that take an async amount of time to come back will fail (see commented out code in XmlEntityStream
-	Need to test error handling for attribute references
-
-S 138 EntityStream test that we are, in fact, unsubscribing from child streams.
-S 139 EntityStream - doesn't care if source is lax or strict
-S 140 EntityStream should be unsubscribing in case of error too?
-S 141 EntityStream optimize by not calling __tokenLoop if we aren't on the top in entity stream
-
-Enhance entityManager to do retrieval
-S 121 add EntityRetriever to EntityManager
-	change EntityRetriever to:
-	get(location, callback(error, success))
-      add eager flag
-            sets flag so get knows is fetching
-S 122 addEntity should start fetching if eager flag on
-S 123 get should turn around and retrieve again if eager on
-            should put a callback in structure so that can call back if proper
-M 135 XmlEntityManager needs some kind of cache so it isn't always re-fetching.  Should be able to tee an async thing?
-
-M 115 Advanced XmlEntityStream
-	When it encounters: DOCTYPE or entityDecl with an externalID Sets up info in EntityManager
-	EntityManager should be set up to be either greedy or JIT
-		if greedy fetches all immediately
-		if JIT waits until a request and then fetches
-	returns a stream
-		This will be a dummy stream if we have already retrieve the whole thing.
-
-
-M 112: Browser entity retriever. For now must be sync to get a string cursor
-	PLAN THIS -- note: node will be unhappy for a bit.  in fact, code coverage is going to be a big problem because of the conditional nature here.
-		- in fact maybe we should end up with a module that wraps both browser and node to one api?
-		- I think 112 is going to become a research task.
-	Does an XMLHttpRequest (Can we in IE?)
-	http://jasmine.github.io/2.0/ajax.html
-		doesn't do async.  Doesn't do timeouts.  So, you'll end up layering more on top
-	how to deal with files?
-M 113: Node entity retriever. For now must be sync to get a string cursor. but testing can test both
-	use https://github.com/node-nock/nock
-	This also needs to deal with files 
-S 154  Provide a cross environment "location" which StringCursor or EntityInfo or EntityLocation uses to default to either process.cwd() or window.location
-87:S: Handle PEReferences and character references in entity values
 
 --- DTD [3XL]
 21:XL Read element content structure

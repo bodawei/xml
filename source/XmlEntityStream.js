@@ -57,9 +57,9 @@ class XmlEntityStream extends stream.Transform {
     * Don't respond to any changes if we are in an error state.
     */
    _treeChanged(handler) {
-      if (this._errored) {
-         return;
-      }
+//      if (this._errored) {
+//         return;
+//      }
 
       let nextToken = handler.getNext();
       while (nextToken) {

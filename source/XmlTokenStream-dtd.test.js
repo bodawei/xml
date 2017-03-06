@@ -56,7 +56,9 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetStart);
          expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetEnd);
          expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
       });
 
@@ -65,9 +67,11 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetStart);
          expect(s.read()).toBeInstanceOf(tokens.Space);
          expect(s.read()).toBeInstanceOf(tokens.EntityDeclaration);
          expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetEnd);
          expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
       });
 
@@ -87,9 +91,11 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.XmlDeclaration);
 
          expect(s.read()).toBeInstanceOf(tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetStart);
          expect(s.read()).toBeInstanceOf(tokens.Space);
          expect(s.read()).toBeInstanceOf(tokens.EntityDeclaration);
          expect(s.read()).toBeInstanceOf(tokens.Space);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetEnd);
          expect(s.read()).toBeInstanceOf(tokens.DocTypeEnd);
          expect(s.read().name).toEqual('testType');
       });
@@ -108,6 +114,7 @@ describe('XmlTokenStream (dtd)', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreToken(s, tokens.DocTypeStart);
+         expect(s.read()).toBeInstanceOf(tokens.InternalSubsetStart);
          ignoreToken(s, tokens.Space);
          ignoreToken(s, tokens.EntityDeclaration);
          ignoreToken(s, tokens.Space);
@@ -189,9 +196,13 @@ describe('XmlTokenStream (dtd)', () => {
             new TextChunk.PlainChunk('[')
          ], 21));
 
+         expect(s.read().chunks).toBeUndefined();  // start internal subset
+
          expect(s.read().chunks).toEqual(makeStringTokenArray([
             new TextChunk.WithSpaceChunk(' ', ' ')
          ], 55));
+
+         expect(s.read().chunks).toBeUndefined();  // end internal subset
 
          expect(s.read().chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk(']'),
@@ -275,6 +286,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeLaxStream('<?xml version="1.1" encoding="usascii"?><!DOCTYPE one [<!DOCTYPE two >]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectError(s, SyntaxError.ID.DOCTYPE_INVALID_DOC_CONTEXT,
                'A DOCTYPE must be declared once between the XML Declaration and the content.');
@@ -463,6 +475,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!NOTATION frog PUBLIC "foo">]> ');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectTokenType(s, tokens.NotationDeclaration);
          });
@@ -777,6 +790,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ENTITY name PUBLIC "test" >]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectTokenType(s, tokens.EntityDeclaration);
          });
@@ -1139,6 +1153,7 @@ describe('XmlTokenStream (dtd)', () => {
             const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ELEMENT elementName ANY>]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectTokenType(s, tokens.ElementDeclaration);
          });
@@ -1956,6 +1971,7 @@ describe('XmlTokenStream (dtd)', () => {
                '<?xml version="1.0"?><!DOCTYPE testType [<!ATTLIST elementName attrName CDATA #REQUIRED >]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
+            ignoreToken(s, tokens.InternalSubsetStart);
 
             expectTokenType(s, tokens.AttrListDeclaration);
          });
