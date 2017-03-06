@@ -209,7 +209,7 @@ class TreeStreamHandler extends StreamHandler {
       while (nextToken) {
          if (nextToken === this._peek().firstToken) {
             // Do no further processing of this token, as we already handled it
-         } else if (nextToken instanceof tokens.EntityStart) {
+         } else if (nextToken instanceof tokens.EntityReference) {
             handler = new QueuedStreamHandler(this._childChanged, this._entityManager, nextToken);
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
             nextToken = handler.getNext();
@@ -267,7 +267,7 @@ class TreeStreamHandler extends StreamHandler {
 
 /**********************************************************************\
  A QueuedStreamHandler uses the information in the provided
- EntityStart token to retrieve the specified entity, and start parsing
+ EntityRerence token to retrieve the specified entity, and start parsing
  its data into this handler's queue. If any errors are encountered,
  they are also added to the queue at the time that they are found.
 
@@ -277,28 +277,30 @@ class TreeStreamHandler extends StreamHandler {
 \**********************************************************************/
 class QueuedStreamHandler extends StreamHandler {
 
-   constructor(changeCallbackCallback, entityManager, entityStartToken) {
+   constructor(changeCallbackCallback, entityManager, entityReferenceToken) {
       super(changeCallbackCallback);
-      this._entityStartToken = entityStartToken;
 
       this._onData = this._onData.bind(this);
       this._onEnd = this._onEnd.bind(this);
 
-      const cursor = entityManager.getEntity(this._entityStartToken.name);
+      const cursor = entityManager.getEntity(entityReferenceToken.name);
+      let startToken = entityReferenceToken;
 
       if (cursor) {
+         this._entityName = entityReferenceToken.name;
+         startToken = new tokens.EntityStart(entityReferenceToken.name,
+            entityReferenceToken.chunks || tokens.ATTR_NO_CHUNKS); // if no chunks, it must be an attribute
          this._stream = new XmlTokenStream(cursor, entityManager, {
             lax: true
          });
          this._stream.addListener('data', this._onData);
          this._stream.addListener('error', this._onData);
          this._stream.addListener('end', this._onEnd);
-         this._entityStartToken.haveEntityData = true;
       } else {
-         const error = new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ this._entityStartToken.name ]);
+         const error = new SyntaxError(SyntaxError.ID.REFERENCE_NO_DECLARATION, [ entityReferenceToken.name ]);
 
-         if (entityStartToken.chunks) {
-            const firstChunk = entityStartToken.chunks[0];
+         if (entityReferenceToken.chunks) {
+            const firstChunk = entityReferenceToken.chunks[0];
             error.place = firstChunk.startOffset;
          }
 
@@ -307,10 +309,11 @@ class QueuedStreamHandler extends StreamHandler {
          this._noMoreInput = true;
       }
 
-      this._queue.push(this._entityStartToken);
+      this._queue.push(startToken);
    }
 
    _onEnd() {
+      this._queue.push(new tokens.EntityEnd(this._entityName, []));
       this._stream.removeListener('data', this._onData);
       this._stream.removeListener('error', this._onData);
       this._stream.removeListener('end', this._onEnd);
@@ -352,7 +355,7 @@ class ElementStreamHandler extends StreamHandler {
          const attribute = startElementToken.attributes[attrIndex];
 
          for (let index = 0; index < attribute.value.length; index++) {
-            if (!(attribute.value[index] instanceof tokens.EntityStart)) {
+            if (!(attribute.value[index] instanceof tokens.EntityReference)) {
                continue;
             }
 
@@ -391,7 +394,7 @@ class ElementStreamHandler extends StreamHandler {
          for (let index = 0; index < attribute.value.length; index++) {
             const valuePiece = attribute.value[index];
 
-            if (valuePiece instanceof tokens.EntityStart) {
+            if (valuePiece instanceof tokens.EntityReference) {
                const handler = this._working[mkKey(attrIndex, index)];
 
                let piece = handler.getNext();

@@ -35,13 +35,13 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 	T: Rework
 	CHECK
 
-M Change entity ref start/end to just entityref. Let entitystream turn into start/end
+√ 181: M Change entity ref start/end to just entityref. Let entitystream turn into start/end
 	T: Rework
 
 
 
 
--- next: 180
+-- next: 182
 =============================================
 CLEANUP
 - continue to pull out all parsing logic

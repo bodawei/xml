@@ -359,16 +359,12 @@ class XmlTokenStream extends stream.Readable {
          this._checkSyntax(closingSemicolon, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
          if (inAttribute) {
-            return [ new tokens.EntityStart(entityName, false, tokens.ATTR_NO_CHUNKS),
-               new tokens.EntityEnd(entityName, tokens.ATTR_NO_CHUNKS) ];
+            return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
          } else {
-            const startToken = new tokens.EntityStart(entityName, false, this._cursor.getRecentChunks());
-
             this._checkContentState(start,
                SEID.REFERENCE_INVALID_DOC_CONTEXT, SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
 
-            this._pushToken(startToken);
-            this._pushToken(new tokens.EntityEnd(entityName, this._cursor.getRecentChunks()));
+            this._pushToken(new tokens.EntityReference(entityName, this._cursor.getRecentChunks()));
          }
       }
    }

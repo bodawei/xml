@@ -596,16 +596,12 @@ describe('XmlTokenStream', () => {
       it('retrieves the expected chunks', () => {
          const s = makeStrictExternalEntityStream('&lt;');
 
-         let t = s.read();
+         const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
             new TextChunk.PlainChunk('&'),
             new TextChunk.PlainChunk('lt'),
             new TextChunk.PlainChunk(';')
          ]));
-
-         // end entity has no chunks
-         t = s.read();
-         expect(t.chunks).toEqual([]);
       });
 
       describe('state transitions', () => {
@@ -637,7 +633,7 @@ describe('XmlTokenStream', () => {
          it('can appear at the start of an external entity', () => {
             const s = makeStrictExternalEntityStream('&amp;');
 
-            expectTokenType(s, tokens.EntityStart);
+            expectTokenType(s, tokens.EntityReference);
          });
 
          it('transitions to after Text Declaration if appears at the start of an external entity', () => {
@@ -646,8 +642,8 @@ describe('XmlTokenStream', () => {
             s.on('error', (err) => {
                strictError = err;
             });
-            ignoreToken(s, tokens.EntityStart);
-            ignoreToken(s, tokens.EntityEnd);
+            expectTokenType(s, tokens.EntityReference);
+            expect(s.read()).toBeNull();  // goose the stream into reading the next token which will find the error
 
             expect(strictError.message).toEqual('An XML or Text Declaration must be the first thing in the entity.');
          });
@@ -674,7 +670,7 @@ describe('XmlTokenStream', () => {
             const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>&amp;');
             ignoreToken(s, tokens.TextDeclaration);
 
-            expectTokenType(s, tokens.EntityStart);
+            expectTokenType(s, tokens.EntityReference);
          });
 
          it('can appear within elements in the document entity', () => {
@@ -682,13 +678,12 @@ describe('XmlTokenStream', () => {
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.ElementStart);
 
-            expectTokenType(s, tokens.EntityStart);
+            expectTokenType(s, tokens.EntityReference);
          });
 
          it('changes state in an external entity to be in content', () => {
             const s = makeLaxExternalEntityStream('&amp;<?xml encoding="UTF-8"?>');
-            ignoreToken(s, tokens.EntityStart);
-            ignoreToken(s, tokens.EntityEnd);
+            ignoreToken(s, tokens.EntityReference);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
                'An XML or Text Declaration must be the first thing in the entity.');

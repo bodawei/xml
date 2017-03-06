@@ -240,9 +240,9 @@ describe('XmlEntityStream', () => {
 
    describe('entity expansion in content', () => {
 
-      it('marks entity start as having data when the entity is defined', (done) => {
+      it('replaces an entity reference with an entity start', (done) => {
          pipeAndTest('<?xml version="1.0"?><one>&amp;data</one>', done, (results) => {
-            expect(results[2].haveEntityData).toEqual(true);
+            expect(results[2] instanceof tokens.EntityStart).toEqual(true);
          });
       });
 
@@ -338,8 +338,7 @@ describe('XmlEntityStream', () => {
                tokens.XmlDeclaration,
                tokens.ElementStart,
                SyntaxError,
-               tokens.EntityStart,
-               tokens.EntityEnd,
+               tokens.EntityReference,
                tokens.ElementEnd
             ]);
 
@@ -432,8 +431,7 @@ describe('XmlEntityStream', () => {
                tokens.EntityStart,
                tokens.CharData,
                SyntaxError,
-               tokens.EntityStart,
-               tokens.EntityEnd,
+               tokens.EntityReference,
                tokens.EntityEnd,
                tokens.ElementEnd,
                tokens.EntityEnd,
@@ -534,9 +532,9 @@ describe('XmlEntityStream', () => {
          });
       });
 
-      it('does not mark the EntityStart token as having data if it is not found', (done) => {
+      it('does not change the entity reference to an entity start if the data is not found', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&bogus2;"></one>', done, (results) => {
-            expect(results[2].attributes[0].value[0].haveEntityData).toEqual(false);
+            expect(results[2].attributes[0].value[0] instanceof tokens.EntityReference).toEqual(true);
          });
       });
 
@@ -551,6 +549,14 @@ describe('XmlEntityStream', () => {
 
             expect(results[1].id).toEqual(SyntaxError.ID.REFERENCE_NO_DECLARATION);
             expect(results[1].message).toEqual('Missing declaration for entity "bogus3".');
+         });
+      });
+
+      it('does not replace the entity reference with an entity start/end pair if entity not found', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&bogus3;"></one>', done, (results) => {
+            expectTokenTypes(results[2].attributes[0].value, [
+               tokens.EntityReference
+            ]);
          });
       });
 
@@ -575,7 +581,7 @@ describe('XmlEntityStream', () => {
          }
       });
 
-      it('marks entity start as having data when the entity is defined', (done) => {
+      it('changes the entity reference to an entity start', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&amp;"></one>', done, (results) => {
             expectTokenTypes(results, [
                tokens.XmlDeclaration,
@@ -583,7 +589,7 @@ describe('XmlEntityStream', () => {
                tokens.ElementEnd
             ]);
 
-            expect(results[1].attributes[0].value[0].haveEntityData).toEqual(true);
+            expect(results[1].attributes[0].value[0] instanceof tokens.EntityStart).toEqual(true);
          });
       });
 

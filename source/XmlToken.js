@@ -53,13 +53,21 @@ class ProcessingInstruction extends XmlToken {
 
 }
 
-class EntityStart extends XmlToken {
+class EntityReference extends XmlToken {
 
-   constructor(name, haveEntityData, chunks) {
+   constructor(name, chunks) {
       super(chunks);
 
       this.name = name;
-      this.haveEntityData = haveEntityData || false;
+   }
+
+}
+
+class EntityStart extends XmlToken {
+
+   constructor(name, chunks) {
+      super(chunks);
+      this.name = name;
    }
 
 }
@@ -271,6 +279,7 @@ module.exports = {
    EmptyElement,
    ElementEnd,
 
+   EntityReference,
    EntityStart,
    EntityEnd,
 

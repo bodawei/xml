@@ -541,8 +541,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.EntityStart('quot', false, tokens.ATTR_NO_CHUNKS),
-                  new tokens.EntityEnd('quot', tokens.ATTR_NO_CHUNKS),
+                  new tokens.EntityReference('quot', tokens.ATTR_NO_CHUNKS),
                   new tokens.Text('o', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
@@ -556,8 +555,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.EntityStart('test', false, tokens.ATTR_NO_CHUNKS),
-                  new tokens.EntityEnd('test', tokens.ATTR_NO_CHUNKS),
+                  new tokens.EntityReference('test', tokens.ATTR_NO_CHUNKS),
                   new tokens.Text('o', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
