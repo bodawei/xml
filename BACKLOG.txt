@@ -38,10 +38,22 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 √ 181: M Change entity ref start/end to just entityref. Let entitystream turn into start/end
 	T: Rework
 
+√ 182 M: Entity Stream identifies entity declarations and adds to entity manager
+	√ - Change entity stream to create it's own entity manager unless one passed in in options
+		- this will break a lot of tests
+	- Identify entity declarations and add them.
+		- should not need the type parameter on the add routines <-- yes I do, more or less.
+		- honestly, should not even need the two adds, as the token should be self describing (though, we don't even notice param entities yet)
+	√ creating element declaration tokens in EntityManager test and EntityStream tests is causing test runner to fail.  They're also long and ungainly.  Would be good to do a routine to create them. both shorter, AND will allow us to paramaterize as we improve.
+	√ - turn on one group at a time. Start with XmlEntityManager
+
+√ - the internal and external subsets are not well recognized in entity stream
+√ - we commented out a failing case in entity stream. Can we force coverage of that
+
+170/210
 
 
-
--- next: 182
+-- next: 183
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -60,8 +72,10 @@ CLEANUP
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
 - Should review all the validation code given that we are making the parsing clearer
 	- add place and context to all errors while doing this
+- Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
 
 BUILD
+- move all out of subfolders
 126: Enhancements to the reporting
 * Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
 - Change test reporter to look at new json files per browser
@@ -116,6 +130,7 @@ BUILD
 
 PROJECT
 --- technical debt []
+- read should probably be the one emitting the error, not pushing
 
 --- Entity management [3L 7M 3S] !!!  [39]
 
@@ -156,21 +171,24 @@ WALKTHROUGH
 	- do not need to do ANY parsing of these at load time. Will be consumed by entity stream properly when it comes up
 
 RESEARCH
-- Must design PERef inline
+Must design the interface for fetching.
+	- need to multiplex between file and http in node
+	- can browser do file if with security mode off?
+		- otherwise do fetch or xmlhttprequest
+	- start off with a simple interface. exposign only a little bit.  Latter version can do more.
+YES Must design PERef inline
 	- surrounded by spaces unless in entity value!
 	- strongly looks like these can't be in attrlist defaults
 	- so, how do you find the end if you find a PERef in markup?  I suggest a scan for > but that is smart enough to deal with quotes since > might be in a quoted value in some of these cases.
 	- so all markup parsers need to be re-entrant with more complete data, namely the expanded peref (cursor?) and the unparsed text.
-- When cleanup done, rather than a flag to xmltoken, we should have a separate stream type?
+YES:  When cleanup done, rather than a flag to xmltoken, we should have a separate stream type?
 	-- yes.  I t seems like a good idea to have multiple stream types once we have finished the cleanup separation
 		- note that this means a bunch of the tests will fail.  :-|
 
 
-M: Entity Stream identifies entity declarations and adds to entity manager
-	- It will create its own entity manager unless handed one in options
-		- breaks tests
-
 M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
+	- need to identify parameter entities in the first place!
+		- maybe should wait until we get the separation done? Or this could prep for that
 	- does token stream parse this correctly and barf if context is wrong?
 
 L F need a single interface for both browser and node

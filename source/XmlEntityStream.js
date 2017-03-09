@@ -4,6 +4,7 @@
 
 const stream = require('readable-stream');
 
+const XmlEntityManager = require('./XmlEntityManager.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
 const XmlError = require('./error/XmlError.js');
@@ -25,13 +26,21 @@ const XmlTokenStream = require('./XmlTokenStream.js');
 
 class XmlEntityStream extends stream.Transform {
 
-   constructor(entityManager, options = {}) {
+   constructor(options = {}) {
       super({
          objectMode: true
       });
 
-      if (!entityManager) {
-         throw Error('Must provide an XmlEntityManager instance.');
+      let entityManager;
+
+      if (options.manager) {
+         if (!(options.manager instanceof XmlEntityManager)) {
+            throw Error('Must provide an XmlEntityManager instance.');
+         } else {
+            entityManager = options.manager;
+         }
+      } else {
+         entityManager = new XmlEntityManager();
       }
 
       this._options = {
@@ -57,9 +66,14 @@ class XmlEntityStream extends stream.Transform {
     * Don't respond to any changes if we are in an error state.
     */
    _treeChanged(handler) {
-//      if (this._errored) {
-//         return;
-//      }
+      /*
+       * This can never happen given current implementation. But
+       * not protecting ourselves will give really hard to
+       * understand bugs should callback behavior change slightly.
+       */
+      if (this._errored) {
+         return;
+      }
 
       let nextToken = handler.getNext();
       while (nextToken) {
@@ -182,6 +196,7 @@ class TreeStreamHandler extends StreamHandler {
    constructor(changeCallbackCallback, firstHandler, entityManager) {
       super(changeCallbackCallback);
       this._entityManager = entityManager;
+      this._inInternalSubset = false;
       this._handlerStack = [ new HandlerFrame(firstHandler) ];
       this._childChanged = this._childChanged.bind(this);
 
@@ -221,6 +236,12 @@ class TreeStreamHandler extends StreamHandler {
             continue;
          } else if (nextToken instanceof XmlError) {
             this._addErrorContext(nextToken);
+         } else if (nextToken instanceof tokens.InternalSubsetStart) {
+            this._inInternalSubset = true;
+         } else if (nextToken instanceof tokens.InternalSubsetEnd) {
+            this._inInternalSubset = false;
+         } else if (nextToken instanceof tokens.EntityDeclaration && this._inInternalSubset) {
+            this._entityManager.addEntity(nextToken, this._entityManager.INTERNAL_SUBSET);
          }
 
          this._queue.push(nextToken);

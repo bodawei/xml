@@ -8,8 +8,8 @@ const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 
 const DEFAULT_ENTITY = 'DefaultEntity';
-const INTERNAL_ENTITY = 'EntityDeclaredInInternalSubset';
-const EXTERNAL_ENTITY = 'EntityDeclaredInExternalSubset';
+const INTERNAL_SUBSET = 'EntityDeclaredInInternalSubset';
+const EXTERNAL_SUBSET = 'EntityDeclaredInExternalSubset';
 
 const DEF_CHUNKS = [ new TextChunk.PlainChunk('default') ];
 
@@ -27,11 +27,16 @@ class XmlEntityManager {
       this._entityMap = {};
       this._paramEntityMap = {};
 
-      this.addEntity(new tokens.EntityDeclaration('lt', '&#60;', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
-      this.addEntity(new tokens.EntityDeclaration('gt', '>', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
-      this.addEntity(new tokens.EntityDeclaration('amp', '&#38;', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
-      this.addEntity(new tokens.EntityDeclaration('apos', '\'', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
-      this.addEntity(new tokens.EntityDeclaration('quot', '"', undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('lt', [ new tokens.Text('&#60;', tokens.ENTITYVAL_NO_CHUNKS) ],
+         undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('gt', [ new tokens.Text('>', tokens.ENTITYVAL_NO_CHUNKS) ],
+         undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('amp', [ new tokens.Text('&#38;', tokens.ENTITYVAL_NO_CHUNKS) ],
+         undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('apos', [ new tokens.Text('\'', tokens.ENTITYVAL_NO_CHUNKS) ],
+         undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
+      this.addEntity(new tokens.EntityDeclaration('quot', [ new tokens.Text('"', tokens.ENTITYVAL_NO_CHUNKS) ],
+         undefined, undefined, DEF_CHUNKS), DEFAULT_ENTITY);
    }
 
    /**********************************************************************\
@@ -41,10 +46,10 @@ class XmlEntityManager {
 
     PARAM
     token: The EntityToken to add
-    type: Either XmlEntityManager.INTERNAL_ENTITY or EXTERNAL_ENTITY
+    type: Either XmlEntityManager.INTERNAL_SUBSET or EXTERNAL_SUBSET
    \**********************************************************************/
 
-   addEntity(token, type = INTERNAL_ENTITY) {
+   addEntity(token, type = INTERNAL_SUBSET) {
       this._internalAdd(token, type, false);
    }
 
@@ -53,10 +58,10 @@ class XmlEntityManager {
 
     PARAM
     token: The EntityToken to add
-    type: Either XmlEntityManager.INTERNAL_ENTITY or EXTERNAL_ENTITY
+    type: Either XmlEntityManager.INTERNAL_SUBSET or EXTERNAL_SUBSET
    \**********************************************************************/
 
-   addParameterEntity(token, type = INTERNAL_ENTITY) {
+   addParameterEntity(token, type = INTERNAL_SUBSET) {
       this._internalAdd(token, type, true);
    }
 
@@ -171,7 +176,7 @@ class XmlEntityManager {
          return;
       }
 
-      return new XmlStringCursor(info.token.value, new EntityMetaData(EntityMetaData.TYPE.EXTERNAL));
+      return new XmlStringCursor(info.token.value[0].text, new EntityMetaData(EntityMetaData.TYPE.EXTERNAL));
    }
 
    _internalGetEntityToken(name, isParameter) {
@@ -256,15 +261,15 @@ class EntityEntry {
 
    constructor() {
       this[DEFAULT_ENTITY] = [];
-      this[INTERNAL_ENTITY] = [];
-      this[EXTERNAL_ENTITY] = [];
+      this[INTERNAL_SUBSET] = [];
+      this[EXTERNAL_SUBSET] = [];
    }
 
    getBestEntityData() {
-      if (this[INTERNAL_ENTITY].length > 0) {
-         return this[INTERNAL_ENTITY][0];
-      } else if (this[EXTERNAL_ENTITY].length > 0) {
-         return this[EXTERNAL_ENTITY][0];
+      if (this[INTERNAL_SUBSET].length > 0) {
+         return this[INTERNAL_SUBSET][0];
+      } else if (this[EXTERNAL_SUBSET].length > 0) {
+         return this[EXTERNAL_SUBSET][0];
       } else {
          // if we get this far, we have to have a default entry.
          return this[DEFAULT_ENTITY][0];
@@ -281,7 +286,7 @@ class EntityData {
 }
 
 XmlEntityManager.DEFAULT_ENTITY = DEFAULT_ENTITY;
-XmlEntityManager.INTERNAL_ENTITY = INTERNAL_ENTITY;
-XmlEntityManager.EXTERNAL_ENTITY = EXTERNAL_ENTITY;
+XmlEntityManager.INTERNAL_SUBSET = INTERNAL_SUBSET;
+XmlEntityManager.EXTERNAL_SUBSET = EXTERNAL_SUBSET;
 
 module.exports = XmlEntityManager;
