@@ -563,7 +563,8 @@ describe('XmlTokenStream (element)', () => {
          });
 
          it('throws an error if there is a < in the attribute value', () => {
-            expectSyntaxError('<elementName attr1="value<">',
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
+               '<elementName attr1="value<">',
                SyntaxError.ID.ATTRIBUTE_INVALID_VALUE,
                'The value of attribute "attr1" must not contain "<".');
          });
@@ -575,13 +576,15 @@ describe('XmlTokenStream (element)', () => {
          });
 
          it('throws an error if there is no space between attributes', () => {
-            expectSyntaxError('<elementName attr1="value"attr2="value2">',
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
+               '<elementName attr1="value"attr2="value2">',
                SyntaxError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
                '"attr2" must have a space before it.');
          });
 
          it('throws an error if there is no quote around the attribute value', () => {
-            expectSyntaxError('<elementName attr1=value>',
+            expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
+               '<elementName attr1=value>',
                SyntaxError.ID.ATTRIBUTE_NO_QUOTE,
                'The value for "attr1" must be quoted.');
          });

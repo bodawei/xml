@@ -2,11 +2,11 @@
 
 'use strict';
 
-//const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
-//const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
-//const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
+const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
+const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
+const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
 
-//const tokens = require('./XmlToken.js');
+const tokens = require('./XmlToken.js');
 
 /**********************************************************************\
 
@@ -23,70 +23,50 @@ class XmlTokenStreamElement {
     * PARAMS isStartOrEmpty: true if this is a start or empty tag, or false
     *        if an end tag
     * RETURN {
-    *    startChunk
-    *    preNameSpaceChunk
-    *    nameChunk
-    *    postNameSpaceChunk
-    *    attributes: Array of values return by parseAttributes
-    * isEmpty
-    * closeChunk
+    *    ... stuff..
     * }
     */
-//   parseStartTag(cursor, start, options) {
-//      const results = {
-//         startChunk: start,
-//      };
-//
-//      results.preNameSpaceChunk = cursor.getSpace();
-//      results.nameChunk = cursor.getWord([ '>', '/>' ]);
-//      results.postNameSpaceChunk = cursor.getSpace();
-//      results.attributes = this._parseAttributes(cursor, options);
-//      results.closeChunk = cursor.getMatch('>');
-//      results.isEmpty = false;
-//
-//      if (!results.closeChunk) {
-//         results.closeChunk = cursor.getMatch('/>');
-//
-//         if (results.closeChunk) {
-//            results.isEmpty = true;
-//         }
-//      }
-//
-//      return results;
-//   }
-//
-//   parseEndTag(cursor, start) {
-//      const results = {
-//         startChunk: start,
-//      };
-//
-//      results.preNameSpaceChunk = cursor.getSpace();
-//      results.nameChunk = cursor.getWord([ '>', '/>' ]);
-//      results.postNameSpaceChunk = cursor.getSpace();
-//      results.closeChunk = cursor.getMatch('>');
-//
-//      return results;
-//   }
+   parseStartTag(cursor, start, options) {
+      const results = {
+         startChunk: start
+      };
 
-   /**********************************************************************\
-    parseContent() extracts CharData from the input.  Note that this will
-    extract a ]]> found in that content and return it in the array of
-    chunks, if that is found. Technically illegal, but we need to provide
-    enough information for a strict case
+      results.preNameSpaceChunk = cursor.getSpace();
+      results.nameChunk = cursor.getWord([ '>', '/>' ]);
+      results.postNameSpaceChunk = cursor.getSpace();
+      results.attributes = this._parseAttributes(cursor, options);
+      results.closeChunk = cursor.getMatch('>');
+      results.isEmpty = false;
 
-    PARAM
-    cursor: The cursor to read from
+      if (!results.closeChunk) {
+         results.closeChunk = cursor.getMatch('/>');
 
-    RETURN
-      {
-         chunks: An array of zero or more chunks
+         if (results.closeChunk) {
+            results.isEmpty = true;
+         }
       }
 
-    SYNTAX
-    [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
-   \**********************************************************************/
+      return results;
+   }
 
-   /*
+   parseEndTag(cursor, start) {
+      const results = {
+         startChunk: start
+      };
+
+      results.preNameSpaceChunk = cursor.getSpace();
+      results.nameChunk = cursor.getWord([ '>', '/>' ]);
+      results.postNameSpaceChunk = cursor.getSpace();
+      results.closeChunk = cursor.getMatch('>');
+
+      if (!results.closeChunk) {
+         results.closeChunk = cursor.getMatch('/>');
+      }
+
+      return results;
+   }
+
+   /**********************************************************************\
     * Retrieve attributes either for a start/empty tag or for an XML
     * Declaration.
     * For an element start or empty tag:
@@ -139,131 +119,174 @@ class XmlTokenStreamElement {
     * An array of attributes. Each element has a name (string), a value
     * (array of XMLTokens) and a quoteType, which is either " or ' The
     * latter is only useful for reproducing the original quote type.
-    */
-//   _parseAttributes(cursor, options) {
-//      const attributes = [];
-//      let abort = false;
-//      let attribute = {
-//         name: cursor.getWord(ATTRIBUTE_NAME_TERMINATORS)
-//      };
-//
-//      while (attribute.name && !abort) {
-//         attribute.preEqualSpace = cursor.getSpace();
-//         attribute.equal = cursor.getMatch('=');
-//         attribute.postEqualSpace = cursor.getSpace();
-//         attribute.quote = cursor.peekChar();
-//
-//         let parsedValue = { value: [] };
-//         const gotQuote = attribute.quote && (attribute.quote.text === '"' || attribute.quote.text === '\'');
-//
-//         if (gotQuote) {
-//            parsedValue = this._getQuotedValue(cursor, options);
-//         } else if (attribute.equal) {
-//            parsedValue = this._getOneWordValue(cursor, options);
-//         }
-//         // without a quote, we assume there is no value and treat any following as a name
-//
-//         abort = parsedValue.abort;
-//         attribute.value = parsedValue.value;
-//         attribute.trailingSpace = cursor.getSpace();
-//
-//         this._doCDataNormalization(attribute.value);
-//
-//         attributes.push(attribute);
-//
-//         if (!abort) {
-//            attribute = {
-//               name: cursor.getWord(ATTRIBUTE_NAME_TERMINATORS)
-//            };
-//         }
-//      }
-//
-//      return attributes;
-//   }
-//
-//   // See §3.3.3 Attribute-Value Normalization
-//   _doCDataNormalization(valueArray) {
-//      for (let index = 0; index < valueArray.length; index++) {
-//         const item = valueArray[index];
-//         if (item instanceof tokens.Text) {
-//            item.text = item.text.replace(/[\n\r\t]/g, ' ');
-//         }
-//      }
-//   }
-//
-//    //@ @@@@ why don't we abort when we find any unexpected terminator?
-//   _getOneWordValue(cursor, options) {
-//      const allowAngleBracket = options['lax:allowOpenAngleBracketsInAttributeValues'];
-//      const terminators = allowAngleBracket ? ATTRIBUTE_VALUE_TERMINATORS_LAX : ATTRIBUTE_VALUE_TERMINATORS;
-//
-//      const word = cursor.getWord(terminators);
-//      const terminator = cursor.peekChar();
-//
-//      return {
-//         value: word ? [ new tokens.Text(word.text, tokens.ATTR_NO_CHUNKS) ] : [],
-//         abort: (terminator && terminator.text === '<')
-//      };
-//   }
-//
-//   /**********************************************************************\
-//    _getQuotedValue consumes the next data from the cursor to extract
-//    the quoted value for an attribute.
-//
-//    PARAMS
-//    cursor: The cursor to read from
-//    quoteChunk is the TextChunk containing the quote that opened the value
-//    options @@@@@@@@@
-//
-//    RETURN
-//    {
-//      value: Array<XmlToken> Text, CharRef, Start/EndEntity tokens
-//      abort: true if this encountered a < in the attribute value, and
-//         options doesn't override that.
-//    }
-//   \**********************************************************************/
-//   _getQuotedValue(cursor, options) {
-//      let parseMore = true;
-//      const result = {
-//         value: [],
-//         abort: false
-//      };
-//      const quoteChunk = cursor.getChar();     // consume the quote that got us here DOC THIS
-//
-//      const terminators = [ quoteChunk.text, '&' ];
-//      if (options['lax:allowOpenAngleBracketsInAttributeValues']) {
-//         terminators.push('<');
-//      }
-//
-//      while (parseMore) {
-//         const chunkInfo = cursor.getToTerminator(terminators);
-//         parseMore = false;
-//
-//         if (chunkInfo.chunk) {
-//            result.value.push(new tokens.Text(chunkInfo.chunk.text, tokens.ATTR_NO_CHUNKS));
-//         }
-//
-//         switch (chunkInfo.terminator) {
-//            case quoteChunk.text:
-//               cursor.getChar();
-//               break;
-//            case '&':
-//               //const start = cursor.getChar(); // consume the &
-//               //const tokens = this._getReference(start, true);
-//               //for (const index in tokens) {
-//               //   result.value.push(tokens[index]);
-//               //}
-//               parseMore = true;
-//               break;
-//            case '<':
-//               result.abort = true;
-//               break;
-//            default: // no terminator
-//               break;
-//         }
-//      }
-//
-//      return result;
-//   }
+   \**********************************************************************/
+   _parseAttributes(cursor, options) {
+      const attributes = [];
+      let attribute = {
+         name: cursor.getWord(ATTRIBUTE_NAME_TERMINATORS)
+      };
+
+      while (attribute.name && !attribute.abort) {
+         attribute.preEqualSpace = cursor.getSpace();
+         attribute.equal = cursor.getMatch('=');
+         attribute.postEqualSpace = cursor.getSpace();
+         const quote = cursor.peekChar();
+
+         let parsedValue = { value: [] };
+         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
+
+         if (gotQuote) {
+            attribute.quote = quote;
+            parsedValue = this._getQuotedValue(cursor, options);
+         } else if (attribute.equal) {
+            parsedValue = this._getOneWordValue(cursor, options);
+         }
+         // without a quote, we assume there is no value and treat any following as a name
+
+         attribute.closeQuote = parsedValue.closeQuote;
+         attribute.abort = parsedValue.abort;
+         attribute.value = parsedValue.value;
+         attribute.trailingSpace = cursor.getSpace();
+
+         this._doCDataNormalization(attribute.value);
+
+         attributes.push(attribute);
+
+         if (!attribute.abort) {
+            attribute = {
+               name: cursor.getWord(ATTRIBUTE_NAME_TERMINATORS)
+            };
+         }
+      }
+
+      return attributes;
+   }
+
+   // See §3.3.3 Attribute-Value Normalization
+   _doCDataNormalization(valueArray) {
+      for (let index = 0; index < valueArray.length; index++) {
+         const item = valueArray[index];
+         if (item instanceof tokens.Text) {
+            item.text = item.text.replace(/[\n\r\t]/g, ' ');
+         }
+      }
+   }
+
+    //@ @@@@ why don't we abort when we find any unexpected terminator?
+   _getOneWordValue(cursor, options) {
+      const allowAngleBracket = options['lax:allowOpenAngleBracketsInAttributeValues'];
+      const terminators = allowAngleBracket ? ATTRIBUTE_VALUE_TERMINATORS_LAX : ATTRIBUTE_VALUE_TERMINATORS;
+
+      const word = cursor.getWord(terminators);
+      const terminator = cursor.peekChar();
+
+      return {
+         value: word ? [ new tokens.Text(word.text, tokens.ATTR_NO_CHUNKS) ] : [],
+         abort: (terminator && terminator.text === '<')
+      };
+   }
+
+   /**********************************************************************\
+    _getQuotedValue consumes the next data from the cursor to extract
+    the quoted value for an attribute.
+
+    PARAMS
+    cursor: The cursor to read from
+    quoteChunk is the TextChunk containing the quote that opened the value
+    options @@@@@@@@@
+
+    RETURN
+    {
+      value: Array<XmlToken> Text, CharRef, Start/EndEntity tokens
+      abort: true if this encountered a < in the attribute value, and
+         options doesn't override that.
+    }
+   \**********************************************************************/
+   _getQuotedValue(cursor, options) {
+      let parseMore = true;
+      const result = {
+         value: [],
+         abort: false
+      };
+      const quoteChunk = cursor.getChar();     // consume the quote that got us here DOC THIS
+
+      const terminators = [ quoteChunk.text, '&' ];
+      if (!options['lax:allowOpenAngleBracketsInAttributeValues']) {
+         terminators.push('<');
+      }
+
+      while (parseMore) {
+         const chunkInfo = cursor.getToTerminator(terminators);
+         parseMore = false;
+
+         if (chunkInfo.chunk) {
+            result.value.push(new tokens.Text(chunkInfo.chunk.text, tokens.ATTR_NO_CHUNKS));
+         }
+
+         switch (chunkInfo.terminator) {
+            case quoteChunk.text:
+               result.closeQuote = cursor.getChar();
+               break;
+            case '&':
+               cursor.getChar(); // consume the &
+               const tokens = this._getReference(cursor);
+               for (const index in tokens) {
+                  result.value.push(tokens[index]);
+               }
+               parseMore = true;
+               break;
+            case '<':
+               result.abort = true;
+               break;
+            default: // no terminator
+               break;
+         }
+      }
+
+      return result;
+   }
+
+   _getReference(cursor) {
+      cursor.getSpace();
+      const next = cursor.peekChar();
+
+      if (next.text === '#') {
+         cursor.getChar();
+         const character = this._getCharReference(cursor);
+
+         return [ new tokens.CharRef(character, tokens.ATTR_NO_CHUNKS) ];
+      } else {
+         const name = cursor.getWord([ ';' ]);
+         const entityName = name.text;
+         cursor.getSpace();   // not reporting this as an error
+         cursor.getMatch(';');   // not reporting the lack as an error
+
+         return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
+      }
+   }
+
+   _getCharReference(cursor) {
+      let isHex = false;
+      cursor.getSpace();
+      const nextChar = cursor.peekChar();
+
+      if (nextChar.text.toLocaleLowerCase() === 'x') {
+         isHex = true;
+         cursor.getChar();
+      }
+
+      cursor.getSpace();
+      const digits = cursor.getDigits();
+      cursor.getSpace();   // not reporting as an error
+      cursor.getMatch(';');   // ditto
+
+      //if (digits) {
+         //if (!isHex && !digits.isDecimal) {
+         //   isHex = true;
+         //}
+
+      return String.fromCharCode(parseInt(digits.text, isHex ? 16 : 10));
+   }
 
 }
 

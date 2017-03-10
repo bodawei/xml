@@ -21,10 +21,6 @@ const SEID = SyntaxError.ID;
 const XWID = XmlWarning.ID;
 const WFEID = WellFormednessError.ID;
 
-const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
-const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
-const ATTRIBUTE_VALUE_TERMINATORS = [ '<', '>', '/>' ];
-
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
@@ -89,26 +85,6 @@ const XML_DECL_PARAMS = {
    encoding: 'encoding',
    standalone: 'standalone'
 };
-
-function makePair(nameChunk, valueChunk, quoteToken) {
-   const value = valueChunk;
-
-   return {
-      name: nameChunk.text,
-      value: value,
-      quoteType: quoteToken ? quoteToken.text : undefined
-   };
-}
-
-// See §3.3.3 Attribute-Value Normalization
-function doCDataNormalization(valueArray) {
-   for (let index = 0; index < valueArray.length; index++) {
-      const item = valueArray[index];
-      if (item instanceof tokens.Text) {
-         item.text = item.text.replace(/[\n\r\t]/g, ' ');
-      }
-   }
-}
 
 function locFromExternalId(externalId) {
    if (!externalId) {
@@ -247,10 +223,10 @@ class XmlTokenStream extends stream.Readable {
                   this._getReference(markupToken);
                   break;
                case '<':
-                  this._getTag(markupToken, true);
+                  this._getStartOrEmptyTag(markupToken);
                   break;
                case '</':
-                  this._getTag(markupToken, false);
+                  this._getEndTag(markupToken);
                   break;
                case '<?':
                   this._getProcessingInstruction(markupToken);
@@ -329,7 +305,7 @@ class XmlTokenStream extends stream.Readable {
       this._cursor.getRecentChunks();  // flush the recent chunks
    }
 
-   _getReference(start, inAttribute) {
+   _getReference(start) {
       const space = this._cursor.getSpace();
       const next = this._cursor.peekChar();
 
@@ -339,12 +315,11 @@ class XmlTokenStream extends stream.Readable {
          this._cursor.getChar();
          const character = this._getCharReference();
 
-         if (inAttribute) {
-            return [ new tokens.CharRef(character, tokens.ATTR_NO_CHUNKS) ];
-         } else {
-            this._checkContentState(start, SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
-            this._pushToken(new tokens.CharRef(character, this._cursor.getRecentChunks()));
-         }
+         //if (inAttribute) {
+         //   return [ new tokens.CharRef(character, tokens.ATTR_NO_CHUNKS) ];
+         //} else {
+         this._checkContentState(start, SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
+         this._pushToken(new tokens.CharRef(character, this._cursor.getRecentChunks()));
       } else {
          const name = this._cursor.getWord([ ';' ]);
          const entityName = name ? name.text : '';
@@ -358,14 +333,11 @@ class XmlTokenStream extends stream.Readable {
          this._checkSyntax(!afterSpace, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
          this._checkSyntax(closingSemicolon, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
 
-         if (inAttribute) {
-            return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
-         } else {
-            this._checkContentState(start,
-               SEID.REFERENCE_INVALID_DOC_CONTEXT, SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
-
-            this._pushToken(new tokens.EntityReference(entityName, this._cursor.getRecentChunks()));
-         }
+         //if (inAttribute) {
+         //   return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
+         //} else {
+         this._checkContentState(start, SEID.REFERENCE_INVALID_DOC_CONTEXT, SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
+         this._pushToken(new tokens.EntityReference(entityName, this._cursor.getRecentChunks()));
       }
    }
 
@@ -547,391 +519,37 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   /*
-    * Parse the XML start or end tag, and queues the return token and/or any
-    * errors found
-    *  [40] STag ::= '<' Name (S Attribute)* S? '>'
-    *  [42] ETag ::= '</' Name S? '>'
-    *  [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'
-    * PARAMS isStartOrEmpty: true if this is a start or empty tag, or false
-    *        if an end tag
-    * RETURN none
-    */
-   _getTag(start, isStartOrEmpty) {
-//      let parsedTag;
-//
-//      if (isStartOrEmpty) {
-//         parsedTag = this._elementParser.parseStartTag(this._cursor, start, this._options);
-//      } else {
-//         parsedTag = this._elementParser.parseEndTag(this._cursor, start);
-//      }
-//
-//      if (!isStartOrEmpty) {
-//         if (parsedTag.closeChunk && parsedTag.closeChunk.text === '/>') {
-//            this._report(SEID.ELEMENT_END_INVALID_CLOSE);
-//         }
-//      }
-//
-//      this._checkSyntax(!parsedTag.preNameSpaceChunk, SEID.ELEMENT_XTRA_LEADING_SPACE);
-//
-//      if (!parsedTag.nameChunk) {
-//         this._report(SEID.ELEMENT_NO_NAME);
-//      } else {
-//         this._checkNameValid(parsedTag.nameChunk, SEID.ELEMENT_NAME_INVALID, start);
-//
-//         if (isStartOrEmpty) {
-//            const error = util.checkNameRecommendations(parsedTag.nameChunk.text, this._entityMd,
-//               XWID.ELEMENT_NAME_XMLDASH_RESERVED,
-//               XWID.ELEMENT_NAME_XML_RESERVED);
-//            this._checkWarn(!error, error, [ parsedTag.nameChunk.text ]);
-//         }
-//      }
-//
-//      if (!close) {
-//         this._report(SEID.ELEMENT_NO_CLOSE);
-//      }
-//
-//      let xtoken;
-//
-//      if (isStartOrEmpty) {
-//         // @@@ FIX THIS?
-//         const attrs = parsedTag.attributes.map((attribute) => {
-//            return {
-//               name: textOrUndef(attribute.name),
-//               value: attribute.value,
-//               quoteType: textOrUndef(attribute.quote)
-//            };
-//         });
-//         if (parsedTag.isEmpty) {
-//            xtoken = new tokens.EmptyElement(textOrBlank(parsedTag.nameChunk), parsedTag.attributes,
-//              this._cursor.getRecentChunks());
-//         } else {
-//            xtoken = new tokens.ElementStart(textOrBlank(parsedTag.nameChunk), parsedTag.attributes,
-//             this._cursor.getRecentChunks());
-//         }
-//      } else {
-//         xtoken = new tokens.ElementEnd(textOrBlank(parsedTag.nameChunk), this._cursor.getRecentChunks());
-//      }
-//
-//      if (isStartOrEmpty) {
-//         if (!parsedTag.isEmpty) {
-//            this._elementNameStack.push(xtoken.name);
-//         }
-//      } else {
-//         const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
-//
-//         if (lastElement === xtoken.name) {
-//            this._elementNameStack.pop();
-//         } else {
-//            this._reportWFError(WFEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
-//         }
-//      }
-//
-//      const nameText = textOrBlank(parsedTag.nameChunk);
-//      switch (this._entityMd.type) {
-//         case EntityMetaData.TYPE.DOCUMENT:
-//            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
-//               this._state = STATE.IN_CONTENT;
-//            } else if (this._state === STATE.IN_DTD) {
-//               this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
-//            } else if (this._state !== STATE.IN_CONTENT) {
-//               this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
-//            }
-//            break;
-//         case EntityMetaData.TYPE.EXTERNAL:
-//            if (this._state === STATE.START) {
-//               this._state = STATE.IN_CONTENT;
-//            }
-//            this._checkSyntax(this._state === STATE.IN_CONTENT,
-//               SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
-//            break;
-//         case EntityMetaData.TYPE.EXTERNALSUBSET:
-//            this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
-//            break;
-//      }
-//
-//
-//      this._pushToken(xtoken);
-//      return;
-      let attributes = [];
+   _getStartOrEmptyTag(start) {
+      const parsedTag = this._elementParser.parseStartTag(this._cursor, start, this._options);
 
-      const leadingSpace = this._cursor.getSpace();
-      const name = this._cursor.getWord([ '>', '/>' ]);
+      this._validateStartTag(parsedTag);
 
-      if (isStartOrEmpty) {
-         // best if this ate the space before getting attributes
-         attributes = this._getAttributes();
+      let token;
+      const attrs = parsedTag.attributes.map((attribute) => {
+         return {
+            name: attribute.name.text,
+            value: attribute.value,
+            quoteType: textOrUndef(attribute.quote)
+         };
+      });
+
+      if (parsedTag.isEmpty) {
+         token = new tokens.EmptyElement(textOrBlank(parsedTag.nameChunk), attrs, this._cursor.getRecentChunks());
       } else {
-         this._cursor.getSpace();
+         token = new tokens.ElementStart(textOrBlank(parsedTag.nameChunk), attrs, this._cursor.getRecentChunks());
       }
 
-      let close = this._cursor.getMatch('>');
-      let isEmpty = false;
-
-      if (!close) {
-         close = this._cursor.getMatch('/>');
-
-         if (close) {
-            if (isStartOrEmpty) {
-               isEmpty = true;
-            } else {
-               this._report(SEID.ELEMENT_END_INVALID_CLOSE);
-            }
-         }
-      }
-
-      this._checkSyntax(!leadingSpace, SEID.ELEMENT_XTRA_LEADING_SPACE);
-
-      if (!name) {
-         this._report(SEID.ELEMENT_NO_NAME);
-      } else {
-         this._checkNameValid(name, SEID.ELEMENT_NAME_INVALID, start);
-
-         if (isStartOrEmpty) {
-            const error = util.checkNameRecommendations(name.text, this._entityMd, XWID.ELEMENT_NAME_XMLDASH_RESERVED,
-               XWID.ELEMENT_NAME_XML_RESERVED);
-            this._checkWarn(!error, error, [ name.text ]);
-         }
-      }
-
-      if (!close) {
-         this._report(SEID.ELEMENT_NO_CLOSE);
-      }
-
-      let xtoken;
-
-      if (isStartOrEmpty) {
-         if (isEmpty) {
-            xtoken = new tokens.EmptyElement(name ? name.text : '', attributes, this._cursor.getRecentChunks());
-         } else {
-            xtoken = new tokens.ElementStart(name ? name.text : '', attributes, this._cursor.getRecentChunks());
-         }
-      } else {
-         xtoken = new tokens.ElementEnd(name ? name.text : '', this._cursor.getRecentChunks());
-      }
-
-      if (isStartOrEmpty) {
-         if (!isEmpty) {
-            this._elementNameStack.push(xtoken.name);
-         }
-      } else {
-         const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
-
-         if (lastElement === xtoken.name) {
-            this._elementNameStack.pop();
-         } else {
-            this._reportWFError(WFEID.ELEMENT_UNBALANCED, [ lastElement, xtoken.name ]);
-         }
-      }
-
-      const nameText = name ? name.text : '';
-      switch (this._entityMd.type) {
-         case EntityMetaData.TYPE.DOCUMENT:
-            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
-               this._state = STATE.IN_CONTENT;
-            } else if (this._state === STATE.IN_DTD) {
-               this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
-            } else if (this._state !== STATE.IN_CONTENT) {
-               this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], start.startOffset, start);
-            }
-            break;
-         case EntityMetaData.TYPE.EXTERNAL:
-            if (this._state === STATE.START) {
-               this._state = STATE.IN_CONTENT;
-            }
-            this._checkSyntax(this._state === STATE.IN_CONTENT,
-               SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], start.startOffset, start);
-            break;
-         case EntityMetaData.TYPE.EXTERNALSUBSET:
-            this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], start.startOffset, start);
-            break;
-      }
-
-      this._pushToken(xtoken);
+      this._pushToken(token);
    }
 
-   /*
-    * Retrieve attributes either for a start/empty tag or for an XML
-    * Declaration.
-    * For an element start or empty tag:
-    *   [41] Attribute ::= Name Eq AttValue
-    *   [10] AttValue ::= '"' ([^<&"] | Reference)* '"' |
-    *                     "'" ([^<&'] | Reference)* "'"
-    *
-    * While syntactically valid attributes are easy to parse, part of the goal
-    * of this class is to try to cope reasonably with syntactically invalid
-    * files so processing can continue. There are some cases where parsing
-    * attributes that this gets ugly, and there are some cases where the
-    * decision of what to do with the case is not "obvious".  These are the
-    * general rules used:
-    *    1) If a value's quote is missing, read the next space-terminated
-    *       token (within the tag) as the value
-    *            name=value
-    *    2) If an equal is missing, if the following string starts with a
-    *       quote, just read that as a value. Otherwise, consider this as
-    *       a valueless attribute.
-    *            name "value"
-    *            name name
-    *    3) If a quote is found within an attribute name, consider it part
-    *       of a name that doesn't match the syntax for xml names.
-    *            name"name"
-    * In truly degenerate cases, of course, this will produce a messy set of
-    * attributes. And it is still possible to have a mis-balanced quote on
-    * an attribute and so consider a substantial chunk of the remainder of the
-    * document part of the attribute. Ignoring that case, though, the damage
-    * here should be confined cleanly to the set of attributes, with just
-    * a variety of presumably invalid-name attributes.
-    *
-    * Put another way, when parsing attributes in lax mode, a name is any
-    * sequence of characters terminated by space or equal, the equal may or
-    * may not exist. If an attribute value doesn't start with a quote, then
-    * the value is anything that is terminated by <, space, or the tag close,
-    * otherwise the value terminates by <, the close quote, or tag close.
-    *
-    * Two final notes: We could legitimately consider the case of a missing
-    * equal and quote  (the second case of 2, above) to produce a name and
-    * value, rather than two names. This seemed an arbitrary decision, and
-    * since HTML allows valueless attributes, that seemed a fine way to go.
-    * We could also consider finding a quote within a name as the start of
-    * the name's value. The main argument against this is just that a single
-    * quote within a name would tend to risk reading in past the end of the
-    * tag as part of the attribute. In terms of recovery from errors, it
-    * seemed safer to be biased towards the case that would consume less
-    * (all of these, after all, are syntax errors to start with).
-    *
-    * RETURN
-    * An array of attributes. Each element has a name (string), a value
-    * (array of XMLTokens) and a quoteType, which is either " or ' The
-    * latter is only useful for reproducing the original quote type.
-    */
-   _getAttributes() {
-      const attributes = [];
-      let abort = false;
-      let lastSpace = this._cursor.getSpace();
-      let name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
+   _getEndTag(start) {
+      const parsedTag = this._elementParser.parseEndTag(this._cursor, start);
 
-      while (name && !abort) {
-         this._cursor.getSpace();    // optional
-         const equal = this._cursor.getMatch('=');
-         this._cursor.getSpace();    // optional
-         const quote = this._cursor.peekChar();
-         const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
-         let value = [];
+      this._validateEndTag(parsedTag);
 
-         this._checkSyntax(lastSpace, SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ name.text ], name.startOffset);
-         this._checkNameValid(name, SEID.ATTRIBUTE_INVALID_NAME, name);
-         this._checkSyntax(equal, SEID.ATTRIBUTE_NO_EQUAL, [ name.text ]);
+      const token = new tokens.ElementEnd(textOrBlank(parsedTag.nameChunk), this._cursor.getRecentChunks());
 
-         if (gotQuote) {
-            this._cursor.getChar();     // consume the quote
-            ({value, abort} = this._getQuotedValue(quote, {
-               attributeName: name.text
-            }));
-         } else if (!equal) {
-            this._report(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
-            attributes.push(makePair(name, value, undefined));
-
-            name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
-            continue;   // without a quote, we assume there is no value and treat any following as a name
-         } else {
-            let terminators = ATTRIBUTE_VALUE_TERMINATORS;
-
-            if (this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
-               terminators = ATTRIBUTE_VALUE_TERMINATORS_LAX;
-            }
-
-            const word = this._cursor.getWord(terminators);
-            if (word) {
-               value.push(new tokens.Text(word.text, tokens.ATTR_NO_CHUNKS));
-            }
-            const terminator = this._cursor.peekChar();
-
-            if (value.length === 0) {
-               this._report(SEID.ATTRIBUTE_NO_VALUE, [ name.text ]);
-            } else {
-               this._report(SEID.ATTRIBUTE_NO_QUOTE, [ name.text ]);
-
-               if (terminator && terminator.text === '<') {
-                  this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ name.text ]);
-                  attributes.push(makePair(name, value, undefined));
-                  break;   // Stop processing of attributes
-               }
-            }
-         }
-
-         doCDataNormalization(value);
-         attributes.push(makePair(name, value, quote));
-
-         if (!abort) {
-            lastSpace = this._cursor.getSpace();
-            name = this._cursor.getWord(ATTRIBUTE_NAME_TERMINATORS);
-         }
-      }
-
-      return attributes;
-   }
-
-   /**********************************************************************\
-    _getQuotedValue consumes the next data from the cursor to extract
-    a quoted value.  This is used for several diverse types of quoted
-    values, so the options specify which variation should be handled.
-
-    PARAMS
-    quoteChunk is the TextChunk containing the quote that opened the value
-    options is an Object containing these values:
-      nameChunk: If this is an element or xmldecl attribute value, this
-                 the name of the attribute must be provided here.
-
-    RETURN
-    For attributes, this returns an object that contains the array of
-    possibly zero XmlTokens found to make up the attribute value, and a
-    flag named abort. If abort is true, it indicates that a "<" was found
-    in the attribute value, and not only attribute value gathering should
-    stop, but the whole start tag processing should stop.
-    For entity values, this just returns the array of XMLTokens
-   \**********************************************************************/
-   _getQuotedValue(quoteChunk, options) {
-      const result = {
-         value: [],
-         abort: false
-      };
-      let done = false;
-      const terminators = [ quoteChunk.text, '&' ];
-
-      if (!this._options['lax:allowOpenAngleBracketsInAttributeValues']) {
-         terminators.push('<');
-      }
-
-      while (!done) {
-         const chunkInfo = this._cursor.getToTerminator(terminators);
-         if (chunkInfo.chunk) {
-            result.value.push(new tokens.Text(chunkInfo.chunk.text, tokens.ATTR_NO_CHUNKS));
-         }
-         done = true;
-
-         switch (chunkInfo.terminator) {
-            case quoteChunk.text:
-               this._cursor.getChar(); // consume the quote
-               break;
-            case '&':
-               done = false;
-               const start = this._cursor.getChar(); // consume the &
-               const tokens = this._getReference(start, true);
-               for (const index in tokens) {
-                  result.value.push(tokens[index]);
-               }
-               break;
-            case '<':
-               this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ options.attributeName ]);
-               result.abort = true;
-               break;
-            default: // no terminator
-               this._report(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ options.attributeName ]);
-               break;
-         }
-      }
-
-      return result;
+      this._pushToken(token);
    }
 
    _checkPiAndCommentState(start, error) {
@@ -1489,6 +1107,118 @@ class XmlTokenStream extends stream.Readable {
       } else if (parsed.typeChunk) {
          this._report(SEID.BRACKETITEM_UNKNOWN, [ parsed.typeString ]);
       }
+   }
+
+   _validateStartTag(parsedTag) {
+      this._checkSyntax(!parsedTag.preNameSpaceChunk, SEID.ELEMENT_XTRA_LEADING_SPACE);
+
+      if (!parsedTag.nameChunk) {
+         this._report(SEID.ELEMENT_NO_NAME);
+      } else {
+         this._checkNameValid(parsedTag.nameChunk, SEID.ELEMENT_NAME_INVALID, parsedTag.startChunk);
+
+         const error = util.checkNameRecommendations(parsedTag.nameChunk.text, this._entityMd,
+            XWID.ELEMENT_NAME_XMLDASH_RESERVED,
+            XWID.ELEMENT_NAME_XML_RESERVED);
+         this._checkWarn(!error, error, [ parsedTag.nameChunk.text ]);
+      }
+
+      for (let index = 0; index < parsedTag.attributes.length; index++) {
+         const attribute = parsedTag.attributes[index];
+         const nameText = attribute.name.text;
+
+         if (!attribute.trailingSpace && attribute.equal && index !== parsedTag.attributes.length - 1) {
+            const nextAttr = parsedTag.attributes[index + 1];
+            this._report(SEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nextAttr.name.text ], attribute.name.startOffset);
+         }
+         this._checkNameValid(attribute.name, SEID.ATTRIBUTE_INVALID_NAME, nameText);
+         this._checkSyntax(attribute.equal, SEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+
+         if (!attribute.quote) {
+            if (!attribute.equal) {
+               this._report(SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+            } else if (attribute.value.length === 0) {
+               this._report(SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+            } else {
+               this._report(SEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+            }
+         }
+
+         if (attribute.abort) {
+            this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ nameText ]);
+         } else if (attribute.quote && !attribute.closeQuote) {
+            this._report(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ nameText ]);
+         }
+      }
+
+      if (!parsedTag.closeChunk) {
+         this._report(SEID.ELEMENT_NO_CLOSE);
+      }
+
+      const nameText = textOrBlank(parsedTag.nameChunk);
+      if (!parsedTag.isEmpty) {
+         this._elementNameStack.push(nameText);
+      }
+
+      this._validateTagState(parsedTag);
+   }
+
+   _validateTagState(parsedTag) {
+      const nameText = textOrBlank(parsedTag.nameChunk);
+
+      switch (this._entityMd.type) {
+         case EntityMetaData.TYPE.DOCUMENT:
+            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
+               this._state = STATE.IN_CONTENT;
+            } else if (this._state === STATE.IN_DTD) {
+               this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], parsedTag.startChunk.startOffset,
+                  parsedTag.startChunk);
+            } else if (this._state !== STATE.IN_CONTENT) {
+               this._report(SEID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ], parsedTag.startChunk.startOffset,
+                  parsedTag.startChunk);
+            }
+            break;
+         case EntityMetaData.TYPE.EXTERNAL:
+            if (this._state === STATE.START) {
+               this._state = STATE.IN_CONTENT;
+            }
+            this._checkSyntax(this._state === STATE.IN_CONTENT,
+               SEID.ELEMENT_INVALID_CONTEXT, [ nameText ], parsedTag.startChunk.startOffset, parsedTag.startChunk);
+            break;
+         case EntityMetaData.TYPE.EXTERNALSUBSET:
+            this._report(SEID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ], parsedTag.startChunk.startOffset,
+               parsedTag.startChunk);
+            break;
+      }
+   }
+
+   _validateEndTag(parsedTag) {
+      if (parsedTag.closeChunk && parsedTag.closeChunk.text === '/>') {
+         this._report(SEID.ELEMENT_END_INVALID_CLOSE);
+      }
+
+      this._checkSyntax(!parsedTag.preNameSpaceChunk, SEID.ELEMENT_XTRA_LEADING_SPACE);
+
+      if (!parsedTag.nameChunk) {
+         this._report(SEID.ELEMENT_NO_NAME);
+      } else {
+         this._checkNameValid(parsedTag.nameChunk, SEID.ELEMENT_NAME_INVALID, parsedTag.startChunk);
+      }
+
+      if (!parsedTag.closeChunk) {
+         this._report(SEID.ELEMENT_NO_CLOSE);
+      }
+
+      const nameText = textOrBlank(parsedTag.nameChunk);
+      const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
+
+      if (lastElement === nameText) {
+         this._elementNameStack.pop();
+      } else {
+         this._reportWFError(WFEID.ELEMENT_UNBALANCED, [ lastElement || '', nameText ]);
+      }
+
+      this._validateTagState(parsedTag);
    }
 
    _validateText(chunk, start) {

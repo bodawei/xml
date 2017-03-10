@@ -50,7 +50,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 √ - the internal and external subsets are not well recognized in entity stream
 √ - we commented out a failing case in entity stream. Can we force coverage of that
 
-170/210
+240/210 --> however, we decided to deal with the commented out thing,w hich wasn't strictly necessary.
 
 
 -- next: 183
@@ -75,7 +75,6 @@ CLEANUP
 - Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
 
 BUILD
-- move all out of subfolders
 126: Enhancements to the reporting
 * Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
 - Change test reporter to look at new json files per browser
