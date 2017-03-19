@@ -234,6 +234,76 @@ class XmlTokenStreamMisc {
    }
 
    /**********************************************************************\
+    parseCharReference
+
+    RETURN
+      {
+         startChunk
+         hashChunk
+         postHashSpaceChunk
+         hexMarkerChunk
+         postHexSpaceChunk
+         digitsChunk
+         postDigitsSpaceChunk
+         semicolonChunk
+         character
+      }
+   \**********************************************************************/
+   parseCharReference(cursor, startChunk, hashChunk) {
+      const result = {
+         startChunk: startChunk,
+         hashChunk: hashChunk
+      };
+      let isHex = false;
+
+      result.postHashSpaceChunk = cursor.getSpace();
+      const nextChar = cursor.peekChar();
+
+      if (nextChar && nextChar.text.toLocaleLowerCase() === 'x') {
+         isHex = true;
+         result.hexMarkerChunk = cursor.getChar();
+         result.postHexSpaceChunk = cursor.getSpace();
+      }
+
+      result.digitsChunk = cursor.getDigits();
+      result.postDigitsSpaceChunk = cursor.getSpace();
+      result.semicolonChunk = cursor.getMatch(';');
+
+      if (result.digitsChunk) {
+         if (!result.digitsChunk.isDecimal) {
+            isHex = true;
+         }
+
+         result.character = String.fromCharCode(parseInt(result.digitsChunk.text, isHex ? 16 : 10));
+      }
+
+      return result;
+   }
+
+   /**********************************************************************\
+    parseEntityReference
+
+    RETURN
+      {
+         startChunk
+         nameChunk
+         postNameSpaceChunk
+         semicolonChunk
+      }
+   \**********************************************************************/
+   parseEntityReference(cursor, startChunk) {
+      const result = {
+         startChunk: startChunk
+      };
+
+      result.nameChunk = cursor.getWord([ ';' ]);
+      result.postNameSpaceChunk = cursor.getSpace();
+      result.semicolonChunk = cursor.getMatch(';');
+
+      return result;
+   }
+
+   /**********************************************************************\
     Parses the params of an XML or Text Declaration.
     Tolerates a missing = and value, or a missing value, or an unquoted
     value.

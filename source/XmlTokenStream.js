@@ -312,72 +312,59 @@ class XmlTokenStream extends stream.Readable {
       this._checkSyntax(!space, SEID.REFERENCE_XTRA_SPACE);
 
       if (next.text === '#') {
-         this._cursor.getChar();
-         const character = this._getCharReference();
+         const hashChunk = this._cursor.getChar();
+         const parsedCharRef = this._miscParser.parseCharReference(this._cursor, start, hashChunk);
+
+         this._validateCharReference(parsedCharRef);
 
          //if (inAttribute) {
          //   return [ new tokens.CharRef(character, tokens.ATTR_NO_CHUNKS) ];
          //} else {
-         this._checkContentState(start, SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
-         this._pushToken(new tokens.CharRef(character, this._cursor.getRecentChunks()));
+         this._pushToken(new tokens.CharRef(parsedCharRef.character, this._cursor.getRecentChunks()));
       } else {
-         const name = this._cursor.getWord([ ';' ]);
-         const entityName = name ? name.text : '';
-         const afterSpace = this._cursor.getSpace();
-         const closingSemicolon = this._cursor.getMatch(';');
+         const parsedRef = this._miscParser.parseEntityReference(this._cursor, start);
 
-         if (!entityName) {
-            this._report(SEID.REFERENCE_NO_NAME);
-         }
-
-         this._checkSyntax(!afterSpace, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
-         this._checkSyntax(closingSemicolon, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
+         this._validateEntityReference(parsedRef);
 
          //if (inAttribute) {
          //   return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
          //} else {
-         this._checkContentState(start, SEID.REFERENCE_INVALID_DOC_CONTEXT, SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
-         this._pushToken(new tokens.EntityReference(entityName, this._cursor.getRecentChunks()));
+         this._pushToken(new tokens.EntityReference(textOrBlank(parsedRef.nameChunk), this._cursor.getRecentChunks()));
       }
    }
 
-   _getCharReference() {
-      let isHex = false;
-      let character;
-      const space = this._cursor.getSpace();
-      const nextChar = this._cursor.peekChar();
+   _validateEntityReference(parsed) {
+      const entityName = textOrBlank(parsed.nameChunk);
 
-      this._checkSyntax(!space, SEID.CHARREF_XTRA_SPACE);
-
-      if (nextChar.text.toLocaleLowerCase() === 'x') {
-         this._checkSyntax(nextChar.text === 'x', SEID.CHARREF_INVALID_HEX_CASE);
-
-         isHex = true;
-         this._cursor.getChar();
+      if (!entityName) {
+         this._report(SEID.REFERENCE_NO_NAME);
       }
 
-      const afterSpace = this._cursor.getSpace();
-      const digits = this._cursor.getDigits();
-      const afterDigitsSpace = this._cursor.getSpace();
-      const semicolon = this._cursor.getMatch(';');
+      this._checkSyntax(!parsed.postNameSpaceChunk, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+      this._checkSyntax(parsed.semicolonChunk, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
+      this._checkContentState(parsed.startChunk, SEID.REFERENCE_INVALID_DOC_CONTEXT,
+         SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
+   }
 
-      this._checkSyntax(!afterSpace, SEID.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
+   _validateCharReference(parsed) {
+      this._checkSyntax(!parsed.postHashSpaceChunk, SEID.CHARREF_XTRA_SPACE);
 
-      if (!digits) {
+      if (parsed.hexMarkerChunk && parsed.hexMarkerChunk.text.toLocaleLowerCase() === 'x') {
+         this._checkSyntax(parsed.hexMarkerChunk.text === 'x', SEID.CHARREF_INVALID_HEX_CASE);
+      }
+
+      this._checkSyntax(!parsed.postHexSpaceChunk, SEID.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
+
+      if (!parsed.digitsChunk) {
          this._report(SEID.CHARREF_NO_DIGITS);
-      } else {
-         if (!isHex && !digits.isDecimal) {
-            this._report(SEID.CHARREF_INVALID_BASE, [ digits.text ]);
-            isHex = true;
-         }
-
-         character = String.fromCharCode(parseInt(digits.text, isHex ? 16 : 10));
+      } else if (!parsed.hexMarkerChunk && !parsed.digitsChunk.isDecimal) {
+         this._report(SEID.CHARREF_INVALID_BASE, [ parsed.digitsChunk.text ]);
       }
 
-      this._checkSyntax(!afterDigitsSpace, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
-      this._checkSyntax(semicolon, SEID.CHARREF_NO_SEMICOLON);
+      this._checkSyntax(!parsed.postDigitsSpaceChunk, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
+      this._checkSyntax(parsed.semicolonChunk, SEID.CHARREF_NO_SEMICOLON);
 
-      return character;
+      this._checkContentState(parsed.startChunk, SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
    }
 
    _getBangItem(start) {

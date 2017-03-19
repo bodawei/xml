@@ -28,51 +28,58 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
  1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
- 2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: ?
+ 2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: 7
+ 3/11 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: ?
 
+Cleanup:
+- separate out char reference and reference
 
-√ 180: S: Turn internal subset into a separate start/end token within document type
+187: L: Do a common parser for entity values, attribute decls and attributes
 	T: Rework
-	CHECK
+	DEPENDS on cleanup of references
+	- finds references.
+		- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
+		- do we actually want to identify GRefs in entity values?  I don't think so.
+		- has to barf for the < in attributes and attrdecl?
+	---
+	parseQuotedValue(cursor, recognizeGRef, recognizePERef, reject<)
+	internal entity value
+		recognize char refs
+		recognize peref	<--- not in internal subset
+		can we say &##;peref; and have that expand?
+	external entity value
+		n/a.  this is the whole token stream
+	attribute values
+		recognize char refs
+		recognize gref
+		change: allow <, but identify an error.
+			it is an error either way, but the current "abort" scheme i messy, and while it theoretically reduces larger than memory attribute values, not sure this is worth it.  we have same problems with things we can't help, like comments.
+		--- if char ref is  < ???
+	attriute values in definitions
+		recognize char refs
+		recognize gref
+		same about <
+		(evidently not peref)
 
-√ 181: M Change entity ref start/end to just entityref. Let entitystream turn into start/end
-	T: Rework
+Chunk could have a prototype function: getTextOrBlank and getTextOrUndefiend
 
-√ 182 M: Entity Stream identifies entity declarations and adds to entity manager
-	√ - Change entity stream to create it's own entity manager unless one passed in in options
-		- this will break a lot of tests
-	- Identify entity declarations and add them.
-		- should not need the type parameter on the add routines <-- yes I do, more or less.
-		- honestly, should not even need the two adds, as the token should be self describing (though, we don't even notice param entities yet)
-	√ creating element declaration tokens in EntityManager test and EntityStream tests is causing test runner to fail.  They're also long and ungainly.  Would be good to do a routine to create them. both shorter, AND will allow us to paramaterize as we improve.
-	√ - turn on one group at a time. Start with XmlEntityManager
-
-√ - the internal and external subsets are not well recognized in entity stream
-√ - we commented out a failing case in entity stream. Can we force coverage of that
-
-240/210 --> however, we decided to deal with the commented out thing,w hich wasn't strictly necessary.
-
-
--- next: 183
+-- next: 193
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- Beginning to extract elements
-		- attributes seem to be going into an infinite loop.
-			- suggest commenting back in, and then adding one "with attributes" at a time
-	- bangitem, elements, references
+	- char reference, then reference, then bangitems
+- Provide async interface to cursor
+- remove entity manager from xmltokenstream
+- parsing/validation/check
+	- Need to pull out validation into another file
+	- add contexts to all errors
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
-		- especially char references
+- Look into fragmenting validation parsing etc into groups by token type.
 - need to add other error types
 	- generalize stuff in XmlError and XmlWarning.
 		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem
 - cleaning up util would be nice
-- Need to pull out validation into another file
-- Think about pulling the parse declaration, validation and tokenization of each type into a single file (for each type)
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
-- Should review all the validation code given that we are making the parsing clearer
-	- add place and context to all errors while doing this
-- Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
 
 BUILD
 126: Enhancements to the reporting
@@ -105,7 +112,6 @@ BUILD
 	- optionally put tests in hierarchy rather than string
 - coverage reporter should have a percent cutoff
 - Build build code to auto generate the other errors
-
 149 Test deriveLocale
 - We are getting errors in the output again
 	- The number of errors seems to reduce if we turn off the djb reporter.
@@ -126,10 +132,9 @@ BUILD
 41:XL:Investigate newer/better build tool than grunt
 
 
-
 PROJECT
 --- technical debt []
-- read should probably be the one emitting the error, not pushing
+- read() should probably be the one emitting the error, not pushing
 
 --- Entity management [3L 7M 3S] !!!  [39]
 
@@ -184,56 +189,63 @@ YES:  When cleanup done, rather than a flag to xmltoken, we should have a separa
 	-- yes.  I t seems like a good idea to have multiple stream types once we have finished the cleanup separation
 		- note that this means a bunch of the tests will fail.  :-|
 
+- Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
 
-M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
+
+
+
+183: M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
 	- need to identify parameter entities in the first place!
 		- maybe should wait until we get the separation done? Or this could prep for that
 	- does token stream parse this correctly and barf if context is wrong?
 
-L F need a single interface for both browser and node
+186: S: I Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
+	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
+
+184: L F need a single interface for both browser and node
+	* Todo
+	    * [x] [x] typescript
+	    * [x] [x] webpack it to es 5
+	    * [x] [x] Add linting
+	    * [x] [x] Add unit testing
+	    * [ ] [x] sourcemaps
+	    * [ ] [ ] coverage
 	- EntityLocations need to know enough info so that the entity manager can call the right retriever
-M E need entity manager to retrieve remote entities
+	- this is a separate module
+	- NEED TO RESEARCH fetch.
+
+185: M E need entity manager to retrieve remote entities
 	- external entities (can just wrap a cursor. may need to think about entity locations -- caching cursor?  but don't cache if too big!)
 	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)
 
-S: I Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
-	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
 
 --- All the below is needed, but depends on cleanup work
 
-L: Do a common parser for entity values, attribute decls and attributes
-	T: Rework
-	DEPENDS on cleanup of references
-	- finds references.
-		- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
-		- do we actually want to identify GRefs in entity values?  I don't think so.
-		- has to barf for the < in attributes and attrdecl
-
-M: Add parsing to entity values
+188: M: Add parsing to entity values
 	T: Rework
 	DEPENDS on L
 	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
 		- @@@ need to think about the cursor that will need to consume these. 
 	- Biggest effort here is going to be cleaning up tests
 
-M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
 	T: Rework
 	DEPENDS on cleanup
 	DEPENDS on L
 	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
 
-S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+190: S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
 	T: Rework
 	DEPENDS on L
 	- Biggest effort here is going to be cleaning up tests
 
 
-M: A Entity manager will insert arbitrary markup tokens into attributes
+191: M: A Entity manager will insert arbitrary markup tokens into attributes
 	DEPENDS on cleanup with references
 	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.  This is used internally when entitystream is filling in an attribute
 
 
-L: B We need to deal with the internal entities that have character references in them (NEEDS PLANNING)
+192: L: B We need to deal with the internal entities that have character references in them (NEEDS PLANNING)
 	DEPENDS on reworked entity values
 	- a cursor which has a different offset (for consuming entity values)
 	- a cursor which deals with the internal subset mess
@@ -1842,3 +1854,35 @@ The post-mortem for this is that 179 took longer than I expected because the ted
 While broadly that is true, there was more change than I expected, and even once I had done that I discovered it had been left off in an incomplete state.  Some tests were turned off (I forget which) and this didn't support entities in side of entities in element attributes.  I ended up getting a version kinda working, but the logic was horrible and twisted.  I then essentially re-wrote it with cleaner abstractions.
 With this done, however, it finally gets me back to dealing with entities for real.  Which means the next planning session is going to be really important.
 
+Sprint 29
+=========
+√ 180: S: Turn internal subset into a separate start/end token within document type
+	T: Rework
+	CHECK
+
+√ 181: M Change entity ref start/end to just entityref. Let entitystream turn into start/end
+	T: Rework
+
+√ 182 M: Entity Stream identifies entity declarations and adds to entity manager
+	√ - Change entity stream to create it's own entity manager unless one passed in in options
+		- this will break a lot of tests
+	- Identify entity declarations and add them.
+		- should not need the type parameter on the add routines <-- yes I do, more or less.
+		- honestly, should not even need the two adds, as the token should be self describing (though, we don't even notice param entities yet)
+	√ creating element declaration tokens in EntityManager test and EntityStream tests is causing test runner to fail.  They're also long and ungainly.  Would be good to do a routine to create them. both shorter, AND will allow us to paramaterize as we improve.
+	√ - turn on one group at a time. Start with XmlEntityManager
+
+√ - the internal and external subsets are not well recognized in entity stream
+√ - we commented out a failing case in entity stream. Can we force coverage of that
+
+240/210 --> however, we decided to deal with the commented out thing,w hich wasn't strictly necessary.
+
+Notes29
+-------
+This sprint went pretty well. Ended up going over because I decided to write a test for a case which can't happen, but I didn't want
+to remove the code in question.
+For build work, I turned off html reporting on the browser to get rid of the error. A hack, but we still get coverage reports from node, and I really don't like having the errors there.This took 1 minute, but I didn't do more build because cleanup went so badly over schedule.
+Cleanup ended up going over by a factor of 5.  I just really really wanted to get the element stuff done, which I got done.
+This is good, as the split up code is probably two or three sprints from being done.
+We really really need to go back over the validation and parsing code with a finer toothed comb, make it consistent etc, and move towards breaking XmlTokenStream into three different ones.
+But we're almost blocking the main task, so we need to get references pulled out. After that, I think we need to prioritize getting the cursor made async.  That's almost a main dev task, as ultimately that's going to require test reworking for the cursor. But we can do that in stages, first get async calls in, move xmltokenstream over, and then we can eol the tested interface.
