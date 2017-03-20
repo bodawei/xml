@@ -63,6 +63,16 @@ class EntityReference extends XmlToken {
 
 }
 
+//class ParameterEntityReference extends XmlToken {
+//
+//   constructor(name, chunks) {
+//      super(chunks);
+//
+//      this.name = name;
+//   }
+//
+//}
+
 class EntityStart extends XmlToken {
 
    constructor(name, chunks) {
@@ -280,6 +290,7 @@ module.exports = {
    ElementEnd,
 
    EntityReference,
+//   ParameterEntityReference,
    EntityStart,
    EntityEnd,
 

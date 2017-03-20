@@ -10,6 +10,8 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./shared/TextChunk.js');
 const tokens = require('./XmlToken.js');
+const XmlMiscParser = require('./XmlTokenStream-misc.js');
+const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlWarning = require('./error/XmlWarning.js');
 
 const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
@@ -33,6 +35,21 @@ function compareXmlDeclAttribute(attr, name, value) {
    } else {
       expect(attr.value).toBeUndefined();
    }
+}
+
+function makePlainChunk(text, start, end) {
+   return new TextChunk.PlainChunk(text,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+}
+
+function makeDigitsChunk(text, start, end, isDecimal) {
+   return new TextChunk.DigitChunk(text, isDecimal,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+}
+
+function makeWithSpaceChunk(text, start, end, originalText) {
+   return new TextChunk.WithSpaceChunk(text, originalText || text,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
 }
 
 describe('XmlTokenStream (Misc)', () => {
@@ -1970,6 +1987,207 @@ describe('XmlTokenStream (Misc)', () => {
                'An XML or Text Declaration must be the first thing in the entity.');
          });
 
+      });
+
+   });
+
+   describe('parseQuotedValue()', () => {
+      let standardCursor;
+
+      beforeEach(() => {
+         standardCursor = new XmlStringCursor('"zero &#49; &#x32; &three; %four;" extra');
+      });
+
+      it('retrieves a single chunk if all options are false', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor);
+
+         expect(result).toEqual({
+            startQuoteChunk: makePlainChunk('"', 0, 1),
+            items: [ makeWithSpaceChunk('zero &#49; &#x32; &three; %four;', 1, 33) ],
+            stopQuoteChunk: makePlainChunk('"', 33, 34)
+         });
+      });
+
+      it('recognizes a character reference if instructed to do so', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { charRef: true });
+
+         expect(result.items.length).toEqual(5);
+         expect(result.items[0].text).toEqual('zero ');
+         expect(result.items[1]).toEqual({
+            type: XmlMiscParser.TYPE.CHAR_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 6, 7),
+               hashChunk: makePlainChunk('#', 7, 8),
+               postHashSpaceChunk: undefined,
+               hexMarkerChunk: undefined,
+               postHexSpaceChunk: undefined,
+               digitsChunk: makeDigitsChunk('49', 8, 10, true),
+               postDigitsSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 10, 11),
+               character: '1'
+            }
+         });
+         expect(result.items[2].text).toEqual(' ');
+         expect(result.items[3]).toEqual({
+            type: XmlMiscParser.TYPE.CHAR_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 12, 13),
+               hashChunk: makePlainChunk('#', 13, 14),
+               postHashSpaceChunk: undefined,
+               hexMarkerChunk: makePlainChunk('x', 14, 15),
+               postHexSpaceChunk: undefined,
+               digitsChunk: makeDigitsChunk('32', 15, 17, true),
+               postDigitsSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 17, 18),
+               character: '2'
+            }
+         });
+         expect(result.items[4].text).toEqual(' &three; %four;');
+      });
+
+      it('recognizes a parameter entity reference if instructed to do so', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { peRef: true });
+
+         expect(result.items.length).toEqual(2);
+         expect(result.items[0].text).toEqual('zero &#49; &#x32; &three; ');
+         expect(result.items[1]).toEqual({
+            type: XmlMiscParser.TYPE.PARAMETER_REF,
+            parsed: {
+               startChunk: makePlainChunk('%', 27, 28),
+               nameChunk: makePlainChunk('four', 28, 32),
+               postNameSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 32, 33)
+            }
+         });
+      });
+
+      it('recognizes a general entity reference if instructed to do so', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { geRef: true });
+
+         expect(result.items.length).toEqual(3);
+         expect(result.items[0].text).toEqual('zero &#49; &#x32; ');
+         expect(result.items[1]).toEqual({
+            type: XmlMiscParser.TYPE.GENERAL_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 19, 20),
+               nameChunk: makePlainChunk('three', 20, 25),
+               postNameSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 25, 26)
+            }
+         });
+         expect(result.items[2].text).toEqual(' %four;');
+      });
+
+      it('recognizes all types when asked to', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor, {
+            geRef: true,
+            peRef: true,
+            charRef: true
+         });
+
+         expect(result.items.length).toEqual(8);
+         expect(result.items[0].text).toEqual('zero ');
+         expect(result.items[1]).toEqual({
+            type: XmlMiscParser.TYPE.CHAR_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 6, 7),
+               hashChunk: makePlainChunk('#', 7, 8),
+               postHashSpaceChunk: undefined,
+               hexMarkerChunk: undefined,
+               postHexSpaceChunk: undefined,
+               digitsChunk: makeDigitsChunk('49', 8, 10, true),
+               postDigitsSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 10, 11),
+               character: '1'
+            }
+         });
+         expect(result.items[2].text).toEqual(' ');
+         expect(result.items[3]).toEqual({
+            type: XmlMiscParser.TYPE.CHAR_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 12, 13),
+               hashChunk: makePlainChunk('#', 13, 14),
+               postHashSpaceChunk: undefined,
+               hexMarkerChunk: makePlainChunk('x', 14, 15),
+               postHexSpaceChunk: undefined,
+               digitsChunk: makeDigitsChunk('32', 15, 17, true),
+               postDigitsSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 17, 18),
+               character: '2'
+            }
+         });
+         expect(result.items[4].text).toEqual(' ');
+         expect(result.items[5]).toEqual({
+            type: XmlMiscParser.TYPE.GENERAL_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 19, 20),
+               nameChunk: makePlainChunk('three', 20, 25),
+               postNameSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 25, 26)
+            }
+         });
+         expect(result.items[6].text).toEqual(' ');
+         expect(result.items[7]).toEqual({
+            type: XmlMiscParser.TYPE.PARAMETER_REF,
+            parsed: {
+               startChunk: makePlainChunk('%', 27, 28),
+               nameChunk: makePlainChunk('four', 28, 32),
+               postNameSpaceChunk: undefined,
+               semicolonChunk: makePlainChunk(';', 32, 33)
+            }
+         });
+      });
+
+      it('stops when a specified terminator is found', () => {
+         const result = new XmlMiscParser().parseQuotedValue(standardCursor, {
+            terminators: [ 'o' ]
+         });
+
+         expect(result).toEqual({
+            startQuoteChunk: makePlainChunk('"', 0, 1),
+            items: [ makeWithSpaceChunk('zer', 1, 4) ],
+            stopQuoteChunk: undefined
+         });
+      });
+
+      it('copes with an entity reference starting at EOF', () => {
+         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"zero &'), {
+            geRef: true
+         });
+
+         expect(result.items.length).toEqual(2);
+         expect(result.items[0].text).toEqual('zero ');
+         expect(result.items[1]).toEqual({
+            type: XmlMiscParser.TYPE.GENERAL_REF,
+            parsed: {
+               startChunk: makePlainChunk('&', 6, 7),
+               nameChunk: undefined,
+               postNameSpaceChunk: undefined,
+               semicolonChunk: undefined
+            }
+         });
+      });
+
+      it('combines a PlainChunk with a WithSpaceChunk (whitebox)', () => {
+         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"& one"'), {
+            charRef: true
+         });
+
+         expect(result.items).toEqual([ makeWithSpaceChunk('& one', 1, 6) ]);
+      });
+
+      it('combines a PlainChunk with a PlainChunk (whitebox)', () => {
+         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"&&"'), {
+            charRef: true
+         });
+
+         expect(result.items).toEqual([ makePlainChunk('&&', 1, 3) ]);
+      });
+
+      it('copes with a missing quote when no items specified', () => {
+         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"zero one'));
+
+         expect(result.items).toEqual([ makeWithSpaceChunk('zero one', 1, 9) ]);
       });
 
    });

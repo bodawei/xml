@@ -38,30 +38,19 @@ Cleanup:
 	T: Rework
 	DEPENDS on cleanup of references
 	- finds references.
-		- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
-		- do we actually want to identify GRefs in entity values?  I don't think so.
-		- has to barf for the < in attributes and attrdecl?
+	- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
+	- do we actually want to identify GRefs in entity values?  I don't think so.
+		NO.  They will be parsed as entity is read in
+	- has to barf for the < in attributes and attrdecl?
+		NO: We were doing this. The reason was to avoid missing quotes leading to LONG attributes
+			However, this doesn't absolutely avoid this (e.g. <warAndPeace author="herman melville> .... )
+			We don't try to avoid runon comments, CDATA etc.
+			To be sure, if we want to deal with these by chunking them, we would need
+				to pull attributes out of the element token, which is quite disruptive.
+				But it would be as doable from an external interface standpoint.
 	---
 	parseQuotedValue(cursor, recognizeGRef, recognizePERef, reject<)
-	internal entity value
-		recognize char refs
-		recognize peref	<--- not in internal subset
-		can we say &##;peref; and have that expand?
-	external entity value
-		n/a.  this is the whole token stream
-	attribute values
-		recognize char refs
-		recognize gref
-		change: allow <, but identify an error.
-			it is an error either way, but the current "abort" scheme i messy, and while it theoretically reduces larger than memory attribute values, not sure this is worth it.  we have same problems with things we can't help, like comments.
-		--- if char ref is  < ???
-	attriute values in definitions
-		recognize char refs
-		recognize gref
-		same about <
-		(evidently not peref)
 
-Chunk could have a prototype function: getTextOrBlank and getTextOrUndefiend
 
 -- next: 193
 =============================================
@@ -69,6 +58,7 @@ CLEANUP
 - continue to pull out all parsing logic
 	- char reference, then reference, then bangitems
 - Provide async interface to cursor
+- look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.  Mock the cursor?  how to test this?
 - remove entity manager from xmltokenstream
 - parsing/validation/check
 	- Need to pull out validation into another file
@@ -220,6 +210,27 @@ YES:  When cleanup done, rather than a flag to xmltoken, we should have a separa
 
 
 --- All the below is needed, but depends on cleanup work
+NOTE
+	internal entity value
+		recognize char refs
+		recognize peref	<--- not in internal subset
+		can we say &##;peref; and have that expand?
+	external entity value
+		n/a.  this is the whole token stream
+	attribute values
+		recognize char refs
+		recognize gref
+		change: allow <, but identify an error.
+			it is an error either way, but the current "abort" scheme i messy, and while it theoretically reduces larger than memory attribute values, not sure this is worth it.  we have same problems with things we can't help, like comments.
+		--- if char ref is  < ???
+	attriute values in definitions
+		recognize char refs
+		recognize gref
+		same about <
+		(evidently not peref)
+
+
+
 
 188: M: Add parsing to entity values
 	T: Rework

@@ -2,8 +2,16 @@
 
 'use strict';
 
+const TextChunk = require('./shared/TextChunk.js');
+
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
+
+const QUOTE_PIECE_TYPES = {
+   CHAR_REF: 'CHAR_REF',
+   GENERAL_REF: 'GENERAL_REF',
+   PARAMETER_REF: 'PARAMETER_REF'
+};
 
 /**********************************************************************\
  XmlTokenStreamMisc provides a set of routines for parsing the "misc"
@@ -259,6 +267,8 @@ class XmlTokenStreamMisc {
       result.postHashSpaceChunk = cursor.getSpace();
       const nextChar = cursor.peekChar();
 
+      result.hexMarkerChunk = undefined;
+      result.postHexSpaceChunk = undefined;
       if (nextChar && nextChar.text.toLocaleLowerCase() === 'x') {
          isHex = true;
          result.hexMarkerChunk = cursor.getChar();
@@ -301,6 +311,118 @@ class XmlTokenStreamMisc {
       result.semicolonChunk = cursor.getMatch(';');
 
       return result;
+   }
+
+   /**********************************************************************\
+    parseQuotedValue
+
+    RETURN
+      {
+         startQuoteChunk
+         items
+         stopQuoteChunk
+         aborted
+      }
+   \**********************************************************************/
+   parseQuotedValue(cursor, options = {}) {
+      const result = {
+         startQuoteChunk: cursor.getChar(),
+         items: [],
+         stopQuoteChunk: undefined
+      };
+      const terminators = options.terminators ? options.terminators.slice(0) : [];
+      let toPrepend;
+      let block;
+
+      terminators.push(result.startQuoteChunk.text);
+
+      if (options.charRef || options.geRef) {
+         terminators.push('&');
+      }
+
+      if (options.peRef) {
+         terminators.push('%');
+      }
+
+      do {
+         block = cursor.getToTerminator(terminators);
+
+         if (block.chunk) {
+            if (toPrepend) {
+               block.chunk = this._combineChunks(toPrepend, block.chunk);
+               toPrepend = undefined;
+            }
+            result.items.push(block.chunk);
+         } else if (toPrepend) {
+            result.items.push(toPrepend);
+         }
+
+         if (block.terminator === '&') {
+            const ampersand = cursor.getChar();
+            const hashChunk = cursor.peekChar() || {};
+
+            if (hashChunk.text === '#') {
+               if (options.charRef) {
+                  cursor.getChar();
+                  result.items.push({
+                     type: QUOTE_PIECE_TYPES.CHAR_REF,
+                     parsed: this.parseCharReference(cursor, ampersand, hashChunk)
+                  });
+               } else {
+                  toPrepend = ampersand;
+               }
+            } else if (options.geRef) {
+               result.items.push({
+                  type: QUOTE_PIECE_TYPES.GENERAL_REF,
+                  parsed: this.parseEntityReference(cursor, ampersand)
+               });
+            } else {
+               toPrepend = ampersand;
+            }
+
+            if (toPrepend) {
+               const lastChunk = result.items.pop();
+               toPrepend = this._combineChunks(lastChunk, toPrepend);
+            }
+         } else if (block.terminator === '%') {
+            const percent = cursor.getChar();
+            result.items.push({
+               type: QUOTE_PIECE_TYPES.PARAMETER_REF,
+               parsed: this.parseEntityReference(cursor, percent)
+            });
+         } else if (block.terminator === result.startQuoteChunk.text) {
+            result.stopQuoteChunk = cursor.getChar();
+            break;
+         } else {
+            // some terminator provided by the caller
+            break;
+         }
+      } while (block.terminator);
+
+      return result;
+   }
+
+   _combineChunks(first, second) {
+      if (!first) {
+         return second;
+      }
+
+      if (first instanceof TextChunk.WithSpaceChunk) {
+         if (second instanceof TextChunk.WithSpaceChunk) {
+            first.originalText += second.originalText;
+         } else {
+            first.originalText += second.text;
+         }
+      } else if (second instanceof TextChunk.WithSpaceChunk) {
+         second.text = first.text + second.text;
+         second.originalText = first.text + second.originalText;
+         second.startOffset = first.startOffset;
+         return second;
+      }
+
+      first.text += second.text;
+      first.endOffset = second.endOffset;
+      return first;
    }
 
    /**********************************************************************\
@@ -364,5 +486,7 @@ class XmlTokenStreamMisc {
    }
 
 }
+
+XmlTokenStreamMisc.TYPE = QUOTE_PIECE_TYPES;
 
 module.exports = XmlTokenStreamMisc;
