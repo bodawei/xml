@@ -72,6 +72,17 @@ module.exports = (grunt) => {
       var browserResults = browserFiles.map(processResultsPerBrowser);
       const failure = browserResults.reduce((soFar, result) => { return result.failure || soFar; }, false);
 
+      let shownHeader = false;
+      browserResults.map((result) => {
+         if (result.duplicates) {
+            if (!shownHeader) {
+               grunt.log.error('DUPLICATE TEST NAMES\n');
+               shownHeader = true;
+            }
+            grunt.log.error('Browser: ' + result.name + '\n');
+            grunt.log.error(result.duplicates + '\n');
+         }
+      });
       if (failure) {
          grunt.fail.fatal('Tests failed.');
       }
@@ -81,47 +92,75 @@ module.exports = (grunt) => {
       const byBrowserName = {};
 
       browserResults.map((result) => {
-         for (const name in result) {
-            maxLengths[name] = maxLengths[name] || 0;
-            maxLengths[name] = Math.max(result[name].length, maxLengths[name]);
-         }
          var browserMatch = /([A-Za-z]+) ([0-9\.]+)/.exec(result.name);
          var osMatch = /^([^0-9]+) ([0-9\.]+)/.exec(result.os);
          result.browserName = browserMatch[1];
          result.browserVersion = browserMatch[2];
          result.osName = osMatch[1];
          result.osVersion = osMatch[2];
+         result.percent = ((result.passed / result.run) * 100) + '%';
+         result.seconds = (result.time / 1000) + 'ms';
+         result.counts = result.passed + '/' + result.run;
+
+         [ 'osName', 'osVersion', 'browserName', 'browserVersion', 'time', 'percent', 'seconds', 'counts' ]
+            .forEach((name) => {
+               maxLengths[name] = maxLengths[name] || 0;
+               maxLengths[name] = Math.max(result[name].toString().length, maxLengths[name]);
+            });
 
          sortedNames.push(result.name);
          byBrowserName[result.name] = result;
       });
 
-      function padValue(value, columnWidth) {
+      function padValue(value, columnWidth, padChar) {
          let nameResult = value;
-         for (let paddingSpace = value.length - 1; paddingSpace < columnWidth; paddingSpace++) {
-            nameResult += ' ';
+         for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
+            nameResult += padChar || ' ';
          }
 
          return nameResult;
       }
 
+      function padLeftValue(value, columnWidth, padChar) {
+         let nameResult = '';
+         for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
+            nameResult += padChar || ' ';
+         }
+
+         return nameResult + value;
+      }
+
       sortedNames.sort();
+
+      process.passthroughWrite('TESTS\n');
+
+      const border = [];
+      border.push(padValue('', maxLengths.percent, '─'));
+      border.push(padValue('', maxLengths.browserName, '─'));
+      border.push(padValue('', maxLengths.browserVersion, '─'));
+      border.push(padValue('', maxLengths.osName, '─'));
+      border.push(padValue('', maxLengths.osVersion, '─'));
+      border.push(padValue('', maxLengths.seconds, '─'));
+      border.push(padValue('', maxLengths.counts, '─'));
+      process.passthroughWrite('┌─' + border.join('─┬─') + '─┐\n');
 
       for (let index = 0; index < sortedNames.length; index++) {
          const name = sortedNames[index];
          const value = [];
-         value.push(padValue((byBrowserName[name].passed / byBrowserName[name].run) * 100, maxLengths.time) + '%');
+         value.push(padLeftValue(byBrowserName[name].percent, maxLengths.percent));
          value.push(padValue(byBrowserName[name].browserName, maxLengths.browserName));
          value.push(padValue(byBrowserName[name].browserVersion, maxLengths.browserVersion));
          value.push(padValue(byBrowserName[name].osName, maxLengths.osName));
          value.push(padValue(byBrowserName[name].osVersion, maxLengths.osVersion));
-         value.push(padValue(byBrowserName[name].time / 1000, maxLengths.time) + 'ms');
-         value.push(padValue(`${byBrowserName[name].passed}/${byBrowserName[name].run}`, maxLengths.time));
+         value.push(padLeftValue(byBrowserName[name].seconds, maxLengths.seconds));
+         value.push(padLeftValue(byBrowserName[name].counts, maxLengths.counts));
          if (byBrowserName[name].skipped) {
             value.push(`Skipped ${byBrowserName[name].skipped}`);
          }
-         process.passthroughWrite(value.join(' │ ') + '\n');
+         process.passthroughWrite('│ ' + value.join(' │ ') + ' │\n');
       }
+      process.passthroughWrite('└─' + border.join('─┴─') + '─┘\n');
+      process.passthroughWrite('Missing node.js results\n');
 
 //      for (const key in byOs) {
 //         process.passthroughWrite(key + '\n');

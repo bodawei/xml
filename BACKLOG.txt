@@ -29,34 +29,31 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
  2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: 7
- 3/11 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: ?
+ 3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
+ 3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 
 
-Cleanup:
-- separate out char reference and reference
-
-187: L: Do a common parser for entity values, attribute decls and attributes
+[ Need to do full half hour planning, if you get through the two below in less, then do 
+188: M: Add parsing to entity values
 	T: Rework
-	DEPENDS on cleanup of references
-	- finds references.
-	- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
-	- do we actually want to identify GRefs in entity values?  I don't think so.
-		NO.  They will be parsed as entity is read in
-	- has to barf for the < in attributes and attrdecl?
-		NO: We were doing this. The reason was to avoid missing quotes leading to LONG attributes
-			However, this doesn't absolutely avoid this (e.g. <warAndPeace author="herman melville> .... )
-			We don't try to avoid runon comments, CDATA etc.
-			To be sure, if we want to deal with these by chunking them, we would need
-				to pull attributes out of the element token, which is quite disruptive.
-				But it would be as doable from an external interface standpoint.
-	---
-	parseQuotedValue(cursor, recognizeGRef, recognizePERef, reject<)
+	DEPENDS on L
+	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
+		- @@@ need to think about the cursor that will need to consume these. 
+	- Biggest effort here is going to be cleaning up tests
+
+190: S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+	T: Rework
+	DEPENDS on L
+	- Biggest effort here is going to be cleaning up tests
 
 
 -- next: 193
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- char reference, then reference, then bangitems
+	- getReference should be pushed into misc, and we should check the return value
+		to decide validation and tokenization.
+	- attributes should shift to using misc.  And think about the validation.
+	- bangitem should do the same pattern as getReference
 - Provide async interface to cursor
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.  Mock the cursor?  how to test this?
 - remove entity manager from xmltokenstream
@@ -75,15 +72,7 @@ BUILD
 126: Enhancements to the reporting
 * Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
 - Change test reporter to look at new json files per browser
-	√ add your own totals to make sure they are the same
-	√ totals and percents should come from it.
-	√ - Do not actually need to be counting per test, as are in the summary, as we are accumulating the same values in the reporter
-		duh. summary IS our counting
 	- could summarize the failing tests along with the duplicates, however.
-	- Format result better. Sort by percent, then browser
-		Percent | Browser | Version | OS | Count/Count | Time | Skipped
-	√- Where are the disconnected and error/failure in the overall summary coming from
-		- No idea what error versus failed does.
 	- would be good to test out onBrowserComplete once some of this is done.
 	- what happened to node reporting?
 	- Aren't we supposed to be writing this to a file and then displaying it at the end on success?
@@ -180,10 +169,11 @@ YES:  When cleanup done, rather than a flag to xmltoken, we should have a separa
 		- note that this means a bunch of the tests will fail.  :-|
 
 - Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
+- Missing writing an stream cursor
+- Missing: async api in cursor
 
 
-
-
+Async cursor should move into here, honestly.
 183: M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
 	- need to identify parameter entities in the first place!
 		- maybe should wait until we get the separation done? Or this could prep for that
@@ -229,27 +219,11 @@ NOTE
 		same about <
 		(evidently not peref)
 
-
-
-
-188: M: Add parsing to entity values
-	T: Rework
-	DEPENDS on L
-	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
-		- @@@ need to think about the cursor that will need to consume these. 
-	- Biggest effort here is going to be cleaning up tests
-
 189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
 	T: Rework
 	DEPENDS on cleanup
 	DEPENDS on L
 	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
-
-190: S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
-	T: Rework
-	DEPENDS on L
-	- Biggest effort here is going to be cleaning up tests
-
 
 191: M: A Entity manager will insert arbitrary markup tokens into attributes
 	DEPENDS on cleanup with references
@@ -1897,3 +1871,46 @@ Cleanup ended up going over by a factor of 5.  I just really really wanted to ge
 This is good, as the split up code is probably two or three sprints from being done.
 We really really need to go back over the validation and parsing code with a finer toothed comb, make it consistent etc, and move towards breaking XmlTokenStream into three different ones.
 But we're almost blocking the main task, so we need to get references pulled out. After that, I think we need to prioritize getting the cursor made async.  That's almost a main dev task, as ultimately that's going to require test reworking for the cursor. But we can do that in stages, first get async calls in, move xmltokenstream over, and then we can eol the tested interface.
+
+Sprint 30
+=========
+Cleanup:
+- separate out char reference and reference
+
+187: L: Do a common parser for entity values, attribute decls and attributes
+	T: Rework
+	DEPENDS on cleanup of references
+	- finds references.
+	- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
+	- do we actually want to identify GRefs in entity values?  I don't think so.
+		NO.  They will be parsed as entity is read in
+	- has to barf for the < in attributes and attrdecl?
+		NO: We were doing this. The reason was to avoid missing quotes leading to LONG attributes
+			However, this doesn't absolutely avoid this (e.g. <warAndPeace author="herman melville> .... )
+			We don't try to avoid runon comments, CDATA etc.
+			To be sure, if we want to deal with these by chunking them, we would need
+				to pull attributes out of the element token, which is quite disruptive.
+				But it would be as doable from an external interface standpoint.
+	---
+	parseQuotedValue(cursor, recognizeGRef, recognizePERef, reject<)
+	Build
+	√ add your own totals to make sure they are the same
+	√ totals and percents should come from it.
+	√ - Do not actually need to be counting per test, as are in the summary,
+		as we are accumulating the same values in the reporter
+		duh. summary IS our counting
+	√- Where are the disconnected and error/failure in the overall summary coming from
+		- No idea what error versus failed does.
+	√ duplicate test name is causing build to fail without much info why
+		I think because counts aren't matching somewhere.		
+	√ Format result better. Sort by percent, then browser
+		Percent | Browser | Version | OS | Count/Count | Time | Skipped
+
+Notes30
+We set out intending to do 187, and felt it would go pretty quickly. Could probably do other stuff.  While the base logic got in place quickly, the testing for edge cases and so on took much longer than hoped. In the end we exceeded the sprint size by a few minutes.  However, we did get this done, which is nice.
+We actually started with the cleanup phase, since we really needed the reference things done first.
+
+One thing I'm realizing as I begin to get close to no longer using cleanup for the refactoring of the parsing logic, is I really should be using the cleanup to do more investigation of the code I've written and seeing if I can make the logic better.  A learning phase.
+
+
+
