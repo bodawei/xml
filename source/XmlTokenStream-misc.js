@@ -321,7 +321,6 @@ class XmlTokenStreamMisc {
          startQuoteChunk
          items
          stopQuoteChunk
-         aborted
       }
    \**********************************************************************/
    parseQuotedValue(cursor, options = {}) {

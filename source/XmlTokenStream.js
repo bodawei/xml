@@ -427,7 +427,7 @@ class XmlTokenStream extends stream.Readable {
                const entityClass = parsedEntity.isParameter ? tokens.PEntityDeclaration : tokens.EntityDeclaration;
 
                this._pushToken(new entityClass(textOrBlank(parsedEntity.nameChunk),
-                  parsedEntity.valueChunk,
+                  this._convertParsedQuotedValueToTokens(parsedEntity.value),
                   locFromExternalId(parsedEntity.externalId),
                   textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
                return;
@@ -452,6 +452,38 @@ class XmlTokenStream extends stream.Readable {
       }
 
       this._report(SEID.BANGITEM_UNKNOWN);
+   }
+
+   _convertParsedQuotedValueToTokens(parsedQuotedValue) {
+      const result = [];
+
+      if (!parsedQuotedValue) {
+         return;
+      }
+
+      for (let index = 0; index < parsedQuotedValue.items.length; index++) {
+         const item = parsedQuotedValue.items[index];
+
+         if (item instanceof TextChunk.PlainChunk) {
+            result.push(new tokens.Text(item.text, tokens.ENTITYVAL_NO_CHUNKS));
+         } else {
+            const name = item.parsed.nameChunk ? item.parsed.nameChunk.text : '';
+
+            switch (item.type) {
+               case XmlTokenStreamMisc.TYPE.CHAR_REF:
+                  result.push(new tokens.CharRef(item.parsed.character, tokens.ENTITYVAL_NO_CHUNKS));
+                  break;
+//               case XmlTokenStreamMisc.TYPE.GENERAL_REF:
+//                  result.push(new tokens.EntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));
+//                  break;
+               case XmlTokenStreamMisc.TYPE.PARAMETER_REF:
+                  result.push(new tokens.ParameterEntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));
+                  break;
+            }
+         }
+      }
+
+      return result;
    }
 
    _closeDocType() {
@@ -807,9 +839,20 @@ class XmlTokenStream extends stream.Readable {
          this._validateText(parsedEntity.nDataName, parsedEntity.start);
       }
 
-      this._checkSyntax(parsedEntity.valueChunk || parsedEntity.externalId,
+      this._checkSyntax(parsedEntity.value || parsedEntity.externalId,
          SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
       this._checkSyntax(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+
+      if (this._entityMd.type === EntityMetaData.TYPE.DOCUMENT && this._state === STATE.IN_DTD) {
+         const count = parsedEntity.value ? parsedEntity.value.items.length : 0;
+
+         for (let index = 0; index < count; index++) {
+            const item = parsedEntity.value.items[index];
+            if (item.type === XmlTokenStreamMisc.TYPE.PARAMETER_REF) {
+               this._report(SEID.PEREF_INVALID_ENTITYVALUE_CONTEXT, [ textOrBlank(item.parsed.nameChunk) ]);
+            }
+         }
+      }
 
       this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
    }

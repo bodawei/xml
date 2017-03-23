@@ -545,6 +545,35 @@ describe('XmlTokenStream (dtd)', () => {
          expect(s.read().value).toEqual([ new tokens.Text('value&amp;', tokens.ENTITYVAL_NO_CHUNKS) ]);
       });
 
+      it('expands parameter entity references in the value', () => {
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value%amp;">');
+
+         expect(s.read().value).toEqual([
+            new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.ParameterEntityReference('amp', tokens.ENTITYVAL_NO_CHUNKS)
+         ]);
+      });
+
+      it('reports an error if a param entity ref is found in an entity value in the internal subset', () => {
+         const s = makeLaxStream(
+            '<?xml version="1.0"?><!DOCTYPE test [<!ENTITY myEntity "%aPE;">]>');
+         expectTokenType(s, tokens.XmlDeclaration);
+         expectTokenType(s, tokens.DocTypeStart);
+         expectTokenType(s, tokens.InternalSubsetStart);
+
+         expectError(s, SyntaxError.ID.PEREF_INVALID_ENTITYVALUE_CONTEXT,
+            'Must not have a parameter entity reference in an entity value in the internal subset. Found "aPE".');
+      });
+
+      it('expands character references in the value', () => {
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName "value&#65;">');
+
+         expect(s.read().value).toEqual([
+            new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS)
+         ]);
+      });
+
       it('sets the value to undefined if none specified', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 

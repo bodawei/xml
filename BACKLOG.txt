@@ -32,19 +32,67 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 
 
-[ Need to do full half hour planning, if you get through the two below in less, then do 
+BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM CHANGES OUT IF NEEDED.  EACH ONE IN SUCCESSION SHOULD REAP BENEFITS FROM THE ONE BEFORE. I'm committing to all of 188 and 189 minus the entitystream work
+	= Would be good to add this to readme's
+
 188: M: Add parsing to entity values
 	T: Rework
 	DEPENDS on L
 	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
 		- @@@ need to think about the cursor that will need to consume these. 
 	- Biggest effort here is going to be cleaning up tests
+	√ * Substitute _getQuotedValue and get back an array of pieces  Parse charref and peref and text
+	√ * need to assemble this into the value that is passed to the token. Probably reasonable to have a routine do that.
+	√ * cleanup tests
+	√ NEW: Not recognize perefs in internal subset
 
-190: S: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+	T: Rework
+	DEPENDS on cleanup
+	DEPENDS on L
+	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
+	* Slight modification to _getQuotedValue
+		Basically, abort case goes away.
+		We already do the rest, but it is generating tokens, and shouldn't be
+	* validation
+		we have woefully inadequte validation. Can reuse from above
+	* _getStartOrEmptyTag
+		Arguably should extract attribute construction
+		Needs to convert stuff into tokens. Can reuse routien from above
+	* test cleanup
+	* EntityStream seems like it is already built to do the right thing.
+
+AS TIME PERMITS
+	NEW: * ValidateEntity will need to validate each chunk. charref, peref, text  (peref not in internal subset)
+		_validateCharReference
+		_validateEntityReference
+			- this is not build for perefs.
+			- need to barf if this is in the internal subset
+		not much validation for text, actually
+	NEW: * entityStream should be able to expand perefs, BEFORE this gets inserted into the entity manager.
+		- pretty easy, but should have a test to make sure peref gets expanded before entity ref is used
+			<!ENTITY % foo "bar">
+			<!ENTITY foo "%foo;">
+
+
+190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
 	T: Rework
 	DEPENDS on L
 	- Biggest effort here is going to be cleaning up tests
+	* substitute _getQuotedValue for charref and geref
+		This will break the test because we're abandoning the < abort process
+	* _validateAttList
+		_validateCharReference
+		_validateEntityReference
+		- validate text
+	* Extract assembly of the attribute out of the validation routine
+	* clean up tests
+	* EntityStream completely ignores attribute defaults right now. This would be the same as attributes.
 
+This is more than 2 M.  How much more, I'm not sure. in particular, the entityStream changes should, arguably, be pulled out.  Without them I'm more confident these can get done.
+
+	
+		
 
 -- next: 193
 =============================================
@@ -73,6 +121,7 @@ BUILD
 * Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
 - Change test reporter to look at new json files per browser
 	- could summarize the failing tests along with the duplicates, however.
+	- skipping a test leaves you with the implication that all tests were run. and border wrong
 	- would be good to test out onBrowserComplete once some of this is done.
 	- what happened to node reporting?
 	- Aren't we supposed to be writing this to a file and then displaying it at the end on success?
@@ -115,7 +164,24 @@ PROJECT
 --- technical debt []
 - read() should probably be the one emitting the error, not pushing
 
---- Entity management [3L 7M 3S] !!!  [39]
+
+
+
+--- Entity/attribute/attlist rework [1L 4m]
+PLAN PLAN PLAN 192 in mor detail.
+192: L: B We need to deal with the internal entities that have character references in them
+	DEPENDS on reworked entity values
+	- a cursor which has a different offset (for consuming entity values)
+	- a cursor which deals with the internal entities
+	- it needs to cope with the result of PERefs in there too. they'll ahve been expanded, but tokens still there
+
+191: M: Bug: A Entity stream will insert arbitrary markup tokens into attributes
+	DEPENDS on cleanup with references
+	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.
+		This is used internally when entitystream is filling in an attribute
+
+
+--- Entity management [2L 3M 3S] !!!  [39]
 
 WALKTHROUGH
 * No GE or PE's
@@ -154,6 +220,7 @@ WALKTHROUGH
 	- do not need to do ANY parsing of these at load time. Will be consumed by entity stream properly when it comes up
 
 RESEARCH
+- Missing: async api in cursor
 Must design the interface for fetching.
 	- need to multiplex between file and http in node
 	- can browser do file if with security mode off?
@@ -164,16 +231,12 @@ YES Must design PERef inline
 	- strongly looks like these can't be in attrlist defaults
 	- so, how do you find the end if you find a PERef in markup?  I suggest a scan for > but that is smart enough to deal with quotes since > might be in a quoted value in some of these cases.
 	- so all markup parsers need to be re-entrant with more complete data, namely the expanded peref (cursor?) and the unparsed text.
-YES:  When cleanup done, rather than a flag to xmltoken, we should have a separate stream type?
-	-- yes.  I t seems like a good idea to have multiple stream types once we have finished the cleanup separation
-		- note that this means a bunch of the tests will fail.  :-|
-
-- Note that a GERef should not pull in new PERefs.  Do we need to make this two passes, though, to be sure
+Should think more about the processing of GE and PERefs, especially are we ok if PERefs in bad places?
 - Missing writing an stream cursor
-- Missing: async api in cursor
+- If we pass something through entity stream multiple times, how to avoid adding context onto errors repeatedly?  How do we keep from manglign errors that happen in the document?: it's OK, because it looks at the stack
 
 
-Async cursor should move into here, honestly.
+
 183: M: Identifies PE References in internal subset (so just between markup) and populates from entity mangager
 	- need to identify parameter entities in the first place!
 		- maybe should wait until we get the separation done? Or this could prep for that
@@ -197,46 +260,6 @@ Async cursor should move into here, honestly.
 185: M E need entity manager to retrieve remote entities
 	- external entities (can just wrap a cursor. may need to think about entity locations -- caching cursor?  but don't cache if too big!)
 	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)
-
-
---- All the below is needed, but depends on cleanup work
-NOTE
-	internal entity value
-		recognize char refs
-		recognize peref	<--- not in internal subset
-		can we say &##;peref; and have that expand?
-	external entity value
-		n/a.  this is the whole token stream
-	attribute values
-		recognize char refs
-		recognize gref
-		change: allow <, but identify an error.
-			it is an error either way, but the current "abort" scheme i messy, and while it theoretically reduces larger than memory attribute values, not sure this is worth it.  we have same problems with things we can't help, like comments.
-		--- if char ref is  < ???
-	attriute values in definitions
-		recognize char refs
-		recognize gref
-		same about <
-		(evidently not peref)
-
-189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
-	T: Rework
-	DEPENDS on cleanup
-	DEPENDS on L
-	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
-
-191: M: A Entity manager will insert arbitrary markup tokens into attributes
-	DEPENDS on cleanup with references
-	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.  This is used internally when entitystream is filling in an attribute
-
-
-192: L: B We need to deal with the internal entities that have character references in them (NEEDS PLANNING)
-	DEPENDS on reworked entity values
-	- a cursor which has a different offset (for consuming entity values)
-	- a cursor which deals with the internal subset mess
-	- it needs to cope with the result of PERefs in there too. they'll ahve been expanded, but tokens still there
-
-- If we pass something through entity stream multiple times, how to avoid adding context onto errors repeatedly?  How do we keep from manglign errors that happen in the document?: it's OK, because it looks at the stack
 
 
 --- DTD [3XL]
@@ -1912,5 +1935,12 @@ We actually started with the cleanup phase, since we really needed the reference
 
 One thing I'm realizing as I begin to get close to no longer using cleanup for the refactoring of the parsing logic, is I really should be using the cleanup to do more investigation of the code I've written and seeing if I can make the logic better.  A learning phase.
 
+Sprint 31
+=========
+		change: allow <, but identify an error.
+			it is an error either way, but the current "abort" scheme is
+			messy, and while it theoretically reduces larger than memory
+			attribute values, not sure this is worth it.  we have same
+			problems with things we can't help, like comments.
 
 

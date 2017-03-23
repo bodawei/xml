@@ -121,6 +121,8 @@ module.exports = (grunt) => {
          return nameResult;
       }
 
+      // would be nice to identify decimal places, and padd out numbers so they line up on that, and for the versions,
+      // align on the first
       function padLeftValue(value, columnWidth, padChar) {
          let nameResult = '';
          for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {

@@ -3,7 +3,8 @@
 'use strict';
 
 const TextChunk = require('./shared/TextChunk.js');
-const tokens = require('./XmlToken.js');
+const MiscParser = require('./XmlTokenStream-misc.js');
+const miscParser = new MiscParser();
 
 /*
  * Biases: If find something unexpected, assume the > is missing.
@@ -127,7 +128,7 @@ class XmlTokenStreamDtd {
          isParameter: True if this is a parameter entry declaration
          postNameSpaceChunk: The space after the name, if any.
          valueQuoteChunk
-         valueChunk
+         value
          externalId,
          preNDataSpace
          nDataMarker
@@ -164,12 +165,11 @@ class XmlTokenStreamDtd {
 
       const valueQuote = cursor.peekChar();
       if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
-         results.valueQuoteChunk = cursor.getChar();     // consume the quote
-         this._getQuotedValue(cursor, valueQuote, { isEntityValue: true }, results);
-         results.valueChunk = [ ];
-         if (results.value[0]) {
-            results.valueChunk.push(new tokens.Text(results.value[0].text, tokens.ENTITYVAL_NO_CHUNKS));
-         }
+         results.value = miscParser.parseQuotedValue(cursor, {
+            terminators: [ '>' ],
+            charRef: true,
+            peRef: true // NOT if we are in the internal subset
+         });
       } else {
          results.externalId = this._retrieveExternalId(cursor, [ '>' ], { isEntity: true });
       }
