@@ -736,49 +736,23 @@ describe('XmlTokenStream (element)', () => {
             compareAttribute(t.attributes[0], 'name', undefined);
          });
 
-         it('throws an error if a < is found in an attribute', () => {
-            expectSyntaxError('<elementName name="myvalue<one">',
-               SyntaxError.ID.ATTRIBUTE_INVALID_VALUE,
-               'The value of attribute "name" must not contain "<".');
-         });
-
-         it('terminates start tag and continues processing if an < in an attribute value in lax mode', () => {
+         it('includes a < in an attribute value in lax mode', () => {
             const s = makeLaxExternalEntityStream('<elementName name="one<two">');
             ignoreError(s, SyntaxError.ID.ATTRIBUTE_INVALID_VALUE);
-            ignoreError(s, SyntaxError.ID.ELEMENT_NO_CLOSE);
-
-            let t = s.read();
-
-            compareAttribute(t.attributes[0], 'name', 'one');
-            ignoreError(s, SyntaxError.ID.ELEMENT_NAME_INVALID);
-
-            t = s.read();
-            expect(t.name).toEqual('two"');
-         });
-
-         it('considers < part of attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
-            const s = makeLaxExternalEntityStream('<elementName name="one<two">', {
-               'lax:allowOpenAngleBracketsInAttributeValues': true
-            });
 
             const t = s.read();
 
             compareAttribute(t.attributes[0], 'name', 'one<two');
          });
 
-         it('terminates start tag if an < in a quoteless attribute value in lax mode', () => {
+         it('allows the < in an attribute value in lax mode', () => {
             const s = makeLaxExternalEntityStream('<elementName name=one<two">');
             ignoreError(s, SyntaxError.ID.ATTRIBUTE_NO_QUOTE);
             ignoreError(s, SyntaxError.ID.ATTRIBUTE_INVALID_VALUE);
-            ignoreError(s, SyntaxError.ID.ELEMENT_NO_CLOSE);
 
-            let t = s.read();
+            const t = s.read();
 
-            compareAttribute(t.attributes[0], 'name', 'one');
-            ignoreError(s, SyntaxError.ID.ELEMENT_NAME_INVALID);
-
-            t = s.read();
-            expect(t.name).toEqual('two"');
+            compareAttribute(t.attributes[0], 'name', 'one<two"');
          });
 
          it('terminates gracefully even when EOF at end of quoteless attribute value', () => {
@@ -791,11 +765,10 @@ describe('XmlTokenStream (element)', () => {
             compareAttribute(t.attributes[0], 'name', 'one');
          });
 
-         it('considers < part of quoteless attribute value if lax:allowOpenAngleBracketsInAttributeValues', () => {
-            const s = makeLaxExternalEntityStream('<elementName name=one<two">', {
-               'lax:allowOpenAngleBracketsInAttributeValues': true
-            });
+         it('considers < part of quoteless attribute value', () => {
+            const s = makeLaxExternalEntityStream('<elementName name=one<two">');
             ignoreError(s, SyntaxError.ID.ATTRIBUTE_NO_QUOTE);
+            ignoreError(s, SyntaxError.ID.ATTRIBUTE_INVALID_VALUE);
 
             const t = s.read();
             compareAttribute(t.attributes[0], 'name', 'one<two"');

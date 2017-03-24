@@ -1409,7 +1409,7 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: undefined,
-            value: [ 'this is a test value' ]
+            value: [ new tokens.Text('this is a test value', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 
@@ -1422,7 +1422,7 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: undefined,
-            value: [ 'this is a test value' ]
+            value: [ new tokens.Text('this is a test value', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 
@@ -1439,7 +1439,7 @@ describe('XmlTokenStream (dtd)', () => {
          } ]);
       });
 
-      it('recognizes an default with a reference in it, without expanding it', () => {
+      it('recognizes recognizes general entity references', () => {
          const s = makeStrictExternalSubsetStream('<!ATTLIST elementName ' +
                'CDataName CDATA "one &amp;">');
 
@@ -1448,7 +1448,8 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: undefined,
-            value: [ 'one &amp;' ]
+            value: [ new tokens.Text('one ', tokens.ENTITYVAL_NO_CHUNKS),
+               new tokens.EntityReference('amp', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 
@@ -1461,7 +1462,7 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: '#FIXED',
-            value: [ 'this is a test value' ]
+            value: [ new tokens.Text('this is a test value', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 
@@ -1517,7 +1518,7 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: '#FIXED',
-            value: [ 'foo' ]
+            value: [ new tokens.Text('foo', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 
@@ -1691,37 +1692,16 @@ describe('XmlTokenStream (dtd)', () => {
 
       it('allows an attribute with "<" in the default if the right lax flag is set', () => {
          const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
-               'attrName CDATA "one < two">', {
-                  'lax:allowOpenAngleBracketsInAttributeValues': true
-               });
-
-         expect(s.read().attributes).toEqual([ {
-            name: 'attrName',
-            type: 'CDATA',
-            list: undefined,
-            flag: undefined,
-            value: [ 'one < two' ]
-         } ]);
-      });
-
-      it('terminates the attribute list element early if there is a "<" in the attribute value ', () => {
-         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
                'attrName CDATA "one < two">');
          ignoreError(s, SyntaxError.ID.ATTLISTDECL_ATTR_INVALID);
-         ignoreError(s, SyntaxError.ID.ATTLISTDECL_NO_CLOSE);
 
          expect(s.read().attributes).toEqual([ {
             name: 'attrName',
             type: 'CDATA',
             list: undefined,
             flag: undefined,
-            value: [ 'one ' ]
+            value: [ new tokens.Text('one < two', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
-
-         ignoreError(s, SyntaxError.ID.ELEMENT_XTRA_LEADING_SPACE);
-         ignoreError(s, SyntaxError.ID.ELEMENT_NAME_INVALID);
-         ignoreError(s, SyntaxError.ID.ELEMENT_INVALID_DTD_CONTEXT);
-         expectTokenType(s, tokens.ElementStart);
       });
 
       it('reports a syntax error if there is not a closing quote', () => {

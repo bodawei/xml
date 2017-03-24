@@ -251,8 +251,6 @@ class XmlTokenStreamDtd {
 
     PARAM
     cursor: The cursor to read from
-    options: This makes use of the
-         lax:allowOpenAngleBracketsInAttributeValues option.
 
     RETURN
       {
@@ -285,7 +283,7 @@ class XmlTokenStreamDtd {
     [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' |
                             (('#FIXED' S)? AttValue)
    \**********************************************************************/
-   parseAttList(cursor, options) {
+   parseAttList(cursor) {
       const results = {
          attributes: []
       };
@@ -327,7 +325,7 @@ class XmlTokenStreamDtd {
 
          attr.preDefaultSpace = cursor.getSpace();
 
-         const nextChar = cursor.peekChar();
+         let nextChar = cursor.peekChar();
 
          if (nextChar && nextChar.text === '#') {
             attr.default = cursor.getWord([ '>', '"', '\'' ]);
@@ -335,20 +333,16 @@ class XmlTokenStreamDtd {
             if (attr.default.text.toLocaleUpperCase() === '#FIXED') {
                attr.postFixedSpace = cursor.getSpace();
 
-               const quoteChunk = cursor.peekChar();
-
-               if (quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'')) {
-                  cursor.getChar();
-                  this._getQuotedValue(cursor, quoteChunk, options, attr);
-               }
+               nextChar = cursor.peekChar();
             }
-         } else if (nextChar && nextChar.text !== '>') {
-            const quoteChunk = cursor.getChar();
-            this._getQuotedValue(cursor, quoteChunk, options, attr);
          }
 
-         if (attr.aborted) {
-            done = true;
+         if (nextChar && (nextChar.text === '"' || nextChar.text === '\'')) {
+            attr.value = miscParser.parseQuotedValue(cursor, {
+               terminators: [ '>' ],
+               charRef: true,
+               geRef: true
+            });
          }
 
          if (attr.name) {
@@ -358,6 +352,7 @@ class XmlTokenStreamDtd {
          }
       }
 
+      // Big assumptions about the input here.
       cursor.getSpace();
       results.closeChunk = cursor.getMatch('>');
 
@@ -420,62 +415,6 @@ class XmlTokenStreamDtd {
 
          if (results.close || foundTerminator) {
             done = true;
-         }
-      }
-   }
-
-   /**********************************************************************\
-    _getQuotedValue consumes the next data from the cursor to extract
-    a quoted value.  This is used for several diverse types of quoted
-    values, so the options specify which variation should be handled.
-
-    PARAMS
-    quoteChunk is the TextChunk containing the quote that opened the value
-    options is an Object containing these values:
-      isElementAttribute: true if this is an element attribute's value
-      isEntityValue: If true, expand parameter entity values
-      nameChunk: If this is an element or xmldecl attribute value, this
-                 the name of the attribute must be provided here.
-
-    RETURN
-    For attributes, this returns an object that contains the array of
-    possibly zero XmlTokens found to make up the attribute value, and a
-    flag named abort. If abort is true, it indicates that a "<" was found
-    in the attribute value, and not only attribute value gathering should
-    stop, but the whole start tag processing should stop.
-    For entity values, this just returns the array of XMLTokens
-   \**********************************************************************/
-   _getQuotedValue(cursor, quoteChunk, options = {}, result) {
-      let done = false;
-      const terminators = [ quoteChunk.text ];
-
-      result.value = [];
-      result.aborted = false;
-      result.quote = undefined;
-
-      if (!options['lax:allowOpenAngleBracketsInAttributeValues']) {
-         terminators.push('<');
-      }
-
-      while (!done) {
-         const chunkInfo = cursor.getToTerminator(terminators);
-
-         if (chunkInfo.chunk) {
-            result.value.push(chunkInfo.chunk);
-         }
-
-         done = true;
-
-         switch (chunkInfo.terminator) {
-            case quoteChunk.text:
-               cursor.getChar(); // consume the quote
-               result.quote = quoteChunk.text;
-               break;
-            case '<':
-               result.aborted = true;
-               break;
-            default: // no terminator
-               break;
          }
       }
    }

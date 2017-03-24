@@ -32,9 +32,6 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 
 
-BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM CHANGES OUT IF NEEDED.  EACH ONE IN SUCCESSION SHOULD REAP BENEFITS FROM THE ONE BEFORE. I'm committing to all of 188 and 189 minus the entitystream work
-	= Would be good to add this to readme's
-
 188: M: Add parsing to entity values
 	T: Rework
 	DEPENDS on L
@@ -46,23 +43,47 @@ BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM 
 	√ * cleanup tests
 	√ NEW: Not recognize perefs in internal subset
 
-189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+[ 1 hr ]
+
+√ 189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
 	T: Rework
 	DEPENDS on cleanup
 	DEPENDS on L
 	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
-	* Slight modification to _getQuotedValue
+	√ * Slight modification to _getQuotedValue
 		Basically, abort case goes away.
 		We already do the rest, but it is generating tokens, and shouldn't be
-	* validation
+	√ * validation
 		we have woefully inadequte validation. Can reuse from above
-	* _getStartOrEmptyTag
+	√ * _getStartOrEmptyTag
 		Arguably should extract attribute construction
 		Needs to convert stuff into tokens. Can reuse routien from above
-	* test cleanup
-	* EntityStream seems like it is already built to do the right thing.
+	√ * test cleanup
+	√ * EntityStream seems like it is already built to do the right thing.
+
+[ 2.5hr ]
+
+
+190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+	T: Rework
+	DEPENDS on L
+	- Biggest effort here is going to be cleaning up tests
+	√ * substitute _getQuotedValue for charref and geref
+		This will break the test because we're abandoning the < abort process
+	√* _validateAttList
+		_validateCharReference
+		_validateEntityReference
+		- validate text
+	√ * Extract assembly of the attribute out of the validation routine
+	√* clean up tests
+
+
+- why are all the parsers classes? They have no state. could just be namespaces
+- Do we really want to be supporting quoteless attributes at this point?
 
 AS TIME PERMITS
+	NEW: Begin documenting behavior of refs, in your README
+	NEW * AddChunks to the entity tokens.  cursor will need them.
 	NEW: * ValidateEntity will need to validate each chunk. charref, peref, text  (peref not in internal subset)
 		_validateCharReference
 		_validateEntityReference
@@ -73,25 +94,11 @@ AS TIME PERMITS
 		- pretty easy, but should have a test to make sure peref gets expanded before entity ref is used
 			<!ENTITY % foo "bar">
 			<!ENTITY foo "%foo;">
+	NEW: Need to think about expansion order, especially on gere's in attlist's.  Can anything forward reference?
+	NEW: do tests of validation of bad char refs etc in attribute value
+	NEW: do tests of validation of bad char refs etc in attrlist value
+	NEW: EntityStream completely ignores attribute defaults right now. This would be the same as attributes.
 
-
-190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
-	T: Rework
-	DEPENDS on L
-	- Biggest effort here is going to be cleaning up tests
-	* substitute _getQuotedValue for charref and geref
-		This will break the test because we're abandoning the < abort process
-	* _validateAttList
-		_validateCharReference
-		_validateEntityReference
-		- validate text
-	* Extract assembly of the attribute out of the validation routine
-	* clean up tests
-	* EntityStream completely ignores attribute defaults right now. This would be the same as attributes.
-
-This is more than 2 M.  How much more, I'm not sure. in particular, the entityStream changes should, arguably, be pulled out.  Without them I'm more confident these can get done.
-
-	
 		
 
 -- next: 193
@@ -163,8 +170,6 @@ BUILD
 PROJECT
 --- technical debt []
 - read() should probably be the one emitting the error, not pushing
-
-
 
 
 --- Entity/attribute/attlist rework [1L 4m]
@@ -289,16 +294,16 @@ Should think more about the processing of GE and PERefs, especially are we ok if
 		Note: Can't do regex from an offset without doing a substr. sigh.
 
 ---- Extra (not part of MVP)
+33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
 70:S: Recognize char entities in PI and Commands with a special wrapper stream
+43:M:deal with references within comments and PI
+	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
 85:s: could suppress repeated "this isn't a valid name" for element names that might be repeated thousands of times.
 I:XL Cursors can't be synchronous!
 15:M: Put a limit on how much read in in one chunk (pass in as option). 
-33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
 34:M:Cope with junk before xmldeclaration
 35:M:Deal with xmldecl not actually being an xmldecl
 42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
-43:M:deal with references within comments and PI
-	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
 When doing a write out xml thing, don'g forget the errata for 1.1/2 which mentions the requirement to add a BOM in some cases
 =============================================
 BLOG IDEAS
@@ -1943,4 +1948,6 @@ Sprint 31
 			attribute values, not sure this is worth it.  we have same
 			problems with things we can't help, like comments.
 
+This is more than 2 M.  How much more, I'm not sure. in particular, the entityStream changes should, arguably, be pulled out.  Without them I'm more confident these can get done.
+BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM CHANGES OUT IF NEEDED.  EACH ONE IN SUCCESSION SHOULD REAP BENEFITS FROM THE ONE BEFORE. I'm committing to all of 188 and 189 minus the entitystream work
 

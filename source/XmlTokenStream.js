@@ -156,7 +156,6 @@ class XmlTokenStream extends stream.Readable {
 
       this._options = {
          lax: false,
-         'lax:allowOpenAngleBracketsInAttributeValues': false,
          ignoreDocumentVersion: false,
          ignoreDocumentEncoding: false
       };
@@ -441,9 +440,11 @@ class XmlTokenStream extends stream.Readable {
                   this._cursor.getRecentChunks()));
                return;
             case 'ATTLIST':
-               const parseResults = this._dtdParser.parseAttList(this._cursor, this._options);
+               const parseResults = this._dtdParser.parseAttList(this._cursor);
 
-               const attributes = this._validateAttList(parseResults, start);
+               this._validateAttList(parseResults, start);
+
+               const attributes = this._extractAttrListAttributes(parseResults);
 
                this._pushToken(new tokens.AttrListDeclaration(textOrBlank(parseResults.elementNameChunk), attributes,
                   this._cursor.getRecentChunks()));
@@ -452,6 +453,58 @@ class XmlTokenStream extends stream.Readable {
       }
 
       this._report(SEID.BANGITEM_UNKNOWN);
+   }
+
+   _extractAttrListAttributes(parseResults) {
+      const rawAttrs = parseResults.attributes;
+
+      const attributes = [];
+
+      for (let index = 0; index < rawAttrs.length; index++) {
+         const attr = rawAttrs[index];
+         let list;
+         let attrType = '';
+         let attrDefault;  // value liked #FIXED
+
+         if (attr.type) {
+            attrType = attr.type.text;
+
+            const upper = attrType.toLocaleUpperCase();
+            const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
+
+            if (known && attrType !== upper) {
+               attrType = upper;
+            }
+
+            if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
+               const attrList = attr.list || [];
+               list = [];
+
+               for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
+                  list.push(attrList[listIndex].text);
+               }
+            }
+         }
+
+         if (attr.default) {
+            attrDefault = attr.default.text;
+            const upper = attrDefault.toLocaleUpperCase();
+
+            if (ATTR_DEFAULT_NAMES.indexOf(upper) !== -1) {
+               attrDefault = upper;
+            }
+         }
+
+         attributes.push({
+            name: attr.name.text,
+            type: attrType,
+            list: list,
+            flag: attrDefault,
+            value: attr.value ? this._convertParsedQuotedValueToTokens(attr.value) : undefined
+         });
+      }
+
+      return attributes;
    }
 
    _convertParsedQuotedValueToTokens(parsedQuotedValue) {
@@ -473,9 +526,9 @@ class XmlTokenStream extends stream.Readable {
                case XmlTokenStreamMisc.TYPE.CHAR_REF:
                   result.push(new tokens.CharRef(item.parsed.character, tokens.ENTITYVAL_NO_CHUNKS));
                   break;
-//               case XmlTokenStreamMisc.TYPE.GENERAL_REF:
-//                  result.push(new tokens.EntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));
-//                  break;
+               case XmlTokenStreamMisc.TYPE.GENERAL_REF:
+                  result.push(new tokens.EntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));
+                  break;
                case XmlTokenStreamMisc.TYPE.PARAMETER_REF:
                   result.push(new tokens.ParameterEntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));
                   break;
@@ -539,7 +592,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getStartOrEmptyTag(start) {
-      const parsedTag = this._elementParser.parseStartTag(this._cursor, start, this._options);
+      const parsedTag = this._elementParser.parseStartTag(this._cursor, start);
 
       this._validateStartTag(parsedTag);
 
@@ -547,8 +600,8 @@ class XmlTokenStream extends stream.Readable {
       const attrs = parsedTag.attributes.map((attribute) => {
          return {
             name: attribute.name.text,
-            value: attribute.value,
-            quoteType: textOrUndef(attribute.quote)
+            value: this._convertParsedQuotedValueToTokens(attribute.value),
+            quoteType: textOrUndef(attribute.value.startQuoteChunk)
          };
       });
 
@@ -920,7 +973,6 @@ class XmlTokenStream extends stream.Readable {
       const rawAttrs = parseResults.attributes;
       const attListClose = parseResults.closeChunk;
 
-      const attributes = [];
       const elName = textOrBlank(elNameChunk);
 
       this._checkSyntax(elName !== '', SEID.ATTLISTDECL_NO_NAME);
@@ -931,9 +983,6 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < rawAttrs.length; index++) {
          const attr = rawAttrs[index];
          const attrName = attr.name.text;
-         let list;
-         let attrType = '';
-         let attrDefault;
 
          this._checkNameValid(attr.name, SEID.ATTLISTDECL_ATTR_NAME_INVALID, start);
          const error = util.checkNameRecommendations(attrName, this._entityMd,
@@ -943,7 +992,7 @@ class XmlTokenStream extends stream.Readable {
          if (!attr.type) {
             this._report(SEID.ATTLISTDECL_ATTR_NO_TYPE, [ attrName, elName ]);
          } else {
-            attrType = attr.type.text;
+            const attrType = attr.type.text;
 
             const upper = attrType.toLocaleUpperCase();
             const known = ATTR_TYPE_NAMES.indexOf(upper) !== -1;
@@ -952,32 +1001,28 @@ class XmlTokenStream extends stream.Readable {
 
             if (known && attrType !== upper) {
                this._report(SEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ upper, elName, attrType ]);
-               attrType = upper;
             }
 
-            if (attrType === 'NOTATION' || attrType === 'ENUMERATION') {
+            if (upper === 'NOTATION' || upper === 'ENUMERATION') {
                const attrList = attr.list || [];
-               list = [];
 
-               if (attrType === 'NOTATION') {
+               if (upper === 'NOTATION') {
                   this._checkSyntax(attr.postNotationSpace, SEID.ATTLISTDECL_ATTR_NOTA_NO_SPACE, [ elName ]);
                }
 
-               if (attrType === 'ENUMERATION') {
+               if (upper === 'ENUMERATION') {
                   this._checkSyntax(attr.preEnumSpaceChunk, SEID.ATTLISTDECL_ATTR_ENUM_NO_PRESPACE,
                      [ elName ], attr.name, start);
                }
                this._checkSyntax(attrList.length > 0, SEID.ATTLISTDECL_ATTR_NOTA_EMPTY, [ elName ]);
 
                for (let listIndex = 0; listIndex < attrList.length; listIndex++) {
-                  if (attrType === 'NOTATION') {
+                  if (upper === 'NOTATION') {
                      // we also do not check for xml usage in the name, as that will be caught elsewhere.
                      this._checkNameValid(attrList[listIndex], SEID.ATTLISTDECL_ATTR_NOTA_NAME_INVALID, start);
                   } else {
                      this._checkNmTokenValid(attrList[listIndex], SEID.ATTLISTDECL_ATTR_ENUM_NMTOKEN_INVALID, start);
                   }
-
-                  list.push(attrList[listIndex].text);
                }
 
                this._checkSyntax(attr.missingOr === 0,
@@ -986,7 +1031,7 @@ class XmlTokenStream extends stream.Readable {
                   SEID.ATTLISTDECL_ATTR_LIST_NO_NAMES, [ attr.missingCount, elName ]);
 
                if (!attr.close) {
-                  this._report(attrType === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
+                  this._report(upper === 'NOTATION' ? SEID.ATTLISTDECL_ATTR_NOTA_NO_CLOSE :
                      SEID.ATTLISTDECL_ATTR_ENUM_NO_CLOSE, [ attrName, elName ]);
                }
             }
@@ -997,7 +1042,7 @@ class XmlTokenStream extends stream.Readable {
          }
 
          if (attr.default) {
-            attrDefault = attr.default.text;
+            const attrDefault = attr.default.text;
 
             const upper = attrDefault.toLocaleUpperCase();
             const known = ATTR_DEFAULT_NAMES.indexOf(upper) !== -1;
@@ -1007,9 +1052,8 @@ class XmlTokenStream extends stream.Readable {
             } else {
                this._checkSyntax(upper === attrDefault,
                   SEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ upper, elName, attrDefault ]);
-               attrDefault = upper;
 
-               if (attrDefault === '#FIXED') {
+               if (upper === '#FIXED') {
                   if (attr.value) {
                      this._checkSyntax(attr.postFixedSpace, SEID.ATTLISTDECL_FIXED_NO_SPACE, [ elName ]);
                   }
@@ -1024,33 +1068,26 @@ class XmlTokenStream extends stream.Readable {
                SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
 
             if (attr.value) {
-               this._checkSyntax(!attr.aborted, SEID.ATTLISTDECL_ATTR_INVALID, [ elName ]);
-               if (!attr.aborted) {
-                  this._checkSyntax(attr.quote, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
-               }
+               this._validateNoAngleBrackets(attr.value.items, SEID.ATTLISTDECL_ATTR_INVALID, elName);
+               this._checkSyntax(attr.value.stopQuoteChunk, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
             }
          }
-
-         if (attr.value) {
-            for (let index = 0; index < attr.value.length; index++) {
-               attr.value[index] = attr.value[index].text;
-            }
-         }
-
-         attributes.push({
-            name: attrName,
-            type: attrType,
-            list: list,
-            flag: attrDefault,
-            value: attr.value
-         });
       }
 
       this._checkSyntax(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
 
       this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
+   }
 
-      return attributes;
+   _validateNoAngleBrackets(attributePieces, error, param) {
+      for (let pieceIndex = 0; pieceIndex < attributePieces.length; pieceIndex++) {
+         const piece = attributePieces[pieceIndex];
+         if (piece.text) {
+            if (piece.text.indexOf('<') !== -1) {
+               this._report(error, [ param ]);
+            }
+         }
+      }
    }
 
    _validateExternalId(externalId, systemRequired, start) {
@@ -1164,19 +1201,18 @@ class XmlTokenStream extends stream.Readable {
          this._checkNameValid(attribute.name, SEID.ATTRIBUTE_INVALID_NAME, nameText);
          this._checkSyntax(attribute.equal, SEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
 
-         if (!attribute.quote) {
+         if (!attribute.value.startQuoteChunk) {
             if (!attribute.equal) {
                this._report(SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-            } else if (attribute.value.length === 0) {
+            } else if (attribute.value.items.length === 0) {
                this._report(SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
             } else {
                this._report(SEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
             }
          }
 
-         if (attribute.abort) {
-            this._report(SEID.ATTRIBUTE_INVALID_VALUE, [ nameText ]);
-         } else if (attribute.quote && !attribute.closeQuote) {
+         this._validateNoAngleBrackets(attribute.value.items, SEID.ATTRIBUTE_INVALID_VALUE, nameText);
+         if (attribute.value.startQuoteChunk && !attribute.closeQuote) {   // ???
             this._report(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ nameText ]);
          }
       }

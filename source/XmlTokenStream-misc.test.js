@@ -500,9 +500,8 @@ describe('XmlTokenStream (Misc)', () => {
             new Offset(0, 2, 2));
       });
 
-      it('allows < in a values even if lax:allowOpenAngleBracketsInAttributeValues is false', () => {
+      it('allows < in a values', () => {
          const s = makeLaxStream('<?xml version="1.1" encoding="frog<"?>', new EntityMetaData(), {
-            'lax:allowOpenAngleBracketsInAttributeValues': false,
             ignoreDocumentEncoding: true
          });
 

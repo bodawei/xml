@@ -49,7 +49,6 @@ describe('XmlTokenStream', () => {
 
          expect(s._options).toEqual({
             lax: false,
-            'lax:allowOpenAngleBracketsInAttributeValues': false,
             ignoreDocumentVersion: false,
             ignoreDocumentEncoding: false
          });
