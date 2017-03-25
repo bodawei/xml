@@ -459,17 +459,16 @@ class XmlTokenStreamMisc {
          const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
 
          if (gotQuote) {
-            attribute.quoteChunk = cursor.getChar();
-            const chunkInfo = cursor.getToTerminator([ quote.text ]);
+            attribute.val = this.parseQuotedValue(cursor, {
+               terminators: [ '?>' ]
+            });
 
-            if (chunkInfo.chunk) {
-               attribute.valueChunk = chunkInfo.chunk;
-            }
-
-            attribute.postValueQuoteChunk = cursor.getMatch(quote.text);
+            attribute.postValueQuoteChunk = attribute.val.startQuoteChunk;
             attribute.trailingSpaceChunk = cursor.getSpace();
          } else if (attribute.equalChunk) {
-            attribute.valueChunk = cursor.getWord(XMLDECL_VALUE_TERMINATORS);
+            attribute.val = {
+               items: [ cursor.getWord(XMLDECL_VALUE_TERMINATORS) ]
+            };
             attribute.trailingSpaceChunk = cursor.getSpace();
          } else {
             attribute.trailingSpaceChunk = attribute.postNameSpaceChunk;

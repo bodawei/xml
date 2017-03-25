@@ -76,6 +76,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 		- validate text
 	√ * Extract assembly of the attribute out of the validation routine
 	√* clean up tests
+Extra: Applied the same pattern to XmlDecl
 
 
 - why are all the parsers classes? They have no state. could just be namespaces

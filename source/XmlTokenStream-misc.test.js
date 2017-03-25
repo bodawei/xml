@@ -31,9 +31,9 @@ const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeString
 function compareXmlDeclAttribute(attr, name, value) {
    expect(attr.name).toEqual(name);
    if (value) {
-      expect(attr.value).toEqual(value);
+      expect(attr.value ? attr.value[0].text : undefined).toEqual(value);
    } else {
-      expect(attr.value).toBeUndefined();
+      expect(attr.value ? attr.value[0] : undefined).toBeUndefined();
    }
 }
 
@@ -823,11 +823,11 @@ describe('XmlTokenStream (Misc)', () => {
                '"standalone" must be lower case. Found "STANDALONE".');
          });
 
-         it('returns the expected standalone value, even when wrong case used', () => {
+         it('returns the provided standalone value, even when wrong case used', () => {
             const s = makeLaxStream('<?xml  version="1.1" standalone="NO" ?>');
             ignoreError(s, SyntaxError.ID.XMLDECL_STANDALONE_INVALID_CASE);
 
-            compareXmlDeclAttribute(s.read().params[1], 'standalone', 'no');
+            compareXmlDeclAttribute(s.read().params[1], 'standalone', 'NO');
          });
 
          it('reports error if standalone value is wrong case', () => {

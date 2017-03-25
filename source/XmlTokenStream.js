@@ -568,9 +568,12 @@ class XmlTokenStream extends stream.Readable {
       if (parsedPI.isXmlDecl) {
          const parsed = this._miscParser.parseXmlDecl(this._cursor, start);
 
-         const { foundVersion, foundEncoding, attributes } = this._validateXmlDecl(start, parsed);
+         this._validateXmlDecl(start, parsed);
+         const params = this._extractParams(parsed);
 
          if (!this._options.ignoreDocumentVersion) {
+            const foundVersion = this._getParamValue(params, 'version');
+
             if (foundVersion === '1.0') {
                this._entityMd.version = 1.0;
             } else if (foundVersion === '1.1') {
@@ -579,15 +582,40 @@ class XmlTokenStream extends stream.Readable {
          }
 
          if (!this._options.ignoreDocumentEncoding) {
-            this._cursor.specifiedEncoding = foundEncoding;
+            this._cursor.specifiedEncoding = this._getParamValue(params, 'encoding');
          }
 
          this._pushToken(this._entityMd.isTypeDocument ?
-            new tokens.XmlDeclaration(attributes, this._cursor.getRecentChunks()) :
-            new tokens.TextDeclaration(attributes, this._cursor.getRecentChunks()));
+            new tokens.XmlDeclaration(params, this._cursor.getRecentChunks()) :
+            new tokens.TextDeclaration(params, this._cursor.getRecentChunks()));
       } else {
          this._pushToken(new tokens.ProcessingInstruction(textOrBlank(parsedPI.targetChunk),
             textOrBlank(parsedPI.instructionChunk), this._cursor.getRecentChunks()));
+      }
+   }
+
+   _extractParams(parsed) {
+      const params = [];
+
+      for (let index = 0; index < parsed.params.length; index++) {
+         const param = parsed.params[index];
+         const values = param.val ? param.val : { items: [] };
+
+         params.push({
+            name: textOrBlank(param.nameChunk),
+            value: this._convertParsedQuotedValueToTokens(values)
+         });
+      }
+
+      return params;
+   }
+
+   _getParamValue(params, paramName) {
+      for (let index = 0; index < params.length; index++) {
+         if (params[index].name.toLocaleLowerCase() === paramName) {
+            const value = params[index].value[0];
+            return value ? value.text : '';
+         }
       }
    }
 
@@ -700,7 +728,6 @@ class XmlTokenStream extends stream.Readable {
       let foundVersion;
       let foundEncoding;
       let seenStandalone = false;
-      const attributes = [];
 
       this._checkSyntax(parsed.closeChunk, SEID.XMLDECL_NO_CLOSE);
       this._checkSyntax(parsed.params.length !== 0, SEID.XMLDECL_NO_ATTRIBUTES,
@@ -710,7 +737,7 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < parsed.params.length; index++) {
          const param = parsed.params[index];
          const lcName = param.nameChunk.text.toLocaleLowerCase();
-         let valueText = textOrUndef(param.valueChunk);
+         let valueText;
          const nameText = textOrBlank(param.nameChunk);
 
          if (index === 0) {
@@ -723,11 +750,14 @@ class XmlTokenStream extends stream.Readable {
 
          this._checkNameValid(param.nameChunk, SEID.ATTRIBUTE_INVALID_NAME, start);
          this._checkSyntax(param.equalChunk, SEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
-         if (param.valueChunk) {
-            this._checkSyntax(param.quoteChunk, SEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+         if (param.val) {
+            this._checkSyntax(param.val.startQuoteChunk, SEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
          }
-         this._checkSyntax(param.valueChunk, SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-         this._validateText(param.valueChunk, start);
+         this._checkSyntax((param.val && param.val.items.length > 0), SEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+         if (param.val && param.val.items.length > 0) {
+            this._validateText(param.val.items[0], start);
+            valueText = textOrUndef(param.val.items[0]);
+         }
 
          if (XML_DECL_PARAMS[lcName]) {
             this._checkSyntax(param.nameChunk.text === lcName, SEID.XMLDECL_ATTR_INVALID_CASE,
@@ -756,7 +786,7 @@ class XmlTokenStream extends stream.Readable {
                   this._report(SEID.TEXTDECL_XTRA_STANDALONE);
                }
 
-               const lcValue = textOrBlank(param.valueChunk).toLocaleLowerCase();
+               const lcValue = valueText ? valueText.toLocaleLowerCase() : '';
 
                seenStandalone = true;
 
@@ -766,19 +796,11 @@ class XmlTokenStream extends stream.Readable {
 
                if (lcValue !== 'no' && lcValue !== 'yes') {
                   this._report(SEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
-                  valueText = param.valueChunk ? lcValue : undefined;
-               } else {
-                  valueText = lcValue;
                }
                break;
             default:
                this._report(SEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
          }
-
-         attributes.push({
-            name: param.nameChunk.text,
-            value: valueText
-         });
       }
 
       if (!isXmlDecl) {
@@ -800,12 +822,6 @@ class XmlTokenStream extends stream.Readable {
       } else {
          this._report(SEID.XMLDECL_INVALID_CONTEXT);
       }
-
-      return {
-         foundVersion: foundVersion,
-         foundEncoding: foundEncoding,
-         attributes: attributes
-      };
    }
 
    _validateStartDocType(parsedDocType) {
