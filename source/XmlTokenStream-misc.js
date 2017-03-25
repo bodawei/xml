@@ -183,6 +183,31 @@ class XmlTokenStreamMisc {
    }
 
    /**********************************************************************\
+    parseBangItem
+
+    RETURN
+       {
+         startChunk
+       }
+   \**********************************************************************/
+   parseBangItem(cursor, startChunk) {
+      const result = {
+         startChunk: startChunk,
+         postStartSpaceChunk: cursor.getSpace(),
+         openBracket: cursor.getMatch('[')
+      };
+
+      if (result.openBracket) {
+         return this._parseBracketItem(cursor, result);
+      }
+
+      result.declarationName = cursor.getWord([ '[', '>' ]); // could look for quotes, too
+      result.postDeclarationNameSpace = cursor.getSpace();
+
+      return result;
+   }
+
+   /**********************************************************************\
     parseBracketItem() extracts the start of a bracket item ( <![name[ )
 
     PARAM
@@ -191,7 +216,9 @@ class XmlTokenStreamMisc {
 
     RETURN
       {
-         openChunk: The start chunk. <!
+         startChunk: The start chunk. <!
+         postStartSpaceChunk
+         openBracket
          preTypeSpaceChunk: Space before the type
          typeChunk: The name
          typeString: The name or a blank
@@ -208,11 +235,7 @@ class XmlTokenStreamMisc {
       [21] CDEnd   ::=  ']]>'
    \**********************************************************************/
 
-   parseBracketItem(cursor, startChunk) {
-      const results = {};
-
-      results.openChunk = startChunk;
-      // no bracket right now
+   _parseBracketItem(cursor, results) {
       results.preTypeSpaceChunk = cursor.getSpace();
       results.typeChunk = cursor.getWord([ '[' ]);
       results.postTypeSpaceChunk = cursor.getSpace();
@@ -242,7 +265,26 @@ class XmlTokenStreamMisc {
    }
 
    /**********************************************************************\
+    parseReference
+
+    RETURN
+       Either a character reference or a general entity reference
+   \**********************************************************************/
+   parseReference(cursor, startChunk) {
+      const spaceChunk = cursor.getSpace();
+      const nextChunk = cursor.peekChar();
+
+      if (nextChunk && nextChunk.text === '#') {
+         return this.parseCharReference(cursor, startChunk, spaceChunk);
+      } else {
+         return this.parseEntityReference(cursor, startChunk, spaceChunk);
+      }
+   }
+
+   /**********************************************************************\
     parseCharReference
+
+    Note the & has already been read.  The # has been peeked
 
     RETURN
       {
@@ -257,13 +299,14 @@ class XmlTokenStreamMisc {
          character
       }
    \**********************************************************************/
-   parseCharReference(cursor, startChunk, hashChunk) {
+   parseCharReference(cursor, startChunk, spaceChunk) {
       const result = {
          startChunk: startChunk,
-         hashChunk: hashChunk
+         postStartSpaceChunk: spaceChunk
       };
       let isHex = false;
 
+      result.hashChunk = cursor.getChar();
       result.postHashSpaceChunk = cursor.getSpace();
       const nextChar = cursor.peekChar();
 
@@ -301,9 +344,10 @@ class XmlTokenStreamMisc {
          semicolonChunk
       }
    \**********************************************************************/
-   parseEntityReference(cursor, startChunk) {
+   parseEntityReference(cursor, startChunk, spaceChunk) {
       const result = {
-         startChunk: startChunk
+         startChunk: startChunk,
+         postStartSpaceChunk: spaceChunk
       };
 
       result.nameChunk = cursor.getWord([ ';' ]);
@@ -358,14 +402,14 @@ class XmlTokenStreamMisc {
 
          if (block.terminator === '&') {
             const ampersand = cursor.getChar();
+            const spaceChunk = cursor.getSpace();
             const hashChunk = cursor.peekChar() || {};
 
             if (hashChunk.text === '#') {
                if (options.charRef) {
-                  cursor.getChar();
                   result.items.push({
                      type: QUOTE_PIECE_TYPES.CHAR_REF,
-                     parsed: this.parseCharReference(cursor, ampersand, hashChunk)
+                     parsed: this.parseCharReference(cursor, ampersand, spaceChunk)
                   });
                } else {
                   toPrepend = ampersand;
@@ -373,10 +417,10 @@ class XmlTokenStreamMisc {
             } else if (options.geRef) {
                result.items.push({
                   type: QUOTE_PIECE_TYPES.GENERAL_REF,
-                  parsed: this.parseEntityReference(cursor, ampersand)
+                  parsed: this.parseEntityReference(cursor, ampersand, spaceChunk)
                });
             } else {
-               toPrepend = ampersand;
+               toPrepend = this._combineChunks(ampersand, spaceChunk);
             }
 
             if (toPrepend) {
@@ -404,6 +448,9 @@ class XmlTokenStreamMisc {
    _combineChunks(first, second) {
       if (!first) {
          return second;
+      }
+      if (!second) {
+         return first;
       }
 
       if (first instanceof TextChunk.WithSpaceChunk) {

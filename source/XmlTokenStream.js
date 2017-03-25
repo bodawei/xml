@@ -305,34 +305,21 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getReference(start) {
-      const space = this._cursor.getSpace();
-      const next = this._cursor.peekChar();
+      const reference = this._miscParser.parseReference(this._cursor, start);
 
-      this._checkSyntax(!space, SEID.REFERENCE_XTRA_SPACE);
+      if (reference.hashChunk) {
+         this._validateCharReference(reference);
 
-      if (next.text === '#') {
-         const hashChunk = this._cursor.getChar();
-         const parsedCharRef = this._miscParser.parseCharReference(this._cursor, start, hashChunk);
-
-         this._validateCharReference(parsedCharRef);
-
-         //if (inAttribute) {
-         //   return [ new tokens.CharRef(character, tokens.ATTR_NO_CHUNKS) ];
-         //} else {
-         this._pushToken(new tokens.CharRef(parsedCharRef.character, this._cursor.getRecentChunks()));
+         this._pushToken(new tokens.CharRef(reference.character, this._cursor.getRecentChunks()));
       } else {
-         const parsedRef = this._miscParser.parseEntityReference(this._cursor, start);
+         this._validateEntityReference(reference);
 
-         this._validateEntityReference(parsedRef);
-
-         //if (inAttribute) {
-         //   return [ new tokens.EntityReference(entityName, tokens.ATTR_NO_CHUNKS) ];
-         //} else {
-         this._pushToken(new tokens.EntityReference(textOrBlank(parsedRef.nameChunk), this._cursor.getRecentChunks()));
+         this._pushToken(new tokens.EntityReference(textOrBlank(reference.nameChunk), this._cursor.getRecentChunks()));
       }
    }
 
    _validateEntityReference(parsed) {
+      this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
       const entityName = textOrBlank(parsed.nameChunk);
 
       if (!entityName) {
@@ -346,6 +333,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _validateCharReference(parsed) {
+      this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
       this._checkSyntax(!parsed.postHashSpaceChunk, SEID.CHARREF_XTRA_SPACE);
 
       if (parsed.hexMarkerChunk && parsed.hexMarkerChunk.text.toLocaleLowerCase() === 'x') {
@@ -367,34 +355,33 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getBangItem(start) {
-      this._cursor.getMarkup();
-      const leadingSpace = this._cursor.getSpace();
-      const bracket = this._cursor.getMatch('[');
+      const parsed = this._miscParser.parseBangItem(this._cursor, start);
 
-      if (bracket) {
-         this._checkSyntax(!leadingSpace, SEID.BRACKETITEM_XTRA_SPACE_BEFORE);
+      if (parsed.openBracket) {
+         this._checkSyntax(!parsed.postStartSpaceChunk, SEID.BRACKETITEM_XTRA_SPACE_BEFORE);
 
-         this._getBracketItem(start);
+         this._validateBracketItem(parsed, start);
+
+         if (parsed.typeString.toLocaleLowerCase() === 'cdata') {
+            this._pushToken(new tokens.CData(textOrUndef(parsed.contentChunk), this._cursor.getRecentChunks()));
+         }
          return;
       }
 
-      const declarationName = this._cursor.getWord([ '[', '>' ]); // could look for quotes, too
-      const postDeclarationSpace = this._cursor.getSpace();
+      this._checkSyntax(!parsed.postStartSpaceChunk, SEID.BANGITEM_NAME_XTRA_SPACE_BEFORE);
 
-      this._checkSyntax(!leadingSpace, SEID.BANGITEM_NAME_XTRA_SPACE_BEFORE);
-
-      if (!declarationName) {
+      if (!parsed.declarationName) {
          this._report(SEID.BANGITEM_NO_NAME);
       } else {
-         const type = declarationName.text;
+         const type = parsed.declarationName.text;
          const upperCaseType = type.toLocaleUpperCase();
 
          this._checkSyntax(type === upperCaseType, SEID.BANGITEM_NAME_INVALID_CASE, [ upperCaseType, type ]);
-         this._checkSyntax(postDeclarationSpace, SEID.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
+         this._checkSyntax(parsed.postDeclarationNameSpace, SEID.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
 
          switch (upperCaseType) {
             case 'DOCTYPE':
-               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, declarationName);
+               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, parsed.declarationName);
 
                this._validateStartDocType(parsedDocType, start);
 
@@ -411,7 +398,7 @@ class XmlTokenStream extends stream.Readable {
                }
                return;
             case 'NOTATION':
-               const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, declarationName);
+               const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, parsed.declarationName);
 
                this._validateNotation(parsedNotation);
 
@@ -419,7 +406,7 @@ class XmlTokenStream extends stream.Readable {
                   locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
                return;
             case 'ENTITY':
-               const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, declarationName);
+               const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, parsed.declarationName);
 
                this._validateEntity(parsedEntity);
 
@@ -548,16 +535,6 @@ class XmlTokenStream extends stream.Readable {
          this._state = STATE.PROLOG;
       }
       this._pushToken(new tokens.DocTypeEnd(this._cursor.getRecentChunks()));
-   }
-
-   _getBracketItem(start) {
-      const parsed = this._miscParser.parseBracketItem(this._cursor, start);
-
-      this._validateBracketItem(parsed, start);
-
-      if (parsed.typeString.toLocaleLowerCase() === 'cdata') {
-         this._pushToken(new tokens.CData(textOrUndef(parsed.contentChunk), this._cursor.getRecentChunks()));
-      }
    }
 
    _getProcessingInstruction(start) {

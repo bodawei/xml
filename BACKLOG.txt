@@ -30,75 +30,29 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
  2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: 7
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
- 3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 
+ 3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
 
-188: M: Add parsing to entity values
-	T: Rework
-	DEPENDS on L
-	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
-		- @@@ need to think about the cursor that will need to consume these. 
-	- Biggest effort here is going to be cleaning up tests
-	√ * Substitute _getQuotedValue and get back an array of pieces  Parse charref and peref and text
-	√ * need to assemble this into the value that is passed to the token. Probably reasonable to have a routine do that.
-	√ * cleanup tests
-	√ NEW: Not recognize perefs in internal subset
-
-[ 1 hr ]
-
-√ 189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
-	T: Rework
-	DEPENDS on cleanup
-	DEPENDS on L
-	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
-	√ * Slight modification to _getQuotedValue
-		Basically, abort case goes away.
-		We already do the rest, but it is generating tokens, and shouldn't be
-	√ * validation
-		we have woefully inadequte validation. Can reuse from above
-	√ * _getStartOrEmptyTag
-		Arguably should extract attribute construction
-		Needs to convert stuff into tokens. Can reuse routien from above
-	√ * test cleanup
-	√ * EntityStream seems like it is already built to do the right thing.
-
-[ 2.5hr ]
-
-
-190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
-	T: Rework
-	DEPENDS on L
-	- Biggest effort here is going to be cleaning up tests
-	√ * substitute _getQuotedValue for charref and geref
-		This will break the test because we're abandoning the < abort process
-	√* _validateAttList
-		_validateCharReference
-		_validateEntityReference
-		- validate text
-	√ * Extract assembly of the attribute out of the validation routine
-	√* clean up tests
-Extra: Applied the same pattern to XmlDecl
-
-
-- why are all the parsers classes? They have no state. could just be namespaces
-- Do we really want to be supporting quoteless attributes at this point?
 
 AS TIME PERMITS
 	NEW: Begin documenting behavior of refs, in your README
 	NEW * AddChunks to the entity tokens.  cursor will need them.
+
+	NEW: do tests of validation of bad char refs etc in attribute value
+	NEW: do tests of validation of bad char refs etc in attrlist value
 	NEW: * ValidateEntity will need to validate each chunk. charref, peref, text  (peref not in internal subset)
 		_validateCharReference
 		_validateEntityReference
 			- this is not build for perefs.
 			- need to barf if this is in the internal subset
 		not much validation for text, actually
-	NEW: * entityStream should be able to expand perefs, BEFORE this gets inserted into the entity manager.
+
+nope	NEW: * entityStream should be able to expand perefs, BEFORE this gets inserted into the entity manager.
 		- pretty easy, but should have a test to make sure peref gets expanded before entity ref is used
 			<!ENTITY % foo "bar">
 			<!ENTITY foo "%foo;">
 	NEW: Need to think about expansion order, especially on gere's in attlist's.  Can anything forward reference?
-	NEW: do tests of validation of bad char refs etc in attribute value
-	NEW: do tests of validation of bad char refs etc in attrlist value
 	NEW: EntityStream completely ignores attribute defaults right now. This would be the same as attributes.
+	NEED CURSOR for cleanup
 
 		
 
@@ -106,13 +60,16 @@ AS TIME PERMITS
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- getReference should be pushed into misc, and we should check the return value
+	√- getReference should be pushed into misc, and we should check the return value
 		to decide validation and tokenization.
-	- attributes should shift to using misc.  And think about the validation.
-	- bangitem should do the same pattern as getReference
+	√ - attributes should shift to using misc.  And think about the validation.
+	√- bangitem should do the same pattern as getReference
+	- separate validation out of get bang item
+	- read
 - Provide async interface to cursor
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.  Mock the cursor?  how to test this?
 - remove entity manager from xmltokenstream
+- why are all the parsers classes? They have no state. could just be namespaces
 - parsing/validation/check
 	- Need to pull out validation into another file
 	- add contexts to all errors
@@ -1952,3 +1909,51 @@ Sprint 31
 This is more than 2 M.  How much more, I'm not sure. in particular, the entityStream changes should, arguably, be pulled out.  Without them I'm more confident these can get done.
 BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM CHANGES OUT IF NEEDED.  EACH ONE IN SUCCESSION SHOULD REAP BENEFITS FROM THE ONE BEFORE. I'm committing to all of 188 and 189 minus the entitystream work
 
+
+188: M: Add parsing to entity values
+	T: Rework
+	DEPENDS on L
+	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
+		- @@@ need to think about the cursor that will need to consume these. 
+	- Biggest effort here is going to be cleaning up tests
+	√ * Substitute _getQuotedValue and get back an array of pieces  Parse charref and peref and text
+	√ * need to assemble this into the value that is passed to the token. Probably reasonable to have a routine do that.
+	√ * cleanup tests
+	√ NEW: Not recognize perefs in internal subset
+
+[ 1 hr ]
+
+√ 189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+	T: Rework
+	DEPENDS on cleanup
+	DEPENDS on L
+	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
+	√ * Slight modification to _getQuotedValue
+		Basically, abort case goes away.
+		We already do the rest, but it is generating tokens, and shouldn't be
+	√ * validation
+		we have woefully inadequte validation. Can reuse from above
+	√ * _getStartOrEmptyTag
+		Arguably should extract attribute construction
+		Needs to convert stuff into tokens. Can reuse routien from above
+	√ * test cleanup
+	√ * EntityStream seems like it is already built to do the right thing.
+
+[ 2.5hr ]
+
+
+190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+	T: Rework
+	DEPENDS on L
+	- Biggest effort here is going to be cleaning up tests
+	√ * substitute _getQuotedValue for charref and geref
+		This will break the test because we're abandoning the < abort process
+	√* _validateAttList
+		_validateCharReference
+		_validateEntityReference
+		- validate text
+	√ * Extract assembly of the attribute out of the validation routine
+	√* clean up tests
+Extra: Applied the same pattern to XmlDecl
+
+[4hr]

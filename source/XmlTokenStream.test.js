@@ -4,11 +4,9 @@
 
 /* eslint-env jasmine */
 
-const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared//EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
@@ -17,16 +15,11 @@ const XmlTokenStream = require('./XmlTokenStream.js');
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeLaxStream = testUtils.makeLaxStream;
 const makeStrictStream = testUtils.makeStrictStream;
-const makeStrictExternalSubsetStream = testUtils.makeStrictExternalSubsetStream;
 const makeLaxExternalEntityStream = testUtils.makeLaxExternalEntityStream;
 const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
-const expectSyntaxError = testUtils.expectSyntaxError;
 const expectTokenType = testUtils.expectTokenType;
-const expectError = testUtils.expectError;
 const ignoreError = testUtils.ignoreError;
 const ignoreToken = testUtils.ignoreToken;
-
-const makeStringTokenArray = testUtils.makeStringTokenArray;
 
 describe('XmlTokenStream', () => {
 
@@ -363,128 +356,6 @@ describe('XmlTokenStream', () => {
          expect(() => {
             s.read();
          }).not.toThrow();
-      });
-
-   });
-
-   describe('parsing entity reference', () => {
-
-      it('throws an error if there is no entity name', () => {
-         expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
-            '&;',
-            SyntaxError.ID.REFERENCE_NO_NAME,
-            'Missing name in entity reference.');
-      });
-
-      it('throws an error if there is a space after the entity name', () => {
-         expectSyntaxError('&frog ;',
-            SyntaxError.ID.REFERENCE_XTRA_TRAILING_SPACE,
-            'Must not have a space after the entity reference "frog".');
-      });
-
-      it('throws an error if there is no closing semicolon', () => {
-         expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
-            '&frog',
-            SyntaxError.ID.REFERENCE_NO_SEMICOLON,
-            'Missing semicolon after entity reference "frog".');
-      });
-
-      it('retrieves the expected chunks', () => {
-         const s = makeStrictExternalEntityStream('&lt;');
-
-         const t = s.read();
-         expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('&'),
-            new TextChunk.PlainChunk('lt'),
-            new TextChunk.PlainChunk(';')
-         ]));
-      });
-
-      describe('state transitions', () => {
-
-         it('throws an error if at the start of a document entity', () => {
-            expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
-               '&amp;',
-               SyntaxError.ID.REFERENCE_INVALID_DOC_CONTEXT,
-               'An entity reference must not be outside the content of the document entity.',
-               new Offset(0, 0, 0),
-               [ {
-                  offset: new Offset(0, 0, 0),
-                  location: new EntityLocation()
-               } ]);
-         });
-
-         it('throws an error if at the start of the external subset', () => {
-            expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
-               '&amp;',
-               SyntaxError.ID.REFERENCE_INVALID_SUBSET_CONTEXT,
-               'An entity reference must not be in the external subset.',
-               new Offset(0, 0, 0),
-               [ {
-                  offset: new Offset(0, 0, 0),
-                  location: new EntityLocation()
-               } ]);
-         });
-
-         it('can appear at the start of an external entity', () => {
-            const s = makeStrictExternalEntityStream('&amp;');
-
-            expectTokenType(s, tokens.EntityReference);
-         });
-
-         it('transitions to after Text Declaration if appears at the start of an external entity', () => {
-            const s = makeStrictExternalEntityStream('&amp;<?xml encoding="usascii"?>');
-            let strictError;
-            s.on('error', (err) => {
-               strictError = err;
-            });
-            expectTokenType(s, tokens.EntityReference);
-            expect(s.read()).toBeNull();  // goose the stream into reading the next token which will find the error
-
-            expect(strictError.message).toEqual('An XML or Text Declaration must be the first thing in the entity.');
-         });
-
-         it('throws an error if after the XML Declaration in the document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0"?>&amp;');
-            ignoreToken(s, tokens.XmlDeclaration);
-
-            expect(() => {
-               s.read();
-            }).toThrowError('An entity reference must not be outside the content of the document entity.');
-         });
-
-         it('can not appear after the Text Declaration in the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<?xml encoding="usascii"?>&amp;');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expect(() => {
-               s.read();
-            }).toThrowError('An entity reference must not be in the external subset.');
-         });
-
-         it('can appear after the Text Declaration of an external entity', () => {
-            const s = makeStrictExternalEntityStream('<?xml encoding="usascii"?>&amp;');
-            ignoreToken(s, tokens.TextDeclaration);
-
-            expectTokenType(s, tokens.EntityReference);
-         });
-
-         it('can appear within elements in the document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0" encoding="usascii"?><one>&amp;</one>');
-            ignoreToken(s, tokens.XmlDeclaration);
-            ignoreToken(s, tokens.ElementStart);
-
-            expectTokenType(s, tokens.EntityReference);
-         });
-
-         it('changes state in an external entity to be in content', () => {
-            const s = makeLaxExternalEntityStream('&amp;<?xml encoding="UTF-8"?>');
-            ignoreToken(s, tokens.EntityReference);
-
-            expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
-               'An XML or Text Declaration must be the first thing in the entity.');
-         });
-
       });
 
    });
