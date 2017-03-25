@@ -90,6 +90,7 @@ module.exports = (grunt) => {
       const maxLengths = {};
       const sortedNames = [];
       const byBrowserName = {};
+      let skipped = false;
 
       browserResults.map((result) => {
          var browserMatch = /([A-Za-z]+) ([0-9\.]+)/.exec(result.name);
@@ -98,11 +99,15 @@ module.exports = (grunt) => {
          result.browserVersion = browserMatch[2];
          result.osName = osMatch[1];
          result.osVersion = osMatch[2];
-         result.percent = ((result.passed / result.run) * 100) + '%';
+         result.percent = (((result.passed - result.skipped) / result.run) * 100) + '%';
          result.seconds = (result.time / 1000) + 'ms';
-         result.counts = result.passed + '/' + result.run;
+         result.counts = (result.passed - result.skipped) + '/' + result.run;
 
-         [ 'osName', 'osVersion', 'browserName', 'browserVersion', 'time', 'percent', 'seconds', 'counts' ]
+         if (result.skipped) {
+            skipped = true;
+            result.skipped = 'Skipped ' + result.skipped;
+         }
+         [ 'osName', 'osVersion', 'browserName', 'browserVersion', 'time', 'percent', 'seconds', 'counts', 'skipped' ]
             .forEach((name) => {
                maxLengths[name] = maxLengths[name] || 0;
                maxLengths[name] = Math.max(result[name].toString().length, maxLengths[name]);
@@ -144,6 +149,9 @@ module.exports = (grunt) => {
       border.push(padValue('', maxLengths.osVersion, '─'));
       border.push(padValue('', maxLengths.seconds, '─'));
       border.push(padValue('', maxLengths.counts, '─'));
+      if (skipped) {
+         border.push(padValue('', maxLengths.skipped, '─'));
+      }
       process.passthroughWrite('┌─' + border.join('─┬─') + '─┐\n');
 
       for (let index = 0; index < sortedNames.length; index++) {
@@ -156,8 +164,8 @@ module.exports = (grunt) => {
          value.push(padValue(byBrowserName[name].osVersion, maxLengths.osVersion));
          value.push(padLeftValue(byBrowserName[name].seconds, maxLengths.seconds));
          value.push(padLeftValue(byBrowserName[name].counts, maxLengths.counts));
-         if (byBrowserName[name].skipped) {
-            value.push(`Skipped ${byBrowserName[name].skipped}`);
+         if (skipped) {
+            value.push(padValue(byBrowserName[name].skipped, maxLengths.skipped));
          }
          process.passthroughWrite('│ ' + value.join(' │ ') + ' │\n');
       }

@@ -30,16 +30,15 @@ injectables:
    formatError
 
 Functions:
-   onRunStart()
-   onBrowserStart(browser)
-   renderBrowser(browser) ??
-   onSpecComplete(browser, result)
-   specSuccess(browser, result)
-   specSkipped(browser, result)
-   specFailure(browser, result)
-   onRunComplete(browser, results)
-   onBrowserComplete(browser, results)
-   onRunComplete(browsers, results)
+      onRunStart()
+         onBrowserStart(browser)
+            renderBrowser(browser) ??
+            onSpecComplete(browser, result)
+            specSuccess(browser, result)
+            specSkipped(browser, result)
+            specFailure(browser, result)
+         onBrowserComplete(browser, results)
+      onRunComplete(browser, results)
    onExit
 */
 
@@ -48,6 +47,7 @@ function DJBJsonReporter(baseReporterDecorator, config) {
 
    this.onSpecComplete = onSpecComplete;
    this.onRunComplete = onRunComplete;
+
    this._config = config;
 }
 
@@ -66,6 +66,21 @@ function onRunComplete(browsers, results) {
          JSON.stringify(finalPerBrowser[browser.name], null, 2));
    });
 
+   if (results.disconnected) {
+      /* eslint-disable no-console */
+      console.log('😭😡😭 😭😡😭 😭😡😭 😭😡😭  GOT A DISCONNECTED IN THE REPORTER RESULTS');
+      /* eslint-disable no-console */
+      console.log(results);
+      throw new Error();
+   }
+
+   if (results.error) {
+      /* eslint-disable no-console */
+      console.log('😭😡😭 😭😡😭 😭😡😭 😭😡😭  GOT AN ERROR IN THE REPORTER RESULTS');
+      /* eslint-disable no-console */
+      console.log(results);
+      throw new Error();
+   }
    fs.writeFileSync(path, JSON.stringify(results, null, 2));
 }
 

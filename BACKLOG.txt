@@ -60,10 +60,6 @@ nope	NEW: * entityStream should be able to expand perefs, BEFORE this gets inser
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	√- getReference should be pushed into misc, and we should check the return value
-		to decide validation and tokenization.
-	√ - attributes should shift to using misc.  And think about the validation.
-	√- bangitem should do the same pattern as getReference
 	- separate validation out of get bang item
 	- read
 - Provide async interface to cursor
@@ -84,12 +80,7 @@ CLEANUP
 BUILD
 126: Enhancements to the reporting
 * Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
-- Change test reporter to look at new json files per browser
-	- could summarize the failing tests along with the duplicates, however.
-	- skipping a test leaves you with the implication that all tests were run. and border wrong
-	- would be good to test out onBrowserComplete once some of this is done.
-	- what happened to node reporting?
-	- Aren't we supposed to be writing this to a file and then displaying it at the end on success?
+- get reporting of node tests
 - fork quiet-grunt
 	- silent by default
 	- returns a controller
@@ -103,6 +94,7 @@ BUILD
 - test json reporter and turn into a module. Check it in for now
 	- provide a dividing char for test segments
 	- optionally put tests in hierarchy rather than string
+- get report to appear even in silent
 - coverage reporter should have a percent cutoff
 - Build build code to auto generate the other errors
 149 Test deriveLocale
@@ -1957,3 +1949,12 @@ BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM 
 Extra: Applied the same pattern to XmlDecl
 
 [4hr]
+	√- getReference should be pushed into misc, and we should check the return value
+		to decide validation and tokenization.
+	√ - attributes should shift to using misc.  And think about the validation.
+	√- bangitem should do the same pattern as getReference
+- Change test reporter to look at new json files per browser
+	√ - could summarize the failing tests along with the duplicates, however.
+	√ - skipping a test leaves you with the implication that all tests were run. and border wrong
+	√ - would be good to test out onBrowserComplete once some of this is done.
+	√ - and check out the failure etc flags in the reporter
