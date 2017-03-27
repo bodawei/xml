@@ -516,7 +516,12 @@ class XmlTokenStream extends stream.Readable {
 
             switch (item.type) {
                case XmlTokenStreamMisc.TYPE.CHAR_REF:
-                  result.push(new tokens.CharRef(item.parsed.character, tokens.ENTITYVAL_NO_CHUNKS));
+                  const parsed = item.parsed;
+                  result.push(new tokens.CharRef(item.parsed.character, [
+                     this._miscParser.combineChunks(parsed.startChunk, parsed.hashChunk, parsed.postHashSpaceChunk,
+                        parsed.hexMarkerChunk, parsed.postHexSpaceChunk, parsed.digitsChunk,
+                        parsed.postDigitsSpaceChunk, parsed.semicolonChunk)
+                  ]));
                   break;
                case XmlTokenStreamMisc.TYPE.GENERAL_REF:
                   result.push(new tokens.EntityReference(name, tokens.ENTITYVAL_NO_CHUNKS));

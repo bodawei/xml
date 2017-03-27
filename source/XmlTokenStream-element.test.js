@@ -16,20 +16,20 @@ const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 const XmlWarning = require('./error/XmlWarning.js');
 
-const testUtils = require('./XmlTokenStream-util.test.js');
-const makeStrictStream = testUtils.makeStrictStream;
-const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
-const expectXmlWarning = testUtils.expectXmlWarning;
-const expectError = testUtils.expectError;
-const ignoreError = testUtils.ignoreError;
-const ignoreToken = testUtils.ignoreToken;
-const makeStringTokenArray = testUtils.makeStringTokenArray;
+const util = require('./XmlTokenStream-util.test.js');
+const makeStrictStream = util.makeStrictStream;
+const makeStrictExternalEntityStream = util.makeStrictExternalEntityStream;
+const expectXmlWarning = util.expectXmlWarning;
+const expectError = util.expectError;
+const ignoreError = util.ignoreError;
+const ignoreToken = util.ignoreToken;
+const makeStringTokenArray = util.makeStringTokenArray;
 
-const makeLaxStream = testUtils.makeLaxStream;
-const makeLaxExternalSubsetStream = testUtils.makeLaxExternalSubsetStream;
-const makeLaxExternalEntityStream = testUtils.makeLaxExternalEntityStream;
-const expectSyntaxError = testUtils.expectSyntaxError;
-const expectTokenType = testUtils.expectTokenType;
+const makeLaxStream = util.makeLaxStream;
+const makeLaxExternalSubsetStream = util.makeLaxExternalSubsetStream;
+const makeLaxExternalEntityStream = util.makeLaxExternalEntityStream;
+const expectSyntaxError = util.expectSyntaxError;
+const expectTokenType = util.expectTokenType;
 
 function compareAttribute(attr, name, value) {
    expect(attr.name).toEqual(name);
@@ -487,7 +487,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef('A', tokens.ATTR_NO_CHUNKS),
+                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 19) ]),
                   new tokens.Text('o', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
@@ -509,7 +509,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [
-                  new tokens.CharRef('A', tokens.ATTR_NO_CHUNKS),
+                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 17) ]),
                   new tokens.Text(' test', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
@@ -523,7 +523,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef('A', tokens.ATTR_NO_CHUNKS)
+                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 19) ])
                ],
                quoteType: '"'
             } ]);
@@ -536,7 +536,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef(String.fromCharCode(8), tokens.ATTR_NO_CHUNKS)
+                  new tokens.CharRef(String.fromCharCode(8), [ util.makePlainChunk('&#x8;', 19) ])
                ],
                quoteType: '"'
             } ]);
@@ -821,13 +821,13 @@ describe('XmlTokenStream (element)', () => {
                   name: 'attr1',
                   value: [
                      new tokens.Text('space:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef(' ', tokens.ATTR_NO_CHUNKS),
+                     new tokens.CharRef(' ', [ util.makePlainChunk('&#32;', 17) ]),
                      new tokens.Text(', tab:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\t', tokens.ATTR_NO_CHUNKS),
+                     new tokens.CharRef('\t', [ util.makePlainChunk('&#9;', 28) ]),
                      new tokens.Text(', newline:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\n', tokens.ATTR_NO_CHUNKS),
+                     new tokens.CharRef('\n', [ util.makePlainChunk('&#10;', 42) ]),
                      new tokens.Text(', cr:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\r', tokens.ATTR_NO_CHUNKS)
+                     new tokens.CharRef('\r', [ util.makePlainChunk('&#13;', 52) ])
                   ],
                   quoteType: '"'
                } ]);

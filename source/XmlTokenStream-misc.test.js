@@ -27,6 +27,10 @@ const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
 const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeStringTokenArray;
+const util = require('./XmlTokenStream-util.test.js');
+const makePlainChunk = util.makePlainChunk;
+const makeDigitsChunk = util.makeDigitsChunk;
+const makeWithSpaceChunk = util.makeWithSpaceChunk;
 
 function compareXmlDeclAttribute(attr, name, value) {
    expect(attr.name).toEqual(name);
@@ -35,21 +39,6 @@ function compareXmlDeclAttribute(attr, name, value) {
    } else {
       expect(attr.value ? attr.value[0] : undefined).toBeUndefined();
    }
-}
-
-function makePlainChunk(text, start, end) {
-   return new TextChunk.PlainChunk(text,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
-}
-
-function makeDigitsChunk(text, start, end, isDecimal) {
-   return new TextChunk.DigitChunk(text, isDecimal,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
-}
-
-function makeWithSpaceChunk(text, start, end, originalText) {
-   return new TextChunk.WithSpaceChunk(text, originalText || text,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
 }
 
 describe('XmlTokenStream (Misc)', () => {

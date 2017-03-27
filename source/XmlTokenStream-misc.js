@@ -445,6 +445,23 @@ class XmlTokenStreamMisc {
       return result;
    }
 
+   combineChunks(...args) {
+      const chunks = [];
+      for (let index = 0; index < args.length; index++) {
+         if (args[index]) {
+            chunks.push(args[index]);
+         }
+      }
+
+      let accumulator = chunks[0];
+
+      for (let index = 1; index < chunks.length; index++) {
+         accumulator = this._combineChunks(accumulator, chunks[index]);
+      }
+
+      return accumulator;
+   }
+
    _combineChunks(first, second) {
       if (!first) {
          return second;

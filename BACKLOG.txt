@@ -50,7 +50,10 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 		with &#123; &ge; %pe;
 		make sure that only legal ones are parsed
 		report errors for those that are bad (e.g. put an extra space into each)
-S+ 195: Add chunks to entity values
+
+[1.5hr]
+
+√ S+ 195: Add chunks to entity values
 	- generalize combineChunks to take an array of chunks, and will assemble them.  Will barf if values don't match offsets
 	- add a routine which sweeps through an value.items
 		if it finds a charref, assemble a single chunk from each of the bits in there.
@@ -59,6 +62,7 @@ S+ 195: Add chunks to entity values
 
 M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
 
+Cleanup: We are adding chunks to charrefs in entity values for the benefit of the string cursor. Arguably, though, we should do this for all.
 		
 
 -- next: 193

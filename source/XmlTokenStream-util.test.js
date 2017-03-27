@@ -7,11 +7,12 @@
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared/EntityLocation.js');
+const SyntaxError = require('./error/SyntaxError.js');
+const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 const XmlWarning = require('./error/XmlWarning.js');
-const SyntaxError = require('./error/SyntaxError.js');
 
 function makeStream(str, type, entityManager, options) {
    if (typeof type === 'string') {
@@ -188,6 +189,24 @@ function makeStringTokenArray(values, offset = 0) {
    return results;
 }
 
+function makePlainChunk(text, start, end) {
+   end = end || start + text.length;
+   return new TextChunk.PlainChunk(text,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+}
+
+function makeDigitsChunk(text, start, end, isDecimal) {
+   end = end || start + text.length;
+   return new TextChunk.DigitChunk(text, isDecimal,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+}
+
+function makeWithSpaceChunk(text, start, end, originalText) {
+   end = end || start + text.length;
+   return new TextChunk.WithSpaceChunk(text, originalText || text,
+      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+}
+
 module.exports = {
    expectSyntaxError,
    expectXmlWarning,
@@ -202,5 +221,8 @@ module.exports = {
    makeStrictExternalSubsetStream,
    makeLaxExternalEntityStream,
    makeStrictExternalEntityStream,
-   makeStringTokenArray
+   makeStringTokenArray,
+   makePlainChunk,
+   makeWithSpaceChunk,
+   makeDigitsChunk
 };

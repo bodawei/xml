@@ -24,6 +24,7 @@ const ignoreError = require('./XmlTokenStream-util.test.js').ignoreError;
 const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
 const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeStringTokenArray;
+const util = require('./XmlTokenStream-util.test.js');
 
 describe('XmlTokenStream (dtd)', () => {
 
@@ -570,7 +571,7 @@ describe('XmlTokenStream (dtd)', () => {
 
          expect(s.read().value).toEqual([
             new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS)
+            new tokens.CharRef('A', [ util.makePlainChunk('&#65;', 26) ])
          ]);
       });
 
@@ -581,7 +582,7 @@ describe('XmlTokenStream (dtd)', () => {
             'Must not have a space after the "#" in a character reference.');
          expect(s.read().value).toEqual([
             new tokens.Text('tw', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.CharRef('A', [ util.makeWithSpaceChunk('&# 65;', 21) ]),
             new tokens.Text('o', tokens.ENTITYVAL_NO_CHUNKS)
          ]);
       });
@@ -1586,7 +1587,7 @@ describe('XmlTokenStream (dtd)', () => {
             flag: undefined,
             value: [
                new tokens.Text('x', tokens.ENTITYVAL_NO_CHUNKS),
-               new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS),
+               new tokens.CharRef('A', [ util.makePlainChunk('&#65;', 40) ]),
                new tokens.Text('y', tokens.ENTITYVAL_NO_CHUNKS)
             ]
          } ]);
@@ -1800,7 +1801,9 @@ describe('XmlTokenStream (dtd)', () => {
             type: 'CDATA',
             list: undefined,
             flag: undefined,
-            value: [ new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS) ]
+            value: [
+               new tokens.CharRef('A', [ util.makeWithSpaceChunk('&# 65;', 39) ])
+            ]
          } ]);
       });
 
