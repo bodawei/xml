@@ -494,6 +494,14 @@ describe('XmlTokenStream (element)', () => {
             } ]);
          });
 
+         it('reports an error if a malformed character reference is specified', () => {
+            const s = makeLaxExternalEntityStream('<elemName attr1="tw&#x 41;o">');
+
+            expectError(s, SyntaxError.ID.CHARREF_XTRA_SPACE_BEFORE_DIGITS,
+               'Must not have spaces before digits in a character reference.');
+            expectTokenType(s, tokens.ElementStart);
+         });
+
          it('can parse attributes with a character reference at the start of the value', () => {
             const s = makeStrictExternalEntityStream('<elemName attr1="&#x41; test">');
 
@@ -558,6 +566,24 @@ describe('XmlTokenStream (element)', () => {
                   new tokens.EntityReference('test', tokens.ATTR_NO_CHUNKS),
                   new tokens.Text('o', tokens.ATTR_NO_CHUNKS)
                ],
+               quoteType: '"'
+            } ]);
+         });
+
+         it('reports an error if a malformed entity reference is specified', () => {
+            const s = makeLaxExternalEntityStream('<elemName attr1="tw&;o">');
+
+            expectError(s, SyntaxError.ID.REFERENCE_NO_NAME, 'Missing name in entity reference.');
+            expectTokenType(s, tokens.ElementStart);
+         });
+
+         it('will ignore a parameter entity reference', () => {
+            const s = makeLaxExternalEntityStream('<elemName attr1="a %bleep; attribute">');
+            const t = s.read();
+
+            expect(t.attributes).toEqual([ {
+               name: 'attr1',
+               value: [ new tokens.Text('a %bleep; attribute', tokens.ATTR_NO_CHUNKS) ],
                quoteType: '"'
             } ]);
          });

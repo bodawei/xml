@@ -574,6 +574,33 @@ describe('XmlTokenStream (dtd)', () => {
          ]);
       });
 
+      it('reports an error if a malformed character reference is specified', () => {
+         const s = makeLaxExternalSubsetStream('<!ENTITY myEntity "tw&# 65;o">');
+
+         expectError(s, SyntaxError.ID.CHARREF_XTRA_SPACE,
+            'Must not have a space after the "#" in a character reference.');
+         expect(s.read().value).toEqual([
+            new tokens.Text('tw', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.Text('o', tokens.ENTITYVAL_NO_CHUNKS)
+         ]);
+      });
+
+      it('ignores general entity references in the default value', () => {
+         const s = makeLaxExternalSubsetStream('<!ENTITY myEntity "tw&;o">');
+
+         expect(s.read().value).toEqual([
+            new tokens.Text('tw&;o', tokens.ENTITYVAL_NO_CHUNKS)
+         ]);
+      });
+
+      it('reports an error if a malformed parameter entity reference is specified', () => {
+         const s = makeLaxExternalSubsetStream('<!ENTITY myEntity "tw%;o">');
+
+         expectError(s, SyntaxError.ID.REFERENCE_NO_NAME, 'Missing name in entity reference.');
+         expectTokenType(s, tokens.EntityDeclaration);
+      });
+
       it('sets the value to undefined if none specified', () => {
          const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
 
@@ -1522,6 +1549,49 @@ describe('XmlTokenStream (dtd)', () => {
          } ]);
       });
 
+      it('ignores parameter entity references in default values', () => {
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "%pe;">');
+
+         expect(s.read().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ new tokens.Text('%pe;', tokens.ENTITYVAL_NO_CHUNKS) ]
+         } ]);
+      });
+
+      it('recognizes entity references in the default value', () => {
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "&ge;">');
+
+         expect(s.read().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ new tokens.EntityReference('ge', tokens.ENTITYVAL_NO_CHUNKS) ]
+         } ]);
+      });
+
+      it('recognizes character reference in the default value', () => {
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "x&#65;y">');
+
+         expect(s.read().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [
+               new tokens.Text('x', tokens.ENTITYVAL_NO_CHUNKS),
+               new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS),
+               new tokens.Text('y', tokens.ENTITYVAL_NO_CHUNKS)
+            ]
+         } ]);
+      });
+
       it('reports a syntax error if an attribute list is declared outside of a DTD context', () => {
          expectSyntaxError('<!ATTLIST elementName attrName CDATA #REQUIRED >',
             SyntaxError.ID.ATTLISTDECL_INVALID_CONTEXT,
@@ -1701,6 +1771,36 @@ describe('XmlTokenStream (dtd)', () => {
             list: undefined,
             flag: undefined,
             value: [ new tokens.Text('one < two', tokens.ENTITYVAL_NO_CHUNKS) ]
+         } ]);
+      });
+
+      it('reports an error if a malformed general entity is included', () => {
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "& ge;">');
+
+         expectError(s, SyntaxError.ID.REFERENCE_XTRA_SPACE,
+            'Must not have space in an entity reference.');
+         expect(s.read().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ new tokens.EntityReference('ge', tokens.ENTITYVAL_NO_CHUNKS) ]
+         } ]);
+      });
+
+      it('reports an error if a malformed character reference is included', () => {
+         const s = makeLaxExternalSubsetStream('<!ATTLIST elementName ' +
+               'CDataName CDATA "&# 65;">');
+
+         expectError(s, SyntaxError.ID.CHARREF_XTRA_SPACE,
+            'Must not have a space after the "#" in a character reference.');
+         expect(s.read().attributes).toEqual([ {
+            name: 'CDataName',
+            type: 'CDATA',
+            list: undefined,
+            flag: undefined,
+            value: [ new tokens.CharRef('A', tokens.ENTITYVAL_NO_CHUNKS) ]
          } ]);
       });
 

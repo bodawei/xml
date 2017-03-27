@@ -43,7 +43,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 
    // HEy, what happens after expansion?
 
-S 194: Add validation and testing using the above. includes a test for each kind of bad thing
+√ S 194: Add validation and testing using the above. includes a test for each kind of bad thing
 	_validateEntity
 	_validateAttList
 	_validateStartTag

@@ -334,7 +334,7 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   _validateCharReference(parsed) {
+   _validateCharReference(parsed, inQuotedValue) {
       this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
       this._checkSyntax(!parsed.postHashSpaceChunk, SEID.CHARREF_XTRA_SPACE);
 
@@ -353,7 +353,10 @@ class XmlTokenStream extends stream.Readable {
       this._checkSyntax(!parsed.postDigitsSpaceChunk, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
       this._checkSyntax(parsed.semicolonChunk, SEID.CHARREF_NO_SEMICOLON);
 
-      this._checkContentState(parsed.startChunk, SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
+      if (!inQuotedValue) {
+         this._checkContentState(parsed.startChunk,
+            SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
+      }
    }
 
    _getBangItem(start) {
@@ -545,11 +548,14 @@ class XmlTokenStream extends stream.Readable {
          } else {
             switch (item.type) {
                case XmlTokenStreamMisc.TYPE.CHAR_REF:
-                  this._validateCharReference(item.parsed);
+                  this._validateCharReference(item.parsed, true);
                   break;
                case XmlTokenStreamMisc.TYPE.GENERAL_REF:
                case XmlTokenStreamMisc.TYPE.PARAMETER_REF:
-                  if (options.validateEntityValue && item.type === XmlTokenStreamMisc.TYPE.PARAMETER_REF) {
+                  if (this._entityMd.type === EntityMetaData.TYPE.DOCUMENT &&
+                     this._state === STATE.IN_DTD &&
+                     options.validateEntityValue &&
+                     item.type === XmlTokenStreamMisc.TYPE.PARAMETER_REF) {
                      this._report(SEID.PEREF_INVALID_ENTITYVALUE_CONTEXT, [ textOrBlank(item.parsed.nameChunk) ]);
                   }
 
@@ -923,11 +929,9 @@ class XmlTokenStream extends stream.Readable {
          SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
       this._checkSyntax(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
-      if (this._entityMd.type === EntityMetaData.TYPE.DOCUMENT && this._state === STATE.IN_DTD) {
-         this._validateParsedQuotedValue(parsedEntity.value, {
-            validateEntityValue: true
-         });
-      }
+      this._validateParsedQuotedValue(parsedEntity.value, {
+         validateEntityValue: true
+      });
 
       this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
    }
