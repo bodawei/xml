@@ -318,7 +318,7 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   _validateEntityReference(parsed) {
+   _validateEntityReference(parsed, inQuotedValue) {
       this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
       const entityName = textOrBlank(parsed.nameChunk);
 
@@ -328,8 +328,10 @@ class XmlTokenStream extends stream.Readable {
 
       this._checkSyntax(!parsed.postNameSpaceChunk, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
       this._checkSyntax(parsed.semicolonChunk, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
-      this._checkContentState(parsed.startChunk, SEID.REFERENCE_INVALID_DOC_CONTEXT,
-         SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
+      if (!inQuotedValue) {
+         this._checkContentState(parsed.startChunk, SEID.REFERENCE_INVALID_DOC_CONTEXT,
+            SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
+      }
    }
 
    _validateCharReference(parsed) {
@@ -524,6 +526,38 @@ class XmlTokenStream extends stream.Readable {
       }
 
       return result;
+   }
+
+   _validateParsedQuotedValue(parsedQuotedValue, options) {
+      if (!parsedQuotedValue) {
+         return;
+      }
+
+      for (let index = 0; index < parsedQuotedValue.items.length; index++) {
+         const item = parsedQuotedValue.items[index];
+
+         if (item instanceof TextChunk.PlainChunk) {
+            if (options.validateAngleBracket) {
+               if (item.text.indexOf('<') !== -1) {
+                  this._report(options.error, [ options.param ]);
+               }
+            }
+         } else {
+            switch (item.type) {
+               case XmlTokenStreamMisc.TYPE.CHAR_REF:
+                  this._validateCharReference(item.parsed);
+                  break;
+               case XmlTokenStreamMisc.TYPE.GENERAL_REF:
+               case XmlTokenStreamMisc.TYPE.PARAMETER_REF:
+                  if (options.validateEntityValue && item.type === XmlTokenStreamMisc.TYPE.PARAMETER_REF) {
+                     this._report(SEID.PEREF_INVALID_ENTITYVALUE_CONTEXT, [ textOrBlank(item.parsed.nameChunk) ]);
+                  }
+
+                  this._validateEntityReference(item.parsed, true);
+                  break;
+            }
+         }
+      }
    }
 
    _closeDocType() {
@@ -890,14 +924,9 @@ class XmlTokenStream extends stream.Readable {
       this._checkSyntax(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
       if (this._entityMd.type === EntityMetaData.TYPE.DOCUMENT && this._state === STATE.IN_DTD) {
-         const count = parsedEntity.value ? parsedEntity.value.items.length : 0;
-
-         for (let index = 0; index < count; index++) {
-            const item = parsedEntity.value.items[index];
-            if (item.type === XmlTokenStreamMisc.TYPE.PARAMETER_REF) {
-               this._report(SEID.PEREF_INVALID_ENTITYVALUE_CONTEXT, [ textOrBlank(item.parsed.nameChunk) ]);
-            }
-         }
+         this._validateParsedQuotedValue(parsedEntity.value, {
+            validateEntityValue: true
+         });
       }
 
       this._checkDeclarationState(parsedEntity.start, SEID.ENTITYDECL_INVALID_CONTEXT);
@@ -1061,7 +1090,11 @@ class XmlTokenStream extends stream.Readable {
                SEID.ATTLISTDECL_ATTR_DEFAULT_NO_SPACE, [ attrName, elName ]);
 
             if (attr.value) {
-               this._validateNoAngleBrackets(attr.value.items, SEID.ATTLISTDECL_ATTR_INVALID, elName);
+               this._validateParsedQuotedValue(attr.value, {
+                  validateAngleBracket: true,
+                  error: SEID.ATTLISTDECL_ATTR_INVALID,
+                  param: elName
+               });
                this._checkSyntax(attr.value.stopQuoteChunk, SEID.ATTLISTDECL_ATTR_NO_CLOSE_QUOTE, [ elName ]);
             }
          }
@@ -1070,17 +1103,6 @@ class XmlTokenStream extends stream.Readable {
       this._checkSyntax(attListClose, SEID.ATTLISTDECL_NO_CLOSE, [ elName ]);
 
       this._checkDeclarationState(start, SEID.ATTLISTDECL_INVALID_CONTEXT);
-   }
-
-   _validateNoAngleBrackets(attributePieces, error, param) {
-      for (let pieceIndex = 0; pieceIndex < attributePieces.length; pieceIndex++) {
-         const piece = attributePieces[pieceIndex];
-         if (piece.text) {
-            if (piece.text.indexOf('<') !== -1) {
-               this._report(error, [ param ]);
-            }
-         }
-      }
    }
 
    _validateExternalId(externalId, systemRequired, start) {
@@ -1204,7 +1226,11 @@ class XmlTokenStream extends stream.Readable {
             }
          }
 
-         this._validateNoAngleBrackets(attribute.value.items, SEID.ATTRIBUTE_INVALID_VALUE, nameText);
+         this._validateParsedQuotedValue(attribute.value, {
+            validateAngleBracket: true,
+            error: SEID.ATTRIBUTE_INVALID_VALUE,
+            param: nameText
+         });
          if (attribute.value.startQuoteChunk && !attribute.closeQuote) {   // ???
             this._report(SEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ nameText ]);
          }
