@@ -224,8 +224,14 @@ class TreeStreamHandler extends StreamHandler {
       while (nextToken) {
          if (nextToken === this._peek().firstToken) {
             // Do no further processing of this token, as we already handled it
-         } else if (nextToken instanceof tokens.EntityReference) {
+         } else if (nextToken instanceof tokens.EntityReference ||
+            nextToken instanceof tokens.ParameterEntityReference) {
             handler = new QueuedStreamHandler(this._childChanged, this._entityManager, nextToken);
+            this._handlerStack.push(new HandlerFrame(handler, nextToken));
+            nextToken = handler.getNext();
+            continue;
+         } else if (nextToken instanceof tokens.EntityDeclaration) {
+            handler = new EntityValueStreamHandler(this._childChanged, this._entityManager, nextToken);
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
             nextToken = handler.getNext();
             continue;
@@ -304,7 +310,13 @@ class QueuedStreamHandler extends StreamHandler {
       this._onData = this._onData.bind(this);
       this._onEnd = this._onEnd.bind(this);
 
-      const cursor = entityManager.getEntity(entityReferenceToken.name);
+      let cursor;
+      if (entityReferenceToken instanceof tokens.EntityReference) {
+         cursor = entityManager.getEntity(entityReferenceToken.name);
+      } else {
+         cursor = entityManager.getParameterEntity(entityReferenceToken.name);
+      }
+
       let startToken = entityReferenceToken;
 
       if (cursor) {
@@ -438,6 +450,86 @@ class ElementStreamHandler extends StreamHandler {
 
       this._noMoreInput = true;
       this._queue.push(this._startElementToken);
+      this.changeCallback(this); // repetiation
+   }
+}
+
+/**********************************************************************\
+ @@@  This is so much the same as the above
+\**********************************************************************/
+class EntityValueStreamHandler extends StreamHandler {
+
+   constructor(changeCallbackCallback, entityManager, entityDeclarationToken) {
+      super(changeCallbackCallback);
+
+      this._entityDeclarationToken = entityDeclarationToken;
+      this._working = {};
+      this._workingCount = 0;
+
+      this._treeChanged = this._treeChanged.bind(this);
+
+      const value = entityDeclarationToken.value;
+
+      for (let pieceIndex = 0; pieceIndex < value.length; pieceIndex++) {
+         if (!(value[pieceIndex] instanceof tokens.ParameterEntityReference)) {
+            continue;
+         }
+
+         const simpleHandler = new BaseStreamHandler();
+         const handler = new TreeStreamHandler(this._treeChanged, simpleHandler, entityManager);
+         simpleHandler.add(value[pieceIndex]);
+         simpleHandler.add(null); // No more input to provide.
+
+         this._working[pieceIndex] = handler;
+         this._workingCount ++;
+      }
+
+      this._checkIfDone();
+   }
+
+   _treeChanged(handler) {
+      if (!handler.treeFullyWalked) {
+         return;
+      }
+
+      this._workingCount --;
+      this._checkIfDone();
+   }
+
+   _checkIfDone() {
+      if (this._workingCount !== 0) {
+         return;
+      }
+
+      // With all the data gathered, pour the final expanded data into the element
+      const value = this._entityDeclarationToken.value;
+      const newValue = [];
+
+      for (let index = 0; index < value.length; index++) {
+         const valuePiece = value[index];
+
+         if (valuePiece instanceof tokens.ParameterEntityReference) {
+            const handler = this._working[index];
+
+            let piece = handler.getNext();
+            while (piece) {
+               // Separate out errors and put before the start token.
+               if (piece instanceof Error) {
+                  this._queue.push(piece);
+               } else {
+                  newValue.push(piece);
+               }
+               piece = handler.getNext();
+            }
+         } else {
+            newValue.push(valuePiece);
+         }
+      }
+
+      this._entityDeclarationToken.value = newValue;
+
+      this._noMoreInput = true;
+      this._queue.push(this._entityDeclarationToken);
       this.changeCallback(this); // repetiation
    }
 }

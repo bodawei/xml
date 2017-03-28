@@ -31,7 +31,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: 7
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
- 3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
+ 3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
 
 
 √ S 193: provide a standard routine which will take a value.items array and validate
@@ -60,12 +60,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 		if it is an (pe) entityreference, assemble a single chunk
 	- adjust tests
 
-M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
+[2hr 10min]
 
-Cleanup: We are adding chunks to charrefs in entity values for the benefit of the string cursor. Arguably, though, we should do this for all.
+√ M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
+
+[3hr 5min]
+
+√ // issues.  when calling in, not finding the pe in the manager caused everything to die
 		
 
--- next: 193
+-- next: 198
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
@@ -80,6 +84,7 @@ CLEANUP
 	- add contexts to all errors
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
 - Look into fragmenting validation parsing etc into groups by token type.
+- We are adding chunks to charrefs in entity values for the benefit of the string cursor. Arguably, though, we should do this for all.
 - need to add other error types
 	- generalize stuff in XmlError and XmlWarning.
 		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem
@@ -131,8 +136,19 @@ PROJECT
 - read() should probably be the one emitting the error, not pushing
 - entity expansion may generate illegal < in an attribute value
 
+- Chunks in the expanded attributes and entity values are not correct.  Is that OK?
+
 --- Entity/attribute/attlist rework [1L 2m]
 M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
+	- Deal with all the duplciate code
+
+- Need to be able to parse param entity declarations and put in entity manager
+	we can't yet test PE's inside of PE's'
+	then need to be able to cope with this in the cursor below
+- So, is it CharData or Text?  We are putting both into entity Values
+	- The problem is that the XmlTokenStream rightly identifies it as charData.  But, it could have < in it, so it mibht be other things.  The new stream should return Text only.  Text should be Chars
+
+
 PLAN PLAN PLAN 192 in mor detail.
 192: L: B We need to deal with the internal entities that have character references in them
 	DEPENDS on reworked entity values
