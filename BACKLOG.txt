@@ -38,8 +38,16 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 =============================================
 CLEANUP
 - continue to pull out all parsing logic
-	- separate validation out of get bang item
 	- read
+		- parseNextItem() in misc
+			return
+				type:
+				peekedString  (nothing, markup, or close)
+			does
+				peekType
+				if markup gets string
+				if close gets close
+			all markup things must now get their own.
 - Provide async interface to cursor
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.  Mock the cursor?  how to test this?
 - remove entity manager from xmltokenstream
@@ -58,8 +66,8 @@ CLEANUP
 
 BUILD
 126: Enhancements to the reporting
-* Goal: get terse summaries of test and coverage reports that you can check in with commits in the future.
-- get reporting of node tests
+- pretify coverage reports along the lines of tests
+- our tests are passing coverage even though they do not cover.
 - fork quiet-grunt
 	- silent by default
 	- returns a controller
@@ -74,6 +82,7 @@ BUILD
 	- provide a dividing char for test segments
 	- optionally put tests in hierarchy rather than string
 - get report to appear even in silent
+- get reporting of node tests
 - coverage reporter should have a percent cutoff
 - Build build code to auto generate the other errors
 149 Test deriveLocale
@@ -1993,3 +2002,4 @@ Sprint 32
 [3hr 5min]
 
 √ // issues.  when calling in, not finding the pe in the manager caused everything to die
+	√ - separate validation out of get bang item

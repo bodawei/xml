@@ -233,6 +233,9 @@ class TreeStreamHandler extends StreamHandler {
          } else if (nextToken instanceof tokens.EntityDeclaration) {
             handler = new EntityValueStreamHandler(this._childChanged, this._entityManager, nextToken);
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
+            if (this._inInternalSubset) {
+               this._entityManager.addEntity(nextToken, this._entityManager.INTERNAL_SUBSET);
+            }
             nextToken = handler.getNext();
             continue;
          } else if (nextToken instanceof tokens.ElementStart || nextToken instanceof tokens.EmptyElement) {
@@ -246,8 +249,6 @@ class TreeStreamHandler extends StreamHandler {
             this._inInternalSubset = true;
          } else if (nextToken instanceof tokens.InternalSubsetEnd) {
             this._inInternalSubset = false;
-         } else if (nextToken instanceof tokens.EntityDeclaration && this._inInternalSubset) {
-            this._entityManager.addEntity(nextToken, this._entityManager.INTERNAL_SUBSET);
          }
 
          this._queue.push(nextToken);

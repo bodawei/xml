@@ -527,6 +527,246 @@ describe('XmlEntityStream', () => {
 
    });
 
+   describe('entity expansion in attributes', () => {
+
+      it('does nothing when attribute is just text', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="bar"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            expect(results[1].attributes[0].value).toEqual([ new tokens.Text('bar', tokens.ATTR_NO_CHUNKS) ]);
+         });
+      });
+
+      it('inserts text from entity', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&amp;"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            const attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+         });
+      });
+
+      it('does not change the entity reference to an entity start if the data is not found', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&bogus2;"></one>', done, (results) => {
+            expect(results[2].attributes[0].value[0] instanceof tokens.EntityReference).toEqual(true);
+         });
+      });
+
+      it('adds an error to the stream if the entity is not found', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&bogus3;"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               SyntaxError,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            expect(results[1].id).toEqual(SyntaxError.ID.REFERENCE_NO_DECLARATION);
+            expect(results[1].message).toEqual('Missing declaration for entity "bogus3".');
+         });
+      });
+
+      it('does not replace the entity reference with an entity start/end pair if entity not found', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&bogus3;"></one>', done, (results) => {
+            expectTokenTypes(results[2].attributes[0].value, [
+               tokens.EntityReference
+            ]);
+         });
+      });
+
+      it('reports an error to the error handler in strict mode', (done) => {
+         let gotError = false;
+         pipeAndTest('<?xml version="1.0"?><root foo="&bogus99;"></root>', done, evaluate, {
+            errorHandler: errorHandler,
+            strictMode: true
+         });
+
+         function errorHandler(error) {
+            gotError = true;
+            expect(error.id).toEqual(SyntaxError.ID.REFERENCE_NO_DECLARATION);
+            expect(error.message).toEqual('Missing declaration for entity "bogus99".');
+         }
+
+         function evaluate(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration
+            ]);
+            expect(gotError).toEqual(true);
+         }
+      });
+
+      it('changes the entity reference to an entity start', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&amp;"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            expect(results[1].attributes[0].value[0] instanceof tokens.EntityStart).toEqual(true);
+         });
+      });
+
+      it('inserts text from multiple entities in one attribute', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&amp;&amp;"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            const attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+         });
+      });
+
+      it('inserts text from multiple attributes', (done) => {
+         pipeAndTest('<?xml version="1.0"?><one foo="&amp;&quot;" bar="&quot;&amp;"></one>', done, (results) => {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.ElementStart,
+               tokens.ElementEnd
+            ]);
+
+            let attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd
+            ]);
+            attrPieces = results[1].attributes[1].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd,
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+         });
+
+      });
+
+      it('recognizes entities within entities', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(makeToken('level1', '(&level2;)'));
+         manager.addEntity(makeToken('level2', '&quot;&#x41;'));
+
+         pipeAndTest('<?xml version="1.0"?><root attr="&level1;">one</root>', done, evaluate, { manager: manager });
+
+         function evaluate(results) {
+            const attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityStart,
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.CharData,
+               tokens.EntityEnd
+            ]);
+         }
+      });
+
+      it('recognizes entities within entities inside of an empty element', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(makeToken('level1', '(&level2;)'));
+         manager.addEntity(makeToken('level2', '&quot;&#x41;'));
+
+         pipeAndTest('<?xml version="1.0"?><root attr="&level1;"/>', done, evaluate, { manager: manager });
+
+         function evaluate(results) {
+            const attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityStart,
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.CharData,
+               tokens.EntityEnd
+            ]);
+         }
+      });
+
+      it('reports the place and context of the error', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(makeToken('l1', 'stuff&level2;'));
+         manager.addEntity(makeToken('level2', 'foo&badRef;'));
+
+         pipeAndTest('<?xml version="1.0"?><root attr="&l1;"></root>', done, evaluate, {
+            manager: manager,
+            entityMd: new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, new EntityLocation('sys3', 'pub3'))
+         });
+
+         function evaluate(results) {
+            const token = results[1];
+
+            expect(token.place).toEqual(new Offset(0, 3, 3));   // location of the point of the error at &badRef;
+            expect(token.context).toEqual([ {
+               offset: new Offset(0, 3, 3),  // location of start of the bad ref in level2
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 5, 5),  // location of level2 reference in l1
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 21, 21),   // location of the root element start
+               location: new EntityLocation('sys3', 'pub3')
+            } ]);
+         }
+      });
+
+   });
+
+   describe('entities from internal subset', () => {
+
+      it('replaces an entity reference with an entity start', (done) => {
+         const input = `<?xml version="1.0"?>
+            <!DOCTYPE one [<!ENTITY testEntity "testValue">]><one>&testEntity;data</one>`;
+
+         pipeAndTest(input, done, (results) => {
+            expect(results[9].text).toEqual('testValue');
+         });
+      });
+
+      it('ignores entity declarations outside the DTD', (done) => {
+         const input = '<?xml version="1.0"?><!ENTITY testEntity "testValue"><one>&testEntity;data</one>';
+
+         pipeAndTest(input, done, (results) => {
+            expect(results[5] instanceof tokens.EntityReference).toEqual(true);
+         });
+      });
+
+   });
+
    describe('parameter entity expansion in entity values', () => {
 
       it('does nothing when entity value is just text', (done) => {

@@ -205,7 +205,6 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   // This is separate from _nextToken to support a pseudo-async test case until we get full async capabilities in
    _read() {
       const type = this._cursor.peekType();
 
