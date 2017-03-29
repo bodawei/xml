@@ -20,15 +20,22 @@ const makeStringTokenArray = testUtils.makeStringTokenArray;
 
 const TEST_CHUNKS = [ new TextChunk.PlainChunk('from test') ];
 
-function expectTokenTypes(tokenArray, typeArray) {
-   if (tokenArray.length !== typeArray.length) {
-      console.log('Lengths in expectTokenTypes() do not match: tokenArray.length=' + tokenArray.length + ', ' +
-      'typeArray.length=' + typeArray.length);
-      expect(tokenArray.length).toEqual(typeArray.length);
+function expectLengthsMatch(fnName, aName, bName, actual, expected) {
+   if (expected === actual) {
+      return;
    }
 
+   const expectedMsg = `Lengths in ${fnName}(): ${aName}.length=${expected}, ${bName}.length=${expected}`;
+   const actualMsg = `Lengths in ${fnName}(): ${aName}.length=${actual}, ${bName}.length=${expected}`;
+
+   expect(expectedMsg).toEqual(actualMsg);
+}
+
+function expectTokenTypes(tokenArray, expectedTypes) {
+   expectLengthsMatch('expectTokenTypes', 'expectedTypes', 'actualTypes', expectedTypes.length, expectedTypes.length);
+
    for (let index = 0; index < tokenArray.length; index++) {
-      const expectedDescription = `index ${index} (${typeArray[index].name})`;
+      const expectedDescription = `index ${index} (${expectedTypes[index].name})`;
       const actualDescription = `index ${index} (${tokenArray[index].constructor.name})`;
 
       expect(actualDescription).toEqual(expectedDescription);
@@ -36,11 +43,7 @@ function expectTokenTypes(tokenArray, typeArray) {
 }
 
 function expectTokenDetails(tokenArray, detailsArray) {
-   if (tokenArray.length !== detailsArray.length) {
-      console.log('Lengths in expectTokenDetails() do not match: tokenArray.length=' + tokenArray.length + ', ' +
-      'detailsArray.length=' + detailsArray.length);
-      expect(tokenArray.length).toEqual(typeArray.length);
-   }
+   expectLengthsMatch('expectTokenDetails', 'tokenArray', 'detailsArray', tokenArray.length, detailsArray.length);
 
    for (let index = 0; index < tokenArray.length; index++) {
       for (const key in detailsArray[index]) {

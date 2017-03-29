@@ -26,6 +26,7 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 const ATTR_TYPE_NAMES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION',
    'ENUMERATION' ];
 const ATTR_DEFAULT_NAMES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
+const KNOWN_BANGITEMS = [ 'DOCTYPE', 'NOTATION', 'ENTITY', 'ELEMENT', 'ATTLIST' ];
 
 /* eslint-disable max-len, max-block-comment-len */
 /*
@@ -359,17 +360,11 @@ class XmlTokenStream extends stream.Readable {
       }
    }
 
-   _getBangItem(start) {
-      const parsed = this._miscParser.parseBangItem(this._cursor, start);
-
+   _validateBangItem(parsed, start) {
       if (parsed.openBracket) {
          this._checkSyntax(!parsed.postStartSpaceChunk, SEID.BRACKETITEM_XTRA_SPACE_BEFORE);
 
          this._validateBracketItem(parsed, start);
-
-         if (parsed.typeString.toLocaleLowerCase() === 'cdata') {
-            this._pushToken(new tokens.CData(textOrUndef(parsed.contentChunk), this._cursor.getRecentChunks()));
-         }
          return;
       }
 
@@ -380,71 +375,86 @@ class XmlTokenStream extends stream.Readable {
       } else {
          const type = parsed.declarationName.text;
          const upperCaseType = type.toLocaleUpperCase();
+         const isKnownName = KNOWN_BANGITEMS.indexOf(upperCaseType) !== -1;
 
          this._checkSyntax(type === upperCaseType, SEID.BANGITEM_NAME_INVALID_CASE, [ upperCaseType, type ]);
          this._checkSyntax(parsed.postDeclarationNameSpace, SEID.BANGITEM_NAME_XTRA_SPACE_AFTER, [ type ]);
 
-         switch (upperCaseType) {
-            case 'DOCTYPE':
-               const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, parsed.declarationName);
-
-               this._validateStartDocType(parsedDocType, start);
-
-               const docToken = new tokens.DocTypeStart(textOrBlank(parsedDocType.nameChunk),
-                  locFromExternalId(parsedDocType.externalId), this._cursor.getRecentChunks());
-               this._pushToken(docToken);
-
-               if (parsedDocType.startInternalSubsetChunk) {
-                  this._pushToken(new tokens.InternalSubsetStart());
-                  this._pushEnveloper(']', docToken);
-                  this._state = STATE.IN_DTD;
-               } else {
-                  this._closeDocType();
-               }
-               return;
-            case 'NOTATION':
-               const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, parsed.declarationName);
-
-               this._validateNotation(parsedNotation);
-
-               this._pushToken(new tokens.NotationDeclaration(textOrBlank(parsedNotation.nameChunk),
-                  locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
-               return;
-            case 'ENTITY':
-               const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, parsed.declarationName);
-
-               this._validateEntity(parsedEntity);
-
-               const entityClass = parsedEntity.isParameter ? tokens.PEntityDeclaration : tokens.EntityDeclaration;
-
-               this._pushToken(new entityClass(textOrBlank(parsedEntity.nameChunk),
-                  this._convertParsedQuotedValueToTokens(parsedEntity.value),
-                  locFromExternalId(parsedEntity.externalId),
-                  textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
-               return;
-            case 'ELEMENT':
-
-               const parsedEl = this._dtdParser.parseElement(this._cursor);
-
-               const contentText = this._validateElementDeclaration(parsedEl, start);
-
-               this._pushToken(new tokens.ElementDeclaration(textOrBlank(parsedEl.elementName), contentText,
-                  this._cursor.getRecentChunks()));
-               return;
-            case 'ATTLIST':
-               const parseResults = this._dtdParser.parseAttList(this._cursor);
-
-               this._validateAttList(parseResults, start);
-
-               const attributes = this._extractAttrListAttributes(parseResults);
-
-               this._pushToken(new tokens.AttrListDeclaration(textOrBlank(parseResults.elementNameChunk), attributes,
-                  this._cursor.getRecentChunks()));
-               return;
+         if (!isKnownName) {
+            this._report(SEID.BANGITEM_UNKNOWN);
          }
       }
+   }
 
-      this._report(SEID.BANGITEM_UNKNOWN);
+   _getBangItem(start) {
+      const parsed = this._miscParser.parseBangItem(this._cursor, start);
+      const upperCaseType = textOrBlank(parsed.declarationName).toLocaleUpperCase();
+
+      this._validateBangItem(parsed, start);
+
+      if (parsed.openBracket && parsed.typeString.toLocaleLowerCase() === 'cdata') {
+         this._pushToken(new tokens.CData(textOrUndef(parsed.contentChunk), this._cursor.getRecentChunks()));
+         return;
+      }
+
+      switch (upperCaseType) {
+         case 'DOCTYPE':
+            const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, parsed.declarationName);
+
+            this._validateStartDocType(parsedDocType, start);
+
+            const docToken = new tokens.DocTypeStart(textOrBlank(parsedDocType.nameChunk),
+               locFromExternalId(parsedDocType.externalId), this._cursor.getRecentChunks());
+            this._pushToken(docToken);
+
+            if (parsedDocType.startInternalSubsetChunk) {
+               this._pushToken(new tokens.InternalSubsetStart());
+               this._pushEnveloper(']', docToken);
+               this._state = STATE.IN_DTD;
+            } else {
+               this._closeDocType();
+            }
+            break;
+         case 'NOTATION':
+            const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, parsed.declarationName);
+
+            this._validateNotation(parsedNotation);
+
+            this._pushToken(new tokens.NotationDeclaration(textOrBlank(parsedNotation.nameChunk),
+               locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
+            break;
+         case 'ENTITY':
+            const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, parsed.declarationName);
+
+            this._validateEntity(parsedEntity);
+
+            const entityClass = parsedEntity.isParameter ? tokens.PEntityDeclaration : tokens.EntityDeclaration;
+
+            this._pushToken(new entityClass(textOrBlank(parsedEntity.nameChunk),
+               this._convertParsedQuotedValueToTokens(parsedEntity.value),
+               locFromExternalId(parsedEntity.externalId),
+               textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
+            break;
+         case 'ELEMENT':
+            const parsedEl = this._dtdParser.parseElement(this._cursor);
+
+            const contentText = this._validateElementDeclaration(parsedEl, start);
+
+            this._pushToken(new tokens.ElementDeclaration(textOrBlank(parsedEl.elementName), contentText,
+               this._cursor.getRecentChunks()));
+            break;
+         case 'ATTLIST':
+            const parseResults = this._dtdParser.parseAttList(this._cursor);
+
+            this._validateAttList(parseResults, start);
+
+            const attributes = this._extractAttrListAttributes(parseResults);
+
+            this._pushToken(new tokens.AttrListDeclaration(textOrBlank(parseResults.elementNameChunk), attributes,
+               this._cursor.getRecentChunks()));
+            break;
+         // Eventually need a default with some kind of recovery scheme
+      }
    }
 
    _extractAttrListAttributes(parseResults) {

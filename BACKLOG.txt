@@ -32,41 +32,6 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
  3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
-
-
-√ S 193: provide a standard routine which will take a value.items array and validate
-	_validateCharReference
-	_validateEntityReference
-		both gref and peref
-	_validateNoAngleBrackets  if flag set
-	?- unexpected peref (or gref or charref?)
-
-   // HEy, what happens after expansion?
-
-√ S 194: Add validation and testing using the above. includes a test for each kind of bad thing
-	_validateEntity
-	_validateAttList
-	_validateStartTag
-		with &#123; &ge; %pe;
-		make sure that only legal ones are parsed
-		report errors for those that are bad (e.g. put an extra space into each)
-
-[1.5hr]
-
-√ S+ 195: Add chunks to entity values
-	- generalize combineChunks to take an array of chunks, and will assemble them.  Will barf if values don't match offsets
-	- add a routine which sweeps through an value.items
-		if it finds a charref, assemble a single chunk from each of the bits in there.
-		if it is an (pe) entityreference, assemble a single chunk
-	- adjust tests
-
-[2hr 10min]
-
-√ M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
-
-[3hr 5min]
-
-√ // issues.  when calling in, not finding the pe in the manager caused everything to die
 		
 
 -- next: 198
@@ -1991,3 +1956,40 @@ This sprint went pretty well.  I went in with 3 big tasks, and said "not sure ho
 I ended up doing the first half of each ofthe 3, more or less.  It was more unified that way.  Very satisfying to have finished up this definitive definition of what is in each of the entity values, attributes and attlist strings.  Finally opens the way to the big bugaboo of a special cursor and then a special stream.  These have been haunting me for a long time, so very happy to have this moving forward.
 In cleanup, almost finished the whole separation of parsing work.  And build finished up my vague work around the test reporter.
 Overall, I'm feeling like things are moving again on all three fronts.
+
+
+Sprint 32
+=========
+√ S 193: provide a standard routine which will take a value.items array and validate
+	_validateCharReference
+	_validateEntityReference
+		both gref and peref
+	_validateNoAngleBrackets  if flag set
+	?- unexpected peref (or gref or charref?)
+
+   // HEy, what happens after expansion?
+
+√ S 194: Add validation and testing using the above. includes a test for each kind of bad thing
+	_validateEntity
+	_validateAttList
+	_validateStartTag
+		with &#123; &ge; %pe;
+		make sure that only legal ones are parsed
+		report errors for those that are bad (e.g. put an extra space into each)
+
+[1.5hr]
+
+√ S+ 195: Add chunks to entity values
+	- generalize combineChunks to take an array of chunks, and will assemble them.  Will barf if values don't match offsets
+	- add a routine which sweeps through an value.items
+		if it finds a charref, assemble a single chunk from each of the bits in there.
+		if it is an (pe) entityreference, assemble a single chunk
+	- adjust tests
+
+[2hr 10min]
+
+√ M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
+
+[3hr 5min]
+
+√ // issues.  when calling in, not finding the pe in the manager caused everything to die
