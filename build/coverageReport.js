@@ -43,6 +43,7 @@ function getSummaryPaths(dir, parentName, filesToSkip, totalsAccumulator) {
             for (var key in jsonData) {
 
                if (key === 'total' || filesToSkip.includes(key)) {
+//                  console.log('Skipping :' + key);
                   continue;
                }
 
@@ -111,20 +112,88 @@ module.exports = (grunt) => {
 
       var keys = Object.keys(totals);
       var failed = false;
+      var sortedNames = [];
 
-      for (var index = 0; index < keys.length; index++) {
-         var browserName = keys[index];
-         var percentage = calculatePercentage(totals[browserName]);
+      var info = keys.map((key) => {
+         var browserMatch = /([A-Za-z]+) [v]?([0-9\.]+)/.exec(key);
+         var browserName = browserMatch[1];
+         var browserVersion = browserMatch[2];
+//         var osMatch = /^([^0-9]+) ([0-9\.]+)/.exec(result.os);
+
+         sortedNames.push(browserName);
+         var percentage = calculatePercentage(totals[key]);
          if (percentage !== 100) {
             failed = true;
          }
 
+         return {
+            name: browserName,
+            percentage: percentage + '%',
+            version: browserVersion
+         };
+      });
+
+      var maxLengths = info.reduce((accumulation, entry) => {
+         accumulation.name = Math.max(accumulation.name, entry.name.length);
+         accumulation.percentage = Math.max(accumulation.percentage, entry.percentage.toString().length);
+         accumulation.version = Math.max(accumulation.version, entry.version.length);
+         return accumulation;
+      }, { name: 0, percentage: 0, version: 0});
+
+      function padValue(value, columnWidth, padChar) {
+         let nameResult = value;
+         for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
+            nameResult += padChar || ' ';
+         }
+
+         return nameResult;
+      }
+
+      const border = [];
+      border.push(padValue('', maxLengths.percentage, '─'));
+      border.push(padValue('', maxLengths.name, '─'));
+      border.push(padValue('', maxLengths.version, '─'));
+      print('COVERAGE\n');
+      print('┌─' + border.join('─┬─') + '─┐\n');
+
+      sortedNames.sort();
+
+      var byBrowser = {};
+      info.forEach((entry) => {
+         byBrowser[entry.name] = entry;
+      });
+
+      function print(message) {
          if (process.passthroughWrite) {
-            process.passthroughWrite(percentage + '%: ' + browserName + '\n');
+            process.passthroughWrite(message);
          } else {
-            console.log(percentage + '%: ' + browserName);
+            console.log(message);
          }
       }
+
+      for (let index = 0; index < sortedNames.length; index++) {
+         const name = sortedNames[index];
+         const value = [];
+         value.push(padValue(byBrowser[name].percentage, maxLengths.percentage));
+         value.push(padValue(byBrowser[name].name, maxLengths.name));
+         value.push(padValue(byBrowser[name].version, maxLengths.version));
+         print('│ ' + value.join(' │ ') + ' │\n');
+      }
+      print('└─' + border.join('─┴─') + '─┘\n');
+
+//      for (var index = 0; index < keys.length; index++) {
+//         var browserName = keys[index];
+//         var percentage = calculatePercentage(totals[browserName]);
+//         if (percentage !== 100) {
+//            failed = true;
+//         }
+//
+//         if (process.passthroughWrite) {
+//            process.passthroughWrite(percentage + '%: ' + browserName + '\n');
+//         } else {
+//            console.log(percentage + '%: ' + browserName);
+//         }
+//      }
 
       if (failed) {
          grunt.fail.fatal('coveragereport: Did not get 100% code coverage. Build failed');
