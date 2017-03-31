@@ -243,6 +243,11 @@ class TreeStreamHandler extends StreamHandler {
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
             nextToken = handler.getNext();
             continue;
+         } else if (nextToken instanceof tokens.AttrListDeclaration) {
+            handler = new ElementStreamHandler(this._childChanged, this._entityManager, nextToken);
+            this._handlerStack.push(new HandlerFrame(handler, nextToken));
+            nextToken = handler.getNext();
+            continue;
          } else if (nextToken instanceof XmlError) {
             this._addErrorContext(nextToken);
          } else if (nextToken instanceof tokens.InternalSubsetStart) {

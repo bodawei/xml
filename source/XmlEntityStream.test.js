@@ -884,6 +884,152 @@ describe('XmlEntityStream', () => {
 
    });
 
+   describe('entity expansion in attribute lists', () => {
+      let entityMd;
+
+      beforeEach(() => {
+         entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5,
+            new EntityLocation('', undefined));
+      });
+
+      it('does nothing when attribute defaults are just text', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "one">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            expectTokenTypes(results, [
+               tokens.AttrListDeclaration
+            ]);
+
+            expect(results[0].attributes[0].value).toEqual([ new tokens.Text('one', tokens.ATTR_NO_CHUNKS) ]);
+         }
+      });
+
+      it('inserts a char reference from entity', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "&amp;">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            const attrPieces = results[0].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+
+            expect(results[0].attributes[0].value[1].text).toEqual('&');
+         }
+      });
+
+      it('does not change the entity reference to an entity start if the data is not found', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "&bogus;">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            const attrPieces = results[1].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityReference
+            ]);
+         }
+      });
+
+      it('adds an error to the stream if the entity is not found', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "&bogus3;">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            expectTokenTypes(results, [
+               SyntaxError,
+               tokens.AttrListDeclaration
+            ]);
+
+            expect(results[0].id).toEqual(SyntaxError.ID.REFERENCE_NO_DECLARATION);
+            expect(results[0].message).toEqual('Missing declaration for entity "bogus3".');
+         }
+      });
+
+      it('inserts text from multiple entities in one attribute', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "&amp;&amp;">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            const attrPieces = results[0].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+         }
+      });
+
+      it('inserts text from multiple attributes', (done) => {
+         pipeAndTest('<!ATTLIST one attr CDATA "&amp;" attr2 CDATA "&quot;">', done, checkResults, { entityMd });
+
+         function checkResults(results) {
+            let attrPieces = results[0].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharRef,
+               tokens.EntityEnd
+            ]);
+            attrPieces = results[0].attributes[1].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd
+            ]);
+         }
+      });
+
+      it('recognizes entities within entities', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(makeToken('level1', '(&level2;)'));
+         manager.addEntity(makeToken('level2', '&quot;&#x41;'));
+         pipeAndTest('<!ATTLIST one attr CDATA "&level1;">', done, checkResults, { entityMd, manager });
+
+         function checkResults(results) {
+            const attrPieces = results[0].attributes[0].value;
+            expectTokenTypes(attrPieces, [
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityStart,
+               tokens.EntityStart,
+               tokens.CharData,
+               tokens.EntityEnd,
+               tokens.CharRef,
+               tokens.EntityEnd,
+               tokens.CharData,
+               tokens.EntityEnd
+            ]);
+         }
+      });
+
+      it('reports the place and context of the error', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addEntity(makeToken('l1', 'stuff&level2;'));
+         manager.addEntity(makeToken('level2', 'foo&badRef;'));
+         pipeAndTest('<!ATTLIST one attr CDATA "&l1;">', done, checkResults, {
+            entityMd: new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5, new EntityLocation('sys3', 'pub3')),
+            manager
+         });
+
+         function checkResults(results) {
+            const token = results[0];
+
+            expect(token.place).toEqual(new Offset(0, 3, 3));   // location of the point of the error at &badRef;
+            expect(token.context).toEqual([ {
+               offset: new Offset(0, 3, 3),  // location of start of the bad ref in level2
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 5, 5),  // location of level2 reference in l1
+               location: new EntityLocation('', undefined)
+            }, {
+               offset: new Offset(0, 0, 0),   // location of the root element start
+               location: new EntityLocation('sys3', 'pub3')
+            } ]);
+         }
+      });
+
+   });
+
    describe('stream processing', () => {
 
       /*

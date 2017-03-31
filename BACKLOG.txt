@@ -32,7 +32,33 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
  3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
-		
+ 3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL:
+
+M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
+	- Deal with all the duplciate code
+
+S: 186: Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
+	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
+	- Need to gather the entity reference from the doctype start, but only apply it when we see the close doctype.
+	This is entity stream.  The key is that we aren't already doing anything for this!
+	And this story is a very big S.
+	- could we start gathering "in parallel" on the doctype? WE might be able to
+		- we see the token, create a stream handler and say "go to town".
+		- on the end, we stick it onto the stack and let it finish.
+			- which it might do immeciately
+		- safer to start with going it like we "always" have done it.
+			== need a better definition for the handlers.
+	- entity manager is totally not ready to deal with stuff.
+	I suggest adding a special entity type: the external subset.  Because it doesn't have a token.  Either that, or, better, fake it for the moment. Create a special entity with a pretty funky name no one would have.  one with a space in it which is impossible to express.Then the existing machinery can be used.
+		With this, we can probably used a queued stream handler, but turn off it's notification... or even leave it, come to think of it.  we'll just ignore it because it isn't the top.  And presumably all the machinery should work just fine for it.
+
+Later: Cleanup duplicate code in entity stream
+
+
+Cleanup:
+- Finish separation
+Build
+- Walk through test reporting code.  make sure it is doing the right thing, and dumping to file.		
 
 -- next: 198
 =============================================
@@ -66,8 +92,6 @@ CLEANUP
 
 BUILD
 126: Enhancements to the reporting
-- pretify coverage reports along the lines of tests
-- our tests are passing coverage even though they do not cover.
 - fork quiet-grunt
 	- silent by default
 	- returns a controller
@@ -112,9 +136,7 @@ PROJECT
 
 - Chunks in the expanded attributes and entity values are not correct.  Is that OK?
 
---- Entity/attribute/attlist rework [1L 2m]
-M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
-	- Deal with all the duplciate code
+--- Entity/attribute/attlist rework [1L 1m]
 
 - Need to be able to parse param entity declarations and put in entity manager
 	we can't yet test PE's inside of PE's'
@@ -136,7 +158,7 @@ PLAN PLAN PLAN 192 in mor detail.
 		This is used internally when entitystream is filling in an attribute
 
 
---- Entity management [1L 2M 1S] !!!  [39]
+--- Entity management [1L 2M] !!!  [39]
 
 WALKTHROUGH
 * No GE or PE's
@@ -196,9 +218,6 @@ Should think more about the processing of GE and PERefs, especially are we ok if
 	- need to identify parameter entities in the first place!
 		- maybe should wait until we get the separation done? Or this could prep for that
 	- does token stream parse this correctly and barf if context is wrong?
-
-186: S: I Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
-	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
 
 184: L F need a single interface for both browser and node
 	* Todo
@@ -2003,3 +2022,11 @@ Sprint 32
 
 √ // issues.  when calling in, not finding the pe in the manager caused everything to die
 	√ - separate validation out of get bang item
+√ - pretify coverage reports along the lines of tests
+√ - our tests are passing coverage even though they do not cover.
+
+
+Sprint 33
+=========
+Starting this sprint a little heavy.  One of the S's is closer to a M. But then the M is a little light.  so, probably ok.
+Planning is still much too easy to overlook.
