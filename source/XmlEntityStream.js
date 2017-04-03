@@ -238,22 +238,32 @@ class TreeStreamHandler extends StreamHandler {
             }
             nextToken = handler.getNext();
             continue;
-         } else if (nextToken instanceof tokens.ElementStart || nextToken instanceof tokens.EmptyElement) {
+         } else if (nextToken instanceof tokens.ElementStart ||
+            nextToken instanceof tokens.EmptyElement ||
+            nextToken instanceof tokens.AttrListDeclaration) {
             handler = new ElementStreamHandler(this._childChanged, this._entityManager, nextToken);
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
             nextToken = handler.getNext();
             continue;
-         } else if (nextToken instanceof tokens.AttrListDeclaration) {
-            handler = new ElementStreamHandler(this._childChanged, this._entityManager, nextToken);
-            this._handlerStack.push(new HandlerFrame(handler, nextToken));
-            nextToken = handler.getNext();
-            continue;
-         } else if (nextToken instanceof XmlError) {
-            this._addErrorContext(nextToken);
          } else if (nextToken instanceof tokens.InternalSubsetStart) {
             this._inInternalSubset = true;
          } else if (nextToken instanceof tokens.InternalSubsetEnd) {
             this._inInternalSubset = false;
+         } else if (nextToken instanceof tokens.DocTypeStart) {
+            if (nextToken.externalLoc) {
+               this._entityManager.addExternalSubsetEntity(nextToken.externalLoc);
+               this._externalEntityHandler = new ExternalEntityStreamHandler(this._childChanged, this._entityManager);
+            }
+         } else if (nextToken instanceof tokens.DocTypeEnd) {
+            if (this._externalEntityHandler) {
+               this._handlerStack.push(new HandlerFrame(this._externalEntityHandler, nextToken));
+               handler = this._externalEntityHandler;
+               delete this._externalEntityHandler;
+               nextToken = handler.getNext();
+               continue;
+            }
+         } else if (nextToken instanceof XmlError) {
+            this._addErrorContext(nextToken);
          }
 
          this._queue.push(nextToken);
@@ -294,6 +304,43 @@ class TreeStreamHandler extends StreamHandler {
             location: this._handlerStack[index].firstToken.chunks[0].entityLocation
          });
       }
+   }
+
+}
+
+class ExternalEntityStreamHandler extends StreamHandler {
+
+   constructor(changeCallbackCallback, entityManager) {
+      super(changeCallbackCallback);
+
+      this._onData = this._onData.bind(this);
+      this._onEnd = this._onEnd.bind(this);
+
+      const cursor = entityManager.getExternalSubsetEntity();
+
+      this._stream = new XmlTokenStream(cursor, entityManager, {
+         lax: true
+      });
+      this._stream.addListener('data', this._onData);
+      this._stream.addListener('error', this._onData);
+      this._stream.addListener('end', this._onEnd);
+
+      this._queue.push(new tokens.ExternalSubsetStart());
+   }
+
+   _onEnd() {
+      this._queue.push(new tokens.ExternalSubsetEnd());
+      this._stream.removeListener('data', this._onData);
+      this._stream.removeListener('error', this._onData);
+      this._stream.removeListener('end', this._onEnd);
+      delete this._stream;
+      this._noMoreInput = true;
+      this.changeCallback(this);
+   }
+
+   _onData(token) {
+      this._queue.push(token);
+      this.changeCallback(this);
    }
 
 }

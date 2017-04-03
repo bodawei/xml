@@ -1007,7 +1007,7 @@ describe('XmlEntityStream', () => {
          manager.addEntity(makeToken('l1', 'stuff&level2;'));
          manager.addEntity(makeToken('level2', 'foo&badRef;'));
          pipeAndTest('<!ATTLIST one attr CDATA "&l1;">', done, checkResults, {
-            entityMd: new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5, new EntityLocation('sys3', 'pub3')),
+            entityMd: new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5, new EntityLocation('s4', 'p4')),
             manager
          });
 
@@ -1023,8 +1023,75 @@ describe('XmlEntityStream', () => {
                location: new EntityLocation('', undefined)
             }, {
                offset: new Offset(0, 0, 0),   // location of the root element start
-               location: new EntityLocation('sys3', 'pub3')
+               location: new EntityLocation('s4', 'p4')
             } ]);
+         }
+      });
+
+   });
+
+   describe('expands the external subset', () => {
+
+      it('inserts no internal or external subset if none is specified', (done) => {
+         pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo>', done, checkResults);
+
+         function checkResults(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.DocTypeStart,
+               tokens.DocTypeEnd
+            ]);
+         }
+      });
+
+      it('inserts an internal subset if one is specified', (done) => {
+         pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo [<!ELEMENT foo ANY>]>', done, checkResults);
+
+         function checkResults(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.DocTypeStart,
+               tokens.InternalSubsetStart,
+               tokens.ElementDeclaration,
+               tokens.InternalSubsetEnd,
+               tokens.DocTypeEnd
+            ]);
+         }
+      });
+
+      it('inserts an external subset after the internal if both are specified', (done) => {
+         const manager = new XmlEntityManager();
+         // work behind the scenes with intimate knowledge of the manager
+         manager.addParameterEntity(makeToken('\tEXTERNAL\tSUBSET\t', '<!ENTITY foo "bar">'));
+         spyOn(manager, 'addExternalSubsetEntity');
+         pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "foo" [<!ELEMENT foo ANY>]>', done, checkResults, {
+            manager
+         });
+
+         function checkResults(results) {
+            expectTokenTypes(results, [
+               tokens.XmlDeclaration,
+               tokens.DocTypeStart,
+               tokens.InternalSubsetStart,
+               tokens.ElementDeclaration,
+               tokens.InternalSubsetEnd,
+               tokens.ExternalSubsetStart,
+               tokens.EntityDeclaration,
+               tokens.ExternalSubsetEnd,
+               tokens.DocTypeEnd
+            ]);
+         }
+      });
+
+      it('inserts the external subset location into the entity manager', (done) => {
+         const manager = new XmlEntityManager();
+         manager.addParameterEntity(makeToken('\tEXTERNAL\tSUBSET\t', '<!ENTITY foo "bar">'));
+         spyOn(manager, 'addExternalSubsetEntity');
+         pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "pub.xml" "sys.xml" [<!ELEMENT foo ANY>]>', done,
+            checkResults, { manager });
+
+         function checkResults() {
+            expect(manager.addExternalSubsetEntity).toHaveBeenCalledWith(new EntityLocation('sys.xml', 'pub.xml'));
          }
       });
 

@@ -10,6 +10,7 @@ const tokens = require('./XmlToken.js');
 const DEFAULT_ENTITY = 'DefaultEntity';
 const INTERNAL_SUBSET = 'EntityDeclaredInInternalSubset';
 const EXTERNAL_SUBSET = 'EntityDeclaredInExternalSubset';
+const EXTERNAL_SUBSET_NAME = '\tEXTERNAL\tSUBSET\t';
 
 const DEF_CHUNKS = [ new TextChunk.PlainChunk('default') ];
 
@@ -66,6 +67,25 @@ class XmlEntityManager {
    }
 
    /**********************************************************************\
+    addExternalSubsetEntity() Adds the specified location as the location
+    of the external subset entity, which can be retrieved only with
+    getExternalSubsetEntity
+
+    PARAM
+    location: An EntityLocation. If undefined, this does nothing.
+   \**********************************************************************/
+
+   addExternalSubsetEntity(location) {
+      if (!location) {
+         return;
+      }
+      const token = new tokens.EntityDeclaration(EXTERNAL_SUBSET_NAME,
+         [ new tokens.Text('', tokens.ENTITYVAL_NO_CHUNKS) ], location, undefined,
+         tokens.ENTITYVAL_NO_CHUNKS);
+      this._internalAdd(token, EXTERNAL_SUBSET, true);
+   }
+
+   /**********************************************************************\
     getEntity() returns an XmlCursor with the contents of the requested
     general entity, or undefined if there is no such entity present.
     Note that entities declared earlier take precedence over those
@@ -97,6 +117,18 @@ class XmlEntityManager {
 
    getParameterEntity(name) {
       return this._internalGet(name, true);
+   }
+
+   /**********************************************************************\
+    getExternalSubsetEntity() Retrieves a cursor for the external subset
+    entity, or returns undefiend if none has been specified.
+
+    RETURN
+    An XmlCursor or undefined
+   \**********************************************************************/
+
+   getExternalSubsetEntity() {
+      return this._internalGet(EXTERNAL_SUBSET_NAME, true, true);
    }
 
    /**********************************************************************\
@@ -165,7 +197,7 @@ class XmlEntityManager {
     external over the default ones.
    \**********************************************************************/
 
-   _internalGet(name, isParameter) {
+   _internalGet(name, isParameter, isExternalSubset) {
       const info = this._internalGetEntityData(name, isParameter);
 
       if (!info) {
@@ -176,7 +208,8 @@ class XmlEntityManager {
          return;
       }
 
-      return new XmlStringCursor(info.token.value[0].text, new EntityMetaData(EntityMetaData.TYPE.EXTERNAL));
+      return new XmlStringCursor(info.token.value[0].text,
+         new EntityMetaData(isExternalSubset ? EntityMetaData.TYPE.EXTERNALSUBSET : EntityMetaData.TYPE.EXTERNAL));
    }
 
    _internalGetEntityToken(name, isParameter) {

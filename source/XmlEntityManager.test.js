@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const TextChunk = require('./shared/TextChunk.js');
+const EntityLocation = require('./shared/EntityLocation.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
@@ -199,6 +200,22 @@ describe('XmlEntityManager', () => {
          manager.addEntity(token, XmlEntityManager.INTERNAL_SUBSET);
 
          expect(manager.getEntityToken('test')).toEqual(token);
+      });
+
+   });
+
+   describe('addExternalSubsetEntity', () => {
+
+      it('adds nothing if no parameter is passed', () => {
+         manager.addExternalSubsetEntity();
+
+         expect(manager.getExternalSubsetEntity()).toBeUndefined();
+      });
+
+      it('adds a token for the specified location', () => {
+         manager.addExternalSubsetEntity(new EntityLocation('system', 'public'));
+
+         expect(manager.getExternalSubsetEntity()._source).toEqual('');
       });
 
    });

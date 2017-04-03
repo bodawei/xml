@@ -212,6 +212,22 @@ class InternalSubsetEnd extends XmlToken {
 
 }
 
+class ExternalSubsetStart extends XmlToken {
+
+   constructor() {
+      super(SUBSET_NO_CHUNKS);
+   }
+
+}
+
+class ExternalSubsetEnd extends XmlToken {
+
+   constructor() {
+      super(SUBSET_NO_CHUNKS);
+   }
+
+}
+
 class DocTypeEnd extends XmlToken {
 }
 
@@ -279,6 +295,8 @@ module.exports = {
    DocTypeEnd,
    InternalSubsetStart,
    InternalSubsetEnd,
+   ExternalSubsetStart,
+   ExternalSubsetEnd,
    NotationDeclaration,
    EntityDeclaration,
    PEntityDeclaration,
