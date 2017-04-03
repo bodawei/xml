@@ -10,7 +10,7 @@ const Offset = require('./shared/Offset.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const TextChunk = require('./shared/TextChunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
-const XmlEntityStream = require('./XmlEntityStream.js');
+const EntityExpandingStream = require('./EntityExpandingStream.js');
 const tokens = require('./XmlToken.js');
 
 const testUtils = require('./XmlTokenStream-util.test.js');
@@ -66,7 +66,7 @@ function pipeAndTest(inputString, done, endHandler, other = {}) {
    const entityMd = other.entityMd;
 
    const ts = makeLaxStream(inputString, entityMd);
-   const es = new XmlEntityStream({
+   const es = new EntityExpandingStream({
       manager: manager,
       lax: !strictMode
    });
@@ -92,26 +92,26 @@ function makeToken(name, text, location, notationName) {
       TEST_CHUNKS);
 }
 
-describe('XmlEntityStream', () => {
+describe('EntityExpandingStream', () => {
 
    describe('construction', () => {
 
       it('throws an error if not passed an entity manager', () => {
          expect(() => {
-            new XmlEntityStream({ manager: {} });
+            new EntityExpandingStream({ manager: {} });
          }).toThrowError('Must provide an XmlEntityManager instance.');
       });
 
       it('does not care if no entity manager is passed at all', () => {
          expect(() => {
-            new XmlEntityStream();
+            new EntityExpandingStream();
          }).not.toThrow();
       });
 
       // tests below implicitly test whether the passed in manager is used at all
       it('does not throw an error if an entity manager is passed', () => {
          expect(() => {
-            new XmlEntityStream({ manager: new XmlEntityManager() });
+            new EntityExpandingStream({ manager: new XmlEntityManager() });
          }).not.toThrow();
       });
 
@@ -121,7 +121,7 @@ describe('XmlEntityStream', () => {
 
       it('retrieves all the tokens from the underlying stream', (done) => {
          const ts = makeLaxStream('<?xml version="1.0"?><one>data</one>');
-         const es = new XmlEntityStream({
+         const es = new EntityExpandingStream({
             lax: true
          });
 
@@ -170,7 +170,7 @@ describe('XmlEntityStream', () => {
 
       it('does not reflect the error from the piped-from stream', (done) => {
          const ts = makeStrictStream('<?xml version="1.0"?><one>data</two>');
-         const es = new XmlEntityStream();
+         const es = new EntityExpandingStream();
          const results = [];
          let tsErrorOrder;
          let esErrorOrder;
@@ -204,7 +204,7 @@ describe('XmlEntityStream', () => {
 
       it('is ended after a terminal error in the underlying stream', (done) => {
          const ts = makeStrictStream('<?xml version="1.0"?><one>data</two>');
-         const es = new XmlEntityStream();
+         const es = new EntityExpandingStream();
          const results = [];
          let esFinished;
 
@@ -236,7 +236,7 @@ describe('XmlEntityStream', () => {
 
       it('is finished and ended automatically after piped-from stream is ended', (done) => {
          const ts = makeStrictStream('<?xml version="1.0"?><one>data</one>');
-         const es = new XmlEntityStream();
+         const es = new EntityExpandingStream();
          const results = [];
          const endSequence = [];
          es.on('data', (token) => {
@@ -1110,7 +1110,7 @@ describe('XmlEntityStream', () => {
        * call is made after an error has occurred.
        */
       it('does not break if _treeChanged() is called repeatedly after error', (done) => {
-         const es = new XmlEntityStream({
+         const es = new EntityExpandingStream({
             lax: false
          });
          spyOn(es, 'push').and.callThrough();

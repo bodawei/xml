@@ -37,8 +37,6 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
 M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
 	- Deal with all the duplciate code
 
-[45min]
-
 S: 186: Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
 	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
 	- Need to gather the entity reference from the doctype start, but only apply it when we see the close doctype.
@@ -53,6 +51,8 @@ S: 186: Inline external subset.  Should appear between start and end of document
 	- entity manager is totally not ready to deal with stuff.
 	I suggest adding a special entity type: the external subset.  Because it doesn't have a token.  Either that, or, better, fake it for the moment. Create a special entity with a pretty funky name no one would have.  one with a space in it which is impossible to express.Then the existing machinery can be used.
 		With this, we can probably used a queued stream handler, but turn off it's notification... or even leave it, come to think of it.  we'll just ignore it because it isn't the top.  And presumably all the machinery should work just fine for it.
+
+[105min]
 
 Later: Cleanup duplicate code in entity stream
 

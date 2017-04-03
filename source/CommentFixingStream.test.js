@@ -4,17 +4,17 @@
 
 /* eslint-env jasmine */
 
-const CommentFixer = require('./CommentFixer.js');
+const CommentFixingStream = require('./CommentFixingStream.js');
 const tokens = require('./XmlToken.js');
 
 const testUtils = require('./XmlTokenStream-util.test.js');
 const makeStrictExternalEntityStream = testUtils.makeStrictExternalEntityStream;
 
-describe('CommentFixer', () => {
+describe('CommentFixingStream', () => {
 
    function testTransformation(before, after, done) {
       const s = makeStrictExternalEntityStream('<?xml encoding="utf-8"?><!--' + before + '-->');
-      const cf = new CommentFixer();
+      const cf = new CommentFixingStream();
       const results = [];
       s.pipe(cf);
 
@@ -59,7 +59,7 @@ describe('CommentFixer', () => {
 
       it('passes all tokens through', (done) => {
          const s = makeStrictExternalEntityStream('<?xml encoding="utf-8"?> <!--test--><one>foo</one>');
-         const cf = new CommentFixer();
+         const cf = new CommentFixingStream();
          const results = [];
          s.pipe(cf);
 
