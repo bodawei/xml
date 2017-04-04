@@ -317,7 +317,7 @@ class XmlStringCursor {
          return;
       }
 
-      if (nextChar === '<' || nextChar === '&') {
+      if (nextChar === '<' || nextChar === '&' || nextChar === '%') {
          return TextChunk.TYPE.MARKUP;
       } else if (this._isSpace(this._source[this._offset.index])) {
          return TextChunk.TYPE.SPACE;

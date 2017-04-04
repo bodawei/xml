@@ -488,6 +488,12 @@ describe('XmlStringCursor', () => {
          expect(c.peekType()).toEqual(TYPE.MARKUP);
       });
 
+      it('returns MARKUP if there is a % next', () => {
+         const c = new XmlStringCursor('%foo>');
+
+         expect(c.peekType()).toEqual(TYPE.MARKUP);
+      });
+
       it('returns SPACE if that is what is next', () => {
          const c = new XmlStringCursor(' \t\n ');
 
