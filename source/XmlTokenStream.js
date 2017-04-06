@@ -206,35 +206,35 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _read() {
-      const type = this._cursor.peekType();
+      const pendingClose = this._peekEnveloper();
+      const pendingCloseText = pendingClose ? pendingClose.close : undefined;
+      const result = this._miscParser.parseUnknownInContent(this._cursor, pendingCloseText);
 
-      if (!type) {
+      if (!result.type) {
          this._pushToken(null);
          return;
       }
 
-      switch (type) {
+      switch (result.type) {
          case TextChunk.TYPE.MARKUP:
-            const markupToken = this._cursor.getMarkup();
-
-            switch (markupToken.text) {
+            switch (result.markup.text) {
                case '&':
-                  this._getReference(markupToken);
+                  this._getReference(result.markup);
                   break;
                case '<':
-                  this._getStartOrEmptyTag(markupToken);
+                  this._getStartOrEmptyTag(result.markup);
                   break;
                case '</':
-                  this._getEndTag(markupToken);
+                  this._getEndTag(result.markup);
                   break;
                case '<?':
-                  this._getProcessingInstruction(markupToken);
+                  this._getProcessingInstruction(result.markup);
                   break;
                case '<!':
-                  this._getBangItem(markupToken);
+                  this._getBangItem(result.markup);
                   break;
                case '<!--':
-                  this._getComment(markupToken);
+                  this._getComment(result.markup);
                   break;
             }
             break;
@@ -247,23 +247,11 @@ class XmlTokenStream extends stream.Readable {
             }
             break;
          case TextChunk.TYPE.CLOSE:
-            const pendingClose = this._peekEnveloper();
-            let close;
-
-            if (pendingClose) {
-               close = this._cursor.getClose();
-
-               if (close.text !== pendingClose.close) {
-                  this._cursor.unget(close);
-                  close = undefined;
-               } else {
-                  this._pushToken(new tokens.InternalSubsetEnd());
-                  this._closeDocType();
-                  this._popEnveloper();
-               }
-            }
-
-            if (!close) {
+            if (result.close) {
+               this._pushToken(new tokens.InternalSubsetEnd());
+               this._closeDocType();
+               this._popEnveloper();
+            } else {
                this._getContent();
             }
             break;

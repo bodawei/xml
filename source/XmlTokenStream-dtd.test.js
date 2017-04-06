@@ -111,7 +111,7 @@ describe('XmlTokenStream (dtd)', () => {
          expect(s.read().name).toEqual('testType');
       });
 
-      it('does not cause problems if the wrong kind of close is encountered', () => {
+      it('copes with an unexpected close by recognizing what it can and then reporting errors', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE testType [ <!ENTITY test "one"> ]]> ] >');
          ignoreToken(s, tokens.XmlDeclaration);
          ignoreToken(s, tokens.DocTypeStart);
@@ -119,12 +119,14 @@ describe('XmlTokenStream (dtd)', () => {
          ignoreToken(s, tokens.Space);
          ignoreToken(s, tokens.EntityDeclaration);
          ignoreToken(s, tokens.Space);
-         ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_TEXT);
+         ignoreToken(s, tokens.InternalSubsetEnd);
+         ignoreError(s, SyntaxError.ID.DOCTYPE_NO_CLOSE);
+         ignoreToken(s, tokens.DocTypeEnd);
          ignoreError(s, SyntaxError.ID.CHARDATA_INVALID_DOC_CONTEXT);
 
          const t = s.read();
          expect(t).toBeInstanceOf(tokens.CharData);
-         expect(t.text).toEqual(']]>');
+         expect(t.text).toEqual(']> ] >');
       });
 
       it('reports a syntax error if the actual type name is not a name', () => {

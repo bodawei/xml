@@ -32,65 +32,40 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
  3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
  3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
- 3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL:
+ 3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL: 4
+ ?/?? Sprint 34:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 4 (almost 7)
 
-M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
-	- Deal with all the duplciate code
 
-S: 186: Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
-	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
-	- Need to gather the entity reference from the doctype start, but only apply it when we see the close doctype.
-	This is entity stream.  The key is that we aren't already doing anything for this!
-	And this story is a very big S.
-	- could we start gathering "in parallel" on the doctype? WE might be able to
-		- we see the token, create a stream handler and say "go to town".
-		- on the end, we stick it onto the stack and let it finish.
-			- which it might do immeciately
-		- safer to start with going it like we "always" have done it.
-			== need a better definition for the handlers.
-	- entity manager is totally not ready to deal with stuff.
-	I suggest adding a special entity type: the external subset.  Because it doesn't have a token.  Either that, or, better, fake it for the moment. Create a special entity with a pretty funky name no one would have.  one with a space in it which is impossible to express.Then the existing machinery can be used.
-		With this, we can probably used a queued stream handler, but turn off it's notification... or even leave it, come to think of it.  we'll just ignore it because it isn't the top.  And presumably all the machinery should work just fine for it.
-
-[105min]
-
-Later: Cleanup duplicate code in entity stream
-
+Leftover:  191b
+- testing of chunks in ValueStrea
+- validation errors
+	- hardest part of this is separating out the validation code.
+- Adding to ExpandingEntityStream with tests
 
 Cleanup:
-- Finish separation
+- Finish separation (now have to do this in both TokenStream and Value Stream
+- Duplicate code in EntityStream
+- Duplicate code in ValueStreamTest
 Build
 - Walk through test reporting code.  make sure it is doing the right thing, and dumping to file.		
+Planning
+- Plan 191b
+- Plan 192!
+- Start to pare down the cruft around entities.
+- Think about replacing the quoted value with ValueStream.  Could we do that?  They're much the same, though VS is much bigger.
 
 -- next: 198
 =============================================
 CLEANUP
-- continue to pull out all parsing logic
-	- read
-		- parseNextItem() in misc
-			return
-				type:
-				peekedString  (nothing, markup, or close)
-			does
-				peekType
-				if markup gets string
-				if close gets close
-			all markup things must now get their own.
-- Provide async interface to cursor
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.  Mock the cursor?  how to test this?
 - remove entity manager from xmltokenstream
 - why are all the parsers classes? They have no state. could just be namespaces
-- parsing/validation/check
-	- Need to pull out validation into another file
+- We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
+- We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
+- general things
 	- add contexts to all errors
 	- remember to add validateText() for each as they come out (entity ndata value test is prototypical at this point)
-- Look into fragmenting validation parsing etc into groups by token type.
-- We are adding chunks to charrefs in entity values for the benefit of the string cursor. Arguably, though, we should do this for all.
-- need to add other error types
-	- generalize stuff in XmlError and XmlWarning.
-		- can be done, but I'm holding off until we see if everything really is generalizable to XmlProblem
-- cleaning up util would be nice
-- We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
+
 
 BUILD
 126: Enhancements to the reporting
@@ -154,10 +129,6 @@ PLAN PLAN PLAN 192 in mor detail.
 	- a cursor which deals with the internal entities
 	- it needs to cope with the result of PERefs in there too. they'll ahve been expanded, but tokens still there
 
-191: M: Bug: A Entity stream will insert arbitrary markup tokens into attributes
-	DEPENDS on cleanup with references
-	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.
-		This is used internally when entitystream is filling in an attribute
 
 
 --- Entity management [1L 2M] !!!  [39]
@@ -2034,3 +2005,47 @@ Starting this sprint a little heavy.  One of the S's is closer to a M. But then 
 Planning is still much too easy to overlook.
 (midway)
 Holy heck. I thought I was going to need to duplicate a bunch of the code for 197, but when I got there, I realized that through ducktyping, these things matched.
+
+Did:
+M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
+	- Deal with all the duplciate code
+
+S: 186: Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
+	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
+	- Need to gather the entity reference from the doctype start, but only apply it when we see the close doctype.
+	This is entity stream.  The key is that we aren't already doing anything for this!
+	And this story is a very big S.
+	- could we start gathering "in parallel" on the doctype? WE might be able to
+		- we see the token, create a stream handler and say "go to town".
+		- on the end, we stick it onto the stack and let it finish.
+			- which it might do immeciately
+		- safer to start with going it like we "always" have done it.
+			== need a better definition for the handlers.
+	- entity manager is totally not ready to deal with stuff.
+	I suggest adding a special entity type: the external subset.  Because it doesn't have a token.  Either that, or, better, fake it for the moment. Create a special entity with a pretty funky name no one would have.  one with a space in it which is impossible to express.Then the existing machinery can be used.
+		With this, we can probably used a queued stream handler, but turn off it's notification... or even leave it, come to think of it.  we'll just ignore it because it isn't the top.  And presumably all the machinery should work just fine for it.
+
+[105min]
+
+
+191: M: Bug: A Entity stream will insert arbitrary markup tokens into attributes
+	DEPENDS on cleanup with references
+	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.
+		This is used internally when entitystream is filling in an attribute
+
+
+Note, I did 191 in the last 1hr 45min of time, because I got done with 197 and 186 early, and I felt I had a good chance of getting 191 done.  In fact, we got all the functionality done, but still have some testing to do and need to integrate it into EntityExpandingStream, that latter is a bit of a wildcard.
+
+
+FINALLY!!  The separation is done.
+- continue to pull out all parsing logic
+	- read
+		- parseNextItem() in misc
+			return
+				type:
+				peekedString  (nothing, markup, or close)
+			does
+				peekType
+				if markup gets string
+				if close gets close
+			all markup things must now get their own.

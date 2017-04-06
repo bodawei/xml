@@ -25,6 +25,81 @@ const QUOTE_PIECE_TYPES = {
 class XmlTokenStreamMisc {
 
    /**********************************************************************\
+    parseUnknownInContent() is used to help identify the next thing in
+    the cursor, which can help an XmlStringParser figure out what to
+    parse next.
+
+    Parameters:
+    cursor: the cursor to read from
+    awaitingCloseText: the string to match if the next might be a close
+
+    RETURN
+    {
+       type: MARKUP|CLOSE|STRING|etc  undefined if there is nothing next
+       markup: If the type is markup, the markup chunk
+       close: if the type is CLOSE, the close chunk
+    }
+   \**********************************************************************/
+
+   parseUnknownInContent(cursor, awaitingCloseText) {
+      const result = {
+         type: cursor.peekType()
+      };
+
+      if (!result.type) {
+         return result;
+      }
+
+      switch (result.type) {
+         case TextChunk.TYPE.MARKUP:
+            result.markup = cursor.getMarkup();
+            break;
+         case TextChunk.TYPE.CLOSE:
+            if (awaitingCloseText) {
+               result.close = cursor.getMatch(awaitingCloseText);
+            }
+            break;
+      }
+
+      return result;
+   }
+
+   /**********************************************************************\
+    parseUnknownInValue() is used to help identify the next thing in
+    the cursor, which can help an ValueStream figure out what to
+    parse next.
+
+    Parameters:
+    cursor: the cursor to read from
+    awaitingCloseText: the string to match if the next might be a close
+
+    RETURN
+    {
+       type: MARKUP|CLOSE|STRING|etc  undefined if there is nothing next
+       refStart: The chunk for the start of a character or entity ref
+    }
+   \**********************************************************************/
+
+   parseUnknownInValue(cursor) {
+      const result = {
+         type: cursor.peekType()
+      };
+
+      if (!result.type) {
+         return result;
+      }
+
+      const nextChar = cursor.peekChar();
+
+      // always have a nextchar or we would have returned without a type
+      if (nextChar.text === '&' || nextChar.text === '%') {
+         result.refStart = cursor.getChar();
+      }
+
+      return result;
+   }
+
+   /**********************************************************************\
     parseContent() extracts CharData from the input.  Note that this will
     extract a ]]> found in that content and return it in the array of
     chunks, if that is found. Technically illegal, but we need to provide
