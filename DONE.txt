@@ -1,0 +1,1952 @@
+=============================================
+SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
+ 6/16 Sprint 1:  196story points. Assumed: 7/sprint = 28 sprints. ACTUAL: 8
+ 6/25 Sprint 2:  174story points. Avg: 8/sprint = 22 sprints. ACTUAL: 5
+ 7/06 Sprint 3:  171story points. Avg: 7/sprint = 25 sprints. ACTUAL: 10
+ 7/15 Sprint 4:  166sp [12XL 9M 19S]. Avg: 7/sprint = 24 sprints. ACTUAL: 7
+ 7/22 Sprint 5:  159sp [12XL 8M 15S]. Avg: 5/sprint = 32 sprints. ACTUAL: 6
+ 7/30 Sprint 6:  153sp [11XL 9M 16S]. Avg: 5/sprint = 31 sprints. ACTUAL: 5
+ 9/22 Sprint 7:  144sp [10XL 9M 18S]. Avg: 5/sprint = 29 sprints. ACTUAL: 6
+ 9/29 Sprint 8:  133sp [9XL 8M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
+10/1  Sprint 9:  120sp [8XL 7M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL: 3
+10/6  Sprint 10: 117sp [8XL 7M 16S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5
+10/13 Sprint 11: 117sp [8XL 6M 19S]. Avg: 5/sprint = 24 sprints. ACTUAL:  5
+10/16 Sprint 12: 121sp [7XL 10M 21S]. Avg: 5/sprint = 25 sprints. ACTUAL:  2
+10/19 Sprint 13: 113sp [7XL 8M 19S]. Avg: 5/sprint = 23 sprints. ACTUAL: 2
+10/24 Sprint 14: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 0
+10/27 Sprint 15: 106sp [7XL 8M 12S]. Avg: 5/sprint = 21 sprints. ACTUAL: 2
+11/1  Sprint 16: 127sp [7XL 13M 18S]. Avg: 5/sprint = 26 sprints. ACTUAL: 4
+11/8  Sprint 17: 134sp [7XL 14M 22S]. Avg: 5/sprint = 27 sprints. ACTUAL: 5
+11/8  Sprint 18: 130sp [7XL 13M 21S]. Avg: 5/sprint = 26 sprints. ACTUAL: 5
+11/14 Sprint 19: 120sp [7XL 12M 14S]. Avg: 5/sprint = 24 sprints. ACTUAL: 5+
+11/22 Sprint 20: 114sp [7XL 10M 14S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+11/25 Sprint 21: 110sp [7XL 9M 13S]. Avg: 5/sprint = 22 sprints. ACTUAL: 5+
+11/30 Sprint 22: 131sp [7XL 14M 19S]. Avg: 5/sprint = 27 sprints. ACTUAL: 6
+12/6  Sprint 23: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
+12/20 Sprint 24: 125sp [7XL 13M 16S]. Avg: 5/sprint = 25 sprints. ACTUAL: 4
+ 1/1  Sprint 25: 123sp [7XL 14M 11S]. Avg: 5/sprint = 25 sprints. ACTUAL: 6
+ 1/10 Sprint 26: 113sp [7XL 11M 10S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6
+ 1/26 Sprint 27: 111sp [7XL 11M 8S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+ 2/6  Sprint 28: 106sp [7XL 10M 6S]. Avg: 5/sprint = 22 sprints. ACTUAL: 3
+ 2/21 Sprint 29: 109sp [7XL 3L 7M 3S]. Avg: 5/sprint = 22 sprints. ACTUAL: 7
+ 3/19 Sprint 30: 102sp [7XL 3L 5M 1S]. Avg: 5/sprint = 21 sprints. ACTUAL: 5
+ 3/21 Sprint 31:  97sp [7XL 2L 5M 1S]. Avg: 5/sprint = 20 sprints. ACTUAL: 4
+ 3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
+ 3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL: 4 (almost 7)
+
+=============================================
+BLOG IDEAS
+- Blog: assert (can we write a good one)
+- Blog: comment about the problems of flexible time and measuring
+- Blog: writing a matcher
+- Blog build process?
+- Blog spec changes.
+- Blog: Asynchronous
+- SVCC: how to set up karma etc.
+- Art: What fun things can you do with an xml parser?
+
+
+---------------------------------------------------------------------------------------------------------------------------
+(original DESIGN PLAN)
+
+XMLStringToken
+	name
+	string
+	start column/row/byte-offset
+	end "
+	raw-string?  or flags?
+
+XMLStringCursor
+ readS: returns a series of characters up to EOF or a non-whitespace
+readToMarkup: reads characters until encountering < or &
+readMarkup: returns <, </ <!name(two or more tokens) <![name[ <?name (two or more tokens) <!-- /> > ]]> --> or &name;
+readWord: returns characters up to whitespace, or some markup, or =
+readQuotedString: returns everything in quotes. May return multiple tokens if reference in there
+readToken: will read any of the others here and return. May also just return a single character
+peekToken
+
+XMLStream: essentially produces a stream of xml chunks
+StreamNode
+	type
+	textTokens <-- include  reference to entity they came from. and may have reference to entityReference it came from
+	other (e.g. in case of elementstart)
+		name -> ref to textTokens
+		attributes
+			name = value  <-- references to textTokens			
+has a list of entities involved, can set a flag to expand or not expand entity refs. note that we kinda have to expand the parameter entities in the dtd or may not actually be able to parse it.
+getPiece: returns
+	elementStart, elementStartEnd
+		name, attributes, some kind of whitespace indicators
+	elementEnd
+	processingInstruction
+	cData
+	charData
+	comment
+	include
+	exclude
+	entityReference
+	entityTextDecl
+	doctype (includes dtd, it seems)
+		-- delivering this so it can be reconstructed is very hard
+	syntaxError
+xmlstream starts off: white space reading, and then readToMarkup. if this is strict, all that is ignored, but we will have a soft non-strict flag which is to allow whitespace (or other junk, even) before start 
+I think we can now map this to a SAX style api, or the like.
+
+layer 3
+does validation and wellformedness
+Maybe these produce the same api as 2, so that you can stack these. So really we have layer 3/passthrough and layer 3/not-passthrough
+These have the whole document in memory
+output of this is probably a normalized document?
+
+layer 4
+these are things like json converters, or the like
+
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+FINISHED SPRINTS
+SPRINT1:
+√ 1:S: Read start tag without attributes
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 2:S: Read end tag
+	syntax error if not a name or no name
+	syntax error if space before name
+	syntax error if > not found
+√ 4:S: Empty element
+√ 3:S: Syntax error if Start and end don't balance
+	(but will allow if it lax)
+√ 5:S: Read simple CharData
+	Needs string cursor support (read to markup)
+	Ignore newline issues
+(nice to have)
+√ 6:M: StringCursor cleanup
+	√ Make a constructor for xmlStringToken that will automatically add it to the this._tokens? and the closing offset
+	√ test getChar
+	x getChar should feed off of peekChar
+	√ test getMarkup for <? and <!-- and < for that matter.
+	√ test getWord on word terminators (space, ? and =)
+       Some test cleanup
+Cleanup:
+√ maybe merge start and end tag parsing?  They're almost the same
+√ More string cursor cleanup
+Build
+√ Fix build directory! In particular, get eslint a bit better organized
+
+SPRINT2:
+Summary: This sprint had two problems:
+	- #50 took much longer than expected. It was estimated as a M, and took closer to a L. And even then we generated a bunch of related cleanup tasks in the process.
+	- The build task wasn't particularly scoped. Have been treating build tasks as just informal thins.  But, we spent a bunch of time on looking at beginning to build the processing for the xml conformance suite, only to discover that (a) we didn't have the node docs (b) we hadn't looked at what was involved enough to realize we really should be using the xml skeleton documents to drive this, which requires the full xml processor, including DTD handling.  So, it really is unfortunately out of scope at this point.  Also, need a canonical outputter.
+The fact that #50 took so long isn't really a failure.  That happens sometimes.  However, the latter indicates we should be planning build tasks more formally.
+
+x 16:XL read attributes
+x 17:XL Read Content (char data)
+x 18:XL READ CDATA [2.7]
+√48:S: Read syntactically valid attribute, while ignoring references
+	[41]
+	nameS?=S?value  value can be "" or ''
+√ 49:S: Cope with basic syntax errors in attribute
+	< in value
+	name not a name	
+√ 50:M: Cope with major syntax errors in attribute
+	add a getToSpaceOrTerminator('>') in string cursor.
+	other
+		name="value"	<-- good
+		√ name=value	<-- syntax error. recovery: read a word as value (stops at space or >)
+		√ name "value"	<- syntax error = missing (we notice the quote)
+		name value	<- syntax error, read a word (stops at space or >)
+		name= >		<-- syntax error, no value
+		name name	<-- this will look like name value
+		name junk	<-- This will also look like name value,
+		(no-name) junk	<-- Here, we've gone quite astray. We can't proceed, as we get no name. Likely something is very very messed up. I'd suggest creating an invalid attribute name, e.g. -yaxt="<baz". The point is absorb all to the >, wherever that is, and   continue.
+					<elem name=foo <baz></baz>
+		<foo bar baz another="value">
+			Assume value after name:  we get bar/baz and another/value
+			Assume if no equal is a valueless name: bar/, baz/ another/value
+			Assume if no quote must be name: bar/, baz/, another/value
+			Assume everything after non-equal is value until >: bar/'bar another="value"'
+		<foo bar baz another=value>
+			same as above
+		<foo bar baz another value>
+			Assume value after name:  we get bar/baz and another/, value/
+			Assume if no equal is a valueless name: bar/, baz/ another/, value
+			Assume if no quote must be name: bar/, baz/, another/, value
+			Assume everything after non-equal is value until >: bar/'bar another value'
+		<foo bar "baz">
+		<foo bar>
+		<foo bar ?> > <-- that is, something in the value which can't be a name, or at least which could terminate the element
+		Given random content in the element
+			can try to force name/value
+				- don't know when to stop. if you have name a b c d>
+					that is name/a, b/c d/?  Fundamentally this puts you in the following category
+				- or aggressive name/"a b c d"
+					which is ok, but really messy
+			can try name/value or fall back to name only
+				this works fine until you get token which can't be a name, but we'll allow that. The issue is to notice the end of the element tag.  Actually, we're parsing words, so words have some characters they can't be.  So, we can get into a dead-end.
+
+		Note: we should probably stop parsing values if < found in them, and consider that the end of the element tag
+			We have a general problem. What if any of the Words we get start with a stop character? our parsing goes to hell.
+		element names, PI targets, attribute names. That is what if you have
+			<?/fooname ?>
+			This is the root of your problem.
+		So, getting a word should have the set of terminators. S or any one of /> or > or ?> or = or multiple
+			if we do this, we can still end up with no name, but this is an easier case.
+				in particular, in our attribute case, we can just get a bizarre sequence of names and values, but we'll never actually stop until we hit something that looks like a terminator. = or > or /> or " or '. = " and ' just introduce an attribute, so this just degenerates until we hit > or />.   but getWord needs to have a set of terminators in addition to space.
+			PI: ?>
+			attribute names: =, > and />  (and maybe ' and " if you want)  This seems to fix all these 
+			degenerate attribute value: > and />
+		REVISED 50
+			√ modify getWord to take an array of terminators
+			√ Modify existing uses
+				test getPI with <??> and <?/bogus?>   -- terminates with ?>
+				test getTag with </>, < ?/>	terminates with > or />
+			getAttribute tries the following
+				name="blah" OK
+				name=blah   OK (see below)
+				name "blah" assumes equal
+				name"blah"  assumes name is 'name"blah"' -- safer than trying to make it a value, since name"v would cause potentially whole doc to be read in as the value
+				name blah   this becomes two names (no real reason, except that html allows valueless attrs)
+				-- name terminates with = or /> or >
+				-- degenerate value terminates with /> or >
+
+				-- this will need some testing of the bad cases in xmldecl ultimately.
+				? If we detect a < in a value do we keep trying to get a value, or terminate the element start tag?
+					if the latter, the getToTerminator there needs to include < as a possible terminator too
+				in short: read a name, if we can get ="value" or =1wordvalue or ' "value"' all if good. Otherwise, we assume no value and just repeat. a name in this case is a space separated string that doesn't include /> or > or = in it
+				need to test this with the above also
+					<foo name /name >
+					<foo name random-xml-markup-content>
+			√ Document all this in the comments
+			√ Generate test cases around the bad contents
+			√ Fix: getToTerminator needs to return an object, with the token, and an indication of what terminator it found. that can be undefined.
+			√	- all callers need to be modified and tested
+			Fix handling of <
+				Recovery is ambiguous. do we terminate the tag (probably safer) or include this in the attribute
+					Probably good to have a flag
+CLEANUP:
+	- Yow. the get attributes code and the same for xmldecl are almost the same.Can we combine those while allowing for xmldecl to fail as needed?
+		- getxmldecl isn't dealing with failure to find terminator for value
+	- duplicate code in getAttributes
+	- getAttributes is getting ugly.
+10:M: prove links between things like version="1.1" and the underlying tokens.   <-- auto fixed as part of 50
+Done: ISSUE Think about error what if no equal in xmldecl? how would we recover lax-ly?
+
+SPRINT3
+√ 51:S:syntax error if ]]> found in char data
+	modify getToMarkup to stop at ]]>
+		_getContent() now may read multiple chunks and produce multiple tokens in lax mode
+√ 52:M: Read CDATA
+	√ syntactically correct
+	√ Deal with cases: EOF in middle, empty
+	√ allows spaces in the [ CDATA [ part   (note, can't have spaces in ]]>, or risk misunderstanding)
+		- remember we'll want to do the same for all the <![ x [ things. the others allow spaces.
+	√ For the moment this should just return a CDATA token, which is basically the same as a CHARDATA one.  We may want to do a two level thing when we get to entities though
+   √ check not getting the name!  or missing closing square bracket, √ or name isn't cdata'
+   √review
+   2
+√ 7:M: StringCursor basic cleanup
+	√ review testing of all routines (through getMarkup)
+		√ including doc them and test at non-start of string
+		√ - document that getX returns undefined or a token, but getToX always returns something.
+      √ - Add a test for each routine that makes sure they add the right tokens to the queue
+      √ - Deal with gettoTerminator, in particular watch for whitespace
+      √ - should check terminators for all routines for whitespace?
+47:M: Minor StringCursor features
+	√ getSpace should return text and origText
+	√ Resolve what to do with CR in terminator and match, and read to markup
+	√ remove the type returned on string tokens (not being used, and is unpredictable from the outside)
+	√ make one consistent stringcursortoken
+	√ Niticed that we could be returning a function with the length of terminators precalculated. would be more elegant
+	√ match and terminator things have check for whitespace in their params.  Could generalize
+	√ change imports in XmlStringCursor to be the actual types not TextChunk.Blah
+	√ rename the attribute sfrom name and value Token.  Remove token overall
+	3? 4?
+
+SPRINT 4
+=======
+BROKEN-DOWN: 27:XL Read in entities (see issues, below)
+	character entities
+	identify references in attributes and charData
+	provide infrastructure for recursive processing these.
+	Need the answer for how to feedback both the content and the fact that there was a reference here.
+		Suggest return the leaves, but each one may have a reference to a parent, which has a set of children.
+			Parent may not have all children at the point of first being returned. for streaming purposes.
+			Parent may, itself, have parent.
+		Thus, all xml tokens may have a parent property.  CHAR_REFERENCE, ENTITY_REFERENCE and CDATA may have children.
+		This may impact parts of stringCursor which need to become reference aware.
+		Should used this as an opportunity to define the structures of the different xmltoken and string token types.
+		Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+√ 72:S: Bug: if <start> foo </start>  We read the space after <start> as an S, not as content
+√ 62:S: Recognize a character entity in content
+	- add to readToMarkup
+	&#NNN;
+	- need a specialized cursor routine: To get a number.
+	Return a CHARREF token, which has text, and original format (hex or decimal)
+√ 63:S: Error cases with char entity lookup
+	√ &#xNNN;
+	√ & followed by space: syntax error but ok
+	√ & followed by non # is a regular reference. we don't support that yet. error
+	√ # followed by space
+	√ x followed by space
+	√ case of x
+	√ No name found (e.g. &#; or &;: syntax error. do nothing.
+	√ no ; found (e.g. NNN ends with a space)
+	√ hex digits on decimal reference
+	√ EOF cases
+√ 64:M: Restructure attributes
+	An array of xmltokens
+	token type ATTR_TEXT: Any non-ref text
+	2
+√ 65:S: Recognize char entities in attributes
+	add to array
+	√ couldBeName on attributes is wrong place
+	√ need to rework getReference to not assume it is creating a new toplevel token
+	√ - need to rework getAttributes structure so it deals with repeated pieces
+	This took 3 or 4.  And a bunch of offline work.  Planning was too superficial
+√ GetAttribute has gotten really really ugly
+√ 37:M:line numbers are off in coverage report.  Makes hard to identify what is wrong.
+	- Continue with isolation work that is going on in "Working on code coverage numbers".
+	- Goal is to get enough understanding of which part is failing that we can see if there's already a fix
+	- Keep a better log of what you are doing since this may take several sprints.
+	√ NS: Get plain browserify to work, without coverage.
+	√ Then do coverage on top of that
+		- Got this working simply by upgrading the npm modules. Convenient
+		- But upgrading the main repo causes lots of errors. Probably just a misconfig
+	- Got it all working. Turns out the big problems was that the tranformation order is important and I had things wrong.
+
+SPRINT 5
+========
+√ Need other 4 versions of xml 1.0
+√ need doc for writing reporters for karma. --> Read the Source, Luke.  No other help
+
+√ 66:S: Build table of entities. Contains the default ones
+	Entity manager: has the default 5
+		getentity(name)
+		returns a string cursor.
+√ 68:S Include in attributes
+	We then just read to &'s or end of input and replace values. We need to allow for arbitrary deep. only has TEXT and charRef and ENTITY_START
+√ 67:M: Recognize regular entity names.  Replace with an ENTITY-START, etc ENTITY-END
+	ENTITY-START has a flag whether entity manager has an entity
+	This replaces the current cursor... or at least pushes it. Wraps a new tokenstream around it and getNextToken reads from it.
+		if throws error, need to pass that error on.
+√ 14:S: How to check high plane unicode chars in javascript? // (char >= '\u010000' && char <= '\u0EFFFF');
+√ Must provide an XmlEntityManager instance why is the stream instantiating its own entity manager?
+√ 75:S: need a toEqualProps() handelr in tests for entities
+
+Note5  changing to timebox. So only put 3.5 hours into the sprint.  (not sure if this was for sprint 5 or sprint6)
+SPRINT 6
+========
+x19:XL Read doctype: Replaced with 79-81
+√ 79:S Read sunny day doctype with no external. has optional empty internal subset (that is legal)
+√ 81:S read an external id  (separate routine since we'll use this in other places)
+	√ system literal
+	√ read a public ID
+[1.5] + [0.75] + 1.25
+80:M Problematic doctype
+	√ ERROR: space before DOCTYPE
+	√ ERROR: Case of doctype
+	√ ERROR: pubid has illegal character
+	√ ERROR: Case of public or system
+	√ ERROR: No spaces between publid and system
+	√ ERROR: No spaces between SYSTEM and system literal
+	√ ERROR: No spaces between PUBLIC and publid 
+	√ ERROR: unknown word (not PUBLIC or SYSTEM)
+	√ ERROR: names not names <-- not sure how much I care. If it is bad, in most cases it will be flagged in DTD and actual usage.
+	√ ERROR: no quote on literal
+	√ ERROR: No name
+	√ ERROR: test with [ and >, with a word and no word
+		SYSTEM, public, any literal terminated with [ or " or >
+	√ Y: test publicid with no system with notation and doctype
+	√ X: test notation with no public or system and with no name
+	√ Z: Consider other error cases for notation.
+	√ ERROR: Any other doctype errors?
+		- space between name and following
+		- need not have space between external id and subset!
+		- intSubset is optional
+	√ ERROR: Crap in the declaration
+		In these last cases, suggest either ignoring until [ or > or attaching to token as junk.
+	√ - Cleanup retrieveExternalId
+		- Could consolidate the quote checking into a utility routine.
+	√ 78:S: Extract handlers into a common setup area, and figure out how to test them.
+
+SPRINT 7
+========
+x23:XL read entity declaration
+√ [70] EntityDecl ::= GEDecl | PEDecl
+√ [71] GEDecl ::= '<!ENTITY' S Name S EntityDef S? '>'
+√ [72] PEDecl ::= '<!ENTITY' S '%' S Name S PEDef S? '>'
+√ [73] EntityDef ::= EntityValue | (ExternalID NDataDecl?)
+√ [74] PEDef ::= EntityValue | ExternalID
+√ [76] NDataDecl ::= S 'NDATA' S Name
+√ [9] EntityValue ::= '"' ([^%&"] | PEReference | Reference)* '"'
+√	|  "'" ([^%&'] | PEReference | Reference)* "'"
+
+√ 81:S: Get entity with ExternalID (partial 71)
+√ 82:S: Parse a PEDecl (with %)
+-- 1.5hr
+√ 83:S: Parse an NDecl after the external id
+[1.5hr left]
+84:M: Parse an EntityValue  (could generalize _getQuotedAttributeValue for this)
+	- more testing for externalid?
+	- In particular, the lack of a system id on the externalid gums up the notation
+
+Note7: We actually took 4.5 hours for this sprint when it was scheduled for 3.5.  We didn't even completely finish, because we didn't do PEReferences or char refs.  In theory we should have dropped 84 from the sprint an shipped without.  However, as it stands, we had only half done 83... that is, there was a major case which didn't work. Our priorities were wrong here, in that this would have left us with a buggy project.  we really would have needed to roll back before 83 to ship the sprint.  This would have worked better if we'd actually put the time into fixing 83's feature rather than 84.  With that said, much of the work for 84 was actually testing to make sure 81 and 83 were ok.  As I was going through the sprint, I kept saying "yeah, I'm leaving some dirt bt will clean up later". This jeopardized the whole sprint and caused overtime.  This should not be allowed again.
+Paying for this with no cleanup and no build.  This is the bad, because those are important, but it keeps the time more honest.
+This is a disaster sprint
+Moral: You should never have a checkin which leaves you in a have to rollback state.
+
+Sprint 8
+========
+[45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'	[VC: Unique Element Type Declaration]
+[46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
+Mixed ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
+| '(' S? '#PCDATA' S? ')'	[VC: Proper Group/PE Nesting]
+[VC: No Duplicate Types]
+
+x20:XL Read element declaration
+√ 88:S: Basic !ELEMENT with name and ANY as value with errors
+	- no content spec
+	- no name
+	- bad name
+	- case of any
+√ 89:S: EMPTY or #PCDATA
+	- case of empty
+	- case of PCData 
+90:S: Mixed. note that name can be terminated by | as well as )
+	- names not names
+	- pcdata not first
+	- missing | (e.g. count when don't see it, report later)
+	- missing name. just count as well.
+[2hr]
+√ 12:M: need to do string substitution in reportSyntaxError (depends on above). If doing internationalization, need some raw details in error object so code can handle it.
+	- in the process, our messages are inconsistent, I think. sometimes putting missing values at the end, sometimes beginning, bad names need a consistent message, etc.
+
+Note8
+The big thing here is I went overschedule between 50 mintues and 80 (the difference is that I used the cleanup time to do this).  Again, this was because I was working on error messages.  I chose to do this despite the bad precedent just because I really wanted to get that task done. Could have shipped without it complete.... I just wanted it out of my hair.
+
+
+Sprint 9
+========
+x22:XL read attribute declaration
+x 76:S: for that matter, something that compares a stream of tokens without paying attention to the undrlying chunks would be good. -- right now I don't see why.
+40:S:git aliases?
+
+√ 91:S: Parse <ATTLIST foo bar CDATA #REQIRED>
+	missing name
+	missing name
+	names not names
+	missing type
+	missing default
+	no finding >
+√ 95:S: read a set of attribute definitions
+√ 92:S: recognize all base types: CDATA, ID< IDREF, IDREFS, ENTITY, ENTITIES, NMTIKEN, NMTOKENS, NOTATION (without values)
+	case wrong
+	unknown type
+[1hr 40]
+√93:S: read in notation values
+	√ no names
+	no name tokens
+	√ this includes a way to tell if a value is a valid nmtoken.  This is probably a modification to cursor
+	√ Suggest: internal datastructure puts the CDATA, etc including NOTATION and ENUMERATION as the type, and the array of values 
+is a separate thing
+	- beware that the ( should terminate many of the names.
+√ 39:M:Investigate getting node testing into build process
+	Add spec/support/jasmine.json to root, and then call node_modules/jasmine/bin/jasmine.js
+	NS: is there a grunt-jasmine which would call this for us so we don't have to call exec?
+	+: Can we move the spec definition into build?
+	+ Can we turn off the dots reporter and just echo that this ran with node in the report?
+
+
+Note9
+This was in some ways a bad sprint, in that the things committed to were not all delivered (and we had to add 95 in the middle, having overlooked this detail in the planning).  On the other hand, we didn't go over time in order to deliver a functioning thing, we just didn't deliver on all the functionality as hoped, so from another vantage point it was very successful.
+
+
+Sprint 10
+=========
+[52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
+[53] AttDef         ::= S Name S AttType S DefaultDecl
+[54] AttType        ::= StringType | TokenizedType | EnumeratedType
+[55] StringType     ::= 'CDATA'
+[56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY' | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
+[57] EnumeratedType ::= NotationType | Enumeration
+[58] NotationType   ::= 'NOTATION' S '(' S? Name (S? '|' S? Name)* S? ')'
+[59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
+[60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED' | (('#FIXED' S)? AttValue)
+[10]   	AttValue	   ::=   	'"' ([^<&"] | Reference)* '"' |  "'" ([^<&'] | Reference)* "'"
+√ 96:S Read enumeration
+√9:M: Include context for syntax errors (relevant string tokens)  (needs design). consider an error in a %foo;
+	I suggest _reportSyntaxError(code, params, chunkOfOccurrence, chunk|[array of tokens of starts of things to this point]
+		The last param would normally mark the start of the syntax element the problem occurred in, but in some cases (e.g. in references) we may be several entities deep)
+		note that undefined would mean eof.
+		This is a bit of a wildcard, as I haven't looked at every case yet.
+	Doing 9 now, because as we saw with the error cleanup, the longer we wait, the more work this is.
+√ - change the getList so you can say ( name name name ), and change error reporting.
+√ 94:S: read #IMPLIED, optional #Fixed and attValue
+	case wrong
+	unknown type
+	Assume we can just use the existing attribute value reader
+	We do not at this level actually parse the value to see if it matches the validity constraints
+98:L: Get windows build to work
+	√ Get stable build with reduced package.json on mac
+	√ Get agreed upon node.js version (note, versions from at lest 6.4 onward cause coverage to fail)
+	√ Get npm install to work without errors on windows
+	√ get grunt dev to work on windows
+	√ get grunt to work on windows
+	√ Get Edge to work
+	x Fix overwhelming build output in DOS shell (ehh.. do this when you fix the reporting in 60)
+	
+
+Note 10
+This was OK.  We went over schedule some.  here, again, #94 was much more complex than given credit for.  We might have been fine on time except we decied to change getListItems partway through this, which probably took up the 20 minutes we went over schedule.
+Again what killed 94 was all the errors that can happen.  And it is worse than it looks because the resulting code is rather nasty, and may not be sufficiently tested.
+I think the goal for 9, originally, was to convert everything to using the new errors. instead we just did a proof of concept with comments and some processing instructions. I'm ok with that because as I looked at the impact, I realized it really is asking for things to be reorganized (separating parsing from error checking). In this regard, we went grossly over schedule, because 94 was quite big.
+
+
+Sprint 11
+=========
+x:L Need to be able to read in the XML DOCTYPE with the DTD there and entities in order to do xmlconf
+√ S 99 add a TERMINATOR type to peekType in cursor
+	Needs to match ] or ]]>
+√ S 100 Token stream can push various "envelopers" (at this point, the DOCTYPE dtd and conditional sections onto a stack
+	nextToken should notice if type is a terminator and matches one of the envelopers, otherwise get content
+[1h 20min]
+√ S: 101 If matches end of DOCTYPE, switches to doctype finish
+	doctype then needs to store the token on the stack, and not allow others to flow out
+	Some provision for early cancel (what did I mean?)
+	- some whitespace in the internal dtd is showing up as a space token. but not all is. (probably all should show up. taht's easy)
+x S 102 Rework token delivery so routines do not know where they are delivering them
+	in general a token is created and pushed, and then routine adds chunks
+	for the doctype, the token is created, pushed in a special place waiting for the doctype and both it and the doctype get chunks
+√ S 104 Provide an end of doctype token, and internal subset, if any, appears between them
+[2.5 hr?]  Lost a block of time there.
+
+√ S 103 Report syntax error if declaration outside of the right context  (this might benefit from the work on 58!)
+	parser needs to know if doing an external dtd subset or not
+	set inDtd flag (make it a state, as we'll need it later)
+	report error if get a dtd type while not in dtd
+	report error if get a non dtd type while in a dtd
+√ 97:M: Fix jasmine tests in node so they run stuff from ./build/ too. (probably just playing with paths)
+√ Karma edge launcher is barfing on the mac. Suggest putting it on the path https://nodejs.org/api/modules.html
+√ cleanup: note bad things with getCharData in 100
+√ push and pop envelopers are slightly strange routines.
+√ is invalid context the right thing?
+? good to have something that checks a series of tokwns?
+√ a thing in tests which expects error in external subset
+
+Note11
+This sprint went OK.  I changed a design direction in the middle, REalized that rather than going with the plan of embedding the internal subset into the doctype token (and by implication the same process for the forthcoming conditional section), I could just make the doctype token a start and end thing with the internal subset between.  This killed 102 and added 104 and 105 (the latter was too big to fit in the sprint).
+I lost some time in the middle of the sprint, so am not 100% sure I did this in time, but I think so.
+Nicely, the cleanup process addressed all the egregious stuff encountered quickly, and so went back to doing some work to help continuing to extract  stuff out of XmlTokenStream. And the build process cleanup 97 went faster than I expected, allowing me to also fix a problem I'd inadvertantly introduced with the addition of karma-edge-launcher on the mac.
+
+
+Sprint 12
+=========
+x25:XL read external entities -- need for xmlconf
+
+√ S 107 Read the TextDecl.  Same as XmlDecl with a few minor changes
+	- standlone is not allowed
+	- version is optional
+[45min]
+M 109 Set up state for external entities both regular and extSubset, so they barf if no TextDecl (this will break some tests)
+	Transition is START -> EXTERNAL_CONTENT or START -> IN_DTD
+		Declaration tests will need to go through start, now
+			Errors should be modified so that if in START, we get a better error.
+		Comments, PI, etc should barf if in START
+	Realistically, we can do 13 and 106 in the process, since we will have to touch everything.
+		√ chardata (finish up)
+		√ char references ???
+		√ entity references
+		√CDATA
+		√comments
+		√ processing instructions
+		√ xmldecl
+		√ textdecl
+		√ start
+		√ empty
+		√ end
+		√ doctype
+		√ notation
+		√ entity
+		√ element
+		√ attlist
+√ 13:M: Do higher level syntax checking, e.g. xmldecl, misc, doctype etc. and barf if not there
+√ 106:S Finish out of context error reporting for: references, comments, element start, processing instruction, cdata, xmldecl
+
+Note 12
+Got good stuff done. To say, however, that 109 was an understatement would be an  understatement. It was slated for M, thus 3, thus on the order probably of 120 minutes. It took closer to 400. Almost two whole sprints.  It could have been subdivided, but when I realized it was going to go over, I basically said : well, let's get the whole thing done.
+
+
+Sprint 13
+=========
+√ S 110 Need to associate an externalId with all entities and pass on to the cursor so it can attach to all chunks
+	StringCursor can take a url (will create anExternalId structure) or a resolved externalId structure.
+		- can we wrap up the call to get pwd?
+	An externalId structure can be resolved if it is the root, or if .resolve(resolvedExtId)
+		Seems like parser should attach the externalId from the chunk that gave < to the parse structure
+		Final tokens need to have the resolved structure
+
+√ S 108 Add a pluggable entity retriever that must be passed in
+	√getEntity(sourceId, externalId, options{sync|async}):Promise<XmlTokenStream>
+		No, should be returning a cursor
+	√ Right now just fake delivers content using setTimeout
+	√ does babel provide us with a Promise, or do we need to build our own?
+		Yes, but drags in the universe
+		Ended up using one that MDN recommended
+			https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+			https://github.com/stefanpenner/es6-promise
+		This seems like so much overhead taht I'll need to consider another api eventually.
+	x Should the EntityLocation actually become the entity???
+		I don't think so.
+61:M: Build a reporter for coverage which just reports the final summaries
+		√ NS: Need documentation for coverage reporter plugins
+			see /Users/bodawei/active/é›»/xml/node_modules/istanbul/lib/report/index.js
+		√ Put a dummy reporter in that matches the api. Give it some config params in karma config
+			then emulate text.js and see if it can access the param and write "foo" to disk
+		√ Figure out how to abstract the summaries and report 'PhantomJS coverage: 100%"
+		√ Figure out how to configure this for jasmine in node
+		√ We can extract stuff from the json output from the coverage runner. See coverageSummary.js
+			- this is miles and miles easier than trying to write a reporter
+		√Modify coverage reporter so it
+			https://nodejs.org/api/fs.html#fs_fs_stat_path_callback
+			- Identifies node output as distinguished from browsers
+			- writes out a final summary file like:
+				100% coverage for Chrome 34, node 6.2.1, Safari 123
+			- returns a pass or fail indicator
+			- would be good if it was async.
+		√Find a way to run this from grunt
+			https://www.npmjs.com/package/grunt-run
+			https://www.npmjs.com/package/grunt-execute
+			https://github.com/sindresorhus/grunt-shell
+			We should invoke this, fail the build if it fails
+				http://gruntjs.com/api/grunt.fail
+			We should write summary line out
+		√- Build should fail if not 100%
+[1h50min]
+
+Note13
+------
+Disasterous sprint.  I finished 108, but as I was finishing it, realized I was going to have a problem with conditional code... using HTTP in node and XmlHttpRequest was going to mess up my code coverage numbers.  Then I realized I need to be able to load files in node, and you can't do that with XmlHttpRequest. And then began to also rethink what I'd been thinking about with the pluggable entity retriever.  Basically, I realized I needed to think about what I was trying to do more.  So, I spent the remainder of the sprint starting to think about this.  I also think that I really need to be thinking about what the async pattern is going to be.
+
+Sprint 14
+=========
+M 116 Flesh out EntityManager
+	_entityRetriever: Constructor
+	_map of EntityName -> {
+		entityLocation
+		data
+		cursor
+	}
+	_eager
+	get/setEntityRetriever()
+	get/setEager()
+	addEntity(name, data|location, internal|external)
+	addParameterEntity(name, data|location, internal|external)
+	hasEntity():{internal|external|default|undefined}
+	hasParameterEntity():{internal|external|undefined}
+	getEntity(name, callback) --> or proise
+	getParameterEntity(name, callback)
+   ----
+   remainder:
+         √ add should just take an entity declaration token
+            name
+            value
+            location
+            notationDataName
+      √ add an entityisUnparsed() function
+      √ add an parameterEntityIsUnparsed() function
+      √ get returns nothing if it is a notation token
+      √getRawEntity
+      √getRawParameterEntity
+
+Note14
+Did do good research for the build part, planning on getting a karma report the next time.
+Coding part didn't go so well. Put time into both tasks, finished neither.  The first one turned out to be too big, and involved adding async api's to the xml token stream.  Implemented a promise-based one as planned, but in practice it felt too weird.  So, decided to do a different api.  Wasn't sure I could finish in time and do next task, so started on it, but only gave it an hour, and got mostly through.  Both will be easy to get done in the next sprint.
+
+
+
+Sprint 15
+=========
+xS 114 Basic EntityHandler 
+	This is a wrapper around the main parser (should be async in style)
+		getNext():Promise
+		mightHaveMore():Boolean
+			- eof is an error
+	Main parser should stop filling in references in getRererence
+	When it encounters an entity reference, will retrieve it from the entity manager and fill it in
+		in terms of async, it may have to wait for that to be retrieved and parse.
+√ S 118 Get async behavior in XmlTokenStream
+√ S 119 Get exceptions handled in XmlTokenStream
+	pull out of reportError, and put in nextToken(), 
+	break nextToken into a private routine called by both nextToken and tokenLoop, and the public one which will throw an exception
+		While here, we might set the flag on a strict stream so it stops reporting anything after the first error i borh read and loop
+	73:S: If error is thrown, we can still call getNextToken.  Should block that.
+
+√ M 120 get Async behavior in EntityStream
+- First part, get the read and loop working without replacing tokens, including testing.
+	In particular, we can't do a passthrough because the lower stream may be generating events while waiting for the upper.  We actually have to queue those
+	We can't rely on read, instead of events.  If anyone else has events, it will consume our items first.
+	@@@ alternate to think about: We could produce a queueing stream, which reads events and provides a read interface.  That would simplify this logic I think, and that's easy to do.
+	So the solution here is to queue events from the stream, and then our read reads from there.
+	Whenever something queued, we start a loop
+√ 59:M: Build a reporter for karma which dumps testing results to a file
+
+
+Notes15
+- I had a file problem due to branch changes and lost my plan, which is maybe convenient, since my first S took 2 hours.  Rebuilding my plan, I of course see I won't get done what I thought I would in this sprint.  Again, I'm not doing enough planning, and forgetting the cost of testing.
+Got further, but still taking longer than I expected. The reset early on was more realistic.
+
+Sprint 16
+=========
+xM 120 get Async behavior in EntityStream
+NOTE: It would be prudent to do your detailed spec breakdown on 4.8 - 4.0 soon. I think you have all the details in your head now, but would be good to confirm. Does the SGML handbook explain the double expansion issue?
+
+√ S 129 add an end event in XmlStream
+	- So simple to do, except that it interacts with the errored case
+
+M 131 for references,
+	- notice a reference
+	- ask for it from entityManager
+	- if not there, error
+	- otherwise pushes a context
+	- sets up token stream there
+		handler queues tokens in that context
+		sets a flag when it is closed
+	- inner get next will just pull items off the queue, if any
+		- if queue empty, checks flag, and if so pops stream
+	√ place of error
+	√ error if no cursor/entity
+	√ sub-entity stream should be lax or not based on parent
+		--> should eventually become an entity stream, but that's a different story
+	√ Need to clean up cursorCiontexts in xml token stream
+		// should be easy once place of error is handled
+	+ review recent changes
+		√ new Context() would be nicer
+		√ remove hasNext and noNext
+		√ make sure you agree that you aren't going to be firing things out of line due to timings.
+		√ how do you know EntityStream._innerGetNext won't be called when no contexts?
+			PArent needs to promise never to call if ended
+			Need clearer definitions of contract. it is soupy at the moment.
+		√ move token test thingie into utils
+60:XL Improve build output
+	Goal: on a good build we don't need to show anything of the build
+		- But should include: style passed, which browsers and platform tested, and total coverage summaries
+		- The reports should be terse enough to even be able to be put in a commit checkin
+	On a failing build, should dump the whole grunt output (can then have verbose reports)
+		- non-100% coverage should actually be a failure.	
+	36:M:silence the build except for report
+		- quiet-grunt: Turns everything off in the whole node process.
+			- need to be able to override this for final report
+		- grunt-verbosity  : I'm too dumb to figure out how to make this work.
+
+Note16
+------
+Much better than the last few sprints.  129 took much longer than expected, but fortunately 131 went a wee bit faster. Dropped a couple tests off the end, but it's ok.
+
+Sprint 17
+=========
+√ Test out the case we just got in email
+√ S 137 Finish up the cleanup of doctype parsing. get the spacing dealt with and quoteless values. Merge in.
+√ S 130 Add CDATA normalization in Attributes (mainly, spaces all get converted into ' ')
+ [74min]
+
+M 132 Set up architecture for attribute behavior
+	√ for each attribute, scan if it has an entity start token
+		set up special context within the context
+			use ordinary token stream. Just be put the right stuff into it.
+		if so, add it to the context, each with a private place to stash tokens
+		when empty arrives on each, check if all others done.
+	√ clean up the wretched code.
+		√ Too much duplicate
+		√ switch is getting too long
+		√ pave way for recursive case
+   - do doctype parsing
+	- started
+	- big issue is dealing with all the externalID validation
+		- big issues remaining are:
+			- missing spaces
+			- quoteless values
+	- remove the entity retrieval code from XmlTokenStream (yay!)
+	- would be good to review the validation. 
+	- finish doctype extraction
+   - extract entity notationid extraction
+
+Note17
+------
+You'll note that the last item in the sprint was "set up architecture", which implied to me it was only the first part of dealing with attribute behavior.  However, there is no second part.  So, the boundary wasn't clear.
+I started work on this, and ended up with some lose ends. Significantly went over time, but not sure that's illegal, as the boundary wasn't clear.  Maybe I was done.
+Either way, this entity stuff is really killing me. This was originally an XL (10 units, sorta).  I've now been working on this for 5 sprints (25) and the end is nowhere near in sight.Estimate is at least 29.  Not quite sure how this got so long. I think I'm also getting tangled in too many lose ends.
+I'm also running into a lot of async issues, and since I'm expectingto switch over to node streams, that may change.
+I really need to do a more careful set of planning.
+
+Because I think the number of lose ends is getting too large, I'm going to suggest:
+- sprint 18 should just tackle technical debt
+- sprint 19 should pull in the node streams module
+- by sprint 20 we can be back to entity handling.  At least all of that is out of XmlTokenStream now.
+
+Sprint 18
+=========
+√ 58:S: Remove data prop on token, and make all token types more explicit
+	- Just get all the token types named and declared in XmlToken.
+		// looks like you can lose all the XmlToken.CONSTANT values
+		// XmlToken.CommentToken  could become XmlToken.Comment
+		// return value should be { Comment: Comment ... } etc
+		// Leave chunks
+		// XmlToken --> BaseXmlToken?
+105:S dtd declaration types must start including their chunks always.
+	- In essence, remove _pushTokenWrapper() and put its logic into _pushToken(). Add tests for each case if not already there.
+	- This will be expensive because of tests, but there aren't that many and many is already done.
+11:M: Provide some kind of internationalizable string catalog
+	msgs = { locale: { error: string, ...}, ... }. build script makes sure no leaking. pick which show
+	in the process, might be good to give these numeric codes.
+	======================
+	- Start with a properties file (can generate it by a script from existing code)  locale/base.properties  locale/code.properties
+		BRACKETITEM_XTRA_SPACE_BEFORE = Must not have space before opening "[".
+	- use 
+		√ add grunt task which reads in the properties files synchronously  (everything in locale)
+		√ passes to node-properties-parser  (or something like ini? What about trailing space etc?)
+			√ Distinguish base and code.
+		Checks:
+			√ no dup values: codes
+			√ no dup values: base
+			√ keys identical: base & code
+				report missing in code
+				report extra in code
+		√ Remove keys in base and code with base.value OBSOLETE
+		√ write to derived/{name}.{code|string}.json
+		# Trailing space allows unicode.
+		# Obsolete messages have the value OBSOLETE which excludes them from the .json files, but lets us keep track of things we can't change
+	√ XmlErrorToken.ERROR = keys from the stringBundle
+	√ XmlErrorToken.STRING = new StringBundle(SyntaxErrors);
+
+	√ write StringBundle(stringSet)
+		√ _stringset is {locale: { key: value }}
+		√ preferredLocales // if undefined uses browser or nothing
+
+		lookupString([locale | localeArray])
+			for each locale try to look up. if available, success, otherwise go to next. if none, return base locale
+		lookupSubstitutedString(params, [locale | localeArray])
+			// {0} ...
+		Nice to haves: 
+	√ Test SyntaxError
+	√ XmlError extends Error <-- can't really do this right now. NEed some funky in babel that we can't do yet. see 143
+S 142 move XmlErrorToken to XmlError and a subtype of Error
+
+Note18
+------
+This was, thankfully, a much better sprint.  A big part of this was a lot more planning up front. A LOT MORE. the planning took something like 2 hours.
+There are still some holes in what I got done. some of the build system stuff for 11 isn't quite as elaborate as I'd like, but I met the letter of the requirements.  It does feel good to get a lot of this stuff cleaned up. The chunk testing feels really fragile to me.  in particular, the reporting is really lousy.  If we want to do a big overhaul of this, we should change some of the testing so that the reporting is more specified about what is wrong or different.  I got 142 for free, which is nice (partly because I also let 11 expand a bit into that area).
+
+Sprint 19
+=========
+√ S 145 Switch code to id in SyntaxError
+	- code partially done is stashed.
+	- XmlError should take code, id and params
+	- load codes and populate error
+√ error tests
+√ Write SyntaxError tests
+√ S 146 remove public SyntaxError.ERROR
+	add SyntaxError.id('ID') which will return that ID or barf if it isn't there
+	SyntaxError constructor should barf if message is not found.
+	Then can replace ERROR
+√ M 144 All token creation must report chunks  (this is a generous M.  But, 146 is a tight S)
+	- Could then put a check in XmlToken constructor that says Chunks must not be undefined
+		- need some way to signal for, say, attributes, that they have none
+			- pass an empty array?
+			- SyntaxError.ATTRCHUNK, SyntaxError.ELEMENTVALCHUNK
+√ Add to StringBundle:
+	addLocale()	// nice to ahve
+	removeLocale() // nice to have
+- Can simplify _reportError and _assert. as _report() and _assert() for brevity. and can lose the context check in the former
+143 Add check to make sure error constants all being used
+	√- should read in all .js files (not .test.js) in source as raw strings.
+		note-glob glob("**/*.js", options, function (er, files) {  glob.sync
+	√- read in each base.js file. glob.sync("source/locale/**/base.properties) parse each.
+	√- for each key, ignore OBSOLETE, search through all files. if find a use, declare it ok
+	√- if find it not being used, report as an error
+	√ Turn in to a proper task.  Recognize source files (using this.filesSrc)
+		src:
+		baseProps: GLOB // http://gruntjs.com/api/grunt.file
+	x Also, check out this.async on the task
+
+Note19
+------
+Got all the stuff done with 1.5 hours to spare!
+Spent an hour looking into streams.  Very easy to do.  However, we get dramatic slow down. Must be investigated.
+
+Next sprint should be doing more technical debt.  And soon we need to investigate stream performance.
+
+Sprint 20
+=========
+
+√ S 117 parameterize some errors so XMLDECL_NO_ATTRIBUTES is an xml or text declaration
+	// Nice to have {0:key}  <-- Use the value not as a literal, but as something to look up within the set
+	// Nice to have Need an escape  {{} and {}} ?
+	StringBuffer first does a search for {0:key}, if it finds it does that lookup and replace
+		otherwise does the {0}
+	WHen done does the {{} and {}}
+√ S 54 :use xml decl version to change processing
+	Passes version to StringCursor
+	All entities are 1.0 unless they specify their own entity
+	Theoretically would be best to do this as soon as see it, but it isn't needed. can be in post parsing.
+		Fatal error if strange line endings in xmldecl!
+√ M 44 Enforce 1.0 vs 1.1 line ending changes
+	- this is not just in getS, but in all the routines which touch whitespace.
+	Might be worth doing a test to see if a regex to replace multiple at once would be better than one at a time.
+	√ isSpace
+	√ peekChar  <-- review test cases
+	√ getToTerminator
+	√ getSpace
+	√ test getName and anything else, to make sure they show up correctly
+
+44 is probably a short M.  But I'm not sure what the performance impact would be.  If get done, either investigate the stream performance problem or do the next task
+x S 151 Add sniffing of version and encoding to StringCursor -- not needed. Doing this in xmltokenstream is fine
+	Looks for <?xml, then extracts to ?>, can then find version and encoding and make a good guess.		
+
+Some cleanup:
+√ - Parsekind has a weird name  .  rename to EntityInfo
+√ * Need to resolve the 3 places this info comes in: in cursor, in the xml file, and options.
+√- why is it throwing an exception. that's bad
+√ - is1point1() is1point0(),
+√ - wrap the whole thing so there are no values being passed around. setVersion1dot1() setKindDocumentEntity(), isDocumentEntityKind()
+√ - Why isn't the entity location in it?
+
+Build just found more problems, so got nothing but investigation done.
+
+Note20
+------
+This sprint went pretty well.  Biggest note is that you started off with a sloppy EntityInfo, and it ended up costing the whole cleanup time to get it back to what it should have been.  Need to be more discipliend about api definitions.
+
+
+Sprint 21
+=========
+√ S 154 BUG getToTerminator isn't incrementing lines correctly in the offsets.
+	-- in code, where checks if we need to change lines, if so we can just then increment through and count.
+		- might be worth comparing with doing a regex which gives all the matches so we just count those
+√ S 153 Entityinfo tweaks:
+	- Should pass EntityLocation into EntityInfo - quick
+	- document that entityinfo lives in cursor - quick
+	- options override what is in cursor
+		- version: "1.1" or "1.0" or "1.1/2" Revision tied to version for keeping in synch
+		- overrides whatever is in cursor
+	- user set version/revision overrides what is in xmldecl - set some flags
+	[this took almost 80 mins!]
+[110]
+69:S: Rework PI and Comment to be arrays of content, just like attributes
+
+M 46 Improve handling of 1.0 vs. 1.1 control chars
+	In 1.0 ctrl 7F-9F were directly allowed, but in 1.1 only in char refs
+	In 1.0 most of x1-x1F were not allowed anywhere but in 1.1 they are as char refs
+	The cost of this is touching each and every character and seeing if they are any of the invalid chars
+	it also means checking those discouraged characters (this is a new class of error
+	- check expansion of char refs
+		- use charKind, which becomes a utility routine. (could also do on int
+		- report error
+		-- Oops, the invalidness is a well-formedness constraint, not syntax.  
+	- peekChar and getChar	- use charKind()
+		- This goes in validation. examines every parse result
+		- maybe just iterate through the parse result, and for each chunk check if there are bad, then accumulate and report error if so. This will be rare, but having a library routine will reduce testing.
+CLEANUP
+√ - entitydata in manager is weird
+√ - Maybe EntityInfo should be EntityMetaData (I'm serious)
+- It should probably also be read-only (except for version)
+√ - overrideDocument should be in the options to XmlTokenStream
+√ - Things like EntityInfo, EntityLocation, TextChunk and token  etc. perhaps belong in a common area? They underpin any cursor. util is the wrong name, and weird that EntityInfo is reaching up to EntityLocation
+√- readme, package and license could go into another subdirectory, too. moduleMetadata?  (may need build support)
+152 Build problems
+	- We are no longer getting code coverage info from node.  When did this break?  Why?
+		=> Found out when
+		=> can you identify the change?
+	- Test numbers are different in node and browser
+		=> investigate globs.
+	- Getting errors in html error reports (see web). evidently a clash between babel and browserify and istanbul
+		- when did this start?
+		=> find when (same as first?)
+	- Seems like a trazillion files are showing up in the verbose log when it goes to do node testing
+		- same as test numbers being different?
+		=> investigate globs
+
+Note21
+------
+Stopped a bit early.  Threw 69 into the mix just because I had extra time.  Ended up not doing arrays, as I can't see any reason, even with 70.  Nonetheless, I changed one thing that had been bugging me which was that comments and processing instructions were returning undefined rather than ''.
+
+I was "smart" in that I think early on in the sprint, or maybe just as I was starting, I broke 46 into two parts, the getting started and "if I could get to it".
+I got the committed parts of 46 done, at least at the cursor level.
+However, we need more thinking about all of this at the stream level, and even more at the cursor level for things like to terminator. 
+I'm suggesting that rather than adding a lot of syntax error checking for every getChar and so on, that we have a library routine which walks through parse results and barfs if any chunks have invalidChars markers.
+The point is, this is more complex than I can be doing on the fly, it does need some consideration in planning.
+Second, in the last sprint, I created EntityInfo, and this sprint smoothed it out (153). I'm happy with the result, but by the time I was done I will spend a bunch of the cleanup time finishing polishing the work.  I'm a bit bothered at how long this took to settle down.
+Also, when I was deciding I was done even though there was 20 mins left, and I picked 69, I realized I don't have a long store of small thigns to grab when time is available.  Some of that is because I have been eating up the technical debt bit, but it is still a concern.
+Summary
+- STILL need to be better at planning (this showed up both for 46 and how much reworking around 153)
+- Need to have some more small backlog items. This could be prototyping the cursor async behavior or something. Either way, more planning.
+- I note that the other remaining things in technical debt are also all saying "read the specs more".
+So, the planning session is going to be long, I think.
+Planning for the next sprint was huge, as expanded all technical debt.
+
+Sprint 22
+=========
+Went over time by 15 minutes.  HAd pulled in 163 since got done half an hour early.
+
+<names 1M>
+- What we have now is 1.1/* and 1.0/5
+- 1.0/1-4 has a very different production that is defined in vast tables in Appendix B
+√ M 161 try building these as regular expressions and checking each char, versus a manual check
+	- That is, we should use this as an opportunity to time this.
+	- Worth doing the suggestion from invalid chars, below, to extract and apply a regex across the whole thing
+	- The code here is pretty mechanical, but definitely involves jsperf!
+		So, some preliminary tests of this showed that a regex and getToTerminator solution for getWord was more than half the speed of the existing getWord!
+		But, it doesn't seem to be the fault of the regex.  It seems to be more getToTerminator.Which gets us back to wanting to do performance work on the cursor
+		That's out of scope for this sprint.
+		So:
+			- Take the existing getWord, and instead of relying on getToTerminator, replace the calls to isNameChar and isNameStart with a regex
+				- RegEx isn't slower.  Inlining probably a tiny bit faster, and cleaner.
+	- based on that, either switch to using regex, in which case convert the stuff in [84-89] into regex and use those
+				x or convert the stuff in 84-89 into functions.	
+<encoding>
+√ S 162 Accept encoding option (overrides all autodetection)
+     - sets specifiedEncoding
+√ S 164 stream
+    - has ignoreDocumentEncoding
+    - otherwise passes encoding
+          - which sets specifiedEncoding (ifgnored if already set)
+√ S 163 Autodetect
+     - read in 4 bytes compare with each (see standard)
+     - sets autodetected format
+
+148 Augment locale to be set up per type. e.g. SyntaxError-en-US.properties  or SyntaxError/en-US.properties
+	- Needed for errors in technical debt section
+	Loop through each directory and read in all properties. { SyntaxError: { base.properties: json }}, other: }
+	Each has a base.properties and code.properties. Barf if missing
+		- base and code must match keys exactly
+		- code must have no dup values
+		- remove OBSOLETE
+		- each locale must match base keys exactly
+	assemble all into one big happy json which writes out as SyntaxError.json
+??? Do we (can we?) change from all caps error codes in code? -- not important enough
+??? Can you switch to using ini file format?  Would be nice to say -- not important enough.
+		[XmlDecl]
+		NoAttributes = Blah blah
+
+
+Sprint 23
+=========
+<errata changes 1m>
+√ M 74 1.0/5 now doesn't allow any xml-* name as a PI target, but allows [Xx][Mm][Ll], but not xml (sections 2.3, 2.6, 3)
+	√ - names in general before 1.0/5 (and 1.1) are not allowed to start with xml. in 1.0/5 that is ok.
+	- need a checkName(name, metaData, v1r5Error, otherError); in util
+	==> Actually, it turns out any time we check couldBeName we should be checking for this.
+		==> Testing is getting to be a pain due to the refactoring.  Should refactor and then finish
+	- targets are now xml- only not xml
+	- element attribute names and elment names same
+	- all uses of name, including notations, entity, etc.
+	√ Pretty easy to do this, even per version.
+	√ Need to extract common code from warning and syntax error
+	√ expectXmlWarning and expectSyntaxError should be simplified
+	√ if (!name.couldBeName should be an assert, could do an _assertWarn()
+	√ versionIs1dot0 should be isVersion1dot0
+	√ better expectXmlWarning in XmlTokenStream given that we need to specify a version.
+	√ exposed a lot of types in dtd test that didn't need to before
+	√ indeed, everything related to this needs some refactoring
+[2h20]
+
+<encoding 2s>
+NOTE: Must support utf8 and utf16.  others are listed as having canonical names.  utf16 must have a bom.
+	?? Where is the error coming from if the byte order mark is not present?
+√ S 165 resolution
+	Autodetect:
+	A something that need conversion (utf16 etc)
+	B Something that looks no-conversion-needed/already-decoded  (ascii, unicode, etc)
+	C unknown
+	if specified is undefined and autodetect is C, barf
+	If specified is undefined and autodetect is B  done
+	if specified is undefined and autodetect is A then try to convert. barf if no lookup or fail
+	     specified could be a charset or name of a module which provides a conversion function
+	If specified is value and autoC, then match and convert, or not match and fail
+	If specified is value and autoB then if match done, if not match convert
+	If specified is value and autoA then convert
+	values for specified and autodetect: name (UTF-8 etc), x-noConversion, x-yaxt-xxxx-text-converter
+	Cursor exposes: dataConvertedFrom
+	     - only set once it has data enough to decide
+
+
+Notes23
+-------
+Sprint went reasonably well.  74 was a bit bigger than I realized at first, as when I started doing this I realized every name needed to be checked.
+I started on 166 but didn't get it done.  In particular need to plan out the testing work better, and need to think about coping with the types it seems there's no support for converting.
+
+
+Sprint 24
+=========
+xS 124 need to modify XmlTokenStream to pass in an EntityLocation to entity and DTD
+xM 125 Extract entity replacement from XmlTokenStream into EntityStream
+<misc 1s>
+√ S 157 errors that are showing the chain of locations should be including the entity locations
+	- stash the entityinfo with each frame, and then add that to the info in the error.
+<WFC 2s>
+√ S 173 Create a WellFormednessConstraintError.  Superclass of SyntaxError, as all SyntaxErrors are WellFormednessErrors.
+	In our current syntax errors, at last the misbalanced elements must be a WFCError
+	- Some of these require more knowledge in the stream parser than I'm happy with.
+	Need build support
+√ S 174 Need to sweep over existing errors and see if any look like errors
+
+[85 - 2hr 5min]
++ at least half an hour of planning
+
+S 166 Actually do the convert
+	preserves bom
+	skips over it
+	Conversion always starts from current point
+	     - before read anything
+	     - by stream as soon as it finds an encoding
+	there is a streaming option for use with streaming cursors. for string we can do all
+	use iconv-lite. Can check if an encoding is there
+	√ Install iconv-lite: need both in build and in shipping!
+		- build changes
+	√ Check if conversion allowed, if not throw an error
+	√ do the convert
+	√ fix existing tests (they will have to be failing, because we lack the conversions)
+	√ remove currentEncoding
+	x test that an auto-detected utf8 string is converted -- no such detection
+	√ test that an auto-detected utf8bom string is converted
+	√ test that an auto-detected utf16be string is converted
+	√ test that an auto-detected utf16BEbom string is converted
+	√ test that an auto-detected utf16le string is converted
+	√ test that an auto-detected utf16LEbom string is converted
+	√ test other autodetections fail because iconvlite is dumb.
+	- test that a specified value passed in takes precedence over autodetection?
+		√ autodetect discovers UTF16, but specified is unencoded.
+			- we'll do no conversion, and get gibberish
+**		√ - autodetect discovers UTF16, but specified is utf8.
+			- we'll try to convert to utf8 and get gibberish
+**		√- autodetect discovers unencoded, but specified is utf16 (and it is not)
+			- we'll get an error in conversion
+		√ - autodetect discovers unencoded, but specified is utf8 (and it is)
+			- we'll decode
+	- test from document
+		√- autodetect says is unencoded
+			- doc says utf8
+			- decodes to utf8
+		√- autodetect says is unencoded, pass in is unencoded
+			- doc says utf8, but is ignored because of pass in
+			- we get some gibberish
+		?- autodetect says utf16, no specified
+			- doc says utf8
+			- we have a conflict. we've already done a conversion which worked this far.
+√ test reporter should report per browser
+√ test reporter should complain on duplicate test names!
+√ test reporter should dump all tests plus summary
+
+Notes24
+-------
+This sprint went pretty well, though the testing of the 166 took much longer than I expected.  The first part got done quickly, and I thought "well, I can definitely get the conversion done in 2 hours".  Except that I basiclaly didn't.  Overshot time a bit.  Still not wild about how we deal with some cases.
+
+Sprint 25
+=========
+This sprint is starting off in an unusual state in that the two big tasks here involve a bunch of research to determine if we can even procede down those paths. We should expect to be stopping once or twice to make sure the game is still going.
+
+√ M 175 Collapse errors together into XmlError. 
+	- type is SyntaxError, Warning, WellFormednessError etc
+	- have a flag for non-fatal?
+	- XmlError.ID.SYNTAX_ERROR etc.
+	- XmlError.ID becomes XmlError.SYNTAX_ERROR
+	- add XmlError.installTypeInfo(TYPE, stringBundle, codes);
+	- add XmlError.preferredLocale(localeName);
+	- XmlError.TYPE.SYNTAX_ERROR:StringBundle
+	- This requires
+		- modifying the error reporting routines
+		- the error throwing in stream, needs to explicitly check for warning
+		- the isSyntaxError test, too
+	- We're doing a lot of work at startup that is not needed for actual work.
+		- could we auto-generate the error classes with the data in place?
+	- Or maybe just keep the different errors as thin wrappers on XmlError?
+		- the problem with this is all the duplicate code. But we could be living off this.constructor and doing this more dynamically.
+	=== PLAN
+		- See if you can generalize the XmlError code via this.constructor so you can have the code in one place
+		- if so, then all the subclasses are trivial, and could be autogenerated so we don't have to build their id tables at startup.
+			ErrorType.ID = { built data }
+			ErrorType.STRING:StringBundle = new StringBundle({ built-data })
+			ErrorType.CODE = { built data }
+			XmlError if preferredLocale then set on error at construction time
+		- concern: higher level errors won't have place or context
+			This suggests, really, having a type hierarchy. XmlError, XmlParseError
+				super(type, id, params, place, contextOffset, entityLocation);
+			We'll burn t hat bridge when we get there.  Easy enough to do
+	=== New plan
+		√ Refactor all logic into XmlError
+
+Overall proposal:
+Pull all character checking out of cursor, and put in validators
+	- cost of doing these scans is unknown.
+	- 1 call getWord 1million times as now
+	- 2 call it 1million times with no character flagging
+	- 3 call it 1million times and then do validation via regex in caller
+	=> If cost of 3 and 1 is the same, this is probably better given our plan to turn this off, and makes cursor smarter.
+		- check cost of reworked getWord
+		-- It's notably faster to be doing this in the validate, rather than in the cursor.
+	=> if 1 and 3 are same, then we should move invalid and discouraged characters to regex's as well and in validation. Then we just need the generic parsing solution (167).  This is at least a M since we need to build the error reporting.
+	=> May result in getWord being reworked (see 170)
+----------------
+// 100,000 times
+---> With full cursor work
+LOG: 5122
+LOG: 5293
+LOG: 4834
+LOG: 5327
+LOG: 5383
+LOG: 5073
+LOG: 5405
+---
+With check removed in cursor
+LOG: 4493
+LOG: 4626
+LOG: 4620
+=========
+With check removed in cursor and big regex in XmlTokenSteram
+LOG: 4754
+LOG: 4655
+LOG: 4644
+LOG: 4587
+LOG: 4548
+LOG: 4564
+LOG: 4413
+--- Conclusion
+
+x S 171 new error type: Warning  extends XmlError
+x M 170 getWord
+	Try out a different routine which returns  the most specific value
+		nameStart, nameChar, Char, discouragedChar, invalidChar
+	use this to set flags
+	- alternately, extract to terminator, then apply several regex
+x S 168 getToTerminator should check with a regex if there is any bad char
+	if so, then go across the whole thing in more detail to collect the bad indexes
+x S 169 getMatch and getToTerminator add in comments that this doesn't check for invalid chars. Do the right thing
+	--- these no longer check for any kind of chars
+
+[2.25hr]
+M 176 - Pull all character checking out of cursor, and put in validators
+	√ ?Could we move the name and nametoken to being regular expressions over the whole name rather than character by character?
+	- biggest impact is going to be the testing of StringCursor.
+	- We probably need to move a bunch of those tests to some prototypical place in the testing in, say, dtd testing.
+	- remove checks in cursor.
+
+- next is xmldecl!
+	√- separate the parsing from the validation from the token building in xmltokenstream
+	√ - Comment -misc for the xml decl (in particular, return structure)
+	√- think about merging getPI and parsing the xml token so it does not take two calls.
+- Then space and comment validation should be extracted
+- coverage reporter should be able to exclude some files: Have crude.
+
+Notes25
+-------
+Sprint went pretty well. the wildcards with respect to the unknown things turned out to happen quickly.
+And in the process of doing the pulling of character checking out of cursor, we really paved the way for getting rid of a lot of other things, so 168-170 just vanished in this process, nicely. Those don't really count, but they'd make it look like this sprint went exceedingly well.
+
+
+Sprint 26
+=========
+√ 177 S Note sure need WordChunk
+√ S getToTerminator and getWord have a lot of commonality. Could combine. Probably clobber _makeTerminatorCheckFunction in the process
+	- it only needs to return the end index.
+
+The following actually needs planning:
+
+M 167 report bad chars: suggest having routine which goes over parsing result recursively and reports generically
+	Error should say something like "at position X the character "0x0" was found.
+	- 1.1
+		only via escapes: [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+		--> For each return type
+			check for 0x00 anywhere
+			check for any of the above in a non char ref
+	1.0/5
+		not even via escapes. only ok: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+		- check for any of the non-above in literals
+		- check for any of the non-above in charrefs
+
+
+S 172 add discouraged characters to tokens and error reporting
+	1.1
+[#x1-#x8], [#xB-#xC], [#xE-#x1F], [#x7F-#x84], [#x86-#x9F],
+ [#xFDD0-#xFDDF],  <--- note endchange
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.1/1 & 1.0/3 /4  (missing a bunch of x's)
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF],
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/5
+[#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDEF],  <-- fixed via errata
+[#x1FFFE-#x1FFFF], [#x2FFFE-#x2FFFF], [#x3FFFE-#x3FFFF],
+[#x4FFFE-#x4FFFF], [#x5FFFE-#x5FFFF], [#x6FFFE-#x6FFFF],
+[#x7FFFE-#x7FFFF], [#x8FFFE-#x8FFFF], [#x9FFFE-#x9FFFF],
+[#xAFFFE-#xAFFFF], [#xBFFFE-#xBFFFF], [#xCFFFE-#xCFFFF],
+[#xDFFFE-#xDFFFF], [#xEFFFE-#xEFFFF], [#xFFFFE-#xFFFFF],
+[#x10FFFE-#x10FFFF].
+
+1.0/2 and /1 has none
+		- check for these in literals or charrefs
+			- report warning
+
+√ Comments:
+	- just commentChunk
+
+PI
+√	targetChunk
+√	instructionChunk
+
+xml decl
+	params
+√		nameChunk
+√		valueChunk
+
+doctype
+√	nameChunk
+√	(external id values)
+
+√ notation
+	nameChunk
+	externalId
+√ entity
+	nameChunk
+	valueChunk
+	externalId
+	nDataName
+x element
+	elenentName
+	list (array)
+
+attrList
+	elementNameChunk
+	attributes
+		name
+		type
+		default *
+			#fixed 
+		value
+√ externalid
+	publicId
+		literalChunk
+	systemId
+		literalChunk
+	√ - fail on duplicate tests
+
+
+Notes26
+-------
+This was a very distracted sprint between job hunting and hazel arrival.  Nonetheless, we did some good cleanup with the tweaks to cursor embodied in 177, and laid the groundwork for dealing with illegal and discouraged characters.  This is only checking in the routines where we have separated validation, and ignores some of the entity and attribute declaration value stuff as those are scheduled to be revisited and are a bit of a mess.
+An open question I left is what kinds of testing should be being done for the full range of discouraged and illegal characters. Should every character be being tested?
+
+Sprint 27
+=========
+M 158 Make XmlTokenStream a node stream
+	- getNext
+		calls read and throws error if it is an error token
+	- read
+	- on data
+	- on error
+	all of these return both tokens and errors, unless we set syntaxErrorAsError
+	- easy to substitute in and have XmlTokenStream call push and for the _read to call _innerGetNext?
+		our getNext() should call read() and then throw an exception if appropriate.
+	- semantics around ending need attention (that's most the work). Modify tests since we can't use fake timeout
+	- ending
+		if error, then we set ended
+		if erorred on getNext or looping
+			errored set in getNext if an error is found
+		- in short, in our push routine, if we are strict, and we find an error, we push undefined/null
+		and the puzzling thing is that in innnerGetNext, we say if we don't get a token, then we must be done.
+			This works for the moment, but won't work for async.
+	Work
+		- Set up mapping or a separate file to load readable-stream in browser and stream in node
+		- subtype XmlTokenStream from ReadableStream
+		- _innerNext() becomes _read()
+			- if cursor says there is nothing, we push null
+			- I don't understand our while loop here.
+		- pushToken() should just call push()
+			- getting and tokenLoop should be removed
+			- needs to queue the token if the read buffer is full and then push the next time called
+			- if strict mode, then pushing an error should then push undefined/null
+		- getNext() moves back into XmlTokenStream
+			- it does a read()
+			- throws exception if there is an error
+	--
+√ Basic support present.  However, not sure we actually end after seeing an error.  Need to test this
+			- if strict mode, then pushing an error should then push undefined/null
+	-- eh: delivers an "end" event after "error" in a strict stream
+√ S 159 Do simple transforming stream which fixes comments (makes sure our stream works)
+	- should just need a _transform() which passes all through except comments which it modifies and then pushes through
+√ S 178 Cursor should note presence of BOM and xmltokenstream should barf if not present
+	- sets a flag, which tokenstream validates
+√ Cleanup: more extraction
+Build: Finish up moving to the json reporter for our reporting.
+	Get test numbers (skipped and failures)
+	100%: 1002/1002 Tests on MacOS X 123.45: Chrome 55.0.2883/ ...
+
+Notes27
+-------
+None
+
+Spring 28
+=========
+M 179 Consider doing a thorough test of the invalid and discouraged characters.
+	- Turn the comment testing into the prototypical case (entity NDATA value)
+	- make a whole separate set of tests just for this
+		- revisit error text
+		- check explicitly one character invalid, and multiple
+		- check all the characters in 1.1 and 1.0
+			Maybe just have a comment with all the characters in it, and get the right indices
+				- try with all 7 versions
+		- test all the discouraged characters in all 5 versions
+M 160 Make XmlEntityStream a transforming stream
+	here, _transform() will respond to entityStart and element start and syntax error.
+		Note that this may be async since we have a callback function to call to notify of finishing
+		I dont think we actually have any async working yet, so we just need existing tests to pass.
+- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+- Why do we need to call getNext multiple times is ugly. can we stop that?
+
+√ M 179 Consider doing a thorough test of the invalid and discouraged characters.
+	√- Turn the comment testing into the prototypical case (entity NDATA value)
+	- make a whole separate set of tests just for this
+		√- revisit error text
+		√- check explicitly one character invalid, and multiple
+		x - do the prototypical case with both error and discouraged text
+
+		- check all the characters in 1.1/1,2 and 1.0/1-5
+			do this in several chunks.  The invalid indexes are the most important.
+				√The first 256 chars
+				then selected chunks thereafter.
+			
+M 160 Make XmlEntityStream a transforming stream
+	here, _transform() will respond to entityStart and element start and syntax error.
+		Note that this may be async since we have a callback function to call to notify of finishing
+		I dont think we actually have any async working yet, so we just need existing tests to pass.
+	- Chunks in attribute entities seem wrong (why is clearChunks() in testing needed?)
+	- Why do we need to call getNext multiple times is ugly. can we stop that?
+	----
+	Question: What happens when an error happens in the first stream?
+	Question: what does transform() get when underlying stream ends? I assume it automatically calls flush and ends. Presumably waiting for the callback call first.
+
+	- on start: create a BaseStreamHandler
+	- on each transform,
+		baseStreamHandler.add(data, callback)
+	- StreamHandler
+		StreamHandler(notifiee)	<-- notifies when queued, errors or finished
+		start()	<-- need to keep processing from starting in constructor
+		getQueued()
+		getErrors()
+		isFinished()
+		[doCleanup()]
+		
+		+ BaseStreamHandler
+			gets .add() as above
+			notifies on each add
+			has a doCleanup()
+		+ EntityStreamHandler
+			it is handed the start token, and creates its own steram
+			gets .on('error", "data" and "finish"
+			notifies on each new data
+			this gets passed 
+		+ ElementStreamHandler
+			handed the start token and does its own thing
+			creates multiple streams
+				each is an entityStreamHandler, I think.
+			doesn't notify until all are done
+			pushes start into queue
+	- XmlEntityHandler
+		gets a notification from a streamhandler
+			if it is the current/topmost handler, then process
+			otherwise ignore
+
+		standardHandling(token)  (this is innerGetNext)
+			for the element in the queue, do the following
+ 				if error
+					modify and push
+				if start
+					create context
+					push
+				if elementStart
+					create context
+				else push
+			if this handler is finished, then pop the stack and call doCleanup if present
+			otherwise, call doCleanup() if present (no need to call when we added a frame).  (only baseStreamHandler has cleanup)
+
+	---
+	Process
+		√- resolve question about errors
+		√- Rebuild basic XmlEntityStream transform with BaseStreamHandler
+			√- transform() calls .add()
+			√- BaseStreamHandler does a callback
+				for now, we just pass through. don't check errors or starts
+			√- callback checks with current stack (use shift and unshift, therefore we can always check at [0])
+			√- how does end/close/finish work?
+			√- does error in source work?  (e.g. strict)
+		- Build EntityStreamHandler
+			√- add case in standard handler.
+			√- deal with errors
+		- Build ElementStreamHandler
+			- does nothing. just passthrough.
+			- AttributeStreamHandler  : probably related to EntityStreamHandler
+				notifies when sub streams done
+		- add hierarchical error handling
+		- mix errors and data in queues so we can tell when the error occurred
+		-- code cleanup
+		- test close in with the case where the entitystreamhandler ends after the base would be done
+		--> We need to be firing close
+		-- if source stream is strict, then the substreams we create should be strict
+		-- test read() interface
+		- should be emitting errors based on strictness
+	<I thought this would be a small sized M, but now think it is a big one. A LOT of code reshuffling>
+	< Note the attempt to make the main body of code simpler by pushing things to handlers.  And ultimately keep the interactions simpler and semantics simpler> 
+
+Notes28
+-------
+This sprint started out OK and then went to beyond disaster.
+179, I thought was closer to an S than a M, but it took close to 2 hours.  That was OK, becauseI didn't think 160 would actually take that long (though, I figured it was probably a long M and wouldn't get done).  however, 160 turned out to be much, much bigger than I was estimating.  It probably took the equivalent of 2-3 sprints to do.  In fact, after the time for 28 ended, I said "well, f'it, I have to do this anyway, lets get it done. That coupled with a couple times forgetting to turn on/off the punchin/out timer meant I didn't get an accurate time.
+The post-mortem for this is that 179 took longer than I expected because the tedium of writing the tests are more than I expected.  That's within the realm of "ok".  However, 160 is squarely because I was just casually saying "yeah, the logic will be the same".
+While broadly that is true, there was more change than I expected, and even once I had done that I discovered it had been left off in an incomplete state.  Some tests were turned off (I forget which) and this didn't support entities in side of entities in element attributes.  I ended up getting a version kinda working, but the logic was horrible and twisted.  I then essentially re-wrote it with cleaner abstractions.
+With this done, however, it finally gets me back to dealing with entities for real.  Which means the next planning session is going to be really important.
+
+Sprint 29
+=========
+√ 180: S: Turn internal subset into a separate start/end token within document type
+	T: Rework
+	CHECK
+
+√ 181: M Change entity ref start/end to just entityref. Let entitystream turn into start/end
+	T: Rework
+
+√ 182 M: Entity Stream identifies entity declarations and adds to entity manager
+	√ - Change entity stream to create it's own entity manager unless one passed in in options
+		- this will break a lot of tests
+	- Identify entity declarations and add them.
+		- should not need the type parameter on the add routines <-- yes I do, more or less.
+		- honestly, should not even need the two adds, as the token should be self describing (though, we don't even notice param entities yet)
+	√ creating element declaration tokens in EntityManager test and EntityStream tests is causing test runner to fail.  They're also long and ungainly.  Would be good to do a routine to create them. both shorter, AND will allow us to paramaterize as we improve.
+	√ - turn on one group at a time. Start with XmlEntityManager
+
+√ - the internal and external subsets are not well recognized in entity stream
+√ - we commented out a failing case in entity stream. Can we force coverage of that
+
+240/210 --> however, we decided to deal with the commented out thing,w hich wasn't strictly necessary.
+
+Notes29
+-------
+This sprint went pretty well. Ended up going over because I decided to write a test for a case which can't happen, but I didn't want
+to remove the code in question.
+For build work, I turned off html reporting on the browser to get rid of the error. A hack, but we still get coverage reports from node, and I really don't like having the errors there.This took 1 minute, but I didn't do more build because cleanup went so badly over schedule.
+Cleanup ended up going over by a factor of 5.  I just really really wanted to get the element stuff done, which I got done.
+This is good, as the split up code is probably two or three sprints from being done.
+We really really need to go back over the validation and parsing code with a finer toothed comb, make it consistent etc, and move towards breaking XmlTokenStream into three different ones.
+But we're almost blocking the main task, so we need to get references pulled out. After that, I think we need to prioritize getting the cursor made async.  That's almost a main dev task, as ultimately that's going to require test reworking for the cursor. But we can do that in stages, first get async calls in, move xmltokenstream over, and then we can eol the tested interface.
+
+Sprint 30
+=========
+Cleanup:
+- separate out char reference and reference
+
+187: L: Do a common parser for entity values, attribute decls and attributes
+	T: Rework
+	DEPENDS on cleanup of references
+	- finds references.
+	- flag to identify whether to recognize PE refs (off for attributes and attlist it seems)
+	- do we actually want to identify GRefs in entity values?  I don't think so.
+		NO.  They will be parsed as entity is read in
+	- has to barf for the < in attributes and attrdecl?
+		NO: We were doing this. The reason was to avoid missing quotes leading to LONG attributes
+			However, this doesn't absolutely avoid this (e.g. <warAndPeace author="herman melville> .... )
+			We don't try to avoid runon comments, CDATA etc.
+			To be sure, if we want to deal with these by chunking them, we would need
+				to pull attributes out of the element token, which is quite disruptive.
+				But it would be as doable from an external interface standpoint.
+	---
+	parseQuotedValue(cursor, recognizeGRef, recognizePERef, reject<)
+	Build
+	√ add your own totals to make sure they are the same
+	√ totals and percents should come from it.
+	√ - Do not actually need to be counting per test, as are in the summary,
+		as we are accumulating the same values in the reporter
+		duh. summary IS our counting
+	√- Where are the disconnected and error/failure in the overall summary coming from
+		- No idea what error versus failed does.
+	√ duplicate test name is causing build to fail without much info why
+		I think because counts aren't matching somewhere.		
+	√ Format result better. Sort by percent, then browser
+		Percent | Browser | Version | OS | Count/Count | Time | Skipped
+
+Notes30
+We set out intending to do 187, and felt it would go pretty quickly. Could probably do other stuff.  While the base logic got in place quickly, the testing for edge cases and so on took much longer than hoped. In the end we exceeded the sprint size by a few minutes.  However, we did get this done, which is nice.
+We actually started with the cleanup phase, since we really needed the reference things done first.
+
+One thing I'm realizing as I begin to get close to no longer using cleanup for the refactoring of the parsing logic, is I really should be using the cleanup to do more investigation of the code I've written and seeing if I can make the logic better.  A learning phase.
+
+Sprint 31
+=========
+		change: allow <, but identify an error.
+			it is an error either way, but the current "abort" scheme is
+			messy, and while it theoretically reduces larger than memory
+			attribute values, not sure this is worth it.  we have same
+			problems with things we can't help, like comments.
+
+This is more than 2 M.  How much more, I'm not sure. in particular, the entityStream changes should, arguably, be pulled out.  Without them I'm more confident these can get done.
+BELOW ARE THREE ITEMS.  I DOUBT WE CAN EVEN DO 2 COMPLETELY.  MOVE ENTITYSTREAM CHANGES OUT IF NEEDED.  EACH ONE IN SUCCESSION SHOULD REAP BENEFITS FROM THE ONE BEFORE. I'm committing to all of 188 and 189 minus the entitystream work
+
+
+188: M: Add parsing to entity values
+	T: Rework
+	DEPENDS on L
+	XmlTokenStream-dtd needs to parse the value it gets, looking for char refs, PERefs and other entity refs
+		- @@@ need to think about the cursor that will need to consume these. 
+	- Biggest effort here is going to be cleaning up tests
+	√ * Substitute _getQuotedValue and get back an array of pieces  Parse charref and peref and text
+	√ * need to assemble this into the value that is passed to the token. Probably reasonable to have a routine do that.
+	√ * cleanup tests
+	√ NEW: Not recognize perefs in internal subset
+
+[ 1 hr ]
+
+√ 189: M: Add parsing for attribute decls: Recognize char refs, and GERefs   NO PE REFS
+	T: Rework
+	DEPENDS on cleanup
+	DEPENDS on L
+	- @@@ when will we make use of these?  I think this happens during dtd validation where these will be inserted
+	√ * Slight modification to _getQuotedValue
+		Basically, abort case goes away.
+		We already do the rest, but it is generating tokens, and shouldn't be
+	√ * validation
+		we have woefully inadequte validation. Can reuse from above
+	√ * _getStartOrEmptyTag
+		Arguably should extract attribute construction
+		Needs to convert stuff into tokens. Can reuse routien from above
+	√ * test cleanup
+	√ * EntityStream seems like it is already built to do the right thing.
+
+[ 2.5hr ]
+
+
+190: M: AttDecl: identifies all references (char, GE) <-- looks like no PE's
+	T: Rework
+	DEPENDS on L
+	- Biggest effort here is going to be cleaning up tests
+	√ * substitute _getQuotedValue for charref and geref
+		This will break the test because we're abandoning the < abort process
+	√* _validateAttList
+		_validateCharReference
+		_validateEntityReference
+		- validate text
+	√ * Extract assembly of the attribute out of the validation routine
+	√* clean up tests
+Extra: Applied the same pattern to XmlDecl
+
+[4hr]
+	√- getReference should be pushed into misc, and we should check the return value
+		to decide validation and tokenization.
+	√ - attributes should shift to using misc.  And think about the validation.
+	√- bangitem should do the same pattern as getReference
+- Change test reporter to look at new json files per browser
+	√ - could summarize the failing tests along with the duplicates, however.
+	√ - skipping a test leaves you with the implication that all tests were run. and border wrong
+	√ - would be good to test out onBrowserComplete once some of this is done.
+	√ - and check out the failure etc flags in the reporter
+
+Notes31
+-------
+This sprint went pretty well.  I went in with 3 big tasks, and said "not sure how much one can do, but I commit to only most of the first two"
+I ended up doing the first half of each ofthe 3, more or less.  It was more unified that way.  Very satisfying to have finished up this definitive definition of what is in each of the entity values, attributes and attlist strings.  Finally opens the way to the big bugaboo of a special cursor and then a special stream.  These have been haunting me for a long time, so very happy to have this moving forward.
+In cleanup, almost finished the whole separation of parsing work.  And build finished up my vague work around the test reporter.
+Overall, I'm feeling like things are moving again on all three fronts.
+
+
+Sprint 32
+=========
+√ S 193: provide a standard routine which will take a value.items array and validate
+	_validateCharReference
+	_validateEntityReference
+		both gref and peref
+	_validateNoAngleBrackets  if flag set
+	?- unexpected peref (or gref or charref?)
+
+   // HEy, what happens after expansion?
+
+√ S 194: Add validation and testing using the above. includes a test for each kind of bad thing
+	_validateEntity
+	_validateAttList
+	_validateStartTag
+		with &#123; &ge; %pe;
+		make sure that only legal ones are parsed
+		report errors for those that are bad (e.g. put an extra space into each)
+
+[1.5hr]
+
+√ S+ 195: Add chunks to entity values
+	- generalize combineChunks to take an array of chunks, and will assemble them.  Will barf if values don't match offsets
+	- add a routine which sweeps through an value.items
+		if it finds a charref, assemble a single chunk from each of the bits in there.
+		if it is an (pe) entityreference, assemble a single chunk
+	- adjust tests
+
+[2hr 10min]
+
+√ M 196: EntityStream expands perefs in entityValues.  This will be much the same as ElementStreamHandler but simpler.
+
+[3hr 5min]
+
+√ // issues.  when calling in, not finding the pe in the manager caused everything to die
+	√ - separate validation out of get bang item
+√ - pretify coverage reports along the lines of tests
+√ - our tests are passing coverage even though they do not cover.
+
+
+Sprint 33
+=========
+Starting this sprint a little heavy.  One of the S's is closer to a M. But then the M is a little light.  so, probably ok.
+Planning is still much too easy to overlook.
+(midway)
+Holy heck. I thought I was going to need to duplicate a bunch of the code for 197, but when I got there, I realized that through ducktyping, these things matched.
+
+Did:
+M 197: EntityStream expands gerefs in attrlist values. This is very much the same as ElementStreamHandler
+	- Deal with all the duplciate code
+
+S: 186: Inline external subset.  Should appear between start and end of document type declaration.  this makes it easier to avoid really misplacing it if we require this.
+	--> Internal comes first (2.8), which means it TAKES PRECEDENCE
+	- Need to gather the entity reference from the doctype start, but only apply it when we see the close doctype.
+	This is entity stream.  The key is that we aren't already doing anything for this!
+	And this story is a very big S.
+	- could we start gathering "in parallel" on the doctype? WE might be able to
+		- we see the token, create a stream handler and say "go to town".
+		- on the end, we stick it onto the stack and let it finish.
+			- which it might do immeciately
+		- safer to start with going it like we "always" have done it.
+			== need a better definition for the handlers.
+	- entity manager is totally not ready to deal with stuff.
+	I suggest adding a special entity type: the external subset.  Because it doesn't have a token.  Either that, or, better, fake it for the moment. Create a special entity with a pretty funky name no one would have.  one with a space in it which is impossible to express.Then the existing machinery can be used.
+		With this, we can probably used a queued stream handler, but turn off it's notification... or even leave it, come to think of it.  we'll just ignore it because it isn't the top.  And presumably all the machinery should work just fine for it.
+
+[105min]
+
+
+191: M: Bug: A Entity stream will insert arbitrary markup tokens into attributes
+	DEPENDS on cleanup with references
+	- a tokenstream which consumes an entity value via a cursor, but only finds entity refs and char refs.
+		This is used internally when entitystream is filling in an attribute
+
+
+Note, I did 191 in the last 1hr 45min of time, because I got done with 197 and 186 early, and I felt I had a good chance of getting 191 done.  In fact, we got all the functionality done, but still have some testing to do and need to integrate it into EntityExpandingStream, that latter is a bit of a wildcard.
+
+
+FINALLY!!  The separation is done.
+- continue to pull out all parsing logic
+	- read
+		- parseNextItem() in misc
+			return
+				type:
+				peekedString  (nothing, markup, or close)
+			does
+				peekType
+				if markup gets string
+				if close gets close
+			all markup things must now get their own.
+FINALLY
+- fork quiet-grunt
+	- silent by default
+	- returns a controller
+		- change whether dots reported
+		- provide a toggle function which can turn on and off the writing (or provide a passthrough)
+		# test and coverage report write to files
+		# add a task which cats through that passthrough
+		# https://github.com/cowboy/node-exit/issues/7
+		# https://github.com/sindresorhus/time-grunt/issues/15
+		# https://github.com/sindresorhus/time-grunt/commits/76850c2e5c942fb21e09926fe5ac7ffe0b8e78bc
+
+Notes33
+-------
+Sprint went pretty well in terms of time.  I ended up doing most of 191 done which wasn't in the original plan.
+Cleanup and build got over notable bits of at least psychological constipation.  Feel much better
+
+Sprint 34
+=========
+This is the sprint of starting to do the major cursor changes needed to support entityvalue cursors, which in the process is going to buy us async cursors, since we can unify these.  It is more than one sprint of work, though.
+
+Stuff from backlog extracted in the process of building stories for the sprint
+Async
+-----
+- Sooner or later, we need to be able to do parsing async.  We actually should be able to be living off of streams. Part of the goal of this to be generating a stream of tokens is to allow, like SAX, to handle files bigger than memory.
+	XmlTokenStream should have something like:
+		getNextToken(callback)
+		and/or a node style .on() kind of pattern
+	or, perhaps we should do
+		getNextToken():Promise
+	RAther than every cursor call involving a callback (which would make some of the parsing routines really ugly), I would imagine a cursor may change to just take a series of instructions:
+		[
+			{'name', 'word', '>'},
+			function(results, continue) {
+				if (results.name && results.name.text === '%') {
+					results.isParameter = true;
+					continue([{ 'post%Space', 'space'}, { 'name', 'word'}]);
+					return;
+				}
+				continue();
+			},
+			{'postNameSpace', 'space', '>'}
+			...
+		}
+	That is, to describe the multiple calls, with some occasional logic checks. In this way the async can be pulled largely into the cursors.
+	TokenStream then contains a main decision making loop, and whenever it gets an answer from the cursor, it validates, builds a token, and pushes, which will then trigger an async call back.
+	For the .on() to work, the token stream must always have descriptors queued in the cursor, since the cursor by itself can not parse the text.  (the cursors do really stop being cursors at this point)
+	We really can fake this at this point by having the toplevel getNextToken(callback) call at this point, but we'll have to do a settimeout() of 0 here, or we'll end up with a very deep stack.
+	Note, however, that this transition will touch most tests, making this an expensive api change.
+
+Misc bits
+---------
+- Consider that every string token should perhaps have a reference to the entity (doc entity) it came from
+- getWord has multiple terminators, but doesn't inform you of which it hit
+	It is weird, but in practice not an issue.
+- think about should we be auto-correcting case when we know it should be?  e.g. in attribute definitions
+	At this point, no.  We'll have a stream which should do that.
+- note: if EOF after <!, or if unknown <![name[ items we are losing the <! bit.  For that matter, And similarly for some other nasty bits here.
+- Should we not be doing #xD conversion to #xA in public literals?  I assume so... I also assume no references there.
+	No, I think we're supposed to do this throughout the text.  No references, though.
+
+Xml document in junk
+--------------------
+* ISSUE: Need to figure out what to do with xml decl not being an xml decl
+The stuff below ultimately requires more "look ahead" than we do at the moment. the main problem is if we say "skip junk until xmldecl found", what happens if we find <?xml junkjunkjunk?> ? That, then, is still junk.  We could indeed detect that when getXmlDecl reports tons of errors.  in which case we could continue with "junkjunkjunk" in some way  But then we need to put the token(s) back into the string cursor, briefly. Either that, or we consider that something we can't cope with.
+And if we want to allow a non-xmldeclaration document, and want to skip over junk, do we go to the first <name?
+And, what if the xmldecl is found after the start of markup?  do we want to be able to start reading an <?xml and then find it is something else and turn it into an ordinary processing instruction in some way?
+***Maybe that's the solution to the above. The skip junk looks for <[^ ] pair of characters via peek. if it finds that, and it is <name or <? or <! then we go ahead and do what we should.  We also modify the getXmlDecl to decide it is having just too many problems and turn itself into a processing instruction.  And still maybe the skipping should go until we actually find an xml declaration.***
+
+* ISSUE: how to skip over junk until you get to xml decl
+- provide a "skip junk until xmldecl flag  (skip until markup?)
+- fail if xmldecl is found after markup seen (how can you tell?)
+- fail if no xmldecl found (this is higher level than the xmltokenstream)
+	provide to ignore this
+Add state to reader: SMALL
+	- Found markup
+		- set at xmldecl, and after comments, pi's elements doctype. Once set, no more xmldecl looked for
+	- stop interpreting xml declaration once that is set. If someone is using an xml for something else, we don't want to try to parse it.
+Notes
+- violations of any must, required, must not, shall and shall not is an error, which means you may decide and report, and may try to recover.   overall, the results are undefined by the standard.
+
+Old draft of entity manager
+---------------------------
+EntityManagement
+----------------
+EntityManager:
+Contains
+	EntityRetriever: Constructor
+	EntityName -> {
+		entityLocation
+		data
+		_cursor
+	}
+	get/setEntityRetriever()
+	addEntity(name, data|location, internal|external)
+	addParameterEntity(name, data|location, internal|external)
+	hasEntity():{internal|external|default|undefined}
+	hasParameterEntity():{internal|external|undefined}
+	getEntity(name):Cursor
+	getParameterEntity(name):Cursor
+For performance purposes, should provide a way to cache the raw external entity contents so we don't have to fetch each time.
+
+Other cruft
+-----------
+- Missing: async api in cursor
+Must design the interface for fetching.
+	- need to multiplex between file and http in node
+	- can browser do file if with security mode off?
+		- otherwise do fetch or xmlhttprequest
+	- start off with a simple interface. exposign only a little bit.  Latter version can do more.
+- Missing writing an stream cursor
+33:M:Spec makes it sound like charrefs can't be found in comments or pi's. Might want a nonstandard flag to allow this.
+70:S: Recognize char entities in PI and Commands with a special wrapper stream
+43:M:deal with references within comments and PI
+	Standard (2.5 and 2.6) says that "Parameter entity references must not be recognized in" comments or PI's, so are other references allowed in there? Syntax doesn't say so.
+42:XL:Look into providing a way to honor 2.6's suggestion of using notations to formally declare PI targets.  What is involved?
+I:XL Cursors can't be synchronous!
+52:S: StringCursorSpeedup
+	- do performance test jsperf of regex vs hand parsing
+		- Also look at getName	getToTerminator, getWord all seem like have opportuity to speed up
+	optimize getToTerminator for single terminator case
+	Is there a way to do these more efficiently?  is regex faster? could we say if char < 'A" { examine more }
+		Note: Can't do regex from an offset without doing a substr. sigh.
+35:M:Deal with xmldecl not actually being an xmldecl
+- If we pass something through entity stream multiple times, how to avoid adding context onto errors repeatedly?  How do we keep from manglign errors that happen in the document?: it's OK, because it looks at the stack
+- So, is it CharData or Text?  We are putting both into entity Values
+	- The problem is that the XmlTokenStream rightly identifies it as charData.  But, it could have < in it, so it mibht be other things.  The new stream should return Text only.  Text should be Chars
+
+
+PE stuff
+--------
+	- anything which is getSpace could be getPEOrSpace.  These PE's might be flagged on the declaration token somewhere, but would not show up in the output if it is within an element.  But syntactically we should be able to do that easily since they implicitly put a space on either side.  if we don't ahve the PE then we report an error and just absorb it.
+	- otherwise, just notice %value; and accept if in right place or barf and treat as &;
+YES Must design PERef inline
+	- surrounded by spaces unless in entity value!
+	- strongly looks like these can't be in attrlist defaults
+	- so, how do you find the end if you find a PERef in markup?  I suggest a scan for > but that is smart enough to deal with quotes since > might be in a quoted value in some of these cases.
+	- so all markup parsers need to be re-entrant with more complete data, namely the expanded peref (cursor?) and the unparsed text.
+Should think more about the processing of GE and PERefs, especially are we ok if PERefs in bad places?
+- Need to be able to parse param entity declarations and put in entity manager
+	we can't yet test PE's inside of PE's'
+	then need to be able to cope with this in the cursor below
+	- need to identify parameter entities in the first place!
+		- maybe should wait until we get the separation done? Or this could prep for that
+	- does token stream parse this correctly and barf if context is wrong?
+
+
+Getting Ready for consuming Entities
+------------
+WALKTHROUGH
+* No GE or PE's
+- xml token stream
+- possible external-subset adder
+- entity stream does nothing (no error expansion)
+* GE's declared in internal and external. Used in content and attributes and attdecl's
+- xml token stream
+	- just identifies refs in content, entity values, attributes, and attdecl's
+- external subset brings in the external subset
+	- also identiies refs in all cases
+- entity stream
+	- will expand entities in
+		- content
+		- attributes
+		- attdecl's!!! @@@
+		- entity values
+	@ remember there are cases where you want to be able to reasonably process without anything external.  
+* GE's and PE's declared in both
+- xml token does the same
+- external subset brings in external subet
+- entity stream
+	- will expand each sequentially
+	- including PE's in @@@@
+		- content 
+		- free-floating in dtd
+		- in entity values (sounds like can not in internal?)
+		- in attr defs (sounds like can not in internal?)
+		- in any markup (in external)
+	- Both PE and GE can be quite recursive.  However, PE's will have been expanded in any internal subset before we get to anything that consumes them.
+* External subset
+	- Same as above. but not that PE's can appear in markup
+	- should be parsed ok by entity stream
+* External entity
+	- no PE's
+	- do not need to do ANY parsing of these at load time. Will be consumed by entity stream properly when it comes up
+
+184: L F need a single interface for both browser and node
+	- EntityLocations need to know enough info so that the entity manager can call the right retriever
+	- this is a separate module
+	- NEED TO RESEARCH fetch.
+192: L: B We need to deal with the internal entities that have character references in them
+	DEPENDS on reworked entity values
+	- a cursor which has a different offset (for consuming entity values)
+	- a cursor which deals with the internal entities
+	- it needs to cope with the result of PERefs in there too. they'll ahve been expanded, but tokens still there

@@ -228,8 +228,10 @@ module.exports = function standardBuild(grunt) {
 
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
 
-   grunt.registerTask('quietBuild', 'Report on tests', () => {
-      require('./quiet-grunt-mod.js');
+   grunt.registerTask('quietBuild', '@@@', () => {
+      var controller = require('mostly-quiet-grunt');
+      controller.showDots(false);
+      process.passthroughWrite = controller.passthroughWrite.bind(controller);
    });
 
    grunt.registerTask('mkout', 'Make the output directory', () => {

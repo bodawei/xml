@@ -38,6 +38,7 @@
     "karma-phantomjs-launcher": "1.0.2",
     "karma-safari-launcher": "1.0.0",
     "karma-vivaldi-launcher": "0.0.1",
+    "mostly-quiet-grunt": "^1.0.1",
     "node-glob": "^1.2.0",
     "node-properties-parser": "0.0.2",
     "phantomjs-prebuilt": "2.1.13"
