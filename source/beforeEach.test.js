@@ -5,6 +5,7 @@
 /* eslint-env jasmine */
 
 const SyntaxError = require('./error/SyntaxError.js');
+const tokens = require('./XmlToken.js');
 
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
 
@@ -42,6 +43,68 @@ describe('toBeSyntaxError()', () => {
          expect(toBeSyntaxErrorMatcher().compare(actualError, 'BAD_CODE')).toEqual({
             pass: false,
             message: 'Expected syntax error code XMLDECL_NO_CLOSE to match BAD_CODE.'
+         });
+      });
+
+   });
+
+});
+
+describe('toMatchClasses()', () => {
+
+   describe('jasmine use', () => {
+
+      it('reports pass when the types all match', () => {
+         expect([ new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)])
+            .toMatchClasses([tokens.CharRef]);
+      });
+
+      it('reports no pass when the the types do not match', () => {
+         expect([ new tokens.ExternalSubsetStart()])
+            .not.toMatchClasses([tokens.CharRef]);
+      });
+
+      it('reports no pass when the the lengths do not match', () => {
+         expect([
+            new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS),
+            new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
+         ]).not.toMatchClasses([tokens.CharRef]);
+      });
+
+   });
+
+   describe('raw matcher', () => {
+      const toMatchClasses = require('./beforeEach.js').toMatchClasses;
+
+      it('returns a compare function', () => {
+         expect(typeof toMatchClasses().compare === 'function').toEqual(true);
+      });
+
+      it('returns a message indicating failure, when lengths do not match', () => {
+         expect(toMatchClasses().compare([
+            new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
+         ], [ tokens.ExternalSubsetStart, tokens.ExternalSubsetEnd ])).toEqual({
+            pass: false,
+            message: 'Expected 2 objects, but got 1.\n\tActual:   CharRef\n\tExpected: ExternalSubsetStart, ' +
+               'ExternalSubsetEnd\n'
+         });
+      });
+
+      it('returns a message indicating failure, on success, for the .not.toMatchClasses() case', () => {
+         expect(toMatchClasses().compare([
+            new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
+         ], [ tokens.CharRef ])).toEqual({
+            pass: true,
+            message: 'Expected one or more object types to not match: CharRef.'
+         });
+      });
+
+      it('returns a message indicating failure, on failure, for the .toMatchClasses() case', () => {
+         expect(toMatchClasses().compare([
+            new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
+         ], [ tokens.ExternalSubsetStart ])).toEqual({
+            pass: false,
+            message: 'The type of object 0 (CharRef) did not match ExternalSubsetStart.'
          });
       });
 

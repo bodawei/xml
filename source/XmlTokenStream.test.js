@@ -7,7 +7,6 @@
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared//EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
@@ -27,18 +26,12 @@ describe('XmlTokenStream', () => {
 
       it('can be constructed with a cursor', () => {
          expect(() => {
-            new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager());
+            new XmlTokenStream(new XmlStringCursor('hi'));
          }).not.toThrow();
       });
 
-      it('throws an error if called with no entity manager', () => {
-         expect(() => {
-            new XmlTokenStream(new XmlStringCursor('hi'));
-         }).toThrowError('Must provide an XmlEntityManager instance.');
-      });
-
       it('if passed no options, the defaults are used (whitebox)', () => {
-         const s = new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager());
+         const s = new XmlTokenStream(new XmlStringCursor('hi'));
 
          expect(s._options).toEqual({
             lax: false,
@@ -48,7 +41,7 @@ describe('XmlTokenStream', () => {
       });
 
       it('stores the option if passed an option', () => {
-         const s = new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager(), { lax: true });
+         const s = new XmlTokenStream(new XmlStringCursor('hi'), { lax: true });
 
          expect(s._options.lax).toEqual(true);
 
@@ -56,7 +49,7 @@ describe('XmlTokenStream', () => {
 
       it('throws an error if passed an unknown option', () => {
          expect(() => {
-            new XmlTokenStream(new XmlStringCursor('hi'), new XmlEntityManager(), { fish: true });
+            new XmlTokenStream(new XmlStringCursor('hi'), { fish: true });
          }).toThrowError('"fish" is not a supported option name.');
 
       });
@@ -281,7 +274,7 @@ describe('XmlTokenStream', () => {
       it('sets the version on the cursor when the XmlDeclaration is found', () => {
          const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
          const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityMd);
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+         const s = new XmlTokenStream(cursor);
 
          s.read();
 
@@ -295,7 +288,7 @@ describe('XmlTokenStream', () => {
       it('does not set the version on the cursor if ignoreDocumentVersion flag is set to true', () => {
          const entityMd = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 4, new EntityLocation());
          const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', entityMd);
-         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { ignoreDocumentVersion: true });
+         const s = new XmlTokenStream(cursor, { ignoreDocumentVersion: true });
 
          s.read();
 
@@ -304,7 +297,7 @@ describe('XmlTokenStream', () => {
 
       it('sets the document encoding on the cursor by default', () => {
          const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+         const s = new XmlTokenStream(cursor);
 
          s.read();
 
@@ -314,7 +307,7 @@ describe('XmlTokenStream', () => {
       it('does not set the document encoding on the cursor if the cursor was created with an encoding', () => {
          const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>', undefined,
             { encoding: 'UTF-8' });
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+         const s = new XmlTokenStream(cursor);
 
          s.read();
 
@@ -323,7 +316,7 @@ describe('XmlTokenStream', () => {
 
       it('does not set the document encoding on the cursor if the ignoreDocumentEncoding flag is set', () => {
          const cursor = new XmlStringCursor('<?xml version="1.1" encoding="usascii" standalone="yes"?>');
-         const s = new XmlTokenStream(cursor, new XmlEntityManager(), { ignoreDocumentEncoding: true });
+         const s = new XmlTokenStream(cursor, { ignoreDocumentEncoding: true });
 
          s.read();
 
@@ -339,7 +332,7 @@ describe('XmlTokenStream', () => {
          const cursor = new XmlStringCursor('\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020' +
             '\u0000\u0076\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d' +
             '\u0000\u0022\u0000\u0031\u0000\u002e\u0000\u0031\u0000\u0022\u0000\u003f\u0000\u003e');
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+         const s = new XmlTokenStream(cursor);
 
          expect(() => {
             s.read();
@@ -351,7 +344,7 @@ describe('XmlTokenStream', () => {
          const cursor = new XmlStringCursor('\u00FE\u00FF\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c' +
             '\u0000\u0020\u0000\u0076\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e' +
             '\u0000\u003d\u0000\u0022\u0000\u0031\u0000\u002e\u0000\u0031\u0000\u0022\u0000\u003f\u0000\u003e');
-         const s = new XmlTokenStream(cursor, new XmlEntityManager());
+         const s = new XmlTokenStream(cursor);
 
          expect(() => {
             s.read();

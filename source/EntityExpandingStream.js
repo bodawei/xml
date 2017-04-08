@@ -258,6 +258,7 @@ class TreeStreamHandler extends StreamHandler {
             if (this._externalEntityHandler) {
                this._handlerStack.push(new HandlerFrame(this._externalEntityHandler, nextToken));
                handler = this._externalEntityHandler;
+               handler.addDocEnd(nextToken);
                delete this._externalEntityHandler;
                nextToken = handler.getNext();
                continue;
@@ -318,7 +319,7 @@ class ExternalEntityStreamHandler extends StreamHandler {
 
       const cursor = entityManager.getExternalSubsetEntity();
 
-      this._stream = new XmlTokenStream(cursor, entityManager, {
+      this._stream = new XmlTokenStream(cursor, {
          lax: true
       });
       this._stream.addListener('data', this._onData);
@@ -328,8 +329,20 @@ class ExternalEntityStreamHandler extends StreamHandler {
       this._queue.push(new tokens.ExternalSubsetStart());
    }
 
+   addDocEnd(docTypeEnd) {
+      if (this._noMoreInput) {
+         this.queue.push(docTypeEnd);
+      } else {
+         this._docTypeEnd = docTypeEnd;
+      }
+   }
+
    _onEnd() {
       this._queue.push(new tokens.ExternalSubsetEnd());
+      if (this._docTypeEnd) {
+         this._queue.push(this._docTypeEnd);
+         delete this._docTypeEnd;
+      }
       this._stream.removeListener('data', this._onData);
       this._stream.removeListener('error', this._onData);
       this._stream.removeListener('end', this._onEnd);
@@ -376,7 +389,7 @@ class QueuedStreamHandler extends StreamHandler {
          this._entityName = entityReferenceToken.name;
          startToken = new tokens.EntityStart(entityReferenceToken.name,
             entityReferenceToken.chunks || tokens.ATTR_NO_CHUNKS); // if no chunks, it must be an attribute
-         this._stream = new XmlTokenStream(cursor, entityManager, {
+         this._stream = new XmlTokenStream(cursor, {
             lax: true
          });
          this._stream.addListener('data', this._onData);

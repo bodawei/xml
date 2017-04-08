@@ -74,8 +74,8 @@ Design
 =============================================
 CLEANUP
 =======
-- remove entity manager from xmltokenstream
-- why are all the parsers classes? They have no state. could just be namespaces
+√ - remove entity manager from xmltokenstream
+√ - why are all the parsers classes? They have no state. could just be namespaces
 - Duplicate code in EntityStream
 - Duplicate code in ValueStreamTest
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.

@@ -137,22 +137,15 @@ function textOrUndef(chunk) {
 \**********************************************************************/
 class XmlTokenStream extends stream.Readable {
 
-   constructor(cursor, entityManager, options) {
+   constructor(cursor, options) {
       super({
          objectMode: true
       });
-      if (!entityManager) {
-         throw Error('Must provide an XmlEntityManager instance.');
-      }
 
       this._cursor = cursor;
       this._pendingTokens = [];
       this._elementNameStack = [];
-      this._entityManager = entityManager;
       this._envelopers = [];
-      this._dtdParser = new XmlTokenStreamDtd();
-      this._miscParser = new XmlTokenStreamMisc();
-      this._elementParser = new XmlTokenStreamElement();
       this._state = STATE.START;
 
       this._options = {
@@ -208,7 +201,7 @@ class XmlTokenStream extends stream.Readable {
    _read() {
       const pendingClose = this._peekEnveloper();
       const pendingCloseText = pendingClose ? pendingClose.close : undefined;
-      const result = this._miscParser.parseUnknownInContent(this._cursor, pendingCloseText);
+      const result = XmlTokenStreamMisc.parseUnknownInContent(this._cursor, pendingCloseText);
 
       if (!result.hasMore) {
          this._pushToken(null);
@@ -249,7 +242,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getS() {
-      const parsed = this._miscParser.parseSpace(this._cursor);
+      const parsed = XmlTokenStreamMisc.parseSpace(this._cursor);
 
       this._validateSpace(parsed);
 
@@ -257,7 +250,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getComment(start) {
-      const parsedComment = this._miscParser.parseComment(this._cursor, start);
+      const parsedComment = XmlTokenStreamMisc.parseComment(this._cursor, start);
 
       this._validateComment(start, parsedComment);
 
@@ -266,7 +259,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getContent() {
-      const parseResults = this._miscParser.parseContent(this._cursor);
+      const parseResults = XmlTokenStreamMisc.parseContent(this._cursor);
 
       for (let index = 0; index < parseResults.chunks.length; index++) {
          const chunk = parseResults.chunks[index];
@@ -280,7 +273,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getReference(start) {
-      const reference = this._miscParser.parseReference(this._cursor, start);
+      const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
 
       if (reference.hashChunk) {
          this._validateCharReference(reference);
@@ -321,7 +314,7 @@ class XmlTokenStream extends stream.Readable {
 
       if (!parsed.digitsChunk) {
          this._report(SEID.CHARREF_NO_DIGITS);
-      } else if (!parsed.hexMarkerChunk && !this._miscParser.isDecimal(parsed.digitsChunk)) {
+      } else if (!parsed.hexMarkerChunk && !XmlTokenStreamMisc.isDecimal(parsed.digitsChunk)) {
          this._report(SEID.CHARREF_INVALID_BASE, [ parsed.digitsChunk.text ]);
       }
 
@@ -361,7 +354,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getBangItem(start) {
-      const parsed = this._miscParser.parseBangItem(this._cursor, start);
+      const parsed = XmlTokenStreamMisc.parseBangItem(this._cursor, start);
       const upperCaseType = textOrBlank(parsed.declarationName).toLocaleUpperCase();
 
       this._validateBangItem(parsed, start);
@@ -373,7 +366,7 @@ class XmlTokenStream extends stream.Readable {
 
       switch (upperCaseType) {
          case 'DOCTYPE':
-            const parsedDocType = this._dtdParser.parseDocTypeStart(this._cursor, start, parsed.declarationName);
+            const parsedDocType = XmlTokenStreamDtd.parseDocTypeStart(this._cursor, start, parsed.declarationName);
 
             this._validateStartDocType(parsedDocType, start);
 
@@ -390,7 +383,7 @@ class XmlTokenStream extends stream.Readable {
             }
             break;
          case 'NOTATION':
-            const parsedNotation = this._dtdParser.parseNotation(this._cursor, start, parsed.declarationName);
+            const parsedNotation = XmlTokenStreamDtd.parseNotation(this._cursor, start, parsed.declarationName);
 
             this._validateNotation(parsedNotation);
 
@@ -398,7 +391,7 @@ class XmlTokenStream extends stream.Readable {
                locFromExternalId(parsedNotation.externalId), this._cursor.getRecentChunks()));
             break;
          case 'ENTITY':
-            const parsedEntity = this._dtdParser.parseEntity(this._cursor, start, parsed.declarationName);
+            const parsedEntity = XmlTokenStreamDtd.parseEntity(this._cursor, start, parsed.declarationName);
 
             this._validateEntity(parsedEntity);
 
@@ -410,7 +403,7 @@ class XmlTokenStream extends stream.Readable {
                textOrUndef(parsedEntity.nDataName), this._cursor.getRecentChunks()));
             break;
          case 'ELEMENT':
-            const parsedEl = this._dtdParser.parseElement(this._cursor);
+            const parsedEl = XmlTokenStreamDtd.parseElement(this._cursor);
 
             const contentText = this._validateElementDeclaration(parsedEl, start);
 
@@ -418,7 +411,7 @@ class XmlTokenStream extends stream.Readable {
                this._cursor.getRecentChunks()));
             break;
          case 'ATTLIST':
-            const parseResults = this._dtdParser.parseAttList(this._cursor);
+            const parseResults = XmlTokenStreamDtd.parseAttList(this._cursor);
 
             this._validateAttList(parseResults, start);
 
@@ -502,7 +495,7 @@ class XmlTokenStream extends stream.Readable {
                case XmlTokenStreamMisc.TYPE.CHAR_REF:
                   const parsed = item.parsed;
                   result.push(new tokens.CharRef(item.parsed.character, [
-                     this._miscParser.combineChunks(parsed.startChunk, parsed.hashChunk, parsed.postHashSpaceChunk,
+                     XmlTokenStreamMisc.combineChunks(parsed.startChunk, parsed.hashChunk, parsed.postHashSpaceChunk,
                         parsed.hexMarkerChunk, parsed.postHexSpaceChunk, parsed.digitsChunk,
                         parsed.postDigitsSpaceChunk, parsed.semicolonChunk)
                   ]));
@@ -556,7 +549,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _closeDocType() {
-      const parseResults = this._dtdParser.parseDocTypeClose(this._cursor);
+      const parseResults = XmlTokenStreamDtd.parseDocTypeClose(this._cursor);
 
       this._validateCloseDocType(parseResults);
 
@@ -567,12 +560,12 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getProcessingInstruction(start) {
-      const parsedPI = this._miscParser.parseProcessingInstruction(this._cursor, start);
+      const parsedPI = XmlTokenStreamMisc.parseProcessingInstruction(this._cursor, start);
 
       this._validateProcessingInstruction(parsedPI, start);
 
       if (parsedPI.isXmlDecl) {
-         const parsed = this._miscParser.parseXmlDecl(this._cursor, start);
+         const parsed = XmlTokenStreamMisc.parseXmlDecl(this._cursor, start);
 
          this._validateXmlDecl(start, parsed);
          const params = this._extractParams(parsed);
@@ -626,7 +619,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getStartOrEmptyTag(start) {
-      const parsedTag = this._elementParser.parseStartTag(this._cursor, start);
+      const parsedTag = XmlTokenStreamElement.parseStartTag(this._cursor, start);
 
       this._validateStartTag(parsedTag);
 
@@ -649,7 +642,7 @@ class XmlTokenStream extends stream.Readable {
    }
 
    _getEndTag(start) {
-      const parsedTag = this._elementParser.parseEndTag(this._cursor, start);
+      const parsedTag = XmlTokenStreamElement.parseEndTag(this._cursor, start);
 
       this._validateEndTag(parsedTag);
 

@@ -28,30 +28,6 @@ function pipeAndTest(inputString, done, endHandler, other = {}) {
    });
 }
 
-// Duplicate with EntityExpandingStream
-function expectLengthsMatch(fnName, aName, bName, actual, expected) {
-   if (expected === actual) {
-      return;
-   }
-
-   const expectedMsg = `Lengths in ${fnName}(): ${aName}.length=${expected}, ${bName}.length=${expected}`;
-   const actualMsg = `Lengths in ${fnName}(): ${aName}.length=${actual}, ${bName}.length=${expected}`;
-
-   expect(expectedMsg).toEqual(actualMsg);
-}
-
-function expectTokenTypes(tokenArray, expectedTypes) {
-   expectLengthsMatch('expectTokenTypes', 'expectedTypes', 'actualTypes', expectedTypes.length, expectedTypes.length);
-
-   // if the lengths don't match, we end up throwing an exception, which is bad.
-   for (let index = 0; index < tokenArray.length; index++) {
-      const expectedDescription = `index ${index} (${expectedTypes[index].name})`;
-      const actualDescription = `index ${index} (${tokenArray[index].constructor.name})`;
-
-      expect(actualDescription).toEqual(expectedDescription);
-   }
-}
-
 describe('ValueStream', () => {
 
    describe('construction', () => {
@@ -92,7 +68,7 @@ describe('ValueStream', () => {
 
       it('retrieves a single Text token if the input has no relevant markup', (done) => {
          pipeAndTest('This is some stuff', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text
             ]);
 
@@ -102,7 +78,7 @@ describe('ValueStream', () => {
 
       it('retrieves a single Text token while ignoring things that could look like markup', (done) => {
          pipeAndTest('This <begin> is</begin> <!-- some --> <?stuff?>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text
             ]);
 
@@ -112,7 +88,7 @@ describe('ValueStream', () => {
 
       it('retrieves a character reference from the input', (done) => {
          pipeAndTest('This <begin> is</&#65;> <!-- some --> <?stuff?>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text,
                tokens.CharRef,
                tokens.Text
@@ -126,7 +102,7 @@ describe('ValueStream', () => {
 
       it('does not retrieve a general entity reference with the default parameters', (done) => {
          pipeAndTest('a &bird; flew through the sky', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text
             ]);
 
@@ -136,7 +112,7 @@ describe('ValueStream', () => {
 
       it('does not retrieve a parameter entity reference with the default parameters', (done) => {
          pipeAndTest('a %bird; flew through the sky', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text
             ]);
 
@@ -148,7 +124,7 @@ describe('ValueStream', () => {
          pipeAndTest('&#65; &bird; flew through the sky', done, checkResults, { geRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.CharRef,
                tokens.Text,
                tokens.EntityReference,
@@ -165,7 +141,7 @@ describe('ValueStream', () => {
          pipeAndTest('&#65; %bird; flew through the sky', done, checkResults, { geRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.CharRef,
                tokens.Text
             ]);
@@ -178,7 +154,7 @@ describe('ValueStream', () => {
          pipeAndTest('&#65; %bird; flew through the sky', done, checkResults, { peRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.CharRef,
                tokens.Text,
                tokens.ParameterEntityReference,
@@ -195,7 +171,7 @@ describe('ValueStream', () => {
          pipeAndTest('&#65; &bird; flew through the sky', done, checkResults, { peRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.CharRef,
                tokens.Text
             ]);
@@ -214,7 +190,7 @@ describe('ValueStream', () => {
          pipeAndTest('%bird;', done, checkResults, { peRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.ParameterEntityReference
             ]);
          }
@@ -224,7 +200,7 @@ describe('ValueStream', () => {
          pipeAndTest('&;', done, checkResults, { geRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.EntityReference
             ]);
          }
@@ -234,7 +210,7 @@ describe('ValueStream', () => {
          pipeAndTest('%;', done, checkResults, { peRef: true });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.ParameterEntityReference
             ]);
          }
@@ -244,7 +220,7 @@ describe('ValueStream', () => {
          pipeAndTest('<one></one>', done, checkResults);
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.Text
             ]);
          }

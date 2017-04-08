@@ -29,14 +29,59 @@ function toBeSyntaxError() {
    };
 }
 
+function toMatchClasses() {
+   return {
+      compare: (actualObjects, expectedConstructors) => {
+         let pass = true;
+         let message = '';
+         let mismatchIndex;
+
+         const maxSearch = Math.min(actualObjects.length, expectedConstructors.length)
+         for (let index = 0; index < maxSearch; index++) {
+            if (actualObjects[index].constructor.name !== expectedConstructors[index].name) {
+               mismatchIndex = index;
+               break;
+            }
+         }
+
+         if (actualObjects.length !== expectedConstructors.length) {
+            pass = false;
+            message = `Expected ${expectedConstructors.length} objects, but got ${actualObjects.length}.`;
+            if (mismatchIndex) {
+               message += ` First difference at index ${mismatchIndex}.`;
+            }
+            message += `\n\tActual:   ${actualObjects.map((object) => object.constructor.name).join(', ')}\n`;
+            message += `\tExpected: ${expectedConstructors.map((constr) => constr.name).join(', ')}\n`;
+         } else {
+            pass = mismatchIndex === undefined;
+
+            if (pass) {
+               const types = expectedConstructors.map((constr) => constr.name);
+               message = `Expected one or more object types to not match: ${types.join()}.`;
+            } else {
+               message = `The type of object ${mismatchIndex} (${actualObjects[mismatchIndex].constructor.name})`;
+               message += ` did not match ${expectedConstructors[mismatchIndex].name}.`;
+            }
+         }
+
+         return {
+            pass,
+            message
+         };
+      }
+   }
+}
+
 beforeEach(() => {
 
    jasmine.addMatchers({
-      toBeSyntaxError
+      toBeSyntaxError,
+      toMatchClasses
    });
 
 });
 
 module.exports = {
-   toBeSyntaxError
+   toBeSyntaxError,
+   toMatchClasses
 };

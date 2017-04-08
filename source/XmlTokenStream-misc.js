@@ -22,7 +22,7 @@ const DECIMAL_CHARS = /^[0-9]*$/;
  [27]   	Misc	   ::=   	Comment | PI | S
 \**********************************************************************/
 
-class XmlTokenStreamMisc {
+const XmlTokenStreamMisc = {
 
    /**********************************************************************\
     parseUnknownInContent() is used to help identify the next thing in
@@ -66,7 +66,7 @@ class XmlTokenStreamMisc {
       }
 
       return result;
-   }
+   },
 
    /**********************************************************************\
     parseUnknownInValue() is used to help identify the next thing in
@@ -100,7 +100,7 @@ class XmlTokenStreamMisc {
       }
 
       return result;
-   }
+   },
 
    /**********************************************************************\
     parseContent() extracts CharData from the input.  Note that this will
@@ -142,7 +142,7 @@ class XmlTokenStreamMisc {
       return {
          chunks: results
       };
-   }
+   },
 
    /**********************************************************************\
     parseComment() does the parsing to extract a comment.
@@ -178,7 +178,7 @@ class XmlTokenStreamMisc {
       }
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseProcessingInstruction() does the parsing to extract either a
@@ -222,7 +222,7 @@ class XmlTokenStreamMisc {
       }
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseXmlDecl parses an XML Declaration which has the following format:
@@ -258,7 +258,7 @@ class XmlTokenStreamMisc {
       results.closeChunk = cursor.getMatch('?>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseBangItem
@@ -283,7 +283,7 @@ class XmlTokenStreamMisc {
       result.postDeclarationNameSpace = cursor.getSpace();
 
       return result;
-   }
+   },
 
    /**********************************************************************\
     parseBracketItem() extracts the start of a bracket item ( <![name[ )
@@ -326,7 +326,7 @@ class XmlTokenStreamMisc {
       results.closeChunk = cursor.getMatch(']]>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     Parses whitespace
@@ -340,7 +340,7 @@ class XmlTokenStreamMisc {
       return {
          spaceChunk: cursor.getSpace()
       };
-   }
+   },
 
    /**********************************************************************\
     parseReference
@@ -357,7 +357,7 @@ class XmlTokenStreamMisc {
       } else {
          return this.parseEntityReference(cursor, startChunk, spaceChunk);
       }
-   }
+   },
 
    /**********************************************************************\
     parseCharReference
@@ -407,11 +407,11 @@ class XmlTokenStreamMisc {
       }
 
       return result;
-   }
+   },
 
    isDecimal(chunk) {
       return DECIMAL_CHARS.test(chunk.text);
-   }
+   },
 
    /**********************************************************************\
     parseEntityReference
@@ -435,7 +435,7 @@ class XmlTokenStreamMisc {
       result.semicolonChunk = cursor.getMatch(';');
 
       return result;
-   }
+   },
 
    /**********************************************************************\
     parseQuotedValue
@@ -523,7 +523,7 @@ class XmlTokenStreamMisc {
       } while (block.terminator);
 
       return result;
-   }
+   },
 
    combineChunks(...args) {
       const chunks = [];
@@ -540,7 +540,7 @@ class XmlTokenStreamMisc {
       }
 
       return accumulator;
-   }
+   },
 
    _combineChunks(first, second) {
       if (!first) {
@@ -554,7 +554,7 @@ class XmlTokenStreamMisc {
       first.text += second.text;
       first.endOffset = second.endOffset;
       return first;
-   }
+   },
 
    /**********************************************************************\
     Parses the params of an XML or Text Declaration.
@@ -613,7 +613,7 @@ class XmlTokenStreamMisc {
       }
 
       return attributes;
-   }
+   },
 
 }
 

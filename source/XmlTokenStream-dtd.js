@@ -3,13 +3,12 @@
 'use strict';
 
 const Chunk = require('./shared/Chunk.js');
-const MiscParser = require('./XmlTokenStream-misc.js');
-const miscParser = new MiscParser();
+const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
 
 /*
  * Biases: If find something unexpected, assume the > is missing.
  */
-class XmlTokenStreamDtd {
+const XmlTokenStreamDtd = {
 
    /**********************************************************************\
     parseDocTypeStart extracts information about a DocType declaration.
@@ -49,7 +48,7 @@ class XmlTokenStreamDtd {
       results.startInternalSubsetChunk = cursor.getMatch('[');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseDocTypeClose extracts the closing 'S? > of a DOCTYPE.
@@ -74,7 +73,7 @@ class XmlTokenStreamDtd {
       results.closeChunk = cursor.getMatch('>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseNotation extracts a notation declaration from the provided cursor
@@ -109,7 +108,7 @@ class XmlTokenStreamDtd {
       results.close = cursor.getMatch('>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseEntity extracts an entity declaration from the provided cursor
@@ -165,7 +164,7 @@ class XmlTokenStreamDtd {
 
       const valueQuote = cursor.peekChar();
       if (valueQuote && (valueQuote.text === '"' || valueQuote.text === '\'')) {
-         results.value = miscParser.parseQuotedValue(cursor, {
+         results.value = XmlTokenStreamMisc.parseQuotedValue(cursor, {
             terminators: [ '>' ],
             charRef: true,
             peRef: true // NOT if we are in the internal subset
@@ -195,7 +194,7 @@ class XmlTokenStreamDtd {
       results.closeChunk = cursor.getMatch('>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseElement extracts an element declaration from the provided cursor
@@ -241,7 +240,7 @@ class XmlTokenStreamDtd {
       results.closeChunk = cursor.getMatch('>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     parseAttList extracts an AttlistDecl from the input stream, and returns
@@ -338,7 +337,7 @@ class XmlTokenStreamDtd {
          }
 
          if (nextChar && (nextChar.text === '"' || nextChar.text === '\'')) {
-            attr.value = miscParser.parseQuotedValue(cursor, {
+            attr.value = XmlTokenStreamMisc.parseQuotedValue(cursor, {
                terminators: [ '>' ],
                charRef: true,
                geRef: true
@@ -357,7 +356,7 @@ class XmlTokenStreamDtd {
       results.closeChunk = cursor.getMatch('>');
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     _getListItems gets all the items from a list that is terminated
@@ -417,7 +416,7 @@ class XmlTokenStreamDtd {
             done = true;
          }
       }
-   }
+   },
 
    /**********************************************************************\
     _retrieveExternalId tries to extract an ExternalID or a PublicID from
@@ -509,7 +508,7 @@ class XmlTokenStreamDtd {
       }
 
       return result;
-   }
+   },
 
    /**********************************************************************\
     _getQuotedLiteral generically extracts either a PublicID value or a
@@ -543,7 +542,7 @@ class XmlTokenStreamDtd {
 
          return result;
       }
-   }
+   },
 
    _getWordLiteral(cursor, terminators) {
       const word = cursor.getWord(terminators);

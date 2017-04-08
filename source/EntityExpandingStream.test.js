@@ -31,17 +31,6 @@ function expectLengthsMatch(fnName, aName, bName, actual, expected) {
    expect(expectedMsg).toEqual(actualMsg);
 }
 
-function expectTokenTypes(tokenArray, expectedTypes) {
-   expectLengthsMatch('expectTokenTypes', 'expectedTypes', 'actualTypes', expectedTypes.length, expectedTypes.length);
-
-   for (let index = 0; index < tokenArray.length; index++) {
-      const expectedDescription = `index ${index} (${expectedTypes[index].name})`;
-      const actualDescription = `index ${index} (${tokenArray[index].constructor.name})`;
-
-      expect(actualDescription).toEqual(expectedDescription);
-   }
-}
-
 function expectTokenDetails(tokenArray, detailsArray) {
    expectLengthsMatch('expectTokenDetails', 'tokenArray', 'detailsArray', tokenArray.length, detailsArray.length);
 
@@ -155,7 +144,7 @@ describe('EntityExpandingStream', () => {
 
       it('retrieves all the tokens from the underlying stream', (done) => {
          pipeAndTest('<?xml version="1.0"?><one>data</one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.CharData,
@@ -183,7 +172,7 @@ describe('EntityExpandingStream', () => {
 
             expect(esErrorOrder).toBeUndefined();
 
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.CharData
@@ -214,7 +203,7 @@ describe('EntityExpandingStream', () => {
          es.on('end', () => {
             expect(esFinished).toEqual(true);
 
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.CharData
@@ -243,7 +232,7 @@ describe('EntityExpandingStream', () => {
             results.push(token);
          });
          es.on('end', () => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.CharData,
@@ -275,7 +264,7 @@ describe('EntityExpandingStream', () => {
 
       it('inserts entity data after start and before end', (done) => {
          pipeAndTest('<?xml version="1.0"?><one>&quot;data</one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.EntityStart,
@@ -341,7 +330,7 @@ describe('EntityExpandingStream', () => {
 
       it('retrieves the expected chunks', (done) => {
          pipeAndTest('<?xml version="1.0"?><root>&lt;</root>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.EntityStart,
@@ -361,7 +350,7 @@ describe('EntityExpandingStream', () => {
 
       it('adds an error to the stream if the entity is not found', (done) => {
          pipeAndTest('<?xml version="1.0"?><root>&bogus1;</root>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                SyntaxError,
@@ -388,7 +377,7 @@ describe('EntityExpandingStream', () => {
          }
 
          function evaluate(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart
             ]);
@@ -409,7 +398,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function evaluate(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.EntityStart,
@@ -450,7 +439,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function evaluate(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.EntityStart,
@@ -492,7 +481,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function evaluate(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.EntityStart,
@@ -531,7 +520,7 @@ describe('EntityExpandingStream', () => {
 
       it('does nothing when attribute is just text', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="bar"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.ElementEnd
@@ -543,14 +532,14 @@ describe('EntityExpandingStream', () => {
 
       it('inserts text from entity', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&amp;"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.ElementEnd
             ]);
 
             const attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd
@@ -566,7 +555,7 @@ describe('EntityExpandingStream', () => {
 
       it('adds an error to the stream if the entity is not found', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&bogus3;"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                SyntaxError,
                tokens.ElementStart,
@@ -580,7 +569,7 @@ describe('EntityExpandingStream', () => {
 
       it('does not replace the entity reference with an entity start/end pair if entity not found', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&bogus3;"></one>', done, (results) => {
-            expectTokenTypes(results[2].attributes[0].value, [
+            expect(results[2].attributes[0].value).toMatchClasses([
                tokens.EntityReference
             ]);
          });
@@ -600,7 +589,7 @@ describe('EntityExpandingStream', () => {
          }
 
          function evaluate(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration
             ]);
             expect(gotError).toEqual(true);
@@ -609,7 +598,7 @@ describe('EntityExpandingStream', () => {
 
       it('changes the entity reference to an entity start', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&amp;"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.ElementEnd
@@ -621,14 +610,14 @@ describe('EntityExpandingStream', () => {
 
       it('inserts text from multiple entities in one attribute', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&amp;&amp;"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.ElementEnd
             ]);
 
             const attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd,
@@ -641,14 +630,14 @@ describe('EntityExpandingStream', () => {
 
       it('inserts text from multiple attributes', (done) => {
          pipeAndTest('<?xml version="1.0"?><one foo="&amp;&quot;" bar="&quot;&amp;"></one>', done, (results) => {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.ElementStart,
                tokens.ElementEnd
             ]);
 
             let attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd,
@@ -657,7 +646,7 @@ describe('EntityExpandingStream', () => {
                tokens.EntityEnd
             ]);
             attrPieces = results[1].attributes[1].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityEnd,
@@ -678,7 +667,7 @@ describe('EntityExpandingStream', () => {
 
          function evaluate(results) {
             const attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityStart,
@@ -702,7 +691,7 @@ describe('EntityExpandingStream', () => {
 
          function evaluate(results) {
             const attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityStart,
@@ -779,7 +768,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.EntityDeclaration
             ]);
 
@@ -798,7 +787,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.EntityDeclaration
             ]);
 
@@ -817,11 +806,11 @@ describe('EntityExpandingStream', () => {
          });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.EntityDeclaration
             ]);
 
-            expectTokenTypes(results[0].value, [
+            expect(results[0].value).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityEnd
@@ -842,12 +831,12 @@ describe('EntityExpandingStream', () => {
          });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                SyntaxError,
                tokens.EntityDeclaration
             ]);
 
-            expectTokenTypes(results[1].value, [
+            expect(results[1].value).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.CharRef,
@@ -868,7 +857,7 @@ describe('EntityExpandingStream', () => {
 //         });
 //
 //         function checkResults(results) {
-//            expectTokenTypes(results, [
+//            expect(results).toMatchClasses([
 //               tokens.EntityDeclaration
 //            ]);
 //
@@ -896,7 +885,7 @@ describe('EntityExpandingStream', () => {
          pipeAndTest('<!ATTLIST one attr CDATA "one">', done, checkResults, { entityMd });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.AttrListDeclaration
             ]);
 
@@ -909,7 +898,7 @@ describe('EntityExpandingStream', () => {
 
          function checkResults(results) {
             const attrPieces = results[0].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd
@@ -924,7 +913,7 @@ describe('EntityExpandingStream', () => {
 
          function checkResults(results) {
             const attrPieces = results[1].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityReference
             ]);
          }
@@ -934,7 +923,7 @@ describe('EntityExpandingStream', () => {
          pipeAndTest('<!ATTLIST one attr CDATA "&bogus3;">', done, checkResults, { entityMd });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                SyntaxError,
                tokens.AttrListDeclaration
             ]);
@@ -949,7 +938,7 @@ describe('EntityExpandingStream', () => {
 
          function checkResults(results) {
             const attrPieces = results[0].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd,
@@ -965,13 +954,13 @@ describe('EntityExpandingStream', () => {
 
          function checkResults(results) {
             let attrPieces = results[0].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharRef,
                tokens.EntityEnd
             ]);
             attrPieces = results[0].attributes[1].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityEnd
@@ -987,7 +976,7 @@ describe('EntityExpandingStream', () => {
 
          function checkResults(results) {
             const attrPieces = results[0].attributes[0].value;
-            expectTokenTypes(attrPieces, [
+            expect(attrPieces).toMatchClasses([
                tokens.EntityStart,
                tokens.CharData,
                tokens.EntityStart,
@@ -1036,7 +1025,7 @@ describe('EntityExpandingStream', () => {
          pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo>', done, checkResults);
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.DocTypeStart,
                tokens.DocTypeEnd
@@ -1048,7 +1037,7 @@ describe('EntityExpandingStream', () => {
          pipeAndTest('<?xml version="1.0"?><!DOCTYPE foo [<!ELEMENT foo ANY>]>', done, checkResults);
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.DocTypeStart,
                tokens.InternalSubsetStart,
@@ -1069,7 +1058,7 @@ describe('EntityExpandingStream', () => {
          });
 
          function checkResults(results) {
-            expectTokenTypes(results, [
+            expect(results).toMatchClasses([
                tokens.XmlDeclaration,
                tokens.DocTypeStart,
                tokens.InternalSubsetStart,

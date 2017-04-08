@@ -5,14 +5,13 @@
 const ATTRIBUTE_NAME_TERMINATORS = [ '=', '>', '/>' ];
 const ATTRIBUTE_VALUE_TERMINATORS_LAX = [ '>', '/>' ];
 
-const MiscParser = require('./XmlTokenStream-misc.js');
-const miscParser = new MiscParser();
+const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
 
 /**********************************************************************\
 
 \**********************************************************************/
 
-class XmlTokenStreamElement {
+const XmlTokenStreamElement = {
 
    /*
     * Parse the XML start or end tag, and queues the return token and/or any
@@ -47,7 +46,7 @@ class XmlTokenStreamElement {
       }
 
       return results;
-   }
+   },
 
    parseEndTag(cursor, start) {
       const results = {
@@ -64,7 +63,7 @@ class XmlTokenStreamElement {
       }
 
       return results;
-   }
+   },
 
    /**********************************************************************\
     * Retrieve attributes either for a start/empty tag or for an XML
@@ -136,7 +135,7 @@ class XmlTokenStreamElement {
          const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
 
          if (gotQuote) {
-            parsedValue = miscParser.parseQuotedValue(cursor, {
+            parsedValue = XmlTokenStreamMisc.parseQuotedValue(cursor, {
                terminators: [ '>' ],
                charRef: true,
                geRef: true
@@ -164,7 +163,7 @@ class XmlTokenStreamElement {
       }
 
       return attributes;
-   }
+   },
 
    // See §3.3.3 Attribute-Value Normalization
    _doCDataNormalization(valueArray) {
@@ -174,7 +173,7 @@ class XmlTokenStreamElement {
             item.text = item.text.replace(/[\n\r\t]/g, ' ');
          }
       }
-   }
+   },
 
    _getOneWordValue(cursor) {
       const word = cursor.getWord(ATTRIBUTE_VALUE_TERMINATORS_LAX);

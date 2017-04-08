@@ -1019,14 +1019,14 @@ describe('XmlTokenStream (element)', () => {
 
       it('allows a name to start with "XML-" if this is 1.0/5', () => {
          const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
-         const s = new XmlTokenStream(new XmlStringCursor('<XML-Foo/>', entityMd), new XmlEntityManager());
+         const s = new XmlTokenStream(new XmlStringCursor('<XML-Foo/>', entityMd));
 
          expectTokenType(s, tokens.EmptyElement);
       });
 
       it('allows a name to start with just "xml" if this is 1.0/5', () => {
          const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
-         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo/>', entityMd), new XmlEntityManager());
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo/>', entityMd));
 
          expectTokenType(s, tokens.EmptyElement);
       });
@@ -1218,7 +1218,7 @@ describe('XmlTokenStream (element)', () => {
       // do not report warnings. If this balances, they already got a warning on start
       it('reports no warning if the name starts with xml- in 1.0/5', () => {
          const entityMd = new EntityMetaData(EntityMetaData.TYPE.EXTERNAL, 1.0, 5, new EntityLocation());
-         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xml-foo>', entityMd), new XmlEntityManager(),
+         const s = new XmlTokenStream(new XmlStringCursor('<xmlFoo></xml-foo>', entityMd),
             { lax: true });
          expectTokenType(s, tokens.ElementStart);
          expectError(s, WellFormednessError.ID.ELEMENT_UNBALANCED,

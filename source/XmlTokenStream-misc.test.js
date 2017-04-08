@@ -10,7 +10,7 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const Chunk = require('./shared/Chunk.js');
 const tokens = require('./XmlToken.js');
-const XmlMiscParser = require('./XmlTokenStream-misc.js');
+const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlWarning = require('./error/XmlWarning.js');
 
@@ -1985,7 +1985,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('retrieves a single chunk if all options are false', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor);
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor);
 
          expect(result).toEqual({
             startQuoteChunk: makeChunk('"', 0, 1),
@@ -1995,12 +1995,12 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('recognizes a character reference if instructed to do so', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { charRef: true });
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor, { charRef: true });
 
          expect(result.items.length).toEqual(5);
          expect(result.items[0].text).toEqual('zero ');
          expect(result.items[1]).toEqual({
-            type: XmlMiscParser.TYPE.CHAR_REF,
+            type: XmlTokenStreamMisc.TYPE.CHAR_REF,
             parsed: {
                startChunk: makeChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
@@ -2016,7 +2016,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
          expect(result.items[2].text).toEqual(' ');
          expect(result.items[3]).toEqual({
-            type: XmlMiscParser.TYPE.CHAR_REF,
+            type: XmlTokenStreamMisc.TYPE.CHAR_REF,
             parsed: {
                startChunk: makeChunk('&', 12, 13),
                postStartSpaceChunk: undefined,
@@ -2034,12 +2034,12 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('recognizes a parameter entity reference if instructed to do so', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { peRef: true });
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor, { peRef: true });
 
          expect(result.items.length).toEqual(2);
          expect(result.items[0].text).toEqual('zero &#49; &#x32; &three; ');
          expect(result.items[1]).toEqual({
-            type: XmlMiscParser.TYPE.PARAMETER_REF,
+            type: XmlTokenStreamMisc.TYPE.PARAMETER_REF,
             parsed: {
                startChunk: makeChunk('%', 27, 28),
                postStartSpaceChunk: undefined,
@@ -2051,12 +2051,12 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('recognizes a general entity reference if instructed to do so', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor, { geRef: true });
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor, { geRef: true });
 
          expect(result.items.length).toEqual(3);
          expect(result.items[0].text).toEqual('zero &#49; &#x32; ');
          expect(result.items[1]).toEqual({
-            type: XmlMiscParser.TYPE.GENERAL_REF,
+            type: XmlTokenStreamMisc.TYPE.GENERAL_REF,
             parsed: {
                startChunk: makeChunk('&', 19, 20),
                postStartSpaceChunk: undefined,
@@ -2069,7 +2069,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('recognizes all types when asked to', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor, {
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor, {
             geRef: true,
             peRef: true,
             charRef: true
@@ -2078,7 +2078,7 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items.length).toEqual(8);
          expect(result.items[0].text).toEqual('zero ');
          expect(result.items[1]).toEqual({
-            type: XmlMiscParser.TYPE.CHAR_REF,
+            type: XmlTokenStreamMisc.TYPE.CHAR_REF,
             parsed: {
                startChunk: makeChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
@@ -2094,7 +2094,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
          expect(result.items[2].text).toEqual(' ');
          expect(result.items[3]).toEqual({
-            type: XmlMiscParser.TYPE.CHAR_REF,
+            type: XmlTokenStreamMisc.TYPE.CHAR_REF,
             parsed: {
                startChunk: makeChunk('&', 12, 13),
                postStartSpaceChunk: undefined,
@@ -2110,7 +2110,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
          expect(result.items[4].text).toEqual(' ');
          expect(result.items[5]).toEqual({
-            type: XmlMiscParser.TYPE.GENERAL_REF,
+            type: XmlTokenStreamMisc.TYPE.GENERAL_REF,
             parsed: {
                startChunk: makeChunk('&', 19, 20),
                postStartSpaceChunk: undefined,
@@ -2121,7 +2121,7 @@ describe('XmlTokenStream (Misc)', () => {
          });
          expect(result.items[6].text).toEqual(' ');
          expect(result.items[7]).toEqual({
-            type: XmlMiscParser.TYPE.PARAMETER_REF,
+            type: XmlTokenStreamMisc.TYPE.PARAMETER_REF,
             parsed: {
                startChunk: makeChunk('%', 27, 28),
                postStartSpaceChunk: undefined,
@@ -2133,7 +2133,7 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('stops when a specified terminator is found', () => {
-         const result = new XmlMiscParser().parseQuotedValue(standardCursor, {
+         const result = XmlTokenStreamMisc.parseQuotedValue(standardCursor, {
             terminators: [ 'o' ]
          });
 
@@ -2145,14 +2145,14 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('copes with an entity reference starting at EOF', () => {
-         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"zero &'), {
+         const result = XmlTokenStreamMisc.parseQuotedValue(new XmlStringCursor('"zero &'), {
             geRef: true
          });
 
          expect(result.items.length).toEqual(2);
          expect(result.items[0].text).toEqual('zero ');
          expect(result.items[1]).toEqual({
-            type: XmlMiscParser.TYPE.GENERAL_REF,
+            type: XmlTokenStreamMisc.TYPE.GENERAL_REF,
             parsed: {
                startChunk: makeChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
@@ -2164,13 +2164,13 @@ describe('XmlTokenStream (Misc)', () => {
       });
 
       it('copes with a missing quote when no items specified', () => {
-         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"zero one'));
+         const result = XmlTokenStreamMisc.parseQuotedValue(new XmlStringCursor('"zero one'));
 
          expect(result.items).toEqual([ makeChunk('zero one', 1, 9) ]);
       });
 
       it('copes with a malformed ref at the end', () => {
-         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"&"'), {
+         const result = XmlTokenStreamMisc.parseQuotedValue(new XmlStringCursor('"&"'), {
             charRef: true
          });
 

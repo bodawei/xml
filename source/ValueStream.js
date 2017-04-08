@@ -37,7 +37,6 @@ class ValueStream extends stream.Readable {
          geRef: options.geRef || false,
          peRef: options.peRef || false
       };
-      this._miscParser = new XmlTokenStreamMisc();
       this._pendingChunks = [];
    }
 
@@ -45,7 +44,7 @@ class ValueStream extends stream.Readable {
       this._pushedValue = false;
 
       while (!this._pushedValue) {
-         const result = this._miscParser.parseUnknownInValue(this._cursor);
+         const result = XmlTokenStreamMisc.parseUnknownInValue(this._cursor);
 
          if (!result.hasMore) {
             this._pushToken(null);
@@ -72,11 +71,11 @@ class ValueStream extends stream.Readable {
       const nextChar = this._cursor.peekChar();
 
       if (nextChar && nextChar.text === '#') {
-         const reference = this._miscParser.parseReference(this._cursor, start);
+         const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
 
          this._pushToken(new tokens.CharRef(reference.character, this._cursor.getRecentChunks()));
       } else if (this._options.geRef) {
-         const reference = this._miscParser.parseReference(this._cursor, start);
+         const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
          const name = reference.nameChunk ? reference.nameChunk.text : '';
 
          this._pushToken(new tokens.EntityReference(name, this._cursor.getRecentChunks()));
@@ -85,7 +84,7 @@ class ValueStream extends stream.Readable {
 
    _getParameterEntityReference(start) {
       if (this._options.peRef) {
-         const reference = this._miscParser.parseReference(this._cursor, start);
+         const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
          const name = reference.nameChunk ? reference.nameChunk.text : '';
 
          this._pushToken(new tokens.ParameterEntityReference(name, this._cursor.getRecentChunks()));
@@ -104,7 +103,7 @@ class ValueStream extends stream.Readable {
 
    _pushToken(newToken) {
       if (this._pendingChunks.length > 0) {
-         const combinedChunk = this._miscParser.combineChunks(...this._pendingChunks);
+         const combinedChunk = XmlTokenStreamMisc.combineChunks(...this._pendingChunks);
          this._pendingChunks = [];
          this.push(new tokens.Text(combinedChunk.text, [ combinedChunk ]));
       }
