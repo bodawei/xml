@@ -302,30 +302,15 @@ class XmlStringCursor {
    }
 
    /**********************************************************************\
-    Returns the most likely type for the next token in the cursor. In some
-    cases, the next token is ambiguous (e.g. is it a CHAR or a WORD or a
-    STRING?). In those cases, this assumes STRING.
+    peekIsSpace() returns true if the next character might be a space
+    (
 
     RETURN
-    One of the XmlStringToken constants: MARKUP, CLOSE, SPACE, or STRING.
+    true if the next character is a space type of character.
    \**********************************************************************/
 
-   peekType() {
-      const nextChar = this._source[this._offset.index];
-
-      if (!nextChar) {
-         return;
-      }
-
-      if (nextChar === '<' || nextChar === '&' || nextChar === '%') {
-         return TextChunk.TYPE.MARKUP;
-      } else if (this._isSpace(this._source[this._offset.index])) {
-         return TextChunk.TYPE.SPACE;
-      } else if (nextChar === ']') {
-         return TextChunk.TYPE.CLOSE;
-      } else {
-         return TextChunk.TYPE.STRING;
-      }
+   peekIsSpace() {
+      return this._isSpace(this._source[this._offset.index]);
    }
 
    /* ---------------------------------------------------------------------*\
@@ -335,7 +320,6 @@ class XmlStringCursor {
    \*----------------------------------------------------------------------*/
 
    peekChar() {
-      let invalidChars;
       const startOffset = this._offset.clone();
       const endOffset = this._offset.clone();
       const is1dot1 = this._entityMd.isVersion1dot1;
@@ -361,16 +345,9 @@ class XmlStringCursor {
          }
 
          nextChar = '\n';
-      } else {
-         const charKind = util.charKind(nextChar, this.entityMd);
-
-         if (charKind === util.CHARKIND_INVALID) {
-            invalidChars = [ 0 ];
-         }
       }
 
       const chunk = new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._entityMd.location);
-      chunk.invalidChars = invalidChars;
 
       return chunk;
    }
@@ -968,7 +945,7 @@ class XmlStringCursor {
    \**********************************************************************/
 
    _makeDigitChunk(data, isDecimal, startOffset) {
-      const chunk = new TextChunk.DigitChunk(data, isDecimal, startOffset, this._offset.clone(),
+      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(),
          this._entityMd.location);
       this._chunks.push(chunk);
       return chunk;

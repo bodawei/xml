@@ -47,7 +47,7 @@ class ValueStream extends stream.Readable {
       while (!this._pushedValue) {
          const result = this._miscParser.parseUnknownInValue(this._cursor);
 
-         if (!result.type) {
+         if (!result.hasMore) {
             this._pushToken(null);
             return;
          }

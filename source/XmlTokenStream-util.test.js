@@ -195,12 +195,6 @@ function makePlainChunk(text, start, end) {
       new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
 }
 
-function makeDigitsChunk(text, start, end, isDecimal) {
-   end = end || start + text.length;
-   return new TextChunk.DigitChunk(text, isDecimal,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
-}
-
 function makeWithSpaceChunk(text, start, end, originalText) {
    end = end || start + text.length;
    return new TextChunk.WithSpaceChunk(text, originalText || text,
@@ -223,6 +217,5 @@ module.exports = {
    makeStrictExternalEntityStream,
    makeStringTokenArray,
    makePlainChunk,
-   makeWithSpaceChunk,
-   makeDigitsChunk
+   makeWithSpaceChunk
 };

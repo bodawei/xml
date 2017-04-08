@@ -353,7 +353,7 @@ describe('EntityExpandingStream', () => {
             expect(results[3].chunks).toEqual(makeStringTokenArray([
                new TextChunk.PlainChunk('&'),
                new TextChunk.PlainChunk('#'),
-               new TextChunk.DigitChunk('60', true),
+               new TextChunk.PlainChunk('60'),
                new TextChunk.PlainChunk(';')
             ]));
          });

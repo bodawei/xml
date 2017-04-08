@@ -210,54 +210,41 @@ class XmlTokenStream extends stream.Readable {
       const pendingCloseText = pendingClose ? pendingClose.close : undefined;
       const result = this._miscParser.parseUnknownInContent(this._cursor, pendingCloseText);
 
-      if (!result.type) {
+      if (!result.hasMore) {
          this._pushToken(null);
          return;
       }
 
-      switch (result.type) {
-         case TextChunk.TYPE.MARKUP:
-            switch (result.markup.text) {
-               case '&':
-                  this._getReference(result.markup);
-                  break;
-               case '<':
-                  this._getStartOrEmptyTag(result.markup);
-                  break;
-               case '</':
-                  this._getEndTag(result.markup);
-                  break;
-               case '<?':
-                  this._getProcessingInstruction(result.markup);
-                  break;
-               case '<!':
-                  this._getBangItem(result.markup);
-                  break;
-               case '<!--':
-                  this._getComment(result.markup);
-                  break;
-            }
-            break;
-         case TextChunk.TYPE.SPACE:
-            // only recognize spaces when we aren't between tags
-            if (this._elementNameStack.length === 0) {
-               this._getS();
-            } else {
-               this._getContent();
-            }
-            break;
-         case TextChunk.TYPE.CLOSE:
-            if (result.close) {
-               this._pushToken(new tokens.InternalSubsetEnd());
-               this._closeDocType();
-               this._popEnveloper();
-            } else {
-               this._getContent();
-            }
-            break;
-         case TextChunk.TYPE.STRING:
-            this._getContent();
-            break;
+      if (result.markup) {
+         switch (result.markup.text) {
+            case '&':
+               this._getReference(result.markup);
+               break;
+            case '<':
+               this._getStartOrEmptyTag(result.markup);
+               break;
+            case '</':
+               this._getEndTag(result.markup);
+               break;
+            case '<?':
+               this._getProcessingInstruction(result.markup);
+               break;
+            case '<!':
+               this._getBangItem(result.markup);
+               break;
+            case '<!--':
+               this._getComment(result.markup);
+               break;
+         }
+      } else if (result.isSpace && this._elementNameStack.length === 0) {
+         // only recognize spaces when we aren't between tags
+         this._getS();
+      } else if (result.close) {
+         this._pushToken(new tokens.InternalSubsetEnd());
+         this._closeDocType();
+         this._popEnveloper();
+      } else {
+         this._getContent();
       }
    }
 
@@ -334,7 +321,7 @@ class XmlTokenStream extends stream.Readable {
 
       if (!parsed.digitsChunk) {
          this._report(SEID.CHARREF_NO_DIGITS);
-      } else if (!parsed.hexMarkerChunk && !parsed.digitsChunk.isDecimal) {
+      } else if (!parsed.hexMarkerChunk && !this._miscParser.isDecimal(parsed.digitsChunk)) {
          this._report(SEID.CHARREF_INVALID_BASE, [ parsed.digitsChunk.text ]);
       }
 

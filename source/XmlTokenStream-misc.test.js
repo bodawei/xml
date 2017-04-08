@@ -29,7 +29,6 @@ const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType
 const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeStringTokenArray;
 const util = require('./XmlTokenStream-util.test.js');
 const makePlainChunk = util.makePlainChunk;
-const makeDigitsChunk = util.makeDigitsChunk;
 const makeWithSpaceChunk = util.makeWithSpaceChunk;
 
 function compareXmlDeclAttribute(attr, name, value) {
@@ -1884,7 +1883,7 @@ describe('XmlTokenStream (Misc)', () => {
             new TextChunk.PlainChunk('&'),
             new TextChunk.PlainChunk('#'),
             new TextChunk.PlainChunk('x'),
-            new TextChunk.DigitChunk('42', true),
+            new TextChunk.PlainChunk('42'),
             new TextChunk.PlainChunk(';')
          ]));
       });
@@ -2010,7 +2009,7 @@ describe('XmlTokenStream (Misc)', () => {
                postHashSpaceChunk: undefined,
                hexMarkerChunk: undefined,
                postHexSpaceChunk: undefined,
-               digitsChunk: makeDigitsChunk('49', 8, 10, true),
+               digitsChunk: makePlainChunk('49', 8, 10),
                postDigitsSpaceChunk: undefined,
                semicolonChunk: makePlainChunk(';', 10, 11),
                character: '1'
@@ -2026,7 +2025,7 @@ describe('XmlTokenStream (Misc)', () => {
                postHashSpaceChunk: undefined,
                hexMarkerChunk: makePlainChunk('x', 14, 15),
                postHexSpaceChunk: undefined,
-               digitsChunk: makeDigitsChunk('32', 15, 17, true),
+               digitsChunk: makePlainChunk('32', 15, 17),
                postDigitsSpaceChunk: undefined,
                semicolonChunk: makePlainChunk(';', 17, 18),
                character: '2'
@@ -2088,7 +2087,7 @@ describe('XmlTokenStream (Misc)', () => {
                postHashSpaceChunk: undefined,
                hexMarkerChunk: undefined,
                postHexSpaceChunk: undefined,
-               digitsChunk: makeDigitsChunk('49', 8, 10, true),
+               digitsChunk: makePlainChunk('49', 8, 10),
                postDigitsSpaceChunk: undefined,
                semicolonChunk: makePlainChunk(';', 10, 11),
                character: '1'
@@ -2104,7 +2103,7 @@ describe('XmlTokenStream (Misc)', () => {
                postHashSpaceChunk: undefined,
                hexMarkerChunk: makePlainChunk('x', 14, 15),
                postHexSpaceChunk: undefined,
-               digitsChunk: makeDigitsChunk('32', 15, 17, true),
+               digitsChunk: makePlainChunk('32', 15, 17),
                postDigitsSpaceChunk: undefined,
                semicolonChunk: makePlainChunk(';', 17, 18),
                character: '2'

@@ -474,96 +474,6 @@ describe('XmlStringCursor', () => {
 
    });
 
-   describe('peekType()', () => {
-
-      it('returns MARKUP if there is a < next', () => {
-         const c = new XmlStringCursor('<foo>');
-
-         expect(c.peekType()).toEqual(TYPE.MARKUP);
-      });
-
-      it('returns MARKUP if there is a & next', () => {
-         const c = new XmlStringCursor('&foo>');
-
-         expect(c.peekType()).toEqual(TYPE.MARKUP);
-      });
-
-      it('returns MARKUP if there is a % next', () => {
-         const c = new XmlStringCursor('%foo>');
-
-         expect(c.peekType()).toEqual(TYPE.MARKUP);
-      });
-
-      it('returns SPACE if that is what is next', () => {
-         const c = new XmlStringCursor(' \t\n ');
-
-         expect(c.peekType()).toEqual(TYPE.SPACE);
-      });
-
-      it('returns that \\u0085 is STRING if this is parsing as 1.0', () => {
-         const c = new XmlStringCursor('\u0085');
-
-         expect(c.peekType()).toEqual(TYPE.STRING);
-      });
-
-      it('returns that \\u2028 is STRING if this is parsing as 1.0', () => {
-         const c = new XmlStringCursor('\u2028');
-
-         expect(c.peekType()).toEqual(TYPE.STRING);
-      });
-
-      it('returns that \\u0085 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u0085', entityMetaData1dot1);
-
-         expect(c.peekType()).toEqual(TYPE.SPACE);
-      });
-
-      it('returns that \\u2028 is SPACE if this is parsing as 1.1', () => {
-         const c = new XmlStringCursor('\u2028', entityMetaData1dot1);
-
-         expect(c.peekType()).toEqual(TYPE.SPACE);
-      });
-
-      it('returns STRING if the next is neither markup or space', () => {
-         const c = new XmlStringCursor('one');
-
-         expect(c.peekType()).toEqual(TYPE.STRING);
-      });
-
-      it('returns CLOSE if the next is a square bracket', () => {
-         const c = new XmlStringCursor(']<');
-
-         expect(c.peekType()).toEqual(TYPE.CLOSE);
-      });
-
-      it('returns CLOSE if the next the end of a conditional section', () => {
-         const c = new XmlStringCursor(']]>');
-
-         expect(c.peekType()).toEqual(TYPE.CLOSE);
-      });
-
-      it('returns undefined if at the end of the input', () => {
-         const c = new XmlStringCursor('');
-
-         expect(c.peekType()).toBeUndefined();
-      });
-
-      it('works correctly when cursor has incremented past start of string', () => {
-         const c = new XmlStringCursor('h<foo>');
-         c.getChar();
-
-         expect(c.peekType()).toEqual(TYPE.MARKUP);
-      });
-
-      it('adds nothing to the recent chunks', () => {
-         const c = new XmlStringCursor('h<foo>');
-         c.peekType();
-
-         expect(c.getRecentChunks()).toEqual([]);
-      });
-
-   });
-
    describe('peekChar()', () => {
 
       it('returns the next character', () => {
@@ -637,91 +547,6 @@ describe('XmlStringCursor', () => {
          c.getChar();
 
          expect(c.peekChar()).toEqual(new PlainChunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
-      });
-
-      it('adds an array of invalid character indexes when a bad character is found', () => {
-         const c = new XmlStringCursor('\u0000');
-
-         expect(c.peekChar().invalidChars).toEqual([ 0 ]);
-      });
-
-      it('adds the index for all invalid characters below 256 in 1.0', () => {
-         for (let index = 0; index <= 255; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index));
-            const expected = {
-               index: index.toString(16),  // to let failures be more understandable
-               result: undefined
-            };
-
-            if (index < 0x20 && index !== 0x09 && index !== 0x0A && index !== 0x0D) {
-               expected.result = [ 0 ];
-            }
-
-            expect({
-               index: index.toString(16),
-               result: c.peekChar().invalidChars
-            }).toEqual(expected);
-         }
-      });
-
-      it('adds the index for all invalid characters between D7FE and E001 in 1.0', () => {
-         for (let index = 0xFFFD; index <= 0xFFFF; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index));
-            const expected = {
-               index: index.toString(16),
-               result: undefined
-            };
-
-            if (index !== 0xFFFD) {
-               expected.result = [ 0 ];
-            }
-
-            expect({
-               index: index.toString(16),
-               result: c.peekChar().invalidChars
-            }).toEqual(expected);
-         }
-      });
-
-      it('adds the index for all invalid characters below 256 in 1.1', () => {
-         for (let index = 0; index <= 255; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index),
-               new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2));
-            const expected = {
-               index: index.toString(16),  // to let failures be more understandable
-               result: undefined
-            };
-
-            if ((index < 0x20 && index !== 0x09 && index !== 0x0A && index !== 0x0D) ||
-               (index >= 0x7F && index <= 0x9F && index !== 0x85)) {
-               expected.result = [ 0 ];
-            }
-
-            expect({
-               index: index.toString(16),
-               result: c.peekChar().invalidChars
-            }).toEqual(expected);
-         }
-      });
-
-      it('adds the index for all invalid characters between D7FE and E001 in 1.1/2', () => {
-         for (let index = 0xFFFD; index <= 0xFFFF; index++) {
-            const c = new XmlStringCursor(String.fromCharCode(index),
-               new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2));
-            const expected = {
-               index: index.toString(16),
-               result: undefined
-            };
-
-            if (index !== 0xFFFD) {
-               expected.result = [ 0 ];
-            }
-
-            expect({
-               index: index.toString(16),
-               result: c.peekChar().invalidChars
-            }).toEqual(expected);
-         }
       });
 
       it('adds nothing to the recent chunks', () => {
@@ -989,21 +814,21 @@ describe('XmlStringCursor', () => {
       it('returns the next space-terminated set of decimal digits', () => {
          const c = new XmlStringCursor('123 ');
 
-         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('123', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
 
       it('returns the next space-terminated set of hex digits', () => {
          const c = new XmlStringCursor('12AbCdE3 ');
 
-         const expected = new DigitChunk('12AbCdE3', false, new Offset(0, 0, 0), new Offset(0, 8, 8), defaultLoc);
+         const expected = new PlainChunk('12AbCdE3', new Offset(0, 0, 0), new Offset(0, 8, 8), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
 
       it('returns all the possible digits', () => {
          const c = new XmlStringCursor('0123456789AaBbCcDdEeFf');
 
-         const expected = new DigitChunk('0123456789AaBbCcDdEeFf', false, new Offset(0, 0, 0),
+         const expected = new PlainChunk('0123456789AaBbCcDdEeFf', new Offset(0, 0, 0),
             new Offset(0, 22, 22), defaultLoc);
          expect(c.getDigits()).toEqual(expected);
       });
@@ -1023,14 +848,14 @@ describe('XmlStringCursor', () => {
       it('stops processing at a non-digit', () => {
          const c = new XmlStringCursor('12;');
 
-         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0),
+         expect(c.getDigits()).toEqual(new PlainChunk('12', new Offset(0, 0, 0),
             new Offset(0, 2, 2), defaultLoc));
       });
 
       it('stops processing at EOF', () => {
          const c = new XmlStringCursor('12');
 
-         expect(c.getDigits()).toEqual(new DigitChunk('12', true, new Offset(0, 0, 0),
+         expect(c.getDigits()).toEqual(new PlainChunk('12', new Offset(0, 0, 0),
             new Offset(0, 2, 2), defaultLoc));
       });
 
@@ -1039,14 +864,14 @@ describe('XmlStringCursor', () => {
          c.getWord([]);
          c.getSpace();
 
-         expect(c.getDigits()).toEqual(new DigitChunk('123', true, new Offset(0, 4, 4),
+         expect(c.getDigits()).toEqual(new PlainChunk('123', new Offset(0, 4, 4),
             new Offset(0, 7, 7), defaultLoc));
       });
 
       it('adds the digit chunk to the recent chunks', () => {
          const c = new XmlStringCursor('123 ');
          c.getDigits();
-         const expected = new DigitChunk('123', true, new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
+         const expected = new PlainChunk('123', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
 
          expect(c.getRecentChunks()).toEqual([ expected ]);
       });

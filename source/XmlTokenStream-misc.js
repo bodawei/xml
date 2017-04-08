@@ -13,6 +13,8 @@ const QUOTE_PIECE_TYPES = {
    PARAMETER_REF: 'PARAMETER_REF'
 };
 
+const DECIMAL_CHARS = /^[0-9]*$/;
+
 /**********************************************************************\
  XmlTokenStreamMisc provides a set of routines for parsing the "misc"
  production. Indirectly, this includes the XML and Text Declarations,
@@ -42,19 +44,23 @@ class XmlTokenStreamMisc {
    \**********************************************************************/
 
    parseUnknownInContent(cursor, awaitingCloseText) {
+      const nextChar = cursor.peekChar();
+
       const result = {
-         type: cursor.peekType()
+         hasMore: !!nextChar,
+         isSpace: cursor.peekIsSpace()
       };
 
-      if (!result.type) {
+      if (!nextChar) {
          return result;
       }
 
-      switch (result.type) {
-         case TextChunk.TYPE.MARKUP:
+      switch (nextChar.text) {
+         case '&':
+         case '<':
             result.markup = cursor.getMarkup();
             break;
-         case TextChunk.TYPE.CLOSE:
+         case ']':
             if (awaitingCloseText) {
                result.close = cursor.getMatch(awaitingCloseText);
             }
@@ -81,15 +87,14 @@ class XmlTokenStreamMisc {
    \**********************************************************************/
 
    parseUnknownInValue(cursor) {
+      const nextChar = cursor.peekChar()
       const result = {
-         type: cursor.peekType()
+         hasMore: !!nextChar
       };
 
-      if (!result.type) {
+      if (!nextChar) {
          return result;
       }
-
-      const nextChar = cursor.peekChar();
 
       // always have a nextchar or we would have returned without a type
       if (nextChar.text === '&' || nextChar.text === '%') {
@@ -398,14 +403,16 @@ class XmlTokenStreamMisc {
       result.semicolonChunk = cursor.getMatch(';');
 
       if (result.digitsChunk) {
-         if (!result.digitsChunk.isDecimal) {
-            isHex = true;
-         }
+         isHex = isHex || !this.isDecimal(result.digitsChunk);
 
          result.character = String.fromCharCode(parseInt(result.digitsChunk.text, isHex ? 16 : 10));
       }
 
       return result;
+   }
+
+   isDecimal(chunk) {
+      return DECIMAL_CHARS.test(chunk ? chunk.text : '')
    }
 
    /**********************************************************************\

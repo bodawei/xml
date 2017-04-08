@@ -11,10 +11,10 @@ M199: Core new cursor routine
 	- async behavior
 
 M+ 198: Reduce all TextChunks to one kind
-	- move digit checking into parser
-	- remove invalidChars
-	- move 'TextChunk.TYPE' in string cursor as it's own kind of thing
-	- remove peekType
+	√ - move digit checking into parser
+	√ - remove invalidChars
+	√ - move 'TextChunk.TYPE' in string cursor as it's own kind of thing
+	√- remove peekType
 
 
 
