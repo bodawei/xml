@@ -3,7 +3,7 @@
 'use strict';
 
 const EntityMetaData = require('./shared/EntityMetaData.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 
@@ -12,7 +12,7 @@ const INTERNAL_SUBSET = 'EntityDeclaredInInternalSubset';
 const EXTERNAL_SUBSET = 'EntityDeclaredInExternalSubset';
 const EXTERNAL_SUBSET_NAME = '\tEXTERNAL\tSUBSET\t';
 
-const DEF_CHUNKS = [ new TextChunk('default') ];
+const DEF_CHUNKS = [ new Chunk('default') ];
 
 /**********************************************************************\
   A cache of available entities.

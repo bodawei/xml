@@ -8,7 +8,7 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const Offset = require('./shared/Offset.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const EntityExpandingStream = require('./EntityExpandingStream.js');
 const tokens = require('./XmlToken.js');
@@ -18,7 +18,7 @@ const makeStrictStream = testUtils.makeStrictStream;
 const makeLaxStream = testUtils.makeLaxStream;
 const makeStringTokenArray = testUtils.makeStringTokenArray;
 
-const TEST_CHUNKS = [ new TextChunk('from test') ];
+const TEST_CHUNKS = [ new Chunk('from test') ];
 
 function expectLengthsMatch(fnName, aName, bName, actual, expected) {
    if (expected === actual) {
@@ -351,10 +351,10 @@ describe('EntityExpandingStream', () => {
             ]);
 
             expect(results[3].chunks).toEqual(makeStringTokenArray([
-               new TextChunk('&'),
-               new TextChunk('#'),
-               new TextChunk('60'),
-               new TextChunk(';')
+               new Chunk('&'),
+               new Chunk('#'),
+               new Chunk('60'),
+               new Chunk(';')
             ]));
          });
       });

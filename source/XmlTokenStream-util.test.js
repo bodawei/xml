@@ -8,7 +8,7 @@ const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared/EntityLocation.js');
 const SyntaxError = require('./error/SyntaxError.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
@@ -189,9 +189,9 @@ function makeStringTokenArray(values, offset = 0) {
    return results;
 }
 
-function makeTextChunk(text, start, end) {
+function makeChunk(text, start, end) {
    end = end || start + text.length;
-   return new TextChunk(text, new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+   return new Chunk(text, new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
 }
 
 module.exports = {
@@ -209,5 +209,5 @@ module.exports = {
    makeLaxExternalEntityStream,
    makeStrictExternalEntityStream,
    makeStringTokenArray,
-   makeTextChunk
+   makeChunk
 };

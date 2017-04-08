@@ -4,13 +4,13 @@
 
 /* eslint-env jasmine */
 
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const EntityLocation = require('./shared/EntityLocation.js');
 const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 
-const TEST_CHUNKS = [ new TextChunk('from test') ];
+const TEST_CHUNKS = [ new Chunk('from test') ];
 
 function extractEntityText(manager, name) {
    return manager.getEntity(name).getToTerminator([ 'EOF' ]);

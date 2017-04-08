@@ -7,7 +7,7 @@
 const EntityLocation = require('../shared/EntityLocation.js');
 const Offset = require('../shared/Offset.js');
 const StringBundle = require('../shared/StringBundle.js');
-const TextChunk = require('../shared/TextChunk.js');
+const Chunk = require('../shared/Chunk.js');
 const XmlError = require('./XmlError.js');
 
 describe('XmlError()', () => {
@@ -79,9 +79,9 @@ describe('XmlError()', () => {
             .toEqual(new Offset(0, 1, 2));
       });
 
-      it('sets the place even if a TextChunk is passed', () => {
+      it('sets the place even if a Chunk is passed', () => {
          expect(new XmlError(Error.ID.TEST, [],
-            new TextChunk('foo', new Offset(0, 1, 2), new Offset(0, 3, 4))).place)
+            new Chunk('foo', new Offset(0, 1, 2), new Offset(0, 3, 4))).place)
             .toEqual(new Offset(0, 3, 4));
       });
 
@@ -117,10 +117,10 @@ describe('XmlError()', () => {
             } ]);
       });
 
-      it('wraps the context if just an TextChunk is passed', () => {
+      it('wraps the context if just an Chunk is passed', () => {
          const place = new Offset(0, 1, 2);
-         const textChunk = new TextChunk('foo', place, new Offset(0, 3, 4));
-         expect(new XmlError(Error.ID.TEST, [], place, textChunk).context)
+         const chunk = new Chunk('foo', place, new Offset(0, 3, 4));
+         expect(new XmlError(Error.ID.TEST, [], place, chunk).context)
             .toEqual([ {
                offset: place,
                location: undefined

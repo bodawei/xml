@@ -9,7 +9,7 @@ const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const tokens = require('./XmlToken.js');
 
 const util = require('./XmlTokenStream-util.test.js');
@@ -372,7 +372,7 @@ describe('XmlTokenStream (dtd2)', () => {
             flag: undefined,
             value: [
                new tokens.Text('x', tokens.ENTITYVAL_NO_CHUNKS),
-               new tokens.CharRef('A', [ util.makeTextChunk('&#65;', 40) ]),
+               new tokens.CharRef('A', [ util.makeChunk('&#65;', 40) ]),
                new tokens.Text('y', tokens.ENTITYVAL_NO_CHUNKS)
             ]
          } ]);
@@ -587,7 +587,7 @@ describe('XmlTokenStream (dtd2)', () => {
             list: undefined,
             flag: undefined,
             value: [
-               new tokens.CharRef('A', [ util.makeTextChunk('&# 65;', 39) ])
+               new tokens.CharRef('A', [ util.makeChunk('&# 65;', 39) ])
             ]
          } ]);
       });
@@ -800,34 +800,34 @@ describe('XmlTokenStream (dtd2)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('ATTLIST'),
-            new TextChunk(' '),
-            new TextChunk('elName'),
-            new TextChunk('  '),
-            new TextChunk('at1'),
-            new TextChunk(' '),
-            new TextChunk('CDATA'),
-            new TextChunk(' '),
-            new TextChunk('#REQUIRED'),
-            new TextChunk(' '),
-            new TextChunk('at2'),
-            new TextChunk(' '),
-            new TextChunk('NOTATION'),
-            new TextChunk(' '),
-            new TextChunk('('),
-            new TextChunk('foo'),
-            new TextChunk('|'),
-            new TextChunk(' '),
-            new TextChunk('bar'),
-            new TextChunk(')'),
-            new TextChunk(' '),
-            new TextChunk('#FIXED'),
-            new TextChunk(' '),
-            new TextChunk('"'),
-            new TextChunk('argh'),
-            new TextChunk('"'),
-            new TextChunk('>')
+            new Chunk('<!'),
+            new Chunk('ATTLIST'),
+            new Chunk(' '),
+            new Chunk('elName'),
+            new Chunk('  '),
+            new Chunk('at1'),
+            new Chunk(' '),
+            new Chunk('CDATA'),
+            new Chunk(' '),
+            new Chunk('#REQUIRED'),
+            new Chunk(' '),
+            new Chunk('at2'),
+            new Chunk(' '),
+            new Chunk('NOTATION'),
+            new Chunk(' '),
+            new Chunk('('),
+            new Chunk('foo'),
+            new Chunk('|'),
+            new Chunk(' '),
+            new Chunk('bar'),
+            new Chunk(')'),
+            new Chunk(' '),
+            new Chunk('#FIXED'),
+            new Chunk(' '),
+            new Chunk('"'),
+            new Chunk('argh'),
+            new Chunk('"'),
+            new Chunk('>')
          ], 21));
       });
 

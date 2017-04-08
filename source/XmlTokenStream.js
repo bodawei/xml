@@ -9,7 +9,7 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
 const WellFormednessError = require('./error/WellFormednessError.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const tokens = require('./XmlToken.js');
 const util = require('./shared/util.js');
 const XmlError = require('./error/XmlError.js');
@@ -493,7 +493,7 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < parsedQuotedValue.items.length; index++) {
          const item = parsedQuotedValue.items[index];
 
-         if (item instanceof TextChunk) {
+         if (item instanceof Chunk) {
             result.push(new tokens.Text(item.text, tokens.ENTITYVAL_NO_CHUNKS));
          } else {
             const name = item.parsed.nameChunk ? item.parsed.nameChunk.text : '';
@@ -528,7 +528,7 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < parsedQuotedValue.items.length; index++) {
          const item = parsedQuotedValue.items[index];
 
-         if (item instanceof TextChunk) {
+         if (item instanceof Chunk) {
             if (options.validateAngleBracket) {
                if (item.text.indexOf('<') !== -1) {
                   this._report(options.error, [ options.param ]);

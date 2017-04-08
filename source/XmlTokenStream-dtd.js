@@ -2,7 +2,7 @@
 
 'use strict';
 
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const MiscParser = require('./XmlTokenStream-misc.js');
 const miscParser = new MiscParser();
 
@@ -375,7 +375,7 @@ class XmlTokenStreamDtd {
 
     RETURN
     An object with these properties:
-      list: An array of 0 or more TextChunks, each one representing a name
+      list: An array of 0 or more Chunks, each one representing a name
          found in the ist
       missingCount: The number of names missing from the list (e.g. empty
          space between "|"'s)
@@ -537,7 +537,7 @@ class XmlTokenStreamDtd {
       if (isQuote) {
          cursor.getMatch(result.quote.text);
          const stringInfo = cursor.getToTerminator([ result.quote.text ]);
-         result.literalChunk = stringInfo.chunk || new TextChunk('', result.quote.endOffset,
+         result.literalChunk = stringInfo.chunk || new Chunk('', result.quote.endOffset,
             result.quote.endOffset, result.quote.entityLocation);
          result.closeChunk = cursor.getMatch(result.quote.text);
 

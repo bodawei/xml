@@ -1,4 +1,4 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016–2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -7,7 +7,7 @@ const iconvLite = require('iconv-lite');
 const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared/EntityLocation.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 
 const LINE_ENDING_REGEX10 = /(\r\n)|(\r)/g;
 const LINE_ENDING_REGEX11 = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
@@ -343,7 +343,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      const chunk = new TextChunk(nextChar, startOffset, endOffset, this._entityMd.location);
+      const chunk = new Chunk(nextChar, startOffset, endOffset, this._entityMd.location);
 
       return chunk;
    }
@@ -491,7 +491,7 @@ class XmlStringCursor {
     getClose() returns the close character from the input stream.
 
     RETURN
-    A TextChunk chunk containing "]" or "]]>", or undefined if no close is
+    A Chunk chunk containing "]" or "]]>", or undefined if no close is
     at the current position
    \**********************************************************************/
 
@@ -519,7 +519,7 @@ class XmlStringCursor {
 
    /**********************************************************************\
      RETURN
-     A TextChunk token if the next characters in the cursor are the opening
+     A Chunk token if the next characters in the cursor are the opening
      of some markup (<, <? <!, </,  <!-- or &) or undefined (if the current
      cursor position has no markup)
    \**********************************************************************/
@@ -558,7 +558,7 @@ class XmlStringCursor {
      the cursor. This may not contain any whitespace.
 
      RETURN
-     Gets a TextChunk that contains the exact string passed in as a
+     Gets a Chunk that contains the exact string passed in as a
      parameter. In this process, the cursor is advanced past this value.
      If this value is not at the current cursor position, this returns
      undefined.
@@ -910,7 +910,7 @@ class XmlStringCursor {
          startOffset = originalString;
          originalString = data;
       }
-      const chunk = new TextChunk(data, originalString, startOffset, this._offset.clone(), this._entityMd.location);
+      const chunk = new Chunk(data, originalString, startOffset, this._offset.clone(), this._entityMd.location);
       this._chunks.push(chunk);
       return chunk;
    }

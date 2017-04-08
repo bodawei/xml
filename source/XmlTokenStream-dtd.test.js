@@ -9,7 +9,7 @@ const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const XmlWarning = require('./error/XmlWarning.js');
-const TextChunk = require('./shared/TextChunk.js');
+const Chunk = require('./shared/Chunk.js');
 const tokens = require('./XmlToken.js');
 
 const makeLaxStream = require('./XmlTokenStream-util.test.js').makeLaxStream;
@@ -181,35 +181,35 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('DOCTYPE'),
-            new TextChunk(' '),
-            new TextChunk('foo'),
-            new TextChunk(' '),
-            new TextChunk('PUBLIC'),
-            new TextChunk(' '),
-            new TextChunk('"'),
-            new TextChunk('one'),
-            new TextChunk('"'),
-            new TextChunk(' '),
-            new TextChunk('\''),
-            new TextChunk('two'),
-            new TextChunk('\''),
-            new TextChunk(' '),
-            new TextChunk('[')
+            new Chunk('<!'),
+            new Chunk('DOCTYPE'),
+            new Chunk(' '),
+            new Chunk('foo'),
+            new Chunk(' '),
+            new Chunk('PUBLIC'),
+            new Chunk(' '),
+            new Chunk('"'),
+            new Chunk('one'),
+            new Chunk('"'),
+            new Chunk(' '),
+            new Chunk('\''),
+            new Chunk('two'),
+            new Chunk('\''),
+            new Chunk(' '),
+            new Chunk('[')
          ], 21));
 
          expect(s.read().chunks).toBeUndefined();  // start internal subset
 
          expect(s.read().chunks).toEqual(makeStringTokenArray([
-            new TextChunk(' ')
+            new Chunk(' ')
          ], 55));
 
          expect(s.read().chunks).toBeUndefined();  // end internal subset
 
          expect(s.read().chunks).toEqual(makeStringTokenArray([
-            new TextChunk(']'),
-            new TextChunk('>')
+            new Chunk(']'),
+            new Chunk('>')
          ], 56));
       });
 
@@ -386,18 +386,18 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('NOTATION'),
-            new TextChunk(' '),
-            new TextChunk('note'),
-            new TextChunk(' '),
-            new TextChunk('PUBLIC'),
-            new TextChunk(' '),
-            new TextChunk('"'),
-            new TextChunk('ONE'),
-            new TextChunk('"'),
-            new TextChunk(' '),
-            new TextChunk('>')
+            new Chunk('<!'),
+            new Chunk('NOTATION'),
+            new Chunk(' '),
+            new Chunk('note'),
+            new Chunk(' '),
+            new Chunk('PUBLIC'),
+            new Chunk(' '),
+            new Chunk('"'),
+            new Chunk('ONE'),
+            new Chunk('"'),
+            new Chunk(' '),
+            new Chunk('>')
          ], 21));
       });
 
@@ -573,7 +573,7 @@ describe('XmlTokenStream (dtd)', () => {
 
          expect(s.read().value).toEqual([
             new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', [ util.makeTextChunk('&#65;', 26) ])
+            new tokens.CharRef('A', [ util.makeChunk('&#65;', 26) ])
          ]);
       });
 
@@ -584,7 +584,7 @@ describe('XmlTokenStream (dtd)', () => {
             'Must not have a space after the "#" in a character reference.');
          expect(s.read().value).toEqual([
             new tokens.Text('tw', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', [ util.makeTextChunk('&# 65;', 21) ]),
+            new tokens.CharRef('A', [ util.makeChunk('&# 65;', 21) ]),
             new tokens.Text('o', tokens.ENTITYVAL_NO_CHUNKS)
          ]);
       });
@@ -753,15 +753,15 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('ENTITY'),
-            new TextChunk(' '),
-            new TextChunk('myEntity'),
-            new TextChunk(' '),
-            new TextChunk('"'),
-            new TextChunk('entityValue'),
-            new TextChunk('"'),
-            new TextChunk('>')
+            new Chunk('<!'),
+            new Chunk('ENTITY'),
+            new Chunk(' '),
+            new Chunk('myEntity'),
+            new Chunk(' '),
+            new Chunk('"'),
+            new Chunk('entityValue'),
+            new Chunk('"'),
+            new Chunk('>')
          ], 21));
       });
 
@@ -917,23 +917,23 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('ENTITY'),
-            new TextChunk(' '),
-            new TextChunk('%'),
-            new TextChunk(' '),
-            new TextChunk('myPE'),
-            new TextChunk(' '),
-            new TextChunk('SYSTEM'),
-            new TextChunk(' '),
-            new TextChunk('"'),
-            new TextChunk('one'),
-            new TextChunk('"'),
-            new TextChunk(' '),
-            new TextChunk('NDATA'),
-            new TextChunk(' '),
-            new TextChunk('foo'),
-            new TextChunk('>')
+            new Chunk('<!'),
+            new Chunk('ENTITY'),
+            new Chunk(' '),
+            new Chunk('%'),
+            new Chunk(' '),
+            new Chunk('myPE'),
+            new Chunk(' '),
+            new Chunk('SYSTEM'),
+            new Chunk(' '),
+            new Chunk('"'),
+            new Chunk('one'),
+            new Chunk('"'),
+            new Chunk(' '),
+            new Chunk('NDATA'),
+            new Chunk(' '),
+            new Chunk('foo'),
+            new Chunk('>')
          ], 21));
       });
 
@@ -1003,13 +1003,13 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk('<!'),
-            new TextChunk('ELEMENT'),
-            new TextChunk(' '),
-            new TextChunk('elName'),
-            new TextChunk(' '),
-            new TextChunk('ANY'),
-            new TextChunk('>')
+            new Chunk('<!'),
+            new Chunk('ELEMENT'),
+            new Chunk(' '),
+            new Chunk('elName'),
+            new Chunk(' '),
+            new Chunk('ANY'),
+            new Chunk('>')
          ], 21));
       });
 
