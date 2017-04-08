@@ -74,7 +74,7 @@ function calculatePercentage(info) {
       if (info.covered[key] === 0) {
          continue;
       }
-      total += (info.totals[key] / info.covered[key]);
+      total += (info.covered[key] / info.totals[key]);
    }
 
    if (total === 0) {
@@ -150,10 +150,10 @@ module.exports = (grunt) => {
       }
 
       const border = [];
+      let table = '';
       border.push(padValue('', maxLengths.percentage, '─'));
       border.push(padValue('', maxLengths.name, '─'));
       border.push(padValue('', maxLengths.version, '─'));
-      print('COVERAGE\n');
       print('┌─' + border.join('─┬─') + '─┐\n');
 
       sortedNames.sort();
@@ -164,11 +164,7 @@ module.exports = (grunt) => {
       });
 
       function print(message) {
-         if (process.passthroughWrite) {
-            process.passthroughWrite(message);
-         } else {
-            console.log(message);
-         }
+         table += message;
       }
 
       for (let index = 0; index < sortedNames.length; index++) {
@@ -181,6 +177,11 @@ module.exports = (grunt) => {
       }
       print('└─' + border.join('─┴─') + '─┘\n');
 
+      if (options.summaryFile) {
+         fs.writeFileSync(options.summaryFile, table, 'UTF-8');
+      } else {
+         grunt.log.write(table);
+      }
 //      for (var index = 0; index < keys.length; index++) {
 //         var browserName = keys[index];
 //         var percentage = calculatePercentage(totals[browserName]);
@@ -196,7 +197,8 @@ module.exports = (grunt) => {
 //      }
 
       if (failed) {
-         grunt.fail.fatal('coveragereport: Did not get 100% code coverage. Build failed');
+         grunt.log.error(table);
+         grunt.fail.fatal('Did not get 100% code coverage. Build failed');
       }
    }
 

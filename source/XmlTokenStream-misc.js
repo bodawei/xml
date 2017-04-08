@@ -613,9 +613,9 @@ const XmlTokenStreamMisc = {
       }
 
       return attributes;
-   },
+   }
 
-}
+};
 
 XmlTokenStreamMisc.TYPE = QUOTE_PIECE_TYPES;
 

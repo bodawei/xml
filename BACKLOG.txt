@@ -15,6 +15,9 @@ M+ 198: Reduce all TextChunks to one kind
 	√ - remove invalidChars
 	√ - move 'TextChunk.TYPE' in string cursor as it's own kind of thing
 	√- remove peekType
+√ - remove entity manager from xmltokenstream
+√ - why are all the parsers classes? They have no state. could just be namespaces
+√- write reports to files and then print
 
 
 
@@ -74,8 +77,6 @@ Design
 =============================================
 CLEANUP
 =======
-√ - remove entity manager from xmltokenstream
-√ - why are all the parsers classes? They have no state. could just be namespaces
 - Duplicate code in EntityStream
 - Duplicate code in ValueStreamTest
 - We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
@@ -84,11 +85,9 @@ CLEANUP
 - general things
 	- add contexts to all errors
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
-
 BUILD
 =====
 126: Enhancements to the reporting
-	- write reports to files and then print
 	- clean up reporting code
 	- test json reporter and turn into a module. Check it in for now
 		- provide a dividing char for test segments

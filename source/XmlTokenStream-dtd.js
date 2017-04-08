@@ -553,6 +553,6 @@ const XmlTokenStreamDtd = {
       }
    }
 
-}
+};
 
 module.exports = XmlTokenStreamDtd;

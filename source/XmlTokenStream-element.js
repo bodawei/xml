@@ -183,6 +183,6 @@ const XmlTokenStreamElement = {
       };
    }
 
-}
+};
 
 module.exports = XmlTokenStreamElement;

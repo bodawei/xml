@@ -6,7 +6,9 @@
 'use strict';
 
 var jitGrunt = require('jit-grunt');
+var fs = require('fs');
 var os = require('os');
+var path = require('path');
 
 var coverageReport = require('./coverageReport.js');
 var testReport = require('./testReport.js');
@@ -38,6 +40,8 @@ var OTHER_FILE_GLOB = [
 ];
 
 var BABEL_PRESETS = 'es2015';
+
+var controller;
 
 module.exports = function standardBuild(grunt) {
    var browsers;
@@ -179,14 +183,16 @@ module.exports = function standardBuild(grunt) {
       },
       testreport:  {
          dist: {
-            dir: OUT_DIR + '/testResults/'
+            dir: OUT_DIR + '/testResults/',
+            summaryFile: path.join(OUT_DIR, './test-summary.txt')
          }
       },
       coveragereport:  {
          dist: {
             options: {
                filesToSkip: [ ],
-               dir: OUT_DIR
+               dir: OUT_DIR,
+               summaryFile: path.join(OUT_DIR, './coverage-summary.txt')
             }
          }
       },
@@ -221,7 +227,8 @@ module.exports = function standardBuild(grunt) {
       'checkkeys',
       'testreport',
       'coveragereport',
-      '_dist'
+      '_dist',
+      'dumpReports'
    ]);
 
    grunt.registerTask('dev', [ 'derivelocale', 'karma:dev' ]);
@@ -229,7 +236,7 @@ module.exports = function standardBuild(grunt) {
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
 
    grunt.registerTask('quietBuild', '@@@', () => {
-      var controller = require('mostly-quiet-grunt');
+      controller = require('mostly-quiet-grunt');
       controller.showDots(false);
       process.passthroughWrite = controller.passthroughWrite.bind(controller);
    });
@@ -253,6 +260,18 @@ module.exports = function standardBuild(grunt) {
       grunt.task.run('babel:distNpm');
       grunt.task.run('browserify:distFlatfile');
       grunt.task.run('exorcise:distFlatfile');
+   });
+
+   grunt.registerTask('dumpReports', '', () => {
+      const coverageReport = fs.readFileSync(path.join(OUT_DIR, './coverage-summary.txt'));
+      const testReport = fs.readFileSync(path.join(OUT_DIR, './test-summary.txt'));
+
+      if (controller) {
+         controller.passthroughWrite('TEST\n');
+         controller.passthroughWrite(testReport);
+         controller.passthroughWrite('COVERAGE\n');
+         controller.passthroughWrite(coverageReport);
+      }
    });
 
    grunt.registerTask('clean', 'Delete non-essential files.', () => {

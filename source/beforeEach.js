@@ -36,7 +36,7 @@ function toMatchClasses() {
          let message = '';
          let mismatchIndex;
 
-         const maxSearch = Math.min(actualObjects.length, expectedConstructors.length)
+         const maxSearch = Math.min(actualObjects.length, expectedConstructors.length);
          for (let index = 0; index < maxSearch; index++) {
             if (actualObjects[index].constructor.name !== expectedConstructors[index].name) {
                mismatchIndex = index;
@@ -47,9 +47,6 @@ function toMatchClasses() {
          if (actualObjects.length !== expectedConstructors.length) {
             pass = false;
             message = `Expected ${expectedConstructors.length} objects, but got ${actualObjects.length}.`;
-            if (mismatchIndex) {
-               message += ` First difference at index ${mismatchIndex}.`;
-            }
             message += `\n\tActual:   ${actualObjects.map((object) => object.constructor.name).join(', ')}\n`;
             message += `\tExpected: ${expectedConstructors.map((constr) => constr.name).join(', ')}\n`;
          } else {
@@ -69,7 +66,7 @@ function toMatchClasses() {
             message
          };
       }
-   }
+   };
 }
 
 beforeEach(() => {

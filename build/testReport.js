@@ -139,8 +139,7 @@ module.exports = (grunt) => {
 
       sortedNames.sort();
 
-      process.passthroughWrite('TESTS\n');
-
+      let table = '';
       const border = [];
       border.push(padValue('', maxLengths.percent, '─'));
       border.push(padValue('', maxLengths.browserName, '─'));
@@ -152,7 +151,7 @@ module.exports = (grunt) => {
       if (skipped) {
          border.push(padValue('', maxLengths.skipped, '─'));
       }
-      process.passthroughWrite('┌─' + border.join('─┬─') + '─┐\n');
+      print('┌─' + border.join('─┬─') + '─┐\n');
 
       for (let index = 0; index < sortedNames.length; index++) {
          const name = sortedNames[index];
@@ -167,10 +166,14 @@ module.exports = (grunt) => {
          if (skipped) {
             value.push(padValue(byBrowserName[name].skipped, maxLengths.skipped));
          }
-         process.passthroughWrite('│ ' + value.join(' │ ') + ' │\n');
+         print('│ ' + value.join(' │ ') + ' │\n');
       }
-      process.passthroughWrite('└─' + border.join('─┴─') + '─┘\n');
-      process.passthroughWrite('Missing node.js results\n');
+      print('└─' + border.join('─┴─') + '─┘\n');
+      print('Missing node.js results\n');
+
+      function print(message) {
+         table += message;
+      }
 
 //      for (const key in byOs) {
 //         process.passthroughWrite(key + '\n');
@@ -198,6 +201,11 @@ module.exports = (grunt) => {
       //      if (data.error || data.failed) {
       //         grunt.fail.fatal(data.failed + ' test errors. Build failed.');
       //      }
+      grunt.log.write(table);
+
+      if (this.data.summaryFile) {
+         fs.writeFileSync(this.data.summaryFile, table, 'UTF-8');
+      }
    }
 
    grunt.registerMultiTask('testreport', 'Produces a summary of all test coverage', testReport);

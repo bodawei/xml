@@ -330,19 +330,20 @@ class ExternalEntityStreamHandler extends StreamHandler {
    }
 
    addDocEnd(docTypeEnd) {
-      if (this._noMoreInput) {
-         this.queue.push(docTypeEnd);
-      } else {
-         this._docTypeEnd = docTypeEnd;
-      }
+      // need some async support to be able to trigger this
+//      if (this._noMoreInput) {
+//         this.queue.push(docTypeEnd);
+//      } else {
+      this._docTypeEnd = docTypeEnd;
+//      }
    }
 
    _onEnd() {
       this._queue.push(new tokens.ExternalSubsetEnd());
-      if (this._docTypeEnd) {
-         this._queue.push(this._docTypeEnd);
-         delete this._docTypeEnd;
-      }
+//      if (this._docTypeEnd) {
+      this._queue.push(this._docTypeEnd);
+      delete this._docTypeEnd;
+//      }
       this._stream.removeListener('data', this._onData);
       this._stream.removeListener('error', this._onData);
       this._stream.removeListener('end', this._onEnd);

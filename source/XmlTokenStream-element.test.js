@@ -11,7 +11,6 @@ const SyntaxError = require('./error/SyntaxError.js');
 const Chunk = require('./shared/Chunk.js');
 const tokens = require('./XmlToken.js');
 const WellFormednessError = require('./error/WellFormednessError.js');
-const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const XmlTokenStream = require('./XmlTokenStream.js');
 const XmlWarning = require('./error/XmlWarning.js');

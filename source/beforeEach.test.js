@@ -8,6 +8,7 @@ const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
 
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
+const toMatchClasses = require('./beforeEach.js').toMatchClasses;
 
 describe('toBeSyntaxError()', () => {
 
@@ -55,26 +56,25 @@ describe('toMatchClasses()', () => {
    describe('jasmine use', () => {
 
       it('reports pass when the types all match', () => {
-         expect([ new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)])
-            .toMatchClasses([tokens.CharRef]);
+         expect([ new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS) ])
+            .toMatchClasses([ tokens.CharRef ]);
       });
 
       it('reports no pass when the the types do not match', () => {
-         expect([ new tokens.ExternalSubsetStart()])
-            .not.toMatchClasses([tokens.CharRef]);
+         expect([ new tokens.ExternalSubsetStart() ])
+            .not.toMatchClasses([ tokens.CharRef ]);
       });
 
       it('reports no pass when the the lengths do not match', () => {
          expect([
             new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS),
             new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
-         ]).not.toMatchClasses([tokens.CharRef]);
+         ]).not.toMatchClasses([ tokens.CharRef ]);
       });
 
    });
 
    describe('raw matcher', () => {
-      const toMatchClasses = require('./beforeEach.js').toMatchClasses;
 
       it('returns a compare function', () => {
          expect(typeof toMatchClasses().compare === 'function').toEqual(true);
