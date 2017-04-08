@@ -8,10 +8,6 @@ const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const EntityLocation = require('./shared/EntityLocation.js');
 const TextChunk = require('./shared/TextChunk.js');
-const util = require('./shared/util.js');
-
-const DECIMAL = 'DECIMAL';
-const HEX = 'HEX';
 
 const LINE_ENDING_REGEX10 = /(\r\n)|(\r)/g;
 const LINE_ENDING_REGEX11 = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
@@ -347,7 +343,7 @@ class XmlStringCursor {
          nextChar = '\n';
       }
 
-      const chunk = new TextChunk.PlainChunk(nextChar, startOffset, endOffset, this._entityMd.location);
+      const chunk = new TextChunk(nextChar, startOffset, endOffset, this._entityMd.location);
 
       return chunk;
    }
@@ -404,7 +400,7 @@ class XmlStringCursor {
          rawString = rawString.replace(is1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10, '\n');
       }
 
-      return this._makeChunkWithSpace(rawString, originalString, startOffset);
+      return this._makeChunk(rawString, originalString, startOffset);
    }
 
    /**********************************************************************\
@@ -434,7 +430,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makePlainChunk(rawString, startOffset);
+      return this._makeChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -454,22 +450,20 @@ class XmlStringCursor {
 
    getDigits() {
       const startOffset = this._offset.clone();
-      let isDecimal = true;
-      let type = this._nextCharDigitType();
+      let type = this._isDigit();
 
       if (!type) {
          return;
       }
 
       do {
-         isDecimal = isDecimal && (type === DECIMAL);
          this._offset.index ++;
          this._offset.column ++;
-         type = this._nextCharDigitType();
+         type = this._isDigit();
       } while (type);
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeDigitChunk(rawString, isDecimal, startOffset);
+      return this._makeChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -520,7 +514,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makePlainChunk(rawString, startOffset);
+      return this._makeChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -555,7 +549,7 @@ class XmlStringCursor {
       }
 
       const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makePlainChunk(rawString, startOffset);
+      return this._makeChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -586,7 +580,7 @@ class XmlStringCursor {
       this._offset.index += rawString.length;
       this._offset.column += rawString.length;
 
-      return this._makePlainChunk(rawString, startOffset);
+      return this._makeChunk(rawString, startOffset);
    }
 
    /**********************************************************************\
@@ -656,7 +650,7 @@ class XmlStringCursor {
       }
 
       return {
-         chunk: this._makeChunkWithSpace(rawString, originalString, startOffset),
+         chunk: this._makeChunk(rawString, originalString, startOffset),
          terminator: terminator
       };
    }
@@ -786,11 +780,10 @@ class XmlStringCursor {
 
    /**********************************************************************\
      RETURN
-     DECIMAL if the next character in the cursor is 0-9, HEX if it is
-     A-Fa-f, and undefined otherwise.
+     true if the next character is a decimal or hexadecimal character
    \**********************************************************************/
 
-   _nextCharDigitType() {
+   _isDigit() {
       switch (this._source[this._offset.index]) {
          case '0':
          case '1':
@@ -802,7 +795,6 @@ class XmlStringCursor {
          case '7':
          case '8':
          case '9':
-            return DECIMAL;
          case 'A':
          case 'a':
          case 'B':
@@ -815,7 +807,7 @@ class XmlStringCursor {
          case 'e':
          case 'F':
          case 'f':
-            return HEX;
+            return true;
          default:
             return;
       }
@@ -913,40 +905,12 @@ class XmlStringCursor {
      Note this also pushes the chunk into the set of recent chunks.
    \**********************************************************************/
 
-   _makeChunkWithSpace(data, originalString, startOffset) {
-      const chunk = new TextChunk.WithSpaceChunk(data, originalString, startOffset, this._offset.clone(),
-         this._entityMd.location);
-      this._chunks.push(chunk);
-      return chunk;
-   }
-
-   /**********************************************************************\
-     PARAM
-     data for a chunk, and the start of the string's offset.
-
-     RETURN
-     a plain chunk using the parameters and the current cursor offset.
-     Note this also pushes the chunk into the set of recent chunks.
-   \**********************************************************************/
-
-   _makePlainChunk(data, startOffset) {
-      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(), this._entityMd.location);
-      this._chunks.push(chunk);
-      return chunk;
-   }
-
-   /**********************************************************************\
-     PARAM
-     data for a number chunk, whether it is decimal, and the start offset.
-
-     RETURN
-     a number chunk using the parameters and the current cursor offset.
-     Note this also pushes the chunk into the set of recent chunks.
-   \**********************************************************************/
-
-   _makeDigitChunk(data, isDecimal, startOffset) {
-      const chunk = new TextChunk.PlainChunk(data, startOffset, this._offset.clone(),
-         this._entityMd.location);
+   _makeChunk(data, originalString, startOffset) {
+      if (typeof originalString !== 'string') {
+         startOffset = originalString;
+         originalString = data;
+      }
+      const chunk = new TextChunk(data, originalString, startOffset, this._offset.clone(), this._entityMd.location);
       this._chunks.push(chunk);
       return chunk;
    }

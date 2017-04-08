@@ -189,16 +189,9 @@ function makeStringTokenArray(values, offset = 0) {
    return results;
 }
 
-function makePlainChunk(text, start, end) {
+function makeTextChunk(text, start, end) {
    end = end || start + text.length;
-   return new TextChunk.PlainChunk(text,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
-}
-
-function makeWithSpaceChunk(text, start, end, originalText) {
-   end = end || start + text.length;
-   return new TextChunk.WithSpaceChunk(text, originalText || text,
-      new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
+   return new TextChunk(text, new Offset(0, start, start), new Offset(0, end, end), new EntityLocation(''));
 }
 
 module.exports = {
@@ -216,6 +209,5 @@ module.exports = {
    makeLaxExternalEntityStream,
    makeStrictExternalEntityStream,
    makeStringTokenArray,
-   makePlainChunk,
-   makeWithSpaceChunk
+   makeTextChunk
 };

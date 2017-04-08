@@ -28,8 +28,7 @@ const ignoreToken = require('./XmlTokenStream-util.test.js').ignoreToken;
 const expectTokenType = require('./XmlTokenStream-util.test.js').expectTokenType;
 const makeStringTokenArray = require('./XmlTokenStream-util.test.js').makeStringTokenArray;
 const util = require('./XmlTokenStream-util.test.js');
-const makePlainChunk = util.makePlainChunk;
-const makeWithSpaceChunk = util.makeWithSpaceChunk;
+const makeTextChunk = util.makeTextChunk;
 
 function compareXmlDeclAttribute(attr, name, value) {
    expect(attr.name).toEqual(name);
@@ -110,9 +109,9 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!--'),
-            new TextChunk.WithSpaceChunk(' one ', ' one '),
-            new TextChunk.PlainChunk('-->')
+            new TextChunk('<!--'),
+            new TextChunk(' one '),
+            new TextChunk('-->')
          ]));
       });
 
@@ -297,11 +296,11 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<?'),
-            new TextChunk.PlainChunk('target'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.WithSpaceChunk('blah blah', 'blah blah'),
-            new TextChunk.PlainChunk('?>')
+            new TextChunk('<?'),
+            new TextChunk('target'),
+            new TextChunk(' '),
+            new TextChunk('blah blah'),
+            new TextChunk('?>')
          ]));
       });
 
@@ -646,22 +645,22 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<?'),
-            new TextChunk.PlainChunk('xml'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('version'),
-            new TextChunk.PlainChunk('='),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('1.1', '1.1'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('encoding'),
-            new TextChunk.PlainChunk('='),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('usascii', 'usascii'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('  ', '  '),
-            new TextChunk.PlainChunk('?>')
+            new TextChunk('<?'),
+            new TextChunk('xml'),
+            new TextChunk(' '),
+            new TextChunk('version'),
+            new TextChunk('='),
+            new TextChunk('"'),
+            new TextChunk('1.1'),
+            new TextChunk('"'),
+            new TextChunk(' '),
+            new TextChunk('encoding'),
+            new TextChunk('='),
+            new TextChunk('"'),
+            new TextChunk('usascii'),
+            new TextChunk('"'),
+            new TextChunk('  '),
+            new TextChunk('?>')
          ]));
       });
 
@@ -908,16 +907,16 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<?'),
-            new TextChunk.PlainChunk('xml'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('encoding'),
-            new TextChunk.PlainChunk('='),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('usascii', 'usascii'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('?>')
+            new TextChunk('<?'),
+            new TextChunk('xml'),
+            new TextChunk(' '),
+            new TextChunk('encoding'),
+            new TextChunk('='),
+            new TextChunk('"'),
+            new TextChunk('usascii'),
+            new TextChunk('"'),
+            new TextChunk(' '),
+            new TextChunk('?>')
          ]));
       });
 
@@ -996,7 +995,7 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.WithSpaceChunk(' \t ', ' \t ')
+            new TextChunk(' \t ')
          ]));
       });
 
@@ -1112,7 +1111,7 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.WithSpaceChunk('wow zowie ', 'wow zowie ')
+            new TextChunk('wow zowie ')
          ]));
       });
 
@@ -1219,7 +1218,7 @@ describe('XmlTokenStream (Misc)', () => {
 
             const t = s.read();
             expect(t.chunks).toEqual(makeStringTokenArray([
-               new TextChunk.PlainChunk(']]>', ']]>')
+               new TextChunk(']]>', ']]>')
             ], 3));
          });
       });
@@ -1391,12 +1390,12 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('['),
-            new TextChunk.PlainChunk('CDATA'),
-            new TextChunk.PlainChunk('['),
-            new TextChunk.WithSpaceChunk(' one ', ' one '),
-            new TextChunk.PlainChunk(']]>')
+            new TextChunk('<!'),
+            new TextChunk('['),
+            new TextChunk('CDATA'),
+            new TextChunk('['),
+            new TextChunk(' one '),
+            new TextChunk(']]>')
          ]));
       });
 
@@ -1880,11 +1879,11 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('&'),
-            new TextChunk.PlainChunk('#'),
-            new TextChunk.PlainChunk('x'),
-            new TextChunk.PlainChunk('42'),
-            new TextChunk.PlainChunk(';')
+            new TextChunk('&'),
+            new TextChunk('#'),
+            new TextChunk('x'),
+            new TextChunk('42'),
+            new TextChunk(';')
          ]));
       });
 
@@ -1989,9 +1988,9 @@ describe('XmlTokenStream (Misc)', () => {
          const result = new XmlMiscParser().parseQuotedValue(standardCursor);
 
          expect(result).toEqual({
-            startQuoteChunk: makePlainChunk('"', 0, 1),
-            items: [ makeWithSpaceChunk('zero &#49; &#x32; &three; %four;', 1, 33) ],
-            stopQuoteChunk: makePlainChunk('"', 33, 34)
+            startQuoteChunk: makeTextChunk('"', 0, 1),
+            items: [ makeTextChunk('zero &#49; &#x32; &three; %four;', 1, 33) ],
+            stopQuoteChunk: makeTextChunk('"', 33, 34)
          });
       });
 
@@ -2003,15 +2002,15 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[1]).toEqual({
             type: XmlMiscParser.TYPE.CHAR_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 6, 7),
+               startChunk: makeTextChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
-               hashChunk: makePlainChunk('#', 7, 8),
+               hashChunk: makeTextChunk('#', 7, 8),
                postHashSpaceChunk: undefined,
                hexMarkerChunk: undefined,
                postHexSpaceChunk: undefined,
-               digitsChunk: makePlainChunk('49', 8, 10),
+               digitsChunk: makeTextChunk('49', 8, 10),
                postDigitsSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 10, 11),
+               semicolonChunk: makeTextChunk(';', 10, 11),
                character: '1'
             }
          });
@@ -2019,15 +2018,15 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[3]).toEqual({
             type: XmlMiscParser.TYPE.CHAR_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 12, 13),
+               startChunk: makeTextChunk('&', 12, 13),
                postStartSpaceChunk: undefined,
-               hashChunk: makePlainChunk('#', 13, 14),
+               hashChunk: makeTextChunk('#', 13, 14),
                postHashSpaceChunk: undefined,
-               hexMarkerChunk: makePlainChunk('x', 14, 15),
+               hexMarkerChunk: makeTextChunk('x', 14, 15),
                postHexSpaceChunk: undefined,
-               digitsChunk: makePlainChunk('32', 15, 17),
+               digitsChunk: makeTextChunk('32', 15, 17),
                postDigitsSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 17, 18),
+               semicolonChunk: makeTextChunk(';', 17, 18),
                character: '2'
             }
          });
@@ -2042,11 +2041,11 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[1]).toEqual({
             type: XmlMiscParser.TYPE.PARAMETER_REF,
             parsed: {
-               startChunk: makePlainChunk('%', 27, 28),
+               startChunk: makeTextChunk('%', 27, 28),
                postStartSpaceChunk: undefined,
-               nameChunk: makePlainChunk('four', 28, 32),
+               nameChunk: makeTextChunk('four', 28, 32),
                postNameSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 32, 33)
+               semicolonChunk: makeTextChunk(';', 32, 33)
             }
          });
       });
@@ -2059,11 +2058,11 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[1]).toEqual({
             type: XmlMiscParser.TYPE.GENERAL_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 19, 20),
+               startChunk: makeTextChunk('&', 19, 20),
                postStartSpaceChunk: undefined,
-               nameChunk: makePlainChunk('three', 20, 25),
+               nameChunk: makeTextChunk('three', 20, 25),
                postNameSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 25, 26)
+               semicolonChunk: makeTextChunk(';', 25, 26)
             }
          });
          expect(result.items[2].text).toEqual(' %four;');
@@ -2081,15 +2080,15 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[1]).toEqual({
             type: XmlMiscParser.TYPE.CHAR_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 6, 7),
+               startChunk: makeTextChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
-               hashChunk: makePlainChunk('#', 7, 8),
+               hashChunk: makeTextChunk('#', 7, 8),
                postHashSpaceChunk: undefined,
                hexMarkerChunk: undefined,
                postHexSpaceChunk: undefined,
-               digitsChunk: makePlainChunk('49', 8, 10),
+               digitsChunk: makeTextChunk('49', 8, 10),
                postDigitsSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 10, 11),
+               semicolonChunk: makeTextChunk(';', 10, 11),
                character: '1'
             }
          });
@@ -2097,15 +2096,15 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[3]).toEqual({
             type: XmlMiscParser.TYPE.CHAR_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 12, 13),
+               startChunk: makeTextChunk('&', 12, 13),
                postStartSpaceChunk: undefined,
-               hashChunk: makePlainChunk('#', 13, 14),
+               hashChunk: makeTextChunk('#', 13, 14),
                postHashSpaceChunk: undefined,
-               hexMarkerChunk: makePlainChunk('x', 14, 15),
+               hexMarkerChunk: makeTextChunk('x', 14, 15),
                postHexSpaceChunk: undefined,
-               digitsChunk: makePlainChunk('32', 15, 17),
+               digitsChunk: makeTextChunk('32', 15, 17),
                postDigitsSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 17, 18),
+               semicolonChunk: makeTextChunk(';', 17, 18),
                character: '2'
             }
          });
@@ -2113,22 +2112,22 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[5]).toEqual({
             type: XmlMiscParser.TYPE.GENERAL_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 19, 20),
+               startChunk: makeTextChunk('&', 19, 20),
                postStartSpaceChunk: undefined,
-               nameChunk: makePlainChunk('three', 20, 25),
+               nameChunk: makeTextChunk('three', 20, 25),
                postNameSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 25, 26)
+               semicolonChunk: makeTextChunk(';', 25, 26)
             }
          });
          expect(result.items[6].text).toEqual(' ');
          expect(result.items[7]).toEqual({
             type: XmlMiscParser.TYPE.PARAMETER_REF,
             parsed: {
-               startChunk: makePlainChunk('%', 27, 28),
+               startChunk: makeTextChunk('%', 27, 28),
                postStartSpaceChunk: undefined,
-               nameChunk: makePlainChunk('four', 28, 32),
+               nameChunk: makeTextChunk('four', 28, 32),
                postNameSpaceChunk: undefined,
-               semicolonChunk: makePlainChunk(';', 32, 33)
+               semicolonChunk: makeTextChunk(';', 32, 33)
             }
          });
       });
@@ -2139,8 +2138,8 @@ describe('XmlTokenStream (Misc)', () => {
          });
 
          expect(result).toEqual({
-            startQuoteChunk: makePlainChunk('"', 0, 1),
-            items: [ makeWithSpaceChunk('zer', 1, 4) ],
+            startQuoteChunk: makeTextChunk('"', 0, 1),
+            items: [ makeTextChunk('zer', 1, 4) ],
             stopQuoteChunk: undefined
          });
       });
@@ -2155,7 +2154,7 @@ describe('XmlTokenStream (Misc)', () => {
          expect(result.items[1]).toEqual({
             type: XmlMiscParser.TYPE.GENERAL_REF,
             parsed: {
-               startChunk: makePlainChunk('&', 6, 7),
+               startChunk: makeTextChunk('&', 6, 7),
                postStartSpaceChunk: undefined,
                nameChunk: undefined,
                postNameSpaceChunk: undefined,
@@ -2164,26 +2163,18 @@ describe('XmlTokenStream (Misc)', () => {
          });
       });
 
-      it('combines a PlainChunk with a WithSpaceChunk (whitebox)', () => {
-         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"& one"'), {
-            charRef: true
-         });
-
-         expect(result.items).toEqual([ makeWithSpaceChunk('& one', 1, 6) ]);
-      });
-
-      it('combines a PlainChunk with a PlainChunk (whitebox)', () => {
-         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"&&"'), {
-            charRef: true
-         });
-
-         expect(result.items).toEqual([ makePlainChunk('&&', 1, 3) ]);
-      });
-
       it('copes with a missing quote when no items specified', () => {
          const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"zero one'));
 
-         expect(result.items).toEqual([ makeWithSpaceChunk('zero one', 1, 9) ]);
+         expect(result.items).toEqual([ makeTextChunk('zero one', 1, 9) ]);
+      });
+
+      it('copes with a malformed ref at the end', () => {
+         const result = new XmlMiscParser().parseQuotedValue(new XmlStringCursor('"&"'), {
+            charRef: true
+         });
+
+         expect(result.items).toEqual([ makeTextChunk('&', 1, 2) ]);
       });
 
    });
@@ -2215,9 +2206,9 @@ describe('XmlTokenStream (Misc)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('&'),
-            new TextChunk.PlainChunk('lt'),
-            new TextChunk.PlainChunk(';')
+            new TextChunk('&'),
+            new TextChunk('lt'),
+            new TextChunk(';')
          ]));
       });
 

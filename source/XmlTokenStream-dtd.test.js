@@ -181,35 +181,35 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('DOCTYPE'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('foo'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('PUBLIC'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('one', 'one'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('\''),
-            new TextChunk.WithSpaceChunk('two', 'two'),
-            new TextChunk.PlainChunk('\''),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('[')
+            new TextChunk('<!'),
+            new TextChunk('DOCTYPE'),
+            new TextChunk(' '),
+            new TextChunk('foo'),
+            new TextChunk(' '),
+            new TextChunk('PUBLIC'),
+            new TextChunk(' '),
+            new TextChunk('"'),
+            new TextChunk('one'),
+            new TextChunk('"'),
+            new TextChunk(' '),
+            new TextChunk('\''),
+            new TextChunk('two'),
+            new TextChunk('\''),
+            new TextChunk(' '),
+            new TextChunk('[')
          ], 21));
 
          expect(s.read().chunks).toBeUndefined();  // start internal subset
 
          expect(s.read().chunks).toEqual(makeStringTokenArray([
-            new TextChunk.WithSpaceChunk(' ', ' ')
+            new TextChunk(' ')
          ], 55));
 
          expect(s.read().chunks).toBeUndefined();  // end internal subset
 
          expect(s.read().chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk(']'),
-            new TextChunk.PlainChunk('>')
+            new TextChunk(']'),
+            new TextChunk('>')
          ], 56));
       });
 
@@ -386,18 +386,18 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('NOTATION'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('note'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('PUBLIC'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('ONE', 'ONE'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<!'),
+            new TextChunk('NOTATION'),
+            new TextChunk(' '),
+            new TextChunk('note'),
+            new TextChunk(' '),
+            new TextChunk('PUBLIC'),
+            new TextChunk(' '),
+            new TextChunk('"'),
+            new TextChunk('ONE'),
+            new TextChunk('"'),
+            new TextChunk(' '),
+            new TextChunk('>')
          ], 21));
       });
 
@@ -573,7 +573,7 @@ describe('XmlTokenStream (dtd)', () => {
 
          expect(s.read().value).toEqual([
             new tokens.Text('value', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', [ util.makePlainChunk('&#65;', 26) ])
+            new tokens.CharRef('A', [ util.makeTextChunk('&#65;', 26) ])
          ]);
       });
 
@@ -584,7 +584,7 @@ describe('XmlTokenStream (dtd)', () => {
             'Must not have a space after the "#" in a character reference.');
          expect(s.read().value).toEqual([
             new tokens.Text('tw', tokens.ENTITYVAL_NO_CHUNKS),
-            new tokens.CharRef('A', [ util.makeWithSpaceChunk('&# 65;', 21) ]),
+            new tokens.CharRef('A', [ util.makeTextChunk('&# 65;', 21) ]),
             new tokens.Text('o', tokens.ENTITYVAL_NO_CHUNKS)
          ]);
       });
@@ -753,15 +753,15 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('ENTITY'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('myEntity'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('entityValue', 'entityValue'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<!'),
+            new TextChunk('ENTITY'),
+            new TextChunk(' '),
+            new TextChunk('myEntity'),
+            new TextChunk(' '),
+            new TextChunk('"'),
+            new TextChunk('entityValue'),
+            new TextChunk('"'),
+            new TextChunk('>')
          ], 21));
       });
 
@@ -917,23 +917,23 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('ENTITY'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('%'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('myPE'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('SYSTEM'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('one', 'one'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('NDATA'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('foo'),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<!'),
+            new TextChunk('ENTITY'),
+            new TextChunk(' '),
+            new TextChunk('%'),
+            new TextChunk(' '),
+            new TextChunk('myPE'),
+            new TextChunk(' '),
+            new TextChunk('SYSTEM'),
+            new TextChunk(' '),
+            new TextChunk('"'),
+            new TextChunk('one'),
+            new TextChunk('"'),
+            new TextChunk(' '),
+            new TextChunk('NDATA'),
+            new TextChunk(' '),
+            new TextChunk('foo'),
+            new TextChunk('>')
          ], 21));
       });
 
@@ -1003,13 +1003,13 @@ describe('XmlTokenStream (dtd)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('ELEMENT'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('elName'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('ANY'),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<!'),
+            new TextChunk('ELEMENT'),
+            new TextChunk(' '),
+            new TextChunk('elName'),
+            new TextChunk(' '),
+            new TextChunk('ANY'),
+            new TextChunk('>')
          ], 21));
       });
 

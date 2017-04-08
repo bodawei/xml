@@ -1,8 +1,6 @@
-/*Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/*Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
-
-const TextChunk = require('./shared/TextChunk.js');
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const XMLDECL_VALUE_TERMINATORS = [ '?>' ];
@@ -87,7 +85,7 @@ class XmlTokenStreamMisc {
    \**********************************************************************/
 
    parseUnknownInValue(cursor) {
-      const nextChar = cursor.peekChar()
+      const nextChar = cursor.peekChar();
       const result = {
          hasMore: !!nextChar
       };
@@ -412,7 +410,7 @@ class XmlTokenStreamMisc {
    }
 
    isDecimal(chunk) {
-      return DECIMAL_CHARS.test(chunk ? chunk.text : '')
+      return DECIMAL_CHARS.test(chunk.text);
    }
 
    /**********************************************************************\
@@ -552,19 +550,7 @@ class XmlTokenStreamMisc {
          return first;
       }
 
-      if (first instanceof TextChunk.WithSpaceChunk) {
-         if (second instanceof TextChunk.WithSpaceChunk) {
-            first.originalText += second.originalText;
-         } else {
-            first.originalText += second.text;
-         }
-      } else if (second instanceof TextChunk.WithSpaceChunk) {
-         second.text = first.text + second.text;
-         second.originalText = first.text + second.originalText;
-         second.startOffset = first.startOffset;
-         return second;
-      }
-
+      first.originalText += second.originalText;
       first.text += second.text;
       first.endOffset = second.endOffset;
       return first;

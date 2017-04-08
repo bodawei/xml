@@ -487,7 +487,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 19) ]),
+                  new tokens.CharRef('A', [ util.makeTextChunk('&#x41;', 19) ]),
                   new tokens.Text('o', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
@@ -509,7 +509,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [
-                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 17) ]),
+                  new tokens.CharRef('A', [ util.makeTextChunk('&#x41;', 17) ]),
                   new tokens.Text(' test', tokens.ATTR_NO_CHUNKS)
                ],
                quoteType: '"'
@@ -523,7 +523,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef('A', [ util.makePlainChunk('&#x41;', 19) ])
+                  new tokens.CharRef('A', [ util.makeTextChunk('&#x41;', 19) ])
                ],
                quoteType: '"'
             } ]);
@@ -536,7 +536,7 @@ describe('XmlTokenStream (element)', () => {
             expect(t.attributes).toEqual([ {
                name: 'attr1',
                value: [ new tokens.Text('tw', tokens.ATTR_NO_CHUNKS),
-                  new tokens.CharRef(String.fromCharCode(8), [ util.makePlainChunk('&#x8;', 19) ])
+                  new tokens.CharRef(String.fromCharCode(8), [ util.makeTextChunk('&#x8;', 19) ])
                ],
                quoteType: '"'
             } ]);
@@ -821,13 +821,13 @@ describe('XmlTokenStream (element)', () => {
                   name: 'attr1',
                   value: [
                      new tokens.Text('space:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef(' ', [ util.makePlainChunk('&#32;', 17) ]),
+                     new tokens.CharRef(' ', [ util.makeTextChunk('&#32;', 17) ]),
                      new tokens.Text(', tab:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\t', [ util.makePlainChunk('&#9;', 28) ]),
+                     new tokens.CharRef('\t', [ util.makeTextChunk('&#9;', 28) ]),
                      new tokens.Text(', newline:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\n', [ util.makePlainChunk('&#10;', 42) ]),
+                     new tokens.CharRef('\n', [ util.makeTextChunk('&#10;', 42) ]),
                      new tokens.Text(', cr:', tokens.ATTR_NO_CHUNKS),
-                     new tokens.CharRef('\r', [ util.makePlainChunk('&#13;', 52) ])
+                     new tokens.CharRef('\r', [ util.makeTextChunk('&#13;', 52) ])
                   ],
                   quoteType: '"'
                } ]);
@@ -842,10 +842,10 @@ describe('XmlTokenStream (element)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<'),
-            new TextChunk.PlainChunk('one'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<'),
+            new TextChunk('one'),
+            new TextChunk(' '),
+            new TextChunk('>')
          ]));
       });
 
@@ -1036,10 +1036,10 @@ describe('XmlTokenStream (element)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<'),
-            new TextChunk.PlainChunk('one'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('/>')
+            new TextChunk('<'),
+            new TextChunk('one'),
+            new TextChunk(' '),
+            new TextChunk('/>')
          ]));
       });
 
@@ -1234,10 +1234,10 @@ describe('XmlTokenStream (element)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('</'),
-            new TextChunk.PlainChunk('one'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('</'),
+            new TextChunk('one'),
+            new TextChunk(' '),
+            new TextChunk('>')
          ], 5));
       });
 

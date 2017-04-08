@@ -1,11 +1,19 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
-class PlainChunk {
+class TextChunk {
 
-   constructor(text, startOffset, endOffset, entityLocation) {
+   constructor(text, originalText, startOffset, endOffset, entityLocation) {
+      if (typeof originalText !== 'string') {
+         entityLocation = endOffset;
+         endOffset = startOffset;
+         startOffset = originalText;
+         originalText = text;
+      }
+
       this.text = text;
+      this.originalText = originalText;
       this.startOffset = startOffset;
       this.endOffset = endOffset;
       this.entityLocation = entityLocation;
@@ -13,15 +21,4 @@ class PlainChunk {
 
 }
 
-class WithSpaceChunk extends PlainChunk {
-
-   constructor(text, originalText, startOffset, endOffset, entityLocation) {
-      super(text, startOffset, endOffset, entityLocation);
-      this.originalText = originalText;
-   }
-}
-
-module.exports = {
-   PlainChunk: PlainChunk,
-   WithSpaceChunk: WithSpaceChunk
-};
+module.exports = TextChunk;

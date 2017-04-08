@@ -18,7 +18,7 @@ const makeStrictStream = testUtils.makeStrictStream;
 const makeLaxStream = testUtils.makeLaxStream;
 const makeStringTokenArray = testUtils.makeStringTokenArray;
 
-const TEST_CHUNKS = [ new TextChunk.PlainChunk('from test') ];
+const TEST_CHUNKS = [ new TextChunk('from test') ];
 
 function expectLengthsMatch(fnName, aName, bName, actual, expected) {
    if (expected === actual) {
@@ -351,10 +351,10 @@ describe('EntityExpandingStream', () => {
             ]);
 
             expect(results[3].chunks).toEqual(makeStringTokenArray([
-               new TextChunk.PlainChunk('&'),
-               new TextChunk.PlainChunk('#'),
-               new TextChunk.PlainChunk('60'),
-               new TextChunk.PlainChunk(';')
+               new TextChunk('&'),
+               new TextChunk('#'),
+               new TextChunk('60'),
+               new TextChunk(';')
             ]));
          });
       });

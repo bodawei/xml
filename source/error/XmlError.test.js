@@ -81,7 +81,7 @@ describe('XmlError()', () => {
 
       it('sets the place even if a TextChunk is passed', () => {
          expect(new XmlError(Error.ID.TEST, [],
-            new TextChunk.PlainChunk('foo', new Offset(0, 1, 2), new Offset(0, 3, 4))).place)
+            new TextChunk('foo', new Offset(0, 1, 2), new Offset(0, 3, 4))).place)
             .toEqual(new Offset(0, 3, 4));
       });
 
@@ -119,7 +119,7 @@ describe('XmlError()', () => {
 
       it('wraps the context if just an TextChunk is passed', () => {
          const place = new Offset(0, 1, 2);
-         const textChunk = new TextChunk.PlainChunk('foo', place, new Offset(0, 3, 4));
+         const textChunk = new TextChunk('foo', place, new Offset(0, 3, 4));
          expect(new XmlError(Error.ID.TEST, [], place, textChunk).context)
             .toEqual([ {
                offset: place,

@@ -537,7 +537,7 @@ class XmlTokenStreamDtd {
       if (isQuote) {
          cursor.getMatch(result.quote.text);
          const stringInfo = cursor.getToTerminator([ result.quote.text ]);
-         result.literalChunk = stringInfo.chunk || new TextChunk.PlainChunk('', result.quote.endOffset,
+         result.literalChunk = stringInfo.chunk || new TextChunk('', result.quote.endOffset,
             result.quote.endOffset, result.quote.entityLocation);
          result.closeChunk = cursor.getMatch(result.quote.text);
 

@@ -493,7 +493,7 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < parsedQuotedValue.items.length; index++) {
          const item = parsedQuotedValue.items[index];
 
-         if (item instanceof TextChunk.PlainChunk) {
+         if (item instanceof TextChunk) {
             result.push(new tokens.Text(item.text, tokens.ENTITYVAL_NO_CHUNKS));
          } else {
             const name = item.parsed.nameChunk ? item.parsed.nameChunk.text : '';
@@ -528,7 +528,7 @@ class XmlTokenStream extends stream.Readable {
       for (let index = 0; index < parsedQuotedValue.items.length; index++) {
          const item = parsedQuotedValue.items[index];
 
-         if (item instanceof TextChunk.PlainChunk) {
+         if (item instanceof TextChunk) {
             if (options.validateAngleBracket) {
                if (item.text.indexOf('<') !== -1) {
                   this._report(options.error, [ options.param ]);

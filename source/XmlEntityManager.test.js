@@ -1,4 +1,4 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -10,7 +10,7 @@ const XmlEntityManager = require('./XmlEntityManager.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 
-const TEST_CHUNKS = [ new TextChunk.PlainChunk('from test') ];
+const TEST_CHUNKS = [ new TextChunk('from test') ];
 
 function extractEntityText(manager, name) {
    return manager.getEntity(name).getToTerminator([ 'EOF' ]);

@@ -40,7 +40,7 @@ function XmlError(id, params, place, contextOffset, entityLocation) {
    this.id = id;
 
    if (typeof params === 'object') {
-      if (params instanceof Offset || params instanceof TextChunk.PlainChunk) {
+      if (params instanceof Offset || params instanceof TextChunk) {
          contextOffset = place;
          place = params;
          params = [];
@@ -49,13 +49,13 @@ function XmlError(id, params, place, contextOffset, entityLocation) {
 
    params = params || [];
 
-   if (place instanceof TextChunk.PlainChunk) {
+   if (place instanceof TextChunk) {
       place = place.endOffset;   // should be cloning
       entityLocation = entityLocation || place.entityLocation;
    }
 
    if (contextOffset) {
-      if (contextOffset instanceof TextChunk.PlainChunk) {
+      if (contextOffset instanceof TextChunk) {
          contextOffset = contextOffset.startOffset.clone();
       } else if (contextOffset instanceof Offset) {
          contextOffset = contextOffset.clone();

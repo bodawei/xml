@@ -12,7 +12,7 @@ const INTERNAL_SUBSET = 'EntityDeclaredInInternalSubset';
 const EXTERNAL_SUBSET = 'EntityDeclaredInExternalSubset';
 const EXTERNAL_SUBSET_NAME = '\tEXTERNAL\tSUBSET\t';
 
-const DEF_CHUNKS = [ new TextChunk.PlainChunk('default') ];
+const DEF_CHUNKS = [ new TextChunk('default') ];
 
 /**********************************************************************\
   A cache of available entities.

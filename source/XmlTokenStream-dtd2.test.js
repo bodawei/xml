@@ -372,7 +372,7 @@ describe('XmlTokenStream (dtd2)', () => {
             flag: undefined,
             value: [
                new tokens.Text('x', tokens.ENTITYVAL_NO_CHUNKS),
-               new tokens.CharRef('A', [ util.makePlainChunk('&#65;', 40) ]),
+               new tokens.CharRef('A', [ util.makeTextChunk('&#65;', 40) ]),
                new tokens.Text('y', tokens.ENTITYVAL_NO_CHUNKS)
             ]
          } ]);
@@ -587,7 +587,7 @@ describe('XmlTokenStream (dtd2)', () => {
             list: undefined,
             flag: undefined,
             value: [
-               new tokens.CharRef('A', [ util.makeWithSpaceChunk('&# 65;', 39) ])
+               new tokens.CharRef('A', [ util.makeTextChunk('&# 65;', 39) ])
             ]
          } ]);
       });
@@ -800,34 +800,34 @@ describe('XmlTokenStream (dtd2)', () => {
 
          const t = s.read();
          expect(t.chunks).toEqual(makeStringTokenArray([
-            new TextChunk.PlainChunk('<!'),
-            new TextChunk.PlainChunk('ATTLIST'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('elName'),
-            new TextChunk.WithSpaceChunk('  ', '  '),
-            new TextChunk.PlainChunk('at1'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('CDATA'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('#REQUIRED'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('at2'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('NOTATION'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('('),
-            new TextChunk.PlainChunk('foo'),
-            new TextChunk.PlainChunk('|'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('bar'),
-            new TextChunk.PlainChunk(')'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('#FIXED'),
-            new TextChunk.WithSpaceChunk(' ', ' '),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.WithSpaceChunk('argh', 'argh'),
-            new TextChunk.PlainChunk('"'),
-            new TextChunk.PlainChunk('>')
+            new TextChunk('<!'),
+            new TextChunk('ATTLIST'),
+            new TextChunk(' '),
+            new TextChunk('elName'),
+            new TextChunk('  '),
+            new TextChunk('at1'),
+            new TextChunk(' '),
+            new TextChunk('CDATA'),
+            new TextChunk(' '),
+            new TextChunk('#REQUIRED'),
+            new TextChunk(' '),
+            new TextChunk('at2'),
+            new TextChunk(' '),
+            new TextChunk('NOTATION'),
+            new TextChunk(' '),
+            new TextChunk('('),
+            new TextChunk('foo'),
+            new TextChunk('|'),
+            new TextChunk(' '),
+            new TextChunk('bar'),
+            new TextChunk(')'),
+            new TextChunk(' '),
+            new TextChunk('#FIXED'),
+            new TextChunk(' '),
+            new TextChunk('"'),
+            new TextChunk('argh'),
+            new TextChunk('"'),
+            new TextChunk('>')
          ], 21));
       });
 
