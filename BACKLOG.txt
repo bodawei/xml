@@ -1,47 +1,82 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- ?/?? Sprint 34:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 4 (almost 7)
+ 4/8  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 4 (almost 7)
 
 BLOG IDEAS?
+- Shaping out the string cursor rework. get some basic structure. in sprint 34.
 =============================================
 
-M199: Core new cursor routine
-	- getMatch and getDigits
-	- add buffer
-	- async behavior
+L 200: String cursor rework
+	Performance tests
+		- substr and search
+		- char by char search
+		(space and digits are regex for matching chars.  So, search for the ^ of those)
+		(word and terminator are looking for terminators)
+	Whitespace:
+		find the terminator (the ^ of a couple regex)
+		Then identify if theres a \n or other in hthere and then do the expensive change?
+		otoh, these are always small.
+		do the changes, then count the lines?
+	Perforamnce:
+		building a regex
+		could probably memoize them, as there are a small number
 
-M+ 198: Reduce all TextChunks to one kind
-	√ - move digit checking into parser
-	√ - remove invalidChars
-	√ - move 'TextChunk.TYPE' in string cursor as it's own kind of thing
-	√- remove peekType
-√ - remove entity manager from xmltokenstream
-√ - why are all the parsers classes? They have no state. could just be namespaces
-√- write reports to files and then print
+	Do the extenders
+		getSpace
+			regex to find a space?  But can't do this from middle.
+			cheaper to copy string or do char by char?
+		√getDigits
+			ditto
+		getWord
+			this calls getTerminator
+			what is the cost of building a reg-ex versus going char by char?
+			especially given that most words are short.
+		getToTerminator
+			ditto
+	queue requests.
+	tests
+		no segments
+		one or more
+		end in middle of one, or end in middle of N
+		end at end
+		end at terminus
+	Deal with whitespace collapsing. in space and terminator
+		need to count newlines
+		performance
+	deal with different offset passed into addSegment
 
+<10min plan>
 
+L： 201		(find|wait-to-match)
+	getMAtch
+	getClose
+	getMarkup
+	getChar
 
-200: String cursor rework
-Revisit textchunk 
-	- Offsets should have locations (!). how should this work?
-	- two kinds of routines: find|wait-to-match, find|wait-to-extend
-	- async versions of all
-	- getChunks() with descriptors
-	- addBuffer
-	- handling of match and extend cases on call or add buffer
+	peek char
+	peek is space
+	unget	<-- how given async?
+	recent chunks
+	encodings
+
+L: Chunks: Offsets should have locations (!). how should this work?
+	UEL's
+	EntityOffset
+	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.
+M： Variations/subtypes
 	- delivering content via stream
 	- delivering content all at once
 	- delivering content from value
 
+
 Leftover:  191b
-- testing of chunks in ValueStrea
-- validation errors
+S - testing of chunks in ValueStrea
+S - validation errors
 	- hardest part of this is separating out the validation code.
-- Adding to ExpandingEntityStream with tests
-- validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
-- Chunks in the expanded attributes and entity values are not correct.  Is that OK?
+S - Adding to ExpandingEntityStream with tests
+S - validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+S - Chunks in the expanded attributes and entity values are not correct.  Is that OK?
 - is the token type Text or Chars?
-- How to deal with encodings in cursor?
 
 
 
@@ -125,10 +160,10 @@ TechDebt/Bus
 
 EntityManagement [1L 2M 2S]
 ---------
-S 201: Entity declarations in external subset should be added to entity manager
+S 203: Entity declarations in external subset should be added to entity manager
 M 183: Identifies PE References in DTD (ignore elsewhere)
 L 184: gathr (http, https in browser (ftp?  file?) http, https, file in node)
-S 202: Review entity manager's handling of internal/external and ge/pe decls
+S 204: Review entity manager's handling of internal/external and ge/pe decls
 M 185: need entity manager to retrieve remote entities
 	- cache external entities if smaller than memory?
 	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)
@@ -154,9 +189,4 @@ Extras
 - 15: Put a limit on how much read in in one chunk (pass in as option). 
 - 34: Skip over junk before the xml decl
 - Xml writer: Add BOM for some cases
-
-
-
-
-
 

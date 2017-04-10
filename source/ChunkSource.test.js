@@ -5,1449 +5,581 @@
 
 /* eslint-env jasmine */
 
-const iconvLite = require('iconv-lite');
-
 const EntityLocation = require('./shared/EntityLocation.js');
-const Offset = require('./shared/Offset.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
-const Chunk = require('./shared/Chunk.js');
 const ChunkSource = require('./ChunkSource.js');
 
 describe('ChunkSource', () => {
    let defaultLoc;
+   let entityMetaData1dot0;
    let entityMetaData1dot1;
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();
+      entityMetaData1dot0 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, defaultLoc);
       entityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
    });
 
-   describe('wobbly', () => {
+   describe('getDigits', () => {
+      let pluckedSpy;
+      let source;
 
-      it('returns a chunk with digits, if digits are available', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.addSegment('012345*');
-         source.pluckDigits(pluckedSpy);
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('012345');
+      beforeEach(() => {
+         pluckedSpy = jasmine.createSpy('pluckedSpy');
+         source = new ChunkSource(entityMetaData1dot0);
       });
 
-      it('returns a chunk with digits, if digits are availablew', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
+      describe('basic behavior', () => {
 
-         source.pluckDigits(pluckedSpy);
-         source.addSegment('012345*');
+         it('calls back with a chunk with digits when digits are in the segment', () => {
+            source.addSegment('012345', true);
 
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('012345');
-      });
+            source.getDigits(pluckedSpy);
 
-      it('returns a chunk with digits, if digits are availableyy', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.pluckDigits(pluckedSpy);
-         source.addSegment('012345nonChars');
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('012345');
-      });
-
-      it('returns a chunk with digits, if digits are availablez', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.pluckDigits(pluckedSpy);
-         source.addSegment('0123');
-         source.addSegment('456Y');
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('0123456');
-      });
-
-      it('returns a chunk with digits, if digits are availablezz', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.pluckDigits(pluckedSpy);
-         source.addSegment('0123');
-         source.addSegment('456');
-         source.addSegment('789Y');
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('0123456789');
-      });
-
-      it('returns a chunk with digits, if digits are availabley', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.addSegment('-');
-         source.pluckMatch('-->', pluckedSpy);
-         source.addSegment('-');
-         source.addSegment('>');
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('-->');
-      });
-
-      it('returns a chunk with digits, if digits are availablex', () => {
-         const source = new ChunkSource('x');
-         const pluckedSpy = jasmine.createSpy('pluckedSpy');
-
-         source.addSegment('-');
-         source.pluckMatch('-->', () => {});
-         source.addSegment('-');
-         source.addSegment('>987', true);
-         source.pluckDigits(pluckedSpy);
-
-         expect(pluckedSpy.calls.mostRecent().args[0].text).toEqual('987');
-      });
-
-   });
-
-   describe('construction', () => {
-
-      it('can be constructed with a string', () => {
-         expect(() => {
-            new ChunkSource('hi');
-         }).not.toThrow();
-      });
-
-      it('throws an error if it is called with a non-string', () => {
-         expect(() => {
-            new ChunkSource(5);
-         }).toThrowError('Must pass a string to a StringCursor.');
-      });
-
-      it('throws no error if called with a String() instance', () => {
-         /* eslint-disable no-new-wrappers */
-         expect(() => {
-            new ChunkSource(new String('5'));
-         }).not.toThrow();
-      });
-
-      describe('location', () => {
-
-         it('accepts undefined as a value and produces a default EntityMetaData', () => {
-            const c = new ChunkSource('hi');
-            const defaultEntityMetaData = new EntityMetaData();
-
-            expect(c.entityMd).toEqual(defaultEntityMetaData);
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('012345');
          });
 
-         it('accepts a URL as a value and produces an otherwise default EntityMetaData', () => {
-            const c = new ChunkSource('hi', 'http://test.com');
-            const loc = new EntityLocation('http://test.com');
-            const derivedEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
+         it('calls back with a chunk with digits when hex digits are in the segment', () => {
+            source.addSegment('abcdefABCDEF0123456789', true);
 
-            expect(c.entityMd).toEqual(derivedEntityMetaData);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('abcdefABCDEF0123456789');
          });
 
-         it('accepts an EntityMetaData as a value', () => {
-            const loc = new EntityLocation('http://foo.com');
-            const customEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
-            const c = new ChunkSource('hi', customEntityMetaData);
+         it('calls back with undefined when no digits at the current offset in source', () => {
+            source.addSegment('n012345abcdef', true);
 
-            expect(c.entityMd).toEqual(customEntityMetaData);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
-         it('accepts an EntityLocation as a value and produces an otherwise default EntityMetaData', () => {
-            const loc = new EntityLocation('http://foo.com');
-            const c = new ChunkSource('hi', loc);
-            const derivedEntityMetaData = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, loc);
+         it('throws an error if called without a function', () => {
+            source.addSegment('012345', true);
 
-            expect(c.entityMd).toEqual(derivedEntityMetaData);
-         });
-
-         it('throws an error if some unexpected value is passed in as the info', () => {
             expect(() => {
-               new ChunkSource('hi', 44);
-            }).toThrowError('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
+               source.getDigits();
+            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
          });
 
       });
 
-      describe('options', () => {
+      describe('segment spanning', () => {
 
-         it('sets _specifiedEncoding to undefined if no options provided', () => {
-            const c = new ChunkSource('hi');
+         it('calls back with undefined when at the end of input', () => {
+            source.addSegment('', true);
 
-            expect(c._encoding.specifiedEncoding).toBeUndefined();
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
-         it('sets _specifiedEncoding to the value passed in through options', () => {
-            const c = new ChunkSource('hi', undefined, { encoding: 'UTF-8' });
+         it('does not call back if digits go to end of source and nextsegment is not added', () => {
+            source.addSegment('012345');
 
-            expect(c._encoding.specifiedEncoding).toEqual('UTF-8');
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
-      });
+         it('does not call callback if no data is passed to source', () => {
+            source.getDigits(pluckedSpy);
 
-      describe('autodetection of encoding', () => {
-
-         it('makes no opinion on a string with no XML or Text Declaration', () => {
-            const c = new ChunkSource('e.g. an external entity');
-
-            expect(c._encoding.autodetectedEncoding).toBeUndefined();
+            expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
-         it('identifies a non-encoded string as non-encoded', () => {
-            const c = new ChunkSource('<?xml version="1.0"?>');
+         it('calls back with a chunk with digits when digits span segments', () => {
+            source.addSegment('012345', false);
+            source.addSegment('aef', false);
+            source.addSegment('12', true);
 
-            expect(c._encoding.autodetectedEncoding).toBe('UNENCODED');
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('012345aef12');
          });
 
-         it('identifies a EBCDIC encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u004C\u006F\u00A7\u0094');
+         it('calls back with a chunk with digits when digits span segments and digits end before last segment', () => {
+            source.addSegment('012345', false);
+            source.addSegment('aef', false);
+            source.addSegment('13last', false);
 
-            expect(c._encoding.autodetectedEncoding).toBe('EBCDIC');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('EBCDIC');
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('012345aef13');
          });
 
-         it('identifies a UCS-4 big endian encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u0000\u0000\u0000\u003C');
+         it('calls back even when data added after call', () => {
+            source.addSegment('012345', false);
+            source.addSegment('aef', false);
+            source.getDigits(pluckedSpy);
+            expect(pluckedSpy.calls.count()).toEqual(0);
 
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
+            source.addSegment('13last', false);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('012345aef13');
          });
 
-         it('identifies a UCS-4 little endian encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u003C\u0000\u0000\u0000');
+         it('calls back with digits when called after a different operation (mid-segment)', () => {
+            source.addSegment(' \t1234abFred', true);
 
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4LE');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4LE');
+            source.getSpace(pluckedSpy);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('1234abF');
          });
 
-         it('identifies a UCS-4 unusual1 order encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u0000\u0000\u003C\u0000');
+         it('leaves segment offset right for following operation', () => {
+            source.addSegment('1234abF \t', true);
 
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL1');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL1');
-         });
+            source.getDigits(pluckedSpy);
+            source.getSpace(pluckedSpy);
 
-         it('identifies a UCS-4 unusual2 order encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u0000\u003C\u0000\u0000');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL2');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL2');
-         });
-
-         it('identifies a UTF-16 big endian encoding', () => {
-            const c = new ChunkSource('\u0000\u003C\u0000\u003F');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UTF-16BE');
-         });
-
-         it('identifies a UTF-16 little endian encoding', () => {
-            const c = new ChunkSource('\u003C\u0000\u003F\u0000');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UTF-16LE');
-         });
-
-         it('identifies a UCS-4 big endian with BOM encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u0000\u0000\u00FE\u00FF');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4BE/BOM');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4BE');
-         });
-
-         it('identifies a UCS-4 little endian with BOM encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u00FF\u00FE\u0000\u0000');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4LE/BOM');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4LE');
-         });
-
-         it('identifies a UCS-4 unusal1 with BOM encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u0000\u0000\u00FF\u00FE');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL1/BOM');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL1');
-         });
-
-         it('identifies a UCS-4 unusal2 with BOM encoding', () => {
-            spyOn(ChunkSource.prototype, '_decodeSource'); // Block the actual decoding which will barf
-            const c = new ChunkSource('\u00FE\u00FF\u0000\u0000');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UCS-4UNUSUAL2/BOM');
-            expect(c._bestEncoding(c._encoding.autodetectedEncoding)).toBe('UCS-4UNUSUAL2');
-         });
-
-         it('identifies a UTF-16BE with BOM encoding', () => {
-            const c = new ChunkSource('\u00FE\u00FF\u0001\u0000');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UTF-16BE/BOM');
-         });
-
-         it('identifies a UTF-16LE with BOM encoding', () => {
-            const c = new ChunkSource('\u00FF\u00FE\u0000\u0001');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UTF-16LE/BOM');
-         });
-
-         it('identifies a UTF-8 with BOM encoding', () => {
-            const c = new ChunkSource('\u00EF\u00BB\u00BFA');
-
-            expect(c._encoding.autodetectedEncoding).toBe('UTF-8/BOM');
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual(' \t');
          });
 
       });
 
-      describe('decoding', () => {
+      // test chunk offsets
 
-         it('decodes a UTF-8/BOM into a decoded string', () => {
-            const c = new ChunkSource('\u00EF\u00BB\u00BF<?xml version="1.0"?>');
+   });
 
-            expect(c.getChar().text).toEqual('<');
+   describe('getSpace', () => {
+      let pluckedSpy;
+      let source;
+
+      beforeEach(() => {
+         pluckedSpy = jasmine.createSpy('pluckedSpy');
+         source = new ChunkSource(entityMetaData1dot0);
+      });
+
+      describe('basic behavior', () => {
+
+         it('calls back with a chunk with space when space at the current offset in the source', () => {
+            source.addSegment('    hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('    ');
          });
 
-         it('consumes the BOM from the start of the string', () => {
-            const c = new ChunkSource('\u00EF\u00BB\u00BF<?xml version="1.0"?>');
+         it('calls back with undefined when no space at the current offset in source', () => {
+            source.addSegment('n012345abcdef', true);
 
-            expect(c.getChar().text).toEqual('<');
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
-         it('decodes a UTF-16BE into a decoded string', () => {
-            const c = new ChunkSource('\u0000\u003C\u0000\u003F');
+         it('throws an error if called without a function', () => {
+            source.addSegment('  ', true);
 
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-         });
-
-         it('decodes a UTF-16BE/BOM into a decoded string', () => {
-            const c = new ChunkSource('\u00FE\u00FF\u0000\u003C\u0000\u003F');
-
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-         });
-
-         it('decodes a UTF-16LE into a decoded string', () => {
-            const c = new ChunkSource('\u003C\u0000\u003F\u0000');
-
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-         });
-
-         it('decodes a UTF-16LE/BOM into a decoded string', () => {
-            const c = new ChunkSource('\u00FF\u00FE\u003C\u0000\u003F\u0000');
-
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-         });
-
-         it('can not decode a UCS-4LE string', () => {
             expect(() => {
-               new ChunkSource('\u00FF\u00FE\u0000\u0000');
-            }).toThrowError('Can not decode a string in UCS-4LE encoding.');
-         });
-
-         // Seems like an error, but the cursor can't prove that this isn't actually OK
-         it('does not decode a UTF-16BE string when encoding is specified as UNENCODED', () => {
-            const c = new ChunkSource('\u0000\u003C\u0000\u003F', undefined, {
-               encoding: 'UNENCODED'
-            });
-
-            expect(c.getChar().text).toEqual('\u0000');
-            expect(c.getChar().text).toEqual('\u003C');
-         });
-
-         /*
-          * This seems like an error, but technically could be correct,
-          * except for the fact that the sequence \u00EF\u00BB is an incomplete
-          * UTF-8 character. Really, this should be more of an error, but
-          * iconv-lite just gives us a 'bad char' rather than a big complaint
-          */
-         it('does a butchering job of decoding a UTF-16BE as UTF-8 if encoding is specified as UTF-8', () => {
-            const c = new ChunkSource('\u0000\u003C\u0000\u003F\u00EF\u00BB', undefined, {
-               encoding: 'UTF-8'
-            });
-
-            expect(c.getChar().text).toEqual('\u0000');
-            expect(c.getChar().text).toEqual('\u003C');
-            expect(c.getChar().text).toEqual('\u0000');
-            expect(c.getChar().text).toEqual('\u003F');
-            expect(c.getChar().text).toEqual('\uFFFD');
-         });
-
-         // Seems like an error, but technically we can't prove it isn't UTF-16
-         it('forces decoding an unencoded string to UTF-16BE with a UTF-16BE encoding', () => {
-            const c = new ChunkSource('<?xml version="1.0"?>', undefined, {
-               encoding: 'UTF-16BE'
-            });
-
-            expect(c.getChar().text).toEqual('\u3C3F');
-         });
-
-         it('does no decoding in what looks like an unecoded string (but is actually UTF-8 encoded)', () => {
-            const c = new ChunkSource('<?xm\u00e4\u00bd\u00a0'); // e4bda0 is 你 in utf8
-
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-            expect(c.getChar().text).toEqual('x');
-            expect(c.getChar().text).toEqual('m');
-            expect(c.getChar().text).toEqual('ä');
-         });
-
-         it('forces decoding what looks like an unecoded string as UTF-8 with a UTF-8 encoding', () => {
-            const c = new ChunkSource('<?xm\u00e4\u00bd\u00a0', undefined, { // e4bda0 is 你 in utf8
-               encoding: 'UTF-8'
-            });
-
-            expect(c.getChar().text).toEqual('<');
-            expect(c.getChar().text).toEqual('?');
-            expect(c.getChar().text).toEqual('x');
-            expect(c.getChar().text).toEqual('m');
-            expect(c.getChar().text).toEqual('你');
+               source.getSpace();
+            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
          });
 
       });
 
-   });
+      describe('segment spanning', () => {
 
-   describe('specifiedEncoding', () => {
+         it('does not call back if space goes to end of source and next segment is not added', () => {
+            source.addSegment('  \n ');
 
-      it('decodes as UTF-8 if specified as UTF-8', () => {
-         const c = new ChunkSource('<?xm\u00e4\u00bd\u00a0');
+            source.getSpace(pluckedSpy);
 
-         expect(c.getChar().text).toEqual('<');
-         expect(c.getChar().text).toEqual('?');
-         expect(c.getChar().text).toEqual('x');
-         expect(c.getChar().text).toEqual('m');
-
-         c.specifiedEncoding = 'UTF-8';
-
-         expect(c.getChar().text).toEqual('你');
-      });
-
-      it('does not decode to UTF-8 if specified as UTF-8, but encoding parameter was UNENCODED', () => {
-         const c = new ChunkSource('<?xm\u00e4\u00bd\u00a0', undefined, { encoding: 'UNENCODED' });
-
-         expect(c.getChar().text).toEqual('<');
-         expect(c.getChar().text).toEqual('?');
-         expect(c.getChar().text).toEqual('x');
-         expect(c.getChar().text).toEqual('m');
-
-         c.specifiedEncoding = 'UTF-8';
-
-         expect(c.getChar().text).toEqual('\u00e4');
-      });
-
-      /*
-       * This feels like it should be an error. First, we autodetected
-       * UTF-16, so UTF-8 seems contradictory, yet the UTF-16 could conceivably
-       * be legit UTF-8. Note: this is a malformed XML document because 0x00 is
-       * not allowed. However, That's beyond the scope of the cursor to know.
-       */
-      it('decodes as UTF-16 if specified as UTF-8', () => {
-         const c = new ChunkSource('\u0000\u003C\u0000\u003F');
-
-         expect(c.getChar().text).toEqual('<');
-
-         c.specifiedEncoding = 'UTF-8';
-
-         /*
-          * First we converted the text from utf16, and then read the
-          * first character. Then, we converted the original from UTF-8
-          * and readjusted offsets.
-          */
-         expect(c.getChar().text).toEqual('\u0000');
-      });
-
-      it('does not re-decode a UTF-16 string since it was converted at start time (whitebox)', () => {
-         const c = new ChunkSource('\u003C\u0000\u003F\u0000');
-         expect(c.getChar().text).toEqual('<');
-
-         spyOn(iconvLite, 'decode');
-
-         c.specifiedEncoding = 'UTF-16LE';
-
-         expect(iconvLite.decode).not.toHaveBeenCalled();
-      });
-
-   });
-
-   describe('isUTF16', () => {
-
-      it('is false with a plain string', () => {
-         const c = new ChunkSource('e.g. an external entity');
-
-         expect(c.isUTF16).toBe(false);
-      });
-
-      it('is true with a UTF-16 big endian encoding', () => {
-         const c = new ChunkSource('\u0000\u003C\u0000\u003F');
-
-         expect(c.isUTF16).toBe(true);
-      });
-
-      it('is true with a UTF-16 little endian encoding', () => {
-         const c = new ChunkSource('\u003C\u0000\u003F\u0000');
-
-         expect(c.isUTF16).toBe(true);
-      });
-
-      it('is true with a UTF-16BE with BOM encoding', () => {
-         const c = new ChunkSource('\u00FE\u00FF\u0001\u0000');
-
-         expect(c.isUTF16).toBe(true);
-      });
-
-      it('is true with a UTF-16LE with BOM encoding', () => {
-         const c = new ChunkSource('\u00FF\u00FE\u0000\u0001');
-
-         expect(c.isUTF16).toBe(true);
-      });
-
-      it('is false a UTF-8 with BOM encoding', () => {
-         const c = new ChunkSource('\u00EF\u00BB\u00BFA');
-
-         expect(c.isUTF16).toBe(false);
-      });
-
-   });
-
-   describe('hasBOM', () => {
-
-      it('is false with a plain string', () => {
-         const c = new ChunkSource('e.g. an external entity');
-
-         expect(c.hasBOM).toBe(false);
-      });
-
-      it('is false with a UTF-16 big endian encoding', () => {
-         const c = new ChunkSource('\u0000\u003C\u0000\u003F');
-
-         expect(c.hasBOM).toBe(false);
-      });
-
-      it('is false with a UTF-16 little endian encoding', () => {
-         const c = new ChunkSource('\u003C\u0000\u003F\u0000');
-
-         expect(c.hasBOM).toBe(false);
-      });
-
-      it('is true with a UTF-16BE with BOM encoding', () => {
-         const c = new ChunkSource('\u00FE\u00FF\u0001\u0000');
-
-         expect(c.hasBOM).toBe(true);
-      });
-
-      it('is true with a UTF-16LE with BOM encoding', () => {
-         const c = new ChunkSource('\u00FF\u00FE\u0000\u0001');
-
-         expect(c.hasBOM).toBe(true);
-      });
-
-      it('is true a UTF-8 with BOM encoding', () => {
-         const c = new ChunkSource('\u00EF\u00BB\u00BFA');
-
-         expect(c.hasBOM).toBe(true);
-      });
-
-   });
-
-   describe('peekChar()', () => {
-
-      it('returns the next character', () => {
-         const c = new ChunkSource('<foo>');
-
-         expect(c.peekChar()).toEqual(new Chunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns undefined if there is no next character', () => {
-         const c = new ChunkSource('');
-
-         expect(c.peekChar()).toBeUndefined();
-      });
-
-      it('returns the next character even if it is a \\n', () => {
-         const c = new ChunkSource('\n foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\n if it is a \\r', () => {
-         const c = new ChunkSource('\r foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\u0085 if it is \\u0085 and this is 1.0', () => {
-         const c = new ChunkSource('\u0085 foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\u0085', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\u2028 iof it is \\u2028 and this is 1.0', () => {
-         const c = new ChunkSource('\u2028 foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\u2028', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\n if it is \\u0085 and this is 1.1', () => {
-         const c = new ChunkSource('\u0085 foo', entityMetaData1dot1);
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\n if it is \\u2028 and this is 1.1', () => {
-         const c = new ChunkSource('\u2028 foo', entityMetaData1dot1);
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\n if it is both a \\r\\n pair', () => {
-         const c = new ChunkSource('\r\n foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
-      });
-
-      it('returns a \\n if next characters are \\r\\u0085 (and does not consume the latter) and this is 1.0', () => {
-         const c = new ChunkSource('\r\u0085 foo');
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character as \\n if it is a \\r\\u0085 if this is 1.1', () => {
-         const c = new ChunkSource('\r\u0085 foo', entityMetaData1dot1);
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
-      });
-
-      it('returns the next character even when the cursor has incremented past start of string', () => {
-         const c = new ChunkSource('x\r\n foo');
-         c.getChar();
-
-         expect(c.peekChar()).toEqual(new Chunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
-      });
-
-      it('adds nothing to the recent chunks', () => {
-         const c = new ChunkSource('h<foo>');
-         c.peekChar();
-
-         expect(c.getRecentChunks()).toEqual([]);
-      });
-
-   });
-
-   describe('getSpace()', () => {
-
-      it('returns the next run of spaces', () => {
-         const c = new ChunkSource('    hi');
-
-         expect(c.getSpace()).toEqual(new Chunk('    ', '    ', new Offset(0, 0, 0),
-            new Offset(0, 4, 4), defaultLoc));
-      });
-
-      it('returns undefined if the first available character is ot a space', () => {
-         const c = new ChunkSource('hi');
-
-         expect(c.getSpace()).toBeUndefined();
-      });
-
-      it('returns the a mixture of tabs and spaces', () => {
-         const c = new ChunkSource(' \t \t hi');
-
-         expect(c.getSpace()).toEqual(new Chunk(' \t \t ', ' \t \t ',
-            new Offset(0, 0, 0), new Offset(0, 5, 5), defaultLoc));
-      });
-
-      it('returns the a mixture of tabs and spaces and newlines', () => {
-         const c = new ChunkSource(' \n \t \n hi');
-
-         expect(c.getSpace()).toEqual(new Chunk(' \n \t \n ', ' \n \t \n ',
-            new Offset(0, 0, 0), new Offset(2, 1, 7), defaultLoc));
-      });
-
-      it('treats a CR like a LF', () => {
-         const c = new ChunkSource(' \rhi');
-         const expected = new Chunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a CR LF like a LF', () => {
-         const c = new ChunkSource(' \r\nhi');
-         const expected = new Chunk(' \n', ' \r\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\u0085 like non-space if this is 1.0', () => {
-         const c = new ChunkSource(' \u0085hi');
-         const expected = new Chunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\u2028 like a non-space if this is 1.0', () => {
-         const c = new ChunkSource(' \u2028hi');
-         const expected = new Chunk(' ', ' ', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\u0085 like a \\n if this is 1.1', () => {
-         const c = new ChunkSource(' \u0085hi', entityMetaData1dot1);
-         const expected = new Chunk(' \n', ' \u0085', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\u2028 like a \\n if this is 1.1', () => {
-         const c = new ChunkSource(' \u2028hi', entityMetaData1dot1);
-         const expected = new Chunk(' \n', ' \u2028', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a mixture of CRLF and CR and LF as just the right set of LF', () => {
-         const c = new ChunkSource(' \r\n \n \r hi');
-         const expected = new Chunk(' \n \n \n ', ' \r\n \n \r ', new Offset(0, 0, 0),
-            new Offset(3, 1, 8), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\r\\u0085 like \\n\\u0085 if this is 1.0', () => {
-         const c = new ChunkSource(' \r\u0085hi');
-         const expected = new Chunk(' \n', ' \r', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('treats a \\r\\u0085 like a \\n if this is 1.1', () => {
-         const c = new ChunkSource(' \r\u0085hi', entityMetaData1dot1);
-         const expected = new Chunk(' \n', ' \r\u0085', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc);
-
-         expect(c.getSpace()).toEqual(expected);
-      });
-
-      it('returns the original text, without line ending changes', () => {
-         const c = new ChunkSource(' \r \n \r\n \t');
-
-         expect(c.getSpace().originalText).toEqual(' \r \n \r\n \t');
-      });
-
-      it('reads a space string from the middle of the string', () => {
-         const c = new ChunkSource('one twp');
-         c.getWord([]);
-
-         expect(c.getSpace()).toEqual(new Chunk(' ', ' ', new Offset(0, 3, 3),
-            new Offset(0, 4, 4), defaultLoc));
-      });
-
-      it('adds the space chunk to the recent chunks', () => {
-         const c = new ChunkSource(' \t\n');
-         c.getSpace();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk(' \t\n', ' \t\n', new Offset(0, 0, 0), new Offset(1, 0, 3), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource(' hi', loc);
-
-         expect(c.getSpace().entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getWord()', () => {
-
-      it('throws an error if passed a terminator with spaces', () => {
-         const c = new ChunkSource('');
-
-         expect(() => {
-            c.getWord([ '< <' ]);
-         }).toThrowError('Terminators may not have any space characters (space, tab, newline, etc).');
-      });
-
-      it('returns the next space-terminated word', () => {
-         const c = new ChunkSource('one two');
-
-         const expected = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         expect(c.getWord([])).toEqual(expected);
-      });
-
-      it('returns the next word, even if a single letter', () => {
-         const c = new ChunkSource('o two');
-
-         const expected = new Chunk('o', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc);
-         expect(c.getWord([])).toEqual(expected);
-      });
-
-      it('can get multiple words in a row', () => {
-         const c = new ChunkSource('one two');
-         c.getWord([]);
-         c.getSpace();
-
-         const expected = new Chunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
-         expect(c.getWord([])).toEqual(expected);
-      });
-
-      it('considers the word terminated at the specified terminator', () => {
-         const c = new ChunkSource('oneX');
-
-         const expected = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         expect(c.getWord([ 'X' ])).toEqual(expected);
-      });
-
-      it('does not terminate at \\u0085 in 1.0', () => {
-         const c = new ChunkSource('one\u0085X');
-         const expected = new Chunk('one\u0085X', new Offset(0, 0, 0),
-            new Offset(0, 5, 5), defaultLoc);
-
-         expect(c.getWord([ ])).toEqual(expected);
-      });
-
-      it('does not terminate at \\u2028 in 1.0', () => {
-         const c = new ChunkSource('one\u2028X');
-         const expected = new Chunk('one\u2028X', new Offset(0, 0, 0),
-            new Offset(0, 5, 5), defaultLoc);
-
-         expect(c.getWord([ ])).toEqual(expected);
-      });
-
-      it('does terminate at \\u0085 in 1.1', () => {
-         const c = new ChunkSource('one\u0085X', entityMetaData1dot1);
-         const expected = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-
-         expect(c.getWord([ ])).toEqual(expected);
-      });
-
-      it('does terminate at \\u2028 in 1.1', () => {
-         const c = new ChunkSource('one\u2028X', entityMetaData1dot1);
-         const expected = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-
-         expect(c.getWord([ ])).toEqual(expected);
-      });
-
-      it('considers the word terminated at any of the specified terminators', () => {
-         const c1 = new ChunkSource('oneX');
-         const c2 = new ChunkSource('one?');
-         const c3 = new ChunkSource('one/]]>');
-
-         const expected = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         expect(c1.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
-         expect(c2.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
-         expect(c3.getWord([ 'X', '?', '/]]>' ])).toEqual(expected);
-      });
-
-      it('identifies a word even if not at the start of the cursor', () => {
-         const c = new ChunkSource('one> twoX');
-         c.getWord([ '>', 'X' ]);
-         c.getChar();
-         c.getSpace();
-
-         const expected = new Chunk('two', new Offset(0, 5, 5), new Offset(0, 8, 8), defaultLoc);
-         expect(c.getWord([ '>', 'X' ])).toEqual(expected);
-      });
-
-      it('returns undefined if there is a space at the cursor', () => {
-         const c = new ChunkSource(' one two');
-
-         expect(c.getWord([])).toBeUndefined();
-      });
-
-      it('returns undefined if there is another word terminator at the cursor', () => {
-         const c = new ChunkSource('?>one two');
-
-         expect(c.getWord([ '?>' ])).toBeUndefined();
-      });
-
-      it('returns undefined if cursor is at the end of the input', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getWord([])).toBeUndefined();
-      });
-
-      it('adds the word chunk to the recent chunks', () => {
-         const c = new ChunkSource('test ');
-         c.getWord([]);
-         const expected = new Chunk('test', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc);
-
-         expect(c.getRecentChunks()).toEqual([ expected ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('one two', loc);
-
-         expect(c.getWord([]).entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getDigits()', () => {
-
-      it('returns the next space-terminated set of decimal digits', () => {
-         const c = new ChunkSource('123 ');
-
-         const expected = new Chunk('123', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         expect(c.getDigits()).toEqual(expected);
-      });
-
-      it('returns the next space-terminated set of hex digits', () => {
-         const c = new ChunkSource('12AbCdE3 ');
-
-         const expected = new Chunk('12AbCdE3', new Offset(0, 0, 0), new Offset(0, 8, 8), defaultLoc);
-         expect(c.getDigits()).toEqual(expected);
-      });
-
-      it('returns all the possible digits', () => {
-         const c = new ChunkSource('0123456789AaBbCcDdEeFf');
-
-         const expected = new Chunk('0123456789AaBbCcDdEeFf', new Offset(0, 0, 0),
-            new Offset(0, 22, 22), defaultLoc);
-         expect(c.getDigits()).toEqual(expected);
-      });
-
-      it('returns undefined if there is a space at the cursor', () => {
-         const c = new ChunkSource(' one two');
-
-         expect(c.getDigits([])).toBeUndefined();
-      });
-
-      it('returns undefined if cursor is at the end of the input', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getDigits([])).toBeUndefined();
-      });
-
-      it('stops processing at a non-digit', () => {
-         const c = new ChunkSource('12;');
-
-         expect(c.getDigits()).toEqual(new Chunk('12', new Offset(0, 0, 0),
-            new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('stops processing at EOF', () => {
-         const c = new ChunkSource('12');
-
-         expect(c.getDigits()).toEqual(new Chunk('12', new Offset(0, 0, 0),
-            new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('returns the digits even when not at the start of the cursor', () => {
-         const c = new ChunkSource('foo 123');
-         c.getWord([]);
-         c.getSpace();
-
-         expect(c.getDigits()).toEqual(new Chunk('123', new Offset(0, 4, 4),
-            new Offset(0, 7, 7), defaultLoc));
-      });
-
-      it('adds the digit chunk to the recent chunks', () => {
-         const c = new ChunkSource('123 ');
-         c.getDigits();
-         const expected = new Chunk('123', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-
-         expect(c.getRecentChunks()).toEqual([ expected ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('123 ', loc);
-
-         expect(c.getDigits().entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getChar()', () => {
-
-      it('returns the next character', () => {
-         const c = new ChunkSource('<foo>');
-
-         expect(c.getChar()).toEqual(new Chunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns undefined if there are no more characters', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getChar()).toBeUndefined();
-      });
-
-      it('returns the next character even if it is a newline', () => {
-         const c = new ChunkSource('\n foo');
-
-         expect(c.getChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character even if it is a return', () => {
-         const c = new ChunkSource('\r foo');
-
-         expect(c.getChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 1), defaultLoc));
-      });
-
-      it('returns the next character even if it is both a return and newline pair', () => {
-         const c = new ChunkSource('\r\n foo');
-
-         expect(c.getChar()).toEqual(new Chunk('\n', new Offset(0, 0, 0), new Offset(1, 0, 2), defaultLoc));
-      });
-
-      it('returns the next character even when the cursor is not at the beginning', () => {
-         const c = new ChunkSource('x\r\n foo');
-         c.getChar();
-
-         expect(c.getChar()).toEqual(new Chunk('\n', new Offset(0, 1, 1), new Offset(1, 0, 3), defaultLoc));
-      });
-
-      it('adds the char chunk to the recent chunks', () => {
-         const c = new ChunkSource('test ');
-         c.getChar();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk('t', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('<foo>', loc);
-
-         expect(c.getChar().entityLocation).toEqual(loc);
-      });
-
-      // Whitebox: Not testing invalid character ranges.  this is covered in peekChar() which covers this
-   });
-
-   describe('getMarkup()', () => {
-
-      it('returns undefined if cursor is at the end of the input', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getMarkup()).toBeUndefined();
-      });
-
-      it('returns undefined if the next character is not < or &', () => {
-         const c = new ChunkSource('frog');
-
-         expect(c.getMarkup()).toBeUndefined();
-      });
-
-      it('returns a chunk with markup if the next is just <', () => {
-         const c = new ChunkSource('<frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('<', new Offset(0, 0, 0),
-             new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns a chunk with markup if the next is just &', () => {
-         const c = new ChunkSource('&frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('&', new Offset(0, 0, 0),
-             new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns a markup chunk if the next is </', () => {
-         const c = new ChunkSource('</frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('</', new Offset(0, 0, 0),
-             new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('returns a chunk with markup if the next is <!--', () => {
-         const c = new ChunkSource('<!--frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('<!--', new Offset(0, 0, 0),
-             new Offset(0, 4, 4), defaultLoc));
-      });
-
-      it('returns a chunk with markup if the next is <?', () => {
-         const c = new ChunkSource('<?frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('<?', new Offset(0, 0, 0),
-             new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('returns a chunk with markup if the next is <!', () => {
-         const c = new ChunkSource('<!frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('<!', new Offset(0, 0, 0),
-             new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('returns a chunk with markup if the next is </', () => {
-         const c = new ChunkSource('</frog');
-
-         expect(c.getMarkup()).toEqual(new Chunk('</', new Offset(0, 0, 0),
-             new Offset(0, 2, 2), defaultLoc));
-      });
-
-      it('returns a chunk with markup from the middle of the source string', () => {
-         const c = new ChunkSource(' \r  </frog');
-         c.getSpace();
-
-         expect(c.getMarkup()).toEqual(new Chunk('</', new Offset(1, 2, 4),
-             new Offset(1, 4, 6), defaultLoc));
-      });
-
-      it('adds the chunk with < markup to the recent chunks', () => {
-         const c = new ChunkSource('<test>');
-         c.getMarkup();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk('<', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
-         ]);
-      });
-
-      it('adds the chunk with & markup to the recent chunks', () => {
-         const c = new ChunkSource('&test>');
-         c.getMarkup();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk('&', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('<frog', loc);
-
-         expect(c.getMarkup().entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getClose()', () => {
-
-      it('returns undefined if cursor is at the end of the input', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getClose()).toBeUndefined();
-      });
-
-      it('returns undefined if the next character is not ]', () => {
-         const c = new ChunkSource('frog');
-
-         expect(c.getClose()).toBeUndefined();
-      });
-
-      it('returns a chunk with the close if the next is just ]', () => {
-         const c = new ChunkSource(']frog');
-
-         expect(c.getClose()).toEqual(new Chunk(']', new Offset(0, 0, 0),
-             new Offset(0, 1, 1), defaultLoc));
-      });
-
-      it('returns a chunk with the coose if the next ]]>', () => {
-         const c = new ChunkSource(']]>frog');
-
-         expect(c.getClose()).toEqual(new Chunk(']]>', new Offset(0, 0, 0),
-             new Offset(0, 3, 3), defaultLoc));
-      });
-
-      it('adds the chunk with ]]> close to the recent chunks', () => {
-         const c = new ChunkSource(']]>foo');
-         c.getClose();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk(']]>', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc)
-         ]);
-      });
-
-      it('adds the chunk with "]" to the recent chunks', () => {
-         const c = new ChunkSource(']>');
-         c.getClose();
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk(']', new Offset(0, 0, 0), new Offset(0, 1, 1), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource(']frog', loc);
-
-         expect(c.getClose().entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getMatch()', () => {
-
-      it('throws an error if called without a parameter', () => {
-         const c = new ChunkSource('one two');
-
-         expect(() => {
-            c.getMatch();
-         }).toThrowError('Must pass a non-empty string to getMatch().');
-      });
-
-      it('throws an error if passed an empty string', () => {
-         const c = new ChunkSource('');
-
-         expect(() => {
-            c.getMatch('');
-         }).toThrowError('Must pass a non-empty string to getMatch().');
-      });
-
-      it('throws an error if called with whitespace in the parameter', () => {
-         const c = new ChunkSource('one two');
-
-         expect(() => {
-            c.getMatch('one two');
-         }).toThrowError('Parameter to getMatch() may not contain any whitespace characters.');
-      });
-
-      it('throws an error if called with newlines in the parameter', () => {
-         const c = new ChunkSource('one\ntwo');
-
-         expect(() => {
-            c.getMatch('one\ntwo');
-         }).toThrowError('Parameter to getMatch() may not contain any whitespace characters.');
-      });
-
-      it('returns the matched string', () => {
-         const c = new ChunkSource('frogD');
-
-         expect(c.getMatch('fro')).toEqual(new Chunk('fro', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc));
-      });
-
-      it('returns a nothing if the matched string is not found', () => {
-         const c = new ChunkSource('frog');
-
-         expect(c.getMatch('D')).toBeUndefined();
-      });
-
-      it('returns a nothing if at the end of string', () => {
-         const c = new ChunkSource('');
-
-         expect(c.getMatch('D')).toBeUndefined();
-      });
-
-      it('returns the expected value even when not at the start of the cursor data', () => {
-         const c = new ChunkSource('one');
-         c.getChar();
-
-         expect(c.getMatch('ne')).toEqual(new Chunk('ne', new Offset(0, 1, 1), new Offset(0, 3, 3), defaultLoc));
-      });
-
-      it('adds the matched chunk to the recent chunks', () => {
-         const c = new ChunkSource('Testing');
-         c.getMatch('Tes');
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk('Tes', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('frogD', loc);
-
-         expect(c.getMatch('fro').entityLocation).toEqual(loc);
-      });
-
-   });
-
-   describe('getToTerminator()', () => {
-
-      it('throws an error if called without a parameter', () => {
-         const c = new ChunkSource('one two');
-
-         expect(() => {
-            c.getToTerminator();
-         }).toThrowError('Must pass a non-empty array of terminators to getToTerminator().');
-      });
-
-      it('throws an error if terminators have whitespace', () => {
-         const c = new ChunkSource('');
-
-         expect(() => {
-            c.getToTerminator([ '< <' ]);
-         }).toThrowError('Terminators may not have any space characters (space, tab, newline, etc).');
-      });
-
-      it('throws an error if passed an empty array', () => {
-         const c = new ChunkSource('one two');
-
-         expect(() => {
-            c.getToTerminator([]);
-         }).toThrowError('Must pass a non-empty array of terminators to getToTerminator().');
-      });
-
-      it('returns the string up to the specified terminator', () => {
-         const c = new ChunkSource('frogD');
-
-         expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new Chunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
-            terminator: 'D'
+            expect(pluckedSpy.calls.count()).toEqual(0);
          });
-      });
 
-      it('returns nothing if already at the terminator', () => {
-         const c = new ChunkSource('D');
+         it('does not call callback if no data is passed to source', () => {
+            source.getSpace(pluckedSpy);
 
-         expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: undefined,
-            terminator: 'D'
+            expect(pluckedSpy.calls.count()).toEqual(0);
          });
-      });
 
-      it('returns everything to EOF if terminator not found', () => {
-         const c = new ChunkSource('frog');
+         it('calls back with a chunk with space when space spans segments', () => {
+            source.addSegment('  ', false);
+            source.addSegment('\t', false);
+            source.addSegment(' ', true);
 
-         expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new Chunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
-            terminator: undefined
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('  \t ');
          });
-      });
 
-      it('returns the string up to the first terminator when there are multiple', () => {
-         const c = new ChunkSource('frogDandD');
+         it('calls back with a chunk when space spans segments and space ends before last segment', () => {
+            source.addSegment('  ', false);
+            source.addSegment('\t', false);
+            source.addSegment(' last', false);
 
-         expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new Chunk('frog', 'frog', new Offset(0, 0, 0), new Offset(0, 4, 4), defaultLoc),
-            terminator: 'D'
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('  \t ');
          });
-      });
 
-      it('returns the string with newlines appropriately adjusted', () => {
-         const c = new ChunkSource('line1\nline2\rline3\r\nline4!');
-         const chunk = new Chunk('line1\nline2\nline3\nline4', 'line1\nline2\rline3\r\nline4',
-            new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);
+         it('calls back even when data added after call', () => {
+            source.addSegment('  ', false);
+            source.addSegment('\t', false);
+            source.getSpace(pluckedSpy);
+            expect(pluckedSpy.calls.count()).toEqual(0);
 
-         expect(c.getToTerminator([ '!' ])).toEqual({
-            chunk: chunk,
-            terminator: '!'
+            source.addSegment(' last', false);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('  \t ');
          });
+
       });
 
-      it('returns the string with \\u0085 and \\u2028 not adjusted if this is 1.0', () => {
-         const c = new ChunkSource('line1\u0085line2\u2028line3\r\u0085line4!');
-         const chunk = new Chunk('line1\u0085line2\u2028line3\n\u0085line4',
-            'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(1, 5, 24), defaultLoc);
+      describe('space types', () => {
 
-         expect(c.getToTerminator([ '!' ])).toEqual({
-            chunk: chunk,
-            terminator: '!'
+         it('calls back with a mixture of space and tabs', () => {
+            source.addSegment(' \t \t hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \t \t ');
          });
-      });
 
-      it('returns the string with \\u0085 and \\u2028 adjusted if this is 1.1', () => {
-         const c = new ChunkSource('line1\u0085line2\u2028line3\r\u0085line4!', entityMetaData1dot1);
+         it('recognizes tabs (\\t)', () => {
+            source.addSegment(' \t hi', false);
 
-         const chunk = new Chunk('line1\nline2\nline3\nline4', 'line1\u0085line2\u2028line3\r\u0085line4',
-            new Offset(0, 0, 0), new Offset(3, 4, 24), defaultLoc);
-         expect(c.getToTerminator([ '!' ])).toEqual({
-            chunk: chunk,
-            terminator: '!'
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \t ');
          });
-      });
 
-      it('returns the original text before newline replacement', () => {
-         const c = new ChunkSource('line1\nline2\rline3\r\nline4!');
+         it('recognizes newlines (\\n)', () => {
+            source.addSegment(' \n hi', false);
 
-         expect(c.getToTerminator([ '!' ]).chunk.originalText).toEqual('line1\nline2\rline3\r\nline4');
-      });
+            source.getSpace(pluckedSpy);
 
-      it('returns the string even when not at the start of the cursor', () => {
-         const c = new ChunkSource('frogDandD');
-         c.getChar();
-
-         expect(c.getToTerminator([ 'D' ])).toEqual({
-            chunk: new Chunk('rog', 'rog', new Offset(0, 1, 1), new Offset(0, 4, 4), defaultLoc),
-            terminator: 'D'
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
          });
+
+         it('recognizes carrige returns (\\r) and returns them as newlines', () => {
+            source.addSegment(' \r hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
+         });
+
+         it('recognizes carrige returns/new line combinations (\\r\\n) and returns them as newlines', () => {
+            source.addSegment(' \r\n hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
+         });
+
+         it('does not recognize next line (\\u0085) as space if version is 1.0', () => {
+            source.addSegment(' \u0085 hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' ');
+         });
+
+         it('does not recognize line separator (\\u2028) as space if version is 1.0', () => {
+            source.addSegment(' \u2028 hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' ');
+         });
+
+         it('recognizes next line (\\u0085) as space if version is 1.1 and returns as a new line', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment(' \u0085 hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
+         });
+
+         it('recognizes carriage return and next line (\\r\\u0085) if version is 1.1 and returns as a new line', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment(' \r\u0085 hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
+         });
+
+         it('recognizes line separator (\\u2028) as space  if version is 1.1 and returns a new line', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment(' \u2028 hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n ');
+         });
+
+         it('recognizes a combination of line breaks and transforms all to newline', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment(' \n\r\r\n \u2028\u0085\r\u0085hi', false);
+
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \n\n\n \n\n\n');
+         });
+
       });
 
-      it('adds the returned chunk to the recent chunk', () => {
-         const c = new ChunkSource('This is a Test');
-         c.getToTerminator([ 'Tes' ]);
-
-         expect(c.getRecentChunks()).toEqual([
-            new Chunk('This is a ', 'This is a ', new Offset(0, 0, 0), new Offset(0, 10, 10), defaultLoc)
-         ]);
-      });
-
-      it('assigns a location to the created chunk', () => {
-         const loc = new EntityLocation('http://test.com/foo.bar');
-         const c = new ChunkSource('frogD', loc);
-
-         expect(c.getToTerminator([ 'D' ]).chunk.entityLocation).toEqual(loc);
-      });
-
+      // offsets
    });
 
-   describe('unget()', () => {
+   describe('getWord', () => {
+      let pluckedSpy;
+      let source;
 
-      it('ungets the most recent chunk', () => {
-         const c = new ChunkSource('one two');
-         const chunk = c.getWord([]);
-
-         c.unget(chunk);
-
-         expect(c.getWord([])).toEqual(chunk);
+      beforeEach(() => {
+         pluckedSpy = jasmine.createSpy('pluckedSpy');
+         source = new ChunkSource(entityMetaData1dot0);
       });
 
-      it('ungets multiple chunks', () => {
-         const c = new ChunkSource('one two');
-         const chunk = c.getWord([]);
-         const chunk2 = c.getSpace();
+      describe('basic behavior', () => {
 
-         c.unget(chunk2);
-         c.unget(chunk);
+         it('calls back with a chunk with a word terminated by a space', () => {
+            source.addSegment('word ', false);
 
-         expect(c.getWord([])).toEqual(chunk);
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word');
+         });
+
+         it('calls back with undefined when no word at the current offset in source', () => {
+            source.addSegment(' ', true);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('throws an error if called without a function', () => {
+            source.addSegment('foo', true);
+
+            expect(() => {
+               source.getWord();
+            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
+         });
+
       });
 
-      it('throws an error if nothing has been retrieved', () => {
-         const c = new ChunkSource('one two');
+      describe('segment spanning', () => {
 
-         expect(() => {
-            c.unget(new Chunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4)));
-         }).toThrowError('Chunk passed to unget() is not the most recent chunk returned.');
+         it('does not recognize a word if the word reaches to end of segment and new segment not added', () => {
+            source.addSegment('IAmAWord');
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('does not recognize a word if no segments added', () => {
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('recognizes now word when at eof', () => {
+            source.addSegment('', true);
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('recognizes a word when it spans segments', () => {
+            source.addSegment('Wo', false);
+            source.addSegment('rd', false);
+            source.addSegment('99 ', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Word99');
+         });
+
+         it('recognizes a word that ends at the end of the last segment', () => {
+            source.addSegment('Wo', false);
+            source.addSegment('rd', false);
+            source.addSegment('98', true);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Word98');
+         });
+
+         it('recognizes a word when it spans segments and the word ends before the last segment arrives', () => {
+            source.addSegment('Wo', false);
+            source.addSegment('rd', false);
+            source.addSegment('100 ', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Word100');
+         });
+
+         it('recognizes a word even when data added after the call', () => {
+            source.addSegment('Wo', false);
+            source.addSegment('r', false);
+            source.getWord([], pluckedSpy);
+            expect(pluckedSpy.calls.count()).toEqual(0);
+
+            source.addSegment('d101 ', false);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Word101');
+         });
+
       });
 
-   });
+      describe('terminator types', () => {
 
-   describe('getRecentChunks()', () => {
+         it('calls back with a word terminated by a space', () => {
+            source.addSegment('word1 ', false);
 
-      it('returns nothing initially', () => {
-         const c = new ChunkSource('one two');
+            source.getWord([], pluckedSpy);
 
-         expect(c.getRecentChunks()).toEqual([]);
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word1');
+         });
+
+         it('calls back with a word terminated by a tab', () => {
+            source.addSegment('word2\t', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word2');
+         });
+
+         it('calls back with a word terminated by a newline', () => {
+            source.addSegment('word3\n', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word3');
+         });
+
+         it('calls back with a word terminated by a carriage return', () => {
+            source.addSegment('word4\r', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word4');
+         });
+
+         it('does not recognize a word terminated by a \\u0085 in 1.0', () => {
+            source.addSegment('word5\u0085\r', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word5\u0085');
+         });
+
+         it('does not recognize a word terminated by a \\u2028 in 1.0', () => {
+            source.addSegment('word6\u2028\r', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word6\u2028');
+         });
+
+         it('recognizes a word terminated by a \\u0085 in 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('word7\u0085\r', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word7');
+         });
+
+         it('recognizes a word terminated by a \\u2028 in 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('word8\u2028\r', false);
+
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('word8');
+         });
+
+         it('recognizes a word terminated by a custom terminator', () => {
+            source.addSegment('word9\n', false);
+
+            source.getWord([ 'o' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('w');
+         });
+
+         it('recognizes a word terminated by a custom multi-character terminator', () => {
+            source.addSegment('wordA\n', false);
+
+            source.getWord([ 'rdA' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('wo');
+         });
+
+         it('recognizes a word terminated by one of several custom terminators', () => {
+            source.addSegment('wordA\n', false);
+
+            source.getWord([ 'dA', 'A', 'rd' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('wo');
+         });
+
+         it('recognizes a word not terminated by a false-postive terminator', () => {
+            source.addSegment('wordC\n', false);
+
+            // d will match, but then r will not
+            source.getWord([ 'dr' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('wordC');
+         });
+
       });
 
-      it('returns the three chunks most recently returned', () => {
-         const c = new ChunkSource('one two');
-         c.getWord([]);
-         c.getSpace();
-         c.getWord([]);
-
-         const firstWord = new Chunk('one', new Offset(0, 0, 0), new Offset(0, 3, 3), defaultLoc);
-         const secondWord = new Chunk('two', new Offset(0, 4, 4), new Offset(0, 7, 7), defaultLoc);
-
-         expect(c.getRecentChunks()).toEqual([
-            firstWord,
-            new Chunk(' ', ' ', new Offset(0, 3, 3), new Offset(0, 4, 4), defaultLoc),
-            secondWord
-         ]);
-      });
-
-      it('returns an empty array of chunks once it has already been called', () => {
-         const c = new ChunkSource('one two');
-         c.getWord([]);
-         c.getSpace();
-         c.getWord([]);
-         c.getRecentChunks();
-
-         expect(c.getRecentChunks()).toEqual([]);
-      });
-
+      // offsets
    });
 
 });

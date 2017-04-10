@@ -806,7 +806,7 @@ describe('XmlStringCursor', () => {
 
    });
 
-   describe('getDigits()', () => {
+   describe('•getDigits()', () => {
 
       it('returns the next space-terminated set of decimal digits', () => {
          const c = new XmlStringCursor('123 ');

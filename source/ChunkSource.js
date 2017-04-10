@@ -2,53 +2,34 @@
 
 'use strict';
 
-const iconvLite = require('iconv-lite');
-
 const Offset = require('./shared/Offset.js');
-const EntityMetaData = require('./shared/EntityMetaData.js');
-const EntityLocation = require('./shared/EntityLocation.js');
 const Chunk = require('./shared/Chunk.js');
 
-const LINE_ENDING_REGEX10 = /(\r\n)|(\r)/g;
-const LINE_ENDING_REGEX11 = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
-
-const ENCODING = {
-   UNENCODED: 'UNENCODED',
-   UTF8: 'UTF-8',
-   UTF8_BOM: 'UTF-8/BOM',
-   UTF16BE: 'UTF-16BE',
-   UTF16BE_BOM: 'UTF-16BE/BOM',
-   UTF16LE: 'UTF-16LE',
-   UTF16LE_BOM: 'UTF-16LE/BOM',
-   UCS4BE: 'UCS-4BE',
-   UCS4BE_BOM: 'UCS-4BE/BOM',
-   UCS4LE: 'UCS-4LE',
-   UCS4LE_BOM: 'UCS-4LE/BOM',
-   UCS4UNUSUAL1: 'UCS-4UNUSUAL1',
-   UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
-   UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
-   UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
-   EBCDIC: 'EBCDIC'
-};
+const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
+const SPACE_10_REGEX = /[ \t\n\r]+/g;
+const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
+const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
+const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
+const SPACE_TERMINATORS_10 = [ ' ', '\\t', '\\n', '\\r' ];
+const SPACE_TERMINATORS_11 = [ ' ', '\\t', '\\n', '\\r', '\u0085', '\u2028' ];
 
 class Segment {
    constructor(text) {
       this.text = text;
+      this.startOffset = new Offset(0, 0, 0);
       this.offset = new Offset(0, 0, 0);
+      this.index = 0;
+      this.isLast = false;
    }
 
-   incrementChar() {
-      // stop if too far
-      this.offset.index ++;
-      this.offset.column ++;
-   }
-
-   current() {
-      return this.text[this.offset.index];
-   }
+//   incrementChar() {
+//      // stop if too far
+//      this.offset.index ++;
+//      this.offset.column ++;
+//   }
 
    atEnd() {
-      return this.offset.index === this.text.length;
+      return this.index >= this.text.length;
    }
 }
 
@@ -158,69 +139,246 @@ class ChunkSource {
          will try to decode the string before processing it.
    \**********************************************************************/
 
-   constructor(source, info, options) {
-      if (typeof source !== 'string' && !(source instanceof String)) {
-         throw new Error('Must pass a string to a StringCursor.');
-      }
+   constructor(info) {
+//      if (!(info instanceof EntityMetaData)) {
+//         throw new Error('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
+//      }
 
-      if (!info || typeof info === 'string') {
-         info = new EntityLocation(info);
-      }
-
-      if (info instanceof EntityLocation) {
-         const temp = new EntityMetaData();
-         temp.location = info;
-         info = temp;
-      }
-
-      if (!(info instanceof EntityMetaData)) {
-         throw new Error('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
-      }
-
-      this._source = source;
-      this._offset = new Offset(0, 0, 0);
-      this._chunks = [];
-      this._entityMd = info;
-      this._encoding = {
-         specifiedEncoding: (options || {}).encoding,
-         autodetectedEncoding: this._autodetectEncoding()
-      };
-
-      this._decodeSource();
-
-      if (this.hasBOM) {
-         this._offset.index ++;
-         this._offset.column ++;
-      }
-
+      this._info = info;
       this._segments = [];
       this._currentOperation = undefined;
+      this._regexMemo = {};
    }
 
-   pluckMatch(needed, onPlucked) {
+   /**********************************************************************\
+     Extract a chunk of all the digits from the current point in the
+     source and pass it to the callback.
+     If no digits, pass back undefined.
+
+     PARAM
+     deliverChunk: receives the chunk of digits extracted from here.
+         function(chunk:Chunk|undefined):void
+   \**********************************************************************/
+
+   getDigits(deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
+      }
+
       this._currentOperation = {
-         name: '_innerMatch',
-         param: needed,
-         paramOffset: 0,
-         onPlucked: onPlucked
+         name: 'Digit',
+         onPlucked: deliverChunk,
+         match: [],
+         segments: []
       };
+
       this._resumeOperation();
    }
 
-   pluckDigits(onPlucked) {
+   /**********************************************************************\
+     @@@
+
+        [3] S ::= (#x20 | #x9 | #xD | #xA)+
+
+     PARAM
+     deliverChunk: receives the chunk of digits extracted from here.
+         function(chunk:Chunk|undefined):void
+   \**********************************************************************/
+
+   getSpace(deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
+      }
+
       this._currentOperation = {
-         name: '_innerDigits',
-         onPlucked: onPlucked
+         name: 'Space',
+         onPlucked: deliverChunk,
+         match: [],
+         original: [],
+         segments: []
+      };
+
+      this._resumeOperation();
+   }
+
+   getWord(terminators, deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
+      }
+
+      this._currentOperation = {
+         name: 'Word',
+         onPlucked: deliverChunk,
+         match: [],
+         original: [],
+         segments: [],
+         terminators: terminators
       };
 
       this._resumeOperation();
    }
 
    addSegment(text, last) {
-      this._segments.push(new Segment(text));
-      this._allSegments = last;
+      const segment = new Segment(text);
+      this._segments.push(segment);
+      segment.isLast = last;
 
       this._resumeOperation();
+   }
+
+   /**********************************************************************\
+     If decimal or hexadecimal digits are to be found from the current
+     location in the current segment, consume as many digits across as
+     many segments as available, and call back with the results.
+     Do not finish searching and doing the callback until either
+     a non-digit is found or the end of the input is found.
+   \**********************************************************************/
+
+   _innerDigit(op, segment) {
+      while (segment) {
+         DIGITS_REGEX.lastIndex = segment.index;
+         const result = DIGITS_REGEX.exec(segment.text);
+         const haveMatch = result && result.index === segment.index;
+
+         if (haveMatch) {
+            op.match.push(result[0]);
+
+            segment.index += result[0].length;
+            segment.offset.index += result[0].length;
+            segment.offset.column += result[0].length;
+         }
+
+         if (!haveMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
+            this._currentOperation = undefined;
+            op.onPlucked(this._pluckChunk(op));
+            return;
+         }
+
+         segment = this._segments.shift();
+         op.segments.push(segment);
+      }
+   }
+
+   /**********************************************************************\
+     @@@@
+   \**********************************************************************/
+
+   _innerSpace(op, segment) {
+      const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+      const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+
+      while (segment) {
+         SPACE_REGEX.lastIndex = segment.index;
+         const result = SPACE_REGEX.exec(segment.text);
+         const haveMatch = result && result.index === segment.index;
+
+         if (haveMatch) {
+            op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+            op.original.push(result[0]);
+
+            segment.index += result[0].length;
+            segment.offset.index += result[0].length;
+            segment.offset.column += result[0].length;
+         }
+
+         if (!haveMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
+            this._currentOperation = undefined;
+            op.onPlucked(this._pluckChunk(op));
+            return;
+         }
+
+         segment = this._segments.shift();
+         op.segments.push(segment);
+      }
+   }
+
+   _innerWord(op, segment) {
+      const spaceTerminators = this._info.isVersion1dot0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
+
+      this._followToTerminator(op, segment, spaceTerminators, op.terminators);
+   }
+
+   // note: do not need to try to replace newlines for wrod
+   _followToTerminator(op, segment, spaceTerminators, terminators) {
+      const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+      const terminatorCharsArray = spaceTerminators.concat(terminators.map((term) => (term[0])));
+      const terminatorChars = terminatorCharsArray.join('');
+      let terminatorRegex = this._regexMemo[terminatorChars];
+
+      if (!terminatorRegex) {
+         const regexString = '[^' + terminatorChars + ']*';
+         terminatorRegex = new RegExp(regexString, 'g');
+         this._regexMemo[terminatorChars] = terminatorRegex;
+      }
+
+      while (segment) {
+         let actualMatch = false;
+
+         while (!actualMatch && !segment.atEnd()) {
+            terminatorRegex.lastIndex = segment.index;
+            const result = terminatorRegex.exec(segment.text);
+            const havePotentialMatch = result && result.index === segment.index;
+
+            if (havePotentialMatch) {
+               // This could be a false positive. e.g., it matches the first char of a term. which doesn't overall match
+               const remainingChars = segment.text.length - (result.index + result[0].length);
+
+               for (let tIndex = 0; tIndex < terminators.length; tIndex++) {
+                  const term = terminators[tIndex];
+
+                  if (term.length <= remainingChars) {
+                     if (segment.text.substr(result.index + result[0].length, term.length) === term) {
+                        op.terminagor = term;
+                        actualMatch = true;
+                        break;
+                     }
+                  } else {
+                     // do doMatch
+                  }
+               }
+
+               if (!actualMatch && spaceTerminators) {
+                  const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+                  const matchChar = segment.text[result.index + result[0].length];
+                  SPACE_REGEX.lastIndex = 0;
+                  const haveMatch = SPACE_REGEX.exec(matchChar);
+                  if (haveMatch) {
+                     op.terminagor = matchChar;
+                     actualMatch = true;
+                  }
+               }
+
+               if (actualMatch) {
+                  if (result[0].length > 0) {
+                     op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+                     op.original.push(result[0]);
+
+                     segment.index += result[0].length;
+                  }
+               } else {
+                  // copy over what we have so far, including the false-ly matching character
+
+                  // uncomfortable with line endings here
+                  op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+                  op.original.push(result[0]);
+
+                  op.match.push(segment.text[result[0].length]); // .replace(LINE_ENDING_REGEX, '\n')
+                  op.original.push(segment.text[result[0].length]);
+
+                  segment.index += result[0].length + 1;
+               }
+            }
+         }
+
+         if (actualMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
+            this._currentOperation = undefined;
+            op.onPlucked(this._pluckChunk(op));
+            return;
+         }
+
+         segment = this._segments.shift();
+         op.segments.push(segment);
+      }
    }
 
    _resumeOperation() {
@@ -228,865 +386,87 @@ class ChunkSource {
          return;
       }
 
-      this[this._currentOperation.name]();
-   }
+      const operation = this._currentOperation;
 
-   _innerMatch() {
-      const op = this._currentOperation;
-      let segment = this._segments.shift();
+      const segment = this._segments.shift();
 
-      while (segment) {
-         if (!op.start) {
-            op.start = segment.offset.clone();
-            op.segments = [ segment ];
-         } else {
-            op.segments.push(segment);
-         }
-
-         while (segment.current() === op.param[op.paramOffset]) {
-            op.paramOffset ++;
-            segment.incrementChar();
-
-            if (op.paramOffset === op.param.length) {
-               break;
-            }
-         }
-
-         if (op.paramOffset === op.param.length) {
-            this._currentOperation = undefined;
-            op.onPlucked(this._pluckChunk(op));
-            return;
-         }
-         segment = this._segments.shift();
+      if (!operation.start) {
+         operation.start = segment.offset.clone();
+         operation.segments = [ segment ];
+      } else {
+         operation.segments.push(segment);
       }
+
+      this['_inner' + operation.name](operation, segment);
    }
 
-   _innerDigits() {
-      const op = this._currentOperation;
-      let segment = this._segments.shift();
-
-      while (segment) {
-         if (!op.start) {
-            op.start = segment.offset.clone();
-            op.segments = [ segment ];
-         } else {
-            op.segments.push(segment);
-         }
-
-         while (this._isDigitS(segment)) {
-            segment.incrementChar();
-         }
-
-         if (!segment.atEnd() || segment.atEnd() && this._allSegments) {
-            this._currentOperation = undefined;
-            op.onPlucked(this._pluckChunk(op));
-            return;
-         }
-         segment = this._segments.shift();
-      }
-   }
-
-   _isDigitS(segment) {
-      const nextChar = segment.text[segment.offset.index];
-      switch (nextChar) {
-         case '0':
-         case '1':
-         case '2':
-         case '3':
-         case '4':
-         case '5':
-         case '6':
-         case '7':
-         case '8':
-         case '9':
-         case 'A':
-         case 'a':
-         case 'B':
-         case 'b':
-         case 'C':
-         case 'c':
-         case 'D':
-         case 'd':
-         case 'E':
-         case 'e':
-         case 'F':
-         case 'f':
-            return true;
-         default:
-            return;
-      }
-   }
+//   _innerMatch(op, segment) {
+//
+//      while (segment) {
+//         while (segment.current() === op.param[op.paramOffset]) {
+//            op.paramOffset ++;
+//            segment.incrementChar();
+//
+//            if (op.paramOffset === op.param.length) {
+//               break;
+//            }
+//         }
+//
+//         if (op.paramOffset === op.param.length) {
+//            this._currentOperation = undefined;
+//            op.onPlucked(this._pluckChunk(op));
+//            return;
+//         }
+//         segment = this._segments.shift();
+//      }
+//   }
 
    _pluckChunk(operation) {
-      const startSeg = operation.segments.shift();
-      const str = startSeg.text.substring(operation.start.index, startSeg.offset.index);
-
-      if (operation.segments.length === 0) {
-         if (!startSeg.atEnd()) {
-            this._segments.unshift(startSeg);
-         }
-
-         return new Chunk(str, operation.start, startSeg.offset);
+      if (operation.match.length === 0) {
+         return;
       }
 
-      const pieces = [ str ];
-      while (operation.segments.length > 1) {
-         const seg = operation.segments.shift();
-         pieces.push(seg.text);
-      }
+      const lastSegment = operation.segments[operation.segments.length - 1];
 
-      const lastSegment = operation.segments.shift();
-
-      if (lastSegment.atEnd()) {
-         pieces.push(lastSegment.text);
-      } else {
-         pieces.push(lastSegment.text.substr(0, lastSegment.offset.index));
+      if (!lastSegment.atEnd()) {
          this._segments.unshift(lastSegment);
       }
 
-      return new Chunk(pieces.join(''), operation.start, lastSegment.offset);
-   }
-
-   get isUTF16() {
-      switch (this._encoding.autodetectedEncoding) {
-         case ENCODING.UTF16BE:
-         case ENCODING.UTF16BE_BOM:
-         case ENCODING.UTF16LE:
-         case ENCODING.UTF16LE_BOM:
-            return true;
-         default:
-            return false;
-      }
-   }
-
-   get hasBOM() {
-      switch (this._encoding.autodetectedEncoding) {
-         case ENCODING.UTF8_BOM:
-         case ENCODING.UTF16BE_BOM:
-         case ENCODING.UTF16LE_BOM:
-            return true;
-         default:
-            return false;
-      }
-   }
-
-   get entityMd() {
-      return this._entityMd;
-   }
-
-   set specifiedEncoding(value) {
-      if (this._encoding.specifiedEncoding) {
-         return;
+      const text = operation.match.join('');
+      let originalText = text;
+      if (operation.original) {
+         originalText = operation.original.join('');
       }
 
-      this._encoding.specifiedEncoding = value;
-      this._decodeSource(true);
-   }
-
-   /*
-    * Decode the string either:
-    *  - At startup time, in which case we use either the autodetection
-    *    or the encoding option to decode, or
-    *  - After reading the XML Declaration, we may have the specifiedEncoding
-    *    set, which, if the encoding option was not set, will force us to
-    *    reconsider re-encoding. Se the overall class comment for more general
-    *    details.
-    */
-   _decodeSource(fromSetSpecifiedEncoding) {
-      /*
-       * Do not decode if no indication of any decoding that is needed
-       *     (auto and specified are undefined)
-       * or if the specified is forcing that there is no decoding to do,
-       * or if autodetection said there was no encoding and nothing was specified
-       */
-      if ((!this._encoding.autodetectedEncoding && !this._encoding.specifiedEncoding) ||
-         this._encoding.specifiedEncoding === ENCODING.UNENCODED ||
-         (this._encoding.autodetectedEncoding === ENCODING.UNENCODED && !this._encoding.specifiedEncoding)) {
-         return;
-      }
-
-      const encoding = this._encoding.specifiedEncoding || this._encoding.autodetectedEncoding;
-      const targetEncoding = this._bestEncoding(encoding);
-
-      // This can only happen when called from set specifiedEncoding
-      // since currentEncoding will be undefined otherwise.
-      if (targetEncoding === this._encoding.currentEncoding) {
-         this._sourceBackup = undefined;
-         return;
-      }
-
-      const canConvertToTarget = iconvLite.encodingExists(targetEncoding);
-
-      if (canConvertToTarget) {
-         iconvLite.skipDecodeWarning = true;
-         const toConvert = this._sourceBackup || this._source;
-
-         // Store the decoded string in case set specifiedEncoding comes in with a better value
-         this._sourceBackup = fromSetSpecifiedEncoding ? undefined : this._source;
-         this._source = iconvLite.decode(toConvert, targetEncoding, { stripBOM: false });
-
-         // In the case we are re-encoding, try to adjust character offsets
-         if (fromSetSpecifiedEncoding) {
-            if (targetEncoding === ENCODING.UTF8 &&
-               (this._encoding.currentEncoding === ENCODING.UTF16LE ||
-                  this._encoding.currentEncoding === ENCODING.UTF16BE)) {
-               this._offset.index = this._offset.index * 2;
-            }
-         }
-         this._encoding.currentEncoding = targetEncoding;
-      } else {
-         throw new Error('Can not decode a string in ' + targetEncoding + ' encoding.');
-      }
-   }
-
-   /*
-    * Convert our internal identifiers to ones that iconv-lite likes.
-    * It doesn't know about our BOM information.
-    */
-   _bestEncoding(encoding) {
-      switch (encoding) {
-         case ENCODING.UTF8:
-         case ENCODING.UTF8_BOM:
-            return ENCODING.UTF8;
-         case ENCODING.UCS4BE:
-         case ENCODING.UCS4BE_BOM:
-            return ENCODING.UCS4BE;
-         case ENCODING.UCS4LE:
-         case ENCODING.UCS4LE_BOM:
-            return ENCODING.UCS4LE;
-         case ENCODING.UCS4UNUSUAL1:
-         case ENCODING.UCS4UNUSUAL1_BOM:
-            return ENCODING.UCS4UNUSUAL1;
-         case ENCODING.UCS4UNUSUAL2:
-         case ENCODING.UCS4UNUSUAL2_BOM:
-            return ENCODING.UCS4UNUSUAL2;
-         case ENCODING.UTF16BE:
-         case ENCODING.UTF16BE_BOM:
-            return ENCODING.UTF16BE;
-         case ENCODING.UTF16LE:
-         case ENCODING.UTF16LE_BOM:
-            return ENCODING.UTF16LE;
-      }
-
-      return encoding;
-   }
-
-   /**********************************************************************\
-    peekIsSpace() returns true if the next character might be a space
-    (
-
-    RETURN
-    true if the next character is a space type of character.
-   \**********************************************************************/
-
-//   peekIsSpace() {
-//      return this._isSpace(this._source[this._offset.index]);
-//   }
-
-   /* ---------------------------------------------------------------------*\
-    Returns the next character from the string, no matter what it is.
-    RETURN
-    The next character in the cursor as a CHAR token.
-   \*----------------------------------------------------------------------*/
-
-   peekChar() {
-      const startOffset = this._offset.clone();
-      const endOffset = this._offset.clone();
-      const is1dot1 = this._entityMd.isVersion1dot1;
-      let nextChar = this._source[this._offset.index];
-
-      if (!nextChar) {
-         return;
-      }
-
-      endOffset.index ++;
-      endOffset.column ++;
-
-      // Deal with section 2.11 of the standard for end of line handling
-      if (nextChar === '\n' || nextChar === '\r' ||
-         (is1dot1 && (nextChar === '\u0085' || nextChar === '\u2028'))) {
-         endOffset.line ++;
-         endOffset.column = 0;
-         const nextNextChar = this._source[this._offset.index + 1];
-
-         if (nextChar === '\r' &&
-            (nextNextChar === '\n' || (is1dot1 && nextNextChar === '\u0085'))) {
-            endOffset.index ++;
-         }
-
-         nextChar = '\n';
-      }
-
-      const chunk = new Chunk(nextChar, startOffset, endOffset, this._entityMd.location);
-
-      return chunk;
-   }
-
-   /**********************************************************************\
-    RETURN
-    Returns the next S in the input.  That is, the next series of spaces,
-    tabs, and newlines. As per the XML standard, any \r's or \r\n's are
-    converted into single \n's. Note that the unmodified version of the
-    string is included in the return chunk as a property named originalText.
-
-        [3] S ::= (#x20 | #x9 | #xD | #xA)+
-   \**********************************************************************/
-
-   getSpace() {
-      let fixString = false;
-      const startOffset = this._offset.clone();
-      const is1dot1 = this._entityMd.isVersion1dot1;
-      let nextChar = this._source[this._offset.index];
-
-      if (!nextChar || !this._isSpace(nextChar)) {
-         return;
-      }
-
-      while (nextChar && this._isSpace(nextChar)) {
-         if (nextChar === '\r') {
-            const nextNextChar = this._source[this._offset.index + 1];
-
-            nextChar = '\n';
-
-            if (nextNextChar === '\n' || (is1dot1 && nextNextChar === '\u0085')) {
-               this._offset.index ++;
-            }
-            this._offset.line ++;
-            this._offset.column = 0;
-            fixString = true;
-         } else if (nextChar === '\n' || (is1dot1 && (nextChar === '\u0085' || nextChar === '\u2028'))) {
-            this._offset.line ++;
-            this._offset.column = 0;
-            fixString = true;
-         } else {
-            this._offset.column ++;
-         }
-
-         this._offset.index ++;
-         nextChar = this._source[this._offset.index];
-      }
-
-      const originalString = this._source.substring(startOffset.index, this._offset.index);
-      let rawString = originalString;
-
-      if (fixString) {
-         // Address section 2.11 (Line Ending). \r\u0085. \r\n, \r, \u0085 and \u2028 all exposed as \n
-         rawString = rawString.replace(is1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10, '\n');
-      }
-
-      return this._makeChunk(rawString, originalString, startOffset);
-   }
-
-   /**********************************************************************\
-     Returns the next delimited substring from the current position in
-     the cursor. The substring is considered to be terminated by any
-     Space (see getSpace()) or any of the strings in the terminators
-     array.
-
-     This returns a text chunk that has a couldBeName property. This will
-     be set to true if the word adheres to the XML rules for names.
-
-     PARAM
-     terminators: an array of strings
-     RETURN
-     The next word in the cursor, or undefined if there is none.
-   \**********************************************************************/
-
-   getWord(terminators) {
-      this._assertValuesHaveNoSpaces(terminators);
-
-      const startOffset = this._offset.clone();
-
-      this._findToTerminator(terminators, true);
-
-      if (startOffset.index === this._offset.index) {
-         return;
-      }
-
-      const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeChunk(rawString, startOffset);
-   }
-
-   /**********************************************************************\
-     Returns the next delimited substring from the current position in
-     the cursor. The substring is considered to be terminated by any
-     Space (see getSpace()) or any of the strings in the terminators
-     array.
-
-     This returns a text chunk that has a couldBeName property. This will
-     be set to true if the word adheres to the XML rules for names.
-
-     PARAM
-     terminators: an array of strings
-     RETURN
-     The next word in the cursor, or undefined if there is none.
-   \**********************************************************************/
-
-   getDigits() {
-      const startOffset = this._offset.clone();
-      let type = this._isDigit();
-
-      if (!type) {
-         return;
-      }
-
-      do {
-         this._offset.index ++;
-         this._offset.column ++;
-         type = this._isDigit();
-      } while (type);
-
-      const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeChunk(rawString, startOffset);
-   }
-
-   /**********************************************************************\
-     RETURN
-     Returns the next character from the cursor.  Like peekChar(), this
-     does not care what that character is. Thus, < and any S is returned
-     as readily as any other character. Note, however, that this does
-     do line-ending normalization automatically.
-   \**********************************************************************/
-
-   getChar() {
-      const chunk = this.peekChar();
-
-      if (!chunk) {
-         return;
-      }
-
-      this._offset = chunk.endOffset.clone();
-      this._chunks.push(chunk);
-
-      return chunk;
-   }
-
-   /**********************************************************************\
-    getClose() returns the close character from the input stream.
-
-    RETURN
-    A Chunk chunk containing "]" or "]]>", or undefined if no close is
-    at the current position
-   \**********************************************************************/
-
-   getClose() {
-      const startOffset = this._offset.clone();
-      const firstChar = this._source[this._offset.index];
-      const secondChar = this._source[this._offset.index + 1];
-      const thirdChar = this._source[this._offset.index + 2];
-
-      if (!firstChar || firstChar !== ']') {
-         return;
-      }
-
-      this._offset.index ++;
-      this._offset.column ++;
-
-      if (firstChar === ']' && secondChar === ']' && thirdChar === '>') {
-         this._offset.index += 2;
-         this._offset.column += 2;
-      }
-
-      const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeChunk(rawString, startOffset);
-   }
-
-   /**********************************************************************\
-     RETURN
-     A Chunk token if the next characters in the cursor are the opening
-     of some markup (<, <? <!, </,  <!-- or &) or undefined (if the current
-     cursor position has no markup)
-   \**********************************************************************/
-
-   getMarkup() {
-      const startOffset = this._offset.clone();
-      const firstChar = this._source[this._offset.index];
-      const secondChar = this._source[this._offset.index + 1];
-
-      if (!firstChar || (firstChar !== '<' && firstChar !== '&')) {
-         return;
-      }
-
-      this._offset.index ++;
-      this._offset.column ++;
-
-      if (firstChar === '<' && (secondChar === '?' || secondChar === '!' || secondChar === '/')) {
-         this._offset.index ++;
-         this._offset.column ++;
-
-         if (secondChar === '!' &&
-            this._source[this._offset.index] === '-' &&
-            this._source[this._offset.index + 1] === '-') {
-            this._offset.index += 2;
-            this._offset.column += 2;
-         }
-      }
-
-      const rawString = this._source.substring(startOffset.index, this._offset.index);
-      return this._makeChunk(rawString, startOffset);
-   }
-
-   /**********************************************************************\
-     PARAM
-     toMatch: The string value to match at the current position in
-     the cursor. This may not contain any whitespace.
-
-     RETURN
-     Gets a Chunk that contains the exact string passed in as a
-     parameter. In this process, the cursor is advanced past this value.
-     If this value is not at the current cursor position, this returns
-     undefined.
-   \**********************************************************************/
-
-   getMatch(toMatch) {
-      if (!toMatch || toMatch === '') {
-         throw new Error('Must pass a non-empty string to getMatch().');
-      }
-      this._assertValuesHaveNoSpaces([ toMatch ], 'Parameter to getMatch() may not contain any whitespace characters.');
-
-      if (this._source.substr(this._offset.index, toMatch.length) !== toMatch) {
-         return;
-      }
-
-      const startOffset = this._offset.clone();
-
-      const rawString = this._source.substr(startOffset.index, toMatch.length);
-      this._offset.index += rawString.length;
-      this._offset.column += rawString.length;
-
-      return this._makeChunk(rawString, startOffset);
-   }
-
-   /**********************************************************************\
-     Returns all characters from the cursor up to the first of the strings
-     specified in the input.
-
-     For example, if this is passed [ '<', '&' ] and the cursor has
-        "this is an example<name>&value;
-     this will return the string "this is an example", with the terminator
-     of '<'.
-
-     Any \r's in the input will be converted (see the doc for getSpace()).
-     Like that routine, this will return the unmodified original input
-     string on the chunk in a property called originalText.
-
-     PARAM
-     An array of 1 or more strings that could terminate the string.
-
-     RETURN
-     An object with two properties. "chunk" includes all characters from
-     the current position in the cursor up to, but not including, the
-     first termination string found in the input. If the cursor is not at
-     one of those terminators, this will be undefined. Similarly, if at
-     EOF, this chunk will also be undefined. "terminator" is whiever
-     terminator was found to terminate the input string. This will be
-     undefined if at EOF.
-   \**********************************************************************/
-
-   getToTerminator(terminators) {
-      if (!terminators || terminators.length === 0) {
-         throw new Error('Must pass a non-empty array of terminators to getToTerminator().');
-      }
-      const startOffset = this._offset.clone();
-      const terminator = this._findToTerminator(terminators, false);
-
-      if (startOffset.index === this._offset.index) {
-         return {
-            chunk: undefined,
-            terminator: terminator
-         };
-      }
-
-      const originalString = this._source.substring(startOffset.index, this._offset.index);
-      let rawString = originalString;
-      const regex = this._entityMd.isVersion1dot1 ? LINE_ENDING_REGEX11 : LINE_ENDING_REGEX10;
-      let ctr = 0;
-      let lineCount = 0;
-      let lengthToEnd = rawString.length;
-
-      if (regex.exec(rawString)) {
-         rawString = rawString.replace(regex, '\n');
-
-         while (ctr !== -1) {
-            ctr = rawString.indexOf('\n', ctr);
-            if (ctr !== -1) {
-               ctr++; // skip over the match
-               lineCount++;
-               lengthToEnd = rawString.length - ctr;
-            }
-         }
-      }
-
-      // change the offset based on line endings we found in the string
-      if (lineCount > 0) {
-         this._offset.line += lineCount;
-         this._offset.column = lengthToEnd - 1; // length to index
-      }
-
-      return {
-         chunk: this._makeChunk(rawString, originalString, startOffset),
-         terminator: terminator
-      };
-   }
-
-   /**********************************************************************\
-     unget() backs the cursor up past the specified chunk.  That chunk
-     must have been the most recent chunk returned by this cursor, and
-     it must be called before getRecentChunks() has been called.
-     Note that if this cursor has returned A, B, C, you can call unget(C),
-     unget(B), unget(A).
-
-     Note: This could actually operate without the parameter. However,
-     this signature makes it more explicit in the client code what is
-     happening, and provides some error reporting in case the user is
-     confused.
-
-     PARAM
-     chunk the most recent chunk returned
-   \**********************************************************************/
-
-   unget(chunk) {
-      // validate that this is the most recent chunk returned
-      if (this._chunks.length === 0 || this._chunks[this._chunks.length - 1] !== chunk) {
-         throw new Error('Chunk passed to unget() is not the most recent chunk returned.');
-      }
-
-      this._chunks.length = this._chunks.length - 1;
-      this._offset = chunk.startOffset.clone();
-   }
-
-   /**********************************************************************\
-     RETURN
-     All the chunks generated since the last time this routine was called.
-   \**********************************************************************/
-
-   getRecentChunks() {
-      const temp = this._chunks;
-      this._chunks = [];
-
-      return temp;
-   }
-
-   /**********************************************************************\
-     PARAM
-     a single character string
-
-     RETURN
-     True if this character is one of the possible space characters in input.
-   \**********************************************************************/
-
-   _isSpace(aChar) {
-      const base = aChar === ' ' || aChar === '\t' || aChar === '\n' || aChar === '\r';
-
-      if (this._entityMd.isVersion1dot0) {
-         return base;
-      }
-
-      return base || aChar === '\u0085' || aChar === '\u2028';
-   }
-
-   /**********************************************************************\
-     Searches from the current point in the source string either to the
-     first terminator in the terminators array, the first space, or
-     the end of the input.
-
-     PARAM
-     terminators: An array of strings that could be considered terminators
-     checkSpace: true if we should also check for whitespace as terminator
-
-     RETURN
-     The terminator found, or undefined.  This has the side effect of
-     incrementing the offset in the string.
-   \**********************************************************************/
-
-   _findToTerminator(terminators, checkSpace) {
-      this._assertValuesHaveNoSpaces(terminators);
-
-      let maxLen = 0;
-
-      for (let index = 0; index < terminators.length; index++) {
-         const len = terminators[index].length;
-         if (maxLen < len) {
-            maxLen = len;
-         }
-      }
-
-      let nextChar = this._source[this._offset.index];
-      let terminator = this._atTerminator(terminators, maxLen, checkSpace);
-
-      while (nextChar && !terminator) {
-         this._offset.index ++;
-         this._offset.column ++;
-
-         nextChar = this._source[this._offset.index];
-         terminator = this._atTerminator(terminators, maxLen, checkSpace);
-      }
-
-      return terminator;
-   }
-
-   /**********************************************************************\
-     Identify whether we are at a terminator at the current position in
-     the input.
-
-     PARAM
-     terminators: An array of strings that could be considered terminators
-     maxLen: The length of the longest of the terminators
-     checkSpace: true if we should also check for whitespace as terminator
-
-     RETURN
-     The terminating string, from the current position, or undefined
-   \**********************************************************************/
-
-   _atTerminator(terminators, maxLen, checkSpace) {
-      if (checkSpace && this._isSpace(this._source[this._offset.index])) {
-         return this._source[this._offset.index];
-      }
-
-      const nextSeg = this._source.substr(this._offset.index, maxLen);
-
-      for (let index = 0; index < terminators.length; index++) {
-         if (nextSeg.indexOf(terminators[index]) === 0) {
-            return terminators[index];
-         }
-      }
-   }
-
-   /**********************************************************************\
-     RETURN
-     true if the next character is a decimal or hexadecimal character
-   \**********************************************************************/
-
-   _isDigit() {
-      switch (this._source[this._offset.index]) {
-         case '0':
-         case '1':
-         case '2':
-         case '3':
-         case '4':
-         case '5':
-         case '6':
-         case '7':
-         case '8':
-         case '9':
-         case 'A':
-         case 'a':
-         case 'B':
-         case 'b':
-         case 'C':
-         case 'c':
-         case 'D':
-         case 'd':
-         case 'E':
-         case 'e':
-         case 'F':
-         case 'f':
-            return true;
-         default:
-            return;
-      }
-   }
-
-   /**********************************************************************\
-     PARAM
-     values: An array of values to examine
-     message: An optional message to include in error message
-
-     RETURN
-     none
-
-     THROWS
-     Error if any terminators have space in them
-   \**********************************************************************/
-
-   _assertValuesHaveNoSpaces(values, message) {
-      for (const index in values) {
-         const value = values[index];
-
-         for (let ctr = 0; ctr < value.length; ctr++) {
-            if (this._isSpace(value[ctr])) {
-               throw new Error(message || 'Terminators may not have any space characters (space, tab, newline, etc).');
-            }
-         }
-      }
-   }
-
-   /**********************************************************************\
-     PARAM
-     values: An array of values to examine
-     message: An optional message to include in error message
-
-     RETURN
-     none
-
-     THROWS
-     Error if any terminators have space in them
-   \**********************************************************************/
-
-   _autodetectEncoding() {
-      const firstFour = this._source.substr(0, 4);
-
-      switch (firstFour) {
-         case '<?xm':
-            return ENCODING.UNENCODED;
-         case '\u004C\u006F\u00A7\u0094':
-            return ENCODING.EBCDIC;
-         case '\u0000\u003C\u0000\u003F':
-            return ENCODING.UTF16BE;
-         case '\u003C\u0000\u003F\u0000':
-            return ENCODING.UTF16LE;
-         case '\u0000\u0000\u0000\u003C':
-            return ENCODING.UCS4BE;
-         case '\u003C\u0000\u0000\u0000':
-            return ENCODING.UCS4LE;
-         case '\u0000\u0000\u003C\u0000':
-            return ENCODING.UCS4UNUSUAL1;
-         case '\u0000\u003C\u0000\u0000':
-            return ENCODING.UCS4UNUSUAL2;
-         case '\u0000\u0000\u00FE\u00FF':
-            return ENCODING.UCS4BE_BOM;
-         case '\u0000\u0000\u00FF\u00FE':
-            return ENCODING.UCS4UNUSUAL1_BOM;
-      }
-
-      if (firstFour[0] === '\u00FE' && firstFour[1] === '\u00FF') {
-         if (firstFour[2] !== '\u0000' || firstFour[3] !== '\u0000') {
-            return ENCODING.UTF16BE_BOM;
-         } else { // both second bytes are 0
-            return ENCODING.UCS4UNUSUAL2_BOM;
-         }
-      }
-
-      if (firstFour[0] === '\u00FF' && firstFour[1] === '\u00FE') {
-         if (firstFour[2] !== '\u0000' || firstFour[3] !== '\u0000') {
-            return ENCODING.UTF16LE_BOM;
-         } else {
-            return ENCODING.UCS4LE_BOM;
-         }
-      }
-
-      if (firstFour[0] === '\u00EF' && firstFour[1] === '\u00BB' && firstFour[2] === '\u00BF') {
-         return ENCODING.UTF8_BOM;
-      }
-   }
-
-   /**********************************************************************\
-     PARAM
-     data for a chunk, the unmodified data, and the start offset.
-
-     RETURN
-     a with space chunk using the parameters and the current cursor offset.
-     Note this also pushes the chunk into the set of recent chunks.
-   \**********************************************************************/
-
-   _makeChunk(data, originalString, startOffset) {
-      if (typeof originalString !== 'string') {
-         startOffset = originalString;
-         originalString = data;
-      }
-      const chunk = new Chunk(data, originalString, startOffset, this._offset.clone(), this._entityMd.location);
-      this._chunks.push(chunk);
-      return chunk;
+      return new Chunk(text, originalText, operation.start, lastSegment.offset);
+
+      // TODO: NEed to add offsets
+
+//      const startSeg = operation.segments.shift();
+//      const str = startSeg.text.substring(operation.start.index, startSeg.offset.index);
+//
+//      if (operation.segments.length === 0) {
+//         if (!startSeg.atEnd()) {
+//            this._segments.unshift(startSeg);
+//         }
+//
+//         return new Chunk(str, operation.start, startSeg.offset);
+//      }
+//
+//      const pieces = [ str ];
+//      while (operation.segments.length > 1) {
+//         const seg = operation.segments.shift();
+//         pieces.push(seg.text);
+//      }
+//
+//      const lastSegment = operation.segments.shift();
+//
+//      if (lastSegment.atEnd()) {
+//         pieces.push(lastSegment.text);
+//      } else {
+//         pieces.push(lastSegment.text.substr(0, lastSegment.offset.index));
+//         this._segments.unshift(lastSegment);
+//      }
    }
 
 }
