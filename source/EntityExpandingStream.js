@@ -133,7 +133,7 @@ class StreamHandler {
 /**********************************************************************\
  A BaseStreamHandler provides a Stream Handler that receives data from
  some external source (either the XmlEntityStream itself, or the
- ElementStreamHandler.
+ AttributeValueStreamHandler.
  At the time of this writing, a BaseStreamHandler is always coupled
  with a TreeStreamHandler where it serves as the "root" of the tree.
 \**********************************************************************/
@@ -241,7 +241,7 @@ class TreeStreamHandler extends StreamHandler {
          } else if (nextToken instanceof tokens.ElementStart ||
             nextToken instanceof tokens.EmptyElement ||
             nextToken instanceof tokens.AttrListDeclaration) {
-            handler = new ElementStreamHandler(this._childChanged, this._entityManager, nextToken);
+            handler = new AttributeValueStreamHandler(this._childChanged, this._entityManager, nextToken);
             this._handlerStack.push(new HandlerFrame(handler, nextToken));
             nextToken = handler.getNext();
             continue;
@@ -429,131 +429,68 @@ class QueuedStreamHandler extends StreamHandler {
 }
 
 /**********************************************************************\
- An ElementStreamHandler processes a StartElement or EmptyElement
- token. Unlike a QueuedStreamHandler, however, it only processes a
- single token. The interesting task this does, however, is to examine
- all the attributes in the element, and if any contain entity
- references, this will expand those.
+ QuotedValueStreamHandler exists just to reduce the fairly significant
+ amount of duplicate code between AttributeValueStreamHandler and
+ EntityValueStreamHandler.
 
- For each of the N attributes, it will retrieve the 0 or more
- referenced entities at the same time. Each entity may, itself,
- reference others, and thus each individual entity reference forms
- a tree of tokens.
+ Those two types share in common that they must iterate through a
+ quotedValue, and expand the contents of certain references.  They
+ differ in that the AttributeValueStreamHandler may have any number
+ of quoted values, while an EntityValueStreamHandler will have only
+ one.  Thus, the code is broken up in a way to allow the two subtypes
+ to do their own thing, while relying on this class for common
+ behavior.
+
+ The contortions you must think through to understand this are probably
+ worth it to reduce the amount of duplicate logic.  Comments in this
+ class are meant to guide you understand those classes.
 \**********************************************************************/
-class ElementStreamHandler extends StreamHandler {
+class QuotedValueStreamHandler extends StreamHandler {
 
-   constructor(changeCallbackCallback, entityManager, startElementToken) {
+   constructor(changeCallbackCallback, entityManager) {
       super(changeCallbackCallback);
 
-      this._startElementToken = startElementToken;
+      this._entityManager = entityManager;
+      // Keep track of handlers for each reference in the quoted values
       this._working = {};
       this._workingCount = 0;
 
       this._treeChanged = this._treeChanged.bind(this);
 
-      for (let attrIndex = 0; attrIndex < startElementToken.attributes.length; attrIndex++) {
-         const attribute = startElementToken.attributes[attrIndex];
-
-         for (let index = 0; index < attribute.value.length; index++) {
-            if (!(attribute.value[index] instanceof tokens.EntityReference)) {
-               continue;
-            }
-
-            const simpleHandler = new BaseStreamHandler();
-            const handler = new TreeStreamHandler(this._treeChanged, simpleHandler, entityManager);
-            simpleHandler.add(attribute.value[index]);
-            simpleHandler.add(null); // No more input to provide.
-
-            this._working[mkKey(attrIndex, index)] = handler;
-            this._workingCount ++;
-         }
-      }
-
-      this._checkIfDone();
+      /*
+       * Subtypes will, when super() returns, walk through their
+       * quotedValues and start processing for each quotedValue by
+       * calling _startProcessingQuotedValue() for each value.
+       */
    }
 
-   _treeChanged(handler) {
-      if (!handler.treeFullyWalked) {
-         return;
-      }
-
-      this._workingCount --;
-      this._checkIfDone();
-   }
-
-   _checkIfDone() {
-      if (this._workingCount !== 0) {
-         return;
-      }
-
-      // With all the data gathered, pour the final expanded data into the attributes
-      for (let attrIndex = 0; attrIndex < this._startElementToken.attributes.length; attrIndex++) {
-         const attribute = this._startElementToken.attributes[attrIndex];
-         const newAttributeValue = [];
-
-         for (let index = 0; index < attribute.value.length; index++) {
-            const valuePiece = attribute.value[index];
-
-            if (valuePiece instanceof tokens.EntityReference) {
-               const handler = this._working[mkKey(attrIndex, index)];
-
-               let piece = handler.getNext();
-               while (piece) {
-                  // Separate out errors and put before the start token.
-                  if (piece instanceof Error) {
-                     this._queue.push(piece);
-                  } else {
-                     newAttributeValue.push(piece);
-                  }
-                  piece = handler.getNext();
-               }
-            } else {
-               newAttributeValue.push(valuePiece);
-            }
-         }
-
-         attribute.value = newAttributeValue;
-      }
-
-      this._noMoreInput = true;
-      this._queue.push(this._startElementToken);
-      this.changeCallback(this); // repetiation
-   }
-}
-
-/**********************************************************************\
- @@@  This is so much the same as the above
-\**********************************************************************/
-class EntityValueStreamHandler extends StreamHandler {
-
-   constructor(changeCallbackCallback, entityManager, entityDeclarationToken) {
-      super(changeCallbackCallback);
-
-      this._entityDeclarationToken = entityDeclarationToken;
-      this._working = {};
-      this._workingCount = 0;
-
-      this._treeChanged = this._treeChanged.bind(this);
-
-      const value = entityDeclarationToken.value;
-
-      for (let pieceIndex = 0; pieceIndex < value.length; pieceIndex++) {
-         if (!(value[pieceIndex] instanceof tokens.ParameterEntityReference)) {
+   /*
+    * Walk through the quoted value and if a token of expandableRefType type
+    * is found, start another stream handler to walk through and gather its
+    * data. Store that handler using a combination of the baseKey and the
+    * index so we can retrieve the handler later.  That handler may or may
+    * not do its processing very asynchronously or entirely synchronously.
+    */
+   _startProcessingQuotedValue(quotedValue, baseKey = '', expandableRefType) {
+      for (let pieceIndex = 0; pieceIndex < quotedValue.length; pieceIndex++) {
+         if (!(quotedValue[pieceIndex] instanceof expandableRefType)) {
             continue;
          }
 
          const simpleHandler = new BaseStreamHandler();
-         const handler = new TreeStreamHandler(this._treeChanged, simpleHandler, entityManager);
-         simpleHandler.add(value[pieceIndex]);
-         simpleHandler.add(null); // No more input to provide.
+         const handler = new TreeStreamHandler(this._treeChanged, simpleHandler, this._entityManager);
+         // This base handler only is going to process the single reference token.
+         simpleHandler.add(quotedValue[pieceIndex]);
+         simpleHandler.add(null);
 
-         this._working[pieceIndex] = handler;
+         this._working[mkKey(baseKey, pieceIndex)] = handler;
          this._workingCount ++;
       }
-
-      this._checkIfDone();
    }
 
+   /*
+    * Each time the TreeStreamHandler changes, check if it is fully done.
+    */
    _treeChanged(handler) {
       if (!handler.treeFullyWalked) {
          return;
@@ -563,20 +500,35 @@ class EntityValueStreamHandler extends StreamHandler {
       this._checkIfDone();
    }
 
+   /*
+    * If all the handlers we have created have finished, then call
+    * _wrapUpWork(). There, the subtype must find each of the
+    * quotedValues it examined in its constructor, and then call
+    * _finishedProcessingQuotedValue with it.
+    */
    _checkIfDone() {
       if (this._workingCount !== 0) {
          return;
       }
 
-      // With all the data gathered, pour the final expanded data into the element
-      const value = this._entityDeclarationToken.value;
+      this._wrapUpWork();
+
+      this._noMoreInput = true;
+      this.changeCallback(this);
+   }
+
+   /*
+    * This walks through the quoted value, and wherever there is a reference
+    * token, replace it with the queued data from the substream handler.
+    */
+   _finishedProcessingQuotedValue(quotedValue, baseKey = '', expandableRefType) {
       const newValue = [];
 
-      for (let index = 0; index < value.length; index++) {
-         const valuePiece = value[index];
+      for (let index = 0; index < quotedValue.length; index++) {
+         const valuePiece = quotedValue[index];
 
-         if (valuePiece instanceof tokens.ParameterEntityReference) {
-            const handler = this._working[index];
+         if (valuePiece instanceof expandableRefType) {
+            const handler = this._working[mkKey(baseKey, index)];
 
             let piece = handler.getNext();
             while (piece) {
@@ -593,12 +545,78 @@ class EntityValueStreamHandler extends StreamHandler {
          }
       }
 
-      this._entityDeclarationToken.value = newValue;
-
-      this._noMoreInput = true;
-      this._queue.push(this._entityDeclarationToken);
-      this.changeCallback(this); // repetiation
+      return newValue;
    }
+
+}
+
+/**********************************************************************\
+ An AttributeValueStreamHandler processes a StartElement or EmptyElement
+ token. Unlike a QueuedStreamHandler, however, it only processes a
+ single token. The interesting task this does, however, is to examine
+ all the attributes in the element, and if any contain entity
+ references, this will expand those.
+
+ For each of the N attributes, it will retrieve the 0 or more
+ referenced entities at the same time. Each entity may, itself,
+ reference others, and thus each individual entity reference forms
+ a tree of tokens.
+\**********************************************************************/
+class AttributeValueStreamHandler extends QuotedValueStreamHandler {
+
+   constructor(changeCallbackCallback, entityManager, startElementToken) {
+      super(changeCallbackCallback, entityManager);
+
+      this._startElementToken = startElementToken;
+      const attributes = startElementToken.attributes;
+
+      for (let attrIndex = 0; attrIndex < attributes.length; attrIndex++) {
+         this._startProcessingQuotedValue(attributes[attrIndex].value, attrIndex, tokens.EntityReference);
+      }
+
+      this._checkIfDone();
+   }
+
+   _wrapUpWork() {
+      const attributes = this._startElementToken.attributes;
+
+      // With all the data gathered, pour the final expanded data into the element
+      for (let attrIndex = 0; attrIndex < attributes.length; attrIndex++) {
+         const attribute = attributes[attrIndex];
+         const newValue = this._finishedProcessingQuotedValue(attribute.value, attrIndex, tokens.EntityReference);
+         attribute.value = newValue;
+      }
+
+      this._queue.push(this._startElementToken);
+   }
+
+}
+
+/**********************************************************************\
+ EntityValueStreamHandler walks through a quoted value in an entity
+ value, and replaces all ParameterEntity references with the expanded
+ contents of those entities.
+\**********************************************************************/
+class EntityValueStreamHandler extends QuotedValueStreamHandler {
+
+   constructor(changeCallbackCallback, entityManager, entityDeclarationToken) {
+      super(changeCallbackCallback, entityManager);
+
+      this._entityDeclarationToken = entityDeclarationToken;
+
+      this._startProcessingQuotedValue(entityDeclarationToken.value, '', tokens.ParameterEntityReference);
+
+      this._checkIfDone();
+   }
+
+   _wrapUpWork() {
+      // With all the data gathered, pour the final expanded data into the element
+      const value = this._entityDeclarationToken.value;
+      const newValue = this._finishedProcessingQuotedValue(value, '', tokens.ParameterEntityReference);
+      this._entityDeclarationToken.value = newValue;
+      this._queue.push(this._entityDeclarationToken);
+   }
+
 }
 
 class HandlerFrame {

@@ -8,7 +8,6 @@ const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 const ValueStream = require('./ValueStream.js');
 
-// @@@ Similar to EntityExpandingStream
 function pipeAndTest(inputString, done, endHandler, other = {}) {
    const errorHandler = other.errorHandler;
 
