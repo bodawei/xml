@@ -37,20 +37,20 @@ module.exports = (grunt) => {
          name: browserName(browserFilePath)
       };
 
-      for (const key in summary.test) {
+      for (const key in summary.tests) {
          results.run++;
-         results.time += summary.test[key].time;
+         results.time += summary.tests[key].milliseconds;
 
-         if (summary.test[key].result) {
+         if (summary.tests[key].passed) {
             results.passed++;
          }
-         if (summary.test[key].skipped) {
+         if (summary.tests[key].skipped) {
             results.skipped ++;
          }
       }
 
-      if (summary.duplicate.length > 0) {
-         results.duplicates = summary.duplicate.join('\n\t');
+      if (summary.duplicateNames.length > 0) {
+         results.duplicates = summary.duplicateNames.join('\n\t');
          results.failure = true;
       }
 
@@ -174,6 +174,27 @@ module.exports = (grunt) => {
       function print(message) {
          table += message;
       }
+
+      /*
+      Add these to the final checks?
+         if (results.disconnected) {
+      /* eslint-disable no-console
+      console.log('😭😡😭 😭😡😭 😭😡😭 😭😡😭
+      GOT A DISCONNECTED IN THE REPORTER RESULTS');
+      /* eslint-disable no-console
+      console.log(results);
+      throw new Error();
+   }
+   if (results.error) {
+      /* eslint-disable no-console
+      console.log('😭😡😭 😭😡😭 😭😡😭 😭😡😭
+      GOT AN ERROR IN THE REPORTER RESULTS');
+      /* eslint-disable no-console
+      console.log(results);
+      throw new Error();
+   }
+
+*/
 
 //      for (const key in byOs) {
 //         process.passthroughWrite(key + '\n');

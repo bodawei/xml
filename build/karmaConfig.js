@@ -44,13 +44,17 @@ module.exports = function karmaConfig(config) {
             [ 'babelify', {presets: [ BABEL_PRESETS ]} ]
          ]
       },
-      reporters: [ 'progress', 'junit', 'coverage', 'djb' ],
+      reporters: [ 'progress', 'junit', 'coverage', 'yajson' ],
+
       junitReporter: {
          outputDir: OUT_DIR + 'testResults'
       },
-      djbReporter: {
-         outputDir: OUT_DIR + 'testResults',
-         outputFile: 'test-summary.json'
+
+      // https://github.com/bodawei/karma-yajson-reporter
+      yaJsonReporter: {
+         dirPath: OUT_DIR + 'testResults',
+         fileName: 'test-summary.json',
+         separator: ' • '
       },
       // https://github.com/karma-runner/karma-coverage
       coverageReporter: {

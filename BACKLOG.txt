@@ -189,10 +189,11 @@ CLEANUP
 BUILD
 =====
 126: Enhancements to the reporting
-	- clean up reporting code
 	- test json reporter and turn into a module. Check it in for now
 		- provide a dividing char for test segments
 		- optionally put tests in hierarchy rather than string
+	- clean up reporting code
+	- make table a separate module
 Breakings
 	144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 	127: Investigate why current node causes coverage to fail
