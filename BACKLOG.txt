@@ -1,182 +1,31 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/8  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 4 (almost 7)
+ 4/13  Sprint 36:  125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
-Sprint 35
-L 200: String cursor rework
-	Performance tests
-		- substr and search
-		- char by char search
-		(space and digits are regex for matching chars.  So, search for the ^ of those)
-		(word and terminator are looking for terminators)
-	Whitespace:
-		find the terminator (the ^ of a couple regex)
-		Then identify if theres a \n or other in hthere and then do the expensive change?
-		otoh, these are always small.
-		do the changes, then count the lines?
-	Perforamnce:
-		building a regex
-		could probably memoize them, as there are a small number
 
-	Do the extenders
-		getSpace
-			regex to find a space?  But can't do this from middle.
-			cheaper to copy string or do char by char?
-		√getDigits
-			ditto
-		getWord
-			this calls getTerminator
-			what is the cost of building a reg-ex versus going char by char?
-			especially given that most words are short.
-		getToTerminator
-			ditto
-	queue requests.
-	tests
-		no segments
-		one or more
-		end in middle of one, or end in middle of N
-		end at end
-		end at terminus
-	Deal with whitespace collapsing. in space and terminator
-		need to count newlines
-		performance
-	deal with different offset passed into addSegment
+L 201: Core remaining:
+	M: FindMatchOfSet (core under close, markup, match and used by geToTerminator/getWord)
+		need to remember start position, and look ahead, and if fail then roll back and try again
+			to this end, keep an index into the possible matches
+			keep an index into the current match
+			assemble segments
+			un-assemble segments if that doesn't work and start search again
+	M: To Terminator
+		Needs to stash self somewhere, call FindMatchOfSet and then if no match restore self and continue.
 
-Design
-	call a routine
-		if we can find to the end, return
-		if we can't find but plenty of text, return failure
-		if we can't and at buffer end and buffers done, return failure
-		if we can't, but at buffer end and more buffers coming
-			(optimize: if our matched-so-far bit is small enough, substr it from buffer so we can gc)
-			store operation, if match store offset within matched value
-	when buffer arrives:
-		push buffer
-		if in middle operation, then try to continue with above algorithm.
-			may fail to find a match (return with failure)
-			may find a match or end of extension (return the data, and discard buffer(s))
-			may consume buffer but not fully find match or extend-end, in which case push and continue
-	getPieces([{
-		name: foo
-		type: char|peek|closeMarkup|markup|match|space|word|digits|terminator
-		params: matchValue|terminators}, { ... {}]
-		iterates over a series of calls. All async
-			- had been considering putting functions in this at one point.  Look at parsing routines and see which is worse.
-	getSpace, word etc should become async.  Sync routines will just wrap the async, and just be there as temporary to bridge until we get the upper layers fully async
-
-	addBuffer(text, finalBuffer, startOffset?, endOffset?)
-
-	stream version of the cursor just takes a stream and pushes text chunks in as they arrive
-√ - Duplicate code in EntityStream
-√ - Duplicate code in ValueStreamTest
-
-Notes35
-Did a whole lot of 200, but really, I leapt into this sprint with kinda a "yeah, I basically know what I'm doing" attitude.  So, of course, the result is shakey and didn't get done all I wanted.
-
-What I did of the plan was, which is pretty good.  I didn't get to getTerminator, and didn't finish 100% of getWord (if the terminator spans segments, not dealing with that).  I completely punted on performance work, opting to just go with regex work, and I'm ignoring offsets for the moment.
-	Whitespace:
-		find the terminator (the ^ of a couple regex)
-		Then identify if theres a \n or other in hthere and then do the expensive change?
-		otoh, these are always small.
-	Perforamnce:
-		building a regex
-		could probably memoize them, as there are a small number
-
-	Do the extenders
-		getSpace
-			regex to find a space?  But can't do this from middle.
-			cheaper to copy string or do char by char?
-		getDigits
-			ditto
-		getWord
-			this calls getTerminator
-			what is the cost of building a reg-ex versus going char by char?
-			especially given that most words are short.
-	tests
-		no segments
-		one or more
-		end in middle of one, or end in middle of N
-		end at end
-		end at terminus
-	Deal with whitespace collapsing. in space and terminator
-
-NEXT SPRINT should do a lot more planning.
-
-
-
-
-L 201: String cursor rework
+Extra
 	Code is messy.
-	deal with terminator spanning segment. This makes your logic messy, since this may be async in the middle of this routine.
 	review tests: 
 		segs: 0, 1, more than 1
 		no match: nothing at current, at end and incomplete
 		match: start of 1st.  (2) to middle of one (3) to end of same one (4) to middle of another (4) to end of all
-	queue requests.
-	Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
-	getTerminator
-	getMAtch
-	getClose
-	getMarkup
-	getChar
-
-	peek char
-	peek is space
-	unget	<-- how given async?
-	encodings
-	Do more test matchers to check chunks better	
-
-L: Chunks: Offsets should have locations (!). how should this work?
-	UEL's
-	EntityOffset
-	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.
-	deal with different offset passed into addSegment
-	count lines and columns
-M： Variations/subtypes
-	- delivering content via stream
-	- delivering content all at once
-	- delivering content from value
-		192:	entity value will simply take the tokens in an entity value, extract the chunks and feed the original values into this along with their offsets
 
 
-Leftover:  191b
-S - testing of chunks in ValueStrea
-S - validation errors
-	- hardest part of this is separating out the validation code.
-S - Adding to ExpandingEntityStream with tests
-S - validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
-S - Chunks in the expanded attributes and entity values are not correct.  Is that OK?
-- is the token type Text or Chars?
-
-
-
-* I think we can reduce all chunks to just one kind.  Esentially the WithSpaceChunk.
-* One can ask for only digits, but the parsing of them as hex or decimal and making an integer out of them can happen at higher levels
-* Chunks can have start offset, end offset, and an optional array of mid-offsets
-* The entity value cursor
-    * will assemble the entity value into a single string, pass to the string cursor (see below) probably with a ‘don’t generate chunks’ flag.  And as values come back, it just reconstructs the relevant offsets from its set of tokens and the cursor’s chunks.  Pretty easy to do EXCEPT for whitespace.  Because what comes out of it is a single chunk, it can still combine the original values and final values ok, but won’t return the original chunks.
-* async cursor
-    * actually, very simple. We augment the original cursor so it can take a string and a “is this all” flag.  If it isn’t all and it can not decisively complete what it is doing, then it won’t return.  it will instead wait for the next chunk to arrive.
-    * So, the async cursor is really just a stream to cursor translator
-    * We still can’t make the cursor itself drive what to push out as chunks, since depends on context
-        * But more and more I wonder if we can define the context well enough that it could make these decisions itself.
-* alternate token streams
-    * We need an entiyValue to both an attribute value and an entity value stream.  The difference is just which things it recognizes.  We could do a single one which takes a flag of which to pay attention to: % or &# or &.
-    * This sounds a lot like our quoted value thing.  I wonder if we could somehow combine this. yet, this ends up in a stacked case, making this sound suspiciously like the entity stream.
-
-
-Note:
-- Can check for < in ValueStream
-- Need to do all the text validation checking for external entities
-
-
-
-
--- next: 198
+-- next: 215
 =============================================
 CLEANUP
 =======
@@ -189,11 +38,9 @@ CLEANUP
 BUILD
 =====
 126: Enhancements to the reporting
-	- test json reporter and turn into a module. Check it in for now
-		- provide a dividing char for test segments
-		- optionally put tests in hierarchy rather than string
 	- clean up reporting code
 	- make table a separate module
+58:L Build infrastructure for running xmlconf tests.
 Breakings
 	144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
 	127: Investigate why current node causes coverage to fail
@@ -203,7 +50,6 @@ Breakings
 	155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
 	156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
 	111: Get Vivaldi to work
-58:L Build infrastructure for running xmlconf tests.
 - get reporting of node tests
 - coverage reporter should have a percent cutoff
 - Build build code to auto generate the other errors
@@ -225,12 +71,51 @@ TechDebt/Bus
 - Can't test PE's inside PE's
 - Think about replacing the quoted value with ValueStream.  Could we do that?  They're much the same, though VS is much bigger.
 
+Cursor Revisions [1L 3M 8S]
+---------
+S: 202 queue requests.
+M: 203 getTerminator, getMatch, getClose, getMarkup
+S: 204 getChar/peekChar/peekIsSpace
+S: 205 unget
+
+L+: 206 Chunks: Offsets should have locations (!). how should this work?
+	UEL's
+	EntityOffset
+	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.
+	deal with different offset passed into addSegment
+	count lines and columns
+	Do more test matchers to check chunks better	
+
+M: 207 Encodings
+
+Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
+
+M： Variations/subtypes
+	- delivering content via stream
+	- delivering content all at once
+	- delivering content from value
+		192:	entity value will simply take the tokens in an entity value, extract the chunks and feed the original values into this along with their offsets
+
+Uhm:
+- A routine which can be called with multiple requests and does one callback
+- actually integrating all this into the parsers...
+
+Leftover:
+S: 208 testing of chunks in ValueStrea
+S: 209 validation errors
+	- hardest part of this is separating out the validation code.
+S: 210 Adding to ExpandingEntityStream with tests
+S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+	- Need to do all the text validation checking for external entities
+S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
+- is the token type Text or Chars?
+
 EntityManagement [1L 2M 2S]
 ---------
-S 203: Entity declarations in external subset should be added to entity manager
+S 214: Entity declarations in external subset should be added to entity manager
 M 183: Identifies PE References in DTD (ignore elsewhere)
 L 184: gathr (http, https in browser (ftp?  file?) http, https, file in node)
-S 204: Review entity manager's handling of internal/external and ge/pe decls
+S 213: Review entity manager's handling of internal/external and ge/pe decls
 M 185: need entity manager to retrieve remote entities
 	- cache external entities if smaller than memory?
 	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)

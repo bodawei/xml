@@ -34,6 +34,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/26 Sprint 32:  99sp [7XL 2L 5M 4S]. Avg: 5/sprint = 20 sprints. ACTUAL: 6
  3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL: 4 (almost 7)
  4/8  Sprint 34:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 6
+ 4/9  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 5
 
 =============================================
 BLOG IDEAS
@@ -1973,6 +1974,123 @@ Notes34
 OK!  Making good progress.  Have the core nucleus of the async cursor working.  Did much cleanup of TextChunk (reduced to one type and renamed Chunk). Cleanup shifted to actually doing cleanup, rather than refactoring the parsing and started by moving some test stuff into matchers with much better messages in the process.  And build now dumps the reprot tables to files and prints out through the new silent controller.  In short, I'm feeling much less constipated.
 One pretty long sprint in one day.
 
+Sprint 35
+L 200: String cursor rework
+	Performance tests
+		- substr and search
+		- char by char search
+		(space and digits are regex for matching chars.  So, search for the ^ of those)
+		(word and terminator are looking for terminators)
+	Whitespace:
+		find the terminator (the ^ of a couple regex)
+		Then identify if theres a \n or other in hthere and then do the expensive change?
+		otoh, these are always small.
+		do the changes, then count the lines?
+	Perforamnce:
+		building a regex
+		could probably memoize them, as there are a small number
+
+	Do the extenders
+		getSpace
+			regex to find a space?  But can't do this from middle.
+			cheaper to copy string or do char by char?
+		√getDigits
+			ditto
+		getWord
+			this calls getTerminator
+			what is the cost of building a reg-ex versus going char by char?
+			especially given that most words are short.
+		getToTerminator
+			ditto
+	queue requests.
+	tests
+		no segments
+		one or more
+		end in middle of one, or end in middle of N
+		end at end
+		end at terminus
+	Deal with whitespace collapsing. in space and terminator
+		need to count newlines
+		performance
+	deal with different offset passed into addSegment
+
+Design
+	call a routine
+		if we can find to the end, return
+		if we can't find but plenty of text, return failure
+		if we can't and at buffer end and buffers done, return failure
+		if we can't, but at buffer end and more buffers coming
+			(optimize: if our matched-so-far bit is small enough, substr it from buffer so we can gc)
+			store operation, if match store offset within matched value
+	when buffer arrives:
+		push buffer
+		if in middle operation, then try to continue with above algorithm.
+			may fail to find a match (return with failure)
+			may find a match or end of extension (return the data, and discard buffer(s))
+			may consume buffer but not fully find match or extend-end, in which case push and continue
+	getPieces([{
+		name: foo
+		type: char|peek|closeMarkup|markup|match|space|word|digits|terminator
+		params: matchValue|terminators}, { ... {}]
+		iterates over a series of calls. All async
+			- had been considering putting functions in this at one point.  Look at parsing routines and see which is worse.
+	getSpace, word etc should become async.  Sync routines will just wrap the async, and just be there as temporary to bridge until we get the upper layers fully async
+
+	addBuffer(text, finalBuffer, startOffset?, endOffset?)
+
+	stream version of the cursor just takes a stream and pushes text chunks in as they arrive
+√ - Duplicate code in EntityStream
+√ - Duplicate code in ValueStreamTest
+√	- test json reporter and turn into a module. Check it in for now
+		- provide a dividing char for test segments
+		- optionally put tests in hierarchy rather than string
+
+* I think we can reduce all chunks to just one kind.  Esentially the WithSpaceChunk.
+* One can ask for only digits, but the parsing of them as hex or decimal and making an integer out of them can happen at higher levels
+* Chunks can have start offset, end offset, and an optional array of mid-offsets
+* The entity value cursor
+    * will assemble the entity value into a single string, pass to the string cursor (see below) probably with a ‘don’t generate chunks’ flag.  And as values come back, it just reconstructs the relevant offsets from its set of tokens and the cursor’s chunks.  Pretty easy to do EXCEPT for whitespace.  Because what comes out of it is a single chunk, it can still combine the original values and final values ok, but won’t return the original chunks.
+* async cursor
+    * actually, very simple. We augment the original cursor so it can take a string and a “is this all” flag.  If it isn’t all and it can not decisively complete what it is doing, then it won’t return.  it will instead wait for the next chunk to arrive.
+    * So, the async cursor is really just a stream to cursor translator
+    * We still can’t make the cursor itself drive what to push out as chunks, since depends on context
+        * But more and more I wonder if we can define the context well enough that it could make these decisions itself.
+* alternate token streams
+    * We need an entiyValue to both an attribute value and an entity value stream.  The difference is just which things it recognizes.  We could do a single one which takes a flag of which to pay attention to: % or &# or &.
+    * This sounds a lot like our quoted value thing.  I wonder if we could somehow combine this. yet, this ends up in a stacked case, making this sound suspiciously like the entity stream.
+
+
+Notes35
+Did a whole lot of 200, but really, I leapt into this sprint with kinda a "yeah, I basically know what I'm doing" attitude.  So, of course, the result is shakey and didn't get done all I wanted.
+
+What I did of the plan was, which is pretty good.  I didn't get to getTerminator, and didn't finish 100% of getWord (if the terminator spans segments, not dealing with that).  I completely punted on performance work, opting to just go with regex work, and I'm ignoring offsets for the moment.
+	Whitespace:
+		find the terminator (the ^ of a couple regex)
+		Then identify if theres a \n or other in hthere and then do the expensive change?
+		otoh, these are always small.
+	Perforamnce:
+		building a regex
+		could probably memoize them, as there are a small number
+
+	Do the extenders
+		getSpace
+			regex to find a space?  But can't do this from middle.
+			cheaper to copy string or do char by char?
+		getDigits
+			ditto
+		getWord
+			this calls getTerminator
+			what is the cost of building a reg-ex versus going char by char?
+			especially given that most words are short.
+	tests
+		no segments
+		one or more
+		end in middle of one, or end in middle of N
+		end at end
+		end at terminus
+	Deal with whitespace collapsing. in space and terminator
+
+NEXT SPRINT should do a lot more planning.
 
 
 

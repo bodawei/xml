@@ -12,6 +12,8 @@ const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
 const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 const SPACE_TERMINATORS_10 = [ ' ', '\\t', '\\n', '\\r' ];
 const SPACE_TERMINATORS_11 = [ ' ', '\\t', '\\n', '\\r', '\u0085', '\u2028' ];
+const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
+const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
 class Segment {
    constructor(text) {
@@ -165,12 +167,7 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
       }
 
-      this._currentOperation = {
-         name: 'Digit',
-         onPlucked: deliverChunk,
-         match: [],
-         segments: []
-      };
+      this._currentOperation = new DigitsOperation(this._segments, deliverChunk);
 
       this._resumeOperation();
    }
@@ -190,13 +187,7 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
       }
 
-      this._currentOperation = {
-         name: 'Space',
-         onPlucked: deliverChunk,
-         match: [],
-         original: [],
-         segments: []
-      };
+      this._currentOperation = new SpaceOperation(this._info, this._segments, deliverChunk);
 
       this._resumeOperation();
    }
@@ -206,14 +197,35 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
       }
 
-      this._currentOperation = {
-         name: 'Word',
-         onPlucked: deliverChunk,
-         match: [],
-         original: [],
-         segments: [],
-         terminators: terminators
-      };
+      const spaceTerminators = this._info.isVersion1dot0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
+
+      this._currentOperation = new ToTerminatorOperation(this._info, spaceTerminators, terminators, this._segments,
+         deliverChunk);
+
+      this._resumeOperation();
+   }
+
+   getToTerminator(terminators, deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error(
+            'Must pass a callback function of the form function(chunk|undefined):void to getToTerminator().');
+      }
+
+      this._currentOperation = new ToTerminatorOperation(this._info, [], terminators, this._segments,
+         deliverChunk);
+
+      this._resumeOperation();
+   }
+
+   getMatch(matchString, deliverChunk) {
+      if (typeof matchString !== 'string') {
+         throw new Error('Must pass a string to match to getMatch().');
+      }
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getMatch().');
+      }
+
+      this._currentOperation = new MatchOperation([ matchString ], true, this._segments, deliverChunk);
 
       this._resumeOperation();
    }
@@ -226,82 +238,140 @@ class ChunkSource {
       this._resumeOperation();
    }
 
-   /**********************************************************************\
-     If decimal or hexadecimal digits are to be found from the current
-     location in the current segment, consume as many digits across as
-     many segments as available, and call back with the results.
-     Do not finish searching and doing the callback until either
-     a non-digit is found or the end of the input is found.
-   \**********************************************************************/
+   _resumeOperation() {
+      if (this._segments.length === 0 || !this._currentOperation) {
+         return;
+      }
 
-   _innerDigit(op, segment) {
-      while (segment) {
+      this._currentOperation.scan();
+   }
+
+}
+
+class GeneralOperation {
+   constructor(segmentSource, deliverChunk) {
+      this._segmentSource = segmentSource;
+      this._deliverChunk = deliverChunk;
+      this._segments = [];
+      this._matchStrings = [];
+   }
+
+   _getCurrentSegment() {
+      if (!this._currentSegment || this._currentSegment.atEnd()) {
+         this._currentSegment = this._segmentSource.shift();
+         this._segments.push(this._currentSegment);
+
+         if (!this._startOffset) {
+            this._startOffset = this._currentSegment.startOffset.clone();
+         }
+      }
+
+      return this._currentSegment;
+   }
+
+   _extractChunk() {
+      if (this._matchStrings.length === 0) {
+         return;
+      }
+
+      const lastSegment = this._segments[this._segments.length - 1];
+
+      if (!lastSegment.atEnd()) {
+         this._segmentSource.unshift(lastSegment);
+      }
+
+      const text = this._matchStrings.join('');
+      const originalText = text;
+
+      return new Chunk(text, originalText, this._startOffset, lastSegment.offset);
+   }
+
+}
+
+/**********************************************************************\
+  If decimal or hexadecimal digits are to be found from the current
+  location in the current segment, consume as many digits across as
+  many segments as available, and call back with the results.
+  Do not finish searching and doing the callback until either
+  a non-digit is found or the end of the input is found.
+\**********************************************************************/
+
+class DigitsOperation extends GeneralOperation {
+   scan() {
+      while (this._segmentSource.length > 0) {
+         const segment = this._getCurrentSegment();
+
          DIGITS_REGEX.lastIndex = segment.index;
          const result = DIGITS_REGEX.exec(segment.text);
          const haveMatch = result && result.index === segment.index;
 
          if (haveMatch) {
-            op.match.push(result[0]);
+            this._matchStrings.push(result[0]);
 
             segment.index += result[0].length;
-            segment.offset.index += result[0].length;
-            segment.offset.column += result[0].length;
          }
 
          if (!haveMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
-            this._currentOperation = undefined;
-            op.onPlucked(this._pluckChunk(op));
+            this._deliverChunk(this._extractChunk());
             return;
          }
-
-         segment = this._segments.shift();
-         op.segments.push(segment);
       }
    }
+}
 
-   /**********************************************************************\
-     @@@@
-   \**********************************************************************/
+class SpaceOperation extends GeneralOperation {
+   constructor(info, segmentSource, onDone) {
+      super(segmentSource, onDone);
 
-   _innerSpace(op, segment) {
+      this._info = info;
+      this._originalStrings = [];
+   }
+
+   scan() {
       const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
       const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
 
-      while (segment) {
+      while (this._segmentSource.length > 0) {
+         const segment = this._getCurrentSegment();
+
          SPACE_REGEX.lastIndex = segment.index;
          const result = SPACE_REGEX.exec(segment.text);
          const haveMatch = result && result.index === segment.index;
 
          if (haveMatch) {
-            op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
-            op.original.push(result[0]);
+            this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+            this._originalStrings.push(result[0]);
 
             segment.index += result[0].length;
-            segment.offset.index += result[0].length;
-            segment.offset.column += result[0].length;
          }
 
          if (!haveMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
-            this._currentOperation = undefined;
-            op.onPlucked(this._pluckChunk(op));
+            this._deliverChunk(this._extractChunk());
             return;
          }
-
-         segment = this._segments.shift();
-         op.segments.push(segment);
       }
    }
+}
 
-   _innerWord(op, segment) {
-      const spaceTerminators = this._info.isVersion1dot0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
+class ToTerminatorOperation extends GeneralOperation {
+   constructor(info, spaceTerminators, terminators, segmentSource, onDone) {
+      super(segmentSource, onDone);
 
-      this._followToTerminator(op, segment, spaceTerminators, op.terminators);
+      this._info = info;
+      this._originalStrings = [];
+      this._spaceTerminators = spaceTerminators;
+      this._terminators = terminators;
+      this._regexMemo = {}; // ####
    }
 
-   // note: do not need to try to replace newlines for wrod
-   _followToTerminator(op, segment, spaceTerminators, terminators) {
+   scan() {
+      const self = this;
+      if (this._subOp) {
+         this._subOp.scan();
+         return;
+      }
       const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
-      const terminatorCharsArray = spaceTerminators.concat(terminators.map((term) => (term[0])));
+      const terminatorCharsArray = this._spaceTerminators.concat(this._terminators.map((term) => (term[0])));
       const terminatorChars = terminatorCharsArray.join('');
       let terminatorRegex = this._regexMemo[terminatorChars];
 
@@ -311,164 +381,175 @@ class ChunkSource {
          this._regexMemo[terminatorChars] = terminatorRegex;
       }
 
-      while (segment) {
-         let actualMatch = false;
+      while (this._segmentSource.length > 0) {
+         const segment = this._getCurrentSegment();
 
-         while (!actualMatch && !segment.atEnd()) {
+         while (!segment.atEnd()) {
             terminatorRegex.lastIndex = segment.index;
             const result = terminatorRegex.exec(segment.text);
-            const havePotentialMatch = result && result.index === segment.index;
 
-            if (havePotentialMatch) {
-               // This could be a false positive. e.g., it matches the first char of a term. which doesn't overall match
-               const remainingChars = segment.text.length - (result.index + result[0].length);
-
-               for (let tIndex = 0; tIndex < terminators.length; tIndex++) {
-                  const term = terminators[tIndex];
-
-                  if (term.length <= remainingChars) {
-                     if (segment.text.substr(result.index + result[0].length, term.length) === term) {
-                        op.terminagor = term;
-                        actualMatch = true;
-                        break;
-                     }
-                  } else {
-                     // do doMatch
-                  }
-               }
-
-               if (!actualMatch && spaceTerminators) {
-                  const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
-                  const matchChar = segment.text[result.index + result[0].length];
-                  SPACE_REGEX.lastIndex = 0;
-                  const haveMatch = SPACE_REGEX.exec(matchChar);
-                  if (haveMatch) {
-                     op.terminagor = matchChar;
-                     actualMatch = true;
-                  }
-               }
-
-               if (actualMatch) {
-                  if (result[0].length > 0) {
-                     op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
-                     op.original.push(result[0]);
-
-                     segment.index += result[0].length;
-                  }
-               } else {
-                  // copy over what we have so far, including the false-ly matching character
-
-                  // uncomfortable with line endings here
-                  op.match.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
-                  op.original.push(result[0]);
-
-                  op.match.push(segment.text[result[0].length]); // .replace(LINE_ENDING_REGEX, '\n')
-                  op.original.push(segment.text[result[0].length]);
-
-                  segment.index += result[0].length + 1;
-               }
+            if (result[0].length > 0) {
+               this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+               this._originalStrings.push(result[0]);
             }
+
+            segment.index += result[0].length;
+
+            const spaceTerminatorChars = this._info.isVersion1dot0 ? SPACE_TERMINATOR_CHARS_10 :
+               SPACE_TERMINATOR_CHARS_11;
+
+            const terminatorArray = spaceTerminatorChars.concat(this._terminators);  // ick
+            this._segmentSource.unshift(segment);
+
+            this._subOp = new MatchOperation(terminatorArray, false, this._segmentSource, (result) => {
+               delete self._subOp;
+               if (result) {
+                  self._deliverChunk(this._extractChunk());
+               } else {
+                  self._matchStrings.push(segment.text[segment.index]);
+                  self._originalStrings.push(segment.text[segment.index]);
+                  segment.index ++;
+                  self.scan();
+               }
+            });
+            this._subOp.scan();
+            return;
+            // if no potential match, then whole segment should be added and we should continue
+
+//            if (havePotentialMatch) {
+//               // This could be a false positive. e.g., it matches the first char of a term. which doesn't overall
+//               match
+//               const remainingChars = segment.text.length - (result.index + result[0].length);
+//
+//               for (let tIndex = 0; tIndex < this._terminators.length; tIndex++) {
+//                  const term = this._terminators[tIndex];
+//
+//                  if (term.length <= remainingChars) {
+//                     if (segment.text.substr(result.index + result[0].length, term.length) === term) {
+//                        this._terminagor = term;
+//                        actualMatch = true;
+//                        break;
+//                     }
+//                  } else {
+//
+//                  }
+//               }
+//
+//               if (!actualMatch && this._spaceTerminators) {
+//                  const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+//                  const matchChar = segment.text[result.index + result[0].length];
+//                  SPACE_REGEX.lastIndex = 0;
+//                  const haveMatch = SPACE_REGEX.exec(matchChar);
+//                  if (haveMatch) {
+//                     this._terminagor = matchChar;
+//                     actualMatch = true;
+//                  }
+//               }
+//
+//               if (actualMatch) {
+//                  if (result[0].length > 0) {
+//                     this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+//                     this._originalStrings.push(result[0]);
+//
+//                     segment.index += result[0].length;
+//                  }
+//               } else {
+//                  // copy over what we have so far, including the false-ly matching character
+//
+//                  // uncomfortable with line endings here
+//                  this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+//                  this._originalStrings.push(result[0]);
+//
+//                  this._matchStrings.push(segment.text[result[0].length]);
+//                  this._originalStrings.push(segment.text[result[0].length]);
+//
+//                  segment.index += result[0].length + 1;
+//               }
+//            }
          }
 
-         if (actualMatch || !segment.atEnd() || segment.atEnd() && segment.isLast) {
-            this._currentOperation = undefined;
-            op.onPlucked(this._pluckChunk(op));
+         if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
+            this._deliverChunk(this._extractChunk());
             return;
          }
-
-         segment = this._segments.shift();
-         op.segments.push(segment);
       }
    }
+}
 
-   _resumeOperation() {
-      if (this._segments.length === 0 || !this._currentOperation) {
-         return;
-      }
+// Need to deal with newlines if whitespace in match value
+class MatchOperation extends GeneralOperation {
+   constructor(candidates, consumeMatch, segmentSource, onDone) {
+      super(segmentSource, onDone);
 
-      const operation = this._currentOperation;
-
-      const segment = this._segments.shift();
-
-      if (!operation.start) {
-         operation.start = segment.offset.clone();
-         operation.segments = [ segment ];
-      } else {
-         operation.segments.push(segment);
-      }
-
-      this['_inner' + operation.name](operation, segment);
+      this._candidates = candidates;
+      this._consumeMatch = consumeMatch;
+      this._whichCandidate = 0;
+      this._candidateIndex = 0;
    }
 
-//   _innerMatch(op, segment) {
-//
-//      while (segment) {
-//         while (segment.current() === op.param[op.paramOffset]) {
-//            op.paramOffset ++;
-//            segment.incrementChar();
-//
-//            if (op.paramOffset === op.param.length) {
-//               break;
-//            }
-//         }
-//
-//         if (op.paramOffset === op.param.length) {
-//            this._currentOperation = undefined;
-//            op.onPlucked(this._pluckChunk(op));
-//            return;
-//         }
-//         segment = this._segments.shift();
-//      }
-//   }
+   scan() {
+      while (this._segmentSource.length > 0) {
+         const segment = this._getCurrentSegment();
 
-   _pluckChunk(operation) {
-      if (operation.match.length === 0) {
-         return;
+         if (!this._startSegment) {
+            this._startSegment = segment;
+            this._startIndex = segment.index;
+         }
+
+         const candidate = this._candidates[this._whichCandidate];
+         const segmentRemainder = segment.text.length - segment.index;
+         const candidateRemainder = candidate.length - this._candidateIndex;
+         const lengthToCompare = Math.min(segmentRemainder, candidateRemainder);
+         const segmentText = segment.text.substr(segment.index, lengthToCompare);
+         const candidateText = candidate.substr(this._candidateIndex, lengthToCompare);
+
+         if (segmentText === candidateText) {
+            this._matchStrings.push(segmentText);
+            this._candidateIndex += lengthToCompare;
+            segment.index += lengthToCompare;
+
+            if (this._candidateIndex >= candidate.length) {
+               const resultChunk = this._extractChunk();
+
+               if (!this._consumeMatch) {
+                  this._startSegment.index = this._startIndex;
+
+                  for (let index = this._segments.length - 1; index >= 0; index--) {
+                     // need to change their indexes
+                     this._segmentSource.unshift(this._segments[index]);
+                  }
+               }
+
+               this._deliverChunk(resultChunk);
+               return;
+            } else if (segment.atEnd() && segment.isLast) {
+               // ick
+               this._whichCandidate ++;
+               this._candidateIndex = 0;
+               this._segments = [ this._startSegment ];
+               this._startSegment.index = this._startIndex;
+               this._segmentSource.unshift(segment);
+
+               if (this._whichCandidate >= this._candidates.length) {
+                  this._deliverChunk(undefined);
+                  return;
+               }
+            }
+         } else {
+            this._whichCandidate ++;
+            this._candidateIndex = 0;
+            this._segments = [ this._startSegment ];
+            this._startSegment.index = this._startIndex;
+            this._segmentSource.unshift(segment);
+            // need to test spanning multiple segments
+
+            if (this._whichCandidate >= this._candidates.length) {
+               this._deliverChunk(undefined);
+               return;
+            }
+         }
       }
-
-      const lastSegment = operation.segments[operation.segments.length - 1];
-
-      if (!lastSegment.atEnd()) {
-         this._segments.unshift(lastSegment);
-      }
-
-      const text = operation.match.join('');
-      let originalText = text;
-      if (operation.original) {
-         originalText = operation.original.join('');
-      }
-
-      return new Chunk(text, originalText, operation.start, lastSegment.offset);
-
-      // TODO: NEed to add offsets
-
-//      const startSeg = operation.segments.shift();
-//      const str = startSeg.text.substring(operation.start.index, startSeg.offset.index);
-//
-//      if (operation.segments.length === 0) {
-//         if (!startSeg.atEnd()) {
-//            this._segments.unshift(startSeg);
-//         }
-//
-//         return new Chunk(str, operation.start, startSeg.offset);
-//      }
-//
-//      const pieces = [ str ];
-//      while (operation.segments.length > 1) {
-//         const seg = operation.segments.shift();
-//         pieces.push(seg.text);
-//      }
-//
-//      const lastSegment = operation.segments.shift();
-//
-//      if (lastSegment.atEnd()) {
-//         pieces.push(lastSegment.text);
-//      } else {
-//         pieces.push(lastSegment.text.substr(0, lastSegment.offset.index));
-//         this._segments.unshift(lastSegment);
-//      }
    }
-
 }
 
 module.exports = ChunkSource;
