@@ -4,69 +4,125 @@
 /* eslint-disable no-var, prefer-spread, no-console */
 
 var fs = require('fs');
+var path = require('path');
 var process = require('process');
 
-var COVERAGE_FILENAME = 'coverage-summary.json';
-var OS_REGEX = /^(.*) \(.*\)$/;
+var BROWSER_VERSION_OS_VERSION_SEPARATION_REGEX = /^(.*) \((.*)\)$/;
 
-function stripOs(name) {
-   var results = OS_REGEX.exec(name);
-   return results[1];
+var COVERAGE_FILENAME = 'coverage-summary.json';
+
+/*
+ * Identify if a particular subpath is found in an array of paths
+ */
+function subpathInPaths(subpath, paths) {
+   const found = false;
+
+   paths.forEach((path) => {
+      if (path.indexOf(subpath) !== -1) {
+         found = true;
+      }
+   });
+
+   return found;
 }
 
-function getSummaryPaths(dir, parentName, filesToSkip, totalsAccumulator) {
-   var totals = {
+/*
+ * Read in a coverage file, and calculate total lines etc, how many lines etc were
+ * covered, and skip over any files specified with filesToSkip
+ */
+function calculateTotals(coverageFileName, filesToSkip) {
+   const totals = {
       lines: 0,
       statements: 0,
       functions: 0,
       branches: 0
    };
-   var covered = {
+   const covered = {
       lines: 0,
       statements: 0,
       functions: 0,
       branches: 0
    };
-   var files = fs.readdirSync(dir);
 
-   for (var index = 0; index < files.length; index++) {
-      var fullPath = dir + '/' + files[index];
-      var stats = fs.statSync(fullPath);
+   var coverageSummary = fs.readFileSync(coverageFileName, { encoding: 'utf8' });
+   var jsonData = JSON.parse(coverageSummary);
 
-      if (stats.isDirectory()) {
-         getSummaryPaths(fullPath, files[index], filesToSkip, totalsAccumulator);
-      } else if (stats.isFile()) {
-         if (files[index] === COVERAGE_FILENAME) {
-            var coverageSummary = fs.readFileSync(fullPath, { encoding: 'utf8' });
-            var jsonData = JSON.parse(coverageSummary);
-
-            for (var key in jsonData) {
-
-               if (key === 'total' || filesToSkip.includes(key)) {
-//                  console.log('Skipping :' + key);
-                  continue;
-               }
-
-               totals.lines += jsonData[key].lines.total;
-               covered.lines += jsonData[key].lines.covered;
-
-               totals.statements += jsonData[key].statements.total;
-               covered.statements += jsonData[key].statements.covered;
-
-               totals.functions += jsonData[key].functions.total;
-               covered.functions += jsonData[key].functions.covered;
-
-               totals.branches += jsonData[key].branches.total;
-               covered.branches += jsonData[key].branches.covered;
-            }
-            totalsAccumulator[stripOs(parentName)] = {
-               totals: totals,
-               covered: covered
-            };
-         }
+   for (var filePath in jsonData) {
+      // one of the 'files' is named 'total'
+      if (filePath === 'total' || subpathInPaths(filePath, filesToSkip)) {
+         continue;
       }
+      const fileInfo = jsonData[filePath];
+
+      totals.lines += fileInfo.lines.total;
+      covered.lines += fileInfo.lines.covered;
+
+      totals.statements += fileInfo.statements.total;
+      covered.statements += fileInfo.statements.covered;
+
+      totals.functions += fileInfo.functions.total;
+      covered.functions += fileInfo.functions.covered;
+
+      totals.branches += fileInfo.branches.total;
+      covered.branches += fileInfo.branches.covered;
+   }
+
+   return {
+      totals,
+      covered
    }
 }
+
+function makeReport(grunt) {
+   const options = this.options();
+
+   if (!fs.existsSync(options.dir)) {
+      grunt.log.error('Could not find the directory to look for coverage reports: ' + options.dir);
+      return;
+   }
+
+   const filesToSkip = grunt.file.expand(options.filesToSkip) || [];
+   const generalizedFilesToSkip = filesToSkip.map((fileName) => fileName.replace('./', ''));
+   const coverageFilename = options.coverageFileName || COVERAGE_FILENAME;
+   const coverageFiles = grunt.file.expand(options.dir + '/**/' + coverageFilename);
+   const resultsPerBrowser = {};
+
+   coverageFiles.forEach((fileName) => {
+      const browserName = path.basename(path.dirname(fileName));
+      resultsPerBrowser[browserName] = calculateTotals(fileName, generalizedFilesToSkip);
+   });
+
+
+///
+   const totals = resultsPerBrowser;
+
+   var keys = Object.keys(totals);
+   var failed = false;
+   var sortedNames = [];
+
+   var info = keys.map((key) => {
+      const browserAndOs = BROWSER_VERSION_OS_VERSION_SEPARATION_REGEX.exec(key);
+      var browserMatch = /([A-Za-z]+) [v]?([0-9\.]+)/.exec(browserAndOs[1]);
+      var browserName = browserMatch[1];
+      var browserVersion = browserMatch[2];
+      var osMatch = /([^0-9\.]+) [v]?([0-9\.]+)/.exec(browserAndOs[2]);
+      var osName = osMatch[1]
+      var osVersion = osMatch[2]
+
+      sortedNames.push(browserName);
+      var percentage = calculatePercentage(totals[key]);
+      if (percentage !== 100) {
+         failed = true;
+      }
+
+      return {
+         name: browserName,
+         percentage: percentage + '%',
+         version: browserVersion,
+         os: osName,
+         osVersion: osVersion,
+      };
+   });
 
 function calculatePercentage(info) {
    var total = 0;
@@ -84,104 +140,58 @@ function calculatePercentage(info) {
    return (total / 4) * 100;
 }
 
-module.exports = (grunt) => {
-   function coverageReport() {
-      var options = this.options();
-      var exists = fs.existsSync(options.dir);
-      if (!exists) {
-         grunt.log.error('Could not find the directory to look for coverage reports: ' + options.dir);
-         return;
+
+   var maxLengths = info.reduce((accumulation, entry) => {
+      accumulation.name = Math.max(accumulation.name, entry.name.length);
+      accumulation.percentage = Math.max(accumulation.percentage, entry.percentage.toString().length);
+      accumulation.version = Math.max(accumulation.version, entry.version.length);
+      return accumulation;
+   }, { name: 0, percentage: 0, version: 0});
+
+   function padValue(value, columnWidth, padChar) {
+      let nameResult = value;
+      for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
+         nameResult += padChar || ' ';
       }
 
-      var filesToSkip = [];
+      return nameResult;
+   }
 
-      if (options.filesToSkip) {
-         filesToSkip = grunt.file.expand(options.filesToSkip);
-         var newSkip = [];
+   const border = [];
+   let table = '';
+   border.push(padValue('', maxLengths.percentage, '─'));
+   border.push(padValue('', maxLengths.name, '─'));
+   border.push(padValue('', maxLengths.version, '─'));
+   print('┌─' + border.join('─┬─') + '─┐\n');
 
-         for (var ctr = 0; ctr < filesToSkip.length; ctr++) {
-            newSkip.push(filesToSkip[ctr].replace('./', ''));
-            newSkip.push(process.cwd() + '/' + filesToSkip[ctr].replace('./', ''));
-         }
-         filesToSkip = newSkip;
-      }
+   sortedNames.sort();
 
-      var totals = {};
+   var byBrowser = {};
+   info.forEach((entry) => {
+      byBrowser[entry.name] = entry;
+   });
 
-      getSummaryPaths(options.dir, options.dir, filesToSkip, totals);
+   function print(message) {
+      table += message;
+   }
 
-      var keys = Object.keys(totals);
-      var failed = false;
-      var sortedNames = [];
+   for (let index = 0; index < sortedNames.length; index++) {
+      const name = sortedNames[index];
+      const value = [];
+      value.push(padValue(byBrowser[name].percentage, maxLengths.percentage));
+      value.push(padValue(byBrowser[name].name, maxLengths.name));
+      value.push(padValue(byBrowser[name].version, maxLengths.version));
+      value.push(padValue(byBrowser[name].os, maxLengths.version));
+      value.push(padValue(byBrowser[name].osVersion, maxLengths.version));
+      print('│ ' + value.join(' │ ') + ' │\n');
+   }
+   print('└─' + border.join('─┴─') + '─┘\n');
 
-      var info = keys.map((key) => {
-         var browserMatch = /([A-Za-z]+) [v]?([0-9\.]+)/.exec(key);
-         var browserName = browserMatch[1];
-         var browserVersion = browserMatch[2];
-//         var osMatch = /^([^0-9]+) ([0-9\.]+)/.exec(result.os);
-
-         sortedNames.push(browserName);
-         var percentage = calculatePercentage(totals[key]);
-         if (percentage !== 100) {
-            failed = true;
-         }
-
-         return {
-            name: browserName,
-            percentage: percentage + '%',
-            version: browserVersion
-         };
-      });
-
-      var maxLengths = info.reduce((accumulation, entry) => {
-         accumulation.name = Math.max(accumulation.name, entry.name.length);
-         accumulation.percentage = Math.max(accumulation.percentage, entry.percentage.toString().length);
-         accumulation.version = Math.max(accumulation.version, entry.version.length);
-         return accumulation;
-      }, { name: 0, percentage: 0, version: 0});
-
-      function padValue(value, columnWidth, padChar) {
-         let nameResult = value;
-         for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
-            nameResult += padChar || ' ';
-         }
-
-         return nameResult;
-      }
-
-      const border = [];
-      let table = '';
-      border.push(padValue('', maxLengths.percentage, '─'));
-      border.push(padValue('', maxLengths.name, '─'));
-      border.push(padValue('', maxLengths.version, '─'));
-      print('┌─' + border.join('─┬─') + '─┐\n');
-
-      sortedNames.sort();
-
-      var byBrowser = {};
-      info.forEach((entry) => {
-         byBrowser[entry.name] = entry;
-      });
-
-      function print(message) {
-         table += message;
-      }
-
-      for (let index = 0; index < sortedNames.length; index++) {
-         const name = sortedNames[index];
-         const value = [];
-         value.push(padValue(byBrowser[name].percentage, maxLengths.percentage));
-         value.push(padValue(byBrowser[name].name, maxLengths.name));
-         value.push(padValue(byBrowser[name].version, maxLengths.version));
-         print('│ ' + value.join(' │ ') + ' │\n');
-      }
-      print('└─' + border.join('─┴─') + '─┘\n');
-
-      if (options.summaryFile) {
-         fs.writeFileSync(options.summaryFile, table, 'UTF-8');
-      } else {
-         grunt.log.write(table);
-      }
+   if (options.summaryFile) {
+      fs.writeFileSync(options.summaryFile, table, 'UTF-8');
+   } else {
+      grunt.log.write(table);
+   }
 //      for (var index = 0; index < keys.length; index++) {
 //         var browserName = keys[index];
 //         var percentage = calculatePercentage(totals[browserName]);
@@ -196,11 +206,17 @@ module.exports = (grunt) => {
 //         }
 //      }
 
-      if (failed) {
-         grunt.log.error(table);
-         grunt.fail.fatal('Did not get 100% code coverage. Build failed');
-      }
+   if (failed) {
+      grunt.log.error(table);
+      grunt.fail.fatal('Did not get 100% code coverage. Build failed');
+   }
+}
+
+module.exports = (grunt) => {
+
+   function makeCoverageReport() {
+      makeReport.call(this, grunt); // 'this' is the object that grunt attaches the task to
    }
 
-   grunt.registerMultiTask('coveragereport', 'Produces a summary of all test coverage', coverageReport);
+   grunt.registerMultiTask('coveragereport', 'Produces a summary of all test coverage', makeCoverageReport);
 };

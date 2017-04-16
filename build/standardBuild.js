@@ -190,8 +190,9 @@ module.exports = function standardBuild(grunt) {
       coveragereport:  {
          dist: {
             options: {
-               filesToSkip: [ ],
+               filesToSkip: [ 'XmlTokenStream.js' ],
                dir: OUT_DIR,
+               coverageFileName: 'coverage-summary.json',
                summaryFile: path.join(OUT_DIR, './coverage-summary.txt')
             }
          }
