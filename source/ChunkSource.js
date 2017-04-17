@@ -44,7 +44,7 @@ class ChunkSource {
    }
 
    peekChar(deliverChunk) {
-      if (typeof deliverBoolean !== 'function') {
+      if (typeof deliverChunk !== 'function') {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to peekChar().');
       }
 
@@ -68,10 +68,7 @@ class ChunkSource {
          callback: (result) => {
             const chunkText = result ? result.text : '';
 
-            SPACE_REGEX.index = 0;
-console.log('char', result);
-console.log('exec', SPACE_REGEX.exec(chunkText));
-            SPACE_REGEX.index = 0;
+            SPACE_REGEX.lastIndex = 0;
             deliverBoolean(SPACE_REGEX.exec(chunkText) !== null);
          }
       });
@@ -236,14 +233,14 @@ class GeneralOperation {
 
       const lastSegment = this._segments[this._segments.length - 1];
 
-      if (!lastSegment.atEnd()) {
+      if (lastSegment && !lastSegment.atEnd()) {
          this._segmentSource.unshift(lastSegment);
       }
 
       const text = this._matchStrings.join('');
       const originalText = text;
 
-      return new Chunk(text, originalText, this._startOffset, lastSegment.offset);
+      return new Chunk(text, originalText, this._startOffset, lastSegment && lastSegment.offset);
    }
 
 }
@@ -322,6 +319,21 @@ class CharOperation extends GeneralOperation {
       this._originalStrings = [];
    }
 
+   _undoIndexChanges() {
+      if (this._incrementIndex) {
+         return;
+      }
+
+      for (let index = this._segments.length - 1; index >= 0; index--) {
+         const segment = this._segments.pop();
+
+         segment.index = 0;
+         this._segmentSource.unshift(segment);
+      }
+
+      this._startSegment.index = this._startIndex;
+   }
+
    scan() {
       const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
 
@@ -333,53 +345,48 @@ class CharOperation extends GeneralOperation {
             this._startIndex = segment.index;
          }
 
-         // this seems fragile since in theory we could be not at end. but getCurrentSegment seems to protect us
-         if (segment.atEnd()) {
-            this._deliverChunk(undefined);
-            return;
-         }
-
          const currentChar = segment.text[segment.index];
 
          if (this._foundCR) {
-            this._matchStrings.push('\n');
-            this._originalStrings.push('\r');
-
             if (currentChar === '\n' || (currentChar === '\u0085' && this._info.isVersion1dot1)) {
                this._originalStrings.push(currentChar);
                segment.index ++;
             }
 
+            this._undoIndexChanges();
             this._deliverChunk(this._extractChunk());
             return;
          }
 
+         // this seems fragile since in theory we could be not at end. but getCurrentSegment seems to protect us
+         if (segment.atEnd() && segment.isLast) {
+            this._undoIndexChanges();
+            if (!this._incrementIndex) {
+               this._segmentSource.unshift(segment);
+            }
+            this._deliverChunk(undefined);
+            return;
+         }
+
+         if (currentChar === undefined) {
+            continue;
+         }
+
          // Here terrible things happen
          if (currentChar === '\r') {
-            // could we just unshift the segment if not at end, and always call back in?
-            if (segment.text.length <= segment.index + 1) {
-               segment.index ++;
-               if (segment.atEnd() && segment.isLast) {
-                  this._matchStrings.push('\n');
-                  this._originalStrings.push('\r');
-                  this._deliverChunk(this._extractChunk());
-                  return;
-               }
-               this._foundCR = true;
-               continue;
-            }
-
-            const nextChar = segment.text[segment.index + 1];
             this._matchStrings.push('\n');
             this._originalStrings.push('\r');
             segment.index ++;
+            this._foundCR = true;
 
-            if (nextChar === '\n' || (nextChar === '\u0085' && this._info.isVersion1dot1)) {
-               this._originalStrings.push(nextChar);
-               segment.index ++;
+            if (!segment.atEnd()) {
+               this._segmentSource.unshift(segment);
+            } else if (segment.isLast) {
+               this._undoIndexChanges();
+               this._deliverChunk(this._extractChunk());
+               return;
             }
-            this._deliverChunk(this._extractChunk());
-            return;
+            continue;
          }
 
          LINE_ENDING_REGEX.lastIndex = segment.index;
@@ -397,6 +404,7 @@ class CharOperation extends GeneralOperation {
             segment.index ++;
          }
 
+         this._undoIndexChanges();
          this._deliverChunk(this._extractChunk());
          return;
       }
