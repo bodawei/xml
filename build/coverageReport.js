@@ -5,7 +5,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var process = require('process');
 
 var BROWSER_VERSION_OS_VERSION_SEPARATION_REGEX = /^(.*) \((.*)\)$/;
 
@@ -15,7 +14,7 @@ var COVERAGE_FILENAME = 'coverage-summary.json';
  * Identify if a particular subpath is found in an array of paths
  */
 function subpathInPaths(subpath, paths) {
-   const found = false;
+   let found = false;
 
    paths.forEach((path) => {
       if (path.indexOf(subpath) !== -1) {
@@ -27,8 +26,8 @@ function subpathInPaths(subpath, paths) {
 }
 
 /*
- * Read in a coverage file, and calculate total lines etc, how many lines etc were
- * covered, and skip over any files specified with filesToSkip
+ * Read in a coverage file, and calculate total lines etc, how many lines
+ * etc were covered, and skip over any files specified with filesToSkip
  */
 function calculateTotals(coverageFileName, filesToSkip) {
    const totals = {
@@ -70,7 +69,7 @@ function calculateTotals(coverageFileName, filesToSkip) {
    return {
       totals,
       covered
-   }
+   };
 }
 
 function makeReport(grunt) {
@@ -92,7 +91,6 @@ function makeReport(grunt) {
       resultsPerBrowser[browserName] = calculateTotals(fileName, generalizedFilesToSkip);
    });
 
-
 ///
    const totals = resultsPerBrowser;
 
@@ -106,8 +104,8 @@ function makeReport(grunt) {
       var browserName = browserMatch[1];
       var browserVersion = browserMatch[2];
       var osMatch = /([^0-9\.]+) [v]?([0-9\.]+)/.exec(browserAndOs[2]);
-      var osName = osMatch[1]
-      var osVersion = osMatch[2]
+      var osName = osMatch[1];
+      var osVersion = osMatch[2];
 
       sortedNames.push(browserName);
       var percentage = calculatePercentage(totals[key]);
@@ -120,26 +118,25 @@ function makeReport(grunt) {
          percentage: percentage + '%',
          version: browserVersion,
          os: osName,
-         osVersion: osVersion,
+         osVersion: osVersion
       };
    });
 
-function calculatePercentage(info) {
-   var total = 0;
-   for (var key in info.totals) {
-      if (info.covered[key] === 0) {
-         continue;
+   function calculatePercentage(info) {
+      var total = 0;
+      for (var key in info.totals) {
+         if (info.covered[key] === 0) {
+            continue;
+         }
+         total += (info.covered[key] / info.totals[key]);
       }
-      total += (info.covered[key] / info.totals[key]);
+
+      if (total === 0) {
+         return 100;
+      }
+
+      return (total / 4) * 100;
    }
-
-   if (total === 0) {
-      return 100;
-   }
-
-   return (total / 4) * 100;
-}
-
 
    var maxLengths = info.reduce((accumulation, entry) => {
       accumulation.name = Math.max(accumulation.name, entry.name.length);

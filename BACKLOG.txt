@@ -16,6 +16,8 @@ L 201: Core remaining:
 			un-assemble segments if that doesn't work and start search again
 	M: To Terminator
 		Needs to stash self somewhere, call FindMatchOfSet and then if no match restore self and continue.
+√ We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
+
 
 Extra
 	Code is messy.
@@ -29,10 +31,9 @@ Extra
 =============================================
 CLEANUP
 =======
-- We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
 - We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
-- general things
+- general things when cleaning up:
 	- add contexts to all errors
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
 BUILD

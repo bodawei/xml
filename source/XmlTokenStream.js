@@ -911,6 +911,9 @@ class XmlTokenStream extends stream.Readable {
          SEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
       this._checkSyntax(parsedEntity.closeChunk, SEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
+      if (parsedEntity.externalId) {
+         this._validateExternalId(parsedEntity.externalId, true, parsedEntity.start);
+      }
       this._validateParsedQuotedValue(parsedEntity.value, {
          validateEntityValue: true
       });
@@ -1117,7 +1120,7 @@ class XmlTokenStream extends stream.Readable {
          }
       }
 
-      if (systemRequired) {
+      if (systemRequired || externalId.uppercaseTypeText === 'SYSTEM') {
          this._checkSyntax(externalId.systemId, SEID.EXTERNALID_NO_SYSTEM);
       }
 

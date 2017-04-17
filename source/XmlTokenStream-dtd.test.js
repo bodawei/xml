@@ -167,6 +167,14 @@ describe('XmlTokenStream (dtd)', () => {
          expect(t.text).toEqual('fish>');
       });
 
+      it('reports a syntax error if there no system value in a PUBLIC externalId', () => {
+         const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE foo PUBLIC "publicVal">');
+         ignoreToken(s, tokens.XmlDeclaration);
+
+         expectError(s, SyntaxError.ID.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
+      });
+
       it('reports invalid characters in the name of the document type', () => {
          const s = makeLaxStream('<?xml version="1.0"?><!DOCTYPE f\u0000oo>');
          ignoreToken(s, tokens.XmlDeclaration);
@@ -316,16 +324,34 @@ describe('XmlTokenStream (dtd)', () => {
          expectTokenType(s, tokens.NotationDeclaration);
       });
 
-      it('retrieves a token of type NOTATION with both a public and private value', () => {
+      it('retrieves the name of the notation with a PUBLIC entity location with both system and public value', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "public.xml" "system.xml">');
+
+         const token = s.read();
+
+         expect(token.externalLoc).toEqual(new EntityLocation('system.xml', 'public.xml'));
+      });
+
+      it('retrieves the name of the notation with a PUBLIC entity location with only the public value', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "public.xml">');
+
+         const token = s.read();
+
+         expect(token.externalLoc).toEqual(new EntityLocation('', 'public.xml'));
+      });
+
+      it('retrieves the name of the notation with only a SYSTEM entity location', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION notationName SYSTEM "systemEL">');
+
+         const token = s.read();
+
+         expect(token.externalLoc).toEqual(new EntityLocation('systemEL'));
+      });
+
+      it('retrieves a token of with the specified location', () => {
          const s = makeStrictExternalSubsetStream('<!NOTATION notationName PUBLIC "foo" "bar" >');
 
          expectTokenType(s, tokens.NotationDeclaration);
-      });
-
-      it('retrieves the name of the notation with a system externalID', () => {
-         const s = makeStrictExternalSubsetStream('<!NOTATION notationName SYSTEM "foo">');
-
-         expect(s.read().name).toEqual('notationName');
       });
 
       it('reports a syntax error if there is no notation name', () => {
@@ -370,6 +396,13 @@ describe('XmlTokenStream (dtd)', () => {
          expectSyntaxError('<!NOTATION notationName >',
             SyntaxError.ID.NOTATIONDECL_NO_EXTERNALID,
             'Missing the external id the notation declaration "notationName".');
+      });
+
+      it('reports a syntax error if SYSTEM has no value', () => {
+         expectSyntaxError(EntityMetaData.TYPE.EXTERNALSUBSET,
+            '<!NOTATION notationName SYSTEM>',
+            SyntaxError.ID.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
       });
 
       it('reports a syntax error if there is no closing angle bracket', () => {
@@ -513,13 +546,13 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing ENTITY declaration', () => {
 
       it('retrieves a token of type ENTITY', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" >');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" "system">');
 
          expectTokenType(s, tokens.EntityDeclaration);
       });
 
       it('retrieves the name of the entity', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" "system">');
 
          expect(s.read().name).toEqual('entityName');
       });
@@ -605,9 +638,35 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('sets the value to undefined if none specified', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName SYSTEM "testentity">');
 
-         expect(s.read().value).toBeUndefined();
+         const token = s.read();
+
+         expect(token instanceof tokens.EntityDeclaration).toEqual(true);
+         expect(token.value).toBeUndefined();
+      });
+
+      it('retrieves a token with a PUBLIC external id with both system and public literals', () => {
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "pubLit" "sysLit">');
+
+         const token = s.read();
+
+         expect(token.externalLoc).toEqual(new EntityLocation('sysLit', 'pubLit'));
+      });
+
+      it('retrieves a token with a SYSTEM external id with just system literal', () => {
+         const s = makeStrictExternalSubsetStream('<!ENTITY entityName SYSTEM "systemLit">');
+
+         const token = s.read();
+
+         expect(token.externalLoc).toEqual(new EntityLocation('systemLit'));
+      });
+
+      // A proxy for all the validation of the external id. Assume if we get one error, we are doing all validation
+      it('reports an error if the PUBLIC literal leaves off the system value ', () => {
+         expectSyntaxError('<!ENTITY entityName PUBLIC "publicLit">',
+            SyntaxError.ID.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
       });
 
       it('retrieves the NDATA name when a two value PUBLIC is specified', () => {
@@ -617,16 +676,25 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified ', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
+         const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic" NDATA testData>');
+         expectError(s, SyntaxError.ID.EXTERNALID_NO_SYSTEM, 'Missing system literal.');
 
          expect(s.read().notationDataName).toEqual('testData');
       });
 
       it('retrieves the NDATA name when a one value PUBLIC is specified and no space between', () => {
-         const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testData>');
+         const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testpublic"NDATA testPublic>');
+         ignoreError(s, SyntaxError.ID.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
+         expectError(s, SyntaxError.ID.EXTERNALID_NO_SYSTEM, 'Missing system literal.');
+
+         expect(s.read().notationDataName).toEqual('testPublic');
+      });
+
+      it('retrieves the NDATA name when a SYSTEM is specified and no space between', () => {
+         const s = makeLaxExternalSubsetStream('<!ENTITY entityName SYSTEM "system.xml"NDATA testSystem>');
          ignoreError(s, SyntaxError.ID.ENTITYDECL_NDATA_NO_SPACE_BEFORE);
 
-         expect(s.read().notationDataName).toEqual('testData');
+         expect(s.read().notationDataName).toEqual('testSystem');
       });
 
       it('retrieves an undefined NDATA name if no name included', () => {
@@ -637,7 +705,7 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('sets the notation data name to undefined if none specified', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY paramEntityName SYSTEM "testentity">');
 
          expect(s.read().notationDataName).toBeUndefined();
       });
@@ -768,7 +836,7 @@ describe('XmlTokenStream (dtd)', () => {
       describe('discuraged names', () => {
 
          it('allows a notation name to start with "XML-" if this is 1.0/5', () => {
-            const s = makeStrictStream('<!ENTITY XML-entity PUBLIC "testentity" >',
+            const s = makeStrictStream('<!ENTITY XML-entity SYSTEM "testentity" >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
             const t = s.read();
@@ -776,7 +844,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('allows a name to start with just "xml" if this is 1.0/5', () => {
-            const s = makeStrictStream('<!ENTITY xmlEntity PUBLIC "testentity" >',
+            const s = makeStrictStream('<!ENTITY xmlEntity SYSTEM "testentity" >',
                new EntityMetaData(EntityMetaData.TYPE.EXTERNALSUBSET, 1.0, 5));
 
             const t = s.read();
@@ -817,7 +885,7 @@ describe('XmlTokenStream (dtd)', () => {
 
          it('can not appear at the start of a document entity', () => {
             expectSyntaxError(EntityMetaData.TYPE.DOCUMENT,
-               '<!ENTITY entityName PUBLIC "testentity" >',
+               '<!ENTITY entityName PUBLIC "pu" "sys" >',
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
@@ -828,14 +896,14 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can appear at the start of the external subset', () => {
-            const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity" >');
+            const s = makeStrictExternalSubsetStream('<!ENTITY entityName PUBLIC "pu" "sys" >');
 
             expectTokenType(s, tokens.EntityDeclaration);
          });
 
          it('can not appear at the start of an external entity', () => {
             expectSyntaxError(EntityMetaData.TYPE.EXTERNAL,
-               '<!ENTITY entityName PUBLIC "testentity" >',
+               '<!ENTITY entityName PUBLIC "pu" "sys" >',
                SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
                'An entity must not be declared outside of the internal or external subset.',
                new Offset(0, 0, 0),
@@ -846,7 +914,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can appear in the DOCTYPE of a document entity', () => {
-            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ENTITY name PUBLIC "test" >]>');
+            const s = makeStrictStream('<?xml version="1.0"?><!DOCTYPE testType [<!ENTITY name PUBLIC "pu" "sys" >]>');
             ignoreToken(s, tokens.XmlDeclaration);
             ignoreToken(s, tokens.DocTypeStart);
             ignoreToken(s, tokens.InternalSubsetStart);
@@ -855,14 +923,14 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('can appear after the Text Declaration in the external subset', () => {
-            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "testentity">');
+            const s = makeLaxExternalSubsetStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "pu" "sys">');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectTokenType(s, tokens.EntityDeclaration);
          });
 
          it('can not appear after the Text Declaration in an external entity', () => {
-            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "testentity">');
+            const s = makeLaxExternalEntityStream('<?xml encoding="usascii"?><!ENTITY entityName PUBLIC "pu" "sys">');
             ignoreToken(s, tokens.TextDeclaration);
 
             expectError(s, SyntaxError.ID.ENTITYDECL_INVALID_CONTEXT,
@@ -870,7 +938,7 @@ describe('XmlTokenStream (dtd)', () => {
          });
 
          it('changes state so can not include a Text Declaration in an external subset once used', () => {
-            const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "testentity"><?xml encoding="usascii"?>');
+            const s = makeLaxExternalSubsetStream('<!ENTITY entityName PUBLIC "pub" "sys"><?xml encoding="usascii"?>');
             ignoreToken(s, tokens.EntityDeclaration);
 
             expectError(s, SyntaxError.ID.XMLDECL_INVALID_CONTEXT,
@@ -885,7 +953,7 @@ describe('XmlTokenStream (dtd)', () => {
    describe('parsing PARAMETER_ENTITY declaration (whitebox)', () => {
 
       it('retrieves a token of type PARAMETER_ENTITY', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY % entityName PUBLIC "testentity" >');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % entityName PUBLIC "testentity" "sysValue">');
 
          expectTokenType(s, tokens.PEntityDeclaration);
       });
@@ -898,13 +966,13 @@ describe('XmlTokenStream (dtd)', () => {
       });
 
       it('sets the notation data name to undefined if none specified on a parameter entity', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity" "oops">');
 
          expect(s.read().notationDataName).toBeUndefined();
       });
 
       it('retrieves the name of the parameter entity', () => {
-         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity">');
+         const s = makeStrictExternalSubsetStream('<!ENTITY % paramEntityName PUBLIC "testentity" "sysValue">');
 
          expect(s.read().name).toEqual('paramEntityName');
       });
@@ -1428,6 +1496,28 @@ describe('XmlTokenStream (dtd)', () => {
          expect(() => {
             s.read();
          }).not.toThrowError();
+      });
+
+      it('reports no syntax error if systemLiteral is missing, with a notation', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION testType PUBLIC "pubid" >');
+
+         expect(() => {
+            s.read();
+         }).not.toThrowError();
+      });
+
+      it('reports no syntax error if systemLiteral is missing, with a NOTATION with PUBLIC', () => {
+         const s = makeStrictExternalSubsetStream('<!NOTATION testType PUBLIC "pubid" >');
+
+         expect(() => {
+            s.read();
+         }).not.toThrowError();
+      });
+
+      it('reports a syntax error if systemLiteral is missing from a a NOTATION with a SYSTEM externalId ', () => {
+         expectSyntaxError('<!NOTATION testType SYSTEM >',
+            SyntaxError.ID.EXTERNALID_NO_SYSTEM,
+            'Missing system literal.');
       });
 
       it('reports a syntax error if systemLiteral is missing from a SYSTEM externalId', () => {

@@ -244,12 +244,12 @@ class NotationDeclaration extends XmlToken {
 
 class EntityDeclaration extends XmlToken {
 
-   constructor(name, value, entityLocation, notationDataName, chunks) {
+   constructor(name, value, externalLoc, notationDataName, chunks) {
       super(chunks);
 
       this.name = name;
       this.value = value;
-      this.entityLocation = entityLocation;
+      this.externalLoc = externalLoc;
       this.notationDataName = notationDataName;
    }
 
