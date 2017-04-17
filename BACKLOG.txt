@@ -57,6 +57,7 @@ M: 203 getTerminator, getMatch, getClose, getMarkup
 Extra
 	Do performance test of promises versus callbacks.  Consider shifting all to promises
 	Code is VERY messy.
+		The handling of the current segment seems a bit weird. Look at getChar
 	review tests and test cases: 
 		segs: 0, 1, more than 1
 		no match: nothing at current, at end and incomplete

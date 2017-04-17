@@ -71,6 +71,428 @@ describe('ChunkSource', () => {
 
    });
 
+
+   describe('peekIsSpace', () => {
+
+      describe('basic behavior', () => {
+
+         it('calls back with true if there is a space as the next character', () => {
+            source.addSegment(' foo', false);
+
+            source.peekIsSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
+         });
+
+         it('calls back with false if there is no space as the next character', () => {
+            source.addSegment('foo', false);
+
+            source.peekIsSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(false);
+         });
+
+         it('calls back with false when nothing in the source', () => {
+            source.addSegment('', true);
+
+            source.peekIsSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(false);
+         });
+
+         it('throws an error if called without a function', () => {
+            source.addSegment('foo', true);
+
+            expect(() => {
+            source.peekIsSpace();
+            }).toThrowError(
+               'Must pass a callback function of the form function(boolean):void to peekIsSpace().');
+         });
+
+      });
+
+      describe('segment spanning', () => {
+
+         it('calls back with undef', () => {
+            source.addSegment('IAmAWord');
+
+            source.getToTerminator([ 'x' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('does not call back when no seguments have been added', () => {
+            source.getToTerminator([ 'x' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('calls back with undefined at EOF', () => {
+            source.addSegment('', true);
+            source.getToTerminator([ 'x' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('can cope with several empty segments', () => {
+            source.addSegment('', false);
+            source.addSegment('', false);
+            source.addSegment('', true);
+            source.getToTerminator([ 'x' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('calls back with contents that span segments', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt', false);
+            source.addSegment('10', false);
+
+            source.getToTerminator([ '0' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Text1');
+         });
+
+         it('calls back with all content up to EOF when no match found', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt', false);
+            source.addSegment('20', true);
+
+            source.getToTerminator([ '9' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Text20');
+         });
+
+         it('calls back with all content up to match even when match at eof', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt', false);
+            source.addSegment('30 ', true);
+
+            source.getToTerminator([ '0' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Text3');
+         });
+
+         it('calls back with segment spanning text when match found before EOF', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt', false);
+            source.addSegment('40', false);
+
+            source.getToTerminator([ '0' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Text4');
+         });
+
+         it('calls back with text even when final needed segment added after the call', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt', false);
+            source.getToTerminator([ '0' ], pluckedSpy);
+            expect(pluckedSpy.calls.count()).toEqual(0);
+
+            source.addSegment('50 ', false);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('Text5');
+         });
+
+      });
+
+      describe('terminators', () => {
+
+         it('calls back with match of the second terminator', () => {
+            source.addSegment('text10 ', false);
+
+            source.getToTerminator([ '0', '1' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('text');
+         });
+
+         it('calls back with match of a multi character terminator', () => {
+            source.addSegment('text2 234', false);
+
+            source.getToTerminator([ '0', '234' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('text2 ');
+         });
+
+      });
+
+      // offsets
+      // newlines
+   });
+
+   describe('getChar', () => {
+
+      describe('basic behavior', () => {
+
+         it('calls back with a chunk with the next character', () => {
+            source.addSegment('x', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('x');
+         });
+
+         it('calls back with undefined when no character at the offset', () => {
+            source.addSegment('', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('throws an error if called without a function', () => {
+            source.addSegment('012345', true);
+
+            expect(() => {
+               source.getChar();
+            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getChar().');
+         });
+
+      });
+
+      describe('segment spanning', () => {
+
+         it('does not call callback if no data is passed to source', () => {
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('calls back with undefined when at the end of input', () => {
+            source.addSegment('', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('calls back with a char when segment added later', () => {
+            source.getChar(pluckedSpy);
+
+            source.addSegment('abc', true);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('a');
+         });
+
+         it('calls back with a char when in middle of segment', () => {
+            source.addSegment('123mom', true);
+            source.getDigits(pluckedSpy);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('m');
+         });
+
+         it('calls back with a char at middle of segment', () => {
+            source.addSegment('123nun', true);
+            source.getDigits(pluckedSpy);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('n');
+         });
+
+         it('calls back with a char at end of segment', () => {
+            source.addSegment('123p', true);
+            source.getDigits(pluckedSpy);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('p');
+         });
+
+         it('calls back with a char at start of subsequent segment', () => {
+            source.addSegment('123', true);
+            source.addSegment('great', true);
+            source.getDigits(pluckedSpy);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('g');
+         });
+
+         it('does not call back if there is just a carriage return at the end of a non-terminal segment', () => {
+            source.addSegment('\r');
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(0);
+         });
+
+         it('calls back with a newline when a carriage return is found at the end of the terminal segment', () => {
+            source.addSegment('\r', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a single newline after finding a carriage return and newline across segments', () => {
+            source.addSegment('\r');
+            source.addSegment('\n');
+            source.addSegment('x', true);
+
+            source.getChar(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('x');
+         });
+
+         it('calls back with a single newline after finding a carriage return and \\u0085 across segments', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\r');
+            source.addSegment('\u0085');
+            source.addSegment('x', true);
+
+            source.getChar(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('x');
+         });
+
+         it('calls back with a newline after finding a CR at end of one segment and other char at next start', () => {
+            source.addSegment('\r');
+            source.addSegment('x', true);
+
+            source.getChar(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('x');
+         });
+
+      });
+
+      describe('whitespace handling', () => {
+
+         it('calls back with a tab', () => {
+            source.addSegment('\t', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\t');
+         });
+
+         it('calls back with a space', () => {
+            source.addSegment(' ', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' ');
+         });
+
+         it('calls back with a newline', () => {
+            source.addSegment('\n', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a \\u0085 in 1.0', () => {
+            source.addSegment('\u0085', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\u0085');
+         });
+
+         it('calls back with a \\u0085 as a newline in 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\u0085', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a \\u2028 in 1.0', () => {
+            source.addSegment('\u2028', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\u2028');
+         });
+
+         it('calls back with a \\u2028 as a newlinein 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\u2028', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a carriage return as a newline', () => {
+            source.addSegment('\rx', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a carriage return/newline as a newline', () => {
+            source.addSegment('\r\n', true);
+
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+         });
+
+         it('calls back with a carriage return/\\u0085 as a newline and ignores the latter in 1.0', () => {
+            source.addSegment('\r\u0085', true);
+
+            source.getChar(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('\u0085');
+         });
+
+         it('calls back with a carriage return/\\u0085 as a newline in 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\r\u0085x', true);
+
+            source.getChar(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual('\n');
+            expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('x');
+         });
+
+         // more about line endings in the segment section, above
+
+      });
+
+      // test chunk offsets
+
+   });
+
    describe('getDigits', () => {
       let pluckedSpy;
       let source;

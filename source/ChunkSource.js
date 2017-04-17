@@ -43,6 +43,42 @@ class ChunkSource {
       this._finished = this._finished.bind(this);
    }
 
+   peekChar(deliverChunk) {
+      if (typeof deliverBoolean !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to peekChar().');
+      }
+
+      this._chunkers.push({
+         chunker: new CharOperation(false, this._info, this._segments, this._finished),
+         callback: deliverChunk
+      });
+
+      this._resumeOperation();
+   }
+
+   peekIsSpace(deliverBoolean) {
+      const SPACE_REGEX = this._info.isVersion1dot0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+
+      if (typeof deliverBoolean !== 'function') {
+         throw new Error('Must pass a callback function of the form function(boolean):void to peekIsSpace().');
+      }
+
+      this._chunkers.push({
+         chunker: new CharOperation(false, this._info, this._segments, this._finished),
+         callback: (result) => {
+            const chunkText = result ? result.text : '';
+
+            SPACE_REGEX.index = 0;
+console.log('char', result);
+console.log('exec', SPACE_REGEX.exec(chunkText));
+            SPACE_REGEX.index = 0;
+            deliverBoolean(SPACE_REGEX.exec(chunkText) !== null);
+         }
+      });
+
+      this._resumeOperation();
+   }
+
    /**********************************************************************\
      Extract a chunk of all the digits from the current point in the
      source and pass it to the callback.
@@ -83,6 +119,19 @@ class ChunkSource {
 
       this._chunkers.push({
          chunker: new SpaceOperation(this._info, this._segments, this._finished),
+         callback: deliverChunk
+      });
+
+      this._resumeOperation();
+   }
+
+   getChar(deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getChar().');
+      }
+
+      this._chunkers.push({
+         chunker: new CharOperation(true, this._info, this._segments, this._finished),
          callback: deliverChunk
       });
 
@@ -260,6 +309,96 @@ class SpaceOperation extends GeneralOperation {
             this._deliverChunk(this._extractChunk());
             return;
          }
+      }
+   }
+}
+
+class CharOperation extends GeneralOperation {
+   constructor(incrementIndex, info, segmentSource, onDone) {
+      super(segmentSource, onDone);
+
+      this._incrementIndex = incrementIndex;
+      this._info = info;
+      this._originalStrings = [];
+   }
+
+   scan() {
+      const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+
+      while (this._segmentSource.length > 0) {
+         const segment = this._getCurrentSegment();
+
+         if (!this._startSegment) {
+            this._startSegment = segment;
+            this._startIndex = segment.index;
+         }
+
+         // this seems fragile since in theory we could be not at end. but getCurrentSegment seems to protect us
+         if (segment.atEnd()) {
+            this._deliverChunk(undefined);
+            return;
+         }
+
+         const currentChar = segment.text[segment.index];
+
+         if (this._foundCR) {
+            this._matchStrings.push('\n');
+            this._originalStrings.push('\r');
+
+            if (currentChar === '\n' || (currentChar === '\u0085' && this._info.isVersion1dot1)) {
+               this._originalStrings.push(currentChar);
+               segment.index ++;
+            }
+
+            this._deliverChunk(this._extractChunk());
+            return;
+         }
+
+         // Here terrible things happen
+         if (currentChar === '\r') {
+            // could we just unshift the segment if not at end, and always call back in?
+            if (segment.text.length <= segment.index + 1) {
+               segment.index ++;
+               if (segment.atEnd() && segment.isLast) {
+                  this._matchStrings.push('\n');
+                  this._originalStrings.push('\r');
+                  this._deliverChunk(this._extractChunk());
+                  return;
+               }
+               this._foundCR = true;
+               continue;
+            }
+
+            const nextChar = segment.text[segment.index + 1];
+            this._matchStrings.push('\n');
+            this._originalStrings.push('\r');
+            segment.index ++;
+
+            if (nextChar === '\n' || (nextChar === '\u0085' && this._info.isVersion1dot1)) {
+               this._originalStrings.push(nextChar);
+               segment.index ++;
+            }
+            this._deliverChunk(this._extractChunk());
+            return;
+         }
+
+         LINE_ENDING_REGEX.lastIndex = segment.index;
+         const result = LINE_ENDING_REGEX.exec(segment.text);
+         const haveLineEnding = result && result.index === segment.index;
+
+         if (haveLineEnding) {
+            this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+            this._originalStrings.push(result[0]);
+
+            segment.index += result[0].length;
+         } else {
+            this._matchStrings.push(currentChar);
+            this._originalStrings.push(currentChar);
+            segment.index ++;
+         }
+
+         this._deliverChunk(this._extractChunk());
+         return;
       }
    }
 }
