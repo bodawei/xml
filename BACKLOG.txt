@@ -1,30 +1,91 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/13  Sprint 36:  125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 
+ 4/16  Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-L 201: Core remaining:
-	M: FindMatchOfSet (core under close, markup, match and used by geToTerminator/getWord)
-		need to remember start position, and look ahead, and if fail then roll back and try again
-			to this end, keep an index into the possible matches
-			keep an index into the current match
-			assemble segments
-			un-assemble segments if that doesn't work and start search again
-	M: To Terminator
-		Needs to stash self somewhere, call FindMatchOfSet and then if no match restore self and continue.
-√ We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
+√ S: 202 queue requests.
+	- easy to set up a queue. push operation and callback
+	- creation passes callback into the source
+	- resumeop will pull invoke the one on the end
+	- when source is called with callback, it will remove the oen from the array and then do callback
+
+	TEST:
+		- multiple calls without segmetns
+		- multiple calls with segments
+		- make sure callbacks come in the right order.
+
+S: 204 getChar/peekChar/peekIsSpace
+	if chara available, then can answer
+	if no char, then have to wait.
+		definition of scan() is really getChunkIfAvailable()
+
+	Test:
+		- char with no segments yet
+		- char with segment later
+		- char at end of input (no input at all)
+		- char at start of segment
+		- char in middle of segment
+		- char at end of segment (wait for next)
+		- char at end of input (with other input)
 
 
+M: 203 getTerminator, getMatch, getClose, getMarkup
+	- get terminator and match already done
+		- this is good cleanup time actually
+		TERMINATOR TEST
+			- 7 above
+			- terminator N segments ahead
+			- terminator at end of N segmetns
+	get close:
+		can peek if next is ]
+		Can call with ]]> then ]
+		return result
+		TEST: 7 above plus incomplete match at total end
+		TEST: 7 above plus incomplete match at partial end
+		TEST: 7 above plus Span 2 segments
+		TEST: 7 above plus Span N segments
+
+	getMarkup
+		could try to optimize for first char. Even to the point of calling peekChar, 
+		<!--, <? <! </ <, &,    and eventually %
+		TEST: Span multiple segments
+		TEST: just <!- and <foo and <!----
 Extra
-	Code is messy.
-	review tests: 
+	Do performance test of promises versus callbacks.  Consider shifting all to promises
+	Code is VERY messy.
+	review tests and test cases: 
 		segs: 0, 1, more than 1
 		no match: nothing at current, at end and incomplete
 		match: start of 1st.  (2) to middle of one (3) to end of same one (4) to middle of another (4) to end of all
+
+Segment tests:
+	when no data yet (does nothing)
+	with empty input
+	Get At Current Position or from current position
+		when data arrives later (1 seg)
+		when data arrives later (N seg)
+		at start of a seg
+		from middle of seg with no end (yet)
+		from middle of seg to end of thisseg
+		from middle of seg end at first of next seg
+		from middle of seg end at middle of next seg
+		at end of seg (must wait)
+		at end of seg (end at first of next)
+		at end of seg (end in middle of next)
+		cross multiple segments
+		to end with no change
+	from current position match (match, close, markup)
+		match spans
+	from current position to change (string, digits, word, char)
+	from current position to terminator (word, toterminator)
+		terminator crosses
+		terminator at end
+		terminator at start
+		no clear terminator at eof
 
 
 -- next: 215
@@ -74,12 +135,10 @@ TechDebt/Bus
 
 Cursor Revisions [1L 3M 8S]
 ---------
-S: 202 queue requests.
-M: 203 getTerminator, getMatch, getClose, getMarkup
-S: 204 getChar/peekChar/peekIsSpace
 S: 205 unget
 
 L+: 206 Chunks: Offsets should have locations (!). how should this work?
+	See 212, below
 	UEL's
 	EntityOffset
 	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.

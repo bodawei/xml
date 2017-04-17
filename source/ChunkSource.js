@@ -24,122 +24,12 @@ class Segment {
       this.isLast = false;
    }
 
-//   incrementChar() {
-//      // stop if too far
-//      this.offset.index ++;
-//      this.offset.column ++;
-//   }
-
    atEnd() {
       return this.index >= this.text.length;
    }
 }
 
-/**********************************************************************\
-  An implementation of a cursor interface, where the source data for the
-  cursor is a plain string.
-
-  All getXxx() routines return either undefined or an XmlStringToken
-  instance. An unknown return value means either that the specified item
-  can not be retrieved, EOF or some other catastrophic read problem where
-  reading can not procede.
-
-  peekXxx() routines look ahead in the input stream by one character, but
-  do not alter the position of the cursor.
-
-  getToXxxx() routines return a descriptor including a possibly undefined
-  token and additional meta data.
-\**********************************************************************/
-
 class ChunkSource {
-
-   /**********************************************************************\
-    Constructs an instance with the specified source string and entity
-    info.  Note that the second parameter ultimately turns into an
-    EntityMetaData instance, but various alternate parameters can be provided
-    (this is so construction is as easy as possible for the caller).
-    If the paramter is
-       - an EntityMetaData, it is used directly (not cloned).
-       - an EntityLocation, it is passed to an otherwise default-valued
-         EntityMetaData instance.
-       - a String, it is assumed to be the URL locating the entity this
-         is processing, so is passed to an EntityLocation and then an
-         EntityMetaData
-       - the undefined value, it is assumed we should use the default
-         location for the entity, and that is passed to an EntityLocation
-         and then EntityMetaData.
-
-    Encodings
-    Handling the encoding of the XML data can get to be complex.
-    Note: An unencoded string in JavaScript here is a string where and 'a'
-    is represented as an 'a' (or \u0061). In contrast, in UTF-16 it would
-    get to us as \u0000\u0061.  You can get this if you get a sequence of
-    bytes and read each byte into one string character.
-
-    Factors to consider:
-      1. The XML entity itself may specify its own encoding in the
-         XML Declaration or Text Declaration (<?xml encoding="UTF-8"?>
-      2. The cursor will try to examine the first few bytes of the
-         entity to see if it can recognize at least an approximation
-         of the encoding.
-      3. The cursor has an option (called encoding) which you can pass
-         that will let you explicitly state the encoding of the data in
-         the string.
-      4. The XmlTokenStream has an option, ignoreDocumentEncoding, which
-         will tell it to not inform the cursor of the encoding specified
-         in the entity data.
-
-    Here are the most likely use cases:
-      A. You have a string which you have already decoded (e.g. you got
-         it as a UTF-16 encoded string or buffer, and you converted it
-         into a plain unencoded string).
-            In this case, pass it to the cursor, do NOT set the encoding
-            option on the cursor, and set ignoreDocumentEncoding option
-            on the stream.
-      B. You have a string which is encoded, you know the encoding, and
-         the XML document doesn't carry the encoding name in it.
-         (e.g. it is ISO-8859-2, whose lower 128 characters look like
-         ASCII so by #2 the cursor will conclude it is unencoded).
-            Pass the string and encoding option to the cursor
-      C. You have a string which is encoded but looks like ASCII, and
-         the encoding is also stated in the XML or Text Declaration.
-            Pass the encoded string to the cursor. Do nothing else.
-      D. You have an encoded string that is in UTF-16 (either LE or BE)
-         that has a byte order marker on it
-            If the encoding is not there, you can do either B or C
-               (the cursor can identify UTF-16 automatically)
-            Note that if there is an XML or Text Declaration that is
-            different, then you should set the ignoreDocumentEncoding
-            option.
-      E. Same as D, but no byte order mark
-            Strictly, this is an error, since all UTF-16 must have a
-            byte order mark (4.3.3).  However, a lax XmlTokenStream will
-            continue.
-            If there is an XML or Text Declaration, the cursor can
-            auto-detect the character set and convert (if these specify
-            another encoding, you should set ignoreDocumentEncoding)
-            If there is no XML or Text Declaration, you must specify
-            and encoding option as in B.
-   Other notes:
-      -  This uses iconv-lite to do the character decoding. This
-         library is very forgiving of errors. So, if you have passed
-         the wrong character set to convert, you will get gibberish
-         and errors coming out of XmlTokenStream rather than errors
-         at conversion time.
-      -  The encoding option to the cursor (#3), if specified, takes
-         precedence over the value specified in the document (#1).
-
-    PARAM
-    The string that this cursor should use.
-    info: undefiend, a string (URL), EntityLocation, or an EntityMetaData
-    options: An object with any one or more of the following
-      encoding: The name of the encoding that the source string is in.
-         Generally, you should be making sure that the string is already
-         properly decoded to a normal JavaScript string. But if you have
-         a string that actually contains encoded data, and you specify
-         this encoding value with the name of that encoding, the cursor
-         will try to decode the string before processing it.
-   \**********************************************************************/
 
    constructor(info) {
 //      if (!(info instanceof EntityMetaData)) {
@@ -148,8 +38,9 @@ class ChunkSource {
 
       this._info = info;
       this._segments = [];
-      this._currentOperation = undefined;
+      this._chunkers = [];
       this._regexMemo = {};
+      this._finished = this._finished.bind(this);
    }
 
    /**********************************************************************\
@@ -167,7 +58,10 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
       }
 
-      this._currentOperation = new DigitsOperation(this._segments, deliverChunk);
+      this._chunkers.push({
+         chunker: new DigitsOperation(this._segments, this._finished),
+         callback: deliverChunk
+      });
 
       this._resumeOperation();
    }
@@ -187,11 +81,15 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
       }
 
-      this._currentOperation = new SpaceOperation(this._info, this._segments, deliverChunk);
+      this._chunkers.push({
+         chunker: new SpaceOperation(this._info, this._segments, this._finished),
+         callback: deliverChunk
+      });
 
       this._resumeOperation();
    }
 
+   // could make terminators optional.
    getWord(terminators, deliverChunk) {
       if (typeof deliverChunk !== 'function') {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
@@ -199,8 +97,10 @@ class ChunkSource {
 
       const spaceTerminators = this._info.isVersion1dot0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
 
-      this._currentOperation = new ToTerminatorOperation(this._info, spaceTerminators, terminators, this._segments,
-         deliverChunk);
+      this._chunkers.push({
+         chunker: new ToTerminatorOperation(this._info, spaceTerminators, terminators, this._segments, this._finished),
+         callback: deliverChunk
+      });
 
       this._resumeOperation();
    }
@@ -211,8 +111,10 @@ class ChunkSource {
             'Must pass a callback function of the form function(chunk|undefined):void to getToTerminator().');
       }
 
-      this._currentOperation = new ToTerminatorOperation(this._info, [], terminators, this._segments,
-         deliverChunk);
+      this._chunkers.push({
+         chunker: new ToTerminatorOperation(this._info, [], terminators, this._segments, this._finished),
+         callback: deliverChunk
+      });
 
       this._resumeOperation();
    }
@@ -225,7 +127,10 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getMatch().');
       }
 
-      this._currentOperation = new MatchOperation([ matchString ], true, this._segments, deliverChunk);
+      this._chunkers.push({
+         chunker: new MatchOperation([ matchString ], true, this._segments, this._finished),
+         callback: deliverChunk
+      });
 
       this._resumeOperation();
    }
@@ -238,12 +143,18 @@ class ChunkSource {
       this._resumeOperation();
    }
 
-   _resumeOperation() {
-      if (this._segments.length === 0 || !this._currentOperation) {
-         return;
-      }
+   _finished(chunk) {
+      const chunkerInfo = this._chunkers.shift();
 
-      this._currentOperation.scan();
+      chunkerInfo.callback(chunk);
+   }
+
+   _resumeOperation() {
+      while (this._segments.length !== 0 && this._chunkers.length !== 0) {
+         const currentChunker = this._chunkers[0];
+
+         currentChunker.chunker.scan();
+      }
    }
 
 }
@@ -553,3 +464,107 @@ class MatchOperation extends GeneralOperation {
 }
 
 module.exports = ChunkSource;
+
+/**********************************************************************\
+  An implementation of a cursor interface, where the source data for the
+  cursor is a plain string.
+
+  All getXxx() routines return either undefined or an XmlStringToken
+  instance. An unknown return value means either that the specified item
+  can not be retrieved, EOF or some other catastrophic read problem where
+  reading can not procede.
+
+  peekXxx() routines look ahead in the input stream by one character, but
+  do not alter the position of the cursor.
+
+  getToXxxx() routines return a descriptor including a possibly undefined
+  token and additional meta data.
+\**********************************************************************/
+
+   /**********************************************************************\
+    Constructs an instance with the specified source string and entity
+    info.  Note that the second parameter ultimately turns into an
+    EntityMetaData instance, but various alternate parameters can be provided
+    (this is so construction is as easy as possible for the caller).
+    If the paramter is
+       - an EntityMetaData, it is used directly (not cloned).
+       - an EntityLocation, it is passed to an otherwise default-valued
+         EntityMetaData instance.
+       - a String, it is assumed to be the URL locating the entity this
+         is processing, so is passed to an EntityLocation and then an
+         EntityMetaData
+       - the undefined value, it is assumed we should use the default
+         location for the entity, and that is passed to an EntityLocation
+         and then EntityMetaData.
+
+    Encodings
+    Handling the encoding of the XML data can get to be complex.
+    Note: An unencoded string in JavaScript here is a string where and 'a'
+    is represented as an 'a' (or \u0061). In contrast, in UTF-16 it would
+    get to us as \u0000\u0061.  You can get this if you get a sequence of
+    bytes and read each byte into one string character.
+
+    Factors to consider:
+      1. The XML entity itself may specify its own encoding in the
+         XML Declaration or Text Declaration (<?xml encoding="UTF-8"?>
+      2. The cursor will try to examine the first few bytes of the
+         entity to see if it can recognize at least an approximation
+         of the encoding.
+      3. The cursor has an option (called encoding) which you can pass
+         that will let you explicitly state the encoding of the data in
+         the string.
+      4. The XmlTokenStream has an option, ignoreDocumentEncoding, which
+         will tell it to not inform the cursor of the encoding specified
+         in the entity data.
+
+    Here are the most likely use cases:
+      A. You have a string which you have already decoded (e.g. you got
+         it as a UTF-16 encoded string or buffer, and you converted it
+         into a plain unencoded string).
+            In this case, pass it to the cursor, do NOT set the encoding
+            option on the cursor, and set ignoreDocumentEncoding option
+            on the stream.
+      B. You have a string which is encoded, you know the encoding, and
+         the XML document doesn't carry the encoding name in it.
+         (e.g. it is ISO-8859-2, whose lower 128 characters look like
+         ASCII so by #2 the cursor will conclude it is unencoded).
+            Pass the string and encoding option to the cursor
+      C. You have a string which is encoded but looks like ASCII, and
+         the encoding is also stated in the XML or Text Declaration.
+            Pass the encoded string to the cursor. Do nothing else.
+      D. You have an encoded string that is in UTF-16 (either LE or BE)
+         that has a byte order marker on it
+            If the encoding is not there, you can do either B or C
+               (the cursor can identify UTF-16 automatically)
+            Note that if there is an XML or Text Declaration that is
+            different, then you should set the ignoreDocumentEncoding
+            option.
+      E. Same as D, but no byte order mark
+            Strictly, this is an error, since all UTF-16 must have a
+            byte order mark (4.3.3).  However, a lax XmlTokenStream will
+            continue.
+            If there is an XML or Text Declaration, the cursor can
+            auto-detect the character set and convert (if these specify
+            another encoding, you should set ignoreDocumentEncoding)
+            If there is no XML or Text Declaration, you must specify
+            and encoding option as in B.
+   Other notes:
+      -  This uses iconv-lite to do the character decoding. This
+         library is very forgiving of errors. So, if you have passed
+         the wrong character set to convert, you will get gibberish
+         and errors coming out of XmlTokenStream rather than errors
+         at conversion time.
+      -  The encoding option to the cursor (#3), if specified, takes
+         precedence over the value specified in the document (#1).
+
+    PARAM
+    The string that this cursor should use.
+    info: undefiend, a string (URL), EntityLocation, or an EntityMetaData
+    options: An object with any one or more of the following
+      encoding: The name of the encoding that the source string is in.
+         Generally, you should be making sure that the string is already
+         properly decoded to a normal JavaScript string. But if you have
+         a string that actually contains encoded data, and you specify
+         this encoding value with the name of that encoding, the cursor
+         will try to decode the string before processing it.
+   \**********************************************************************/

@@ -35,6 +35,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  3/30 Sprint 33:  93sp [7XL 2L 4M 1S]. Avg: 5/sprint = 19 sprints. ACTUAL: 4 (almost 7)
  4/8  Sprint 34:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 6
  4/9  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 5
+ 4/13 Sprint 36: 125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 5
 
 =============================================
 BLOG IDEAS
@@ -2092,5 +2093,29 @@ What I did of the plan was, which is pretty good.  I didn't get to getTerminator
 
 NEXT SPRINT should do a lot more planning.
 
+Sprint 36
+=========
+L 201: Core remaining:
+	M: FindMatchOfSet (core under close, markup, match and used by geToTerminator/getWord)
+		need to remember start position, and look ahead, and if fail then roll back and try again
+			to this end, keep an index into the possible matches
+			keep an index into the current match
+			assemble segments
+			un-assemble segments if that doesn't work and start search again
+	M: To Terminator
+		Needs to stash self somewhere, call FindMatchOfSet and then if no match restore self and continue.
+√ We are doing NO testing of entityLoc in notation or entity, not even that the value is there.
 
 
+
+
+Notes36
+-------
+This sprint went OK.  didn't get to the extras, and to my surprise only got 201 done by the skin of my teeth while leaving more cruft and questionable code around than I would have liked.
+Most interesting with this was that I shifted gears from where I'd left off after 35 to redoing the chunkers as separate classes.  This was good from the standpoint that the code feels less hinky that way. But feels like a bit too much OO here, and should be doing more functional...
+Build involved cleaning up the coverage reporter. I thought I'd easily get it and testing reporter done here, but didn't.  Didn't even get coverage reporter done. But redid the logic for finding the coverage report files so it is cleaner.  What's really left is prepping the data for the table printing and printing the table.
+Cleanup involved doing some testing around externaId parsing and testing that had been neglected.  Added a validation check and fixed a bug in the process.
+Stll feeling good about how we're progressing here.
+
+Notice that the count of story points went waaay up here. I did planning around all the stuff to finish up the cursor rework etc, and... well, it was more than I would have liked.
+If we were caught up on our cleanup, we could be cleaning up the code in the code we just wrote, which would be preferable.

@@ -10,6 +10,8 @@ const EntityMetaData = require('./shared/EntityMetaData.js');
 const ChunkSource = require('./ChunkSource.js');
 
 describe('ChunkSource', () => {
+   let pluckedSpy;
+   let source;
    let defaultLoc;
    let entityMetaData1dot0;
    let entityMetaData1dot1;
@@ -18,6 +20,55 @@ describe('ChunkSource', () => {
       defaultLoc = new EntityLocation();
       entityMetaData1dot0 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, defaultLoc);
       entityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
+
+      pluckedSpy = jasmine.createSpy('pluckedSpy');
+      source = new ChunkSource(entityMetaData1dot0);
+   });
+
+   describe('multiple calls', () => {
+
+      it('made before any segments added', () => {
+         source.getSpace(pluckedSpy);
+         source.getDigits(pluckedSpy);
+         source.getWord([], pluckedSpy);
+
+         source.addSegment(' 123Test', true);
+
+         expect(pluckedSpy.calls.count()).toEqual(3);
+         expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' ');
+         expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('123');
+         expect(pluckedSpy.calls.argsFor(2)[0].text).toEqual('Test');
+      });
+
+      it('made after segments added', () => {
+         source.addSegment(' 123Test', true);
+
+         source.getSpace(pluckedSpy);
+         source.getDigits(pluckedSpy);
+         source.getWord([], pluckedSpy);
+
+         expect(pluckedSpy.calls.count()).toEqual(3);
+         expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' ');
+         expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('123');
+         expect(pluckedSpy.calls.argsFor(2)[0].text).toEqual('Test');
+      });
+
+      it('made across segment addition', () => {
+         source.addSegment(' ', false);
+
+         source.getSpace(pluckedSpy);
+         source.addSegment('\t123', false);
+         source.getDigits(pluckedSpy);
+         source.addSegment('456TestV', false);
+         source.getWord([], pluckedSpy);
+         source.addSegment('alue ', true);
+
+         expect(pluckedSpy.calls.count()).toEqual(3);
+         expect(pluckedSpy.calls.argsFor(0)[0].text).toEqual(' \t');
+         expect(pluckedSpy.calls.argsFor(1)[0].text).toEqual('123456');
+         expect(pluckedSpy.calls.argsFor(2)[0].text).toEqual('TestValue');
+      });
+
    });
 
    describe('getDigits', () => {
