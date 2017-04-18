@@ -1151,7 +1151,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getMatch', () => {
+   fdescribe('getMatch', () => {
       let pluckedSpy;
       let source;
 
