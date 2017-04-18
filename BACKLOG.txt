@@ -32,6 +32,7 @@ S: 204 getChar/peekChar/peekIsSpace
 		- char at end of segment (wait for next)
 		- char at end of input (with other input)
 
+< Much worse than I expected.  155min>
 
 M: 203 getTerminator, getMatch, getClose, getMarkup
 	- get terminator and match already done
@@ -56,6 +57,7 @@ M: 203 getTerminator, getMatch, getClose, getMarkup
 		TEST: just <!- and <foo and <!----
 Extra
 	Do performance test of promises versus callbacks.  Consider shifting all to promises
+	newlines in getTerminator
 	Code is VERY messy.
 		The handling of the current segment seems a bit weird. Look at getChar
 	review tests and test cases: 

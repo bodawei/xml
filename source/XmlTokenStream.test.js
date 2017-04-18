@@ -24,7 +24,7 @@ describe('XmlTokenStream', () => {
 
    describe('construction', () => {
 
-      it('can be constructed with a cursor', () => {
+      fit('can be constructed with a cursor', () => {
          expect(() => {
             new XmlTokenStream(new XmlStringCursor('hi'));
          }).not.toThrow();

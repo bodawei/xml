@@ -71,7 +71,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('peekIsSpace', () => {
+   fdescribe('peekIsSpace', () => {
 
       describe('basic behavior', () => {
 
@@ -212,7 +212,7 @@ describe('ChunkSource', () => {
    });
 
    // Whitebox note: Code is the same for peekChar and getChar except for index handling. Just test the latter here
-   describe('peekChar', () => {
+   fdescribe('peekChar', () => {
 
       describe('basic behavior', () => {
 
@@ -310,7 +310,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getChar', () => {
+   fdescribe('getChar', () => {
 
       describe('basic behavior', () => {
 
@@ -571,7 +571,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getDigits', () => {
+   fdescribe('getDigits', () => {
       let pluckedSpy;
       let source;
 
@@ -704,7 +704,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getSpace', () => {
+   fdescribe('getSpace', () => {
       let pluckedSpy;
       let source;
 
@@ -1149,7 +1149,6 @@ describe('ChunkSource', () => {
 
       });
 
-      // offsets
    });
 
    describe('getMatch', () => {
@@ -1274,7 +1273,7 @@ describe('ChunkSource', () => {
 
       describe('interacting calls', () => {
 
-         it('calls back with value after a getWord() call', () => {
+         xit('calls back with value after a getWord() call', () => {
             source.addSegment('georgeMichael', false);
 
             source.getWord([ 'M' ], pluckedSpy);
