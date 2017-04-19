@@ -95,8 +95,8 @@ Segment tests:
 =============================================
 CLEANUP
 =======
+- Finish toEqualChunkTexts()
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
-- We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
 - general things when cleaning up:
 	- add contexts to all errors
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
@@ -135,6 +135,7 @@ TechDebt/Bus
 - Can we pass the result of entity stream through multiple times?
 - Can't test PE's inside PE's
 - Think about replacing the quoted value with ValueStream.  Could we do that?  They're much the same, though VS is much bigger.
+- We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
 
 Cursor Revisions [1L 3M 8S]
 ---------

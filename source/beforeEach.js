@@ -69,16 +69,105 @@ function toMatchClasses() {
    };
 }
 
+function toEqualChunkText() {
+   return {
+      compare: (actualChunk, expectedText) => {
+         let pass = true;
+         let message = '';
+
+         if (!actualChunk) {
+            throw new Error('Chunk is undefined, but should not be.');
+         } else {
+            const expected = {
+               text: expectedText,
+               originalText: expectedText
+            };
+
+            if (typeof expectedText === 'object') {
+               expected.text = expectedText.text;
+               expected.originalText = expectedText.originalText;
+            }
+
+            if (actualChunk.text !== expected.text) {
+               pass = false;
+               message = 'Chunk text values do not match.\n';
+               message += `\tActual:   ${actualChunk.text}\n`;
+               message += `\tExpected: ${expected.text}\n`;
+            } else if (actualChunk.originalText !== expected.originalText) {
+               pass = false;
+               message = 'Chunk original text values do not match.\n';
+               message += `\tActual:   ${actualChunk.originalText}\n`;
+               message += `\tExpected: ${expected.originalText}\n`;
+            } else {
+               pass = true;
+               message = 'Expected text values in chunk not to match. ' +
+                  `("${actualChunk.text}" and "${actualChunk.originalText}").\n`;
+            }
+         }
+
+         return {
+            pass,
+            message
+         };
+      }
+   };
+}
+
+//function toEqualChunkTexts() {
+//   return {
+//      compare: (actualArray, expectedTexts) => {
+//         let pass = true;
+//         let message = '';
+//         let mismatchIndex;
+//
+//         if (!actualArray || Array.isArray(actualArray)) {
+//            throw new Error('Expected array of chunks, but got undefined or a non-array.');
+//         }
+//
+//         const maxSearch = Math.min(actualArray.length, expectedTexts.length);
+//         for (let index = 0; index < maxSearch; index++) {
+//            if (actualArray[index].text !== expectedTexts[index]) {
+//               mismatchIndex = index;
+//               break;
+//            }
+//         }
+//
+//         if (actualArray.length !== expectedTexts.length) {
+//            pass = false;
+//            message = `Expected ${expectedTexts.length} chunks, but got ${actualArray.length}.\n`;
+//            message += `\tActual: ${actualArray.join(', ')}\n`;
+//            message += `\tExpected: ${expectedTexts.map((item) => item.text).join(', ')}\n`;
+//         } else {
+//            pass = mismatchIndex === undefined;
+//
+//            if (pass) {
+//               message = `Expected one or more object types to not match: ${expectedTexts.join()}.`;
+//            } else {
+//               message = `The text of chunk ${mismatchIndex} (${actualArray[mismatchIndex].text})`;
+//               message += ` did not match ${expectedTexts[mismatchIndex]}.`;
+//            }
+//         }
+//
+//         return {
+//            pass,
+//            message
+//         };
+//      }
+//   };
+//}
+
 beforeEach(() => {
 
    jasmine.addMatchers({
       toBeSyntaxError,
-      toMatchClasses
+      toMatchClasses,
+      toEqualChunkText
    });
 
 });
 
 module.exports = {
    toBeSyntaxError,
-   toMatchClasses
+   toMatchClasses,
+   toEqualChunkText
 };

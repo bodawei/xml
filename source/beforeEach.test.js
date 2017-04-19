@@ -4,11 +4,13 @@
 
 /* eslint-env jasmine */
 
+const Chunk = require('./shared/Chunk.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
 
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
 const toMatchClasses = require('./beforeEach.js').toMatchClasses;
+const toEqualChunkText = require('./beforeEach.js').toEqualChunkText;
 
 describe('toBeSyntaxError()', () => {
 
@@ -105,6 +107,77 @@ describe('toMatchClasses()', () => {
          ], [ tokens.ExternalSubsetStart ])).toEqual({
             pass: false,
             message: 'The type of object 0 (CharRef) did not match ExternalSubsetStart.'
+         });
+      });
+
+   });
+});
+
+
+fdescribe('toEqualChunkText()', () => {
+
+   describe('jasmine use', () => {
+
+      it('reports pass when the strings all match', () => {
+         expect(new Chunk('one', 'two')).toEqualChunkText({ text: 'one', originalText: 'two'});
+      });
+
+      it('reports an exception if the chunk is undefined', () => {
+         try {
+            expect(undefined).not.toEqualChunkText('foo');
+         } catch(e) {
+         }
+      });
+
+      it('reports no pass if the text value does not match', () => {
+         expect(new Chunk('one', 'one')).not.toEqualChunkText('junk');
+      });
+
+      it('reports pass when text and original text are the same', () => {
+         expect(new Chunk('testValue', 'testValue')).toEqualChunkText('testValue');
+      });
+
+   });
+
+   describe('raw matcher', () => {
+
+      it('returns a compare function', () => {
+         expect(typeof toEqualChunkText().compare === 'function').toEqual(true);
+      });
+
+      it('throws an exception if the chunk is undefined', () => {
+         try {
+            toEqualChunkText().compare(undefined, 'foo');
+         } catch(e) {
+            expect(e.message).toEqual('Chunk is undefined, but should not be.');
+         }
+      });
+
+      it('returns a message indicating failure, when the values all match', () => {
+         const result = toEqualChunkText().compare(new Chunk('testValue', 'original'),
+               { text: 'testValue', originalText: 'original'});
+
+         expect(result).toEqual({
+            pass: true,
+            message: 'Expected text values in chunk not to match. ("testValue" and "original").\n'
+         });
+      });
+
+      it('returns a message indicating failure, on success, when text value does not match', () => {
+         const result = toEqualChunkText().compare(new Chunk('testValue', 'testValue'), 'bogusValue');
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'Chunk text values do not match.\n\tActual:   testValue\n\tExpected: bogusValue\n'
+         });
+      });
+
+      it('returns a message indicating failure, on success, when original text value does not match', () => {
+         const result = toEqualChunkText().compare(new Chunk('testValue', 'original'), 'testValue');
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'Chunk original text values do not match.\n\tActual:   original\n\tExpected: testValue\n'
          });
       });
 
