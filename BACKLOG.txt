@@ -103,8 +103,10 @@ CLEANUP
 BUILD
 =====
 126: Enhancements to the reporting
-	- clean up reporting code
-	- make table a separate module
+	- add line, branch etc to table
+	- give table a right align option
+	- give table a decimal align option
+	- do test report
 58:L Build infrastructure for running xmlconf tests.
 Breakings
 	144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons
