@@ -9,7 +9,7 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const ChunkSource = require('./ChunkSource.js');
 
-describe('ChunkSource', () => {
+xdescribe('ChunkSource', () => {
    let pluckedSpy;
    let source;
    let defaultLoc;
@@ -71,7 +71,7 @@ describe('ChunkSource', () => {
 
    });
 
-   fdescribe('peekIsSpace', () => {
+   describe('peekIsSpace', () => {
 
       describe('basic behavior', () => {
 
@@ -212,7 +212,7 @@ describe('ChunkSource', () => {
    });
 
    // Whitebox note: Code is the same for peekChar and getChar except for index handling. Just test the latter here
-   fdescribe('peekChar', () => {
+   describe('peekChar', () => {
 
       describe('basic behavior', () => {
 
@@ -310,7 +310,7 @@ describe('ChunkSource', () => {
 
    });
 
-   fdescribe('getChar', () => {
+   describe('getChar', () => {
 
       describe('basic behavior', () => {
 
@@ -571,7 +571,7 @@ describe('ChunkSource', () => {
 
    });
 
-   fdescribe('getDigits', () => {
+   describe('getDigits', () => {
       let pluckedSpy;
       let source;
 
@@ -704,7 +704,7 @@ describe('ChunkSource', () => {
 
    });
 
-   fdescribe('getSpace', () => {
+   describe('getSpace', () => {
       let pluckedSpy;
       let source;
 
@@ -1151,7 +1151,7 @@ describe('ChunkSource', () => {
 
    });
 
-   fdescribe('getMatch', () => {
+   describe('getMatch', () => {
       let pluckedSpy;
       let source;
 

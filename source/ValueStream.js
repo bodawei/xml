@@ -4,7 +4,9 @@
 
 const stream = require('readable-stream');
 
+const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
+const XmlReference = require('./XmlReference.js');
 const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
 
 const TERMINATORS = [ '&', '%' ];
@@ -73,10 +75,14 @@ class ValueStream extends stream.Readable {
       if (nextChar && nextChar.text === '#') {
          const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
 
+         XmlReference.validateCharReference(reference, this);
+
          this._pushToken(new tokens.CharRef(reference.character, this._cursor.getRecentChunks()));
       } else if (this._options.geRef) {
          const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
          const name = reference.nameChunk ? reference.nameChunk.text : '';
+
+         XmlReference.validateEntityReference(reference, this);
 
          this._pushToken(new tokens.EntityReference(name, this._cursor.getRecentChunks()));
       }
@@ -86,6 +92,8 @@ class ValueStream extends stream.Readable {
       if (this._options.peRef) {
          const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
          const name = reference.nameChunk ? reference.nameChunk.text : '';
+
+         XmlReference.validateEntityReference(reference, this);
 
          this._pushToken(new tokens.ParameterEntityReference(name, this._cursor.getRecentChunks()));
       }
@@ -111,6 +119,17 @@ class ValueStream extends stream.Readable {
       this.push(newToken);
       this._pushedValue = true;
    }
+
+   _report(code, params, place, context) {
+      this._pushToken(new SyntaxError(code, params, place, context, this._cursor.entityMd.location));
+   }
+
+   _checkSyntax(condition, code, params, place, context) {
+      if (!condition) {
+         this._report(code, params, place, context);
+      }
+   }
+
 }
 
 module.exports = ValueStream;

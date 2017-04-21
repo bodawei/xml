@@ -36,6 +36,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/8  Sprint 34:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 6
  4/9  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 5
  4/13 Sprint 36: 125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 5
+ 4/16 Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 2
 
 =============================================
 BLOG IDEAS
@@ -2119,3 +2120,98 @@ Stll feeling good about how we're progressing here.
 
 Notice that the count of story points went waaay up here. I did planning around all the stuff to finish up the cursor rework etc, and... well, it was more than I would have liked.
 If we were caught up on our cleanup, we could be cleaning up the code in the code we just wrote, which would be preferable.
+
+Sprint 37
+=========
+√ S: 202 queue requests.
+	- easy to set up a queue. push operation and callback
+	- creation passes callback into the source
+	- resumeop will pull invoke the one on the end
+	- when source is called with callback, it will remove the oen from the array and then do callback
+
+	TEST:
+		- multiple calls without segmetns
+		- multiple calls with segments
+		- make sure callbacks come in the right order.
+
+S: 204 getChar/peekChar/peekIsSpace
+	if chara available, then can answer
+	if no char, then have to wait.
+		definition of scan() is really getChunkIfAvailable()
+
+	Test:
+		- char with no segments yet
+		- char with segment later
+		- char at end of input (no input at all)
+		- char at start of segment
+		- char in middle of segment
+		- char at end of segment (wait for next)
+		- char at end of input (with other input)
+
+< Much worse than I expected.  155min>
+
+M: 203 getTerminator, getMatch, getClose, getMarkup
+	- get terminator and match already done
+		- this is good cleanup time actually
+		TERMINATOR TEST
+			- 7 above
+			- terminator N segments ahead
+			- terminator at end of N segmetns
+	get close:
+		can peek if next is ]
+		Can call with ]]> then ]
+		return result
+		TEST: 7 above plus incomplete match at total end
+		TEST: 7 above plus incomplete match at partial end
+		TEST: 7 above plus Span 2 segments
+		TEST: 7 above plus Span N segments
+
+	getMarkup
+		could try to optimize for first char. Even to the point of calling peekChar, 
+		<!--, <? <! </ <, &,    and eventually %
+		TEST: Span multiple segments
+		TEST: just <!- and <foo and <!----
+
+Segment tests:
+	when no data yet (does nothing)
+	with empty input
+	Get At Current Position or from current position
+		when data arrives later (1 seg)
+		when data arrives later (N seg)
+		at start of a seg
+		from middle of seg with no end (yet)
+		from middle of seg to end of thisseg
+		from middle of seg end at first of next seg
+		from middle of seg end at middle of next seg
+		at end of seg (must wait)
+		at end of seg (end at first of next)
+		at end of seg (end in middle of next)
+		cross multiple segments
+		to end with no change
+	from current position match (match, close, markup)
+		match spans
+	from current position to change (string, digits, word, char)
+	from current position to terminator (word, toterminator)
+		terminator crosses
+		terminator at end
+		terminator at start
+		no clear terminator at eof
+
+
+Notes37
+-------
+Less satisfying than the last sprint.  I didn't get 203 completely done.  While I  did get 202 and 204 done, in the process I realized that the OO approach I was taking for the 'operations' was drifting towards something more functional, and so I took the time to rework things.  This definitely made the code better... not because functional is better than OO, but because (a) some of my logic was more contorted than I'd like and (b) in the process of shifting towards the functional I was able to extract some behavior into a common area, which made that routine more complex, but made everything much much easier to reason about.  Overall a significant improvement.  But, this also ate up time that should have gone into 203.  However, it also laid the groundwork for making 203 much easier to do.
+
+Oh, I'm reminded that the BIG problem was 204, because in my thinking about getChar, I'd not considered that that char would be a pair of chars in the case of \r\n or \r\0085.  That blew getChar into a really contorted and complex routine (ironically, probably almost the longest of all of them) when dealing with all the cases. It proved to be more of an M in size. This also was the straw that motivated the move to pull some logic out of each routine and into a common one.
+I also started the process of making test helpers by creating toEqualChunkText() and beginning toEqualChunkTexts().  These are cleanup in that they make the test processing much easier.
+We also got the coverage code all detangled and modularized a bit.  Really, we just need to add some features at this point and then can declare success.
+
+There's a lesson I'm finding with things: You may write sloppy code while you are searching for an answer, but the cost of cleaning it up can be scarily high.  Some evidence that it is better to slow down a bit and write it better as you go.
+
+Most disturbingly, ChunkSource is evolving towards being something that could turn into a stream.  I've started calling it a guidedStream, in that it can't make decisions entirely on its own.  It needs some context to decide what to do.  Though, there's some whif that we might not even really need that.  The question is that this isn't in the schedule.  You can argue that this whole async cursor wasn't in the schedule, too... but it was more and more clear I needed to really be building async in everywhere, so it seemed unwise not to tackle it.  But this other doesn't seem necessary.  Do we do it?
+
+
+
+Sprint 38
+=========
+Going in, the logic around how to deal with terminator deferring to another caller (and potentially getchar doing the same) feels a bit weird.  But, rather than getting it all mapped out, because I think it depends on how _resumeOperation comes along, I'm willing to leave it undefined.  I can't tell if I'm being lazy (I should think about that more) or I want to let that evolve with dealing with the getClose and getMarkup.

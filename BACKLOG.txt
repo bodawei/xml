@@ -1,40 +1,47 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/16  Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
+ 4/21  Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-√ S: 202 queue requests.
-	- easy to set up a queue. push operation and callback
-	- creation passes callback into the source
-	- resumeop will pull invoke the one on the end
-	- when source is called with callback, it will remove the oen from the array and then do callback
-
-	TEST:
-		- multiple calls without segmetns
-		- multiple calls with segments
-		- make sure callbacks come in the right order.
-
-S: 204 getChar/peekChar/peekIsSpace
-	if chara available, then can answer
-	if no char, then have to wait.
-		definition of scan() is really getChunkIfAvailable()
-
-	Test:
-		- char with no segments yet
-		- char with segment later
-		- char at end of input (no input at all)
-		- char at start of segment
-		- char in middle of segment
-		- char at end of segment (wait for next)
-		- char at end of input (with other input)
-
-< Much worse than I expected.  155min>
+S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
+√ S: 209 validation errors
+	√ - Split the validateCharRef and EntitiyReference validations into context check and parsed validation
+	√ - pull parsed validation into a 'XmlReference' object
+	√ - call from value stream and be sure to push into pendingChunks
+	√ - write a test for each of the 3 cases to make sure it validates OK
 
 M: 203 getTerminator, getMatch, getClose, getMarkup
+	- Basic behavior
+		- close and markup require doing a series of matches, so need to peek unless they have a success.
+		- peek belongs in _resumeOperation()
+		- it also needs to deal with an array of things to search for.
+		- code should be cleaned up
+	- ToTerminatorOperation
+		turn into a function
+		think about state
+		Best if it returned a request to prefix on a search which calls back into here
+			-- state contains: runOtherFirst
+			-- This is ugly, and this depends on how _resumeOperation works.  This almost seems like that should be part of this function machinery.
+			-- state might have/BE the head of the array.  This can talk to the head and say: I relinquish myself to another
+				- this might ALWAYS be the case.  The state IS the stream, which each thing gets a hold of.  Rather than returning true or false, they can call the state and say: I'm done. and it will manage that. 
+	- general cleanup:
+		functions should only be getting a subset of state.  This should be well defined
+			matches
+			originals
+			foundCR
+			candidateIndex <-- less needed if the state keeps the candidate matches so far.
+			candidate
+			terminatorCandidates
+			<actualTerminator>
+		we could do a reduce thing where they have to return a new value.
+			If so, this must have a flag
+			Otherwise, could return true/false/undefined and consider the value in the return value.
+		We could just have a single routine: extract(opName, callback, options(term or matchstring)) that returns a tuple
+			
 	- get terminator and match already done
 		- this is good cleanup time actually
 		TERMINATOR TEST
@@ -58,12 +65,7 @@ M: 203 getTerminator, getMatch, getClose, getMarkup
 Extra
 	Do performance test of promises versus callbacks.  Consider shifting all to promises
 	newlines in getTerminator
-	Code is VERY messy.
-		The handling of the current segment seems a bit weird. Look at getChar
-	review tests and test cases: 
-		segs: 0, 1, more than 1
-		no match: nothing at current, at end and incomplete
-		match: start of 1st.  (2) to middle of one (3) to end of same one (4) to middle of another (4) to end of all
+	review tests and test cases
 
 Segment tests:
 	when no data yet (does nothing)
@@ -97,6 +99,7 @@ CLEANUP
 =======
 - Finish toEqualChunkTexts()
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
+- Look over ChunkSource tests... can we elegantize it at all?  e.g. we could iterate over the calls and produce an array to test with the above, thus removing the silly check on number of calls.
 - general things when cleaning up:
 	- add contexts to all errors
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
@@ -141,8 +144,6 @@ TechDebt/Bus
 
 Cursor Revisions [1L 3M 8S]
 ---------
-S: 205 unget
-
 L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	See 212, below
 	UEL's
@@ -167,12 +168,11 @@ Uhm:
 - actually integrating all this into the parsers...
 
 Leftover:
-S: 208 testing of chunks in ValueStrea
-S: 209 validation errors
-	- hardest part of this is separating out the validation code.
-S: 210 Adding to ExpandingEntityStream with tests
+S: 210 Adding to ExpandingEntityStream with tests  (not sure what 'adding' means.  But understand entityexpandingstream should be validating stuff we're putting into attributes etc to see if they are ok. and as the next says, adding checks for invalid chars)  indeed, we're not validating any content from external entities! 9or are we, as it is going through xmltokenstream, if so then it really should be ValueSTream doing the validation)
 S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
 	- Need to do all the text validation checking for external entities
+
+S: 208 testing of chunks in ValueStrea
 S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
 - is the token type Text or Chars?
 

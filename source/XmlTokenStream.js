@@ -16,6 +16,7 @@ const XmlError = require('./error/XmlError.js');
 const XmlTokenStreamDtd = require('./XmlTokenStream-dtd.js');
 const XmlTokenStreamElement = require('./XmlTokenStream-element.js');
 const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
+const XmlReference = require('./XmlReference.js');
 
 const SEID = SyntaxError.ID;
 const XWID = XmlWarning.ID;
@@ -276,54 +277,19 @@ class XmlTokenStream extends stream.Readable {
       const reference = XmlTokenStreamMisc.parseReference(this._cursor, start);
 
       if (reference.hashChunk) {
-         this._validateCharReference(reference);
+         XmlReference.validateCharReference(reference, this);
+
+         this._checkContentState(reference.startChunk,
+            SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
 
          this._pushToken(new tokens.CharRef(reference.character, this._cursor.getRecentChunks()));
       } else {
-         this._validateEntityReference(reference);
+         XmlReference.validateEntityReference(reference, this);
+
+         this._checkContentState(reference.startChunk, SEID.REFERENCE_INVALID_DOC_CONTEXT,
+            SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
 
          this._pushToken(new tokens.EntityReference(textOrBlank(reference.nameChunk), this._cursor.getRecentChunks()));
-      }
-   }
-
-   _validateEntityReference(parsed, inQuotedValue) {
-      this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
-      const entityName = textOrBlank(parsed.nameChunk);
-
-      if (!entityName) {
-         this._report(SEID.REFERENCE_NO_NAME);
-      }
-
-      this._checkSyntax(!parsed.postNameSpaceChunk, SEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
-      this._checkSyntax(parsed.semicolonChunk, SEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
-      if (!inQuotedValue) {
-         this._checkContentState(parsed.startChunk, SEID.REFERENCE_INVALID_DOC_CONTEXT,
-            SEID.REFERENCE_INVALID_SUBSET_CONTEXT);
-      }
-   }
-
-   _validateCharReference(parsed, inQuotedValue) {
-      this._checkSyntax(!parsed.postStartSpaceChunk, SEID.REFERENCE_XTRA_SPACE);
-      this._checkSyntax(!parsed.postHashSpaceChunk, SEID.CHARREF_XTRA_SPACE);
-
-      if (parsed.hexMarkerChunk && parsed.hexMarkerChunk.text.toLocaleLowerCase() === 'x') {
-         this._checkSyntax(parsed.hexMarkerChunk.text === 'x', SEID.CHARREF_INVALID_HEX_CASE);
-      }
-
-      this._checkSyntax(!parsed.postHexSpaceChunk, SEID.CHARREF_XTRA_SPACE_BEFORE_DIGITS);
-
-      if (!parsed.digitsChunk) {
-         this._report(SEID.CHARREF_NO_DIGITS);
-      } else if (!parsed.hexMarkerChunk && !XmlTokenStreamMisc.isDecimal(parsed.digitsChunk)) {
-         this._report(SEID.CHARREF_INVALID_BASE, [ parsed.digitsChunk.text ]);
-      }
-
-      this._checkSyntax(!parsed.postDigitsSpaceChunk, SEID.CHARREF_XTRA_SPACE_AFTER_DIGITS);
-      this._checkSyntax(parsed.semicolonChunk, SEID.CHARREF_NO_SEMICOLON);
-
-      if (!inQuotedValue) {
-         this._checkContentState(parsed.startChunk,
-            SEID.CHARREF_INVALID_DOC_CONTEXT, SEID.CHARREF_INVALID_SUBSET_CONTEXT);
       }
    }
 
@@ -530,7 +496,7 @@ class XmlTokenStream extends stream.Readable {
          } else {
             switch (item.type) {
                case XmlTokenStreamMisc.TYPE.CHAR_REF:
-                  this._validateCharReference(item.parsed, true);
+                  XmlReference.validateCharReference(item.parsed, this);
                   break;
                case XmlTokenStreamMisc.TYPE.GENERAL_REF:
                case XmlTokenStreamMisc.TYPE.PARAMETER_REF:
@@ -541,7 +507,7 @@ class XmlTokenStream extends stream.Readable {
                      this._report(SEID.PEREF_INVALID_ENTITYVALUE_CONTEXT, [ textOrBlank(item.parsed.nameChunk) ]);
                   }
 
-                  this._validateEntityReference(item.parsed, true);
+                  XmlReference.validateEntityReference(item.parsed, this);
                   break;
             }
          }

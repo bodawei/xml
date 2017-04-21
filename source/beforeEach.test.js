@@ -114,7 +114,7 @@ describe('toMatchClasses()', () => {
 });
 
 
-fdescribe('toEqualChunkText()', () => {
+describe('toEqualChunkText()', () => {
 
    describe('jasmine use', () => {
 

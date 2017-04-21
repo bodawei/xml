@@ -4,6 +4,7 @@
 
 /* eslint-env jasmine */
 
+const SyntaxError = require('./error/SyntaxError.js');
 const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 const ValueStream = require('./ValueStream.js');
@@ -183,6 +184,43 @@ describe('ValueStream', () => {
       // test validation
    });
 
+   describe('errors', () => {
+
+      it('reports an error if there is a space after the & for a char ref', (done) => {
+         pipeAndTest('&# 65;', done, checkResults, { geRef: true });
+
+         function checkResults(results) {
+            expect(results[0]).toEqualProps({
+               id: SyntaxError.ID.CHARREF_XTRA_SPACE,
+               message: 'Must not have a space after the "#" in a character reference.'
+            });
+         }
+      });
+
+      it('reports an error if there is a space after the & for a char ref', (done) => {
+         pipeAndTest('& foo;', done, checkResults, { geRef: true });
+
+         function checkResults(results) {
+            expect(results[0]).toEqualProps({
+               id: SyntaxError.ID.REFERENCE_XTRA_SPACE,
+               message: 'Must not have space in an entity reference.'
+            });
+         }
+      });
+
+      it('reports an error if there is a space after the & for a char ref', (done) => {
+         pipeAndTest('% frog;', done, checkResults, { peRef: true });
+
+         function checkResults(results) {
+            expect(results[0]).toEqualProps({
+               id: SyntaxError.ID.REFERENCE_XTRA_SPACE,
+               message: 'Must not have space in an entity reference.'
+            });
+         }
+      });
+
+   });
+
    describe('whitebox tests', () => {
 
       it('handles an entity reference at the end of the input string', (done) => {
@@ -200,6 +238,7 @@ describe('ValueStream', () => {
 
          function checkResults(results) {
             expect(results).toMatchClasses([
+               SyntaxError,
                tokens.EntityReference
             ]);
          }
@@ -210,6 +249,7 @@ describe('ValueStream', () => {
 
          function checkResults(results) {
             expect(results).toMatchClasses([
+               SyntaxError,
                tokens.ParameterEntityReference
             ]);
          }
