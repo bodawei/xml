@@ -372,6 +372,13 @@ function extractToTerminator(segment, state) {
       } else if (subResult.matches.length > 0) {
          return state;
       }
+
+      const hack = state._subOp.startSegment.text[state._subOp.startIndex];
+      state.matches.push(hack);
+      state.originals.push(hack);
+      state._subOp.startSegment.index ++;
+      state._subOp = undefined;
+      return;
    }
 
    const LINE_ENDING_REGEX = state.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
@@ -473,9 +480,7 @@ function searchMultipleMatch(segment, state) {
       state.startSegment = segment;
    }
 
-   if (state.seenSegments.indexOf(segment) === -1) {
-      state.seenSegments.push(segment);
-   }
+   state.seenSegments.push(segment);
 
    let result;
    let candidatesUnmatched = state.candidates.length;
@@ -500,9 +505,9 @@ function searchMultipleMatch(segment, state) {
             if (result.matches.length !== 0 && !couldBePartial) {
                state.matches = state.subState.matches;
                state.originals = state.subState.originals;
-               state.seenSegments.forEach((segment) => { segment.index = 0; });
-               state.startSegment.index = state.startIndex;
                if (state.peek) {
+                  state.seenSegments.forEach((segment) => { segment.index = 0; });
+                  state.startSegment.index = state.startIndex;
                   state.returnSegments(state.seenSegments);
                }
                return state;
@@ -528,6 +533,8 @@ function searchMultipleMatch(segment, state) {
       lastSegment.index = lastSegment.text.length;
       return;
    } else {
+      state.seenSegments.forEach((segment) => { segment.index = 0; });
+      state.startSegment.index = state.startIndex;
       state.returnSegments(state.seenSegments);
       return state;
    }

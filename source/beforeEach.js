@@ -119,7 +119,7 @@ function toEqualChunkTexts() {
          // Frequently, we're going to want to just pass back the result of spy.calls.allArgs(), so just strip
          // off the inner array
          if (Array.isArray(actualArray[0])) {
-            actualArray = actualArray.map((item) => { return item[0] });
+            actualArray = actualArray.map((item) => { return item[0]; });
          }
 
          const expected = expectedTexts.map(toChunkTextObj);

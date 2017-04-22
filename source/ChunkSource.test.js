@@ -198,6 +198,27 @@ describe('ChunkSource', () => {
             expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('\n');
          });
 
+         it('returns false if a \\u2028 is the next character in v. 1.0', () => {
+            source.addSegment('\na', false);
+
+            source.peekIsSpace(pluckedSpy);
+            source.getChar(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(2);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('\n');
+         });
+
+         it('returns true if a \\u2028 is the next character in v. 1.1', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\u2028', false);
+
+            source.peekIsSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
+         });
+
       });
 
    });
@@ -1436,6 +1457,17 @@ describe('ChunkSource', () => {
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text');
          });
 
+         it('calls back with the full text if it finds a terminator does not across multiple segments', () => {
+            source.addSegment('Te', false);
+            source.addSegment('xt<', false);
+            source.addSegment('!', false);
+            source.addSegment('-', false);
+            source.addSegment('-X', true);
+            source.getToTerminator([ '<!---' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.count()).toEqual(1);
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text<!--X');
+         });
       });
 
       describe('terminators', () => {

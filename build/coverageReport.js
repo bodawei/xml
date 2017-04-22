@@ -6,10 +6,41 @@
 const fs = require('fs');
 const path = require('path');
 
-const BROWSER_VERSION_OS_VERSION_SEPARATION_REGEXP = /^(.*) \((.*)\)$/;
-const BROWSER_NAME_AND_VERSION_REGEXP = /([A-Za-z]+) [v]?([0-9\.]+)/;
-const OS_NAME_AND_VERSON_REGEXP = /([^0-9\.]+) [v]?([0-9\.]+)/;
+const tableFormatter = require('./text-table-formatter.js');
+const util = require('./util.js');
+
 const COVERAGE_FILENAME = 'coverage-summary.json';
+
+const COLUMNS = [ {
+   name: 'percentage',
+   units: '%'
+}, {
+   name: 'browserName'
+}, {
+   name: 'browserVersion',
+   alignChar: '.'
+}, {
+   name: 'osName'
+}, {
+   name: 'osVersion',
+   alignChar: '.'
+}, {
+   name: 'lines',
+   units: 'l',
+   alignChar: '/'
+}, {
+   name: 'branches',
+   units: 'b',
+   alignChar: '/'
+}, {
+   name: 'statements',
+   units: 's',
+   alignChar: '/'
+}, {
+   name: 'functions',
+   units: 'f',
+   alignChar: '/'
+} ];
 
 /*
  * Identify if a particular subpath is found in an array of paths
@@ -73,25 +104,10 @@ function calculateTotals(coverageFileName, filesToSkip) {
    };
 }
 
-function extractBrowserAndOsNames(browerId) {
-   const browserAndOs = BROWSER_VERSION_OS_VERSION_SEPARATION_REGEXP.exec(browerId);
-   const browserMatch = BROWSER_NAME_AND_VERSION_REGEXP.exec(browserAndOs[1]);
-   const osMatch = OS_NAME_AND_VERSON_REGEXP.exec(browserAndOs[2]);
-
-   return {
-      browserName: browserMatch[1],
-      browserVersion: browserMatch[2],
-      osName: osMatch[1],
-      osVersion: osMatch[2]
-   };
-}
-
 function calculatePercentage(info) {
    var total = 0;
-   for (var lineBranchEtcKey in info.totals) {
-      if (info.covered[lineBranchEtcKey] === 0) {
-         continue;
-      }
+
+   for (var lineBranchEtcKey in info.count) {
       total += (info.covered[lineBranchEtcKey] / info.count[lineBranchEtcKey]);
    }
 
@@ -100,50 +116,6 @@ function calculatePercentage(info) {
    }
 
    return (total / 4) * 100;
-}
-
-function padValue(value, columnWidth, padChar) {
-   let nameResult = value;
-   for (let paddingSpace = value.length; paddingSpace < columnWidth; paddingSpace++) {
-      nameResult += padChar || ' ';
-   }
-
-   return nameResult;
-}
-
-function buildTable(results, columns) {
-   const totalWidths = results.reduce((widths, entry) => {
-      columns.forEach((colDesc) => {
-         const value = entry[colDesc.name].toString() + (colDesc.units || '');
-         widths[colDesc.name] = Math.max(widths[colDesc.name] || 0, value.length);
-      });
-      return widths;
-   }, {});
-
-   const top = [];
-   const bottom = [];
-
-   columns.forEach((colDesc) => {
-      top.push(padValue('', totalWidths[colDesc.name], '─'));
-      bottom.push(padValue('', totalWidths[colDesc.name], '─'));
-   });
-
-   const rows = results.map((entry) => {
-      const rowValue = [];
-      columns.forEach((colDesc) => {
-         const value = entry[colDesc.name].toString() + (colDesc.units || '');
-         rowValue.push(padValue(value, totalWidths[colDesc.name], ' '));
-      });
-      return rowValue;
-   });
-
-   let table = '┌─' + top.join('─┬─') + '─┐\n';
-   rows.forEach((row) => {
-      table += '│ ' + row.join(' │ ') + ' │\n';
-   });
-   table += '└─' + bottom.join('─┴─') + '─┘\n';
-
-   return table;
 }
 
 function byBrowserName(a, b) {
@@ -179,12 +151,14 @@ function makeReport(grunt, options) {
    const results = coverageFiles.map((fileName) => {
       const browserName = path.basename(path.dirname(fileName));
 
-      const reportColumns = extractBrowserAndOsNames(browserName);
+      const reportColumns = util.extractBrowserAndOsNames(browserName);
       const totals = calculateTotals(fileName, filesToSkip);
       reportColumns.percentage = calculatePercentage(totals);
 
-      reportColumns.count = totals.count;
-      reportColumns.covered = totals.covered;
+      reportColumns.lines = totals.covered.lines + '/' + totals.count.lines;
+      reportColumns.statements = totals.covered.statements + '/' + totals.count.statements;
+      reportColumns.functions = totals.covered.functions + '/' + totals.count.functions;
+      reportColumns.branches = totals.covered.branches + '/' + totals.count.branches;
 
       if (reportColumns.percentage !== 100) {
          failed = true;
@@ -195,18 +169,7 @@ function makeReport(grunt, options) {
 
    results.sort(byBrowserName);
 
-   const table = buildTable(results, [ {
-      name: 'percentage',
-      units: '%'
-   }, {
-      name: 'browserName'
-   }, {
-      name: 'browserVersion'
-   }, {
-      name: 'osName'
-   }, {
-      name: 'osVersion'
-   } ]);
+   const table = tableFormatter(results, { columns: COLUMNS });
 
    if (options.summaryFile) {
       fs.writeFileSync(options.summaryFile, table, 'UTF-8');
