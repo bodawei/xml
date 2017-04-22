@@ -197,7 +197,7 @@ describe('ValueStream', () => {
          }
       });
 
-      it('reports an error if there is a space after the & for a char ref', (done) => {
+      it('reports an error if there is a space after the & for an entity ref', (done) => {
          pipeAndTest('& foo;', done, checkResults, { geRef: true });
 
          function checkResults(results) {
@@ -208,7 +208,7 @@ describe('ValueStream', () => {
          }
       });
 
-      it('reports an error if there is a space after the & for a char ref', (done) => {
+      it('reports an error if there is a space after the % for a parameter entity ref', (done) => {
          pipeAndTest('% frog;', done, checkResults, { peRef: true });
 
          function checkResults(results) {

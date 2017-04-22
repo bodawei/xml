@@ -101,7 +101,7 @@ Segment tests:
 =============================================
 CLEANUP
 =======
-- Finish toEqualChunkTexts()
+√ - Finish toEqualChunkTexts()
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
 - Look over ChunkSource tests... can we elegantize it at all?  e.g. we could iterate over the calls and produce an array to test with the above, thus removing the silly check on number of calls.
 - general things when cleaning up:

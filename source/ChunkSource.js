@@ -176,6 +176,32 @@ class ChunkSource {
       this._resumeOperation();
    }
 
+   getMarkup(deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getMarkup().');
+      }
+
+      const state = new State(searchMultipleMatch, deliverChunk, this._version);
+      state.candidates = [ '<!--', '<?', '<!', '</', '&', '<' ];
+      state.peek = false;
+      this._extractors.push(state);
+
+      this._resumeOperation();
+   }
+
+   getClose(deliverChunk) {
+      if (typeof deliverChunk !== 'function') {
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getClose().');
+      }
+
+      const state = new State(searchMultipleMatch, deliverChunk, this._version);
+      state.candidates = [ ']]>', ']' ];
+      state.peek = false;
+      this._extractors.push(state);
+
+      this._resumeOperation();
+   }
+
    addSegment(text, last) {
       const segment = new Segment(text);
       this._segments.push(segment);
@@ -244,46 +270,6 @@ class ChunkSource {
             this._peekedSegments = []; // ick
          }
       }
-   }
-
-}
-
-class GeneralOperation {
-   constructor(segmentSource, deliverChunk) {
-      this._segmentSource = segmentSource;
-      this._deliverChunk = deliverChunk;
-      this._segments = [];
-      this._matchStrings = [];
-   }
-
-   _getCurrentSegment() {
-      if (!this._currentSegment || this._currentSegment.atEnd()) {
-         this._currentSegment = this._segmentSource.shift();
-         this._segments.push(this._currentSegment);
-
-         if (!this._startOffset) {
-            this._startOffset = this._currentSegment.startOffset.clone();
-         }
-      }
-
-      return this._currentSegment;
-   }
-
-   _extractChunk() {
-      if (this._matchStrings.length === 0) {
-         return;
-      }
-
-      const lastSegment = this._segments[this._segments.length - 1];
-
-      if (lastSegment && !lastSegment.atEnd()) {
-         this._segmentSource.unshift(lastSegment);
-      }
-
-      const text = this._matchStrings.join('');
-      const originalText = text;
-
-      return new Chunk(text, originalText, this._startOffset, lastSegment && lastSegment.offset);
    }
 
 }
@@ -383,10 +369,8 @@ function extractToTerminator(segment, state) {
       const subResult = state._subOp.extractor(segment, state._subOp);
       if (!subResult) {
          return;
-      } else {
-         if (subResult.matches.length > 0) {
-            return state;
-         }
+      } else if (subResult.matches.length > 0) {
+         return state;
       }
    }
 
@@ -421,6 +405,7 @@ function extractToTerminator(segment, state) {
          const subState = new State(searchMultipleMatch, () => {}, state.version);
          subState.returnSegments = state.returnSegments;
          subState.candidates = terminatorArray;
+         subState.peek = true;
 
          state._subOp = subState;
          const firstSub = state._subOp.extractor(segment, subState);
@@ -436,11 +421,6 @@ function extractToTerminator(segment, state) {
             }
          }
       }
-   } else {
-      // const restOfSegment = segment.text.substring(segment.index);
-      // segment.index = segment.text.length;
-      // state.matches.push(restOfSegment.replace(LINE_ENDING_REGEX, '\n'));
-      // state.originals.push(restOfSegment);
    }
 
    if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
@@ -466,6 +446,7 @@ function extractMatch(segment, state) {
       segment.index += lengthToCompare;
 
       if (state.candidateIndex >= candidate.length) {
+         state.candidateIndex = 0;
          return state;
       } else if (segment.atEnd() && segment.isLast) {
          state.candidateIndex = 0;
@@ -483,23 +464,17 @@ function extractMatch(segment, state) {
    }
 }
 
-
-// This is peek
+// Ultimately, should be smarter about recognizing a non-ambiguous terminator at end of segment
 function searchMultipleMatch(segment, state) {
    state.seenSegments = state.seenSegments || [];
    state.candidateIndex = state.candidateIndex || 0;
    if (state.seenSegments.length === 0) {
       state.startIndex = state.startIndex = segment.index;
-      state.startSegment = segment
+      state.startSegment = segment;
    }
 
    if (state.seenSegments.indexOf(segment) === -1) {
       state.seenSegments.push(segment);
-   }
-
-   if (!state.subState) {
-      state.subState = new State(extractMatch, () => {}, state.version);
-      state.subState.candidate = state.candidates[state.candidateIndex];
    }
 
    let result;
@@ -508,21 +483,33 @@ function searchMultipleMatch(segment, state) {
    state.candidateIndex = 0;
    while (state.candidateIndex < state.candidates.length) {
 
+      state.seenSegments.forEach((segment) => { segment.index = 0; });
+      state.startSegment.index = state.startIndex;
+      state.subState = new State(extractMatch, () => {}, state.version);
+      state.subState.candidate = state.candidates[state.candidateIndex];
+
       for (let index = 0; index < state.seenSegments.length; index++) {
          result = state.subState.extractor(state.seenSegments[index], state.subState);
 
          if (result) {
-            if (result.matches.length !== 0) {
+            let couldBePartial = false;
+            if (state.seenSegments[index].atEnd() && index === state.seenSegments.length - 1) {
+               couldBePartial = !state.seenSegments[index].isLast;
+            }
+
+            if (result.matches.length !== 0 && !couldBePartial) {
                state.matches = state.subState.matches;
                state.originals = state.subState.originals;
-               state.seenSegments.forEach((segment) => segment.index = 0);
+               state.seenSegments.forEach((segment) => { segment.index = 0; });
                state.startSegment.index = state.startIndex;
-               state.returnSegments(state.seenSegments);
+               if (state.peek) {
+                  state.returnSegments(state.seenSegments);
+               }
                return state;
             } else {
                state.subState.matches = [];
                state.subState.originals = [];
-               candidatesUnmatched --;
+               candidatesUnmatched--;
                break;
             }
          }
@@ -530,20 +517,20 @@ function searchMultipleMatch(segment, state) {
 
       state.candidateIndex ++;
       state.subState.candidate = state.candidates[state.candidateIndex];
-      state.seenSegments.forEach((segment) => segment.index = 0);
+      state.seenSegments.forEach((segment) => { segment.index = 0; });
       state.startSegment.index = state.startIndex;
    }
 
    state.candidateIndex = 0;
    state.subState.candidate = state.candidates[state.candidateIndex];
    if (candidatesUnmatched > 0) {
+      const lastSegment = state.seenSegments[state.seenSegments.length - 1];
+      lastSegment.index = lastSegment.text.length;
       return;
    } else {
       state.returnSegments(state.seenSegments);
       return state;
    }
-
-   return;
 }
 
 module.exports = ChunkSource;
@@ -651,7 +638,6 @@ module.exports = ChunkSource;
          this encoding value with the name of that encoding, the cursor
          will try to decode the string before processing it.
    \**********************************************************************/
-
 
                // if no potential match, then whole segment should be added and we should continue
 

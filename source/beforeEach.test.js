@@ -11,6 +11,7 @@ const tokens = require('./XmlToken.js');
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
 const toMatchClasses = require('./beforeEach.js').toMatchClasses;
 const toEqualChunkText = require('./beforeEach.js').toEqualChunkText;
+const toEqualChunkTexts = require('./beforeEach.js').toEqualChunkTexts;
 
 describe('toBeSyntaxError()', () => {
 
@@ -113,7 +114,6 @@ describe('toMatchClasses()', () => {
    });
 });
 
-
 describe('toEqualChunkText()', () => {
 
    describe('jasmine use', () => {
@@ -123,10 +123,9 @@ describe('toEqualChunkText()', () => {
       });
 
       it('reports an exception if the chunk is undefined', () => {
-         try {
+         expect(() => {
             expect(undefined).not.toEqualChunkText('foo');
-         } catch(e) {
-         }
+         }).toThrowError('Chunk with text "foo" is undefined, but should not be.');
       });
 
       it('reports no pass if the text value does not match', () => {
@@ -148,7 +147,7 @@ describe('toEqualChunkText()', () => {
       it('throws an exception if the chunk is undefined', () => {
          try {
             toEqualChunkText().compare(undefined, 'foo');
-         } catch(e) {
+         } catch (e) {
             expect(e.message).toEqual('Chunk with text "foo" is undefined, but should not be.');
          }
       });
@@ -178,6 +177,94 @@ describe('toEqualChunkText()', () => {
          expect(result).toEqual({
             pass: false,
             message: 'Chunk original text values do not match.\n\tActual:   original\n\tExpected: testValue\n'
+         });
+      });
+
+   });
+
+});
+
+describe('toEqualChunkTexts()', () => {
+
+   describe('jasmine use', () => {
+
+      it('reports pass when the chunks all match', () => {
+         expect([ new Chunk('one', 'two'), new Chunk('three', 'four') ])
+            .toEqualChunkTexts([ { text: 'one', originalText: 'two'}, { text: 'three', originalText: 'four'} ]);
+      });
+
+      it('reports an exception if the array is undefined', () => {
+         expect(() => {
+            expect(undefined).not.toEqualChunkTexts([ 'foo' ]);
+         }).toThrowError('Expected array of strings or text/original texts, but got undefined or a non-array.');
+      });
+
+      it('reports a pass if passed an array of arrays of chunks', () => {
+         expect([ [ new Chunk('one', 'one') ] ]).toEqualChunkTexts([ 'one' ]);
+      });
+
+      it('reports no pass if the text value does not match', () => {
+         expect([ new Chunk('one', 'one') ]).not.toEqualChunkTexts([ 'junk' ]);
+      });
+
+      it('reports pass when text and original text are the same', () => {
+         expect([ new Chunk('testValue', 'testValue') ]).toEqualChunkTexts([ 'testValue' ]);
+      });
+
+   });
+
+   describe('raw matcher', () => {
+
+      it('returns a compare function', () => {
+         expect(typeof toEqualChunkTexts().compare === 'function').toEqual(true);
+      });
+
+      it('throws an exception if the chunk is undefined', () => {
+         try {
+            toEqualChunkTexts().compare(undefined, [ 'foo' ]);
+         } catch (e) {
+            expect(e.message).toEqual(
+               'Expected array of strings or text/original texts, but got undefined or a non-array.');
+         }
+      });
+
+      it('returns a message indicating failure, when the array lengths do not match', () => {
+         const result = toEqualChunkTexts().compare([ new Chunk('1', '2'), new Chunk('3', '4') ],
+               [ { text: '1', originalText: '2'} ]);
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'Expected 1 chunks, but got 2.\n\tExpected: "1"/"2"\n\tActual:   "1"/"2", "3"/"4"\n'
+         });
+      });
+
+      it('returns a message indicating failure, when the values all match', () => {
+         const result = toEqualChunkTexts().compare([ new Chunk('1', '2'), new Chunk('3', '4') ],
+               [ { text: '1', originalText: '2'}, { text: '3', originalText: '4'} ]);
+
+         expect(result).toEqual({
+            pass: true,
+            message: 'Expected one or more chunk texts to not match: "1"/"2", "3"/"4".'
+         });
+      });
+
+      it('returns a message indicating failure, on success, when text value does not match', () => {
+         const result = toEqualChunkTexts().compare([ new Chunk('1', '2'), new Chunk('3', '5') ],
+               [ { text: '1', originalText: '2'}, { text: '9', originalText: '5'} ]);
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'The text of chunk 1 "3"/"5" did not match "9"/"5".'
+         });
+      });
+
+      it('returns a message indicating failure, on success, when original text value does not match', () => {
+         const result = toEqualChunkTexts().compare([ new Chunk('1', '2'), new Chunk('3', '5') ],
+               [ { text: '1', originalText: '2'}, { text: '3', originalText: '0'} ]);
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'The text of chunk 1 "3"/"5" did not match "3"/"0".'
          });
       });
 

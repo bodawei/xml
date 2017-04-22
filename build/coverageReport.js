@@ -75,15 +75,15 @@ function calculateTotals(coverageFileName, filesToSkip) {
 
 function extractBrowserAndOsNames(browerId) {
    const browserAndOs = BROWSER_VERSION_OS_VERSION_SEPARATION_REGEXP.exec(browerId);
-      const browserMatch = BROWSER_NAME_AND_VERSION_REGEXP.exec(browserAndOs[1]);
-      const osMatch = OS_NAME_AND_VERSON_REGEXP.exec(browserAndOs[2]);
+   const browserMatch = BROWSER_NAME_AND_VERSION_REGEXP.exec(browserAndOs[1]);
+   const osMatch = OS_NAME_AND_VERSON_REGEXP.exec(browserAndOs[2]);
 
    return {
       browserName: browserMatch[1],
       browserVersion: browserMatch[2],
       osName: osMatch[1],
       osVersion: osMatch[2]
-   }
+   };
 }
 
 function calculatePercentage(info) {
@@ -116,7 +116,7 @@ function buildTable(results, columns) {
       columns.forEach((colDesc) => {
          const value = entry[colDesc.name].toString() + (colDesc.units || '');
          widths[colDesc.name] = Math.max(widths[colDesc.name] || 0, value.length);
-      })
+      });
       return widths;
    }, {});
 
@@ -126,23 +126,22 @@ function buildTable(results, columns) {
    columns.forEach((colDesc) => {
       top.push(padValue('', totalWidths[colDesc.name], '─'));
       bottom.push(padValue('', totalWidths[colDesc.name], '─'));
-   })
+   });
 
    const rows = results.map((entry) => {
       const rowValue = [];
       columns.forEach((colDesc) => {
          const value = entry[colDesc.name].toString() + (colDesc.units || '');
          rowValue.push(padValue(value, totalWidths[colDesc.name], ' '));
-      })
+      });
       return rowValue;
    });
 
    let table = '┌─' + top.join('─┬─') + '─┐\n';
    rows.forEach((row) => {
-      table += '│ ' + row.join(' │ ') + ' │\n'
+      table += '│ ' + row.join(' │ ') + ' │\n';
    });
    table += '└─' + bottom.join('─┴─') + '─┘\n';
-
 
    return table;
 }
@@ -196,7 +195,7 @@ function makeReport(grunt, options) {
 
    results.sort(byBrowserName);
 
-   const table = buildTable(results, [{
+   const table = buildTable(results, [ {
       name: 'percentage',
       units: '%'
    }, {
@@ -207,7 +206,7 @@ function makeReport(grunt, options) {
       name: 'osName'
    }, {
       name: 'osVersion'
-   }]);
+   } ]);
 
    if (options.summaryFile) {
       fs.writeFileSync(options.summaryFile, table, 'UTF-8');

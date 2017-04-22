@@ -78,15 +78,7 @@ function toEqualChunkText() {
          if (!actualChunk) {
             throw new Error(`Chunk with text "${expectedText}" is undefined, but should not be.`);
          } else {
-            const expected = {
-               text: expectedText,
-               originalText: expectedText
-            };
-
-            if (typeof expectedText === 'object') {
-               expected.text = expectedText.text;
-               expected.originalText = expectedText.originalText;
-            }
+            const expected = toChunkTextObj(expectedText);
 
             if (actualChunk.text !== expected.text) {
                pass = false;
@@ -113,55 +105,87 @@ function toEqualChunkText() {
    };
 }
 
-//function toEqualChunkTexts() {
-//   return {
-//      compare: (actualArray, expectedTexts) => {
-//         let pass = true;
-//         let message = '';
-//         let mismatchIndex;
-//
-//         if (!actualArray || Array.isArray(actualArray)) {
-//            throw new Error('Expected array of chunks, but got undefined or a non-array.');
-//         }
-//
-//         const maxSearch = Math.min(actualArray.length, expectedTexts.length);
-//         for (let index = 0; index < maxSearch; index++) {
-//            if (actualArray[index].text !== expectedTexts[index]) {
-//               mismatchIndex = index;
-//               break;
-//            }
-//         }
-//
-//         if (actualArray.length !== expectedTexts.length) {
-//            pass = false;
-//            message = `Expected ${expectedTexts.length} chunks, but got ${actualArray.length}.\n`;
-//            message += `\tActual: ${actualArray.join(', ')}\n`;
-//            message += `\tExpected: ${expectedTexts.map((item) => item.text).join(', ')}\n`;
-//         } else {
-//            pass = mismatchIndex === undefined;
-//
-//            if (pass) {
-//               message = `Expected one or more object types to not match: ${expectedTexts.join()}.`;
-//            } else {
-//               message = `The text of chunk ${mismatchIndex} (${actualArray[mismatchIndex].text})`;
-//               message += ` did not match ${expectedTexts[mismatchIndex]}.`;
-//            }
-//         }
-//
-//         return {
-//            pass,
-//            message
-//         };
-//      }
-//   };
-//}
+function toEqualChunkTexts() {
+   return {
+      compare: (actualArray, expectedTexts) => {
+         let pass = true;
+         let message = '';
+         let mismatchIndex;
+
+         if (!actualArray || !Array.isArray(actualArray)) {
+            throw new Error('Expected array of strings or text/original texts, but got undefined or a non-array.');
+         }
+
+         // Frequently, we're going to want to just pass back the result of spy.calls.allArgs(), so just strip
+         // off the inner array
+         if (Array.isArray(actualArray[0])) {
+            actualArray = actualArray.map((item) => { return item[0] });
+         }
+
+         const expected = expectedTexts.map(toChunkTextObj);
+
+         const maxSearch = Math.min(actualArray.length, expected.length);
+         for (let index = 0; index < maxSearch; index++) {
+            if (actualArray[index].text !== expected[index].text ||
+               actualArray[index].originalText !== expected[index].originalText) {
+               mismatchIndex = index;
+               break;
+            }
+         }
+
+         if (actualArray.length !== expected.length) {
+            pass = false;
+            message = `Expected ${expected.length} chunks, but got ${actualArray.length}.\n`;
+            message += `\tExpected: ${displayChunkTexts(expected)}\n`;
+            message += `\tActual:   ${displayChunkTexts(actualArray)}\n`;
+         } else {
+            pass = mismatchIndex === undefined;
+
+            if (pass) {
+               message = `Expected one or more chunk texts to not match: ${displayChunkTexts(expected)}.`;
+            } else {
+               message = `The text of chunk ${mismatchIndex} ${displayChunkTexts([ actualArray[mismatchIndex] ])}`;
+               message += ` did not match ${displayChunkTexts([ expected[mismatchIndex] ])}.`;
+            }
+         }
+
+         return {
+            pass,
+            message
+         };
+      }
+   };
+}
+function displayChunkTexts(objects) {
+   return objects.map((obj) => {
+      if (obj.text !== obj.originalText) {
+         return `"${obj.text}"/"${obj.originalText}"`;
+      } else {
+         return `"${obj.text}"`;
+      }
+   }).join(', ');
+}
+
+function toChunkTextObj(expectedText) {
+   let expected = expectedText;
+
+   if (typeof expectedText === 'string') {
+      expected = {
+         text: expectedText,
+         originalText: expectedText
+      };
+   }
+
+   return expected;
+}
 
 beforeEach(() => {
 
    jasmine.addMatchers({
       toBeSyntaxError,
       toMatchClasses,
-      toEqualChunkText
+      toEqualChunkText,
+      toEqualChunkTexts
    });
 
 });
@@ -169,5 +193,6 @@ beforeEach(() => {
 module.exports = {
    toBeSyntaxError,
    toMatchClasses,
-   toEqualChunkText
+   toEqualChunkText,
+   toEqualChunkTexts
 };
