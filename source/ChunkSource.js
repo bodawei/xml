@@ -139,10 +139,10 @@ class ChunkSource {
 
       const spaceTerminators = this._version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
 
-      this._extractors.push({
-         chunker: new ToTerminatorOperation(this._info, spaceTerminators, terminators, this._segments, this._finished),
-         callback: deliverChunk
-      });
+      const state = new State(extractToTerminator, deliverChunk, this._version);
+      state.spaceTerminators = spaceTerminators;
+      state.terminators = terminators;
+      this._extractors.push(state);
 
       this._resumeOperation();
    }
@@ -153,10 +153,10 @@ class ChunkSource {
             'Must pass a callback function of the form function(chunk|undefined):void to getToTerminator().');
       }
 
-      this._extractors.push({
-         chunker: new ToTerminatorOperation(this._info, [], terminators, this._segments, this._finished),
-         callback: deliverChunk
-      });
+      const state = new State(extractToTerminator, deliverChunk, this._version);
+      state.spaceTerminators = [];
+      state.terminators = terminators;
+      this._extractors.push(state);
 
       this._resumeOperation();
    }
@@ -186,13 +186,8 @@ class ChunkSource {
    }
 
    _resumeOperation() {
-      while (this._extractors.length === 0) {
-         return;
-      }
-
-      const currentChunker = this._extractors[0];
-
-      while (this._segments.length !== 0) {
+      while (this._segments.length !== 0 && this._extractors.length > 0) {
+         const currentChunker = this._extractors[0];
          let nextSegment = this._segments[0];
 
          while (nextSegment.atEnd()) {
@@ -220,6 +215,9 @@ class ChunkSource {
             }
          }
 
+         currentChunker.returnSegments = (segmentArray) => {
+            this._segments = segmentArray.concat(this._segments);
+         };
          const result = currentChunker.extractor(nextSegment, currentChunker, this._segments);
          if (result) {
             let chunk;
@@ -244,7 +242,6 @@ class ChunkSource {
             currentChunker.callback(chunk);
             this._extractors.shift();
             this._peekedSegments = []; // ick
-            return;
          }
       }
    }
@@ -379,74 +376,75 @@ function extractChar(segment, state) {
    return state;
 }
 
-class ToTerminatorOperation extends GeneralOperation {
-   constructor(info, spaceTerminators, terminators, segmentSource, onDone) {
-      super(segmentSource, onDone);
+const regexMemo = {};
 
-      this._info = info;
-      this._originalStrings = [];
-      this._spaceTerminators = spaceTerminators;
-      this._terminators = terminators;
-      this._regexMemo = {}; // ####
+function extractToTerminator(segment, state) {
+   if (state._subOp) {
+      const subResult = state._subOp.extractor(segment, state._subOp);
+      if (!subResult) {
+         return;
+      } else {
+         if (subResult.matches.length > 0) {
+            return state;
+         }
+      }
    }
 
-   scan() {
-      const self = this;
-      if (this._subOp) {
-         this._subOp.scan();
-         return;
-      }
-      const LINE_ENDING_REGEX = this._info.isVersion1dot0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
-      const terminatorCharsArray = this._spaceTerminators.concat(this._terminators.map((term) => (term[0])));
-      const terminatorChars = terminatorCharsArray.join('');
-      let terminatorRegex = this._regexMemo[terminatorChars];
+   const LINE_ENDING_REGEX = state.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+   const terminatorCharsArray = state.spaceTerminators.concat(state.terminators.map((term) => (term[0])));
+   const terminatorChars = terminatorCharsArray.join('');
+   let terminatorRegex = regexMemo[terminatorChars];
 
-      if (!terminatorRegex) {
-         const regexString = '[^' + terminatorChars + ']*';
-         terminatorRegex = new RegExp(regexString, 'g');
-         this._regexMemo[terminatorChars] = terminatorRegex;
-      }
+   if (!terminatorRegex) {
+      const regexString = '[^' + terminatorChars + ']*';
+      terminatorRegex = new RegExp(regexString, 'g');
+      regexMemo[terminatorChars] = terminatorRegex;
+   }
 
-      while (this._segmentSource.length > 0) {
-         const segment = this._getCurrentSegment();
+   terminatorRegex.lastIndex = segment.index;
+   const result = terminatorRegex.exec(segment.text);
 
-         while (!segment.atEnd()) {
-            terminatorRegex.lastIndex = segment.index;
-            const result = terminatorRegex.exec(segment.text);
+   if (result[0].length > 0) {
+      state.matches.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+      state.originals.push(result[0]);
 
-            if (result[0].length > 0) {
-               this._matchStrings.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
-               this._originalStrings.push(result[0]);
+      segment.index += result[0].length;
+
+      if (!segment.atEnd()) {
+         const spaceTerminatorChars = state.version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
+            SPACE_TERMINATOR_CHARS_11;
+
+         let terminatorArray = this.terminators;
+         if (state.spaceTerminators.length > 0) {
+            terminatorArray = spaceTerminatorChars.concat(this.terminators);  // ick
+         }
+         const subState = new State(searchMultipleMatch, () => {}, state.version);
+         subState.returnSegments = state.returnSegments;
+         subState.candidates = terminatorArray;
+
+         state._subOp = subState;
+         const firstSub = state._subOp.extractor(segment, subState);
+         if (firstSub) {
+            state._subOp = undefined;
+            if (firstSub.matches.length > 0) {
+               return state;
+            } else {
+               state.matches.push(segment.text[segment.index]);
+               state.originals.push(segment.text[segment.index]);
+               segment.index ++;
+               return;
             }
-
-            segment.index += result[0].length;
-
-            const spaceTerminatorChars = this._info.isVersion1dot0 ? SPACE_TERMINATOR_CHARS_10 :
-               SPACE_TERMINATOR_CHARS_11;
-
-            const terminatorArray = spaceTerminatorChars.concat(this._terminators);  // ick
-            this._segmentSource.unshift(segment);
-
-            this._subOp = new MatchOperation(terminatorArray, false, this._segmentSource, (result) => {
-               delete self._subOp;
-               if (result) {
-                  self._deliverChunk(this._extractChunk());
-               } else {
-                  self._matchStrings.push(segment.text[segment.index]);
-                  self._originalStrings.push(segment.text[segment.index]);
-                  segment.index ++;
-                  self.scan();
-               }
-            });
-            this._subOp.scan();
-            return;
-         }
-
-         if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
-            this._deliverChunk(this._extractChunk());
-            return;
          }
       }
+   } else {
+      // const restOfSegment = segment.text.substring(segment.index);
+      // segment.index = segment.text.length;
+      // state.matches.push(restOfSegment.replace(LINE_ENDING_REGEX, '\n'));
+      // state.originals.push(restOfSegment);
+   }
+
+   if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
+      return state;
    }
 }
 
@@ -483,6 +481,69 @@ function extractMatch(segment, state) {
 
       return state;
    }
+}
+
+
+// This is peek
+function searchMultipleMatch(segment, state) {
+   state.seenSegments = state.seenSegments || [];
+   state.candidateIndex = state.candidateIndex || 0;
+   if (state.seenSegments.length === 0) {
+      state.startIndex = state.startIndex = segment.index;
+      state.startSegment = segment
+   }
+
+   if (state.seenSegments.indexOf(segment) === -1) {
+      state.seenSegments.push(segment);
+   }
+
+   if (!state.subState) {
+      state.subState = new State(extractMatch, () => {}, state.version);
+      state.subState.candidate = state.candidates[state.candidateIndex];
+   }
+
+   let result;
+   let candidatesUnmatched = state.candidates.length;
+
+   state.candidateIndex = 0;
+   while (state.candidateIndex < state.candidates.length) {
+
+      for (let index = 0; index < state.seenSegments.length; index++) {
+         result = state.subState.extractor(state.seenSegments[index], state.subState);
+
+         if (result) {
+            if (result.matches.length !== 0) {
+               state.matches = state.subState.matches;
+               state.originals = state.subState.originals;
+               state.seenSegments.forEach((segment) => segment.index = 0);
+               state.startSegment.index = state.startIndex;
+               state.returnSegments(state.seenSegments);
+               return state;
+            } else {
+               state.subState.matches = [];
+               state.subState.originals = [];
+               candidatesUnmatched --;
+               break;
+            }
+         }
+      }
+
+      state.candidateIndex ++;
+      state.subState.candidate = state.candidates[state.candidateIndex];
+      state.seenSegments.forEach((segment) => segment.index = 0);
+      state.startSegment.index = state.startIndex;
+   }
+
+   state.candidateIndex = 0;
+   state.subState.candidate = state.candidates[state.candidateIndex];
+   if (candidatesUnmatched > 0) {
+      return;
+   } else {
+      state.returnSegments(state.seenSegments);
+      return state;
+   }
+
+   return;
 }
 
 module.exports = ChunkSource;

@@ -7,12 +7,16 @@ BLOG IDEAS?
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 √ S: 209 validation errors
 	√ - Split the validateCharRef and EntitiyReference validations into context check and parsed validation
 	√ - pull parsed validation into a 'XmlReference' object
 	√ - call from value stream and be sure to push into pendingChunks
 	√ - write a test for each of the 3 cases to make sure it validates OK
+
+-- 48min
+
+
+S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
 M: 203 getTerminator, getMatch, getClose, getMarkup
 	- Basic behavior

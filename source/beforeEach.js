@@ -76,7 +76,7 @@ function toEqualChunkText() {
          let message = '';
 
          if (!actualChunk) {
-            throw new Error('Chunk is undefined, but should not be.');
+            throw new Error(`Chunk with text "${expectedText}" is undefined, but should not be.`);
          } else {
             const expected = {
                text: expectedText,

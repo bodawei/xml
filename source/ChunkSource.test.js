@@ -9,7 +9,7 @@ const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const ChunkSource = require('./ChunkSource.js');
 
-xdescribe('ChunkSource', () => {
+describe('ChunkSource', () => {
    let pluckedSpy;
    let source;
    let defaultLoc;
@@ -1273,7 +1273,7 @@ xdescribe('ChunkSource', () => {
 
       describe('interacting calls', () => {
 
-         xit('calls back with value after a getWord() call', () => {
+         it('calls back with value after a getWord() call', () => {
             source.addSegment('georgeMichael', false);
 
             source.getWord([ 'M' ], pluckedSpy);

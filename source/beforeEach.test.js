@@ -149,7 +149,7 @@ describe('toEqualChunkText()', () => {
          try {
             toEqualChunkText().compare(undefined, 'foo');
          } catch(e) {
-            expect(e.message).toEqual('Chunk is undefined, but should not be.');
+            expect(e.message).toEqual('Chunk with text "foo" is undefined, but should not be.');
          }
       });
 
