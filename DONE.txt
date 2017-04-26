@@ -37,6 +37,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/9  Sprint 35:  87sp [7XL 2L 3M 0S]. Avg: 5/sprint = 18 sprints. ACTUAL: 5
  4/13 Sprint 36: 125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 5
  4/16 Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 2
+ 4/21 Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 4
 
 =============================================
 BLOG IDEAS
@@ -2215,3 +2216,98 @@ Most disturbingly, ChunkSource is evolving towards being something that could tu
 Sprint 38
 =========
 Going in, the logic around how to deal with terminator deferring to another caller (and potentially getchar doing the same) feels a bit weird.  But, rather than getting it all mapped out, because I think it depends on how _resumeOperation comes along, I'm willing to leave it undefined.  I can't tell if I'm being lazy (I should think about that more) or I want to let that evolve with dealing with the getClose and getMarkup.
+
+√ S: 209 validation errors
+	√ - Split the validateCharRef and EntitiyReference validations into context check and parsed validation
+	√ - pull parsed validation into a 'XmlReference' object
+	√ - call from value stream and be sure to push into pendingChunks
+	√ - write a test for each of the 3 cases to make sure it validates OK
+
+-- 48min
+
+
+S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
+
+M: 203 getTerminator, getMatch, getClose, getMarkup
+	- Basic behavior
+		- close and markup require doing a series of matches, so need to peek unless they have a success.
+		- peek belongs in _resumeOperation()
+		- it also needs to deal with an array of things to search for.
+		- code should be cleaned up
+	- ToTerminatorOperation
+		turn into a function
+		think about state
+		Best if it returned a request to prefix on a search which calls back into here
+			-- state contains: runOtherFirst
+			-- This is ugly, and this depends on how _resumeOperation works.  This almost seems like that should be part of this function machinery.
+			-- state might have/BE the head of the array.  This can talk to the head and say: I relinquish myself to another
+				- this might ALWAYS be the case.  The state IS the stream, which each thing gets a hold of.  Rather than returning true or false, they can call the state and say: I'm done. and it will manage that. 
+	- general cleanup:
+		functions should only be getting a subset of state.  This should be well defined
+			matches
+			originals
+			foundCR
+			candidateIndex <-- less needed if the state keeps the candidate matches so far.
+			candidate
+			terminatorCandidates
+			<actualTerminator>
+		we could do a reduce thing where they have to return a new value.
+			If so, this must have a flag
+			Otherwise, could return true/false/undefined and consider the value in the return value.
+		We could just have a single routine: extract(opName, callback, options(term or matchstring)) that returns a tuple
+			
+	- get terminator and match already done
+		- this is good cleanup time actually
+		TERMINATOR TEST
+			- 7 above
+			- terminator N segments ahead
+			- terminator at end of N segmetns
+	get close:
+		can peek if next is ]
+		Can call with ]]> then ]
+		return result
+		TEST: 7 above plus incomplete match at total end
+		TEST: 7 above plus incomplete match at partial end
+		TEST: 7 above plus Span 2 segments
+		TEST: 7 above plus Span N segments
+
+	getMarkup
+		could try to optimize for first char. Even to the point of calling peekChar, 
+		<!--, <? <! </ <, &,    and eventually %
+		TEST: Span multiple segments
+		TEST: just <!- and <foo and <!----
+Extra
+	Do performance test of promises versus callbacks.  Consider shifting all to promises
+	newlines in getTerminator
+	review tests and test cases
+
+Segment tests:
+	when no data yet (does nothing)
+	with empty input
+	Get At Current Position or from current position
+		when data arrives later (1 seg)
+		when data arrives later (N seg)
+		at start of a seg
+		from middle of seg with no end (yet)
+		from middle of seg to end of thisseg
+		from middle of seg end at first of next seg
+		from middle of seg end at middle of next seg
+		at end of seg (must wait)
+		at end of seg (end at first of next)
+		at end of seg (end in middle of next)
+		cross multiple segments
+		to end with no change
+	from current position match (match, close, markup)
+		match spans
+	from current position to change (string, digits, word, char)
+	from current position to terminator (word, toterminator)
+		terminator crosses
+		terminator at end
+		terminator at start
+		no clear terminator at eof
+
+Notes38
+-------
+I spent most of yesterday (saturday april 22) working on this.  203 went OK< in that I got things working, and what is there is OK.  But, it feels too rough to me, and I'm disappointed by that.  I still think there's one more generation of iteration to do on this.  And it is an interesting thing.
+Cleanup was good, in that I got a new test routine in there which is an improvement.
+Build was so-so. I got the table extracted which is good.  And basically I think the code there is done for the coverage report.  But somehow it also felt dirty to me a bit.

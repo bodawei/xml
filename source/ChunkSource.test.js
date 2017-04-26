@@ -5,6 +5,7 @@
 
 /* eslint-env jasmine */
 
+const Buffer = require('buffer').Buffer;
 const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
 const ChunkSource = require('./ChunkSource.js');
@@ -76,7 +77,7 @@ describe('ChunkSource', () => {
          });
 
          it('calls back with false if there is no space as the next character', () => {
-            source.addSegment('foo', false);
+            source.addSegment('foo', true);
 
             source.peekIsSpace(pluckedSpy);
 
@@ -132,7 +133,7 @@ describe('ChunkSource', () => {
 
          it('returns true if the next character is a carriage return', () => {
             source.addSegment('\r', false);
-            source.addSegment('x', false);
+            source.addSegment('x', true);
 
             source.peekIsSpace(pluckedSpy);
 
@@ -142,7 +143,7 @@ describe('ChunkSource', () => {
 
          it('returns true if the next character is a carriage return/newline', () => {
             source.addSegment('\r', false);
-            source.addSegment('\nx', false);
+            source.addSegment('\nx', true);
 
             source.peekIsSpace(pluckedSpy);
 
@@ -155,7 +156,7 @@ describe('ChunkSource', () => {
       describe('terminators', () => {
 
          it('returns true if a space is the next character', () => {
-            source.addSegment(' a', false);
+            source.addSegment(' a', true);
 
             source.peekIsSpace(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -166,7 +167,7 @@ describe('ChunkSource', () => {
          });
 
          it('returns true if a tab is the next character', () => {
-            source.addSegment('\ta', false);
+            source.addSegment('\ta', true);
 
             source.peekIsSpace(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -177,7 +178,7 @@ describe('ChunkSource', () => {
          });
 
          it('returns true if a carriage return is the next character', () => {
-            source.addSegment('\ra', false);
+            source.addSegment('\ra', true);
 
             source.peekIsSpace(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -188,7 +189,7 @@ describe('ChunkSource', () => {
          });
 
          it('returns true if a newline is the next character', () => {
-            source.addSegment('\na', false);
+            source.addSegment('\na', true);
 
             source.peekIsSpace(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -199,7 +200,7 @@ describe('ChunkSource', () => {
          });
 
          it('returns false if a \\u2028 is the next character in v. 1.0', () => {
-            source.addSegment('\na', false);
+            source.addSegment('\na', true);
 
             source.peekIsSpace(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -211,7 +212,7 @@ describe('ChunkSource', () => {
 
          it('returns true if a \\u2028 is the next character in v. 1.1', () => {
             source = new ChunkSource(entityMetaData1dot1);
-            source.addSegment('\u2028', false);
+            source.addSegment('\u2028', true);
 
             source.peekIsSpace(pluckedSpy);
 
@@ -292,7 +293,7 @@ describe('ChunkSource', () => {
 
          it('returns a newline if a carriage return is next', () => {
             source.addSegment('\r', false);
-            source.addSegment('x', false);
+            source.addSegment('x', true);
 
             source.peekChar(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -303,7 +304,7 @@ describe('ChunkSource', () => {
 
          it('returns a newline if the next is a carriage return/newline', () => {
             source.addSegment('\r', false);
-            source.addSegment('\nx', false);
+            source.addSegment('\nx', true);
 
             source.peekChar(pluckedSpy);
             source.getChar(pluckedSpy);
@@ -1760,6 +1761,182 @@ describe('ChunkSource', () => {
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']]>');
          });
 
+      });
+
+   });
+
+   describe('encoding', () => {
+
+      it('sets the encoding using the options (whitebox)', () => {
+         source = new ChunkSource(entityMetaData1dot0, { encoding: 'utf8' });
+
+         expect(source._encoding).toEqual('utf8');
+      });
+
+      it('sets no encoding if no option passed (whitebox)', () => {
+         source = new ChunkSource(entityMetaData1dot0);
+
+         expect(source._encoding).toBeUndefined();
+      });
+
+      it('makes no opinion on a string with no XML or Text Declaration', () => {
+         source.addSegment('no declaration');
+
+         expect(source._encoding).toBeUndefined();
+      });
+
+      describe('from file start', () => {
+
+         describe('in strings', () => {
+
+            it('identifies a non-encoded string as non-encoded', () => {
+               source.addSegment('<?xml version="1.0"?>');
+
+               expect(source._encoding).toBeUndefined();
+            });
+
+            it('identifies a EBCDIC encoding', () => {
+               source.addSegment('\u004C\u006F\u00A7\u0094');
+
+               expect(source._encoding).toBe('EBCDIC');
+            });
+
+            it('identifies a UCS-4 big endian encoding', () => {
+               source.addSegment('\u0000\u0000\u0000\u003C');
+
+               expect(source._encoding).toBe('UCS-4BE');
+            });
+
+            it('identifies a UCS-4 little endian encoding', () => {
+               source.addSegment('\u003C\u0000\u0000\u0000');
+
+               expect(source._encoding).toEqual('UCS-4LE');
+            });
+
+            it('identifies a UCS-4 unusual1 order encoding', () => {
+               source.addSegment('\u0000\u0000\u003C\u0000');
+
+               expect(source._encoding).toEqual('UCS-4UNUSUAL1');
+            });
+
+            it('identifies a UCS-4 unusual2 order encoding', () => {
+               source.addSegment('\u0000\u003C\u0000\u0000');
+
+               expect(source._encoding).toBe('UCS-4UNUSUAL2');
+            });
+
+            it('identifies a UTF-16 big endian encoding', () => {
+               source.addSegment('\u0000\u003C\u0000\u003F');
+
+               expect(source._encoding).toBe('UTF-16BE');
+            });
+
+            it('identifies a UTF-16 little endian encoding', () => {
+               source.addSegment('\u003C\u0000\u003F\u0000');
+
+               expect(source._encoding).toBe('UTF-16LE');
+            });
+
+            it('identifies a UCS-4 big endian with BOM encoding', () => {
+               source.addSegment('\u0000\u0000\u00FE\u00FF');
+
+               expect(source._encoding).toBe('UCS-4BE/BOM');
+            });
+
+            it('identifies a UCS-4 little endian with BOM encoding', () => {
+               source.addSegment('\u00FF\u00FE\u0000\u0000');
+
+               expect(source._encoding).toBe('UCS-4LE/BOM');
+            });
+
+            it('identifies a UCS-4 unusal1 with BOM encoding', () => {
+               source.addSegment('\u0000\u0000\u00FF\u00FE');
+
+               expect(source._encoding).toBe('UCS-4UNUSUAL1/BOM');
+            });
+
+            it('identifies a UCS-4 unusal2 with BOM encoding', () => {
+               source.addSegment('\u00FE\u00FF\u0000\u0000');
+
+               expect(source._encoding).toBe('UCS-4UNUSUAL2/BOM');
+            });
+
+            it('identifies a UTF-16BE with BOM encoding', () => {
+               source.addSegment('\u00FE\u00FF\u0001\u0000');
+
+               expect(source._encoding).toBe('UTF-16BE/BOM');
+            });
+
+            it('identifies a UTF-16LE with BOM encoding', () => {
+               source.addSegment('\u00FF\u00FE\u0000\u0001');
+
+               expect(source._encoding).toBe('UTF-16LE/BOM');
+            });
+
+            it('identifies a UTF-8 with BOM encoding', () => {
+               source.addSegment('\u00EF\u00BB\u00BFA');
+
+               expect(source._encoding).toBe('UTF-8/BOM');
+            });
+
+         });
+
+         describe('in buffer', () => {
+
+            it('identifies a non-encoded string as non-encoded', () => {
+               // '<?xml version="1.0"?>'
+               source.addSegment(new Buffer([ 60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34,
+                  49, 46, 48, 34, 63, 62 ]));
+
+               expect(source._encoding).toBeUndefined();
+            });
+
+            it('identifies a EBCDIC encoding', () => {
+               source.addSegment(new Buffer([ 0x4C, 0x6F, 0xA7, 0x94 ]));
+
+               expect(source._encoding).toBe('EBCDIC');
+            });
+
+         });
+
+      });
+
+      describe('from declaration', () => {
+
+         it('identifies the name mentioned in the encoding clause', () => {
+            source.addSegment('<?xml version="1.0" encoding="frooz" ?>');
+
+            expect(source._encoding).toEqual('frooz');
+         });
+
+         it('identifies the name mentioned in the encoding clause in single quotes', () => {
+            source.addSegment('<?xml version="1.0" encoding=\'single-quotes\' ?>');
+
+            expect(source._encoding).toEqual('single-quotes');
+         });
+
+         it('identifies the name mentioned in the encoding clause even when formatted badly', () => {
+            source.addSegment('<?xml version="1.0" ENCODING = "three" ?>');
+
+            expect(source._encoding).toEqual('three');
+         });
+
+         it('identifies the type name across multiple segments', () => {
+            source.addSegment('<?xml version="1.0" encodin');
+            source.addSegment('g="fo');
+            source.addSegment('ur" ?>');
+
+            expect(source._encoding).toEqual('four');
+         });
+
+         it('identifies the type name across multiple buffer segments', () => {
+            // <?xml version="1.0" encoding="five" ?>
+            source.addSegment(new Buffer([ 60, 63, 120, 109, 108, 32, 118, 101, 114, 115, 105, 111, 110, 61, 34, 49 ]));
+            source.addSegment(new Buffer([ 46, 48, 34, 32, 69, 78, 67, 79, 68, 73, 78, 71, 32, 61, 32, 34, 102 ]));
+            source.addSegment(new Buffer([ 105, 118, 101, 34, 32, 63, 62 ]));
+
+            expect(source._encoding).toEqual('five');
+         });
       });
 
    });

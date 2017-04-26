@@ -15,6 +15,28 @@ const SPACE_TERMINATORS_11 = [ ' ', '\\t', '\\n', '\\r', '\u0085', '\u2028' ];
 const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
 const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
+const ENCODING_REGEXP = /<\?xml.*encoding[ ]*=[ ]*(?:"(.*)"|'(.*)').*?>/i;
+const VERSION_REGEXP = /<\?[xXmMlL].*[VvEeRrSsIiOoNn]=(".*"|'.*').*?>/;
+
+const ENCODING = {
+   UNENCODED: 'UNENCODED',
+   UTF8: 'UTF-8',
+   UTF8_BOM: 'UTF-8/BOM',
+   UTF16BE: 'UTF-16BE',
+   UTF16BE_BOM: 'UTF-16BE/BOM',
+   UTF16LE: 'UTF-16LE',
+   UTF16LE_BOM: 'UTF-16LE/BOM',
+   UCS4BE: 'UCS-4BE',
+   UCS4BE_BOM: 'UCS-4BE/BOM',
+   UCS4LE: 'UCS-4LE',
+   UCS4LE_BOM: 'UCS-4LE/BOM',
+   UCS4UNUSUAL1: 'UCS-4UNUSUAL1',
+   UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
+   UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
+   UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
+   EBCDIC: 'EBCDIC'
+};
+
 class Segment {
    constructor(text) {
       this.text = text;
@@ -35,12 +57,13 @@ function State(extractor, callback, version, peek) {
    this.matches = [];
    this.originals = [];
    this.version = version;
-   this.peek = peek;
 }
+
+const regexMemo = {};
 
 class ChunkSource {
 
-   constructor(info) {
+   constructor(info, options = {}) {
 //      if (!(info instanceof EntityMetaData)) {
 //         throw new Error('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
 //      }
@@ -48,9 +71,19 @@ class ChunkSource {
       this._info = info;
       this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
       this._segments = [];
-      this._peekedSegments = [];
       this._extractors = [];
-      this._regexMemo = {};
+      this._encoding = options.encoding;
+      this._returnSegments = this._returnSegments.bind(this);
+
+      if (!options.encoding) {
+         const peekState = new State(genericPeek, (result) => {
+            this._encoding = result;
+            this._decodeSegments();
+         });
+         peekState.subState = new State(extractEncoding, () => {});
+
+         this._addExtractor(peekState);
+      }
    }
 
    peekChar(deliverChunk) {
@@ -58,9 +91,10 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to peekChar().');
       }
 
-      this._extractors.push(new State(extractChar, deliverChunk, this._version, true));
+      const peekState = new State(genericPeek, deliverChunk);
+      peekState.subState = new State(extractChar, () => {}, this._version);
 
-      this._resumeOperation();
+      this._addExtractor(peekState);
    }
 
    peekIsSpace(deliverBoolean) {
@@ -76,9 +110,10 @@ class ChunkSource {
          SPACE_REGEX.lastIndex = 0;
          deliverBoolean(SPACE_REGEX.exec(chunkText) !== null);
       }
-      this._extractors.push(new State(extractChar, innerDeliver, this._version, true));
+      const peekState = new State(genericPeek, innerDeliver);
+      peekState.subState = new State(extractChar, () => {}, this._version);
 
-      this._resumeOperation();
+      this._addExtractor(peekState);
    }
 
    /**********************************************************************\
@@ -96,9 +131,7 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
       }
 
-      this._extractors.push(new State(extractDigits, deliverChunk, this._version));
-
-      this._resumeOperation();
+      this._addExtractor(new State(extractDigits, deliverChunk, this._version));
    }
 
    /**********************************************************************\
@@ -116,9 +149,7 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
       }
 
-      this._extractors.push(new State(extractSpace, deliverChunk, this._version));
-
-      this._resumeOperation();
+      this._addExtractor(new State(extractSpace, deliverChunk, this._version));
    }
 
    getChar(deliverChunk) {
@@ -126,9 +157,7 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getChar().');
       }
 
-      this._extractors.push(new State(extractChar, deliverChunk, this._version));
-
-      this._resumeOperation();
+      this._addExtractor(new State(extractChar, deliverChunk, this._version));
    }
 
    // could make terminators optional.
@@ -142,9 +171,7 @@ class ChunkSource {
       const state = new State(extractToTerminator, deliverChunk, this._version);
       state.spaceTerminators = spaceTerminators;
       state.terminators = terminators;
-      this._extractors.push(state);
-
-      this._resumeOperation();
+      this._addExtractor(state);
    }
 
    getToTerminator(terminators, deliverChunk) {
@@ -156,9 +183,7 @@ class ChunkSource {
       const state = new State(extractToTerminator, deliverChunk, this._version);
       state.spaceTerminators = [];
       state.terminators = terminators;
-      this._extractors.push(state);
-
-      this._resumeOperation();
+      this._addExtractor(state);
    }
 
    getMatch(matchString, deliverChunk) {
@@ -171,9 +196,7 @@ class ChunkSource {
 
       const state = new State(extractMatch, deliverChunk, this._version);
       state.candidate = matchString;
-      this._extractors.push(state);
-
-      this._resumeOperation();
+      this._addExtractor(state);
    }
 
    getMarkup(deliverChunk) {
@@ -183,10 +206,7 @@ class ChunkSource {
 
       const state = new State(searchMultipleMatch, deliverChunk, this._version);
       state.candidates = [ '<!--', '<?', '<!', '</', '&', '<' ];
-      state.peek = false;
-      this._extractors.push(state);
-
-      this._resumeOperation();
+      this._addExtractor(state);
    }
 
    getClose(deliverChunk) {
@@ -196,10 +216,7 @@ class ChunkSource {
 
       const state = new State(searchMultipleMatch, deliverChunk, this._version);
       state.candidates = [ ']]>', ']' ];
-      state.peek = false;
-      this._extractors.push(state);
-
-      this._resumeOperation();
+      this._addExtractor(state);
    }
 
    addSegment(text, last) {
@@ -211,9 +228,46 @@ class ChunkSource {
       this._resumeOperation();
    }
 
+   _decodeSegments() {
+      this._segments.forEach((segment) => this._decodeSegment(segment));
+   }
+
+   _decodeSegment(segment) {
+      switch (this._encoding) {
+         case ENCODING.UTF8:
+         case ENCODING.UTF8_BOM:
+            break;
+         case ENCODING.UTF16BE:
+         case ENCODING.UTF16BE_BOM:
+            break;
+         case ENCODING.UTF16LE:
+         case ENCODING.UTF16LE:
+            break;
+         default:
+            // error
+            break;
+      }
+      return segment;
+   }
+
+   _addExtractor(extractorState) {
+      this._extractors.push(extractorState);
+
+      this._resumeOperation();
+   }
+
+   _returnSegments(segmentArray) {
+      const isAtEnd = this._segments.allSegments;
+      if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
+         this._segments.shift();
+      }
+      this._segments = segmentArray.concat(this._segments);
+      this._segments.allSegments = isAtEnd;
+   }
+
    _resumeOperation() {
       while (this._segments.length !== 0 && this._extractors.length > 0) {
-         const currentChunker = this._extractors[0];
+         const extractorState = this._extractors[0];
          let nextSegment = this._segments[0];
 
          while (nextSegment.atEnd()) {
@@ -230,44 +284,20 @@ class ChunkSource {
             }
          }
 
-         if (currentChunker.peek) {
-            if (this._peekedSegments.length === 0) {
-               this._firstPeekedSegment = nextSegment;
-               this._firstPeekedIndex = nextSegment.index;
-            }
-            // Gotta be a better way of doing this.
-            if (this._peekedSegments.indexOf(nextSegment) === -1) {
-               this._peekedSegments.push(nextSegment);
-            }
-         }
+         extractorState.returnSegments = this._returnSegments;
 
-         currentChunker.returnSegments = (segmentArray) => {
-            this._segments = segmentArray.concat(this._segments);
-         };
-         const result = currentChunker.extractor(nextSegment, currentChunker, this._segments);
+         const result = extractorState.extractor(nextSegment, extractorState, this._segments);
          if (result) {
             let chunk;
-            if (currentChunker.matches.length !== 0) {
-               const text = currentChunker.matches.join('');
+            if (result.matches.length !== 0) {
+               const text = result.matches.join('');
                const originalText = text;
 
                chunk = new Chunk(text, originalText, nextSegment.startOffset, nextSegment.startOffset);
             }
 
-            if (this._peekedSegments.length > 0) {
-               while (this._peekedSegments.length > 0) {
-                  const segment = this._peekedSegments.pop();
-
-                  segment.index = 0;
-                  this._segments.unshift(segment);
-               }
-               this._firstPeekedSegment.index = this._firstPeekedIndex;
-               this._firstPeekedSegment = undefined;
-            }
-
-            currentChunker.callback(chunk);
+            extractorState.callback(chunk || result.result);   // eek
             this._extractors.shift();
-            this._peekedSegments = []; // ick
          }
       }
    }
@@ -362,8 +392,6 @@ function extractChar(segment, state) {
    return state;
 }
 
-const regexMemo = {};
-
 function extractToTerminator(segment, state) {
    if (state._subOp) {
       const subResult = state._subOp.extractor(segment, state._subOp);
@@ -409,13 +437,14 @@ function extractToTerminator(segment, state) {
          if (state.spaceTerminators.length > 0) {
             terminatorArray = spaceTerminatorChars.concat(this.terminators);  // ick
          }
-         const subState = new State(searchMultipleMatch, () => {}, state.version);
-         subState.returnSegments = state.returnSegments;
-         subState.candidates = terminatorArray;
-         subState.peek = true;
 
-         state._subOp = subState;
-         const firstSub = state._subOp.extractor(segment, subState);
+         const peekState = new State(genericPeek, () => {});
+         peekState.subState = new State(searchMultipleMatch, () => {}, state.version);
+         peekState.returnSegments = state.returnSegments;
+         peekState.subState.candidates = terminatorArray;
+
+         state._subOp = peekState;
+         const firstSub = state._subOp.extractor(segment, peekState);
          if (firstSub) {
             state._subOp = undefined;
             if (firstSub.matches.length > 0) {
@@ -505,11 +534,6 @@ function searchMultipleMatch(segment, state) {
             if (result.matches.length !== 0 && !couldBePartial) {
                state.matches = state.subState.matches;
                state.originals = state.subState.originals;
-               if (state.peek) {
-                  state.seenSegments.forEach((segment) => { segment.index = 0; });
-                  state.startSegment.index = state.startIndex;
-                  state.returnSegments(state.seenSegments);
-               }
                return state;
             } else {
                state.subState.matches = [];
@@ -533,12 +557,131 @@ function searchMultipleMatch(segment, state) {
       lastSegment.index = lastSegment.text.length;
       return;
    } else {
-      state.seenSegments.forEach((segment) => { segment.index = 0; });
-      state.startSegment.index = state.startIndex;
-      state.returnSegments(state.seenSegments);
       return state;
    }
 }
+
+// State must include subState with an extractor in it
+function genericPeek(segment, state) {
+   state.seenSegments = state.seenSegments || [];
+   state.startSegment = state.startSegment || segment;
+   state.startIndex = state.startIndex;
+
+   if (state.startIndex === undefined) {
+      state.startIndex = segment.index;
+   }
+
+   // Protect against possible duplicate.
+   if (state.seenSegments[state.seenSegments.length - 1] !== segment) {
+      state.seenSegments.push(segment);
+   }
+
+   const result = state.subState.extractor(segment, state.subState);
+
+   if (result) {
+      state.seenSegments.forEach((segment) => { segment.index = 0; });
+      state.startSegment.index = state.startIndex;
+      state.returnSegments(state.seenSegments);
+   }
+
+   return result;
+}
+
+function extractEncoding(segment, state) {
+   segment.index = segment.text.length;
+
+   state.data = state.data || '';
+
+   if (typeof segment.text[0] === 'number') {
+      const maxExtract = Math.min(segment.text.length, 100);
+      for (let index = 0; index < maxExtract; index++) {
+         state.data += String.fromCharCode(segment.text[index]);
+      }
+   } else {
+      state.data += segment.text.substr(0, 100);
+   }
+
+   const totalLength = state.data.length;
+
+   // If we haven't already done so, try to identify the encoding based on the first four bytes/characters
+   if (totalLength >= 4 && !state.examinedFirstFour) {
+      const firstFourCharBytes = state.data.substr(0, 4);
+      const encoding = identifyEncodingFromFirstFourCharBytes(firstFourCharBytes);
+
+      if (encoding) {
+         state.result = encoding;
+         return state;
+      }
+
+      // If we can't find an xml or text declaration start, we won't ever be able to say more
+      if (/\<\?xm/i.exec(firstFourCharBytes) === null) {
+         return state;
+      }
+
+      state.examinedFirstFour = true;
+   }
+
+   // If we get this far see if we can find the end of the declaration and extract an encoding
+   if (state.data.indexOf('?>') >= 0) {
+      state.result = getEncodingFromDeclaration(state.data);
+      return state;
+   }
+
+   // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
+   if (totalLength >= 100 || segment.isLast) {
+      return state;
+   }
+}
+
+function identifyEncodingFromFirstFourCharBytes(firstFour) {
+   switch (firstFour) {
+      case '\u004C\u006F\u00A7\u0094':
+         return ENCODING.EBCDIC;
+      case '\u0000\u003C\u0000\u003F':
+         return ENCODING.UTF16BE;
+      case '\u003C\u0000\u003F\u0000':
+         return ENCODING.UTF16LE;
+      case '\u0000\u0000\u0000\u003C':
+         return ENCODING.UCS4BE;
+      case '\u003C\u0000\u0000\u0000':
+         return ENCODING.UCS4LE;
+      case '\u0000\u0000\u003C\u0000':
+         return ENCODING.UCS4UNUSUAL1;
+      case '\u0000\u003C\u0000\u0000':
+         return ENCODING.UCS4UNUSUAL2;
+      case '\u0000\u0000\u00FE\u00FF':
+         return ENCODING.UCS4BE_BOM;
+      case '\u0000\u0000\u00FF\u00FE':
+         return ENCODING.UCS4UNUSUAL1_BOM;
+   }
+
+   if (firstFour[0] === '\u00FE' && firstFour[1] === '\u00FF') {
+      if (firstFour[2] !== '\u0000' || firstFour[3] !== '\u0000') {
+         return ENCODING.UTF16BE_BOM;
+      } else { // both second bytes are 0
+         return ENCODING.UCS4UNUSUAL2_BOM;
+      }
+   }
+
+   if (firstFour[0] === '\u00FF' && firstFour[1] === '\u00FE') {
+      if (firstFour[2] !== '\u0000' || firstFour[3] !== '\u0000') {
+         return ENCODING.UTF16LE_BOM;
+      } else {
+         return ENCODING.UCS4LE_BOM;
+      }
+   }
+
+   if (firstFour[0] === '\u00EF' && firstFour[1] === '\u00BB' && firstFour[2] === '\u00BF') {
+      return ENCODING.UTF8_BOM;
+   }
+}
+
+function getEncodingFromDeclaration(data) {
+   const result = ENCODING_REGEXP.exec(data) || [];
+
+   return result[1] || result[2];
+}
+
 
 module.exports = ChunkSource;
 

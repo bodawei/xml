@@ -1,107 +1,95 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/21  Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 
+ 4/23 Sprint 39:  114sp [7XL 2L 4M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-√ S: 209 validation errors
-	√ - Split the validateCharRef and EntitiyReference validations into context check and parsed validation
-	√ - pull parsed validation into a 'XmlReference' object
-	√ - call from value stream and be sure to push into pendingChunks
-	√ - write a test for each of the 3 cases to make sure it validates OK
+M: 207 Encodings
+This is encodings draft 2.
+The basic plan is this:
+1) TokenSource has an encoding option. When specified, it overrides everything. If it causes a barf, its on you. (and a version option)
+2) ChunkSource will examine the first bytes of the first segment. It can identify certain encodings.  If it can identify one with certainty, that will "win"
+3) It will look at the first segment(s) to find the xml or text declaration.  If present, it will extract the version (defaults to 1.0/5 if not found) and the encoding.  If no other encoding specified or discovered, this will be used.  If #2 identified an ambiguous encoding, and this does not contradict that, then this wins.
 
--- 48min
+0) (out of scope here) entity manager can have an encoding and version specified on a per entity basic (public? identifier).  Allowing you to override the default.
+a) ChunkSource accepts version: can be 1.0 or 1.1. Anything else is failure.
+b) ChunkSource accepts an encoding.
+c) ChunkSource has a peek extractor that will scan the bytes and identify  Only called if we haven't already been given an encoding.
+	UTF-16BE-LE/BOM's:
+	UTF-16BE-LE/no BOM: 
+	UTF-8 with the <? bit
+	UCS-4 variations
+	EBCDIC
+	Finding <?xm  puts us in the possibly-unencoded
+	If found, these are all decisive.  But, they may not be found.in which case we fall back to 'perhaps-unencoded'
+		We could possibly do other things to identify UTF-16 better
+d) Caller can make a call asking if there's a BOM on UTF-16.  This will return a simple value. Is async, and can be called first
+
+We can now do conversion, if the type is known.
+
+e) ChunkSource has a peek extractor that finds the <?xml ?> section in the first hundred bytes or so. and extracts version and encoding.  Doesn't call if have both an encoding and a version. Will ignore the value of either if have one of them.
+	If encoding contradicts what we already have, ignore it.
+	If encoding is a specialization (e.g. was perhaps-unencoded, but this is not one of ones we could be decisively identifying) then we use it.
+
+In any case, we have enough information for conversion at this point:
+- c might be a buffer or string
+	- string_decode seems nice, but doesn't even do the minimum character sets (e.g. UTF-16BE)
+	- https://github.com/bnoordhuis/node-iconv will do a bunch and stream. Throws error on bad. Can handle streaming
+	- https://github.com/ashtuchkin/iconv-lite claims better speed.  Silently corrupts if bad characters. not clear about streamed
+
+A: entity manager has a mapping of system literal (url) to encoding/version info. Will pass to chunksource
+B: ChunkSource accepts an encoding and version. Sets internally as determinedEncoding/Version
+C: If no encoding, calls (autonomous) routine with first 4+ bytes/chars: returns either a decisive value or "i dunno"  Sets decisive value or none.  This requires a peeking extractor to get this info.  Is set up at construction time
+D: If we have a decisive value at this point, convert the segments that exist, and each as it comes in.
+E: A peeking extractor will pull out the <? ... ?> string, unless we already have both decisive values. Extracts version and encoding using regex. If we can't find these (due to malformed) such is life. Document and move on.
+F: Hereafter we decode each.  We use a default decoder (probably iconv-lite), but you can provide aanother. This may be very async as that thing may return a stream (in fact, maybe it always should, even if there's no stream there)
+
+To write:
+- (later) mapper for entity manager
+√ 0 - accept params and set determined encodings in chunk source
+√ 0 - Write autonomous routine to sniff and return an encoding (can lift existing code)
+√ S - Write an autonomous routine that, given a string, extracts version and encoding and returns them
+M - Write a peeker that extracts the first 4 bytes/chars and calls the above routine and the
+	- callback updates the chunkSource
+	- callback converts any existing segments (or at least the start) if needed (stashing both old and new values in the segment)
+	- AddSegment will start converting so we can do the below
+√S - Write a peeker that extracts the first 100 chars or the whole thing, passes to above routine
+	- callback updates chunk source
+
+Need to actually make this work.
+Note big dilemma... many tests do not deliver a complete thing.  And so this never completes.   That's "OK". but what about the tests where they are deliberately not complete?  Can our sniffer notice no <? at all and just throw its hands up in disgust?
+We could reverse the check and accumulate text, but if we don't find <? immediately (or immediately after whitespace) then give up.
+
+- test out iconv-lite for spanning across segments in a stream
+	- probably need to build a stream to receive a segment that then spits out as much of the segment as we can, converted.
 
 
-S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
+√ - test for encoding value in declaration
+√- test with buffers
+- Actually decode!!!
+-- parameterize the decoding
+- do we need the BOM encodings?
+-- need to be able to report error if does not have UTF-16 and BOM
+- Rework the whole convoluted State thing
+	- make the returnSegments easier
+	- make creating a nested thing easier
+	- fix the result.result in _resumeOperation
+-- extract version?
+- Waht about wonky encodings like the UCS2 ones?
 
-M: 203 getTerminator, getMatch, getClose, getMarkup
-	- Basic behavior
-		- close and markup require doing a series of matches, so need to peek unless they have a success.
-		- peek belongs in _resumeOperation()
-		- it also needs to deal with an array of things to search for.
-		- code should be cleaned up
-	- ToTerminatorOperation
-		turn into a function
-		think about state
-		Best if it returned a request to prefix on a search which calls back into here
-			-- state contains: runOtherFirst
-			-- This is ugly, and this depends on how _resumeOperation works.  This almost seems like that should be part of this function machinery.
-			-- state might have/BE the head of the array.  This can talk to the head and say: I relinquish myself to another
-				- this might ALWAYS be the case.  The state IS the stream, which each thing gets a hold of.  Rather than returning true or false, they can call the state and say: I'm done. and it will manage that. 
-	- general cleanup:
-		functions should only be getting a subset of state.  This should be well defined
-			matches
-			originals
-			foundCR
-			candidateIndex <-- less needed if the state keeps the candidate matches so far.
-			candidate
-			terminatorCandidates
-			<actualTerminator>
-		we could do a reduce thing where they have to return a new value.
-			If so, this must have a flag
-			Otherwise, could return true/false/undefined and consider the value in the return value.
-		We could just have a single routine: extract(opName, callback, options(term or matchstring)) that returns a tuple
-			
-	- get terminator and match already done
-		- this is good cleanup time actually
-		TERMINATOR TEST
-			- 7 above
-			- terminator N segments ahead
-			- terminator at end of N segmetns
-	get close:
-		can peek if next is ]
-		Can call with ]]> then ]
-		return result
-		TEST: 7 above plus incomplete match at total end
-		TEST: 7 above plus incomplete match at partial end
-		TEST: 7 above plus Span 2 segments
-		TEST: 7 above plus Span N segments
-
-	getMarkup
-		could try to optimize for first char. Even to the point of calling peekChar, 
-		<!--, <? <! </ <, &,    and eventually %
-		TEST: Span multiple segments
-		TEST: just <!- and <foo and <!----
-Extra
-	Do performance test of promises versus callbacks.  Consider shifting all to promises
-	newlines in getTerminator
-	review tests and test cases
-
-Segment tests:
-	when no data yet (does nothing)
-	with empty input
-	Get At Current Position or from current position
-		when data arrives later (1 seg)
-		when data arrives later (N seg)
-		at start of a seg
-		from middle of seg with no end (yet)
-		from middle of seg to end of thisseg
-		from middle of seg end at first of next seg
-		from middle of seg end at middle of next seg
-		at end of seg (must wait)
-		at end of seg (end at first of next)
-		at end of seg (end in middle of next)
-		cross multiple segments
-		to end with no change
-	from current position match (match, close, markup)
-		match spans
-	from current position to change (string, digits, word, char)
-	from current position to terminator (word, toterminator)
-		terminator crosses
-		terminator at end
-		terminator at start
-		no clear terminator at eof
+We are only going to support the manditory encodings.  But folks can add others. And we may add others optionally.
 
 
 -- next: 215
 =============================================
 CLEANUP
 =======
-√ - Finish toEqualChunkTexts()
+newlines in getTerminator
+review tests and test cases
+Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
 - Look over ChunkSource tests... can we elegantize it at all?  e.g. we could iterate over the calls and produce an array to test with the above, thus removing the silly check on number of calls.
 - general things when cleaning up:
@@ -110,9 +98,7 @@ CLEANUP
 BUILD
 =====
 126: Enhancements to the reporting
-	- add line, branch etc to table
 	- give table a right align option
-	- give table a decimal align option
 	- do test report
 58:L Build infrastructure for running xmlconf tests.
 Breakings
@@ -148,6 +134,8 @@ TechDebt/Bus
 
 Cursor Revisions [1L 3M 8S]
 ---------
+S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
+
 L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	See 212, below
 	UEL's
@@ -157,9 +145,6 @@ L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	count lines and columns
 	Do more test matchers to check chunks better	
 
-M: 207 Encodings
-
-Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
 
 M： Variations/subtypes
 	- delivering content via stream
