@@ -36,7 +36,7 @@ module.exports = function karmaConfig(config) {
       browserify: {
          debug: true,
          watch: true,
-         configure: function(bundle) {
+         configure: (bundle) => {
             bundle.require('../node_modules/buffer/index.js', {expose: 'buffer' });
          },
          transform: [

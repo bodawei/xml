@@ -16,7 +16,6 @@ const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
 const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
 const ENCODING_REGEXP = /<\?xml.*encoding[ ]*=[ ]*(?:"(.*)"|'(.*)').*?>/i;
-const VERSION_REGEXP = /<\?[xXmMlL].*[VvEeRrSsIiOoNn]=(".*"|'.*').*?>/;
 
 const ENCODING = {
    UNENCODED: 'UNENCODED',
@@ -51,7 +50,7 @@ class Segment {
    }
 }
 
-function State(extractor, callback, version, peek) {
+function State(extractor, callback, version) {
    this.extractor = extractor;
    this.callback = callback;
    this.matches = [];
@@ -236,12 +235,19 @@ class ChunkSource {
       switch (this._encoding) {
          case ENCODING.UTF8:
          case ENCODING.UTF8_BOM:
+            // grab the 1 to N bytes.
+            // combine as you go
+            // if error...
             break;
          case ENCODING.UTF16BE:
          case ENCODING.UTF16BE_BOM:
+            // just grab every two bytes.  shift and add and make a char
+            // if in string, extract two bytes and do the same
             break;
          case ENCODING.UTF16LE:
-         case ENCODING.UTF16LE:
+         case ENCODING.UTF16LE_BOM:
+            // just grab every two bytes.  shift and add and make a char
+            // if in string, extract two bytes and do the same
             break;
          default:
             // error
@@ -681,7 +687,6 @@ function getEncodingFromDeclaration(data) {
 
    return result[1] || result[2];
 }
-
 
 module.exports = ChunkSource;
 

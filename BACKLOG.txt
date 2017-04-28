@@ -111,6 +111,7 @@ Breakings
 	156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
 	111: Get Vivaldi to work
 - get reporting of node tests
+Get edge with browserstack integrated into your test runs
 - coverage reporter should have a percent cutoff
 - Build build code to auto generate the other errors
 - write tests for derive locale
