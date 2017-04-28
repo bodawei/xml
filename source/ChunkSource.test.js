@@ -287,8 +287,7 @@ describe('ChunkSource', () => {
             source.peekChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            const chunks = pluckedSpy.calls.allArgs().map((arg) => arg[0]);
-            expect(chunks).toEqualChunkTexts([ 'x', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'x', 'x' ]);
          });
 
          it('returns a newline if a carriage return is next', () => {
@@ -298,8 +297,7 @@ describe('ChunkSource', () => {
             source.peekChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            const chunks = pluckedSpy.calls.allArgs().map((arg) => arg[0]);
-            expect(chunks).toEqualChunkTexts([ '\n', '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n' ]);
          });
 
          it('returns a newline if the next is a carriage return/newline', () => {
@@ -310,8 +308,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            const chunks = pluckedSpy.calls.allArgs().map((arg) => arg[0]);
-            expect(chunks).toEqualChunkTexts([ '\n', '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n', 'x' ]);
          });
 
       });
@@ -327,8 +324,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('x');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'x' ]);
          });
 
          it('calls back with undefined when no character at the offset', () => {
@@ -372,8 +368,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('abc', true);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('a');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'a' ]);
          });
 
          it('calls back with a char when in middle of segment', () => {
@@ -382,8 +377,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('m');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'm' ]);
          });
 
          it('calls back with a char at middle of segment', () => {
@@ -392,8 +386,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'n' ]);
          });
 
          it('calls back with a char at end of segment', () => {
@@ -413,8 +406,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('g');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'g' ]);
          });
 
          it('does not call back if there is just a carriage return at the end of a non-terminal segment', () => {
@@ -430,7 +422,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
 
          it('calls back with a single newline after finding a carriage return and newline across segments', () => {
@@ -441,9 +433,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('x');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
 
          it('calls back with a single newline after finding a carriage return and \\u0085 across segments', () => {
@@ -455,9 +445,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('x');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
 
          it('calls back with a newline after finding a CR at end of one segment and other char at next start', () => {
@@ -467,9 +455,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('x');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
 
       });
@@ -481,7 +467,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\t');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\t' ]);
          });
 
          it('calls back with a space', () => {
@@ -489,7 +475,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
 
          it('calls back with a newline', () => {
@@ -497,7 +483,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
 
          it('calls back with a \\u0085 in 1.0', () => {
@@ -505,7 +491,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\u0085');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\u0085' ]);
          });
 
          it('calls back with a \\u0085 as a newline in 1.1', () => {
@@ -514,7 +500,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
 
          it('calls back with a \\u2028 in 1.0', () => {
@@ -522,7 +508,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\u2028');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\u2028' ]);
          });
 
          it('calls back with a \\u2028 as a newlinein 1.1', () => {
@@ -531,7 +517,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
 
          it('calls back with a carriage return as a newline', () => {
@@ -539,7 +525,7 @@ describe('ChunkSource', () => {
 
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
 
          it('calls back with a carriage return/newline as a newline', () => {
@@ -556,8 +542,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('\u0085');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\u0085' ]);
          });
 
          it('calls back with a carriage return/\\u0085 as a newline in 1.1', () => {
@@ -567,8 +552,7 @@ describe('ChunkSource', () => {
             source.getChar(pluckedSpy);
             source.getChar(pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('x');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
 
          // more about line endings in the segment section, above
@@ -578,13 +562,6 @@ describe('ChunkSource', () => {
    });
 
    describe('getDigits', () => {
-      let pluckedSpy;
-      let source;
-
-      beforeEach(() => {
-         pluckedSpy = jasmine.createSpy('pluckedSpy');
-         source = new ChunkSource(entityMetaData1dot0);
-      });
 
       describe('basic behavior', () => {
 
@@ -593,8 +570,7 @@ describe('ChunkSource', () => {
 
             source.getDigits(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('012345');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345' ]);
          });
 
          it('calls back with a chunk with digits when hex digits are in the segment', () => {
@@ -602,8 +578,7 @@ describe('ChunkSource', () => {
 
             source.getDigits(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('abcdefABCDEF0123456789');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'abcdefABCDEF0123456789' ]);
          });
 
          it('calls back with undefined when no digits at the current offset in source', () => {
@@ -657,8 +632,7 @@ describe('ChunkSource', () => {
 
             source.getDigits(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('012345aef12');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345aef12' ]);
          });
 
          it('calls back with a chunk with digits when digits span segments and digits end before last segment', () => {
@@ -668,8 +642,7 @@ describe('ChunkSource', () => {
 
             source.getDigits(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('012345aef13');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345aef13' ]);
          });
 
          it('calls back even when data added after call', () => {
@@ -680,8 +653,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('13last', false);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('012345aef13');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345aef13' ]);
          });
 
          it('calls back with digits when called after a different operation (mid-segment)', () => {
@@ -690,8 +662,7 @@ describe('ChunkSource', () => {
             source.getSpace(pluckedSpy);
             source.getDigits(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('1234abF');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t', '1234abF' ]);
          });
 
          it('leaves segment offset right for following operation', () => {
@@ -700,24 +671,14 @@ describe('ChunkSource', () => {
             source.getDigits(pluckedSpy);
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText(' \t');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '1234abF', ' \t' ]);
          });
 
       });
 
-      // test chunk offsets
-
    });
 
    describe('getSpace', () => {
-      let pluckedSpy;
-      let source;
-
-      beforeEach(() => {
-         pluckedSpy = jasmine.createSpy('pluckedSpy');
-         source = new ChunkSource(entityMetaData1dot0);
-      });
 
       describe('basic behavior', () => {
 
@@ -726,8 +687,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('    ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '    ' ]);
          });
 
          it('calls back with undefined when no space at the current offset in source', () => {
@@ -781,8 +741,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('  \t ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '  \t ' ]);
          });
 
          it('calls back with a chunk when space spans segments and space ends before last segment', () => {
@@ -792,8 +751,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('  \t ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '  \t ' ]);
          });
 
          it('calls back even when data added after call', () => {
@@ -804,8 +762,7 @@ describe('ChunkSource', () => {
 
             source.addSegment(' last', false);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('  \t ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '  \t ' ]);
          });
 
       });
@@ -817,8 +774,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \t \t ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t \t ' ]);
          });
 
          it('recognizes tabs (\\t)', () => {
@@ -826,8 +782,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \t ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t ' ]);
          });
 
          it('recognizes newlines (\\n)', () => {
@@ -835,8 +790,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('recognizes carrige returns (\\r) and returns them as newlines', () => {
@@ -844,8 +798,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('recognizes carrige returns/new line combinations (\\r\\n) and returns them as newlines', () => {
@@ -853,8 +806,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('does not recognize next line (\\u0085) as space if version is 1.0', () => {
@@ -862,8 +814,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
 
          it('does not recognize line separator (\\u2028) as space if version is 1.0', () => {
@@ -871,8 +822,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
 
          it('recognizes next line (\\u0085) as space if version is 1.1 and returns as a new line', () => {
@@ -881,8 +831,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('recognizes carriage return and next line (\\r\\u0085) if version is 1.1 and returns as a new line', () => {
@@ -891,8 +840,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('recognizes line separator (\\u2028) as space  if version is 1.1 and returns a new line', () => {
@@ -901,8 +849,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
 
          it('recognizes a combination of line breaks and transforms all to newline', () => {
@@ -911,8 +858,7 @@ describe('ChunkSource', () => {
 
             source.getSpace(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(' \n\n\n \n\n\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n\n\n \n\n\n' ]);
          });
 
       });
@@ -920,13 +866,6 @@ describe('ChunkSource', () => {
    });
 
    describe('getWord', () => {
-      let pluckedSpy;
-      let source;
-
-      beforeEach(() => {
-         pluckedSpy = jasmine.createSpy('pluckedSpy');
-         source = new ChunkSource(entityMetaData1dot0);
-      });
 
       describe('basic behavior', () => {
 
@@ -935,8 +874,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word' ]);
          });
 
          it('calls back with undefined when no word at the current offset in source', () => {
@@ -989,8 +927,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Word99');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word99' ]);
          });
 
          it('recognizes a word that ends at the end of the last segment', () => {
@@ -1000,8 +937,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Word98');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word98' ]);
          });
 
          it('recognizes a word when it spans segments and the word ends before the last segment arrives', () => {
@@ -1011,8 +947,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Word100');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word100' ]);
          });
 
          it('recognizes a word even when data added after the call', () => {
@@ -1023,8 +958,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('d101 ', true);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Word101');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word101' ]);
          });
 
       });
@@ -1036,8 +970,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word1');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word1' ]);
          });
 
          it('calls back with a word terminated by a tab', () => {
@@ -1045,8 +978,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word2');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word2' ]);
          });
 
          it('calls back with a word terminated by a newline', () => {
@@ -1054,8 +986,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word3');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word3' ]);
          });
 
          it('calls back with a word terminated by a carriage return', () => {
@@ -1063,8 +994,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word4');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word4' ]);
          });
 
          it('does not recognize a word terminated by a \\u0085 in 1.0', () => {
@@ -1072,8 +1002,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word5\u0085');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word5\u0085' ]);
          });
 
          it('does not recognize a word terminated by a \\u2028 in 1.0', () => {
@@ -1081,8 +1010,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word6\u2028');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word6\u2028' ]);
          });
 
          it('recognizes a word terminated by a \\u0085 in 1.1', () => {
@@ -1091,8 +1019,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word7');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word7' ]);
          });
 
          it('recognizes a word terminated by a \\u2028 in 1.1', () => {
@@ -1101,8 +1028,7 @@ describe('ChunkSource', () => {
 
             source.getWord([], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('word8');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word8' ]);
          });
 
          it('recognizes a word terminated by a custom terminator', () => {
@@ -1110,8 +1036,7 @@ describe('ChunkSource', () => {
 
             source.getWord([ 'o' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('w');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'w' ]);
          });
 
          it('recognizes a word terminated by a custom multi-character terminator', () => {
@@ -1119,8 +1044,7 @@ describe('ChunkSource', () => {
 
             source.getWord([ 'rdA' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('wo');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
 
          it('recognizes a word terminated by one of several custom terminators', () => {
@@ -1128,8 +1052,7 @@ describe('ChunkSource', () => {
 
             source.getWord([ 'dA', 'A', 'rd' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('wo');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
 
          it('recognizes a word not terminated by a false-postive terminator', () => {
@@ -1138,8 +1061,7 @@ describe('ChunkSource', () => {
             // d will match, but then r will not
             source.getWord([ 'dr' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('wordC');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wordC' ]);
          });
 
          it('recognizes a word terminated by terminator that spans chunks', () => {
@@ -1148,8 +1070,7 @@ describe('ChunkSource', () => {
 
             source.getWord([ 'rd' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('wo');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
 
       });
@@ -1157,13 +1078,6 @@ describe('ChunkSource', () => {
    });
 
    describe('getMatch', () => {
-      let pluckedSpy;
-      let source;
-
-      beforeEach(() => {
-         pluckedSpy = jasmine.createSpy('pluckedSpy');
-         source = new ChunkSource(entityMetaData1dot0);
-      });
 
       describe('basic behavior', () => {
 
@@ -1172,8 +1086,7 @@ describe('ChunkSource', () => {
 
             source.getMatch('som', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('som');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'som' ]);
          });
 
          it('calls back with undefined when no match at the current offset in source', () => {
@@ -1210,8 +1123,7 @@ describe('ChunkSource', () => {
 
             source.getMatch('match', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('match');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'match' ]);
          });
 
          it('does not recognize a match if no segments added', () => {
@@ -1236,8 +1148,7 @@ describe('ChunkSource', () => {
 
             source.getMatch('Mat', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Mat');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Mat' ]);
          });
 
          it('recognizes a match that ends at the end of the last segment', () => {
@@ -1247,8 +1158,7 @@ describe('ChunkSource', () => {
 
             source.getMatch('MatchAB', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('MatchAB');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'MatchAB' ]);
          });
 
          it('recognizes a match when it spans segments and the match ends before the last segment arrives', () => {
@@ -1258,8 +1168,7 @@ describe('ChunkSource', () => {
 
             source.getMatch('MatchAA', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('MatchAA');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'MatchAA' ]);
          });
 
          it('recognizes a match even when data added after the call', () => {
@@ -1270,8 +1179,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('ch101 ', false);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Matc');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Matc' ]);
          });
 
       });
@@ -1284,9 +1192,7 @@ describe('ChunkSource', () => {
             source.getWord([ 'M' ], pluckedSpy);
             source.getMatch('Micha', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('george');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('Micha');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'george', 'Micha' ]);
          });
 
          it('calls back with value after a getMatch() call', () => {
@@ -1295,9 +1201,7 @@ describe('ChunkSource', () => {
             source.getMatch('test', pluckedSpy);
             source.getMatch('One', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('test');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('One');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'test', 'One' ]);
          });
 
          it('calls back with value after a getMatch() call across segment boundaries', () => {
@@ -1307,9 +1211,7 @@ describe('ChunkSource', () => {
             source.getMatch('test', pluckedSpy);
             source.getMatch('Two', pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('test');
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('Two');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'test', 'Two' ]);
          });
 
       });
@@ -1317,13 +1219,6 @@ describe('ChunkSource', () => {
    });
 
    describe('getToTerminator', () => {
-      let pluckedSpy;
-      let source;
-
-      beforeEach(() => {
-         pluckedSpy = jasmine.createSpy('pluckedSpy');
-         source = new ChunkSource(entityMetaData1dot0);
-      });
 
       describe('basic behavior', () => {
 
@@ -1332,8 +1227,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ 'x' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('fo');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'fo' ]);
          });
 
          it('calls back with undefined when nothing in the source', () => {
@@ -1397,8 +1291,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '0' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text1');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text1' ]);
          });
 
          it('calls back with all content up to EOF when no match found', () => {
@@ -1408,8 +1301,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '9' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text20');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text20' ]);
          });
 
          it('calls back with all content up to match even when match at eof', () => {
@@ -1419,8 +1311,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '0' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text3');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text3' ]);
          });
 
          it('calls back with segment spanning text when match found before EOF', () => {
@@ -1430,8 +1321,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '0' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text4');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text4' ]);
          });
 
          it('calls back with text even when final needed segment added after the call', () => {
@@ -1442,8 +1332,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('50 ', false);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text5');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text5' ]);
          });
 
          it('calls back with text for a terminator that spans multiple segments', () => {
@@ -1454,8 +1343,7 @@ describe('ChunkSource', () => {
             source.addSegment('-', true);
             source.getToTerminator([ '<!--' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text' ]);
          });
 
          it('calls back with the full text if it finds a terminator does not across multiple segments', () => {
@@ -1466,8 +1354,7 @@ describe('ChunkSource', () => {
             source.addSegment('-X', true);
             source.getToTerminator([ '<!---' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('Text<!--X');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text<!--X' ]);
          });
       });
 
@@ -1478,8 +1365,7 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '0', '1' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('text');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text' ]);
          });
 
          it('calls back with match of a multi character terminator', () => {
@@ -1487,13 +1373,11 @@ describe('ChunkSource', () => {
 
             source.getToTerminator([ '0', '234' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('text2 ');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text2 ' ]);
          });
 
       });
 
-      // newlines
    });
 
    describe('getMarkup()', () => {
@@ -1505,8 +1389,7 @@ describe('ChunkSource', () => {
 
             source.getMarkup(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<' ]);
          });
 
          it('calls back with undefined when no markup at the offset', () => {
@@ -1550,8 +1433,7 @@ describe('ChunkSource', () => {
 
             source.addSegment('<start>', true);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<' ]);
          });
 
          it('calls back with a markup char when in middle of segment', () => {
@@ -1560,8 +1442,7 @@ describe('ChunkSource', () => {
 
             source.getMarkup(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('<!--');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<!--' ]);
          });
 
          it('calls back with markup at end of segment', () => {
@@ -1570,8 +1451,7 @@ describe('ChunkSource', () => {
 
             source.getMarkup(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('<?');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<?' ]);
          });
 
          it('calls back with markup at start of subsequent segment', () => {
@@ -1581,8 +1461,7 @@ describe('ChunkSource', () => {
 
             source.getMarkup(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('<');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<' ]);
          });
 
       });
@@ -1650,8 +1529,7 @@ describe('ChunkSource', () => {
 
             source.getClose(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ']]>' ]);
          });
 
          it('calls back with undefined when no close at the offset', () => {
@@ -1695,8 +1573,7 @@ describe('ChunkSource', () => {
 
             source.addSegment(']]>', true);
 
-            expect(pluckedSpy.calls.count()).toEqual(1);
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ']]>' ]);
          });
 
          it('calls back with a close char when in middle of segment', () => {
@@ -1705,8 +1582,7 @@ describe('ChunkSource', () => {
 
             source.getClose(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
 
          it('calls back with close at end of segment', () => {
@@ -1715,8 +1591,7 @@ describe('ChunkSource', () => {
 
             source.getClose(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
 
          it('calls back with close at start of subsequent segment', () => {
@@ -1726,8 +1601,7 @@ describe('ChunkSource', () => {
 
             source.getClose(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
 
          it('calls back with close when it spans segments', () => {
@@ -1737,8 +1611,7 @@ describe('ChunkSource', () => {
 
             source.getClose(pluckedSpy);
 
-            expect(pluckedSpy.calls.count()).toEqual(2);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText(']]>');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
 
       });
