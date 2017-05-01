@@ -6,9 +6,10 @@
 /* eslint-env jasmine */
 
 const Buffer = require('buffer').Buffer;
+const Chunk = require('./shared/Chunk.js');
+const ChunkSource = require('./ChunkSource.js');
 const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
-const ChunkSource = require('./ChunkSource.js');
 
 describe('ChunkSource', () => {
    let pluckedSpy;
@@ -1632,6 +1633,116 @@ describe('ChunkSource', () => {
             source.getClose(pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']]>');
+         });
+
+      });
+
+   });
+
+   describe('undo()', () => {
+
+      describe('basic behavior', () => {
+
+         it('puts the previous text back', () => {
+            source.addSegment('123 one', true);
+
+            source.getDigits(pluckedSpy);
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
+         });
+
+         it('does nothing if passed undefined', () => {
+            source.addSegment('123 one', true);
+
+            source.getDigits(pluckedSpy);
+            source.undo(undefined);
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ' ' ]);
+         });
+
+         it('throws an error if called something other than undefined or a chunk', () => {
+            source.addSegment('012345', true);
+
+            expect(() => {
+               source.undo(55);
+            }).toThrowError('Must pass a Chunk or undefined to undo().');
+         });
+
+      });
+
+      describe('segment spanning', () => {
+
+         it('erroniously allows one to add a chunk before any segments added', () => {
+            source.undo(new Chunk('one x', 'one x'));
+            source.getWord([], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'one' ]);
+         });
+
+         it('will add to the current segment', () => {
+            source.addSegment('123 one', true);
+            source.getDigits(pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
+         });
+
+         it('will add to a spanning segment location', () => {
+            source.addSegment('12', false);
+            source.addSegment('3 one', true);
+            source.getDigits(pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
+         });
+
+         it('will add to before the remaining segment', () => {
+            source.addSegment('123', false);
+            source.addSegment(' one', true);
+            source.getDigits(pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.getDigits(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
+         });
+
+         it('will add text that can then be retrieved with a different routine', () => {
+            source.addSegment('123', false);
+            source.addSegment(' o<ne', true);
+            source.getToTerminator([ '<' ], pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.getDigits(pluckedSpy);
+            source.getSpace(pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123 o', '123', ' ' ]);
+         });
+
+         it('throws an error if the value that is undone is not correct', () => {
+            source.addSegment('0123zzz', true);
+            source.getDigits(pluckedSpy);
+
+            expect(() => {
+               source.undo(new Chunk('999', '999'));
+            }).toThrowError('Chunk does not match target location.');
+         });
+
+         it('throws an error if the value that is undone is not correct', () => {
+            source.addSegment('012', true);
+            source.addSegment('3zzz', true);
+            source.getDigits(pluckedSpy);
+
+            expect(() => {
+               source.undo(new Chunk('0124', '0124'));
+            }).toThrowError('Chunk does not match target location.');
          });
 
       });

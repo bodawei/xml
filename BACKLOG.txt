@@ -1,86 +1,25 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/23 Sprint 39:  114sp [7XL 2L 4M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
+ 4/30 Sprint 40:  108sp [7XL 2L 4M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
+S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
-M: 207 Encodings
-This is encodings draft 2.
-The basic plan is this:
-1) TokenSource has an encoding option. When specified, it overrides everything. If it causes a barf, its on you. (and a version option)
-2) ChunkSource will examine the first bytes of the first segment. It can identify certain encodings.  If it can identify one with certainty, that will "win"
-3) It will look at the first segment(s) to find the xml or text declaration.  If present, it will extract the version (defaults to 1.0/5 if not found) and the encoding.  If no other encoding specified or discovered, this will be used.  If #2 identified an ambiguous encoding, and this does not contradict that, then this wins.
+S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
 
-0) (out of scope here) entity manager can have an encoding and version specified on a per entity basic (public? identifier).  Allowing you to override the default.
-a) ChunkSource accepts version: can be 1.0 or 1.1. Anything else is failure.
-b) ChunkSource accepts an encoding.
-c) ChunkSource has a peek extractor that will scan the bytes and identify  Only called if we haven't already been given an encoding.
-	UTF-16BE-LE/BOM's:
-	UTF-16BE-LE/no BOM: 
-	UTF-8 with the <? bit
-	UCS-4 variations
-	EBCDIC
-	Finding <?xm  puts us in the possibly-unencoded
-	If found, these are all decisive.  But, they may not be found.in which case we fall back to 'perhaps-unencoded'
-		We could possibly do other things to identify UTF-16 better
-d) Caller can make a call asking if there's a BOM on UTF-16.  This will return a simple value. Is async, and can be called first
+M 215: Finish encoding
+- Move decoding and sniffing into add segment
+	- new routine will do the same sniffing.
+	- if find encoding set it on this and return.  one value it can set is 'unencoded'
+	- on return, if encoding set, then do the decoding
+	- skip over bom, and set flag
+	- while here, look for version
+- All existing and future segments are decoded.  This may involve characters spanning segments
+- Actually decode
 
-We can now do conversion, if the type is known.
-
-e) ChunkSource has a peek extractor that finds the <?xml ?> section in the first hundred bytes or so. and extracts version and encoding.  Doesn't call if have both an encoding and a version. Will ignore the value of either if have one of them.
-	If encoding contradicts what we already have, ignore it.
-	If encoding is a specialization (e.g. was perhaps-unencoded, but this is not one of ones we could be decisively identifying) then we use it.
-
-In any case, we have enough information for conversion at this point:
-- c might be a buffer or string
-	- string_decode seems nice, but doesn't even do the minimum character sets (e.g. UTF-16BE)
-	- https://github.com/bnoordhuis/node-iconv will do a bunch and stream. Throws error on bad. Can handle streaming
-	- https://github.com/ashtuchkin/iconv-lite claims better speed.  Silently corrupts if bad characters. not clear about streamed
-
-A: entity manager has a mapping of system literal (url) to encoding/version info. Will pass to chunksource
-B: ChunkSource accepts an encoding and version. Sets internally as determinedEncoding/Version
-C: If no encoding, calls (autonomous) routine with first 4+ bytes/chars: returns either a decisive value or "i dunno"  Sets decisive value or none.  This requires a peeking extractor to get this info.  Is set up at construction time
-D: If we have a decisive value at this point, convert the segments that exist, and each as it comes in.
-E: A peeking extractor will pull out the <? ... ?> string, unless we already have both decisive values. Extracts version and encoding using regex. If we can't find these (due to malformed) such is life. Document and move on.
-F: Hereafter we decode each.  We use a default decoder (probably iconv-lite), but you can provide aanother. This may be very async as that thing may return a stream (in fact, maybe it always should, even if there's no stream there)
-
-To write:
-- (later) mapper for entity manager
-√ 0 - accept params and set determined encodings in chunk source
-√ 0 - Write autonomous routine to sniff and return an encoding (can lift existing code)
-√ S - Write an autonomous routine that, given a string, extracts version and encoding and returns them
-M - Write a peeker that extracts the first 4 bytes/chars and calls the above routine and the
-	- callback updates the chunkSource
-	- callback converts any existing segments (or at least the start) if needed (stashing both old and new values in the segment)
-	- AddSegment will start converting so we can do the below
-√S - Write a peeker that extracts the first 100 chars or the whole thing, passes to above routine
-	- callback updates chunk source
-
-Need to actually make this work.
-Note big dilemma... many tests do not deliver a complete thing.  And so this never completes.   That's "OK". but what about the tests where they are deliberately not complete?  Can our sniffer notice no <? at all and just throw its hands up in disgust?
-We could reverse the check and accumulate text, but if we don't find <? immediately (or immediately after whitespace) then give up.
-
-- test out iconv-lite for spanning across segments in a stream
-	- probably need to build a stream to receive a segment that then spits out as much of the segment as we can, converted.
-
-
-√ - test for encoding value in declaration
-√- test with buffers
-- Actually decode!!!
--- parameterize the decoding
-- do we need the BOM encodings?
--- need to be able to report error if does not have UTF-16 and BOM
-- Rework the whole convoluted State thing
-	- make the returnSegments easier
-	- make creating a nested thing easier
-	- fix the result.result in _resumeOperation
--- extract version?
-- Waht about wonky encodings like the UCS2 ones?
-
-We are only going to support the manditory encodings.  But folks can add others. And we may add others optionally.
 
 
 -- next: 215
@@ -91,7 +30,6 @@ newlines in getTerminator
 review tests and test cases
 Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
-- Look over ChunkSource tests... can we elegantize it at all?  e.g. we could iterate over the calls and produce an array to test with the above, thus removing the silly check on number of calls.
 - general things when cleaning up:
 	- add contexts to all errors
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
@@ -133,10 +71,12 @@ TechDebt/Bus
 - Can't test PE's inside PE's
 - Think about replacing the quoted value with ValueStream.  Could we do that?  They're much the same, though VS is much bigger.
 - We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
+- A routine which can be called with multiple requests and does one callback
+- actually integrating all this into the parsers...
 
-Cursor Revisions [1L 3M 8S]
+
+Cursor Revisions [1L 1M 2S]
 ---------
-S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
 L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	See 212, below
@@ -145,7 +85,8 @@ L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.
 	deal with different offset passed into addSegment
 	count lines and columns
-	Do more test matchers to check chunks better	
+	Do more test matchers to check chunks better
+	- make sure to improve undo() to check offsets and text
 
 
 M： Variations/subtypes
@@ -154,14 +95,6 @@ M： Variations/subtypes
 	- delivering content from value
 		192:	entity value will simply take the tokens in an entity value, extract the chunks and feed the original values into this along with their offsets
 
-Uhm:
-- A routine which can be called with multiple requests and does one callback
-- actually integrating all this into the parsers...
-
-Leftover:
-S: 210 Adding to ExpandingEntityStream with tests  (not sure what 'adding' means.  But understand entityexpandingstream should be validating stuff we're putting into attributes etc to see if they are ok. and as the next says, adding checks for invalid chars)  indeed, we're not validating any content from external entities! 9or are we, as it is going through xmltokenstream, if so then it really should be ValueSTream doing the validation)
-S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
-	- Need to do all the text validation checking for external entities
 
 S: 208 testing of chunks in ValueStrea
 S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?

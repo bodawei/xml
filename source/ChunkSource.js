@@ -218,6 +218,44 @@ class ChunkSource {
       this._addExtractor(state);
    }
 
+   undo(chunk) {
+      if (!chunk) {
+         return;
+      }
+
+      if (!(chunk instanceof Chunk)) {
+         throw new Error('Must pass a Chunk or undefined to undo().');
+      }
+
+      const firstSegment = this._segments[0];
+      let remainingChunkLength = chunk.originalText.length;
+
+      if (firstSegment) {
+//         remainingChunkLength = Math.min(chunk.originalText.length - firstSegment.index, 0);
+//         firstSegment.index = Math.min(firstSegment.index - chunk.originalText.length, 0);
+
+         if (chunk.originalText.length < firstSegment.index) {
+            const newIndex = firstSegment.index -= chunk.originalText.length;
+
+            if (firstSegment.text.substr(newIndex, chunk.originalText.length) !== chunk.originalText) {
+               throw new Error('Chunk does not match target location.');
+            }
+            firstSegment.index = newIndex;
+         }
+
+         if (chunk.originalText.length >= firstSegment.index) {
+            const chunkIndex = chunk.originalText.length - firstSegment.index;
+            if (chunk.originalText.substr(chunkIndex, chunk.originalText.length) !== firstSegment.text.substr(0, firstSegment.index)) {
+               throw new Error('Chunk does not match target location.');
+            }
+            remainingChunkLength = chunkIndex;
+            firstSegment.index = 0;
+         }
+      }
+
+      this._segments.unshift(new Segment(chunk.originalText.substr(0, remainingChunkLength)));
+   }
+
    addSegment(text, last) {
       const segment = new Segment(text);
       this._segments.push(segment);
@@ -533,6 +571,7 @@ function searchMultipleMatch(segment, state) {
 
          if (result) {
             let couldBePartial = false;
+            // This is a little bit flawed. if we got a match and are no ambiguous candidates then too pessimistic.
             if (state.seenSegments[index].atEnd() && index === state.seenSegments.length - 1) {
                couldBePartial = !state.seenSegments[index].isLast;
             }

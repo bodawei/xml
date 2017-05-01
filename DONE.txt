@@ -38,6 +38,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/13 Sprint 36: 125sp [7XL 3L 5M 10S]. Avg: 5/sprint = 25 sprints. ACTUAL: 5
  4/16 Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 2
  4/21 Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 4
+ 4/23 Sprint 39:  111sp [7XL 2L 3M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 
 =============================================
 BLOG IDEAS
@@ -2311,3 +2312,88 @@ Notes38
 I spent most of yesterday (saturday april 22) working on this.  203 went OK< in that I got things working, and what is there is OK.  But, it feels too rough to me, and I'm disappointed by that.  I still think there's one more generation of iteration to do on this.  And it is an interesting thing.
 Cleanup was good, in that I got a new test routine in there which is an improvement.
 Build was so-so. I got the table extracted which is good.  And basically I think the code there is done for the coverage report.  But somehow it also felt dirty to me a bit.
+
+Sprint 39
+=========
+M: 207 Encodings
+This is encodings draft 2.
+The basic plan is this:
+1) TokenSource has an encoding option. When specified, it overrides everything. If it causes a barf, its on you. (and a version option)
+2) ChunkSource will examine the first bytes of the first segment. It can identify certain encodings.  If it can identify one with certainty, that will "win"
+3) It will look at the first segment(s) to find the xml or text declaration.  If present, it will extract the version (defaults to 1.0/5 if not found) and the encoding.  If no other encoding specified or discovered, this will be used.  If #2 identified an ambiguous encoding, and this does not contradict that, then this wins.
+
+0) (out of scope here) entity manager can have an encoding and version specified on a per entity basic (public? identifier).  Allowing you to override the default.
+a) ChunkSource accepts version: can be 1.0 or 1.1. Anything else is failure.
+b) ChunkSource accepts an encoding.
+c) ChunkSource has a peek extractor that will scan the bytes and identify  Only called if we haven't already been given an encoding.
+	UTF-16BE-LE/BOM's:
+	UTF-16BE-LE/no BOM: 
+	UTF-8 with the <? bit
+	UCS-4 variations
+	EBCDIC
+	Finding <?xm  puts us in the possibly-unencoded
+	If found, these are all decisive.  But, they may not be found.in which case we fall back to 'perhaps-unencoded'
+		We could possibly do other things to identify UTF-16 better
+d) Caller can make a call asking if there's a BOM on UTF-16.  This will return a simple value. Is async, and can be called first
+
+We can now do conversion, if the type is known.
+
+e) ChunkSource has a peek extractor that finds the <?xml ?> section in the first hundred bytes or so. and extracts version and encoding.  Doesn't call if have both an encoding and a version. Will ignore the value of either if have one of them.
+	If encoding contradicts what we already have, ignore it.
+	If encoding is a specialization (e.g. was perhaps-unencoded, but this is not one of ones we could be decisively identifying) then we use it.
+
+In any case, we have enough information for conversion at this point:
+- c might be a buffer or string
+	- string_decode seems nice, but doesn't even do the minimum character sets (e.g. UTF-16BE)
+	- https://github.com/bnoordhuis/node-iconv will do a bunch and stream. Throws error on bad. Can handle streaming
+	- https://github.com/ashtuchkin/iconv-lite claims better speed.  Silently corrupts if bad characters. not clear about streamed
+
+A: entity manager has a mapping of system literal (url) to encoding/version info. Will pass to chunksource
+B: ChunkSource accepts an encoding and version. Sets internally as determinedEncoding/Version
+C: If no encoding, calls (autonomous) routine with first 4+ bytes/chars: returns either a decisive value or "i dunno"  Sets decisive value or none.  This requires a peeking extractor to get this info.  Is set up at construction time
+D: If we have a decisive value at this point, convert the segments that exist, and each as it comes in.
+E: A peeking extractor will pull out the <? ... ?> string, unless we already have both decisive values. Extracts version and encoding using regex. If we can't find these (due to malformed) such is life. Document and move on.
+F: Hereafter we decode each.  We use a default decoder (probably iconv-lite), but you can provide aanother. This may be very async as that thing may return a stream (in fact, maybe it always should, even if there's no stream there)
+
+To write:
+- (later) mapper for entity manager
+√ 0 - accept params and set determined encodings in chunk source
+√ 0 - Write autonomous routine to sniff and return an encoding (can lift existing code)
+√ S - Write an autonomous routine that, given a string, extracts version and encoding and returns them
+M - Write a peeker that extracts the first 4 bytes/chars and calls the above routine and the
+	- callback updates the chunkSource
+	- callback converts any existing segments (or at least the start) if needed (stashing both old and new values in the segment)
+	- AddSegment will start converting so we can do the below
+√S - Write a peeker that extracts the first 100 chars or the whole thing, passes to above routine
+	- callback updates chunk source
+
+Need to actually make this work.
+Note big dilemma... many tests do not deliver a complete thing.  And so this never completes.   That's "OK". but what about the tests where they are deliberately not complete?  Can our sniffer notice no <? at all and just throw its hands up in disgust?
+We could reverse the check and accumulate text, but if we don't find <? immediately (or immediately after whitespace) then give up.
+
+- test out iconv-lite for spanning across segments in a stream
+	- probably need to build a stream to receive a segment that then spits out as much of the segment as we can, converted.
+
+
+√ - test for encoding value in declaration
+√- test with buffers
+- Actually decode!!!
+-- parameterize the decoding
+- do we need the BOM encodings?
+-- need to be able to report error if does not have UTF-16 and BOM
+- Rework the whole convoluted State thing
+	- make the returnSegments easier
+	- make creating a nested thing easier
+	- fix the result.result in _resumeOperation
+-- extract version?
+- Waht about wonky encodings like the UCS2 ones?
+
+We are only going to support the manditory encodings.  But folks can add others. And we may add others optionally.
+
+
+Notes39
+-------
+This sprint went OK. The encoding took longer than I wish it had, probably largely because of a shifting view of what i wanted to do.  Not entirely clear why what I have took so long to do.  I guess better planning might have helped.
+Clean and build went OK, not spectacular but definite progress. Test report 90% done, and table printing improved.
+
+
