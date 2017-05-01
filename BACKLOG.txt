@@ -6,7 +6,7 @@ BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
-S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
+√ S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
 S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
 
@@ -20,7 +20,11 @@ M 215: Finish encoding
 - All existing and future segments are decoded.  This may involve characters spanning segments
 - Actually decode
 
-
+- holy shit. We haven't actually integrated ValueStream into EntityExpandingStream!
+- we're not actually validating the text inside of an entity value or attribute value?
+	- We need a rule where this is done.
+- How to get entity metadata into the valuestream?  And which is even right?
+- need to also pass attribute name into value stream's options
 
 -- next: 215
 =============================================

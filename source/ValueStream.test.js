@@ -5,9 +5,10 @@
 /* eslint-env jasmine */
 
 const SyntaxError = require('./error/SyntaxError.js');
-const XmlStringCursor = require('./XmlStringCursor.js');
 const tokens = require('./XmlToken.js');
 const ValueStream = require('./ValueStream.js');
+const XmlStringCursor = require('./XmlStringCursor.js');
+const XmlWarning = require('./error/XmlWarning.js');
 
 function pipeAndTest(inputString, done, endHandler, other = {}) {
    const errorHandler = other.errorHandler;
@@ -49,16 +50,19 @@ describe('ValueStream', () => {
 
          expect(s._options).toEqual({
             geRef: false,
-            peRef: false
+            peRef: false,
+            attributeName: ''
          });
       });
 
       it('stores the option if passed an option', () => {
-         const s = new ValueStream(new XmlStringCursor('hi'), { peRef: true, geRef: true });
+         const s = new ValueStream(new XmlStringCursor('hi'), {
+            peRef: true, geRef: true, isAttribute: true, attributeName: 'foo' });
 
          expect(s._options).toEqual({
             geRef: true,
-            peRef: true
+            peRef: true,
+            attributeName: 'foo'
          });
       });
 
@@ -215,6 +219,32 @@ describe('ValueStream', () => {
             expect(results[0]).toEqualProps({
                id: SyntaxError.ID.REFERENCE_XTRA_SPACE,
                message: 'Must not have space in an entity reference.'
+            });
+         }
+      });
+
+      it('reports an error if there is an angle bracket and this is an attribute', (done) => {
+         pipeAndTest('foo < bar', done, checkResults, { attributeName: 'myAttr' });
+
+         function checkResults(results) {
+            expect(results[0]).toEqualProps({
+               id: SyntaxError.ID.ATTRIBUTE_INVALID_VALUE,
+               message: 'The value of attribute "myAttr" must not contain "<".'
+            });
+         }
+      });
+
+      it('reports invalid and discouraged characters in the content', (done) => {
+         pipeAndTest('b\u0001x\u0000x\uFDD1x\uFDD2xx', done, checkResults);
+
+         function checkResults(results) {
+            expect(results[0]).toEqualProps({
+               id: SyntaxError.ID.CHARDATA_INVALID_CHAR,
+               message: 'Characters that do not match the syntax for XML document found at: 1, 3.'
+            });
+            expect(results[1]).toEqualProps({
+               id: XmlWarning.ID.CHARDATA_DISCOURAGED_CHAR,
+               message: 'Characters that are disouraged in XML documents found at: 5, 7.'
             });
          }
       });

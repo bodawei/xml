@@ -6,8 +6,11 @@ const stream = require('readable-stream');
 
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
+const EntityMetaData = require('./shared/EntityMetaData.js');
 const XmlReference = require('./XmlReference.js');
+const XmlText = require('./XmlText.js');
 const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
+const XmlWarning = require('./error/XmlWarning.js');
 
 const TERMINATORS = [ '&', '%' ];
 
@@ -16,9 +19,10 @@ const TERMINATORS = [ '&', '%' ];
  used to convert the contents of a cursor into a series of tokens
  appropriate for use in an attribute value, or an entity value.
 
- The options are used to specify what should be recognized:
-   - General Entity References
-   - Parameter Entity References
+ Options:
+   - geRef: true|false: Recognize general Entity References
+   - peRef: true|false: Recognize parameter Entity References
+   - attributeName: string|undefined: this is for an attribute (look for <'s)
  In addition to those, this will always recognize a character
  reference.
 \**********************************************************************/
@@ -37,7 +41,8 @@ class ValueStream extends stream.Readable {
       this._cursor = cursor;
       this._options = {
          geRef: options.geRef || false,
-         peRef: options.peRef || false
+         peRef: options.peRef || false,
+         attributeName: options.attributeName || ''
       };
       this._pendingChunks = [];
    }
@@ -103,7 +108,15 @@ class ValueStream extends stream.Readable {
       const info = this._cursor.getToTerminator(TERMINATORS);
 
       if (info.chunk) {
+         XmlText.validateText(info.chunk, this._cursor.entityMd, info.chunk, this);
+
+         if (this._options.attributeName) {
+            this._checkSyntax(info.chunk.text.indexOf('<') === 0,
+               SyntaxError.ID.ATTRIBUTE_INVALID_VALUE, this._options.attributeName, info.chunk);
+         }
+
          this._pendingChunks.push(info.chunk);
+
          // flush any recent chunks, we do not care about them, as we are managing them
          this._cursor.getRecentChunks();
       }
@@ -128,6 +141,10 @@ class ValueStream extends stream.Readable {
       if (!condition) {
          this._report(code, params, place, context);
       }
+   }
+
+   _warn(code, params, place, context) {
+      this._pushToken(new XmlWarning(code, params, place, context, this._cursor.entityMd.location));
    }
 
 }
