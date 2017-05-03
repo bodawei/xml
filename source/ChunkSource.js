@@ -73,16 +73,6 @@ class ChunkSource {
       this._extractors = [];
       this._encoding = options.encoding;
       this._returnSegments = this._returnSegments.bind(this);
-
-      if (!options.encoding) {
-         const peekState = new State(genericPeek, (result) => {
-            this._encoding = result;
-            this._decodeSegments();
-         });
-         peekState.subState = new State(extractEncoding, () => {});
-
-         this._addExtractor(peekState);
-      }
    }
 
    peekChar(deliverChunk) {
@@ -231,9 +221,6 @@ class ChunkSource {
       let remainingChunkLength = chunk.originalText.length;
 
       if (firstSegment) {
-//         remainingChunkLength = Math.min(chunk.originalText.length - firstSegment.index, 0);
-//         firstSegment.index = Math.min(firstSegment.index - chunk.originalText.length, 0);
-
          if (chunk.originalText.length < firstSegment.index) {
             const newIndex = firstSegment.index -= chunk.originalText.length;
 
@@ -241,6 +228,7 @@ class ChunkSource {
                throw new Error('Chunk does not match target location.');
             }
             firstSegment.index = newIndex;
+            return;
          }
 
          if (chunk.originalText.length >= firstSegment.index) {
@@ -253,17 +241,83 @@ class ChunkSource {
          }
       }
 
-      this._segments.unshift(new Segment(chunk.originalText.substr(0, remainingChunkLength)));
+      this._addToSegment(chunk.originalText.substr(0, remainingChunkLength), undefined, true);
    }
 
    addSegment(text, last) {
+      this._addToSegment(text, last);
+   }
+
+   _addToSegment(text, last, putBefore) {
       const segment = new Segment(text);
-      this._segments.push(segment);
-      this._segments.allSegments = last;
-      segment.isLast = last;
+
+      if (!putBefore) {
+         this._segments.push(segment);
+         this._segments.allSegments = last;
+         segment.isLast = last;
+      } else {
+         this._segments.unshift(segment);
+      }
+
+      if (!this._encoding) {
+         this._identifyEncoding(segment);
+
+         if (this._encoding) {
+            this._segments.forEach((segment) => { segment.index = 0; });
+         } else {
+            return;
+         }
+      }
 
       this._resumeOperation();
    }
+
+   _identifyEncoding(segment) {
+      segment.index = segment.text.length;
+
+      this._findingEncoding = this._findingEncoding || '';
+
+      if (typeof segment.text[0] === 'number') {
+         const maxExtract = Math.min(segment.text.length, 100);
+         for (let index = 0; index < maxExtract; index++) {
+            this._findingEncoding += String.fromCharCode(segment.text[index]);
+         }
+      } else {
+         this._findingEncoding += segment.text.substr(0, 100);
+      }
+
+      const totalLength = this._findingEncoding.length;
+
+      // If we haven't already done so, try to identify the encoding based on the first four bytes/characters
+      if (totalLength >= 4 && !this._examinedFirstFour) {
+         const firstFourCharBytes = this._findingEncoding.substr(0, 4);
+         this._encoding = identifyEncodingFromFirstFourCharBytes(firstFourCharBytes);
+
+         if (this._encoding) {
+            return;
+         }
+
+         // If we can't find an xml or text declaration start, we won't ever be able to say more
+         if (/\<\?xm/i.exec(firstFourCharBytes) === null) {
+            this._encoding = ENCODING.UNENCODED;
+            return;
+         }
+
+         this._examinedFirstFour = true;
+      }
+
+      // If we get this far see if we can find the end of the declaration and extract an encoding
+      if (this._findingEncoding.indexOf('?>') >= 0) {
+         this._encoding = getEncodingFromDeclaration(this._findingEncoding);
+      }
+
+      // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
+      if (totalLength >= 100 || segment.isLast) {
+         this._encoding = ENCODING.UNENCODED;
+         return;
+      }
+   }
+
 
    _decodeSegments() {
       this._segments.forEach((segment) => this._decodeSegment(segment));
@@ -310,6 +364,10 @@ class ChunkSource {
    }
 
    _resumeOperation() {
+      if (!this._encoding) {
+         return;
+      }
+
       while (this._segments.length !== 0 && this._extractors.length > 0) {
          const extractorState = this._extractors[0];
          let nextSegment = this._segments[0];
@@ -630,52 +688,6 @@ function genericPeek(segment, state) {
    }
 
    return result;
-}
-
-function extractEncoding(segment, state) {
-   segment.index = segment.text.length;
-
-   state.data = state.data || '';
-
-   if (typeof segment.text[0] === 'number') {
-      const maxExtract = Math.min(segment.text.length, 100);
-      for (let index = 0; index < maxExtract; index++) {
-         state.data += String.fromCharCode(segment.text[index]);
-      }
-   } else {
-      state.data += segment.text.substr(0, 100);
-   }
-
-   const totalLength = state.data.length;
-
-   // If we haven't already done so, try to identify the encoding based on the first four bytes/characters
-   if (totalLength >= 4 && !state.examinedFirstFour) {
-      const firstFourCharBytes = state.data.substr(0, 4);
-      const encoding = identifyEncodingFromFirstFourCharBytes(firstFourCharBytes);
-
-      if (encoding) {
-         state.result = encoding;
-         return state;
-      }
-
-      // If we can't find an xml or text declaration start, we won't ever be able to say more
-      if (/\<\?xm/i.exec(firstFourCharBytes) === null) {
-         return state;
-      }
-
-      state.examinedFirstFour = true;
-   }
-
-   // If we get this far see if we can find the end of the declaration and extract an encoding
-   if (state.data.indexOf('?>') >= 0) {
-      state.result = getEncodingFromDeclaration(state.data);
-      return state;
-   }
-
-   // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
-   if (totalLength >= 100 || segment.isLast) {
-      return state;
-   }
 }
 
 function identifyEncodingFromFirstFourCharBytes(firstFour) {

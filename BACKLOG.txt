@@ -8,23 +8,25 @@ BLOG IDEAS?
 =============================================
 √ S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
-S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+√ S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+
+[1.5hours]
 
 M 215: Finish encoding
 - Move decoding and sniffing into add segment
-	- new routine will do the same sniffing.
-	- if find encoding set it on this and return.  one value it can set is 'unencoded'
+	√ - new routine will do the same sniffing.
+	√- if find encoding set it on this and return.  one value it can set is 'unencoded'
 	- on return, if encoding set, then do the decoding
 	- skip over bom, and set flag
 	- while here, look for version
 - All existing and future segments are decoded.  This may involve characters spanning segments
 - Actually decode
 
-- holy shit. We haven't actually integrated ValueStream into EntityExpandingStream!
-- we're not actually validating the text inside of an entity value or attribute value?
-	- We need a rule where this is done.
-- How to get entity metadata into the valuestream?  And which is even right?
-- need to also pass attribute name into value stream's options
+- Unrealized problems:
+	- ValueStream is not integrated into EntityExpandingStream
+		- need to be sure to pass attr value in
+	- We aren't validating internal entity text at the time of parsing. OK?
+	- right now ValueStream is living off entity metadata from the cursor, as if it is a fixed value. But it is going to be per chunk, I think.
 
 -- next: 215
 =============================================
@@ -91,6 +93,7 @@ L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	count lines and columns
 	Do more test matchers to check chunks better
 	- make sure to improve undo() to check offsets and text
+	- deal with enty locations as well. See ValueStream
 
 
 M： Variations/subtypes

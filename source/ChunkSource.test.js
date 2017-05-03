@@ -1675,7 +1675,7 @@ describe('ChunkSource', () => {
 
       describe('segment spanning', () => {
 
-         it('erroniously allows one to add a chunk before any segments added', () => {
+         it('erroniously allows one to undo a chunk before any segments added', () => {
             source.undo(new Chunk('one x', 'one x'));
             source.getWord([], pluckedSpy);
 
@@ -1766,7 +1766,7 @@ describe('ChunkSource', () => {
       it('makes no opinion on a string with no XML or Text Declaration', () => {
          source.addSegment('no declaration');
 
-         expect(source._encoding).toBeUndefined();
+         expect(source._encoding).toEqual('UNENCODED');
       });
 
       describe('from file start', () => {
