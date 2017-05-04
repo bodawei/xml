@@ -16,11 +16,14 @@ M 215: Finish encoding
 - Move decoding and sniffing into add segment
 	√ - new routine will do the same sniffing.
 	√- if find encoding set it on this and return.  one value it can set is 'unencoded'
-	- on return, if encoding set, then do the decoding
-	- skip over bom, and set flag
-	- while here, look for version
+	√- on return, if encoding set, then do the decoding
+	- skip over bom, and set flag <-- can't really do this until decoded
+	- while here, look for version <-- can't really do this until decoded
+	- user specifies UTF-16. Need to deal with that
+		- set flag: userSpecified UTF16, and encoding is undefined
+		- if encoding finds a BOM encoding, then set flag. if not, also set a flag
+			- if not, default to UTF-16BE
 - All existing and future segments are decoded.  This may involve characters spanning segments
-- Actually decode
 
 - Unrealized problems:
 	- ValueStream is not integrated into EntityExpandingStream

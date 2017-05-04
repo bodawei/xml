@@ -252,6 +252,9 @@ class ChunkSource {
       const segment = new Segment(text);
 
       if (!putBefore) {
+         if (this._encoding && this._encoding !== ENCODING.UNENCODED) {
+            this._decodeSegment(segment);
+         }
          this._segments.push(segment);
          this._segments.allSegments = last;
          segment.isLast = last;
@@ -263,7 +266,13 @@ class ChunkSource {
          this._identifyEncoding(segment);
 
          if (this._encoding) {
-            this._segments.forEach((segment) => { segment.index = 0; });
+            const existing = this._segments;
+            this._segments = [];
+
+            existing.forEach((segment) => {
+               segment.index = 0;
+               this.addSegment(segment.text, segment.isLast)
+            });
          } else {
             return;
          }
@@ -318,34 +327,43 @@ class ChunkSource {
       }
    }
 
-
-   _decodeSegments() {
-      this._segments.forEach((segment) => this._decodeSegment(segment));
-   }
-
    _decodeSegment(segment) {
-      switch (this._encoding) {
-         case ENCODING.UTF8:
-         case ENCODING.UTF8_BOM:
-            // grab the 1 to N bytes.
-            // combine as you go
-            // if error...
-            break;
-         case ENCODING.UTF16BE:
-         case ENCODING.UTF16BE_BOM:
-            // just grab every two bytes.  shift and add and make a char
-            // if in string, extract two bytes and do the same
-            break;
-         case ENCODING.UTF16LE:
-         case ENCODING.UTF16LE_BOM:
-            // just grab every two bytes.  shift and add and make a char
-            // if in string, extract two bytes and do the same
-            break;
-         default:
-            // error
-            break;
+      if (segment.text.length <= 0) {
+         return;
       }
-      return segment;
+
+      const isInt = (typeof segment.text[0] === 'number');
+      const orig = segment.text;
+      segment.text = [];
+
+      for (let index = 0; index < orig.length; index++) {
+         switch (this._encoding) {
+            case ENCODING.UTF8:
+            case ENCODING.UTF8_BOM:
+               // grab the 1 to N bytes.
+               // combine as you go
+               // if error...
+               break;
+            case ENCODING.UTF16BE:
+            case ENCODING.UTF16BE_BOM:
+               const upper = orig[index];
+               index++;
+               const lower = orig[index];
+               const upperInt = isInt ? upper : upper.charCodeAt(0);
+               const lowerInt = isInt ? lower : lower.charCodeAt(0);
+               segment.text.push(String.fromCharCode((upperInt * 256) + lowerInt));
+               break;
+            case ENCODING.UTF16LE:
+            case ENCODING.UTF16LE_BOM:
+               // just grab every two bytes.  shift and add and make a char
+               // if in string, extract two bytes and do the same
+               break;
+            default:
+               // error
+               break;
+         }
+      }
+      segment.text = segment.text.join('');
    }
 
    _addExtractor(extractorState) {

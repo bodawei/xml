@@ -1925,4 +1925,22 @@ describe('ChunkSource', () => {
 
    });
 
+   describe('decoding', () => {
+
+      describe('UTF-16BE', () => {
+
+         it('identifies a UTF-16 big endian encoding', () => {
+            source.addSegment('\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020\u0000\u0076' +
+               '\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d\u0000\u0022' +
+               '\u0000\u0031\u0000\u002e\u0000\u0030\u0000\u0022\u0000\u003f\u0000\u003e');
+
+            source.getToTerminator([ '1' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<?xml version="' ]);
+         });
+
+      });
+
+   });
+
 });
