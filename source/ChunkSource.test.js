@@ -90,6 +90,14 @@ describe('ChunkSource', () => {
          expect(chunk).toEqualChunkText('f');
       });
 
+      it('getWord() calls back with a word', () => {
+         source.addSegment('frog ', true);
+
+         const chunk = source.getWord([]);
+
+         expect(chunk).toEqualChunkText('frog');
+      });
+
       it('getToTerminator() calls back with text up to the terminator', () => {
          source.addSegment('frog', true);
 
@@ -104,6 +112,22 @@ describe('ChunkSource', () => {
          const chunk = source.getMatch('fro');
 
          expect(chunk).toEqualChunkText('fro');
+      });
+
+      it('getMarkup() calls back with the markup', () => {
+         source.addSegment('<!FOO>', true);
+
+         const chunk = source.getMarkup();
+
+         expect(chunk).toEqualChunkText('<!');
+      });
+
+      it('getClose() calls back with the close', () => {
+         source.addSegment(']]>', true);
+
+         const chunk = source.getClose();
+
+         expect(chunk).toEqualChunkText(']]>');
       });
 
    });
@@ -1714,7 +1738,7 @@ describe('ChunkSource', () => {
             }).toThrowError('Chunk does not match target location.');
          });
 
-         it('throws an error if the value that is undone is not correct', () => {
+         it('throws an error if the value that is undone is not correct and spans segments', () => {
             source.addSegment('012', true);
             source.addSegment('3zzz', true);
             source.extract('digits', undefined, pluckedSpy);

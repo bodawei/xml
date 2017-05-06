@@ -206,23 +206,24 @@ class ChunkSource {
 
       if (firstSegment) {
          if (chunk.originalText.length < firstSegment.index) {
-            const newIndex = firstSegment.index -= chunk.originalText.length;
+//            const newIndex = firstSegment.index -= chunk.originalText.length;
 
-            if (firstSegment.text.substr(newIndex, chunk.originalText.length) !== chunk.originalText) {
-               throw new Error('Chunk does not match target location.');
-            }
-            firstSegment.index = newIndex;
-            return;
+//            if (firstSegment.text.substr(newIndex, chunk.originalText.length) !== chunk.originalText) {
+            throw new Error('Chunk does not match target location.');
+//            }
+//            firstSegment.index = newIndex;
+//            return;
          }
 
-         if (chunk.originalText.length >= firstSegment.index) {
-            const chunkIndex = chunk.originalText.length - firstSegment.index;
-            if (chunk.originalText.substr(chunkIndex, chunk.originalText.length) !== firstSegment.text.substr(0, firstSegment.index)) {
-               throw new Error('Chunk does not match target location.');
-            }
-            remainingChunkLength = chunkIndex;
-            firstSegment.index = 0;
+//         if (chunk.originalText.length >= firstSegment.index) {
+         const chunkIndex = chunk.originalText.length - firstSegment.index;
+         if (chunk.originalText.substr(chunkIndex, chunk.originalText.length) !==
+            firstSegment.text.substr(0, firstSegment.index)) {
+            throw new Error('Chunk does not match target location.');
          }
+         remainingChunkLength = chunkIndex;
+         firstSegment.index = 0;
+//         }
       }
 
       this._addToSegment(chunk.originalText.substr(0, remainingChunkLength), undefined, true);
@@ -255,7 +256,7 @@ class ChunkSource {
 
             existing.forEach((segment) => {
                segment.index = 0;
-               this.addSegment(segment.text, segment.isLast)
+               this.addSegment(segment.text, segment.isLast);
             });
          } else {
             return;
@@ -312,17 +313,17 @@ class ChunkSource {
    }
 
    _decodeSegment(segment) {
-      if (segment.text.length <= 0) {
-         return;
-      }
+//      if (segment.text.length <= 0) {
+//         return;
+//      }
 
-      const isInt = (typeof segment.text[0] === 'number');
+      //const isInt = (typeof segment.text[0] === 'number');
       const orig = segment.text;
       segment.text = [];
 
       for (let index = 0; index < orig.length; index++) {
          switch (this._encoding) {
-            case ENCODING.UTF8:
+//            case ENCODING.UTF8:
             case ENCODING.UTF8_BOM:
                // grab the 1 to N bytes.
                // combine as you go
@@ -342,9 +343,10 @@ class ChunkSource {
                   upper = orig[index + 1];
                }
                index++;
-               const upperInt = isInt ? upper : upper.charCodeAt(0);
-               const lowerInt = isInt ? lower : lower.charCodeAt(0);
+               const upperInt = upper.charCodeAt(0);
+               const lowerInt = lower.charCodeAt(0);
                segment.text.push(String.fromCharCode((upperInt * 256) + lowerInt));
+               break;
             default:
                // error
                break;

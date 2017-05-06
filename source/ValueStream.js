@@ -6,7 +6,6 @@ const stream = require('readable-stream');
 
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
-const EntityMetaData = require('./shared/EntityMetaData.js');
 const XmlReference = require('./XmlReference.js');
 const XmlText = require('./XmlText.js');
 const XmlTokenStreamMisc = require('./XmlTokenStream-misc.js');
@@ -22,7 +21,8 @@ const TERMINATORS = [ '&', '%' ];
  Options:
    - geRef: true|false: Recognize general Entity References
    - peRef: true|false: Recognize parameter Entity References
-   - attributeName: string|undefined: this is for an attribute (look for <'s)
+   - attributeName: string|undefined: this is for an attribute
+      (look for <'s)
  In addition to those, this will always recognize a character
  reference.
 \**********************************************************************/

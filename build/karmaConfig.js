@@ -29,7 +29,8 @@ module.exports = function karmaConfig(config) {
          BUILD_DIR + '**/*.test.js',
          SOURCE_DIR + '**/*.js'
       ],
-      exclude: [],
+      exclude: [
+      ],
       preprocessors: {},   // See the setup of this below.
       frameworks: [ 'jasmine', 'browserify' ],
       // https://github.com/Nikku/karma-browserify

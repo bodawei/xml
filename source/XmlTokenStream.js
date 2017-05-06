@@ -1250,59 +1250,6 @@ class XmlTokenStream extends stream.Readable {
       this._validateTagState(parsedTag);
    }
 
-   _validateText(chunk, start) {
-      if (!chunk) {
-         return;
-      }
-
-      const badIndices = [];
-      const discouragedIndices = [];
-      const badRegEx = this._entityMd.isVersion1dot1 ? BAD_CHARS_11 : BAD_CHARS_10;
-
-      badRegEx.lastIndex = 0;
-      let found = badRegEx.test(chunk.text);
-
-      if (found) {
-         while (found) {
-            badIndices.push(chunk.startOffset.index - 1 + badRegEx.lastIndex);
-            found = badRegEx.test(chunk.text);
-         }
-
-         this._report(SEID.CHARDATA_INVALID_CHAR, [ badIndices.join(', ') ], start, start);
-      }
-
-      let discouragedRegEx;
-
-      if (this._entityMd.isVersion1dot1) {
-         discouragedRegEx = DISCOURAGED_CHARS_11;
-      } else {
-         switch (this._entityMd.revision) {
-            case 1:
-            case 2:
-               return; // no discouraged characters here
-            case 3:
-            case 4:
-               discouragedRegEx = DISCOURAGED_CHARS_10_3_4;
-               break;
-            case 5:
-               discouragedRegEx = DISCOURAGED_CHARS_10_5;
-               break;
-         }
-      }
-
-      discouragedRegEx.lastIndex = 0;
-      let foundDiscouraged = discouragedRegEx.test(chunk.text);
-
-      if (foundDiscouraged) {
-         while (foundDiscouraged) {
-            discouragedIndices.push(chunk.startOffset.index - 1 + discouragedRegEx.lastIndex);
-            foundDiscouraged = discouragedRegEx.test(chunk.text);
-         }
-
-         this._warn(XWID.CHARDATA_DISCOURAGED_CHAR, [ discouragedIndices.join(', ') ], start, start);
-      }
-   }
-
    _report(code, params, place, context) {
       this._pushToken(new SyntaxError(code, params, place, context, this._entityMd.location));
    }

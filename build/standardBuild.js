@@ -183,15 +183,18 @@ module.exports = function standardBuild(grunt) {
       },
       testreport:  {
          dist: {
-            dir: OUT_DIR + '/testResults/',
-            summaryFile: path.join(OUT_DIR, './test-summary.txt')
+            options: {
+               reportDir: OUT_DIR + '/testResults/',
+               testFileName: 'test-summary.json',
+               summaryFile: path.join(OUT_DIR, './test-summary.txt')
+            }
          }
       },
       coveragereport:  {
          dist: {
             options: {
                filesToSkip: [ ],
-               dir: OUT_DIR,
+               reportDir: OUT_DIR,
                coverageFileName: 'coverage-summary.json',
                summaryFile: path.join(OUT_DIR, './coverage-summary.txt')
             }

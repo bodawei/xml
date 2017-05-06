@@ -132,8 +132,8 @@ function byBrowserName(a, b) {
 }
 
 function makeReport(grunt, options) {
-   if (!fs.existsSync(options.dir)) {
-      grunt.log.error('Could not find the directory to look for coverage reports: ' + options.dir);
+   if (!fs.existsSync(options.reportDir)) {
+      grunt.log.error('Could not find the directory to look for coverage reports: ' + options.reportDir);
       return;
    }
 
@@ -143,7 +143,7 @@ function makeReport(grunt, options) {
 
    // Get all the coverage files to examine
    const coverageFilename = options.coverageFileName || COVERAGE_FILENAME;
-   const coverageFiles = grunt.file.expand(options.dir + '/**/' + coverageFilename);
+   const coverageFiles = grunt.file.expand(options.reportDir + '/**/' + coverageFilename);
 
    var failed = false;
 

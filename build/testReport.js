@@ -1,13 +1,16 @@
 'use strict';
 
 /* eslint-env node */
-/* eslint-disable prefer-spread, no-console */
 
 const fs = require('fs');
 const path = require('path');
 
 const tableFormatter = require('./text-table-formatter.js');
 const util = require('./util.js');
+
+const DEFAULT_SUMMARY_FILE = 'testReport.txt';
+const DEFAULT_REPORTS_DIR = './';
+const DEFAULT_REPORT_NAME = 'test-summary.json';
 
 const COLUMNS = [ {
    name: 'percentage',
@@ -32,52 +35,54 @@ const COLUMNS = [ {
    name: 'skipped'
 } ];
 
+/*
+ * For each set of test results, read in the relevant file, and build a
+ * hash with the results of that test run
+ */
 function processResultsPerBrowser(browserFilePath) {
    const summaryJson = fs.readFileSync(browserFilePath, { encoding: 'utf8' });
    const summary = JSON.parse(summaryJson);
+   let testsRun = 0;
+   let testsPassed = 0;
+   let testsSkipped = 0;
+   let totalTime = 0;
+   let failure = false;
+   let duplicates;
 
    const browserAndOsName = path.basename(path.dirname(browserFilePath));
-   const results = util.extractBrowserAndOsNames(browserAndOsName);
-
-   results.failure = false;
-   results.run = 0;
-   results.passed = 0;
-   results.skipped = 0;
-   results.time = 0;
 
    for (const key in summary.tests) {
-      results.run++;
-      results.time += summary.tests[key].milliseconds;
+      testsRun++;
+      totalTime += summary.tests[key].milliseconds;
+      testsPassed += summary.tests[key].passed ? 1 : 0;
+      testsSkipped += summary.tests[key].skipped ? 1 : 0;
+   }
 
-      if (summary.tests[key].passed) {
-         results.passed++;
-      }
-      if (summary.tests[key].skipped) {
-         results.skipped ++;
-      }
+   if (testsRun !== testsPassed) {
+      failure = true;
    }
 
    if (summary.duplicateNames.length > 0) {
-      results.duplicates = summary.duplicateNames.join('\n\t');
-      results.failure = true;
+      duplicates = summary.duplicateNames.join('\n\t');
+      failure = true;
    }
 
-   if (results.run !== results.passed) {
-      results.failure = true;
-   }
-
-   results.percentage = (((results.passed - results.skipped) / results.run) * 100);
-   results.seconds = (results.time / 1000) + 'ms';
-   results.counts = (results.passed - results.skipped) + '/' + results.run;
-   if (results.skipped) {
-      results.skipped = 'Skipped ' + results.skipped;
-   }
+   const results = util.extractBrowserAndOsNames(browserAndOsName);
+   results.percentage = (((testsPassed - testsSkipped) / testsRun) * 100);
+   results.seconds = (totalTime / 1000) + 'ms';
+   results.counts = (testsPassed - testsSkipped) + '/' + testsRun;
+   results.skipped = testsSkipped ? 'Skipped ' + testsSkipped : '';
+   results.duplicates = duplicates;
+   results.failure = failure;
 
    return results;
 }
 
-// Not entirely clear what the disconnected and error/failure fields mean and when used.
-// Report them with some pretty distinctive messages if they appear.
+/*
+ * Not entirely clear what the disconnected and error/failure fields mean
+ * and when used. Report them with some pretty distinctive messages if
+ * they appear.
+ */
 function reportOnSummaryInfo(grunt, dataDir) {
    const summaryJson = fs.readFileSync(dataDir + 'all-test-summary.json', { encoding: 'utf8' });
    const summaryStats = JSON.parse(summaryJson);
@@ -95,8 +100,10 @@ function reportOnSummaryInfo(grunt, dataDir) {
    }
 }
 
+// Print out a message for each set of duplicate test names found in the results
 function reportDuplicateTestNames(grunt, browserResults) {
    let shownHeader = false;
+
    browserResults.map((result) => {
       if (!result.duplicates) {
          return;
@@ -111,33 +118,41 @@ function reportDuplicateTestNames(grunt, browserResults) {
    });
 }
 
-module.exports = (grunt) => {
+/*
+ * Given the options, find the test summary files. Report on any duplicate
+ * test names, and write out a table of the results for all browsers.
+ */
+function testReport(grunt, options) {
+   const summaryFile = options.summaryFile || DEFAULT_SUMMARY_FILE;
+   const reportsRoot = options.reportDir || DEFAULT_REPORTS_DIR;
+   const testFileName = options.testFileName || DEFAULT_REPORT_NAME;
 
-   function testReport() {
-      if (!fs.existsSync(this.data.dir)) {
-         grunt.log.error('Could not find the directory to look for coverage reports: ' + this.data.dir);
-         return;
-      }
-
-      const resultFiles = grunt.file.expand(this.data.dir + '**/test-summary.json');
-      const browserResults = resultFiles.map(processResultsPerBrowser);
-
-      reportDuplicateTestNames(grunt, browserResults);
-
-      const table = tableFormatter(browserResults, { columns: COLUMNS });
-      grunt.log.write(table);
-
-      if (this.data.summaryFile) {
-         fs.writeFileSync(this.data.summaryFile, table, 'UTF-8');
-      }
-
-      reportOnSummaryInfo(grunt, this.data.dir);
-
-      const failure = browserResults.reduce((soFar, result) => { return result.failure || soFar; }, false);
-      if (failure) {
-         grunt.fail.fatal('Tests failed.');
-      }
+   if (!fs.existsSync(reportsRoot)) {
+      grunt.log.error('Could not find the directory to look for rest reports: ' + reportsRoot);
+      return;
    }
 
-   grunt.registerMultiTask('testreport', 'Produces a summary of all test coverage', testReport);
+   const resultFiles = grunt.file.expand(reportsRoot + '/**/' + testFileName);
+   const browserResults = resultFiles.map(processResultsPerBrowser);
+
+   const table = tableFormatter(browserResults, { columns: COLUMNS });
+
+   fs.writeFileSync(summaryFile, table, 'UTF-8');
+
+   reportDuplicateTestNames(grunt, browserResults);
+   reportOnSummaryInfo(grunt, reportsRoot);
+}
+
+/*
+ * Options:
+ *   reportDir
+ *   testFileName
+ *   summaryFile
+ */
+module.exports = (grunt) => {
+   function makeTestReport() {
+      testReport(grunt, this.options());
+   }
+
+   grunt.registerMultiTask('testreport', 'Produces a summary of all test coverage', makeTestReport);
 };
