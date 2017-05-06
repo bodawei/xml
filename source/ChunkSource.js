@@ -105,107 +105,91 @@ class ChunkSource {
       this._addExtractor(peekState);
    }
 
-   /**********************************************************************\
-     Extract a chunk of all the digits from the current point in the
-     source and pass it to the callback.
-     If no digits, pass back undefined.
-
-     PARAM
-     deliverChunk: receives the chunk of digits extracted from here.
-         function(chunk:Chunk|undefined):void
-   \**********************************************************************/
-
-   getDigits(deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
-      }
-
-      this._addExtractor(new State(extractDigits, deliverChunk, this._version));
+   // Legacy support
+   getDigits() {
+      return this._doLegacy('digits');
    }
 
-   /**********************************************************************\
-     @@@
-
-        [3] S ::= (#x20 | #x9 | #xD | #xA)+
-
-     PARAM
-     deliverChunk: receives the chunk of digits extracted from here.
-         function(chunk:Chunk|undefined):void
-   \**********************************************************************/
-
-   getSpace(deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
-      }
-
-      this._addExtractor(new State(extractSpace, deliverChunk, this._version));
+   getSpace() {
+      return this._doLegacy('space');
    }
 
-   getChar(deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getChar().');
-      }
-
-      this._addExtractor(new State(extractChar, deliverChunk, this._version));
+   getChar() {
+      return this._doLegacy('char');
    }
 
-   // could make terminators optional.
-   getWord(terminators, deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
-      }
-
-      const spaceTerminators = this._version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
-
-      const state = new State(extractToTerminator, deliverChunk, this._version);
-      state.spaceTerminators = spaceTerminators;
-      state.terminators = terminators;
-      this._addExtractor(state);
+   getWord(terminators) {
+      return this._doLegacy('word', terminators);
    }
 
-   getToTerminator(terminators, deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error(
-            'Must pass a callback function of the form function(chunk|undefined):void to getToTerminator().');
-      }
-
-      const state = new State(extractToTerminator, deliverChunk, this._version);
-      state.spaceTerminators = [];
-      state.terminators = terminators;
-      this._addExtractor(state);
+   getToTerminator(terminators) {
+      return this._doLegacy('all', terminators);
    }
 
-   getMatch(matchString, deliverChunk) {
-      if (typeof matchString !== 'string') {
-         throw new Error('Must pass a string to match to getMatch().');
-      }
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getMatch().');
-      }
-
-      const state = new State(extractMatch, deliverChunk, this._version);
-      state.candidate = matchString;
-      this._addExtractor(state);
+   getMatch(matchString) {
+      return this._doLegacy('match', matchString);
    }
 
-   getMarkup(deliverChunk) {
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getMarkup().');
-      }
-
-      const state = new State(searchMultipleMatch, deliverChunk, this._version);
-      state.candidates = [ '<!--', '<?', '<!', '</', '&', '<' ];
-      this._addExtractor(state);
+   getMarkup() {
+      return this._doLegacy('markup');
    }
 
-   getClose(deliverChunk) {
+   getClose() {
+      return this._doLegacy('close');
+   }
+
+   _doLegacy(type, param) {
+      let chunk;
+      this.extract(type, param, (result) => { chunk = result; });
+      return chunk;
+   }
+
+   extract(type, params, deliverChunk) {
       if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to getClose().');
+         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
       }
 
-      const state = new State(searchMultipleMatch, deliverChunk, this._version);
-      state.candidates = [ ']]>', ']' ];
-      this._addExtractor(state);
+      // check params?
+      switch (type) {
+         case 'digits':
+            this._addExtractor(new State(extractDigits, deliverChunk, this._version));
+            break;
+         // [3] S ::= (#x20 | #x9 | #xD | #xA)+
+         case 'space':
+            this._addExtractor(new State(extractSpace, deliverChunk, this._version));
+            break;
+         case 'char':
+            this._addExtractor(new State(extractChar, deliverChunk, this._version));
+            break;
+         case 'word':
+            const state = new State(extractToTerminator, deliverChunk, this._version);
+            state.spaceTerminators = this._version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
+            state.terminators = params;
+            this._addExtractor(state);
+            break;
+         case 'all':
+            const allState = new State(extractToTerminator, deliverChunk, this._version);
+            allState.spaceTerminators = [];
+            allState.terminators = params;
+            this._addExtractor(allState);
+            break;
+         case 'match':
+            const matchState = new State(extractMatch, deliverChunk, this._version);
+            matchState.candidate = params;
+            this._addExtractor(matchState);
+            break;
+         case 'markup':
+            const markupState = new State(searchMultipleMatch, deliverChunk, this._version);
+            markupState.candidates = [ '<!--', '<?', '<!', '</', '&', '<' ];
+            this._addExtractor(markupState);
+            break;
+         case 'close':
+            const closeState = new State(searchMultipleMatch, deliverChunk, this._version);
+            closeState.candidates = [ ']]>', ']' ];
+            this._addExtractor(closeState);
+            break;
+
+      }
    }
 
    undo(chunk) {
@@ -346,18 +330,21 @@ class ChunkSource {
                break;
             case ENCODING.UTF16BE:
             case ENCODING.UTF16BE_BOM:
-               const upper = orig[index];
+            case ENCODING.UTF16LE:
+            case ENCODING.UTF16LE_BOM:
+               let lower;
+               let upper;
+               if (this._encoding === ENCODING.UTF16BE || this._encoding === ENCODING.UTF16BE_BOM) {
+                  upper = orig[index];
+                  lower = orig[index + 1];
+               } else {
+                  lower = orig[index];
+                  upper = orig[index + 1];
+               }
                index++;
-               const lower = orig[index];
                const upperInt = isInt ? upper : upper.charCodeAt(0);
                const lowerInt = isInt ? lower : lower.charCodeAt(0);
                segment.text.push(String.fromCharCode((upperInt * 256) + lowerInt));
-               break;
-            case ENCODING.UTF16LE:
-            case ENCODING.UTF16LE_BOM:
-               // just grab every two bytes.  shift and add and make a char
-               // if in string, extract two bytes and do the same
-               break;
             default:
                // error
                break;

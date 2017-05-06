@@ -17,7 +17,14 @@ M 215: Finish encoding
 	√ - new routine will do the same sniffing.
 	√- if find encoding set it on this and return.  one value it can set is 'unencoded'
 	√- on return, if encoding set, then do the decoding
+	- decode
+		√- big endian
+		√- little endian
+		- utf8
+	- deal with decoding that spans segments
+	- deal with unknown encodings
 	- skip over bom, and set flag <-- can't really do this until decoded
+	- Warning: doing a getToTerminator of ?> with identifies a UTF-16 big endian encoding does not work
 	- while here, look for version <-- can't really do this until decoded
 	- user specifies UTF-16. Need to deal with that
 		- set flag: userSpecified UTF16, and encoding is undefined

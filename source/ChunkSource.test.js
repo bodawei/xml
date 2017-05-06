@@ -30,9 +30,9 @@ describe('ChunkSource', () => {
    describe('multiple calls', () => {
 
       it('made before any segments added', () => {
-         source.getSpace(pluckedSpy);
-         source.getDigits(pluckedSpy);
-         source.getWord([], pluckedSpy);
+         source.extract('space', undefined, pluckedSpy);
+         source.extract('digits', undefined, pluckedSpy);
+         source.extract('word', [], pluckedSpy);
 
          source.addSegment(' 123Test', true);
 
@@ -42,9 +42,9 @@ describe('ChunkSource', () => {
       it('made after segments added', () => {
          source.addSegment(' 123Test', true);
 
-         source.getSpace(pluckedSpy);
-         source.getDigits(pluckedSpy);
-         source.getWord([], pluckedSpy);
+         source.extract('space', undefined, pluckedSpy);
+         source.extract('digits', undefined, pluckedSpy);
+         source.extract('word', [], pluckedSpy);
 
          expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ', '123', 'Test' ]);
       });
@@ -52,14 +52,58 @@ describe('ChunkSource', () => {
       it('made across segment addition', () => {
          source.addSegment(' ', false);
 
-         source.getSpace(pluckedSpy);
+         source.extract('space', undefined, pluckedSpy);
          source.addSegment('\t123', false);
-         source.getDigits(pluckedSpy);
+         source.extract('digits', undefined, pluckedSpy);
          source.addSegment('456TestV', false);
-         source.getWord([], pluckedSpy);
+         source.extract('word', [], pluckedSpy);
          source.addSegment('alue ', true);
 
          expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t', '123456', 'TestValue' ]);
+      });
+
+   });
+
+   describe('legacy', () => {
+
+      it('getDigits() calls back with a chunk with digits when digits are in the segment', () => {
+         source.addSegment('012345', true);
+
+         const chunk = source.getDigits();
+
+         expect(chunk).toEqualChunkText('012345');
+      });
+
+      it('getSpace() calls back with a chunk with spaces when spaces are in the segment', () => {
+         source.addSegment('  \r\n', true);
+
+         const chunk = source.getSpace();
+
+         expect(chunk).toEqualChunkText('  \n');
+      });
+
+      it('getChar() calls back with a chunk with a char', () => {
+         source.addSegment('frog', true);
+
+         const chunk = source.getChar();
+
+         expect(chunk).toEqualChunkText('f');
+      });
+
+      it('getToTerminator() calls back with text up to the terminator', () => {
+         source.addSegment('frog', true);
+
+         const chunk = source.getToTerminator([ 'o' ]);
+
+         expect(chunk).toEqualChunkText('fr');
+      });
+
+      it('getMatch() calls back with the matched text', () => {
+         source.addSegment('frog', true);
+
+         const chunk = source.getMatch('fro');
+
+         expect(chunk).toEqualChunkText('fro');
       });
 
    });
@@ -160,7 +204,7 @@ describe('ChunkSource', () => {
             source.addSegment(' a', true);
 
             source.peekIsSpace(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -171,7 +215,7 @@ describe('ChunkSource', () => {
             source.addSegment('\ta', true);
 
             source.peekIsSpace(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -182,7 +226,7 @@ describe('ChunkSource', () => {
             source.addSegment('\ra', true);
 
             source.peekIsSpace(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -193,7 +237,7 @@ describe('ChunkSource', () => {
             source.addSegment('\na', true);
 
             source.peekIsSpace(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -204,7 +248,7 @@ describe('ChunkSource', () => {
             source.addSegment('\na', true);
 
             source.peekIsSpace(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -234,7 +278,7 @@ describe('ChunkSource', () => {
             source.addSegment(' foo', false);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             const chunks = pluckedSpy.calls.allArgs().map((arg) => arg[0]);
             expect(chunks).toEqualChunkTexts([ ' ', ' ' ]);
@@ -244,7 +288,7 @@ describe('ChunkSource', () => {
             source.addSegment('', true);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -268,7 +312,7 @@ describe('ChunkSource', () => {
             source.addSegment('', true);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -286,7 +330,7 @@ describe('ChunkSource', () => {
             source.addSegment('x', true);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'x', 'x' ]);
          });
@@ -296,7 +340,7 @@ describe('ChunkSource', () => {
             source.addSegment('x', true);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n' ]);
          });
@@ -306,8 +350,8 @@ describe('ChunkSource', () => {
             source.addSegment('\nx', true);
 
             source.peekChar(pluckedSpy);
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n', 'x' ]);
          });
@@ -316,14 +360,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getChar', () => {
+   describe('extract("char"', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with the next character', () => {
             source.addSegment('x', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'x' ]);
          });
@@ -331,18 +375,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no character at the offset', () => {
             source.addSegment('', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('012345', true);
-
-            expect(() => {
-               source.getChar();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getChar().');
          });
 
       });
@@ -350,7 +386,7 @@ describe('ChunkSource', () => {
       describe('segment spanning', () => {
 
          it('does not call callback if no data is passed to source', () => {
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -358,14 +394,14 @@ describe('ChunkSource', () => {
          it('calls back with undefined when at the end of input', () => {
             source.addSegment('', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
          it('calls back with a char when segment added later', () => {
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             source.addSegment('abc', true);
 
@@ -374,27 +410,27 @@ describe('ChunkSource', () => {
 
          it('calls back with a char when in middle of segment', () => {
             source.addSegment('123mom', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'm' ]);
          });
 
          it('calls back with a char at middle of segment', () => {
             source.addSegment('123nun', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'n' ]);
          });
 
          it('calls back with a char at end of segment', () => {
             source.addSegment('123p', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('p');
@@ -403,9 +439,9 @@ describe('ChunkSource', () => {
          it('calls back with a char at start of subsequent segment', () => {
             source.addSegment('123', true);
             source.addSegment('great', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'g' ]);
          });
@@ -413,7 +449,7 @@ describe('ChunkSource', () => {
          it('does not call back if there is just a carriage return at the end of a non-terminal segment', () => {
             source.addSegment('\r');
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -421,7 +457,7 @@ describe('ChunkSource', () => {
          it('calls back with a newline when a carriage return is found at the end of the terminal segment', () => {
             source.addSegment('\r', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
@@ -431,8 +467,8 @@ describe('ChunkSource', () => {
             source.addSegment('\n');
             source.addSegment('x', true);
 
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
@@ -443,8 +479,8 @@ describe('ChunkSource', () => {
             source.addSegment('\u0085');
             source.addSegment('x', true);
 
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
@@ -453,8 +489,8 @@ describe('ChunkSource', () => {
             source.addSegment('\r');
             source.addSegment('x', true);
 
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
@@ -466,7 +502,7 @@ describe('ChunkSource', () => {
          it('calls back with a tab', () => {
             source.addSegment('\t', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\t' ]);
          });
@@ -474,7 +510,7 @@ describe('ChunkSource', () => {
          it('calls back with a space', () => {
             source.addSegment(' ', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
@@ -482,7 +518,7 @@ describe('ChunkSource', () => {
          it('calls back with a newline', () => {
             source.addSegment('\n', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
@@ -490,7 +526,7 @@ describe('ChunkSource', () => {
          it('calls back with a \\u0085 in 1.0', () => {
             source.addSegment('\u0085', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\u0085' ]);
          });
@@ -499,7 +535,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('\u0085', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
@@ -507,7 +543,7 @@ describe('ChunkSource', () => {
          it('calls back with a \\u2028 in 1.0', () => {
             source.addSegment('\u2028', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\u2028' ]);
          });
@@ -516,7 +552,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('\u2028', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
@@ -524,7 +560,7 @@ describe('ChunkSource', () => {
          it('calls back with a carriage return as a newline', () => {
             source.addSegment('\rx', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
          });
@@ -532,7 +568,7 @@ describe('ChunkSource', () => {
          it('calls back with a carriage return/newline as a newline', () => {
             source.addSegment('\r\n', true);
 
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
          });
@@ -540,8 +576,8 @@ describe('ChunkSource', () => {
          it('calls back with a carriage return/\\u0085 as a newline and ignores the latter in 1.0', () => {
             source.addSegment('\r\u0085', true);
 
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\u0085' ]);
          });
@@ -550,8 +586,8 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('\r\u0085x', true);
 
-            source.getChar(pluckedSpy);
-            source.getChar(pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
          });
@@ -562,14 +598,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getDigits', () => {
+   describe('extract("digits")', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with digits when digits are in the segment', () => {
             source.addSegment('012345', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345' ]);
          });
@@ -577,7 +613,7 @@ describe('ChunkSource', () => {
          it('calls back with a chunk with digits when hex digits are in the segment', () => {
             source.addSegment('abcdefABCDEF0123456789', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'abcdefABCDEF0123456789' ]);
          });
@@ -585,7 +621,7 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no digits at the current offset in source', () => {
             source.addSegment('n012345abcdef', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -595,8 +631,8 @@ describe('ChunkSource', () => {
             source.addSegment('012345', true);
 
             expect(() => {
-               source.getDigits();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getDigits().');
+               source.extract('digits', undefined);
+            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to extract().');
          });
 
       });
@@ -606,7 +642,7 @@ describe('ChunkSource', () => {
          it('calls back with undefined when at the end of input', () => {
             source.addSegment('', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -615,13 +651,13 @@ describe('ChunkSource', () => {
          it('does not call back if digits go to end of source and nextsegment is not added', () => {
             source.addSegment('012345');
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('does not call callback if no data is passed to source', () => {
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -631,7 +667,7 @@ describe('ChunkSource', () => {
             source.addSegment('aef', false);
             source.addSegment('12', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345aef12' ]);
          });
@@ -641,7 +677,7 @@ describe('ChunkSource', () => {
             source.addSegment('aef', false);
             source.addSegment('13last', false);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '012345aef13' ]);
          });
@@ -649,7 +685,7 @@ describe('ChunkSource', () => {
          it('calls back even when data added after call', () => {
             source.addSegment('012345', false);
             source.addSegment('aef', false);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
             expect(pluckedSpy.calls.count()).toEqual(0);
 
             source.addSegment('13last', false);
@@ -660,8 +696,8 @@ describe('ChunkSource', () => {
          it('calls back with digits when called after a different operation (mid-segment)', () => {
             source.addSegment(' \t1234abFred', true);
 
-            source.getSpace(pluckedSpy);
-            source.getDigits(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t', '1234abF' ]);
          });
@@ -669,8 +705,8 @@ describe('ChunkSource', () => {
          it('leaves segment offset right for following operation', () => {
             source.addSegment('1234abF \t', true);
 
-            source.getDigits(pluckedSpy);
-            source.getSpace(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '1234abF', ' \t' ]);
          });
@@ -679,14 +715,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getSpace', () => {
+   describe('extract("space")', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with space when space at the current offset in the source', () => {
             source.addSegment('    hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '    ' ]);
          });
@@ -694,18 +730,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no space at the current offset in source', () => {
             source.addSegment('n012345abcdef', true);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('  ', true);
-
-            expect(() => {
-               source.getSpace();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getSpace().');
          });
 
       });
@@ -715,13 +743,13 @@ describe('ChunkSource', () => {
          it('does not call back if space goes to end of source and next segment is not added', () => {
             source.addSegment('  \n ');
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('does not call callback if no data is passed to source', () => {
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -729,7 +757,7 @@ describe('ChunkSource', () => {
          it('calls back with undefined when at the end of the input', () => {
             source.addSegment('', true);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -740,7 +768,7 @@ describe('ChunkSource', () => {
             source.addSegment('\t', false);
             source.addSegment(' ', true);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '  \t ' ]);
          });
@@ -750,7 +778,7 @@ describe('ChunkSource', () => {
             source.addSegment('\t', false);
             source.addSegment(' last', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '  \t ' ]);
          });
@@ -758,7 +786,7 @@ describe('ChunkSource', () => {
          it('calls back even when data added after call', () => {
             source.addSegment('  ', false);
             source.addSegment('\t', false);
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
             expect(pluckedSpy.calls.count()).toEqual(0);
 
             source.addSegment(' last', false);
@@ -773,7 +801,7 @@ describe('ChunkSource', () => {
          it('calls back with a mixture of space and tabs', () => {
             source.addSegment(' \t \t hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t \t ' ]);
          });
@@ -781,7 +809,7 @@ describe('ChunkSource', () => {
          it('recognizes tabs (\\t)', () => {
             source.addSegment(' \t hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \t ' ]);
          });
@@ -789,7 +817,7 @@ describe('ChunkSource', () => {
          it('recognizes newlines (\\n)', () => {
             source.addSegment(' \n hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -797,7 +825,7 @@ describe('ChunkSource', () => {
          it('recognizes carrige returns (\\r) and returns them as newlines', () => {
             source.addSegment(' \r hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -805,7 +833,7 @@ describe('ChunkSource', () => {
          it('recognizes carrige returns/new line combinations (\\r\\n) and returns them as newlines', () => {
             source.addSegment(' \r\n hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -813,7 +841,7 @@ describe('ChunkSource', () => {
          it('does not recognize next line (\\u0085) as space if version is 1.0', () => {
             source.addSegment(' \u0085 hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
@@ -821,7 +849,7 @@ describe('ChunkSource', () => {
          it('does not recognize line separator (\\u2028) as space if version is 1.0', () => {
             source.addSegment(' \u2028 hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' ' ]);
          });
@@ -830,7 +858,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment(' \u0085 hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -839,7 +867,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment(' \r\u0085 hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -848,7 +876,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment(' \u2028 hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
          });
@@ -857,7 +885,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment(' \n\r\r\n \u2028\u0085\r\u0085hi', false);
 
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n\n\n \n\n\n' ]);
          });
@@ -866,14 +894,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getWord', () => {
+   describe('extract("word"', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with a word terminated by a space', () => {
             source.addSegment('word x', false);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word' ]);
          });
@@ -881,18 +909,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no word at the current offset in source', () => {
             source.addSegment(' ', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.getWord();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getWord().');
          });
 
       });
@@ -902,20 +922,20 @@ describe('ChunkSource', () => {
          it('does not recognize a word if the word reaches to end of segment and new segment not added', () => {
             source.addSegment('IAmAWord');
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('does not recognize a word if no segments added', () => {
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('recognizes no word when at eof', () => {
             source.addSegment('', true);
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -926,7 +946,7 @@ describe('ChunkSource', () => {
             source.addSegment('rd', false);
             source.addSegment('99 ', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word99' ]);
          });
@@ -936,7 +956,7 @@ describe('ChunkSource', () => {
             source.addSegment('rd', false);
             source.addSegment('98', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word98' ]);
          });
@@ -946,7 +966,7 @@ describe('ChunkSource', () => {
             source.addSegment('rd', false);
             source.addSegment('100 x', false);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Word100' ]);
          });
@@ -954,7 +974,7 @@ describe('ChunkSource', () => {
          it('recognizes a word even when data added after the call', () => {
             source.addSegment('Wo', false);
             source.addSegment('r', false);
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
             expect(pluckedSpy.calls.count()).toEqual(0);
 
             source.addSegment('d101 ', true);
@@ -969,7 +989,7 @@ describe('ChunkSource', () => {
          it('calls back with a word terminated by a space', () => {
             source.addSegment('word1 ', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word1' ]);
          });
@@ -977,7 +997,7 @@ describe('ChunkSource', () => {
          it('calls back with a word terminated by a tab', () => {
             source.addSegment('word2\t', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word2' ]);
          });
@@ -985,7 +1005,7 @@ describe('ChunkSource', () => {
          it('calls back with a word terminated by a newline', () => {
             source.addSegment('word3\n', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word3' ]);
          });
@@ -993,7 +1013,7 @@ describe('ChunkSource', () => {
          it('calls back with a word terminated by a carriage return', () => {
             source.addSegment('word4\r', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word4' ]);
          });
@@ -1001,7 +1021,7 @@ describe('ChunkSource', () => {
          it('does not recognize a word terminated by a \\u0085 in 1.0', () => {
             source.addSegment('word5\u0085\r', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word5\u0085' ]);
          });
@@ -1009,7 +1029,7 @@ describe('ChunkSource', () => {
          it('does not recognize a word terminated by a \\u2028 in 1.0', () => {
             source.addSegment('word6\u2028\r', true);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word6\u2028' ]);
          });
@@ -1018,7 +1038,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('word7\u0085\r', false);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word7' ]);
          });
@@ -1027,7 +1047,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('word8\u2028\r', false);
 
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'word8' ]);
          });
@@ -1035,7 +1055,7 @@ describe('ChunkSource', () => {
          it('recognizes a word terminated by a custom terminator', () => {
             source.addSegment('word9\n', false);
 
-            source.getWord([ 'o' ], pluckedSpy);
+            source.extract('word', [ 'o' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'w' ]);
          });
@@ -1043,7 +1063,7 @@ describe('ChunkSource', () => {
          it('recognizes a word terminated by a custom multi-character terminator', () => {
             source.addSegment('wordA\n', false);
 
-            source.getWord([ 'rdA' ], pluckedSpy);
+            source.extract('word', [ 'rdA' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
@@ -1051,7 +1071,7 @@ describe('ChunkSource', () => {
          it('recognizes a word terminated by one of several custom terminators', () => {
             source.addSegment('wordA\n', false);
 
-            source.getWord([ 'dA', 'A', 'rd' ], pluckedSpy);
+            source.extract('word', [ 'dA', 'A', 'rd' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
@@ -1060,7 +1080,7 @@ describe('ChunkSource', () => {
             source.addSegment('wordC\n', true);
 
             // d will match, but then r will not
-            source.getWord([ 'dr' ], pluckedSpy);
+            source.extract('word', [ 'dr' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wordC' ]);
          });
@@ -1069,7 +1089,7 @@ describe('ChunkSource', () => {
             source.addSegment('wor', false);
             source.addSegment('dC', true);
 
-            source.getWord([ 'rd' ], pluckedSpy);
+            source.extract('word', [ 'rd' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'wo' ]);
          });
@@ -1078,14 +1098,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getMatch', () => {
+   describe('extract("match")', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk that matches the requested match', () => {
             source.addSegment('some stuff', false);
 
-            source.getMatch('som', pluckedSpy);
+            source.extract('match', 'som', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'som' ]);
          });
@@ -1093,26 +1113,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no match at the current offset in source', () => {
             source.addSegment('test', true);
 
-            source.getMatch('xx', pluckedSpy);
+            source.extract('match', 'xx', pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a match value', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.getMatch();
-            }).toThrowError('Must pass a string to match to getMatch().');
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.getMatch('xxx');
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getMatch().');
          });
 
       });
@@ -1122,13 +1126,13 @@ describe('ChunkSource', () => {
          it('does recognize a match if the match reaches to end of segment and new segment not added', () => {
             source.addSegment('match', false);
 
-            source.getMatch('match', pluckedSpy);
+            source.extract('match', 'match', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'match' ]);
          });
 
          it('does not recognize a match if no segments added', () => {
-            source.getMatch('match', pluckedSpy);
+            source.extract('match', 'match', pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -1136,7 +1140,7 @@ describe('ChunkSource', () => {
          it('recognizes no match when at eof', () => {
             source.addSegment('', true);
 
-            source.getMatch('match', pluckedSpy);
+            source.extract('match', 'match', pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -1147,7 +1151,7 @@ describe('ChunkSource', () => {
             source.addSegment('tc', false);
             source.addSegment('hABxxx', true);
 
-            source.getMatch('Mat', pluckedSpy);
+            source.extract('match', 'Mat', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Mat' ]);
          });
@@ -1157,7 +1161,7 @@ describe('ChunkSource', () => {
             source.addSegment('tc', false);
             source.addSegment('hAB ', true);
 
-            source.getMatch('MatchAB', pluckedSpy);
+            source.extract('match', 'MatchAB', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'MatchAB' ]);
          });
@@ -1167,7 +1171,7 @@ describe('ChunkSource', () => {
             source.addSegment('tc', false);
             source.addSegment('hAAxx', false);
 
-            source.getMatch('MatchAA', pluckedSpy);
+            source.extract('match', 'MatchAA', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'MatchAA' ]);
          });
@@ -1175,7 +1179,7 @@ describe('ChunkSource', () => {
          it('recognizes a match even when data added after the call', () => {
             source.addSegment('Ma', false);
             source.addSegment('t', false);
-            source.getMatch('Matc', pluckedSpy);
+            source.extract('match', 'Matc', pluckedSpy);
             expect(pluckedSpy.calls.count()).toEqual(0);
 
             source.addSegment('ch101 ', false);
@@ -1187,30 +1191,30 @@ describe('ChunkSource', () => {
 
       describe('interacting calls', () => {
 
-         it('calls back with value after a getWord() call', () => {
+         it('calls back with value after extract word call', () => {
             source.addSegment('georgeMichael', false);
 
-            source.getWord([ 'M' ], pluckedSpy);
-            source.getMatch('Micha', pluckedSpy);
+            source.extract('word', [ 'M' ], pluckedSpy);
+            source.extract('match', 'Micha', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'george', 'Micha' ]);
          });
 
-         it('calls back with value after a getMatch() call', () => {
+         it('calls back with value after an extract match call', () => {
             source.addSegment('testOne', false);
 
-            source.getMatch('test', pluckedSpy);
-            source.getMatch('One', pluckedSpy);
+            source.extract('match', 'test', pluckedSpy);
+            source.extract('match', 'One', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'test', 'One' ]);
          });
 
-         it('calls back with value after a getMatch() call across segment boundaries', () => {
+         it('calls back with value after an extract match call across segment boundaries', () => {
             source.addSegment('test', false);
             source.addSegment('Two', false);
 
-            source.getMatch('test', pluckedSpy);
-            source.getMatch('Two', pluckedSpy);
+            source.extract('match', 'test', pluckedSpy);
+            source.extract('match', 'Two', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'test', 'Two' ]);
          });
@@ -1226,7 +1230,7 @@ describe('ChunkSource', () => {
          it('calls back with a chunk with a word terminated by a space', () => {
             source.addSegment('fox and friends', false);
 
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'fo' ]);
          });
@@ -1234,19 +1238,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when nothing in the source', () => {
             source.addSegment('', true);
 
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.getToTerminator([]);
-            }).toThrowError(
-               'Must pass a callback function of the form function(chunk|undefined):void to getToTerminator().');
          });
 
       });
@@ -1256,20 +1251,20 @@ describe('ChunkSource', () => {
          it('does not call back when terminator not found in current non-final segment', () => {
             source.addSegment('IAmAWord');
 
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('does not call back when no seguments have been added', () => {
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
 
          it('calls back with undefined at EOF', () => {
             source.addSegment('', true);
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -1279,7 +1274,7 @@ describe('ChunkSource', () => {
             source.addSegment('', false);
             source.addSegment('', false);
             source.addSegment('', true);
-            source.getToTerminator([ 'x' ], pluckedSpy);
+            source.extract('all', [ 'x' ], pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
@@ -1290,7 +1285,7 @@ describe('ChunkSource', () => {
             source.addSegment('xt', false);
             source.addSegment('10', true);
 
-            source.getToTerminator([ '0' ], pluckedSpy);
+            source.extract('all', [ '0' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text1' ]);
          });
@@ -1300,7 +1295,7 @@ describe('ChunkSource', () => {
             source.addSegment('xt', false);
             source.addSegment('20', true);
 
-            source.getToTerminator([ '9' ], pluckedSpy);
+            source.extract('all', [ '9' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text20' ]);
          });
@@ -1310,7 +1305,7 @@ describe('ChunkSource', () => {
             source.addSegment('xt', false);
             source.addSegment('30 ', true);
 
-            source.getToTerminator([ '0' ], pluckedSpy);
+            source.extract('all', [ '0' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text3' ]);
          });
@@ -1320,7 +1315,7 @@ describe('ChunkSource', () => {
             source.addSegment('xt', false);
             source.addSegment('40', true);
 
-            source.getToTerminator([ '0' ], pluckedSpy);
+            source.extract('all', [ '0' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text4' ]);
          });
@@ -1328,7 +1323,7 @@ describe('ChunkSource', () => {
          it('calls back with text even when final needed segment added after the call', () => {
             source.addSegment('Te', false);
             source.addSegment('xt', false);
-            source.getToTerminator([ '0' ], pluckedSpy);
+            source.extract('all', [ '0' ], pluckedSpy);
             expect(pluckedSpy.calls.count()).toEqual(0);
 
             source.addSegment('50 ', false);
@@ -1342,7 +1337,7 @@ describe('ChunkSource', () => {
             source.addSegment('!', false);
             source.addSegment('-', false);
             source.addSegment('-', true);
-            source.getToTerminator([ '<!--' ], pluckedSpy);
+            source.extract('all', [ '<!--' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text' ]);
          });
@@ -1353,7 +1348,7 @@ describe('ChunkSource', () => {
             source.addSegment('!', false);
             source.addSegment('-', false);
             source.addSegment('-X', true);
-            source.getToTerminator([ '<!---' ], pluckedSpy);
+            source.extract('all', [ '<!---' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text<!--X' ]);
          });
@@ -1364,7 +1359,7 @@ describe('ChunkSource', () => {
          it('calls back with match of the second terminator', () => {
             source.addSegment('text10 ', false);
 
-            source.getToTerminator([ '0', '1' ], pluckedSpy);
+            source.extract('all', [ '0', '1' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text' ]);
          });
@@ -1372,7 +1367,7 @@ describe('ChunkSource', () => {
          it('calls back with match of a multi character terminator', () => {
             source.addSegment('text2 234', true);
 
-            source.getToTerminator([ '0', '234' ], pluckedSpy);
+            source.extract('all', [ '0', '234' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text2 ' ]);
          });
@@ -1381,14 +1376,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getMarkup()', () => {
+   describe('extract("markup")', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with the next bit of markup', () => {
             source.addSegment('<foo', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<' ]);
          });
@@ -1396,18 +1391,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no markup at the offset', () => {
             source.addSegment('ssss', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('012345', true);
-
-            expect(() => {
-               source.getMarkup();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getMarkup().');
          });
 
       });
@@ -1415,7 +1402,7 @@ describe('ChunkSource', () => {
       describe('segment spanning', () => {
 
          it('does not call callback if no data is passed to source', () => {
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -1423,14 +1410,14 @@ describe('ChunkSource', () => {
          it('calls back with undefined when at the end of input', () => {
             source.addSegment('', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
          it('calls back with a markup char when segment added later', () => {
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             source.addSegment('<start>', true);
 
@@ -1439,18 +1426,18 @@ describe('ChunkSource', () => {
 
          it('calls back with a markup char when in middle of segment', () => {
             source.addSegment('123<!--', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<!--' ]);
          });
 
          it('calls back with markup at end of segment', () => {
             source.addSegment('123<?', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<?' ]);
          });
@@ -1458,9 +1445,9 @@ describe('ChunkSource', () => {
          it('calls back with markup at start of subsequent segment', () => {
             source.addSegment('123', true);
             source.addSegment('<start>', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '<' ]);
          });
@@ -1472,7 +1459,7 @@ describe('ChunkSource', () => {
          it('calls back with a <!--', () => {
             source.addSegment('<!--bar ', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<!--');
          });
@@ -1480,7 +1467,7 @@ describe('ChunkSource', () => {
          it('calls back with a <!', () => {
             source.addSegment('<!foo', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<!');
          });
@@ -1488,7 +1475,7 @@ describe('ChunkSource', () => {
          it('calls back with a <', () => {
             source.addSegment('<start>', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<');
          });
@@ -1496,7 +1483,7 @@ describe('ChunkSource', () => {
          it('calls back with a <?', () => {
             source.addSegment('<?xml?>', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('<?');
          });
@@ -1504,7 +1491,7 @@ describe('ChunkSource', () => {
          it('calls back with a &', () => {
             source.addSegment('&testEntity;', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('&');
          });
@@ -1512,7 +1499,7 @@ describe('ChunkSource', () => {
          it('calls back with </', () => {
             source.addSegment('</end>', true);
 
-            source.getMarkup(pluckedSpy);
+            source.extract('markup', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('</');
          });
@@ -1521,14 +1508,14 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getClose()', () => {
+   describe('extract("close")', () => {
 
       describe('basic behavior', () => {
 
          it('calls back with a chunk with the close', () => {
             source.addSegment(']]>', true);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ']]>' ]);
          });
@@ -1536,18 +1523,10 @@ describe('ChunkSource', () => {
          it('calls back with undefined when no close at the offset', () => {
             source.addSegment('ssss', true);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('012345', true);
-
-            expect(() => {
-               source.getClose();
-            }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to getClose().');
          });
 
       });
@@ -1555,7 +1534,7 @@ describe('ChunkSource', () => {
       describe('segment spanning', () => {
 
          it('does not call callback if no data is passed to source', () => {
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -1563,14 +1542,14 @@ describe('ChunkSource', () => {
          it('calls back with undefined when at the end of input', () => {
             source.addSegment('', true);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
          });
 
          it('calls back with a close char when segment added later', () => {
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             source.addSegment(']]>', true);
 
@@ -1579,18 +1558,18 @@ describe('ChunkSource', () => {
 
          it('calls back with a close char when in middle of segment', () => {
             source.addSegment('123]]>', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
 
          it('calls back with close at end of segment', () => {
             source.addSegment('123]]>', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
@@ -1598,9 +1577,9 @@ describe('ChunkSource', () => {
          it('calls back with close at start of subsequent segment', () => {
             source.addSegment('123', false);
             source.addSegment(']]>', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
@@ -1608,9 +1587,9 @@ describe('ChunkSource', () => {
          it('calls back with close when it spans segments', () => {
             source.addSegment('123]', false);
             source.addSegment(']>', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ']]>' ]);
          });
@@ -1622,7 +1601,7 @@ describe('ChunkSource', () => {
          it('calls back with a ]', () => {
             source.addSegment(']]x', true);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']');
          });
@@ -1630,7 +1609,7 @@ describe('ChunkSource', () => {
          it('calls back with a ]]>', () => {
             source.addSegment(']]>', true);
 
-            source.getClose(pluckedSpy);
+            source.extract('close', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText(']]>');
          });
@@ -1646,9 +1625,9 @@ describe('ChunkSource', () => {
          it('puts the previous text back', () => {
             source.addSegment('123 one', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
             source.undo(pluckedSpy.calls.argsFor(0)[0]);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
          });
@@ -1656,9 +1635,9 @@ describe('ChunkSource', () => {
          it('does nothing if passed undefined', () => {
             source.addSegment('123 one', true);
 
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
             source.undo(undefined);
-            source.getSpace(pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', ' ' ]);
          });
@@ -1677,17 +1656,17 @@ describe('ChunkSource', () => {
 
          it('erroniously allows one to undo a chunk before any segments added', () => {
             source.undo(new Chunk('one x', 'one x'));
-            source.getWord([], pluckedSpy);
+            source.extract('word', [], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'one' ]);
          });
 
          it('will add to the current segment', () => {
             source.addSegment('123 one', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             source.undo(pluckedSpy.calls.argsFor(0)[0]);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
          });
@@ -1695,10 +1674,10 @@ describe('ChunkSource', () => {
          it('will add to a spanning segment location', () => {
             source.addSegment('12', false);
             source.addSegment('3 one', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             source.undo(pluckedSpy.calls.argsFor(0)[0]);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
          });
@@ -1706,10 +1685,10 @@ describe('ChunkSource', () => {
          it('will add to before the remaining segment', () => {
             source.addSegment('123', false);
             source.addSegment(' one', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             source.undo(pluckedSpy.calls.argsFor(0)[0]);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
          });
@@ -1717,18 +1696,18 @@ describe('ChunkSource', () => {
          it('will add text that can then be retrieved with a different routine', () => {
             source.addSegment('123', false);
             source.addSegment(' o<ne', true);
-            source.getToTerminator([ '<' ], pluckedSpy);
+            source.extract('all', [ '<' ], pluckedSpy);
 
             source.undo(pluckedSpy.calls.argsFor(0)[0]);
-            source.getDigits(pluckedSpy);
-            source.getSpace(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123 o', '123', ' ' ]);
          });
 
          it('throws an error if the value that is undone is not correct', () => {
             source.addSegment('0123zzz', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(() => {
                source.undo(new Chunk('999', '999'));
@@ -1738,7 +1717,7 @@ describe('ChunkSource', () => {
          it('throws an error if the value that is undone is not correct', () => {
             source.addSegment('012', true);
             source.addSegment('3zzz', true);
-            source.getDigits(pluckedSpy);
+            source.extract('digits', undefined, pluckedSpy);
 
             expect(() => {
                source.undo(new Chunk('0124', '0124'));
@@ -1929,12 +1908,26 @@ describe('ChunkSource', () => {
 
       describe('UTF-16BE', () => {
 
-         it('identifies a UTF-16 big endian encoding', () => {
+         it('decodes text in this encoding', () => {
             source.addSegment('\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020\u0000\u0076' +
                '\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d\u0000\u0022' +
                '\u0000\u0031\u0000\u002e\u0000\u0030\u0000\u0022\u0000\u003f\u0000\u003e');
 
-            source.getToTerminator([ '1' ], pluckedSpy);
+            source.extract('all', [ '1' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<?xml version="' ]);
+         });
+
+      });
+
+      describe('UTF-16LE', () => {
+
+         it('decodes text in this encoding', () => {
+            source.addSegment('\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020\u0000\u0076\u0000' +
+               '\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d\u0000\u0022\u0000' +
+               '\u0031\u0000\u002e\u0000\u0030\u0000\u0022\u0000\u003f\u0000\u003e\u0000');
+
+            source.extract('all', [ '1' ], pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<?xml version="' ]);
          });
