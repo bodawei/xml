@@ -1,44 +1,86 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 4/30 Sprint 40:  108sp [7XL 2L 4M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
+ 5/7 Sprint 41:  108sp [7XL 2L 3M 4S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
-√ S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
-√ S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+Offset plan:
+	- UEL: Universal Entity Location
+	- UER: Universal Entity Range
+	- note: offsets are relative to decoded data characters
+	---
+	√ S - Define a UER (no need for an offset!)
+		- has a clone
+	- Segment keeps a uer which is only partially uses
+	- Add Segment:
+		- optionally given a UER
+	√ - new ChunkSource
+		- optionally given a UEL
+	√ S - testing
+		- toEqualChunkRange(index, row, col) => will use the original text to increment index and col
+		- toEqualChunkRange(index, index, row, row, col, col)
+		- toEqualChunkRange(UER)
+		- toEqualChunkRange([UER, ... ])
+[0 40]
+	M - toTerminator
+		- do end of line substitution
+		- increment index as standard
+		- count number of newlines
+		- increment rows by number of newlines (if morethan 0, then reset col)
+		- increment col by length after newline
+		- may end up with multiple UER if going across segments. so be prepped for that
+	√ - resumeOperation
+		- will need to do the UEL - UER stuff mentioned above when plucking off new segment
+		(add segment actually can't do this)
+		- UEL becomes a UEO (either by adding 0,0,0 or by picking up the offset of the last
+		- No UEL, pick it up from source or previous
 
-[1.5hours]
 
-M 215: Finish encoding
-- Move decoding and sniffing into add segment
-	√ - new routine will do the same sniffing.
-	√- if find encoding set it on this and return.  one value it can set is 'unencoded'
-	√- on return, if encoding set, then do the decoding
-	- decode
-		√- big endian
-		√- little endian
-		- utf8
-	- deal with decoding that spans segments
-	- deal with unknown encodings
-	- skip over bom, and set flag <-- can't really do this until decoded
-	- Warning: doing a getToTerminator of ?> with identifies a UTF-16 big endian encoding does not work
-	- while here, look for version <-- can't really do this until decoded
-	- user specifies UTF-16. Need to deal with that
-		- set flag: userSpecified UTF16, and encoding is undefined
-		- if encoding finds a BOM encoding, then set flag. if not, also set a flag
-			- if not, default to UTF-16BE
-- All existing and future segments are decoded.  This may involve characters spanning segments
 
-- Unrealized problems:
-	- ValueStream is not integrated into EntityExpandingStream
-		- need to be sure to pass attr value in
-	- We aren't validating internal entity text at the time of parsing. OK?
-	- right now ValueStream is living off entity metadata from the cursor, as if it is a fixed value. But it is going to be per chunk, I think.
 
--- next: 215
+	- peek needs to store start UEO
+	- multipleMatch store start UEO  (should be using peek)
+	- extract match: increment index and column, but not row.
+		- document that it doesn't match newlines. ?  scan for newlines in input?
+		- state has a UER
+		- may end up with multiple UER if going across segments. so be prepped for that
+	- char
+		- end of line substitution!
+		- index increment
+		- if is a newline, then col to 0, row increment
+		- will only ever be one range
+	- space
+		- same as to terminator actually
+	- digits
+		- no eol
+		- increment col and index
+		- may have multiple UER
+	- peeks: should be for free.
+	- undo:
+		- has to check if chunk being brought in is correct
+	- cleanup: should extract all the encoding and decoding
+	- decoder:
+		- will be forced to drain on UEL boundaries
+
+
+L+: 206 Chunks: Offsets should have locations (!). how should this work?
+	See 212, below
+	UEL's
+	EntityOffset
+	deal with different offset passed into addSegment
+	count lines and columns
+	Do more test matchers to check chunks better
+	- make sure to improve undo() to check offsets and text
+	- deal with enty locations as well. See ValueStream
+S: 208 testing of chunks in ValueStrea
+S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
+- is the token type Text or Chars?
+
+
+-- next: 216
 =============================================
 CLEANUP
 =======
@@ -52,8 +94,6 @@ Performance variations on these routines (char by char better than regex?  bette
 BUILD
 =====
 126: Enhancements to the reporting
-	- Finish cleaning up test report. Including documenting routines
-		- Get table printed out in the right way
 	- Prep text-table-formatter for open sourcing
 58:L Build infrastructure for running xmlconf tests.
 Breakings
@@ -93,6 +133,24 @@ TechDebt/Bus
 
 Cursor Revisions [1L 1M 2S]
 ---------
+M 2176: Finish encoding
+- Move decoding and sniffing into add segment
+	- deal with decoding that spans segments
+	- deal with unknown encodings
+	- skip over bom, and set flag <-- can't really do this until decoded
+	- Warning: doing a getToTerminator of ?> with identifies a UTF-16 big endian encoding does not work
+	- while here, look for version <-- can't really do this until decoded
+	- user specifies UTF-16. Need to deal with that
+		- set flag: userSpecified UTF16, and encoding is undefined
+		- if encoding finds a BOM encoding, then set flag. if not, also set a flag
+			- if not, default to UTF-16BE
+- All existing and future segments are decoded.  This may involve characters spanning segments
+
+- Unrealized problems:
+	- ValueStream is not integrated into EntityExpandingStream
+		- need to be sure to pass attr value in
+	- We aren't validating internal entity text at the time of parsing. OK?
+	- right now ValueStream is living off entity metadata from the cursor, as if it is a fixed value. But it is going to be per chunk, I think.
 
 L+: 206 Chunks: Offsets should have locations (!). how should this work?
 	See 212, below

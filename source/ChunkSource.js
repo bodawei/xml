@@ -2,8 +2,8 @@
 
 'use strict';
 
-const Offset = require('./shared/Offset.js');
-const Chunk = require('./shared/Chunk.js');
+const Range = require('./chunk/Range.js');
+const Chunk = require('./chunk/Chunk.js');
 
 const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 const SPACE_10_REGEX = /[ \t\n\r]+/g;
@@ -37,12 +37,10 @@ const ENCODING = {
 };
 
 class Segment {
-   constructor(text) {
+   constructor(text, isLast = false) {
       this.text = text;
-      this.startOffset = new Offset(0, 0, 0);
-      this.offset = new Offset(0, 0, 0);
       this.index = 0;
-      this.isLast = false;
+      this.isLast = isLast;
    }
 
    atEnd() {
@@ -68,6 +66,9 @@ class ChunkSource {
 //      }
 
       this._info = info;
+      this._startIndex = 0;
+      this._startRow = 0;
+      this._startColumn = 0;
       this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
       this._segments = [];
       this._extractors = [];
@@ -255,6 +256,7 @@ class ChunkSource {
          if (this._encoding && this._encoding !== ENCODING.UNENCODED) {
             this._decodeSegment(segment);
          }
+         segment.offset = new Range(this._info.location);
          this._segments.push(segment);
          this._segments.allSegments = last;
          segment.isLast = last;
@@ -418,9 +420,20 @@ class ChunkSource {
 
       while ((this._segments.length !== 0 || this._segments.allSegments) && this._extractors.length > 0) {
          const extractorState = this._extractors[0];
-         let nextSegment = this._segments[0];
+         extractorState.endIndex = extractorState.endIndex || 0;
+         extractorState.endColumn = extractorState.endColumn || 0;
+         extractorState.endRow = extractorState.endRow || 0;
 
-         while (!nextSegment || nextSegment.atEnd()) {
+         let nextSegment ;
+
+         if (this._segments.length === 0) {
+            nextSegment = new Segment('');
+            nextSegment.isLast = true;
+         } else {
+            nextSegment = this._segments[0];
+         }
+
+         while (nextSegment.atEnd()) {
             this._segments.shift();
             nextSegment = this._segments[0];
 
@@ -433,6 +446,7 @@ class ChunkSource {
                return;
             }
          }
+         // reset range if location changes
 
          extractorState.returnSegments = this._returnSegments;
 
@@ -443,10 +457,19 @@ class ChunkSource {
                const text = result.matches.join('');
                const originalText = text;
 
-               chunk = new Chunk(text, originalText, nextSegment.startOffset, nextSegment.startOffset);
+               const endIndex = this._startIndex + result.endIndex;
+               const endRow = this._startRow + result.endRow;
+               const endColumn = result.endRow > 0 ? result.endColumn : this._startColumn + result.endColumn;
+
+               const range = new Range(this._info.location, this._startIndex, this._startRow, this._startColumn,
+                  endIndex, endRow, endColumn);
+               chunk = new Chunk(text, originalText, range);
+               this._startIndex = endIndex;
+               this._startRow = endRow;
+               this._startColumn = endColumn;
             }
 
-            extractorState.callback(chunk || result.result);   // eek
+            extractorState.callback(chunk);
             this._extractors.shift();
          }
       }
@@ -471,6 +494,8 @@ function extractDigits(segment, state) {
       state.matches.push(result[0]);
 
       segment.index += result[0].length;
+      state.endIndex += result[0].length;
+      state.endColumn += result[0].length;
    }
 
    if (!foundDigits || !segment.atEnd() || segment.atEnd() && segment.isLast) {
@@ -548,6 +573,7 @@ function extractToTerminator(segment, state) {
       if (!subResult) {
          return;
       } else if (subResult.matches.length > 0) {
+         state.matches = [ adjustTextAndOffset(state.originals.join(''), state) ];
          return state;
       }
 
@@ -559,7 +585,6 @@ function extractToTerminator(segment, state) {
       return;
    }
 
-   const LINE_ENDING_REGEX = state.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
    const terminatorCharsArray = state.spaceTerminators.concat(state.terminators.map((term) => (term[0])));
    const terminatorChars = terminatorCharsArray.join('');
    let terminatorRegex = regexMemo[terminatorChars];
@@ -574,7 +599,6 @@ function extractToTerminator(segment, state) {
    const result = terminatorRegex.exec(segment.text);
 
    if (result[0].length > 0) {
-      state.matches.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
       state.originals.push(result[0]);
 
       segment.index += result[0].length;
@@ -598,6 +622,7 @@ function extractToTerminator(segment, state) {
          if (firstSub) {
             state._subOp = undefined;
             if (firstSub.matches.length > 0) {
+               state.matches = [ adjustTextAndOffset(state.originals.join(''), state) ];
                return state;
             } else {
                state.matches.push(segment.text[segment.index]);
@@ -610,6 +635,9 @@ function extractToTerminator(segment, state) {
    }
 
    if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
+      if (state.originals.length > 0) {
+         state.matches = [ adjustTextAndOffset(state.originals.join(''), state) ];
+      }
       return state;
    }
 }
@@ -786,6 +814,34 @@ function getEncodingFromDeclaration(data) {
 
    return result[1] || result[2];
 }
+
+function adjustTextAndOffset(originalText, state) {
+   const LINE_ENDING_REGEX = state.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+   const newText = originalText.replace(LINE_ENDING_REGEX, '\n')
+
+   state.endIndex += newText.length;
+
+   if (newText.indexOf('\n') === -1) {
+      state.endColumn += newText.length;
+   } else {
+      let currentIndex = -1;
+      let lastIndex = 0;
+      let rowCount = -1;
+
+      do {
+         lastIndex = currentIndex + 1;
+         rowCount ++;
+         currentIndex = newText.indexOf('\n', lastIndex);
+      } while (currentIndex !== -1);
+
+      state.endRow += rowCount;
+      state.endColumn += (newText.length - lastIndex);
+   }
+
+   return newText;
+}
+
+
 
 module.exports = ChunkSource;
 

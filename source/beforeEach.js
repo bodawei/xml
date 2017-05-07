@@ -1,4 +1,4 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -179,13 +179,43 @@ function toChunkTextObj(expectedText) {
    return expected;
 }
 
-beforeEach(() => {
+function toEqualChunkRange() {
+   return {
+      compare: (actualChunk, expectedRange) => {
+         let pass = true;
+         let message = '';
 
+         if (!actualChunk) {
+            throw new Error(`Chunk is undefined, but should not be.`);
+         }
+
+         if (expectedRange.equal(actualChunk.range[0])) {
+            pass = true;
+            message = 'Expected range not to match. ' +
+               `("${actualChunk.range[0].toString()}" and "${expectedRange.toString()}").\n`;
+         } else {
+            pass = false;
+            message = 'Chunk range does not match.\n';
+            message += `\tActual:   ${actualChunk.range[0].toString()}\n`;
+            message += `\tExpected: ${expectedRange.toString()}\n`;
+         }
+
+         return {
+            pass,
+            message
+         };
+      }
+   };
+}
+
+
+beforeEach(() => {
    jasmine.addMatchers({
       toBeSyntaxError,
       toMatchClasses,
       toEqualChunkText,
-      toEqualChunkTexts
+      toEqualChunkTexts,
+      toEqualChunkRange
    });
 
 });
@@ -194,5 +224,6 @@ module.exports = {
    toBeSyntaxError,
    toMatchClasses,
    toEqualChunkText,
-   toEqualChunkTexts
+   toEqualChunkTexts,
+   toEqualChunkRange
 };

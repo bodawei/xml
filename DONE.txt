@@ -39,6 +39,8 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/16 Sprint 37:  120sp [7XL 2L 5M 10S]. Avg: 5/sprint = 24 sprints. ACTUAL: 2
  4/21 Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 4
  4/23 Sprint 39:  111sp [7XL 2L 3M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+ 4/30 Sprint 40:  108sp [7XL 2L 4M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+
 
 =============================================
 BLOG IDEAS
@@ -2396,4 +2398,37 @@ Notes39
 This sprint went OK. The encoding took longer than I wish it had, probably largely because of a shifting view of what i wanted to do.  Not entirely clear why what I have took so long to do.  I guess better planning might have helped.
 Clean and build went OK, not spectacular but definite progress. Test report 90% done, and table printing improved.
 
+Sprint 40
+=========
+√ S: 205 unget: either absorb into the current segment, or add to before the current segment and leave offset
 
+√ S: 211 validation of valueStream needs to deal with <;s in attributes and illegal chars in any external entity
+
+[1.5hours]
+
+M 215: Finish encoding
+- Move decoding and sniffing into add segment
+	√ - new routine will do the same sniffing.
+	√- if find encoding set it on this and return.  one value it can set is 'unencoded'
+	√- on return, if encoding set, then do the decoding
+	- decode
+		√- big endian
+		√- little endian
+		√- utf8
+	- Finish cleaning up test report. Including documenting routines
+		- Get table printed out in the right way
+
+Notes40
+-------
+Sprint started well.  But I didn't get nearly as much of 215 done as I'd hoped.  Some of that was over optimism. But partly in the middle of the sprint I was just staring dully at the work.. listlessly pushing lines of code around.  Lost a lot of energy there.
+Build got the test report code documented and cleaned up.  Almost there!
+Cleanup started to rework ChunkSource some.
+
+Sprint 41
+=========
+This will be the end of the "silencing of the build process" in the build part.
+Cleaning is now doing what it should be doing, which is improving recently written code
+The focus of this sprint is going to be to work on the offsets.  Even though the decoding is in an incomplete state, emotionally I need to do something different, and I'd like to get a first draft of the offsets, at least.  The plan says "L+", and I suspect taht + is justified.
+
+Notes41
+-------

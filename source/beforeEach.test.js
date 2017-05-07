@@ -4,7 +4,7 @@
 
 /* eslint-env jasmine */
 
-const Chunk = require('./shared/Chunk.js');
+const Chunk = require('./chunk/Chunk.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
 

@@ -6,10 +6,11 @@
 /* eslint-env jasmine */
 
 const Buffer = require('buffer').Buffer;
-const Chunk = require('./shared/Chunk.js');
+const Chunk = require('./chunk/Chunk.js');
 const ChunkSource = require('./ChunkSource.js');
 const EntityLocation = require('./shared/EntityLocation.js');
 const EntityMetaData = require('./shared/EntityMetaData.js');
+const Range = require('./chunk/Range.js');
 
 describe('ChunkSource', () => {
    let pluckedSpy;
@@ -659,6 +660,14 @@ describe('ChunkSource', () => {
             }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to extract().');
          });
 
+         it('delivers the expected range', () => {
+            source.addSegment('012345abcdefX', true);
+
+            source.extract('digits', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 12, 0, 12));
+         });
+
       });
 
       describe('segment spanning', () => {
@@ -733,6 +742,15 @@ describe('ChunkSource', () => {
             source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '1234abF', ' \t' ]);
+         });
+
+         it('delivers the expected range across multiple segments', () => {
+            source.addSegment('123', false);
+            source.addSegment('456', true);
+
+            source.extract('digits', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 6, 0, 6));
          });
 
       });
@@ -1215,6 +1233,17 @@ describe('ChunkSource', () => {
 
       describe('interacting calls', () => {
 
+         xit('does not increment index on a failed match', () => {
+            source.addSegment('on', false);
+            source.addSegment('Click', true);
+
+            source.extract('match', 'one', pluckedSpy);
+            source.extract('word', [], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('onClick');
+         });
+
          it('calls back with value after extract word call', () => {
             source.addSegment('georgeMichael', false);
 
@@ -1247,7 +1276,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('getToTerminator', () => {
+   describe('extract("all")', () => {
 
       describe('basic behavior', () => {
 
@@ -1266,6 +1295,22 @@ describe('ChunkSource', () => {
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
+         });
+
+         it('calls back with a chunk with a range for the extracted text', () => {
+            source.addSegment('fox and friends', false);
+
+            source.extract('all', [ 'x' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 2, 0, 2));
+         });
+
+         it('calls back with a chunk with a range for the extracted text accounting for newlines', () => {
+            source.addSegment('fox\r\nand\nfriends! ', false);
+
+            source.extract('all', [ '!' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 15, 2, 7));
          });
 
       });
@@ -1376,6 +1421,17 @@ describe('ChunkSource', () => {
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'Text<!--X' ]);
          });
+
+         it('calls back with a range for the extracted text accounting for newlines across segments', () => {
+            source.addSegment('fox\r', false);
+            source.addSegment('and\n', false);
+            source.addSegment('friends! ', true);
+
+            source.extract('all', [ '!' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 15, 2, 7));
+         });
+
       });
 
       describe('terminators', () => {
