@@ -384,7 +384,7 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('extract("char"', () => {
+   describe('extract("char")', () => {
 
       describe('basic behavior', () => {
 
@@ -1929,6 +1929,18 @@ describe('ChunkSource', () => {
    });
 
    describe('decoding', () => {
+
+      describe('UTF-8/BOM', () => {
+
+         it('decodes text in this encoding', () => {
+            source.addSegment('\u00ef\u00bb\u00bf<?xml version="1.0"?>', true);
+
+            source.extract('all', [ '?>' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '<?xml version="1.0"' ]);
+         });
+
+      });
 
       describe('UTF-16BE', () => {
 

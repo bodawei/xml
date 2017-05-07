@@ -73,6 +73,7 @@ class ChunkSource {
       this._extractors = [];
       this._encoding = options.encoding;
       this._returnSegments = this._returnSegments.bind(this);
+      this._addBomExtractor();
    }
 
    peekChar(deliverChunk) {
@@ -142,6 +143,20 @@ class ChunkSource {
       let chunk;
       this.extract(type, param, (result) => { chunk = result; });
       return chunk;
+   }
+
+   _addBomExtractor() {
+      const self = this;
+      function innerDeliver(result) {
+         if (result) {
+            self._foundBom = true;
+         }
+      }
+
+      const state = new State(extractMatch, innerDeliver, this._version);
+      state.candidate = '\uFEFF';
+
+      this._addExtractor(state);
    }
 
    extract(type, params, deliverChunk) {
@@ -321,18 +336,44 @@ class ChunkSource {
       const orig = segment.text;
       segment.text = [];
 
-      for (let index = 0; index < orig.length; index++) {
-         switch (this._encoding) {
-//            case ENCODING.UTF8:
-            case ENCODING.UTF8_BOM:
-               // grab the 1 to N bytes.
-               // combine as you go
-               // if error...
-               break;
-            case ENCODING.UTF16BE:
-            case ENCODING.UTF16BE_BOM:
-            case ENCODING.UTF16LE:
-            case ENCODING.UTF16LE_BOM:
+      switch (this._encoding) {
+         case ENCODING.UTF8_BOM:
+            for (let index = 0; index < orig.length; index++) {
+               let nextCharByte = orig.charCodeAt(index);
+               if (nextCharByte < 127) {
+                  segment.text.push(orig[index]);
+               } else if ((nextCharByte & 0xE0) === 0xC0) { // Checking for 0b110x xxxx
+                  const upper = nextCharByte & 0x3F;
+                  index++; // should verify it is there
+                  const lower = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  const final = (upper * 64) + lower;
+                  segment.text.push(String.fromCharCode(final));
+               } else if ((nextCharByte & 0xF0) === 0xE0) { // Checking for 0b110x xxxx
+                  const upper = nextCharByte & 0x1F;
+                  index++; // should verify it is there
+                  const mid = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  index++; // should verify it is there
+                  const lower = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  const final = (upper * 4096) + (mid * 64) + lower;
+                  segment.text.push(String.fromCharCode(final));
+               } else if ((nextCharByte & 0xF8) === 0xF0) { // Checking for 0b110x xxxx
+                  const upper = nextCharByte & 0x03;
+                  index++; // should verify it is there
+                  const upperMid = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  index++; // should verify it is there
+                  const lowerMid = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  index++; // should verify it is there
+                  const lower = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+                  const final = (upper << 18) + (upperMid * 4096) + (lowerMid * 64) + lower;
+                  segment.text.push(String.fromCharCode(final));
+               }
+            }
+            break;
+         case ENCODING.UTF16BE:
+         case ENCODING.UTF16BE_BOM:
+         case ENCODING.UTF16LE:
+         case ENCODING.UTF16LE_BOM:
+            for (let index = 0; index < orig.length; index++) {
                let lower;
                let upper;
                if (this._encoding === ENCODING.UTF16BE || this._encoding === ENCODING.UTF16BE_BOM) {
@@ -346,11 +387,11 @@ class ChunkSource {
                const upperInt = upper.charCodeAt(0);
                const lowerInt = lower.charCodeAt(0);
                segment.text.push(String.fromCharCode((upperInt * 256) + lowerInt));
-               break;
-            default:
-               // error
-               break;
-         }
+            }
+            break;
+         default:
+            // error
+            break;
       }
       segment.text = segment.text.join('');
    }
@@ -375,11 +416,11 @@ class ChunkSource {
          return;
       }
 
-      while (this._segments.length !== 0 && this._extractors.length > 0) {
+      while ((this._segments.length !== 0 || this._segments.allSegments) && this._extractors.length > 0) {
          const extractorState = this._extractors[0];
          let nextSegment = this._segments[0];
 
-         while (nextSegment.atEnd()) {
+         while (!nextSegment || nextSegment.atEnd()) {
             this._segments.shift();
             nextSegment = this._segments[0];
 
