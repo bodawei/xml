@@ -2,8 +2,10 @@
 
 'use strict';
 
-const Range = require('./Range.js');
 const Chunk = require('./Chunk.js');
+const EntityMetaData = require('../shared/EntityMetaData.js');
+const Range = require('./Range.js');
+
 const encodingUtils = require('./DefaultEncodingUtils.js');
 
 const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
@@ -15,25 +17,6 @@ const SPACE_TERMINATORS_10 = [ ' ', '\\t', '\\n', '\\r' ];
 const SPACE_TERMINATORS_11 = [ ' ', '\\t', '\\n', '\\r', '\u0085', '\u2028' ];
 const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
 const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
-
-const ENCODING = {
-   UNENCODED: 'UNENCODED',
-   UTF8: 'UTF-8',
-   UTF8_BOM: 'UTF-8/BOM',
-   UTF16BE: 'UTF-16BE',
-   UTF16BE_BOM: 'UTF-16BE/BOM',
-   UTF16LE: 'UTF-16LE',
-   UTF16LE_BOM: 'UTF-16LE/BOM',
-   UCS4BE: 'UCS-4BE',
-   UCS4BE_BOM: 'UCS-4BE/BOM',
-   UCS4LE: 'UCS-4LE',
-   UCS4LE_BOM: 'UCS-4LE/BOM',
-   UCS4UNUSUAL1: 'UCS-4UNUSUAL1',
-   UCS4UNUSUAL1_BOM: 'UCS-4UNUSUAL1/BOM',
-   UCS4UNUSUAL2: 'UCS-4UNUSUAL2',
-   UCS4UNUSUAL2_BOM: 'UCS-4UNUSUAL2/BOM',
-   EBCDIC: 'EBCDIC'
-};
 
 class Segment {
    constructor(text, isLast = false) {
@@ -52,9 +35,9 @@ const regexMemo = {};
 class ChunkSource {
 
    constructor(info, options = {}) {
-//      if (!(info instanceof EntityMetaData)) {
-//         throw new Error('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
-//      }
+      if (!(info instanceof EntityMetaData)) {
+         throw new Error('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
+      }
 
       this._info = info;
       this._startIndex = 0;
@@ -68,6 +51,7 @@ class ChunkSource {
       this._returnSegments = this._returnSegments.bind(this);
       this.returnSegments = this._returnSegments.bind(this);
       this._addBomExtractor();
+      this._encodingState = {};
    }
 
    // Legacy support
@@ -217,7 +201,7 @@ class ChunkSource {
       const segment = new Segment(text);
 
       if (!putBefore) {
-         if (this._encoding && this._encoding !== ENCODING.UNENCODED) {
+         if (this._encoding && this._encoding !== encodingUtils.ENCODING.UNENCODED) {
             encodingUtils.decodeSegment(segment, this._encoding);
          }
          segment.offset = new Range(this._info.location);
@@ -229,7 +213,7 @@ class ChunkSource {
       }
 
       if (!this._encoding) {
-         this._identifyEncoding(segment);
+         this._encoding = encodingUtils.identifyEncoding(segment, this._encodingState);
 
          if (this._encoding) {
             const existing = this._segments;
@@ -245,52 +229,6 @@ class ChunkSource {
       }
 
       this._resumeOperation();
-   }
-
-   _identifyEncoding(segment) {
-      segment.index = segment.text.length;
-
-      this._findingEncoding = this._findingEncoding || '';
-
-      if (typeof segment.text[0] === 'number') {
-         const maxExtract = Math.min(segment.text.length, 100);
-         for (let index = 0; index < maxExtract; index++) {
-            this._findingEncoding += String.fromCharCode(segment.text[index]);
-         }
-      } else {
-         this._findingEncoding += segment.text.substr(0, 100);
-      }
-
-      const totalLength = this._findingEncoding.length;
-
-      // If we haven't already done so, try to identify the encoding based on the first four bytes/characters
-      if (totalLength >= 4 && !this._examinedFirstFour) {
-         const firstFourCharBytes = this._findingEncoding.substr(0, 4);
-         this._encoding = encodingUtils.identifyEncodingFromFirstFourCharBytes(firstFourCharBytes);
-
-         if (this._encoding) {
-            return;
-         }
-
-         // If we can't find an xml or text declaration start, we won't ever be able to say more
-         if (/\<\?xm/i.exec(firstFourCharBytes) === null) {
-            this._encoding = ENCODING.UNENCODED;
-            return;
-         }
-
-         this._examinedFirstFour = true;
-      }
-
-      // If we get this far see if we can find the end of the declaration and extract an encoding
-      if (this._findingEncoding.indexOf('?>') >= 0) {
-         this._encoding = encodingUtils.getEncodingFromDeclaration(this._findingEncoding);
-      }
-
-      // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
-      if (totalLength >= 100 || segment.isLast) {
-         this._encoding = ENCODING.UNENCODED;
-         return;
-      }
    }
 
    _addExtractor(extractorState, callback) {

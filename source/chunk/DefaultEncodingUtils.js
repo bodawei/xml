@@ -111,6 +111,54 @@ const ENCODING = {
 
 const ENCODING_REGEXP = /<\?xml.*encoding[ ]*=[ ]*(?:"(.*)"|'(.*)').*?>/i;
 
+function identifyEncoding(segment, state) {
+   segment.index = segment.text.length;
+
+   state._findingEncoding = state._findingEncoding || '';
+
+   if (typeof segment.text[0] === 'number') {
+      const maxExtract = Math.min(segment.text.length, 100);
+      for (let index = 0; index < maxExtract; index++) {
+         state._findingEncoding += String.fromCharCode(segment.text[index]);
+      }
+   } else {
+      state._findingEncoding += segment.text.substr(0, 100);
+   }
+
+   const totalLength = state._findingEncoding.length;
+
+   // If we haven't already done so, try to identify the encoding based on the first four bytes/characters
+   if (totalLength >= 4 && !state._examinedFirstFour) {
+      const firstFourCharBytes = state._findingEncoding.substr(0, 4);
+      const encoding = identifyEncodingFromFirstFourCharBytes(firstFourCharBytes);
+
+      if (encoding) {
+         return encoding;
+      }
+
+      // If we can't find an xml or text declaration start, we won't ever be able to say more
+      if (/\<\?xm/i.exec(firstFourCharBytes) === null) {
+         return ENCODING.UNENCODED;
+      }
+
+      state._examinedFirstFour = true;
+   }
+
+   // If we get this far see if we can find the end of the declaration and extract an encoding
+   if (state._findingEncoding.indexOf('?>') >= 0) {
+      const encoding = getEncodingFromDeclaration(state._findingEncoding);
+
+      if (encoding) {
+         return encoding;
+      }
+   }
+
+   // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
+   if (totalLength >= 100 || segment.isLast) {
+      return ENCODING.UNENCODED;
+   }
+}
+
 function decodeSegment(segment, encoding) {
 //      if (segment.text.length <= 0) {
 //         return;
@@ -230,7 +278,9 @@ function getEncodingFromDeclaration(data) {
 }
 
 module.exports = {
+   ENCODING,
    decodeSegment,
+   identifyEncoding,
    identifyEncodingFromFirstFourCharBytes,
    getEncodingFromDeclaration
 };

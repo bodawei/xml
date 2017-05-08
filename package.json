@@ -40,8 +40,9 @@
     "karma-vivaldi-launcher": "0.0.1",
     "karma-yajson-reporter": "1.0.0",
     "mostly-quiet-grunt": "^1.0.1",
-    "node-glob": "^1.2.0",
+    "node-glob": "1.2.0",
     "node-properties-parser": "0.0.2",
-    "phantomjs-prebuilt": "2.1.13"
+    "phantomjs-prebuilt": "2.1.13",
+    "text-table-formatter": "0.1.0"
   }
 }

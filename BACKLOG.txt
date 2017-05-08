@@ -38,6 +38,8 @@ Offset plan:
 		- UEL becomes a UEO (either by adding 0,0,0 or by picking up the offset of the last
 		- No UEL, pick it up from source or previous
 
+126: Enhancements to the reporting
+	- Prep text-table-formatter for open sourcing
 
 
 
@@ -93,8 +95,6 @@ Performance variations on these routines (char by char better than regex?  bette
 	- remember to add validateText() for all txt (entity ndata value test is best practice)
 BUILD
 =====
-126: Enhancements to the reporting
-	- Prep text-table-formatter for open sourcing
 58:L Build infrastructure for running xmlconf tests.
 Breakings
 	144 Why does switching to es2106 presets for babel cause phantomjs and firefox to die for different reasons

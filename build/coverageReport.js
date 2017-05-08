@@ -6,39 +6,39 @@
 const fs = require('fs');
 const path = require('path');
 
-const tableFormatter = require('./text-table-formatter.js');
+const tableFormatter = require('text-table-formatter');
 const util = require('./util.js');
 
 const COVERAGE_FILENAME = 'coverage-summary.json';
 
 const COLUMNS = [ {
-   name: 'percentage',
-   units: '%'
+   propName: 'percentage',
+   unit: '%'
 }, {
-   name: 'browserName'
+   propName: 'browserName'
 }, {
-   name: 'browserVersion',
+   propName: 'browserVersion',
    alignChar: '.'
 }, {
-   name: 'osName'
+   propName: 'osName'
 }, {
-   name: 'osVersion',
+   propName: 'osVersion',
    alignChar: '.'
 }, {
-   name: 'lines',
-   units: 'l',
+   propName: 'lines',
+   unit: 'l',
    alignChar: '/'
 }, {
-   name: 'branches',
-   units: 'b',
+   propName: 'branches',
+   unit: 'b',
    alignChar: '/'
 }, {
-   name: 'statements',
-   units: 's',
+   propName: 'statements',
+   unit: 's',
    alignChar: '/'
 }, {
-   name: 'functions',
-   units: 'f',
+   propName: 'functions',
+   unit: 'f',
    alignChar: '/'
 } ];
 
@@ -169,7 +169,7 @@ function makeReport(grunt, options) {
 
    results.sort(byBrowserName);
 
-   const table = tableFormatter(results, { columns: COLUMNS });
+   const table = tableFormatter(results, { column: COLUMNS });
 
    if (options.summaryFile) {
       fs.writeFileSync(options.summaryFile, table, 'UTF-8');

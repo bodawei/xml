@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const tableFormatter = require('./text-table-formatter.js');
+const tableFormatter = require('text-table-formatter');
 const util = require('./util.js');
 
 const DEFAULT_SUMMARY_FILE = 'testReport.txt';
@@ -13,26 +13,26 @@ const DEFAULT_REPORTS_DIR = './';
 const DEFAULT_REPORT_NAME = 'test-summary.json';
 
 const COLUMNS = [ {
-   name: 'percentage',
-   units: '%'
+   propName: 'percentage',
+   unit: '%'
 }, {
-   name: 'browserName'
+   propName: 'browserName'
 }, {
-   name: 'browserVersion',
+   propName: 'browserVersion',
    alignChar: '.'
 }, {
-   name: 'osName'
+   propName: 'osName'
 }, {
-   name: 'osVersion',
+   propName: 'osVersion',
    alignChar: '.'
 }, {
-   name: 'seconds',
+   propName: 'seconds',
    alignChar: '.'
 }, {
-   name: 'counts',
+   propName: 'counts',
    alignChar: '/'
 }, {
-   name: 'skipped'
+   propName: 'skipped'
 } ];
 
 /*
@@ -135,7 +135,7 @@ function testReport(grunt, options) {
    const resultFiles = grunt.file.expand(reportsRoot + '/**/' + testFileName);
    const browserResults = resultFiles.map(processResultsPerBrowser);
 
-   const table = tableFormatter(browserResults, { columns: COLUMNS });
+   const table = tableFormatter(browserResults, { column: COLUMNS });
 
    fs.writeFileSync(summaryFile, table, 'UTF-8');
 
