@@ -6,11 +6,11 @@
 /* eslint-env jasmine */
 
 const Buffer = require('buffer').Buffer;
-const Chunk = require('./chunk/Chunk.js');
+const Chunk = require('./Chunk.js');
 const ChunkSource = require('./ChunkSource.js');
-const EntityLocation = require('./shared/EntityLocation.js');
-const EntityMetaData = require('./shared/EntityMetaData.js');
-const Range = require('./chunk/Range.js');
+const EntityLocation = require('../shared/EntityLocation.js');
+const EntityMetaData = require('../shared/EntityMetaData.js');
+const Range = require('./Range.js');
 
 describe('ChunkSource', () => {
    let pluckedSpy;
@@ -83,6 +83,14 @@ describe('ChunkSource', () => {
          expect(chunk).toEqualChunkText('  \n');
       });
 
+      it('peekChar() calls back with a chunk with a char', () => {
+         source.addSegment('frog', true);
+
+         const chunk = source.peekChar();
+
+         expect(chunk).toEqualChunkText('f');
+      });
+
       it('getChar() calls back with a chunk with a char', () => {
          source.addSegment('frog', true);
 
@@ -140,7 +148,7 @@ describe('ChunkSource', () => {
          it('calls back with true if there is a space as the next character', () => {
             source.addSegment(' foo', false);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -149,7 +157,7 @@ describe('ChunkSource', () => {
          it('calls back with false if there is no space as the next character', () => {
             source.addSegment('foo', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(false);
@@ -158,19 +166,10 @@ describe('ChunkSource', () => {
          it('calls back with false when nothing in the source', () => {
             source.addSegment('', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(false);
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.peekIsSpace();
-            }).toThrowError(
-               'Must pass a callback function of the form function(boolean):void to peekIsSpace().');
          });
 
       });
@@ -180,13 +179,13 @@ describe('ChunkSource', () => {
          it('calls back with false if at the end of all segments', () => {
             source.addSegment('', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(false);
          });
 
          it('does not call back when no seguments have been added', () => {
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -195,7 +194,7 @@ describe('ChunkSource', () => {
             source.addSegment('', false);
             source.addSegment(' x', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -205,7 +204,7 @@ describe('ChunkSource', () => {
             source.addSegment('\r', false);
             source.addSegment('x', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -215,7 +214,7 @@ describe('ChunkSource', () => {
             source.addSegment('\r', false);
             source.addSegment('\nx', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -228,7 +227,7 @@ describe('ChunkSource', () => {
          it('returns true if a space is the next character', () => {
             source.addSegment(' a', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -239,7 +238,7 @@ describe('ChunkSource', () => {
          it('returns true if a tab is the next character', () => {
             source.addSegment('\ta', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -250,7 +249,7 @@ describe('ChunkSource', () => {
          it('returns true if a carriage return is the next character', () => {
             source.addSegment('\ra', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -261,7 +260,7 @@ describe('ChunkSource', () => {
          it('returns true if a newline is the next character', () => {
             source.addSegment('\na', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -272,7 +271,7 @@ describe('ChunkSource', () => {
          it('returns false if a \\u2028 is the next character in v. 1.0', () => {
             source.addSegment('\na', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -284,7 +283,7 @@ describe('ChunkSource', () => {
             source = new ChunkSource(entityMetaData1dot1);
             source.addSegment('\u2028', true);
 
-            source.peekIsSpace(pluckedSpy);
+            source.extract('peekIsSpace', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(1);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
@@ -302,7 +301,7 @@ describe('ChunkSource', () => {
          it('calls back with the char', () => {
             source.addSegment(' foo', false);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             const chunks = pluckedSpy.calls.allArgs().map((arg) => arg[0]);
@@ -312,21 +311,12 @@ describe('ChunkSource', () => {
          it('calls back with undefined when nothing in the source', () => {
             source.addSegment('', true);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toBeUndefined();
             expect(pluckedSpy.calls.argsFor(1)[0]).toBeUndefined();
-         });
-
-         it('throws an error if called without a function', () => {
-            source.addSegment('foo', true);
-
-            expect(() => {
-               source.peekChar();
-            }).toThrowError(
-               'Must pass a callback function of the form function(chunk|undefined):void to peekChar().');
          });
 
       });
@@ -336,7 +326,7 @@ describe('ChunkSource', () => {
          it('calls back with undefined if at the end of all segments', () => {
             source.addSegment('', true);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(2);
@@ -345,7 +335,7 @@ describe('ChunkSource', () => {
          });
 
          it('does not call back when no seguments have been added', () => {
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.count()).toEqual(0);
          });
@@ -354,7 +344,7 @@ describe('ChunkSource', () => {
             source.addSegment('', false);
             source.addSegment('x', true);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'x', 'x' ]);
@@ -364,7 +354,7 @@ describe('ChunkSource', () => {
             source.addSegment('\r', false);
             source.addSegment('x', true);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n' ]);
@@ -374,7 +364,7 @@ describe('ChunkSource', () => {
             source.addSegment('\r', false);
             source.addSegment('\nx', true);
 
-            source.peekChar(pluckedSpy);
+            source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
@@ -1233,7 +1223,7 @@ describe('ChunkSource', () => {
 
       describe('interacting calls', () => {
 
-         xit('does not increment index on a failed match', () => {
+         it('does not increment index on a failed match', () => {
             source.addSegment('on', false);
             source.addSegment('Click', true);
 
@@ -1264,7 +1254,7 @@ describe('ChunkSource', () => {
 
          it('calls back with value after an extract match call across segment boundaries', () => {
             source.addSegment('test', false);
-            source.addSegment('Two', false);
+            source.addSegment('Two', true);
 
             source.extract('match', 'test', pluckedSpy);
             source.extract('match', 'Two', pluckedSpy);

@@ -186,7 +186,7 @@ function toEqualChunkRange() {
          let message = '';
 
          if (!actualChunk) {
-            throw new Error(`Chunk is undefined, but should not be.`);
+            throw new Error('Chunk is undefined, but should not be.');
          }
 
          if (expectedRange.equal(actualChunk.range[0])) {
@@ -207,7 +207,6 @@ function toEqualChunkRange() {
       }
    };
 }
-
 
 beforeEach(() => {
    jasmine.addMatchers({
