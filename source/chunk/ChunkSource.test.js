@@ -1,5 +1,5 @@
 
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -26,6 +26,16 @@ describe('ChunkSource', () => {
 
       pluckedSpy = jasmine.createSpy('pluckedSpy');
       source = new ChunkSource(entityMetaData1dot0);
+   });
+
+   describe('construction', () => {
+
+      it('throws an error if called without an entity meta data', () => {
+         expect(() => {
+            new ChunkSource();
+         }).toThrowError('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
+      });
+
    });
 
    describe('multiple calls', () => {
@@ -77,6 +87,14 @@ describe('ChunkSource', () => {
          const chunk = source.getDigits();
 
          expect(chunk).toEqualChunkText('012345');
+      });
+
+      it('peekIsSpace() calls back with true if there is a space', () => {
+         source.addSegment('   xxx');
+
+         const chunk = source.peekIsSpace();
+
+         expect(chunk).toEqual(true);
       });
 
       it('getSpace() calls back with a chunk with spaces when spaces are in the segment', () => {
@@ -1507,6 +1525,25 @@ describe('ChunkSource', () => {
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text2 ' ]);
          });
 
+         it('reports the full value back if the input ends in the middle of a terminator', () => {
+            source.addSegment('text1<!-');
+            source.endSegments();
+
+            source.extract('all', [ '<!--' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text1<!-' ]);
+         });
+
+         it('reports the value minus the terminator if the terminator is at the end', () => {
+            source.addSegment('text1<!--');
+            source.endSegments();
+
+            source.extract('all', [ '<!--' ], pluckedSpy);
+            source.extract('all', [ ], pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'text1', '<!--' ]);
+         });
+
       });
 
    });
@@ -1897,6 +1934,13 @@ describe('ChunkSource', () => {
          expect(source._encoding).toEqual('UNENCODED');
       });
 
+      it('makes no opinion on a encoding if it finds a <?xml but then nothing for 100 chars', () => {
+         source.addSegment('<?xmlomnamashivayaomnamashivayaomnamashivayaomnamashivayaomnamashivayaomnamashivaya' +
+            'omnamashivayaomnamashivayaomnamashivayaomnamashivayaomnamashivaya');
+
+         expect(source._encoding).toEqual('UNENCODED');
+      });
+
       describe('from file start', () => {
 
          describe('in strings', () => {
@@ -2057,7 +2101,7 @@ describe('ChunkSource', () => {
 
       describe('UTF-8/BOM', () => {
 
-         it('decodes text in this encoding', () => {
+         xit('decodes text in this encoding', () => {
             source.addSegment('\u00ef\u00bb\u00bf<?xml version="1.0"?>');
             source.endSegments();
 

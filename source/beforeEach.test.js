@@ -7,11 +7,13 @@
 const Chunk = require('./chunk/Chunk.js');
 const SyntaxError = require('./error/SyntaxError.js');
 const tokens = require('./XmlToken.js');
+const Range = require('./chunk/Range.js');
 
 const toBeSyntaxErrorMatcher = require('./beforeEach.js').toBeSyntaxError;
 const toMatchClasses = require('./beforeEach.js').toMatchClasses;
 const toEqualChunkText = require('./beforeEach.js').toEqualChunkText;
 const toEqualChunkTexts = require('./beforeEach.js').toEqualChunkTexts;
+const toEqualChunkRange = require('./beforeEach.js').toEqualChunkRange;
 
 describe('toBeSyntaxError()', () => {
 
@@ -265,6 +267,75 @@ describe('toEqualChunkTexts()', () => {
          expect(result).toEqual({
             pass: false,
             message: 'The text of chunk 1 "3"/"5" did not match "3"/"0".'
+         });
+      });
+
+   });
+
+});
+
+describe('toEqualChunkRange()', () => {
+   let range;
+
+   beforeEach(() => {
+      range = new Range({ systemId: 's', publicId: 'p' }, 0, 1, 2, 3, 4, 5);
+   });
+
+   describe('jasmine use', () => {
+
+      it('reports pass when the range matches', () => {
+         expect(new Chunk('one', 'two', [ range ]))
+            .toEqualChunkRange(new Range({ systemId: 's', publicId: 'p' }, 0, 1, 2, 3, 4, 5));
+      });
+
+      it('reports an exception if the chunk is undefined', () => {
+         expect(() => {
+            expect(undefined).not.toEqualChunkRange(range);
+         }).toThrowError('Chunk is undefined, but should not be.');
+      });
+
+      it('reports no pass if the range does not match', () => {
+         expect(new Chunk('one', 'one', range)).not
+            .toEqualChunkText(new Range({ systemId: 's', publicId: 'p' }, 3, 3, 3, 3, 3));
+      });
+
+   });
+
+   describe('raw matcher', () => {
+
+      it('returns a compare function', () => {
+         expect(typeof toEqualChunkRange().compare === 'function').toEqual(true);
+      });
+
+      it('throws an exception if the chunk is undefined', () => {
+         try {
+            toEqualChunkRange().compare(undefined, range);
+         } catch (e) {
+            expect(e.message).toEqual('Chunk is undefined, but should not be.');
+         }
+      });
+
+      it('returns a message indicating failure, when the values all match', () => {
+         const result = toEqualChunkRange().compare(new Chunk('testValue', 'original', range), range);
+
+         expect(result).toEqual({
+            pass: true,
+            message: 'Expected range not to match. ' +
+               '("{"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":1,"startColumn":2,' +
+               '"endIndex":3,"endRow":4,"endColumn":5}").\n'
+         });
+      });
+
+      it('returns a message indicating failure, on success, when range does not match', () => {
+         const result = toEqualChunkRange().compare(new Chunk('testValue', 'testValue', range),
+            new Range({ systemId: 's', publicId: 'p' }, 0, 0, 0, 0, 0, 0));
+
+         expect(result).toEqual({
+            pass: false,
+            message: 'Chunk range does not match.\n\tActual:   {"location":{"systemId":"s","publicId":"p"},' +
+               '"startIndex":0,"startRow":1,"startColumn":2,"endIndex":3,"endRow":4,"endColumn":5}\n' +
+               '\tExpected: {"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":0,"startColumn":0,' +
+               '"endIndex":0,"endRow":0,"endColumn":0}\n'
          });
       });
 

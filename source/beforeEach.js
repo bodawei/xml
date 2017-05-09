@@ -191,8 +191,7 @@ function toEqualChunkRange() {
 
          if (expectedRange.equal(actualChunk.range[0])) {
             pass = true;
-            message = 'Expected range not to match. ' +
-               `("${actualChunk.range[0].toString()}" and "${expectedRange.toString()}").\n`;
+            message = `Expected range not to match. ("${actualChunk.range[0].toString()}").\n`;
          } else {
             pass = false;
             message = 'Chunk range does not match.\n';

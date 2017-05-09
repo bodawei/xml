@@ -1,4 +1,4 @@
-/* Copyright ® 2016–2017 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 
 'use strict';
 
@@ -36,7 +36,7 @@ class ChunkSource {
 
    constructor(info, options = {}) {
       if (!(info instanceof EntityMetaData)) {
-         throw new Error('Must pass an EntityMetaData, or something that can become one, into XmlStringCursor.');
+         throw new Error('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
       }
 
       this._info = info;
@@ -208,12 +208,6 @@ class ChunkSource {
 
    _addToSegment(text, last, putBefore) {
       // replace. error on no text, and on allSegments set to true
-      if (!text) {
-         this._allSegments = true;
-         this._resumeOperation();
-         return;
-      }
-
       if (text.length === 0) {
          return;
       }
@@ -260,7 +254,6 @@ class ChunkSource {
 
    _returnSegments(segmentArray) {
       const isAtEnd = this._segments.allSegments;
-      // @@@ need to beware of a segment at the end
       if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
          this._segments.shift();
       }
@@ -281,8 +274,6 @@ class ChunkSource {
          if (this._segments.length > 0) {
             nextSegment = this._segments[0];
          }
-
-         // reset range if location changes
 
          let result;
          if (nextSegment) {
@@ -358,15 +349,16 @@ class Peek extends Extractor {
       }
 
       // Protect against possible duplicate.
-      if (this._seenSegments[this._seenSegments.length - 1] !== segment) {
-         this._seenSegments.push(segment);
-      }
+//      if (this._seenSegments[this._seenSegments.length - 1] !== segment) {
+      this._seenSegments.push(segment);
+//      }
 
       const result = this._subExtractor.process(segment);
       return this._handleResult(result);
    }
 
    finish() {
+      super.finish();
       const result = this._subExtractor.finish();
       return this._handleResult(result);
    }
@@ -509,19 +501,9 @@ class MatchExtractor extends Extractor {
          if (this.candidateIndex >= candidate.length) {
             this.candidateIndex = 0;
             return this;
-//         } else if (segment.atEnd() && segment.isLast) {
-//            this.candidateIndex = 0;
-//            this.matches = [];
-//            this.originals = [];
-//            return this;
          }
       } else {
-         this.candidateIndex = 0;
-         this.matches = [];
-         this.originals = [];
-         // need to test spanning multiple segments
-
-         return this;
+         return this.finish();
       }
    }
 
@@ -542,7 +524,6 @@ class MultiMatchExtractor extends Extractor {
          items[candidate] = new MatchExtractor(this.context, candidate);
          return items;
       }, {});
-      this.match;
       this.longestMatch = 0;
 
       this.candidates = Object.keys(this.items); // if any duplicate terminators, this removes them
@@ -555,16 +536,12 @@ class MultiMatchExtractor extends Extractor {
 
       this.segments.push(segment);
 
-      for (let candidate in this.items) {
+      for (const candidate in this.items) {
          const item = this.items[candidate];
-         if (!item) {
-            continue;
-         }
-
          const result = item.process(segment);
 
          if (!result) {
-            unresolved ++;
+            unresolved++;
          } else {
             if (result.matches.length > 0) {
                //  Can probably move this up to the beginning of the forloop!
@@ -644,19 +621,18 @@ class AllExtractor extends Extractor {
       if (result.matches.length > 0) {
          return this.finish();
       } else {
-         this.originals.push(origSegment.text[origSegment.index]);
-         origSegment.index ++;
+         this._addCharAndContinue(origSegment);
       }
    }
 
+   _addCharAndContinue(origSegment) {
+      this.originals.push(origSegment.text[origSegment.index]);
+      origSegment.index ++;
+   }
+
    process(segment) {
-      // @@ Can unduplciate this by moving the whole check into _processSubExtractor
       if (this.subExtractor) {
-         const result = this._processSubExtractor(segment);
-         if (result) {
-            return result;
-         }
-         return;
+         return this._processSubExtractor(segment);
       }
 
       this.terminatorRegEx.lastIndex = segment.index;
@@ -667,15 +643,10 @@ class AllExtractor extends Extractor {
          segment.index += result[0].length;
 
          if (!segment.atEnd()) {
-
             this.subExtractor = new Peek(this.context, new MultiMatchExtractor(this.context, this.terminatorArray));
             this.subExtractor._firstSegment = segment;
 
-            const result = this._processSubExtractor(segment);
-            if (result) {
-               return result;
-            }
-            return;
+            return this._processSubExtractor(segment);
          }
       }
 
@@ -685,13 +656,15 @@ class AllExtractor extends Extractor {
    }
 
    finish() {
-      // eeek
       if (this.subExtractor) {
          const result = this.subExtractor.finish();
-         if (result) {
-            return result;
+         const origSegment = this.subExtractor._firstSegment;
+         delete this.subExtractor;
+
+         if (!result || result.matches.length === 0) {
+            this._addCharAndContinue(origSegment);
+            return;
          }
-         return;
       }
 
       if (this.originals.length > 0) {

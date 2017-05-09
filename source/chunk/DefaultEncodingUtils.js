@@ -154,7 +154,7 @@ function identifyEncoding(segment, state) {
    }
 
    // If we've found nothing and we already have 100 charBytes or the segment is the end, then give up.
-   if (totalLength >= 100 || segment.isLast) {
+   if (totalLength >= 100) {
       return ENCODING.UNENCODED;
    }
 }
@@ -174,13 +174,13 @@ function decodeSegment(segment, encoding) {
             const nextCharByte = orig.charCodeAt(index);
             if (nextCharByte < 127) {
                segment.text.push(orig[index]);
-            } else if ((nextCharByte & 0xE0) === 0xC0) { // Checking for 0b110x xxxx
-               const upper = nextCharByte & 0x3F;
-               index++; // should verify it is there
-               const lower = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
-               const final = (upper * 64) + lower;
-               segment.text.push(String.fromCharCode(final));
-            } else if ((nextCharByte & 0xF0) === 0xE0) { // Checking for 0b110x xxxx
+//            } else if ((nextCharByte & 0xE0) === 0xC0) { // Checking for 0b110x xxxx
+//               const upper = nextCharByte & 0x3F;
+//               index++; // should verify it is there
+//               const lower = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
+//               const final = (upper * 64) + lower;
+//               segment.text.push(String.fromCharCode(final));
+//            } else if ((nextCharByte & 0xF0) === 0xE0) { // Checking for 0b110x xxxx
                const upper = nextCharByte & 0x1F;
                index++; // should verify it is there
                const mid = orig.charCodeAt(index) & 0x7F; // should check is 0b10xx
