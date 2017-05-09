@@ -42,6 +42,14 @@ Offset plan:
 	- Prep text-table-formatter for open sourcing
 
 
+<--->
+One hour of desperate cleanup.
+	- I think we need a MultiScan or MultiPeek
+		- will call another for each value of a param
+		- returns on success or failure of all
+		- accumulates segments and applies each.
+		- keeps N submatchers, one for each thing, and just dribbles in segments
+
 
 	- peek needs to store start UEO
 	- multipleMatch store start UEO  (should be using peek)
