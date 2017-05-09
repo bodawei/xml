@@ -197,7 +197,27 @@ class ChunkSource {
       this._addToSegment(text, last);
    }
 
+   endSegments() {
+      this._allSegments = true;
+      if (!this._encoding) {
+         this._segments.forEach((segment) => { segment.index = 0; });
+         this._encoding = 'UNENCODED'; // eew
+      }
+      this._resumeOperation();
+   }
+
    _addToSegment(text, last, putBefore) {
+      // replace. error on no text, and on allSegments set to true
+      if (!text) {
+         this._allSegments = true;
+         this._resumeOperation();
+         return;
+      }
+
+      if (text.length === 0) {
+         return;
+      }
+
       const segment = new Segment(text);
 
       if (!putBefore) {
@@ -206,8 +226,6 @@ class ChunkSource {
          }
          segment.offset = new Range(this._info.location);
          this._segments.push(segment);
-         this._segments.allSegments = last;
-         segment.isLast = last;
       } else {
          this._segments.unshift(segment);
       }
@@ -242,6 +260,7 @@ class ChunkSource {
 
    _returnSegments(segmentArray) {
       const isAtEnd = this._segments.allSegments;
+      // @@@ need to beware of a segment at the end
       if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
          this._segments.shift();
       }
@@ -254,35 +273,27 @@ class ChunkSource {
          return;
       }
 
-      while ((this._segments.length !== 0 || this._segments.allSegments) && this._extractors.length > 0) {
+      while ((this._segments.length !== 0 || this._allSegments) && this._extractors.length > 0) {
          const extractor = this._extractors[0];
 
          let nextSegment;
 
-         if (this._segments.length === 0) {
-            nextSegment = new Segment('');
-            nextSegment.isLast = true;
-         } else {
+         if (this._segments.length > 0) {
             nextSegment = this._segments[0];
          }
 
-         while (nextSegment.atEnd()) {
-            this._segments.shift();
-            nextSegment = this._segments[0];
-
-            if (!nextSegment) {
-               if (this._segments.allSegments) {
-                  nextSegment = new Segment('');
-                  nextSegment.isLast = true;
-                  break;
-               }
-               return;
-            }
-         }
          // reset range if location changes
 
          let result;
-         result = extractor.extractor.process(nextSegment);
+         if (nextSegment) {
+            result = extractor.extractor.process(nextSegment);
+
+            if (nextSegment.atEnd()) {
+               this._segments.shift();
+            }
+         } else {
+            result = extractor.extractor.finish();
+         }
          if (result) {
             let chunk;
             if (result.matches.length !== 0) {
@@ -326,6 +337,9 @@ class Extractor {
 
       this.context = context;
    }
+
+   finish() {
+   }
 }
 
 class Peek extends Extractor {
@@ -349,6 +363,19 @@ class Peek extends Extractor {
       }
 
       const result = this._subExtractor.process(segment);
+      return this._handleResult(result);
+   }
+
+   finish() {
+      const result = this._subExtractor.finish();
+      return this._handleResult(result);
+   }
+
+   _handleResult(result) {
+      if (this._seenSegments.length === 0) {
+         return result;
+      }
+
       const successful = result && (result.matches.length > 0);
       const failed = result && (result.matches.length === 0);
 
@@ -363,6 +390,10 @@ class Peek extends Extractor {
 }
 
 class DigitExtractor extends Extractor {
+   finish() {
+      return this;
+   }
+
    process(segment) {
       DIGITS_REGEX.lastIndex = segment.index;
       const result = DIGITS_REGEX.exec(segment.text);
@@ -376,8 +407,7 @@ class DigitExtractor extends Extractor {
          this.endColumn += result[0].length;
       }
 
-      // @@@ change the end state
-      if (!foundDigits || !segment.atEnd() || segment.atEnd() && segment.isLast) {
+      if (!foundDigits || !segment.atEnd()) {
          return this;
       }
    }
@@ -400,20 +430,19 @@ class SpaceExtractor extends Extractor {
          segment.index += result[0].length;
       }
 
-      // @@@ deal with this
-      if (!foundSpace || !segment.atEnd() || segment.atEnd() && segment.isLast) {
+      if (!foundSpace || !segment.atEnd()) {
          return this;
       }
+   }
+
+   finish() {
+      return this;
    }
 }
 
 class CharExtractor extends Extractor {
    process(segment) {
       const LINE_ENDING_REGEX = this.context.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
-
-      if (segment.atEnd() && segment.isLast) {
-         return this;
-      }
 
       const currentChar = segment.text[segment.index];
 
@@ -451,6 +480,10 @@ class CharExtractor extends Extractor {
 
       return this;
    }
+
+   finish() {
+      return this;
+   }
 }
 
 class MatchExtractor extends Extractor {
@@ -476,11 +509,11 @@ class MatchExtractor extends Extractor {
          if (this.candidateIndex >= candidate.length) {
             this.candidateIndex = 0;
             return this;
-         } else if (segment.atEnd() && segment.isLast) {
-            this.candidateIndex = 0;
-            this.matches = [];
-            this.originals = [];
-            return this;
+//         } else if (segment.atEnd() && segment.isLast) {
+//            this.candidateIndex = 0;
+//            this.matches = [];
+//            this.originals = [];
+//            return this;
          }
       } else {
          this.candidateIndex = 0;
@@ -490,6 +523,13 @@ class MatchExtractor extends Extractor {
 
          return this;
       }
+   }
+
+   finish() {
+      this.candidateIndex = 0;
+      this.matches = [];
+      this.originals = [];
+      return this;
    }
 }
 
@@ -560,6 +600,10 @@ class MultiMatchExtractor extends Extractor {
 
       return;
    }
+
+   finish() {
+      return this;
+   }
 }
 
 class AllExtractor extends Extractor {
@@ -598,16 +642,15 @@ class AllExtractor extends Extractor {
       delete this.subExtractor;
 
       if (result.matches.length > 0) {
-         this.matches = [ adjustTextAndOffset(this.originals.join(''), this, this.context.version) ];
-         return this;
+         return this.finish();
       } else {
-         this.matches.push(origSegment.text[origSegment.index]);
          this.originals.push(origSegment.text[origSegment.index]);
          origSegment.index ++;
       }
    }
 
    process(segment) {
+      // @@ Can unduplciate this by moving the whole check into _processSubExtractor
       if (this.subExtractor) {
          const result = this._processSubExtractor(segment);
          if (result) {
@@ -636,12 +679,25 @@ class AllExtractor extends Extractor {
          }
       }
 
-      if (!segment.atEnd() || segment.atEnd() && segment.isLast) {
-         if (this.originals.length > 0) {
-            this.matches = [ adjustTextAndOffset(this.originals.join(''), this, this.context.version) ];
-         }
-         return this;
+      if (!segment.atEnd()) {
+         return this.finish();
       }
+   }
+
+   finish() {
+      // eeek
+      if (this.subExtractor) {
+         const result = this.subExtractor.finish();
+         if (result) {
+            return result;
+         }
+         return;
+      }
+
+      if (this.originals.length > 0) {
+         this.matches = [ adjustTextAndOffset(this.originals.join(''), this, this.context.version) ];
+      }
+      return this;
    }
 }
 
