@@ -1,100 +1,36 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 5/7 Sprint 41:  108sp [7XL 2L 3M 4S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
+ 5/10 Sprint 42:  114sp [8XL 1L 6M 11S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-Offset plan:
-	- UEL: Universal Entity Location
-	- UER: Universal Entity Range
-	- note: offsets are relative to decoded data characters
-	---
-	√ S - Define a UER (no need for an offset!)
-		- has a clone
-	- Segment keeps a uer which is only partially uses
-	- Add Segment:
-		- optionally given a UER
-	√ - new ChunkSource
-		- optionally given a UEL
-	√ S - testing
-		- toEqualChunkRange(index, row, col) => will use the original text to increment index and col
-		- toEqualChunkRange(index, index, row, row, col, col)
-		- toEqualChunkRange(UER)
-		- toEqualChunkRange([UER, ... ])
-[0 40]
-	M - toTerminator
-		- do end of line substitution
-		- increment index as standard
-		- count number of newlines
-		- increment rows by number of newlines (if morethan 0, then reset col)
-		- increment col by length after newline
-		- may end up with multiple UER if going across segments. so be prepped for that
-	√ - resumeOperation
-		- will need to do the UEL - UER stuff mentioned above when plucking off new segment
-		(add segment actually can't do this)
-		- UEL becomes a UEO (either by adding 0,0,0 or by picking up the offset of the last
-		- No UEL, pick it up from source or previous
 
-126: Enhancements to the reporting
-	- Prep text-table-formatter for open sourcing
+216: S - range for char (note: do not need to do the complex line processing in to terminator of no space tokens)
+		- test char, peekchar
+			- easy to increment end index and row and col.  could even use adjustTextAndoffset
+219: S - range for space
+		- test space and peek space
+		- same pattern as all. Will call same routine.
+220: S - range for match and multi
+		- we simply ignore line breaks?
+		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
+221: S - range for word
+		- should be easy as it rests on all
+	cleanup
+		- pass version into extractor constructor
+		- extractor can have an "segments to return"
+		- extractor should carry a flag of status, rather than returning self.
+		- rename endIndex?
+218 S - extract version
+- performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
 
-
-<--->
-One hour of desperate cleanup.
-	- I think we need a MultiScan or MultiPeek
-		- will call another for each value of a param
-		- returns on success or failure of all
-		- accumulates segments and applies each.
-		- keeps N submatchers, one for each thing, and just dribbles in segments
-
-
-	- peek needs to store start UEO
-	- multipleMatch store start UEO  (should be using peek)
-	- extract match: increment index and column, but not row.
-		- document that it doesn't match newlines. ?  scan for newlines in input?
-		- state has a UER
-		- may end up with multiple UER if going across segments. so be prepped for that
-	- char
-		- end of line substitution!
-		- index increment
-		- if is a newline, then col to 0, row increment
-		- will only ever be one range
-	- space
-		- same as to terminator actually
-	- digits
-		- no eol
-		- increment col and index
-		- may have multiple UER
-	- peeks: should be for free.
-	- undo:
-		- has to check if chunk being brought in is correct
-	- cleanup: should extract all the encoding and decoding
-	- decoder:
-		- will be forced to drain on UEL boundaries
-
-
-L+: 206 Chunks: Offsets should have locations (!). how should this work?
-	See 212, below
-	UEL's
-	EntityOffset
-	deal with different offset passed into addSegment
-	count lines and columns
-	Do more test matchers to check chunks better
-	- make sure to improve undo() to check offsets and text
-	- deal with enty locations as well. See ValueStream
-S: 208 testing of chunks in ValueStrea
-S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
-- is the token type Text or Chars?
-
-
--- next: 216
+-- next: 222
 =============================================
 CLEANUP
 =======
-newlines in getTerminator
 review tests and test cases
 Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
@@ -127,9 +63,10 @@ Get edge with browserstack integrated into your test runs
 
 PROJECT
 =======
-TechDebt/Bus
+TechDebt/Bus [XL]
 ---------
 - read() should probably be the one emitting the error, not pushing
+
 - if EOF after <!, or if unknown <![name[ items we are losing the <! bit
 - Can we pass the result of entity stream through multiple times?
 - Can't test PE's inside PE's
@@ -137,12 +74,19 @@ TechDebt/Bus
 - We are adding chunks to charrefs in entity values for the benefit of the string cursor. should do this for all.
 - A routine which can be called with multiple requests and does one callback
 - actually integrating all this into the parsers...
+- ValueStream is not integrated into EntityExpandingStream
+	- need to be sure to pass attr value in
+- right now ValueStream is living off entity metadata from the cursor, as if it is a fixed value. But it is going to be per chunk, I think.
 
 
-Cursor Revisions [1L 1M 2S]
+Cursor Revisions [4M 4S]
 ---------
-M 2176: Finish encoding
-- Move decoding and sniffing into add segment
+M - undo:
+	- has to check if chunk being brought in is correct
+	- make sure to improve undo() to check offsets and text
+M deal with different offset passed into addSegment
+	- deal with enty locations as well. See ValueStream
+M 217: Finish encoding
 	- deal with decoding that spans segments
 	- deal with unknown encodings
 	- skip over bom, and set flag <-- can't really do this until decoded
@@ -152,25 +96,13 @@ M 2176: Finish encoding
 		- set flag: userSpecified UTF16, and encoding is undefined
 		- if encoding finds a BOM encoding, then set flag. if not, also set a flag
 			- if not, default to UTF-16BE
-- All existing and future segments are decoded.  This may involve characters spanning segments
+		- will be forced to drain on UEL boundaries
 
-- Unrealized problems:
-	- ValueStream is not integrated into EntityExpandingStream
-		- need to be sure to pass attr value in
+S: 208 testing of chunks in ValueStrea
+S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
+- is the token type Text or Chars?
+S - dealing with different versions.
 	- We aren't validating internal entity text at the time of parsing. OK?
-	- right now ValueStream is living off entity metadata from the cursor, as if it is a fixed value. But it is going to be per chunk, I think.
-
-L+: 206 Chunks: Offsets should have locations (!). how should this work?
-	See 212, below
-	UEL's
-	EntityOffset
-	Need matcher to test these things while ignoring offsets.  These failing tests are insane to debug.
-	deal with different offset passed into addSegment
-	count lines and columns
-	Do more test matchers to check chunks better
-	- make sure to improve undo() to check offsets and text
-	- deal with enty locations as well. See ValueStream
-
 
 M： Variations/subtypes
 	- delivering content via stream
@@ -178,10 +110,6 @@ M： Variations/subtypes
 	- delivering content from value
 		192:	entity value will simply take the tokens in an entity value, extract the chunks and feed the original values into this along with their offsets
 
-
-S: 208 testing of chunks in ValueStrea
-S: 212 Chunks in the expanded attributes and entity values are not correct.  Is that OK?
-- is the token type Text or Chars?
 
 EntityManagement [1L 2M 2S]
 ---------
@@ -213,5 +141,4 @@ Extras
 - 85: Stream to suppress repeated "this isn't a valid name" errors
 - 15: Put a limit on how much read in in one chunk (pass in as option). 
 - 34: Skip over junk before the xml decl
-- Xml writer: Add BOM for some cases
 

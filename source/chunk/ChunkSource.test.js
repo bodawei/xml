@@ -415,6 +415,32 @@ describe('ChunkSource', () => {
 
       });
 
+      describe('ranges', () => {
+
+         it('delivers the a one character range for a single character', () => {
+            source.addSegment('012345abcdefX');
+            source.endSegments();
+
+            source.extract('peekChar', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 1, 0, 1));
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 1, 0, 1));
+         });
+
+         it('delivers the a two character range for a complex newline', () => {
+            source.addSegment('\r\n012345abcdefX');
+            source.endSegments();
+
+            source.extract('peekChar', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 2, 1, 0));
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 2, 1, 0));
+         });
+
+      });
+
    });
 
    describe('extract("char")', () => {
@@ -660,6 +686,28 @@ describe('ChunkSource', () => {
          });
 
          // more about line endings in the segment section, above
+
+      });
+
+      describe('ranges', () => {
+
+         it('delivers the a one character range for a single character', () => {
+            source.addSegment('012345abcdefX');
+            source.endSegments();
+
+            source.extract('char', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 1, 0, 1));
+         });
+
+         it('delivers the a two character range for a complex newline', () => {
+            source.addSegment('\r\n012345abcdefX');
+            source.endSegments();
+
+            source.extract('char', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 2, 1, 0));
+         });
 
       });
 
@@ -985,6 +1033,29 @@ describe('ChunkSource', () => {
             source.extract('space', undefined, pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n\n\n \n\n\n' ]);
+         });
+
+      });
+
+      describe('ranges', () => {
+
+         it('delivers the space chars', () => {
+            source.addSegment(' \t\n\r');
+            source.endSegments();
+
+            source.extract('space', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 4, 2, 0));
+         });
+
+         it('delivers the a complex newlinea', () => {
+            source = new ChunkSource(entityMetaData1dot1);
+            source.addSegment('\r\n\u2028\u0085\r\u0085');
+            source.endSegments();
+
+            source.extract('space', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 6, 4, 0));
          });
 
       });
@@ -1375,7 +1446,7 @@ describe('ChunkSource', () => {
 
             source.extract('all', [ '!' ], pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 15, 2, 7));
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 16, 2, 7));
          });
 
       });

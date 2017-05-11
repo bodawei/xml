@@ -7,6 +7,14 @@
  in an entity.
  It tracks which location (by way of an EntityLocation), plus the start
  and end index, row and column within the entity.
+ 
+ It is important to note:
+   - index is a count of characters since the start of the entity.
+      \r\n counts as two
+   - row is the number of rows (0 origin) since the start. All line
+      breaks for this version of xml start a new line (\n, \r, \r\n,
+      \u02028, \u0085, \r\0085)
+   - column is the index of the column in the current row.
 \**********************************************************************/
 
 class Range {

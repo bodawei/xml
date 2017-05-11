@@ -40,6 +40,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/21 Sprint 38:  118sp [7XL 2L 5M 8S]. Avg: 5/sprint = 24 sprints. ACTUAL: 4
  4/23 Sprint 39:  111sp [7XL 2L 3M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  4/30 Sprint 40:  108sp [7XL 2L 4M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+ 5/8  Sprint 41:  108sp [7XL 2L 3M 4S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
 
 
 =============================================
@@ -2430,5 +2431,49 @@ This will be the end of the "silencing of the build process" in the build part.
 Cleaning is now doing what it should be doing, which is improving recently written code
 The focus of this sprint is going to be to work on the offsets.  Even though the decoding is in an incomplete state, emotionally I need to do something different, and I'd like to get a first draft of the offsets, at least.  The plan says "L+", and I suspect taht + is justified.
 
+Offset plan:
+	- UEL: Universal Entity Location
+	- UER: Universal Entity Range
+	- note: offsets are relative to decoded data characters
+	---
+	√ S - Define a UER (no need for an offset!)
+		- has a clone
+	- Segment keeps a uer which is only partially uses
+	- Add Segment:
+		- optionally given a UER
+	√ - new ChunkSource
+		- optionally given a UEL
+	√ S - testing
+		- toEqualChunkRange(index, row, col) => will use the original text to increment index and col
+		- toEqualChunkRange(index, index, row, row, col, col)
+		- toEqualChunkRange(UER)
+		- toEqualChunkRange([UER, ... ])
+[0 40]
+	M - toTerminator
+		- do end of line substitution
+		- increment index as standard
+		- count number of newlines
+		- increment rows by number of newlines (if morethan 0, then reset col)
+		- increment col by length after newline
+		- may end up with multiple UER if going across segments. so be prepped for that
+	√ - resumeOperation
+		- will need to do the UEL - UER stuff mentioned above when plucking off new segment
+		(add segment actually can't do this)
+		- UEL becomes a UEO (either by adding 0,0,0 or by picking up the offset of the last
+		- No UEL, pick it up from source or previous
+	- I think we need a MultiScan or MultiPeek
+		- will call another for each value of a param
+		- returns on success or failure of all
+		- accumulates segments and applies each.
+		- keeps N submatchers, one for each thing, and just dribbles in segments
+
+126: Enhancements to the reporting
+	- Prep text-table-formatter for open sourcing
+
+
 Notes41
 -------
+This sprint went better. I picked off a set of things to do that I was pretty confident that I could do. I got that done, and I got the reporting table finished. hurray!
+
+I actually got done with the stuff I'd committed to in the sprint faster than I expected, and spent the last 60? minutes doing some cleanup of ChunkSource.  I decided to then spend a bunch of time "between sprints" addressing the snarl that the code had become.  Finished that up on the evening of the 8th.  it is still needing cleanup, but no longer needs major architectural overhaul, so I feel that it is reasonable to move on, and keep cleaning it up as we go next.
+

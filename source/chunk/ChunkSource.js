@@ -259,6 +259,7 @@ class ChunkSource {
       }
       this._segments = segmentArray.concat(this._segments);
       this._segments.allSegments = isAtEnd;
+      this._didReturn = true;
    }
 
    _resumeOperation() {
@@ -298,9 +299,13 @@ class ChunkSource {
                const range = new Range(this._info.location, this._startIndex, this._startRow, this._startColumn,
                   endIndex, endRow, endColumn);
                chunk = new Chunk(text, originalText, range);
-               this._startIndex = endIndex;
-               this._startRow = endRow;
-               this._startColumn = endColumn;
+               if (!this._didReturn) {
+                  this._startIndex = endIndex;
+                  this._startRow = endRow;
+                  this._startColumn = endColumn;
+               }
+
+               delete this._didReturn;
             }
 
             extractor.callback(chunk);
@@ -416,7 +421,7 @@ class SpaceExtractor extends Extractor {
       const foundSpace = result && result.index === segment.index;
 
       if (foundSpace) {
-         this.matches.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
+         this.matches.push(adjustTextAndOffset(result[0], this, this.context.version));
          this.originals.push(result[0]);
 
          segment.index += result[0].length;
@@ -442,32 +447,34 @@ class CharExtractor extends Extractor {
          if (currentChar === '\n' || (currentChar === '\u0085' && this.context.version === 1.1)) {
             this.originals.push(currentChar);
             segment.index ++;
+            this.endIndex++;
          }
 
          return this;
       }
 
-      if (currentChar === '\r') {
-         this.matches.push('\n');
-         this.originals.push('\r');
-         segment.index ++;
-         this.foundCR = true;
-         return;
-      }
-
       LINE_ENDING_REGEX.lastIndex = segment.index;
-      const result = LINE_ENDING_REGEX.exec(segment.text);
+      const result = LINE_ENDING_REGEX.exec(currentChar);
       const haveLineEnding = result && result.index === segment.index;
 
       if (haveLineEnding) {
-         this.matches.push(result[0].replace(LINE_ENDING_REGEX, '\n'));
-         this.originals.push(result[0]);
+         this.matches.push(currentChar.replace(LINE_ENDING_REGEX, '\n'));
+         this.originals.push(currentChar);
 
          segment.index += result[0].length;
+         this.endIndex++;
+         this.endRow++;
+         this.endColumn = 0;
+         if (currentChar === '\r') {
+            this.foundCR = true;
+            return;
+         }
       } else {
          this.matches.push(currentChar);
          this.originals.push(currentChar);
          segment.index ++;
+         this.endIndex++;
+         this.endColumn++;
       }
 
       return this;
@@ -678,7 +685,7 @@ function adjustTextAndOffset(originalText, state, version) {
    const LINE_ENDING_REGEX = version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
    const newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
-   state.endIndex += newText.length;
+   state.endIndex += originalText.length;
 
    if (newText.indexOf('\n') === -1) {
       state.endColumn += newText.length;
