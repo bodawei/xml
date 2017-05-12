@@ -1985,6 +1985,18 @@ describe('ChunkSource', () => {
 
    });
 
+   describe('version', () => {
+
+      it('extracts the version from the input', () => {
+         source.addSegment('<?');
+         source.addSegment('xml version="1.3"?>');
+         source.endSegments();
+
+         expect(source._versionFound).toEqual('1.3');
+      });
+
+   });
+
    describe('encoding', () => {
 
       it('sets the encoding using the options (whitebox)', () => {
@@ -2189,6 +2201,7 @@ describe('ChunkSource', () => {
             source.addSegment('\u0000\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020\u0000\u0076' +
                '\u0000\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d\u0000\u0022' +
                '\u0000\u0031\u0000\u002e\u0000\u0030\u0000\u0022\u0000\u003f\u0000\u003e');
+            source.endSegments();
 
             source.extract('all', [ '1' ], pluckedSpy);
 
@@ -2203,6 +2216,7 @@ describe('ChunkSource', () => {
             source.addSegment('\u003c\u0000\u003f\u0000\u0078\u0000\u006d\u0000\u006c\u0000\u0020\u0000\u0076\u0000' +
                '\u0065\u0000\u0072\u0000\u0073\u0000\u0069\u0000\u006f\u0000\u006e\u0000\u003d\u0000\u0022\u0000' +
                '\u0031\u0000\u002e\u0000\u0030\u0000\u0022\u0000\u003f\u0000\u003e\u0000');
+            source.endSegments();
 
             source.extract('all', [ '1' ], pluckedSpy);
 

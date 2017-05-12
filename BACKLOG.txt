@@ -8,12 +8,15 @@ BLOG IDEAS?
 =============================================
 
 
-216: S - range for char (note: do not need to do the complex line processing in to terminator of no space tokens)
+√216: S - range for char (note: do not need to do the complex line processing in to terminator of no space tokens)
 		- test char, peekchar
 			- easy to increment end index and row and col.  could even use adjustTextAndoffset
-219: S - range for space
+√ 219: S - range for space
 		- test space and peek space
 		- same pattern as all. Will call same routine.
+
+27min
+
 220: S - range for match and multi
 		- we simply ignore line breaks?
 		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
@@ -24,7 +27,7 @@ BLOG IDEAS?
 		- extractor can have an "segments to return"
 		- extractor should carry a flag of status, rather than returning self.
 		- rename endIndex?
-218 S - extract version
+√ 218 S - extract version
 - performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
 
 -- next: 222

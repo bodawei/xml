@@ -18,6 +18,8 @@ const SPACE_TERMINATORS_11 = [ ' ', '\\t', '\\n', '\\r', '\u0085', '\u2028' ];
 const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
 const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
+const VERSION_REGEXP = /version=("|')(.+)("|')/i;
+
 class Segment {
    constructor(text, isLast = false) {
       this.text = text;
@@ -52,6 +54,7 @@ class ChunkSource {
       this.returnSegments = this._returnSegments.bind(this);
 
       this._addBomExtractor();
+      this._addVersionExtractor();
    }
 
    // Legacy support
@@ -110,6 +113,17 @@ class ChunkSource {
       }
 
       this._addExtractor(new Peek(this, new MatchExtractor(this, '\uFEFF'), true), innerDeliver);
+   }
+
+   _addVersionExtractor() {
+      const self = this;
+      function innerDeliver(result) {
+         if (result) {
+            self._versionFound = result.text;
+         }
+      }
+
+      this._addExtractor(new Peek(this, new VersionExtractor(this), false), innerDeliver);
    }
 
    extract(type, params, deliverChunk) {
@@ -384,6 +398,43 @@ class Peek extends Extractor {
 
       return result;
    }
+}
+
+class VersionExtractor extends Extractor {
+
+   constructor(context) {
+      super(context);
+      this.accumulated = '';
+   }
+
+   process(segment) {
+      this.accumulated += segment.text.substr(0, 100);
+      segment.index = segment.text.length;
+
+      if (this.accumulated.length < 2) {
+         return;
+      }
+
+      if (this.accumulated.indexOf('<?') === -1) {
+         return this;
+      }
+
+      const result = VERSION_REGEXP.exec(this.accumulated);
+      if (result) {
+         this.matches.push(result[2]);
+         this.originals.push(result[2]);
+         return this;
+      }
+
+      if (this.accumulated.length >= 100) {
+         return this;
+      }
+   }
+
+   finish() {
+      return this;
+   }
+
 }
 
 class DigitExtractor extends Extractor {
