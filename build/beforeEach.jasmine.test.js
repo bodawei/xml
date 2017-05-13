@@ -104,14 +104,14 @@ describe('toBeInstanceOf()', () => {
       it('returns a message indicating failure, on success, for the .not.toBeInstanceOf() case', () => {
          expect(toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(new Test(), Test)).toEqual({
             pass: true,
-            message: 'Expected Test instance not to be an instance of Test.'
+            message: 'Expected instance not to be an instance of Test.'
          });
       });
 
       it('returns a message indicating failure, on failure, for the .toEqualProps() case', () => {
          expect(toBeInstanceOfMatcher({ equals: () => false }, () => true).compare(new Test(), Test2)).toEqual({
             pass: false,
-            message: 'Expected Test instance to be an instance of Test2.'
+            message: 'Expected instance to be an instance of Test2.'
          });
       });
 

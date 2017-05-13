@@ -68,7 +68,7 @@ function XmlError(id, params, place, contextOffset, entityLocation) {
    if (!constructor.CODE[id]) {
       const message = 'The Error id "' + id + '" is not a legal id.';
 
-      throw Error(id ? message : 'No error id passed to ' + constructor.name + '.');
+      throw Error(id ? message : 'No error id passed.');
    }
 
    this.code = constructor.CODE[id];

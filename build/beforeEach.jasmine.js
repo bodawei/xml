@@ -52,12 +52,11 @@ function toBeInstanceOf() {
          const pass = (actual instanceof expected);
          let message;
 
+         // We can't report the instance name in IE11
          if (pass) {
-            message = 'Expected ' + actual.constructor.name +
-               ' instance not to be an instance of ' + expected.name + '.';
+            message = 'Expected instance not to be an instance of ' + expected.name + '.';
          } else {
-            message = 'Expected ' + actual.constructor.name +
-               ' instance to be an instance of ' + expected.name + '.';
+            message = 'Expected instance to be an instance of ' + expected.name + '.';
          }
 
          return {

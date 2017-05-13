@@ -38,7 +38,7 @@ function toMatchClasses() {
 
          const maxSearch = Math.min(actualObjects.length, expectedConstructors.length);
          for (let index = 0; index < maxSearch; index++) {
-            if (actualObjects[index].constructor.name !== expectedConstructors[index].name) {
+            if (actualObjects[index].constructor !== expectedConstructors[index]) {
                mismatchIndex = index;
                break;
             }

@@ -54,7 +54,7 @@ module.exports = function standardBuild(grunt) {
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
-      browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari' ];
+      browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
    } else if (/^win/.test(process.platform)) {
       browsers = [ 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
    } else {

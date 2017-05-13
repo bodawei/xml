@@ -55,7 +55,7 @@ describe('XmlError()', () => {
       it('throws an error if the code is unknown', () => {
          expect(() => {
             new XmlError();
-         }).toThrowError('No error id passed to Error.');
+         }).toThrowError('No error id passed.');
       });
 
       it('sets the code', () => {

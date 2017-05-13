@@ -85,32 +85,32 @@ describe('toMatchClasses()', () => {
          expect(typeof toMatchClasses().compare === 'function').toEqual(true);
       });
 
+      // avoiding testing the actual class names, since on IE we can't get them nicely.
       it('returns a message indicating failure, when lengths do not match', () => {
-         expect(toMatchClasses().compare([
+         const result = toMatchClasses().compare([
             new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
-         ], [ tokens.ExternalSubsetStart, tokens.ExternalSubsetEnd ])).toEqual({
-            pass: false,
-            message: 'Expected 2 objects, but got 1.\n\tActual:   CharRef\n\tExpected: ExternalSubsetStart, ' +
-               'ExternalSubsetEnd\n'
-         });
+         ], [ tokens.ExternalSubsetStart, tokens.ExternalSubsetEnd ]);
+
+         expect(result.pass).toEqual(false);
+         expect(result.message.indexOf('Expected 2 objects, but got 1.\n\tActual')).toEqual(0);
       });
 
       it('returns a message indicating failure, on success, for the .not.toMatchClasses() case', () => {
-         expect(toMatchClasses().compare([
+         const result = toMatchClasses().compare([
             new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
-         ], [ tokens.CharRef ])).toEqual({
-            pass: true,
-            message: 'Expected one or more object types to not match: CharRef.'
-         });
+         ], [ tokens.CharRef ]);
+
+         expect(result.pass).toEqual(true);
+         expect(result.message.indexOf('Expected one or more object types to not match')).toEqual(0);
       });
 
       it('returns a message indicating failure, on failure, for the .toMatchClasses() case', () => {
-         expect(toMatchClasses().compare([
+         const result = toMatchClasses().compare([
             new tokens.CharRef('x', tokens.ENTITYVAL_NO_CHUNKS)
-         ], [ tokens.ExternalSubsetStart ])).toEqual({
-            pass: false,
-            message: 'The type of object 0 (CharRef) did not match ExternalSubsetStart.'
-         });
+         ], [ tokens.ExternalSubsetStart ]);
+
+         expect(result.pass).toEqual(false);
+         expect(result.message.indexOf('The type of object 0')).toEqual(0);
       });
 
    });

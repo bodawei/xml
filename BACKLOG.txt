@@ -23,6 +23,11 @@ BLOG IDEAS?
 		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
 √ 221: S - range for word
 		- should be easy as it rests on all
+222: M - undo:
+	- has to check if chunk being brought in is correct
+	- make sure to improve undo() to check offsets and text
+111: Get Vivaldi to work
+	- on mac
 
 
 	cleanup
@@ -32,7 +37,7 @@ BLOG IDEAS?
 		- rename endIndex?
 - performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
 
--- next: 222
+-- next: 223
 =============================================
 CLEANUP
 =======
@@ -86,9 +91,6 @@ TechDebt/Bus [XL]
 
 Cursor Revisions [4M 4S]
 ---------
-M - undo:
-	- has to check if chunk being brought in is correct
-	- make sure to improve undo() to check offsets and text
 M deal with different offset passed into addSegment
 	- deal with enty locations as well. See ValueStream
 M 217: Finish encoding
