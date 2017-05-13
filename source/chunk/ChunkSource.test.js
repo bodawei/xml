@@ -1977,14 +1977,13 @@ describe('ChunkSource', () => {
 
       describe('segment spanning', () => {
 
-         it('erroniously allows one to undo a chunk before any segments added', () => {
-            source.undo(new Chunk('one x', 'one x'));
-            source.extract('word', [], pluckedSpy);
-
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'one' ]);
+         it('throws an error if trying to undo a chunk before any segments added', () => {
+            expect(() => {
+               source.undo(new Chunk('one x', 'one x', new Range(undefined, 0, 0, 0, 1, 0, 1)));
+            }).toThrowError('Chunk does not match target location (offsets do not match).');
          });
 
-         it('will add to the current segment', () => {
+         it('will undo if within the current segment', () => {
             source.addSegment('123 one');
             source.extract('digits', undefined, pluckedSpy);
 
@@ -2017,6 +2016,17 @@ describe('ChunkSource', () => {
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
          });
 
+         it('undoes after the last segment has been consumed', () => {
+            source.addSegment('123');
+            source.endSegments();
+            source.extract('digits', undefined, pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.extract('digits', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '123' ]);
+         });
+
          it('will add text that can then be retrieved with a different routine', () => {
             source.addSegment('123');
             source.addSegment(' o<ne');
@@ -2034,8 +2044,8 @@ describe('ChunkSource', () => {
             source.extract('digits', undefined, pluckedSpy);
 
             expect(() => {
-               source.undo(new Chunk('999', '999'));
-            }).toThrowError('Chunk does not match target location.');
+               source.undo(new Chunk('999', '999', new Range(undefined, 0, 0, 0, 4, 0, 4)));
+            }).toThrowError('Chunk does not match target location (text does not match).');
          });
 
          it('throws an error if the value that is undone is not correct and spans segments', () => {
@@ -2044,8 +2054,73 @@ describe('ChunkSource', () => {
             source.extract('digits', undefined, pluckedSpy);
 
             expect(() => {
-               source.undo(new Chunk('0124', '0124'));
-            }).toThrowError('Chunk does not match target location.');
+               source.undo(new Chunk('0124', '0124', new Range(undefined, 0, 0, 0, 4, 0, 4)));
+            }).toThrowError('Chunk does not match target location (text does not match).');
+         });
+
+         it('allows ndoing multiple times', () => {
+            source.addSegment('12');
+            source.addSegment('3 ');
+            source.addSegment(' o<ne');
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
+            source.extract('all', [ '<' ], pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(2)[0]);
+            source.undo(pluckedSpy.calls.argsFor(1)[0]);
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', '  ', 'o', '123', '  ' ]);
+         });
+
+      });
+
+      describe('ranges', () => {
+
+         it('protects range on return', () => {
+            source.addSegment('123 one');
+
+            source.extract('digits', undefined, pluckedSpy);
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.extract('digits', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+         });
+
+         it('delivers range when undo() undoes before the beginning of the current segument', () => {
+            source.addSegment('12');
+            source.addSegment('3 one');
+            source.endSegments();
+            source.extract('digits', undefined, pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.extract('digits', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+         });
+
+         it('calculates ranges correctly across multiple undos', () => {
+            source.addSegment('12');
+            source.addSegment('3 ');
+            source.addSegment(' o<ne');
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
+            source.extract('all', [ '<' ], pluckedSpy);
+
+            source.undo(pluckedSpy.calls.argsFor(2)[0]);
+            source.undo(pluckedSpy.calls.argsFor(1)[0]);
+            source.undo(pluckedSpy.calls.argsFor(0)[0]);
+            source.extract('digits', undefined, pluckedSpy);
+            source.extract('space', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkRange(new Range(defaultLoc, 3, 0, 3, 5, 0, 5));
+            expect(pluckedSpy.calls.argsFor(2)[0]).toEqualChunkRange(new Range(defaultLoc, 5, 0, 5, 6, 0, 6));
+            expect(pluckedSpy.calls.argsFor(3)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+            expect(pluckedSpy.calls.argsFor(4)[0]).toEqualChunkRange(new Range(defaultLoc, 3, 0, 3, 5, 0, 5));
          });
 
       });

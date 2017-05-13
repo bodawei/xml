@@ -170,6 +170,8 @@ class ChunkSource {
       }
    }
 
+   // note this doesnot protect against malignant input. e.g.
+   // source.undo(new Chunk('xx', 'xx', new Range(undefined, 0, 0, 0, 0, 0, 0)));
    undo(chunk) {
       if (!chunk) {
          return;
@@ -179,31 +181,42 @@ class ChunkSource {
          throw new Error('Must pass a Chunk or undefined to undo().');
       }
 
+      const firstRange = chunk.range[0];
+      const lastRange = chunk.range[chunk.range.length - 1];
       const firstSegment = this._segments[0];
       let remainingChunkLength = chunk.originalText.length;
 
-      if (firstSegment) {
-         if (chunk.originalText.length < firstSegment.index) {
-//            const newIndex = firstSegment.index -= chunk.originalText.length;
-
-//            if (firstSegment.text.substr(newIndex, chunk.originalText.length) !== chunk.originalText) {
-            throw new Error('Chunk does not match target location.');
-//            }
-//            firstSegment.index = newIndex;
-//            return;
-         }
-
-//         if (chunk.originalText.length >= firstSegment.index) {
-         const chunkIndex = chunk.originalText.length - firstSegment.index;
-         if (chunk.originalText.substr(chunkIndex, chunk.originalText.length) !==
-            firstSegment.text.substr(0, firstSegment.index)) {
-            throw new Error('Chunk does not match target location.');
-         }
-         remainingChunkLength = chunkIndex;
-         firstSegment.index = 0;
-//         }
+      if (this._startIndex !== lastRange.endIndex) {
+         throw new Error('Chunk does not match target location (offsets do not match).');
       }
 
+      if (!firstSegment) {
+         /*
+          * There's no current segment to identify whether the chunk can go here.
+          * Technically one could still insert something invalid here, however.
+          */
+      } else {
+         // validate that the text we have matches
+         const lengthToCompare = Math.min(chunk.originalText.length, firstSegment.index);
+         const chunkText = chunk.originalText.substr(chunk.originalText.length - lengthToCompare);
+         const segmentText = firstSegment.text.substring(firstSegment.index - lengthToCompare, firstSegment.index);
+
+         if (chunkText !== segmentText) {
+            throw new Error('Chunk does not match target location (text does not match).');
+         }
+
+         // adjust indices
+         if (chunk.originalText.length >= firstSegment.index) {
+            remainingChunkLength = chunk.originalText.length - lengthToCompare;
+            firstSegment.index = 0;
+         } else {
+            firstSegment.index -= chunk.originalText.length;
+         }
+      }
+
+      this._startIndex = firstRange.startIndex;
+      this._startRow = firstRange.startRow;
+      this._startColumn = firstRange.startColumn;
       this._addToSegment(chunk.originalText.substr(0, remainingChunkLength), undefined, true);
    }
 
@@ -273,7 +286,6 @@ class ChunkSource {
       }
       this._segments = segmentArray.concat(this._segments);
       this._segments.allSegments = isAtEnd;
-      this._didReturn = true;
    }
 
    _resumeOperation() {
@@ -313,7 +325,7 @@ class ChunkSource {
                const range = new Range(this._info.location, this._startIndex, this._startRow, this._startColumn,
                   endIndex, endRow, endColumn);
                chunk = new Chunk(text, originalText, range);
-               if (!this._didReturn) {
+               if (!(extractor.extractor instanceof Peek)) {
                   this._startIndex = endIndex;
                   this._startRow = endRow;
                   this._startColumn = endColumn;
