@@ -1279,6 +1279,29 @@ describe('ChunkSource', () => {
 
       });
 
+      describe('ranges', () => {
+
+         it('delivers the space chars', () => {
+            source.addSegment('Wo');
+            source.addSegment('r');
+            source.endSegments();
+
+            source.extract('word', [], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 3, 0, 3));
+         });
+
+         it('delivers the range after a false-positive terminator', () => {
+            source.addSegment('wordC\n');
+            source.endSegments();
+
+            source.extract('word', [ 'dr' ], pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 5, 0, 5));
+         });
+
+      });
+
    });
 
    describe('extract("match")', () => {
@@ -1415,6 +1438,40 @@ describe('ChunkSource', () => {
             source.extract('match', 'Two', pluckedSpy);
 
             expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'test', 'Two' ]);
+         });
+
+      });
+
+      describe('ranges', () => {
+
+         it('delivers range for matched text', () => {
+            source.addSegment('test');
+            source.addSegment('Two');
+            source.endSegments();
+
+            source.extract('match', 'test', pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 4, 0, 4));
+         });
+
+         it('delivers range across segments', () => {
+            source.addSegment('te');
+            source.addSegment('st');
+            source.endSegments();
+
+            source.extract('match', 'test', pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 4, 0, 4));
+         });
+
+         it('delivers a range across a newline (not a fully supported use case)', () => {
+            source.addSegment('te\n');
+            source.addSegment('st');
+            source.endSegments();
+
+            source.extract('match', 'te\nst', pluckedSpy);
+
+            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 5, 1, 2));
          });
 
       });

@@ -466,7 +466,6 @@ class DigitExtractor extends Extractor {
 class SpaceExtractor extends Extractor {
    process(segment) {
       const SPACE_REGEX = this.context.version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
-      const LINE_ENDING_REGEX = this.context.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
 
       SPACE_REGEX.lastIndex = segment.index;
       const result = SPACE_REGEX.exec(segment.text);
@@ -554,12 +553,12 @@ class MatchExtractor extends Extractor {
 
       if (segmentText === candidateText) {
          this.originals.push(segmentText);
-         
+
          this.candidateIndex += lengthToCompare;
          segment.index += lengthToCompare;
 
          if (this.candidateIndex >= candidate.length) {
-         this.matches.push(adjustTextAndOffset(candidate, this, this.context.version));
+            this.matches.push(adjustTextAndOffset(candidate, this, this.context.version));
             this.candidateIndex = 0;
             return this;
          }
@@ -718,14 +717,13 @@ class AllExtractor extends Extractor {
 
    finish() {
       if (this.subExtractor) {
-         const result = this.subExtractor.finish();
+         // We found no match up to this point. so ask peek to wrap up and continue
+         this.subExtractor.finish();
          const origSegment = this.subExtractor._firstSegment;
          delete this.subExtractor;
 
-         if (!result || result.matches.length === 0) {
-            this._addCharAndContinue(origSegment);
-            return;
-         }
+         this._addCharAndContinue(origSegment);
+         return;
       }
 
       if (this.originals.length > 0) {

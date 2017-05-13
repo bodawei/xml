@@ -18,11 +18,13 @@ BLOG IDEAS?
 
 73min
 
-220: S - range for match and multi
+√ 220: S - range for match and multi
 		- we simply ignore line breaks?
 		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
-221: S - range for word
+√ 221: S - range for word
 		- should be easy as it rests on all
+
+
 	cleanup
 		- pass version into extractor constructor
 		- extractor can have an "segments to return"

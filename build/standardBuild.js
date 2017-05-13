@@ -273,7 +273,7 @@ module.exports = function standardBuild(grunt) {
       if (controller) {
          controller.passthroughWrite('TEST\n');
          controller.passthroughWrite(testReport);
-         controller.passthroughWrite('COVERAGE\n');
+         controller.passthroughWrite('\nCOVERAGE\n');
          controller.passthroughWrite(coverageReport);
       }
    });

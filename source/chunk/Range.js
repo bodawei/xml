@@ -7,7 +7,7 @@
  in an entity.
  It tracks which location (by way of an EntityLocation), plus the start
  and end index, row and column within the entity.
- 
+
  It is important to note:
    - index is a count of characters since the start of the entity.
       \r\n counts as two
