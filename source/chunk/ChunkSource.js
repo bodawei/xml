@@ -304,7 +304,7 @@ class ChunkSource {
             let chunk;
             if (result.matches.length !== 0) {
                const text = result.matches.join('');
-               const originalText = text;
+               const originalText = result.originals.join('');
 
                const endIndex = this._startIndex + result.endIndex;
                const endRow = this._startRow + result.endRow;
@@ -449,6 +449,7 @@ class DigitExtractor extends Extractor {
 
       if (foundDigits) {
          this.matches.push(result[0]);
+         this.originals.push(result[0]);
 
          segment.index += result[0].length;
          this.endIndex += result[0].length;
@@ -552,11 +553,13 @@ class MatchExtractor extends Extractor {
       const candidateText = candidate.substr(this.candidateIndex, lengthToCompare);
 
       if (segmentText === candidateText) {
-         this.matches.push(segmentText);
+         this.originals.push(segmentText);
+         
          this.candidateIndex += lengthToCompare;
          segment.index += lengthToCompare;
 
          if (this.candidateIndex >= candidate.length) {
+         this.matches.push(adjustTextAndOffset(candidate, this, this.context.version));
             this.candidateIndex = 0;
             return this;
          }

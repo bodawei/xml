@@ -103,7 +103,7 @@ describe('ChunkSource', () => {
 
          const chunk = source.getSpace();
 
-         expect(chunk).toEqualChunkText('  \n');
+         expect(chunk).toEqualChunkText({ text: '  \n', originalText: '  \r\n' });
       });
 
       it('peekChar() calls back with a chunk with a char', () => {
@@ -288,7 +288,7 @@ describe('ChunkSource', () => {
 
             expect(pluckedSpy.calls.count()).toEqual(2);
             expect(pluckedSpy.calls.argsFor(0)[0]).toEqual(true);
-            expect(pluckedSpy.calls.argsFor(1)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.argsFor(1)).toEqualChunkTexts([ { text: '\n', originalText: '\r' } ]);
          });
 
          it('returns true if a newline is the next character', () => {
@@ -398,7 +398,10 @@ describe('ChunkSource', () => {
             source.extract('peekChar', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([
+               { text: '\n', originalText: '\r' },
+               { text: '\n', originalText: '\r' }
+            ]);
          });
 
          it('returns a newline if the next is a carriage return/newline', () => {
@@ -410,7 +413,11 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([
+               { text: '\n', originalText: '\r\n' },
+               { text: '\n', originalText: '\r\n' },
+               'x'
+            ]);
          });
 
       });
@@ -538,7 +545,7 @@ describe('ChunkSource', () => {
 
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r' } ]);
          });
 
          it('calls back with a single newline after finding a carriage return and newline across segments', () => {
@@ -550,7 +557,7 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r\n' }, 'x' ]);
          });
 
          it('calls back with a single newline after finding a carriage return and \\u0085 across segments', () => {
@@ -563,7 +570,7 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r\u0085' }, 'x' ]);
          });
 
          it('calls back with a newline after finding a CR at end of one segment and other char at next start', () => {
@@ -574,7 +581,7 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r' }, 'x' ]);
          });
 
       });
@@ -624,7 +631,7 @@ describe('ChunkSource', () => {
 
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\u0085' } ]);
          });
 
          it('calls back with a \\u2028 in 1.0', () => {
@@ -643,7 +650,7 @@ describe('ChunkSource', () => {
 
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\u2028' } ]);
          });
 
          it('calls back with a carriage return as a newline', () => {
@@ -652,7 +659,7 @@ describe('ChunkSource', () => {
 
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r' } ]);
          });
 
          it('calls back with a carriage return/newline as a newline', () => {
@@ -661,7 +668,7 @@ describe('ChunkSource', () => {
 
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkText('\n');
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r\n' } ]);
          });
 
          it('calls back with a carriage return/\\u0085 as a newline and ignores the latter in 1.0', () => {
@@ -671,7 +678,7 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', '\u0085' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r' }, '\u0085' ]);
          });
 
          it('calls back with a carriage return/\\u0085 as a newline in 1.1', () => {
@@ -682,7 +689,7 @@ describe('ChunkSource', () => {
             source.extract('char', undefined, pluckedSpy);
             source.extract('char', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '\n', 'x' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: '\n', originalText: '\r\u0085' }, 'x' ]);
          });
 
          // more about line endings in the segment section, above
@@ -972,7 +979,7 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: ' \n ', originalText: ' \r ' } ]);
          });
 
          it('recognizes carrige returns/new line combinations (\\r\\n) and returns them as newlines', () => {
@@ -980,7 +987,7 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: ' \n ', originalText: ' \r\n ' } ]);
          });
 
          it('does not recognize next line (\\u0085) as space if version is 1.0', () => {
@@ -1005,7 +1012,7 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: ' \n ', originalText: ' \u0085 ' } ]);
          });
 
          it('recognizes carriage return and next line (\\r\\u0085) if version is 1.1 and returns as a new line', () => {
@@ -1014,7 +1021,7 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: ' \n ', originalText: ' \r\u0085 ' } ]);
          });
 
          it('recognizes line separator (\\u2028) as space  if version is 1.1 and returns a new line', () => {
@@ -1023,7 +1030,7 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n ' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ { text: ' \n ', originalText: ' \u2028 ' } ]);
          });
 
          it('recognizes a combination of line breaks and transforms all to newline', () => {
@@ -1032,7 +1039,10 @@ describe('ChunkSource', () => {
 
             source.extract('space', undefined, pluckedSpy);
 
-            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ ' \n\n\n \n\n\n' ]);
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ {
+               text: ' \n\n\n \n\n\n',
+               originalText: ' \n\r\r\n \u2028\u0085\r\u0085'
+            } ]);
          });
 
       });
