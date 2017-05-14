@@ -41,6 +41,7 @@ SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
  4/23 Sprint 39:  111sp [7XL 2L 3M 7S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  4/30 Sprint 40:  108sp [7XL 2L 4M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
  5/8  Sprint 41:  108sp [7XL 2L 3M 4S]. Avg: 5/sprint = 23 sprints. ACTUAL: 5
+ 5/10 Sprint 42:  114sp [8XL 1L 6M 11S]. Avg: 5/sprint = 23 sprints. ACTUAL: 6+
 
 
 =============================================
@@ -2476,4 +2477,38 @@ Notes41
 This sprint went better. I picked off a set of things to do that I was pretty confident that I could do. I got that done, and I got the reporting table finished. hurray!
 
 I actually got done with the stuff I'd committed to in the sprint faster than I expected, and spent the last 60? minutes doing some cleanup of ChunkSource.  I decided to then spend a bunch of time "between sprints" addressing the snarl that the code had become.  Finished that up on the evening of the 8th.  it is still needing cleanup, but no longer needs major architectural overhaul, so I feel that it is reasonable to move on, and keep cleaning it up as we go next.
+
+
+Sprint 42
+=========
+√216: S - range for char (note: do not need to do the complex line processing in to terminator of no space tokens)
+		- test char, peekchar
+			- easy to increment end index and row and col.  could even use adjustTextAndoffset
+√ 219: S - range for space
+		- test space and peek space
+		- same pattern as all. Will call same routine.
+√ 218 S - extract version
+
+73min
+
+√ 220: S - range for match and multi
+		- we simply ignore line breaks?
+		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
+√ 221: S - range for word
+		- should be easy as it rests on all
+222: M - undo:
+	- has to check if chunk being brought in is correct
+	- make sure to improve undo() to check offsets and text
+111: Get Vivaldi to work
+	- on mac
+		√ - pass version into extractor constructor
+
+Notes42
+-------
+This was an OK sprint. I deliberately aimed more conservatively given the last couple.
+While this went OK, and I was even able to drag work in, I'm still feeling less than stellar about ChunkSource.  The returnSegments() process is really ugly still, and the fact that I tried to remove it in the cleanup and was just getting complex tells me that the logic around nesting extractors is still too messy.  We need to be more explicit about the contract and make sure things adhere to it.
+I also have decided that the charset conversion is not necessary for "1.0" entirely, and so am going to pull it out.  I'm feeling nervous about the amount of work to do and my hope to talk at SVCC
+
+
+
 

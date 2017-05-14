@@ -52,7 +52,6 @@ class ChunkSource {
       this._encodingState = {};
 
       this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
-      this.returnSegments = this._returnSegments.bind(this);
 
       this._addBomExtractor();
       this._addVersionExtractor();
@@ -270,13 +269,6 @@ class ChunkSource {
       this._resumeOperation();
    }
 
-   _returnSegments(segmentArray) {
-      if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
-         this._segments.shift();
-      }
-      this._segments = segmentArray.concat(this._segments);
-   }
-
    _resumeOperation() {
       if (!this._encoding) {
          return;
@@ -301,6 +293,16 @@ class ChunkSource {
          } else {
             result = extractor.extractor.finish();
          }
+
+         if (extractor.extractor.unusedSegments.length > 0) {
+            const segmentArray = extractor.extractor.unusedSegments;
+            if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
+               this._segments.shift();
+            }
+            this._segments = segmentArray.concat(this._segments);
+            extractor.extractor.unusedSegments = [];
+         }
+
          if (result) {
             let chunk;
 
@@ -339,6 +341,7 @@ class Extractor {
       this.endIndex = 0;
       this.endRow = 0;
       this.endColumn = 0;
+      this.unusedSegments = [];
 
       this.context = context;
    }
@@ -385,10 +388,15 @@ class Peek extends Extractor {
       const successful = result && (result.matches.length > 0);
       const failed = result && (result.matches.length === 0);
 
-      if ((successful && !this._consumeOnSuccess) || failed) {
-         this._seenSegments.forEach((segment) => { segment.index = 0; });
-         this._startSegment.index = this._startIndex;
-         this.context.returnSegments(this._seenSegments);
+      if (successful || failed) {
+         if (!this._consumeOnSuccess || failed) {
+            this._seenSegments.forEach((segment) => { segment.index = 0; });
+            this._startSegment.index = this._startIndex;
+            this.unusedSegments = this._seenSegments;
+         } else {
+            // is this not x = x ?
+            result.unusedSegments = this._subExtractor.unusedSegments;
+         }
       }
 
       return result;
@@ -633,7 +641,7 @@ class MultiMatchExtractor extends Extractor {
          }
 
          this.segments[0].index = this.match._lastIndex;
-         this.context.returnSegments(this.segments);
+         this.unusedSegments = this.segments;
          return this.match;
       }
 
@@ -678,6 +686,7 @@ class AllExtractor extends Extractor {
 
       // Reminder: Since Peek() is used, the first segment is always reset back to its initial index
       const origSegment = this.subExtractor._firstSegment;
+      this.unusedSegments = this.subExtractor.unusedSegments;
       delete this.subExtractor;
 
       if (result.matches.length > 0) {
@@ -721,6 +730,7 @@ class AllExtractor extends Extractor {
       if (this.subExtractor) {
          // We found no match up to this point. so ask peek to wrap up and continue
          this.subExtractor.finish();
+         this.unusedSegments = this.subExtractor.unusedSegments;
          const origSegment = this.subExtractor._firstSegment;
          delete this.subExtractor;
 

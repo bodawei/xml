@@ -1,45 +1,58 @@
 =============================================
 SPRINT = 7 dev, 1 cleanup, 1 build, 1 retrospective/plan  XL=10, L=5, M=3, S=1
- 5/10 Sprint 42:  114sp [8XL 1L 6M 11S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
+ 5/14 Sprint 43:  114sp [8XL 1L 5M 6S]. Avg: 5/sprint = 23 sprints. ACTUAL: 
 
 BLOG IDEAS?
 - Shaping out the string cursor rework. get some basic structure. in sprint 34.
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
+Path forward:
+- A *lot* of loose edges
+- Could swap ChunkSource for StringCursor (StringCursor constructor return a ChunkSource instance) and see what happens
+	- about half tests break, but seems for small number of reasons (recent chunks, etc)
+- Still don't have a clear plan about migrating the upper layers over async.
+- Do we abandon ChunkSource and try to finish up with in memory?
+	- Or do we rebuild all on top of ChunkSource?
 
-√216: S - range for char (note: do not need to do the complex line processing in to terminator of no space tokens)
-		- test char, peekchar
-			- easy to increment end index and row and col.  could even use adjustTextAndoffset
-√ 219: S - range for space
-		- test space and peek space
-		- same pattern as all. Will call same routine.
-√ 218 S - extract version
+--- finish chunk source
+- ChunkSource not quite as clean as I'd like
+	- whitespace handling is ugly
+	- peekWord
+	- peekSpace 
+	- kill undo
+	- kill peekIsSpace
+	- break out sub-items
+	- extract terminators
+	- grouped extractor
+M deal with different offset passed into addSegment
+	- store loc and offset/range in segment
+	- extractor increments row and column and maybe index
+	-  main system will keep a current set of ranges. 
+	- extractors have as result:
+		state: 
+		getResults()
+		getUnused()
+		matches, original, index, row, column, unused?
+--- do an exercise to move some over onto it
+	- then decide what to do
 
-73min
-
-√ 220: S - range for match and multi
-		- we simply ignore line breaks?
-		@@@ - we can't accept any newlines in matches right now.  (we can for all, but that's only because we don't actually return the terminator. if we did which I'm advocating down the road, this needs more work...)
-√ 221: S - range for word
-		- should be easy as it rests on all
-222: M - undo:
-	- has to check if chunk being brought in is correct
-	- make sure to improve undo() to check offsets and text
-111: Get Vivaldi to work
-	- on mac
+M: Get segments to return working
+M: Get different offsets working
+S: Redefine Extractor as an external thing with clear contract (see aboves)
+S: 
 
 
-	cleanup
-		√ - pass version into extractor constructor
-		- extractor can have an "segments to return"
-		- extractor should carry a flag of status, rather than returning self.
-- performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
+
+
 
 -- next: 223
 =============================================
 CLEANUP
 =======
+- extractor can have an "segments to return"
+- extractor should carry a flag of status, rather than returning self.
+- performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
 review tests and test cases
 Performance variations on these routines (char by char better than regex?  better way to do line fixes etc?)
 - look for a better way to be testing parseQuotedValue().  The offsets should already be tested elsewhere.
@@ -57,7 +70,6 @@ Breakings
 	- We can't generate html reports for browser coverage: errors reduce if we turn off the djb reporter.
 	155 karma config requires each subdirectory of source to be explicitly enumerated. globs not happy. why?
 	156 jasmine_node's src glob doesn't like negations. and cant figure out specifying build, so we don't get coverage for that.
-	111: Get Vivaldi to work
 - get reporting of node tests
 Get edge with browserstack integrated into your test runs
 - coverage reporter should have a percent cutoff
@@ -126,6 +138,7 @@ S 213: Review entity manager's handling of internal/external and ge/pe decls
 M 185: need entity manager to retrieve remote entities
 	- cache external entities if smaller than memory?
 	- customizable retrievers.  (entity manager might want an eager flag to load entities asap?)
+
 
 --- DTD [3XL]
 21:XL Read element content structure
