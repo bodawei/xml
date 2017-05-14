@@ -404,6 +404,22 @@ describe('ChunkSource', () => {
             ]);
          });
 
+         it('returns a newline if the next is a carriage return/newline in same segment', () => {
+            source.addSegment('\r\n');
+            source.addSegment('x');
+            source.endSegments();
+
+            source.extract('peekChar', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+            source.extract('char', undefined, pluckedSpy);
+
+            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([
+               { text: '\n', originalText: '\r\n' },
+               { text: '\n', originalText: '\r\n' },
+               'x'
+            ]);
+         });
+
          it('returns a newline if the next is a carriage return/newline', () => {
             source.addSegment('\r');
             source.addSegment('\nx');
@@ -2368,5 +2384,64 @@ describe('ChunkSource', () => {
       });
 
    });
+
+   fdescribe('multiple ranges', () => {
+
+      xit('delivers a default range across multiple segments', () => {
+         source.addSegment('one');
+         source.addSegment('two\n');
+         source.addSegment('three');
+         source.endSegments();
+
+         source.extract('all', [], pluckedSpy);
+
+         expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 12, 1, 5));
+      });
+
+      it('delivers an offset range when a range is passed in on the first of several segments', () => {
+         source.addSegment('aaa', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+         source.addSegment('bbb\n');
+         source.addSegment('ccccc');
+         source.endSegments();
+
+         source.extract('all', [], pluckedSpy);
+
+         expect(pluckedSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 3, 2, 1, 15, 3, 5));
+      });
+
+      it('delivers a set of ranges when each segment has a different range', () => {
+         const loc2 = new EntityLocation();
+         const loc3 = new EntityLocation();
+
+         source.addSegment('1', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+         source.addSegment('22\n', new Range(loc2, 100, 100, 100, 9, 9, 9));
+         source.addSegment('55555', new Range(loc3, 200, 200, 200, 9, 9, 9));
+         source.endSegments();
+
+         source.extract('all', [], pluckedSpy);
+
+         // todo test do a range of chunks
+         console.log(pluckedSpy.calls.argsFor(0)[0].range);
+         expect(pluckedSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 3, 2, 2));
+         expect(pluckedSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 102, 101, 0));
+         expect(pluckedSpy.calls.argsFor(0)[0].range[2]).toEqual(new Range(loc3, 200, 200, 200, 205, 200, 205));
+      });
+
+      it('delivers a set of ranges carrying results of one over when no range specified', () => {
+         const loc2 = new EntityLocation();
+         source.addSegment('1', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+         source.addSegment('22\n', new Range(loc2, 100, 100, 100, 9, 9, 9));
+         source.addSegment('55555');
+         source.endSegments();
+
+         source.extract('all', [], pluckedSpy);
+
+         // todo test do a range of chunks
+         expect(pluckedSpy.calls.argsFor(0)[0][0]).toEqualChunkRange(new Range(defaultLoc, 3, 2, 1, 3, 2, 2));
+         expect(pluckedSpy.calls.argsFor(0)[0][1]).toEqualChunkRange(new Range(loc2, 100, 100, 100, 107, 101, 5));
+      });
+
+   });
+
 
 });

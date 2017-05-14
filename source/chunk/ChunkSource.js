@@ -21,10 +21,10 @@ const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 const VERSION_REGEXP = /version=("|')(.+)("|')/i;
 
 class Segment {
-   constructor(text, isLast = false) {
+   constructor(text, range) {
       this.text = text;
       this.index = 0;
-      this.isLast = isLast;
+      this.range = range;
    }
 
    atEnd() {
@@ -47,6 +47,7 @@ class ChunkSource {
       this._startColumn = 0;
 
       this._segments = [];
+      this._ranges= [];
       this._extractors = [];
       this._encoding = options.encoding;
       this._encodingState = {};
@@ -196,8 +197,8 @@ class ChunkSource {
       this._addToSegment(chunk.originalText.substr(0, remainingChunkLength), undefined, true);
    }
 
-   addSegment(text, last) {
-      this._addToSegment(text, last);
+   addSegment(text, range) {
+      this._addToSegment(text, range);
    }
 
    endSegments() {
@@ -209,17 +210,18 @@ class ChunkSource {
       this._resumeOperation();
    }
 
-   _addToSegment(text, last, putBefore) {
+   _addToSegment(text, range, putBefore) {
       // replace. error on no text, and on allSegments set to true
       if (text.length === 0) {
          return;
       }
 
-      const segment = new Segment(text);
+      const segment = new Segment(text, range);
 
       if (!putBefore) {
          if (this._encoding && this._encoding !== encodingUtils.ENCODING.UNENCODED) {
             encodingUtils.decodeSegment(segment, this._encoding);
+            // This is a problem in terms of messing up offsets!
          }
          segment.offset = new Range(this._info.location);
          this._segments.push(segment);
@@ -236,7 +238,7 @@ class ChunkSource {
 
             existing.forEach((segment) => {
                segment.index = 0;
-               this.addSegment(segment.text, segment.isLast);
+               this.addSegment(segment.text, segment.range);
             });
          } else {
             return;
@@ -277,15 +279,41 @@ class ChunkSource {
       while ((this._segments.length !== 0 || this._allSegments) && this._extractors.length > 0) {
          const extractor = this._extractors[0];
 
-         let nextSegment;
-
-         if (this._segments.length > 0) {
-            nextSegment = this._segments[0];
-         }
+         const nextSegment = this._segments[0];
 
          let result;
          if (nextSegment) {
+            if (nextSegment.range) {
+               if (this._ranges.length === 0) {
+                  this._ranges.push(nextSegment.range);  // need to clone this
+//                  this._startIndex = nextSegment.range.startIndex;
+//                  this._startRow = nextSegment.range.startRow;
+//                  this._startColumn = nextSegment.range.startColumn;
+               } else {
+                  const currentRange = this._ranges[this._ranges.length - 1];
+                  const newRange = nextSegment.range;
+
+                  if (currentRange.location !== newRange.location ||
+                     newRange.startIndex !== currentRange.endIndex) {
+                     this._ranges.push(nextSegment.range);
+                  }
+               }
+            } else {
+               if (this._ranges.length === 0) {
+                  this._ranges.push(new Range(this._info.location, 0, 0, 0, 0, 0, 0));
+//                  this._startIndex = 0;
+//                  this._startRow = 0;
+//                  this._startColumn = 0;
+               }
+               // if segment has loc and (is new or startIndex does not matches old index)
+               //      if have a range being built, then stash away
+               //      start new start/row/col
+               // else
+               //      continue on
+            }
+
             result = extractor.extractor.process(nextSegment);
+            // if extractor has no start info, record start segment start index, row and col
 
             if (nextSegment.atEnd()) {
                this._segments.shift();
@@ -303,24 +331,50 @@ class ChunkSource {
             extractor.extractor.unusedSegments = [];
          }
 
-         if (result) {
+         if (!result) {
+            const currentRange = this._ranges[this._ranges.length - 1];
+
+            /// prob not right
+            const endIndex = currentRange.startIndex + extractor.extractor.endIndex;
+            const endRow = currentRange.startRow + extractor.extractor.endRow;
+            const endColumn = extractor.extractor.endRow > 0 ? extractor.extractor.endColumn : currentRange.startColumn + extractor.extractor.endColumn;
+
+            currentRange.endIndex = endIndex;
+            currentRange.endRow = endRow;
+            currentRange.endColumn = endColumn;
+         } else {
             let chunk;
 
             if (result.matches.length !== 0) {
                const text = result.matches.join('');
                const originalText = result.originals.join('');
 
-               const endIndex = this._startIndex + result.endIndex;
-               const endRow = this._startRow + result.endRow;
-               const endColumn = result.endRow > 0 ? result.endColumn : this._startColumn + result.endColumn;
+               const currentRange = this._ranges[this._ranges.length - 1];
 
-               const range = new Range(this._info.location, this._startIndex, this._startRow, this._startColumn,
-                  endIndex, endRow, endColumn);
-               chunk = new Chunk(text, originalText, range);
+               const endIndex = currentRange.startIndex + result.endIndex;
+               const endRow = currentRange.startRow + result.endRow;
+               const endColumn = result.endRow > 0 ? result.endColumn : currentRange.startColumn + result.endColumn;
+               // these will serve as end point of open range so build it.
+
+               currentRange.endIndex = endIndex;
+               currentRange.endRow = endRow;
+               currentRange.endColumn = endColumn;
+
+//               const range = new Range(this._info.location, this._startIndex, this._startRow, this._startColumn,
+//                  endIndex, endRow, endColumn);
+               // pass in set of ranges
+               chunk = new Chunk(text, originalText, this._ranges);
+
+               // if startseg and index have not changed, then don't do this
                if (!(extractor.extractor instanceof Peek)) {
                   this._startIndex = endIndex;
                   this._startRow = endRow;
                   this._startColumn = endColumn;
+                  // don't do this if this is a peek.  (how roll back?)
+                  const newRange = new Range(currentRange.location, endIndex, endRow, endColumn);
+                  this._ranges = [ newRange ];
+               } else {
+                  this._ranges = [ this.ranges[0] ];
                }
 
                delete this._didReturn;
@@ -366,9 +420,9 @@ class Peek extends Extractor {
       }
 
       // Protect against possible duplicate.
-//      if (this._seenSegments[this._seenSegments.length - 1] !== segment) {
-      this._seenSegments.push(segment);
-//      }
+      if (this._seenSegments[this._seenSegments.length - 1] !== segment) {
+         this._seenSegments.push(segment);
+      }
 
       const result = this._subExtractor.process(segment);
       return this._handleResult(result);
