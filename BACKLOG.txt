@@ -31,10 +31,9 @@ BLOG IDEAS?
 
 
 	cleanup
-		- pass version into extractor constructor
+		√ - pass version into extractor constructor
 		- extractor can have an "segments to return"
 		- extractor should carry a flag of status, rather than returning self.
-		- rename endIndex?
 - performance: we check that the index after a REGEX is where we started. which means in the case of a non-match, we're doing a lot of searching.
 
 -- next: 223

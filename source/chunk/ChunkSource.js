@@ -45,19 +45,19 @@ class ChunkSource {
       this._startIndex = 0;
       this._startRow = 0;
       this._startColumn = 0;
-      this.version = this._info.isVersion1dot0 ? 1.0 : 1.1;
+
       this._segments = [];
       this._extractors = [];
       this._encoding = options.encoding;
       this._encodingState = {};
 
+      this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
       this.returnSegments = this._returnSegments.bind(this);
 
       this._addBomExtractor();
       this._addVersionExtractor();
    }
 
-   // Legacy support
    getDigits() {
       return this._doLegacy('digits');
    }
@@ -104,37 +104,14 @@ class ChunkSource {
       return chunk;
    }
 
-   _addBomExtractor() {
-      const self = this;
-      function innerDeliver(result) {
-         if (result) {
-            self._foundBom = true;
-         }
-      }
-
-      this._addExtractor(new Peek(this, new MatchExtractor(this, '\uFEFF'), true), innerDeliver);
-   }
-
-   _addVersionExtractor() {
-      const self = this;
-      function innerDeliver(result) {
-         if (result) {
-            self._versionFound = result.text;
-         }
-      }
-
-      this._addExtractor(new Peek(this, new VersionExtractor(this), false), innerDeliver);
-   }
-
    extract(type, params, deliverChunk) {
       if (typeof deliverChunk !== 'function') {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
       }
 
-      // check params?
       switch (type) {
          case 'digits':
-            this._addExtractor(new DigitExtractor(), deliverChunk);
+            this._addExtractor(new DigitExtractor(this), deliverChunk);
             break;
          case 'space':
             this._addExtractor(new SpaceExtractor(this), deliverChunk);
@@ -151,7 +128,7 @@ class ChunkSource {
             this._addExtractor(new Peek(this, new CharExtractor(this)), deliverChunk);
             break;
          case 'word':
-            const spaceTerminators = this.version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
+            const spaceTerminators = this._version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
             this._addExtractor(new AllExtractor(this, params, spaceTerminators), deliverChunk);
             break;
          case 'all':
@@ -270,6 +247,20 @@ class ChunkSource {
       this._resumeOperation();
    }
 
+   _addBomExtractor() {
+      this._addExtractor(new Peek(this, new MatchExtractor(this, '\uFEFF'), true), (result) => {
+         this._foundBom = !!result;
+      });
+   }
+
+   _addVersionExtractor() {
+      this._addExtractor(new Peek(this, new VersionExtractor(this), false), (result) => {
+         if (result) {
+            this._versionFound = result.text;
+         }
+      });
+   }
+
    _addExtractor(extractor, callback) {
       this._extractors.push({
          extractor: extractor,
@@ -280,12 +271,10 @@ class ChunkSource {
    }
 
    _returnSegments(segmentArray) {
-      const isAtEnd = this._segments.allSegments;
       if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
          this._segments.shift();
       }
       this._segments = segmentArray.concat(this._segments);
-      this._segments.allSegments = isAtEnd;
    }
 
    _resumeOperation() {
@@ -314,6 +303,7 @@ class ChunkSource {
          }
          if (result) {
             let chunk;
+
             if (result.matches.length !== 0) {
                const text = result.matches.join('');
                const originalText = result.originals.join('');
@@ -341,16 +331,9 @@ class ChunkSource {
    }
 }
 
-/**********************************************************************\
-  If decimal or hexadecimal digits are to be found from the current
-  location in the current segment, consume as many digits across as
-  many segments as available, and call back with the results.
-  Do not finish searching and doing the callback until either
-  a non-digit is found or the end of the input is found.
-\**********************************************************************/
-
 class Extractor {
    constructor(context) {
+      this._version = context._version;
       this.matches = [];
       this.originals = [];
       this.endIndex = 0;
@@ -449,6 +432,14 @@ class VersionExtractor extends Extractor {
 
 }
 
+/**********************************************************************\
+  If decimal or hexadecimal digits are to be found from the current
+  location in the current segment, consume as many digits across as
+  many segments as available, and call back with the results.
+  Do not finish searching and doing the callback until either
+  a non-digit is found or the end of the input is found.
+\**********************************************************************/
+
 class DigitExtractor extends Extractor {
    finish() {
       return this;
@@ -477,14 +468,14 @@ class DigitExtractor extends Extractor {
 // [3] S ::= (#x20 | #x9 | #xD | #xA)+
 class SpaceExtractor extends Extractor {
    process(segment) {
-      const SPACE_REGEX = this.context.version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
+      const SPACE_REGEX = this._version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
 
       SPACE_REGEX.lastIndex = segment.index;
       const result = SPACE_REGEX.exec(segment.text);
       const foundSpace = result && result.index === segment.index;
 
       if (foundSpace) {
-         this.matches.push(adjustTextAndOffset(result[0], this, this.context.version));
+         this.matches.push(adjustTextAndOffset(result[0], this, this._version));
          this.originals.push(result[0]);
 
          segment.index += result[0].length;
@@ -502,12 +493,12 @@ class SpaceExtractor extends Extractor {
 
 class CharExtractor extends Extractor {
    process(segment) {
-      const LINE_ENDING_REGEX = this.context.version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
+      const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
 
       const currentChar = segment.text[segment.index];
 
       if (this.foundCR) {
-         if (currentChar === '\n' || (currentChar === '\u0085' && this.context.version === 1.1)) {
+         if (currentChar === '\n' || (currentChar === '\u0085' && this._version === 1.1)) {
             this.originals.push(currentChar);
             segment.index ++;
             this.endIndex++;
@@ -570,7 +561,7 @@ class MatchExtractor extends Extractor {
          segment.index += lengthToCompare;
 
          if (this.candidateIndex >= candidate.length) {
-            this.matches.push(adjustTextAndOffset(candidate, this, this.context.version));
+            this.matches.push(adjustTextAndOffset(candidate, this, this._version));
             this.candidateIndex = 0;
             return this;
          }
@@ -587,7 +578,6 @@ class MatchExtractor extends Extractor {
    }
 }
 
-// This needs documentation.
 class MultiMatchExtractor extends Extractor {
    constructor(context, candidates) {
       super(context);
@@ -671,7 +661,7 @@ class AllExtractor extends Extractor {
          regexMemo[terminatorChars] = this.terminatorRegEx;
       }
 
-      const spaceTerminatorChars = this.context.version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
+      const spaceTerminatorChars = this._version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
          SPACE_TERMINATOR_CHARS_11;
 
       this.terminatorArray = this.terminators;
@@ -739,7 +729,7 @@ class AllExtractor extends Extractor {
       }
 
       if (this.originals.length > 0) {
-         this.matches = [ adjustTextAndOffset(this.originals.join(''), this, this.context.version) ];
+         this.matches = [ adjustTextAndOffset(this.originals.join(''), this, this._version) ];
       }
       return this;
    }
