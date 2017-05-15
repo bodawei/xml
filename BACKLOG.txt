@@ -38,7 +38,10 @@ M deal with different offset passed into addSegment
 	- then decide what to do
 
 223: M: Get returnSegments working
-M: Get different offsets working
+	-48min
+224: M: Get different offsets working
+	- 2hours to proof of concept.  Going to shift to the idea of breaking out extractors and moving towards the exercise of building on top of this.
+
 S: Redefine Extractor as an external thing with clear contract (see aboves)
 S: 
 
