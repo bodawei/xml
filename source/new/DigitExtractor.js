@@ -15,6 +15,9 @@ const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 class DigitExtractor extends Extractor {
 
    process(segment) {
+      const info = this._makeInfo(segment);
+      this._segInfo.push(info);
+
       DIGITS_REGEX.lastIndex = 0;
       this._foundDigits = DIGITS_REGEX.exec(segment.text[segment.index]);
 
@@ -26,41 +29,23 @@ class DigitExtractor extends Extractor {
       DIGITS_REGEX.lastIndex = segment.index;
       const allDigits = DIGITS_REGEX.exec(segment.text);
 
-      const digitsLength = allDigits[0].length;
-      const info = {
-         chars: digitsLength,
-         rows: 0,
-         columns: digitsLength
-      };
-
+      this._normalizedText.push(this._normalizeText(allDigits[0], info));
       this._text.push(allDigits[0]);
-      this._segInfo.push(info);
 
+      const digitsLength = allDigits[0].length;
       segment.index += digitsLength;
 
       if (!segment.atEnd()) {
          this.state = Extractor.STATE.SUCCESS;
-         info.segment = segment;
       } else {
-         info.range = segment.range;
+         info.segment = {
+            range: segment.range
+         };
       }
    }
 
    done() {
       this.state = this._foundDigits ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
-   }
-
-   getExtraction() {
-      if (this.state === Extractor.STATE.WORKING) {
-         return;
-      }
-
-      const combinedText = this._text.join('');
-      return {
-         text: combinedText,
-         original: combinedText,
-         segments: this._segInfo
-      };
    }
 
 }

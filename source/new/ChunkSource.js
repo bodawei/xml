@@ -95,7 +95,6 @@ class ChunkSource {
             this._extractors.shift();
          }
 
-         let chunk;
          const results = extractor.getExtraction();
          const segInfo = results.segments;
          const ranges = [];
@@ -107,27 +106,27 @@ class ChunkSource {
 
             if (item.segment.text) {
                returnedSegments.push(item.segment);
-            } else {
-               let range = item.segment.range;
-
-               if (!range) {
-                  if (current) {
-                     range = current;
-                  } else {
-                     range = this._lastRange;
-                  }
-               }
-
-               if (!current || current.location !== range.location) {
-                  current = new Range(range.location, range.startIndex, range.startRow, range.startColumn,
-                     range.startIndex, range.startRow, range.startColumn);
-                  ranges.push(current);
-               }
-
-               current.endIndex += item.chars;
-               current.endRow += item.rows;
-               current.endColumn += item.columns;
             }
+
+            let range = item.segment.range;
+
+            if (!range) {
+               if (current) {
+                  range = current;
+               } else {
+                  range = this._lastRange;
+               }
+            }
+
+            if (!current || current.location !== range.location) {
+               current = new Range(range.location, range.startIndex, range.startRow, range.startColumn,
+                  range.startIndex, range.startRow, range.startColumn);
+               ranges.push(current);
+            }
+
+            current.endIndex += item.chars;
+            current.endRow += item.rows;
+            current.endColumn += item.columns;
          }
 
          if (extractor.state === Extractor.STATE.SUCCESS) {

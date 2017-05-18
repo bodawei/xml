@@ -47,7 +47,9 @@ describe('DigitExtractor', () => {
                chars: 6,
                rows: 0,
                columns: 6,
-               range: segmentRange
+               segment: {
+                  range: segmentRange
+               }
             } ]
          });
       });
@@ -63,7 +65,9 @@ describe('DigitExtractor', () => {
                chars: 12,
                rows: 0,
                columns: 12,
-               range: segmentRange
+               segment: {
+                  range: segmentRange
+               }
             } ]
          });
       });
@@ -127,12 +131,16 @@ describe('DigitExtractor', () => {
                chars: 3,
                rows: 0,
                columns: 3,
-               range: segmentRange
+               segment: {
+                  range: segmentRange
+               }
             }, {
                chars: 4,
                rows: 0,
                columns: 4,
-               range: undefined
+               segment: {
+                  range: undefined
+               }
             } ]
          });
       });
@@ -167,7 +175,9 @@ describe('DigitExtractor', () => {
                chars: 3,
                rows: 0,
                columns: 3,
-               range: segmentRange
+               segment: {
+                  range: segmentRange
+               }
             } ]
          });
       });

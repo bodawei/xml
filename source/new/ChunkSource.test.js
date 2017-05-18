@@ -279,6 +279,26 @@ describe('ChunkSource', () => {
 
    });
 
+//         it('calls back with a char when segment added later', () => {
+//            source.extract('char', undefined, pluckedSpy);
+//
+//            source.addSegment('abc');
+//            source.endSegments(); // needed since encoding scanning still waiting
+//
+//            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ 'a' ]);
+//         });
+//
+//         it('calls back with a char at start of subsequent segment', () => {
+//            source.addSegment('123');
+//            source.addSegment('great');
+//            source.extract('digits', undefined, pluckedSpy);
+//
+//            source.extract('char', undefined, pluckedSpy);
+//
+//            expect(pluckedSpy.calls.allArgs()).toEqualChunkTexts([ '123', 'g' ]);
+//         });
+//
+
 //   describe('multiple calls', () => {
 //
 //      it('made before any segments added', () => {

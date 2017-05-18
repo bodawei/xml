@@ -7,7 +7,7 @@
 const Range = require('./Range.js');
 const EntityLocation = require('../shared/EntityLocation.js');
 
-describe('Range', () => {
+describe('xRange', () => {
 
    describe('construction', () => {
 
