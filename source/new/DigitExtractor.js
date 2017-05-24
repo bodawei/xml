@@ -29,8 +29,7 @@ class DigitExtractor extends Extractor {
       DIGITS_REGEX.lastIndex = segment.index;
       const allDigits = DIGITS_REGEX.exec(segment.text);
 
-      this._normalizedText.push(this._normalizeText(allDigits[0], info));
-      this._text.push(allDigits[0]);
+      this._processText(allDigits[0], info);
 
       const digitsLength = allDigits[0].length;
       segment.index += digitsLength;
@@ -44,8 +43,9 @@ class DigitExtractor extends Extractor {
       }
    }
 
-   done() {
+   finish() {
       this.state = this._foundDigits ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      return this._finish();
    }
 
 }

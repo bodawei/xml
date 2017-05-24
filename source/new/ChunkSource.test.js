@@ -15,6 +15,7 @@ const Range = require('./Range.js');
 describe('ChunkSource', () => {
    let source;
    let defaultLoc;
+   let entityMetaData1dot0;
    let entityMetaData1dot1;
    let testExtractors;
 
@@ -32,11 +33,13 @@ describe('ChunkSource', () => {
          });
       }
 
-      done() {
-         this.state = Extractor.STATE.SUCCESS;
-      }
+      finish() {
+         if (this._text.length > 0) {
+            this.state = Extractor.STATE.SUCCESS;
+         } else {
+            this.state = Extractor.STATE.FAILURE;
+         }
 
-      getExtraction() {
          const combinedText = this._text.join('');
          return {
             text: combinedText,
@@ -78,12 +81,13 @@ describe('ChunkSource', () => {
          }
       }
 
-      done() {
-         this._text = [];
-         this.state = Extractor.STATE.FAILURE;
-      }
+      finish() {
+         if (this.state !== Extractor.STATE.SUCCESS) {
+            this._text = [];
+            this.state = Extractor.STATE.FAILURE;
+            return;
+         }
 
-      getExtraction() {
          const combinedText = this._text.join('');
          return {
             text: combinedText,
@@ -95,6 +99,7 @@ describe('ChunkSource', () => {
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();
+      entityMetaData1dot0 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.0, 5, defaultLoc);
       entityMetaData1dot1 = new EntityMetaData(EntityMetaData.TYPE.DOCUMENT, 1.1, 2, defaultLoc);
       testExtractors = {
          foo: () => {},
@@ -119,6 +124,29 @@ describe('ChunkSource', () => {
          }).toThrowError('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
       });
 
+   });
+
+   describe('communication with extractos', () => {
+
+      it('throws an error if called without a hash of extractors', () => {
+         let version;
+         testExtractors = {
+            test: function testExtractor(constructedVersion) {
+               version = constructedVersion;
+               this.state = Extractor.STATE.SUCCESS;
+               this.process = () => {};
+               this.finish = () => {
+                  return { segments: [] };
+               };
+            }
+         };
+
+         source = new ChunkSource(testExtractors, entityMetaData1dot0);
+         source.addText('1');
+         source.extract('test', () => {});
+
+         expect(version).toEqual(1.0);
+      });
    });
 
    describe('addText()', () => {
@@ -230,6 +258,13 @@ describe('ChunkSource', () => {
          source.extract('all', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith(new Chunk('122333', '122333', new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
+      });
+
+      it('returns undefined when nothing was retrieved', () => {
+         source.endText();
+         source.extract('all', chunkSpy);
+
+         expect(chunkSpy).toHaveBeenCalledWith();
       });
 
       describe('ranges', () => {

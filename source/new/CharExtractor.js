@@ -27,8 +27,8 @@ class CharExtractor extends Extractor {
 
       const currentChar = segment.text[segment.index];
       this._incrementSegment(segment, info);
-      this._text.push(currentChar);
-      this._normalizedText.push(this._normalizeText(currentChar, info));
+
+      this._processText(currentChar, info);
 
       if (currentChar === '\r') {
          if (segment.atEnd()) {
@@ -41,9 +41,9 @@ class CharExtractor extends Extractor {
       this.state = Extractor.STATE.SUCCESS;
    }
 
-   done() {
-      // The only way we can get here is if we've seen nothing, or have only seen a CR
-      this.state = this._foundCR ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+   finish() {
+      this.state = this._text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      return this._finish();
    }
 
    _incrementSegment(segment, info) {

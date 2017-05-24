@@ -85,17 +85,16 @@ class ChunkSource {
 
          if (nextSegment) {
             extractor.process(nextSegment);
-         } else {
-            extractor.done();
+
+            if (extractor.state === Extractor.STATE.WORKING) {
+               continue;
+            }
          }
 
-         if (extractor.state === Extractor.STATE.WORKING) {
-            continue;
-         } else {
-            this._extractors.shift();
-         }
+         const results = extractor.finish();
 
-         const results = extractor.getExtraction();
+         this._extractors.shift();
+
          const segInfo = results.segments;
          const ranges = [];
          const returnedSegments = [];

@@ -38,9 +38,8 @@ describe('DigitExtractor', () => {
 
       it('delivers a set of decimal digits from the provided segment', () => {
          extractor.process(new Segment('012345', segmentRange));
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '012345',
             original: '012345',
             segments: [ {
@@ -56,9 +55,8 @@ describe('DigitExtractor', () => {
 
       it('delivers a set of hexidecimal digits from the provided segment', () => {
          extractor.process(new Segment('012345ABcdef', segmentRange));
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '012345ABcdef',
             original: '012345ABcdef',
             segments: [ {
@@ -74,13 +72,24 @@ describe('DigitExtractor', () => {
 
    });
 
-   describe('getExtraction()', () => {
+   describe('finish()', () => {
 
-      it('returns nothing when not in a complete state', () => {
+      it('returns whatever has been found when called at end', () => {
          const segment = new Segment('123', segmentRange);
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toBeUndefined();
+         expect(extractor.finish()).toEqual({
+            text: '123',
+            original: '123',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: {
+                  range: segmentRange
+               }
+            } ]
+         });
       });
 
    });
@@ -90,7 +99,7 @@ describe('DigitExtractor', () => {
       it('correctly changes segment index after processing', () => {
          const segment = new Segment('123xy', segmentRange);
          extractor.process(segment);
-         extractor.done();
+         extractor.finish();
 
          expect(segment.index).toEqual(3);
       });
@@ -98,7 +107,7 @@ describe('DigitExtractor', () => {
       it('does not change segment index when no digits found', () => {
          const segment = new Segment('hi there', segmentRange);
          extractor.process(segment);
-         extractor.done();
+         extractor.finish();
 
          expect(segment.index).toEqual(0);
       });
@@ -108,7 +117,7 @@ describe('DigitExtractor', () => {
    describe('segment spanning', () => {
 
       it('reports failure state if no segments provided', () => {
-         extractor.done();
+         extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
@@ -122,9 +131,8 @@ describe('DigitExtractor', () => {
       it('returns all digits and ranges across multiple segments', () => {
          extractor.process(new Segment('123', segmentRange));
          extractor.process(new Segment('abcd'));
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '123abcd',
             original: '123abcd',
             segments: [ {
@@ -148,9 +156,8 @@ describe('DigitExtractor', () => {
       it('returns a partially used segument', () => {
          const segment = new Segment('123xyz', segmentRange);
          extractor.process(segment);
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '123',
             original: '123',
             segments: [ {
@@ -166,9 +173,8 @@ describe('DigitExtractor', () => {
          const segment = new Segment('xy123', segmentRange);
          segment.index = 2;
          extractor.process(segment);
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '123',
             original: '123',
             segments: [ {

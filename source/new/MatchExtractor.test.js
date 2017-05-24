@@ -40,7 +40,7 @@ describe('MatchExtractor', () => {
          extractor = new MatchExtractor(1.0, 'xyzzy');
          extractor.process(new Segment('xyzzy', segmentRange));
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'xyzzy',
             original: 'xyzzy',
             segments: [ {
@@ -56,13 +56,13 @@ describe('MatchExtractor', () => {
 
    });
 
-   describe('getExtraction()', () => {
+   describe('finish()', () => {
 
       it('returns the match, if fully found, while not yet done)', () => {
          extractor = new MatchExtractor(1.0, 'w');
          extractor.process(new Segment('w'));
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'w',
             original: 'w',
             segments: [ {
@@ -101,7 +101,7 @@ describe('MatchExtractor', () => {
 
       it('reports failure state if no segments provided', () => {
          extractor = new MatchExtractor(1.0, 'one');
-         extractor.done();
+         extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
@@ -115,9 +115,8 @@ describe('MatchExtractor', () => {
 
       it('returns no data when a only given eof', () => {
          extractor = new MatchExtractor(1.0, 'x');
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '',
             original: '',
             segments: []
@@ -130,7 +129,7 @@ describe('MatchExtractor', () => {
          extractor.process(new Segment('cd'));
          extractor.process(new Segment('ef'));
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'abcdef',
             original: 'abcdef',
             segments: [ {
@@ -164,7 +163,7 @@ describe('MatchExtractor', () => {
          const segment = new Segment('skywalker');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'lukesky',
             original: 'lukesky',
             segments: [ {
@@ -190,7 +189,7 @@ describe('MatchExtractor', () => {
          extractor.process(segment1);
          extractor.process(segment2);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '',
             original: '',
             segments: [ {
@@ -213,7 +212,7 @@ describe('MatchExtractor', () => {
          segment.index = 1;
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'xy',
             original: 'xy',
             segments: [ {

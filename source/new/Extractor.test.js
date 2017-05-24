@@ -26,18 +26,6 @@ describe('Extractor', () => {
       }).not.toThrow();
    });
 
-   it('provides a no-op done() function', () => {
-      expect(() => {
-         extractor.done();
-      }).not.toThrow();
-   });
-
-   it('provides a no-op getExtraction() function', () => {
-      expect(() => {
-         extractor.getExtraction();
-      }).not.toThrow();
-   });
-
    it('STATE is defined', () => {
       expect(Extractor.STATE).toEqual({
          WORKING: 'WORKING',

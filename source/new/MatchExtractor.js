@@ -38,10 +38,9 @@ class MatchExtractor extends Extractor {
       const candText = this._candidate.substr(this._candIndex, lengthToCompare);
 
       if (segmentText !== candText) {
-         this.done();
+         this.state = Extractor.STATE.FAILURE;
       } else {
-         this._text.push(segmentText);
-         this._normalizedText.push(this._normalizeText(segmentText, info));
+         this._processText(segmentText, info);
 
          this._candIndex += lengthToCompare;
          segment.index += lengthToCompare;
@@ -58,15 +57,22 @@ class MatchExtractor extends Extractor {
       }
    }
 
-   done() {
-      this.state = Extractor.STATE.FAILURE;
-      this._text = [];
-      this._normalizedText = [];
-      this._segInfo.forEach((info) => {
-         info.chars = 0;
-         info.columns = 0;
-         info.rows = 0;
-      });
+   finish() {
+      switch (this.state) {
+         case Extractor.STATE.WORKING:
+         case Extractor.STATE.FAILURE:
+            this.state = Extractor.STATE.FAILURE;
+            this._text = [];
+            this._normalizedText = [];
+            this._segInfo.forEach((info) => {
+               info.chars = 0;
+               info.columns = 0;
+               info.rows = 0;
+            });
+            return this._finish();
+         case Extractor.STATE.SUCCESS:
+            return this._finish();
+      }
    }
 
 }

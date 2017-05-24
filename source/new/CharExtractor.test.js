@@ -31,7 +31,7 @@ describe('CharExtractor', () => {
       });
 
       it('reports failure when it has not found a any characters', () => {
-         extractor.done();
+         extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
@@ -39,7 +39,7 @@ describe('CharExtractor', () => {
       it('delivers the nextcharacter from the segment', () => {
          extractor.process(new Segment('b', segmentRange));
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'b',
             original: 'b',
             segments: [ {
@@ -55,12 +55,23 @@ describe('CharExtractor', () => {
 
    });
 
-   describe('getExtraction()', () => {
+   describe('finish()', () => {
 
-      it('returns nothing when not in a complete state', () => {
+      it('returns whatever has been found at the point it is called', () => {
          extractor.process(new Segment('\r'));
 
-         expect(extractor.getExtraction()).toBeUndefined();
+         expect(extractor.finish()).toEqual({
+            text: '\n',
+            original: '\r',
+            segments: [ {
+               chars: 1,
+               rows: 1,
+               columns: 0,
+               segment: {
+                  range: undefined
+               }
+            } ]
+         });
       });
 
    });
@@ -79,7 +90,7 @@ describe('CharExtractor', () => {
    describe('segment spanning', () => {
 
       it('reports failure state if no segments provided', () => {
-         extractor.done();
+         extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
@@ -88,9 +99,8 @@ describe('CharExtractor', () => {
          const segment = new Segment('xy ', segmentRange);
          segment.index = 1;
          extractor.process(segment);
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: 'y',
             original: 'y',
             segments: [ {
@@ -110,7 +120,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\nx');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\n',
             segments: [ {
@@ -126,7 +136,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\r\n');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
             segments: [ {
@@ -144,7 +154,7 @@ describe('CharExtractor', () => {
          extractor.process(new Segment('\r'));
          extractor.process(new Segment('\n'));
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
             segments: [ {
@@ -170,7 +180,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
             segments: [ {
@@ -195,7 +205,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\r');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
             segments: [ {
@@ -219,7 +229,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\u0085',
             original: '\u0085',
             segments: [ {
@@ -235,7 +245,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\u2028x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\u2028',
             original: '\u2028',
             segments: [ {
@@ -252,7 +262,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u0085',
             segments: [ {
@@ -269,7 +279,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\u2028x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u2028',
             segments: [ {
@@ -286,7 +296,7 @@ describe('CharExtractor', () => {
          const segment = new Segment('\r\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\u0085',
             segments: [ {

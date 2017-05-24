@@ -30,8 +30,7 @@ class SpaceExtractor extends Extractor {
       const allSpace = spaceRegexp.exec(segment.text);
       const spaceLength = allSpace[0].length;
 
-      this._normalizedText.push(this._normalizeText(allSpace[0], info));
-      this._text.push(allSpace[0]);
+      this._processText(allSpace[0], info);
 
       segment.index += spaceLength;
 
@@ -44,8 +43,9 @@ class SpaceExtractor extends Extractor {
       }
    }
 
-   done() {
+   finish() {
       this.state = this._foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      return this._finish();
    }
 
 }

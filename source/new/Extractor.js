@@ -17,9 +17,7 @@ class Extractor {
 
    process() {}
 
-   done() {}
-
-   _normalizeText(originalText, info) {
+   _processText(originalText, info) {
       const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
       const newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
@@ -42,7 +40,8 @@ class Extractor {
          info.columns = (newText.length - lastIndex);
       }
 
-      return newText;
+      this._text.push(originalText);
+      this._normalizedText.push(newText);
    }
 
    _makeInfo(segment) {
@@ -54,15 +53,14 @@ class Extractor {
       };
    }
 
-   getExtraction() {
-      if (this.state === Extractor.STATE.WORKING) {
-         return;
-      }
+   _finish() {
+//      if (this.state === Extractor.STATE.WORKING) {
+//         throw new Error('need to clean this up');
+//      }
 
-      const originalText = this._text.join('');
       return {
-         text: this._normalizedText.length > 0 ? this._normalizedText.join('') : originalText,
-         original: originalText,
+         text: this._normalizedText.join(''),
+         original: this._text.join(''),
          segments: this._segInfo
       };
    }

@@ -19,8 +19,8 @@ class PeekExtractor extends Extractor {
    constructor(version, subExtractor) {
       super(version);
 
-      if (!subExtractor.process || !subExtractor.done || !subExtractor.getExtraction) {
-         throw new Error('Must pass an object with process(), done() and getExtract() methods.');
+      if (!subExtractor.process || !subExtractor.finish) {
+         throw new Error('Must pass an object with process() and finish() methods.');
       }
 
       this._subExtractor = subExtractor;
@@ -35,28 +35,22 @@ class PeekExtractor extends Extractor {
       }
 
       this._subExtractor.process(segment);
-      this._handleState();
+      this.state = this._subExtractor.state;
    }
 
-   done() {
-      this._subExtractor.done();
-      this._handleState();
-   }
-
-   _handleState() {
-      if (this._subExtractor.state === Extractor.STATE.WORKING) {
-         return;
-      }
-
+   finish() {
+      const result = this._subExtractor.finish();
       this.state = this._subExtractor.state;
       this._segInfo.forEach((info) => { info.segment.index = 0; });
-      this._text = this._subExtractor._text;
-      this._normalizedText = this._subExtractor._normalizedText;
 
       if (this._segInfo[0]) {
          this._segInfo[0].segment.index = this._firstIndex;
       }
+
+      result.segments = this._segInfo;
+      return result;
    }
+
 }
 
 module.exports = PeekExtractor;

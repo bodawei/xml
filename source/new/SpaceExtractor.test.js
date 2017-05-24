@@ -38,9 +38,8 @@ describe('SpaceExtractor', () => {
 
       it('delivers a set of spaces and tabs from the current segment', () => {
          extractor.process(new Segment(' \t', segmentRange));
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: ' \t',
             original: ' \t',
             segments: [ {
@@ -56,13 +55,24 @@ describe('SpaceExtractor', () => {
 
    });
 
-   describe('getExtraction()', () => {
+   describe('finish()', () => {
 
-      it('returns nothing when not in a complete state', () => {
+      it('returns whatever has been found when it is called', () => {
          const segment = new Segment(' ', segmentRange);
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toBeUndefined();
+         expect(extractor.finish()).toEqual({
+            text: ' ',
+            original: ' ',
+            segments: [ {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: {
+                  range: segmentRange
+               }
+            } ]
+         });
       });
 
    });
@@ -72,7 +82,7 @@ describe('SpaceExtractor', () => {
       it('correctly changes segment index after processing', () => {
          const segment = new Segment('  xy', segmentRange);
          extractor.process(segment);
-         extractor.done();
+         extractor.finish();
 
          expect(segment.index).toEqual(2);
       });
@@ -80,7 +90,7 @@ describe('SpaceExtractor', () => {
       it('does not change segment index when no spaces found', () => {
          const segment = new Segment('hi there', segmentRange);
          extractor.process(segment);
-         extractor.done();
+         extractor.finish();
 
          expect(segment.index).toEqual(0);
       });
@@ -90,7 +100,7 @@ describe('SpaceExtractor', () => {
    describe('segment spanning', () => {
 
       it('reports failure state if no segments provided', () => {
-         extractor.done();
+         extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
@@ -104,9 +114,8 @@ describe('SpaceExtractor', () => {
       it('returns all spaces and ranges across multiple segments', () => {
          extractor.process(new Segment('  ', segmentRange));
          extractor.process(new Segment('\t\t'));
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '  \t\t',
             original: '  \t\t',
             segments: [ {
@@ -131,9 +140,8 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\t\tstuff');
          extractor.process(new Segment('  ', segmentRange));
          extractor.process(segment);
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '  \t\t',
             original: '  \t\t',
             segments: [ {
@@ -155,7 +163,7 @@ describe('SpaceExtractor', () => {
       it('partially modifies the segment', () => {
          const segment = new Segment('   xyz', segmentRange);
          extractor.process(segment);
-         extractor.done();
+         extractor.finish();
 
          expect(segment.index).toEqual(3);
       });
@@ -164,9 +172,8 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('xy ', segmentRange);
          segment.index = 2;
          extractor.process(segment);
-         extractor.done();
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: ' ',
             original: ' ',
             segments: [ {
@@ -184,11 +191,11 @@ describe('SpaceExtractor', () => {
 
    describe('space types', () => {
 
-      it('calls back with a mixture of space and tabs', () => {
+      it('returns a mixture of space and tabs', () => {
          const segment = new Segment(' \t \t x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: ' \t \t ',
             original: ' \t \t ',
             segments: [ {
@@ -204,7 +211,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment(' \n x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: ' \n ',
             original: ' \n ',
             segments: [ {
@@ -220,7 +227,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\nx');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\n',
             segments: [ {
@@ -236,7 +243,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\rx');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
             segments: [ {
@@ -252,7 +259,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\r\nx');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
             segments: [ {
@@ -268,7 +275,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\r\nx');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
             segments: [ {
@@ -284,7 +291,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '',
             original: '',
             segments: [ {
@@ -300,7 +307,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\u2028x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '',
             original: '',
             segments: [ {
@@ -317,7 +324,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u0085',
             segments: [ {
@@ -334,7 +341,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\u2028x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u2028',
             segments: [ {
@@ -351,7 +358,7 @@ describe('SpaceExtractor', () => {
          const segment = new Segment('\r\u0085x');
          extractor.process(segment);
 
-         expect(extractor.getExtraction()).toEqual({
+         expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\u0085',
             segments: [ {
