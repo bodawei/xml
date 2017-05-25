@@ -6,8 +6,8 @@ const Extractor = require('./Extractor.js');
 const MultiMatchExtractor = require('./MultiMatchExtractor.js');
 const PeekExtractor = require('./PeekExtractor.js');
 
-const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
-const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
+//const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
+//const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
 const regexMemo = {};
 
@@ -31,23 +31,23 @@ class AllExtractor extends Extractor {
          regexMemo[terminatorChars] = this.terminatorRegEx;
       }
 
-      const spaceTerminatorChars = this._version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
-         SPACE_TERMINATOR_CHARS_11;
+//      const spaceTerminatorChars = this._version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
+//         SPACE_TERMINATOR_CHARS_11;
 
       this.terminatorArray = this.terminators;
-      if (this.spaceTerminators.length > 0) {
-         this.terminatorArray = spaceTerminatorChars.concat(this.terminators);  // ick
-      }
+//      if (this.spaceTerminators.length > 0) {
+//         this.terminatorArray = spaceTerminatorChars.concat(this.terminators);  // ick
+//      }
    }
 
    process(segment) {
-      const info = this._makeInfo(segment);
-      this._segInfo.push(info);
-      if (this._matchTerminator) {
-         this._processSubExtractor(segment);
+      if (this._terminatorMatcher) {
+         this._processTerminatorMatcher(segment);
          return;
       }
 
+      const info = this._makeInfo(segment);
+      this._segInfo.push(info);
       this.terminatorRegEx.lastIndex = segment.index;
       const result = this.terminatorRegEx.exec(segment.text);
       // should do what we do in chars
@@ -55,48 +55,66 @@ class AllExtractor extends Extractor {
       if (result && result[0].length > 0) {
          this._processText(result[0], info);
          segment.index += result[0].length;
+         if (segment.atEnd()) {
+            info.segment = { range: segment.range };
+         }
       }
 
       if (!segment.atEnd()) {
-         this._matchTerminator =
+         this._terminatorMatcher =
             new PeekExtractor(this.context, new MultiMatchExtractor(this.context, this.terminatorArray));
-         this._processSubExtractor(segment);
+         this._processTerminatorMatcher(segment);
       }
    }
 
    finish() {
-      if (this._matchTerminator) {
-         // we might have succeeded nope
-         // We found no match up to this point. so ask peek to wrap up and continue
-         //mthis.subExtractor.finish();
-         //we need to continue consuming the segment
-         this.state = Extractor.STATE.FAILURE;
-         delete this._matchTerminagor;
+      if (this._terminatorMatcher) {
+         this._cleanupTerminatorMatcher();
       } else {
-         this.state = Extractor.STATE.SUCCESS;
+         this.state = this._text.length > 0 ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
       }
 
       return this._finish();
    }
 
-   _processSubExtractor(segment) {
-      this.subExtractor.process(segment);
-      if (this.subExtractor.state === Extractor.STATE.WORKING) {
+   _processTerminatorMatcher(segment) {
+      this._terminatorMatcher.process(segment);
+      if (this._terminatorMatcher.state === Extractor.STATE.WORKING) {
          return;
       }
 
-      if (this.subExtractor.state === Extractor.STATE.SUCCESS) {
-         delete this.subExtractor;
+      if (this._terminatorMatcher.state === Extractor.STATE.SUCCESS) {
+         delete this._terminatorMatcher;
          this.state = Extractor.STATE.SUCCESS;
       } else {
-         delete this.subExtractor;
-         this._addCharAndContinue(segment);
-         // need to somehow return the segments that were passed to subextractor
+         this._cleanupTerminatorMatcher();
       }
    }
 
-   _addCharAndContinue(origSegment) {
-      this._processText(origSegment.text[origSegment.index]);
+   _cleanupTerminatorMatcher() {
+      const result = this._terminatorMatcher.finish();
+      delete this._terminatorMatcher;
+      const lastInfo = this._segInfo.pop();
+
+      this._addCharAndContinue(lastInfo.segment, lastInfo);
+      this.process(lastInfo.segment);
+      const newLastInfo = this._segInfo[this._segInfo.length - 1];
+      newLastInfo.chars += lastInfo.chars;
+
+      if (newLastInfo.rows !== 0) {
+         newLastInfo.rows += lastInfo.rows;
+      } else {
+         newLastInfo.columns += lastInfo.columns;
+      }
+
+      result.segments.shift();
+      result.segments.forEach((info) => {
+         this.process(info.segment);
+      });
+   }
+
+   _addCharAndContinue(origSegment, info) {
+      this._processText(origSegment.text[origSegment.index], info);
       origSegment.index ++;
    }
 

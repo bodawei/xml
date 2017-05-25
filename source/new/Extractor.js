@@ -19,11 +19,19 @@ class Extractor {
 
    _processText(originalText, info) {
       const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
-      const newText = originalText.replace(LINE_ENDING_REGEX, '\n');
+      let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
-      info.chars = originalText.length;
-      info.columns = originalText.length;
-      info.rows = 0;
+      if (this._lastProcessSawCr) {
+         if (originalText[0] === '\n' ||
+            (this._version === 1.1 && originalText[0] === '\u0085')) {
+            newText = newText.substring(1);
+         }
+      }
+
+      this._lastProcessSawCr = false;
+      const newChars = originalText.length;
+      let newColumns = originalText.length;
+      let newRows = 0;
 
       if (newText.indexOf('\n') !== -1) {
          let currentIndex = -1;
@@ -36,12 +44,20 @@ class Extractor {
             currentIndex = newText.indexOf('\n', lastIndex);
          } while (currentIndex !== -1);
 
-         info.rows = rowCount;
-         info.columns = (newText.length - lastIndex);
+         newRows = rowCount;
+         newColumns = (newText.length - lastIndex);
       }
 
       this._text.push(originalText);
       this._normalizedText.push(newText);
+
+      if (originalText[originalText.length - 1] === '\r') {
+         this._lastProcessSawCr = true;
+      }
+
+      info.chars += newChars;
+      info.rows += newRows;
+      info.columns += newColumns;
    }
 
    _makeInfo(segment) {
