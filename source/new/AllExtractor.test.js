@@ -109,7 +109,7 @@ describe('AllExtractor', () => {
 
       it('does not change segment index when terminator found immediately', () => {
          const extractor = new AllExtractor(1.0, [ 'h' ]);
-         const segment = new Segment('hi there', segmentRange);
+         const segment = new Segment('hi there');
          extractor.process(segment);
          extractor.finish();
 
@@ -356,6 +356,17 @@ describe('AllExtractor', () => {
    });
 
    describe('terminators', () => {
+
+      it('can cross multiple ambiguous terminators and match one', () => {
+         const extractor = new AllExtractor(1.0, [ '<!--', '<!-', '<!' ]);
+         extractor.process(new Segment('Te'));
+         extractor.process(new Segment('xt<'));
+         extractor.process(new Segment('!'));
+         extractor.process(new Segment('-'));
+         extractor.process(new Segment('-'));
+
+         expect(extractor.finish().text).toEqual('Text');
+      });
 
       it('recognizes terminator across segments', () => {
          const extractor = new AllExtractor(1.0, [ '<!--' ]);

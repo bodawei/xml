@@ -3,11 +3,9 @@
 'use strict';
 
 const Extractor = require('./Extractor.js');
+const MatchExtractor = require('./MatchExtractor.js');
 const MultiMatchExtractor = require('./MultiMatchExtractor.js');
 const PeekExtractor = require('./PeekExtractor.js');
-
-//const SPACE_TERMINATOR_CHARS_10 = [ ' ', '\t', '\n', '\r' ];
-//const SPACE_TERMINATOR_CHARS_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 
 const regexMemo = {};
 
@@ -16,13 +14,10 @@ const regexMemo = {};
 \**********************************************************************/
 
 class AllExtractor extends Extractor {
-   constructor(context, terminators, spaceTerminators = []) {
-      super(context);
-      this.spaceTerminators = spaceTerminators;
-      this.terminators = terminators;
+   constructor(version, terminators) {
+      super(version);
 
-      const terminatorCharsArray = this.spaceTerminators.concat(this.terminators.map((term) => (term[0])));
-      const terminatorChars = terminatorCharsArray.join('');
+      const terminatorChars = terminators.map((term) => term[0]).join('');
       this.terminatorRegEx = regexMemo[terminatorChars];
 
       if (!this.terminatorRegEx) {
@@ -31,13 +26,7 @@ class AllExtractor extends Extractor {
          regexMemo[terminatorChars] = this.terminatorRegEx;
       }
 
-//      const spaceTerminatorChars = this._version === 1.0 ? SPACE_TERMINATOR_CHARS_10 :
-//         SPACE_TERMINATOR_CHARS_11;
-
-      this.terminatorArray = this.terminators;
-//      if (this.spaceTerminators.length > 0) {
-//         this.terminatorArray = spaceTerminatorChars.concat(this.terminators);  // ick
-//      }
+      this.terminatorArray = terminators;
    }
 
    process(segment) {
@@ -50,7 +39,6 @@ class AllExtractor extends Extractor {
       this._segInfo.push(info);
       this.terminatorRegEx.lastIndex = segment.index;
       const result = this.terminatorRegEx.exec(segment.text);
-      // should do what we do in chars
 
       if (result && result[0].length > 0) {
          this._processText(result[0], info);
@@ -61,8 +49,24 @@ class AllExtractor extends Extractor {
       }
 
       if (!segment.atEnd()) {
-         this._terminatorMatcher =
-            new PeekExtractor(this.context, new MultiMatchExtractor(this.context, this.terminatorArray));
+         const nextChar = segment.text[segment.index];
+
+         const terminators = this.terminatorArray.reduce((all, term) => {
+            if (term[0] === nextChar) {
+               all.push(term);
+            }
+            return all;
+         }, []);
+
+         let matcher;
+
+         if (terminators.length > 1) {
+            matcher = new MultiMatchExtractor(this._version, terminators);
+         } else {
+            matcher = new MatchExtractor(this._version, terminators[0]);
+         }
+
+         this._terminatorMatcher = new PeekExtractor(this._version, matcher);
          this._processTerminatorMatcher(segment);
       }
    }
@@ -84,6 +88,7 @@ class AllExtractor extends Extractor {
       }
 
       if (this._terminatorMatcher.state === Extractor.STATE.SUCCESS) {
+         this._terminatorMatcher.finish();
          delete this._terminatorMatcher;
          this.state = Extractor.STATE.SUCCESS;
       } else {

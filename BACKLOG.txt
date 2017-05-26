@@ -7,6 +7,18 @@ BLOG IDEAS?
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
+In this order:
+√ Need WordExtractor in some fashion
+√ Optimized AllExtractor so it does not do a multimatcher when there is only one terminator
+Need to add more integrations (go through existing tests, separate into junk, integrations, and chunksource)
+Do actual tests of chunkSource
+
+
+CLEANUP
+- Go over chunksource code and clean up
+- Range and EntityLocation seem like they belong somewhere even more low-level
+- Can you modify AllExtractor so you can mock out the sub matchers for testing?
+
 Path forward:
 - A *lot* of loose edges
 - Could swap ChunkSource for StringCursor (StringCursor constructor return a ChunkSource instance) and see what happens
