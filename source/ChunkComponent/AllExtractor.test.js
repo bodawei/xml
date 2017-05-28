@@ -4,10 +4,11 @@
 
 /* eslint-env jasmine */
 
-const Extractor = require('./Extractor.js');
-const AllExtractor = require('./AllExtractor.js');
 const EntityLocation = require('../shared/EntityLocation.js');
-const Range = require('./Range.js');
+const Range = require('../Basic/Range.js');
+
+const AllExtractor = require('./AllExtractor.js');
+const Extractor = require('./Extractor.js');
 const Segment = require('./Segment.js');
 
 describe('AllExtractor', () => {
@@ -38,6 +39,24 @@ describe('AllExtractor', () => {
 
       it('delivers a everything to the end of the segment', () => {
          const extractor = new AllExtractor(1.0, []);
+         extractor.process(new Segment('testAll', segmentRange));
+
+         expect(extractor.finish()).toEqual({
+            text: 'testAll',
+            original: 'testAll',
+            segments: [ {
+               chars: 7,
+               rows: 0,
+               columns: 7,
+               segment: {
+                  range: segmentRange
+               }
+            } ]
+         });
+      });
+
+      it('delivers a everything to the end of the segment when no terminators offered at all', () => {
+         const extractor = new AllExtractor(1.0);
          extractor.process(new Segment('testAll', segmentRange));
 
          expect(extractor.finish()).toEqual({

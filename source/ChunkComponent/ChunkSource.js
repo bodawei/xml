@@ -2,21 +2,22 @@
 
 'use strict';
 
-const Chunk = require('./Chunk.js');
 const EntityMetaData = require('../shared/EntityMetaData.js');
+const Range = require('../Basic/Range.js');
+
+const Chunk = require('./Chunk.js');
 const Extractor = require('./Extractor.js');
-const Range = require('./Range.js');
 const Segment = require('./Segment.js');
 
-   /*
-     extractors is a hash, with keys being a type of extractor,
-     and the value being one of the following:
-         name: ConstructorFunction
-         name: {
-            extractor: ConstructorFunction
-            subType: name
-         }
-   */
+/*
+  extractors is a hash, with keys being a type of extractor,
+  and the value being one of the following:
+      name: ConstructorFunction
+      name: {
+         extractor: ConstructorFunction
+         subType: name
+      }
+*/
 class ChunkSource {
 
    constructor(extractorInfo, info) {

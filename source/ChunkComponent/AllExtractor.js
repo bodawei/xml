@@ -14,7 +14,7 @@ const regexMemo = {};
 \**********************************************************************/
 
 class AllExtractor extends Extractor {
-   constructor(version, terminators) {
+   constructor(version, terminators = []) {
       super(version);
 
       const terminatorChars = terminators.map((term) => term[0]).join('');

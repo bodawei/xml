@@ -54,6 +54,7 @@ BLOG IDEAS
 - Blog: Asynchronous
 - SVCC: how to set up karma etc.
 - Art: What fun things can you do with an xml parser?
+- Testing: repeated tests across all the extractors when built in
 
 
 ---------------------------------------------------------------------------------------------------------------------------

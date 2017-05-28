@@ -4,10 +4,11 @@
 
 /* eslint-env jasmine */
 
-const Extractor = require('./Extractor.js');
-const CharExtractor = require('./CharExtractor.js');
 const EntityLocation = require('../shared/EntityLocation.js');
-const Range = require('./Range.js');
+const Range = require('../Basic/Range.js');
+
+const CharExtractor = require('./CharExtractor.js');
+const Extractor = require('./Extractor.js');
 const Segment = require('./Segment.js');
 
 describe('CharExtractor', () => {

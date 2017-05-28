@@ -4,9 +4,10 @@
 
 /* eslint-env jasmine */
 
-const WordExtractor = require('./WordExtractor.js');
 const EntityLocation = require('../shared/EntityLocation.js');
-const Range = require('./Range.js');
+const Range = require('../Basic/Range.js');
+
+const WordExtractor = require('./WordExtractor.js');
 const Segment = require('./Segment.js');
 
 describe('WordExtractor', () => {

@@ -4,10 +4,11 @@
 
 /* eslint-env jasmine */
 
+const EntityLocation = require('../shared/EntityLocation.js');
+const Range = require('../Basic/Range.js');
+
 const Extractor = require('./Extractor.js');
 const DigitExtractor = require('./DigitExtractor.js');
-const EntityLocation = require('../shared/EntityLocation.js');
-const Range = require('./Range.js');
 const Segment = require('./Segment.js');
 
 describe('DigitExtractor', () => {
