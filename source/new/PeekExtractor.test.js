@@ -100,7 +100,18 @@ describe('PeekExtractor', () => {
          };
          sub.finish = function finish() {
             return {
-               text: this._text.join('')
+               text: this._text.join(''),
+               segments: [ {
+                  chars: 0,   // just giving some dummy data so it doesn't get sick
+                  rows: 0,
+                  columns: 0,
+                  segment: undefined
+               }, {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: undefined
+               } ]
             };
          };
          sub.state = Extractor.STATE.SUCCESS;
@@ -110,14 +121,25 @@ describe('PeekExtractor', () => {
          expect(extractor.finish().text).toEqual('onenormaltwonormal');
       });
 
-      it('returns the oringal from the subExtractor', () => {
+      it('returns the original from the subExtractor', () => {
          sub.process = function process(segment) {
             this._text = this._text || [];
             this._text.push(segment.text + 'xx');
          };
          sub.finish = function finish() {
             return {
-               original: this._text.join('')
+               original: this._text.join(''),
+               segments: [ {
+                  chars: 0,   // just giving some dummy data so it doesn't get sick
+                  rows: 0,
+                  columns: 0,
+                  segment: undefined
+               }, {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: undefined
+               } ]
             };
          };
          sub.state = Extractor.STATE.SUCCESS;
@@ -163,6 +185,56 @@ describe('PeekExtractor', () => {
          expect(result.segments[0].segment).toEqual(segment1);
          expect(result.segments[1].segment).toEqual(segment2);
          expect(result.segments[2].segment).toEqual(segment3);
+      });
+
+      it('returns the original from the subExtractor', () => {
+         sub.process = function process(segment) {
+            this._text = this._text || [];
+            this._text.push(segment.text + 'xx');
+            segment.index = segment.text.length;
+         };
+         sub.finish = function finish() {
+            return {
+               text:  this._text.join(''),
+               original: this._text.join(''),
+               segments: [ {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     range: undefined
+                  }
+               }, {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: {
+                     range: undefined
+                  }
+               } ]
+            };
+         };
+         sub.state = Extractor.STATE.SUCCESS;
+         const segment1 = new Segment('one');
+         const segment2 = new Segment('three');
+         extractor.process(segment1);
+         extractor.process(segment2);
+
+         expect(extractor.finish()).toEqual({
+            text: 'onexxthreexx',
+            original: 'onexxthreexx',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: new Segment('one')
+            }, {
+               chars: 5,
+               rows: 0,
+               columns: 5,
+               segment: new Segment('three')
+            } ]
+         });
       });
 
    });

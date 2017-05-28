@@ -126,17 +126,18 @@ describe('ChunkSource', () => {
 
    });
 
-   describe('communication with extractos', () => {
+   describe('communication with extractors', () => {
 
-      it('throws an error if called without a hash of extractors', () => {
+      it('passes a version to the extractors', () => {
          let version;
          testExtractors = {
             test: function testExtractor(constructedVersion) {
                version = constructedVersion;
+               this._infos = [];
                this.state = Extractor.STATE.SUCCESS;
-               this.process = () => {};
+               this.process = (segment) => { this._infos.push({ segment }); };
                this.finish = () => {
-                  return { segments: [] };
+                  return { segments: this._infos };
                };
             }
          };

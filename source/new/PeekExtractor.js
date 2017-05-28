@@ -41,7 +41,16 @@ class PeekExtractor extends Extractor {
    finish() {
       const result = this._subExtractor.finish();
       this.state = this._subExtractor.state;
-      this._segInfo.forEach((info) => { info.segment.index = 0; });
+
+      for (let index = 0; index < this._segInfo.length; index++) {
+         const info = this._segInfo[index];
+         const subInfo = result.segments[index];
+
+         info.chars = subInfo.chars;
+         info.rows = subInfo.rows;
+         info.columns = subInfo.columns;
+         info.segment.index = 0;
+      }
 
       if (this._segInfo[0]) {
          this._segInfo[0].segment.index = this._firstIndex;

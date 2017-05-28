@@ -8,8 +8,6 @@ const Extractor = require('./Extractor.js');
 const Range = require('./Range.js');
 const Segment = require('./Segment.js');
 
-class ChunkSource {
-
    /*
      extractors is a hash, with keys being a type of extractor,
      and the value being one of the following:
@@ -19,6 +17,8 @@ class ChunkSource {
             subType: name
          }
    */
+class ChunkSource {
+
    constructor(extractorInfo, info) {
       if (typeof extractorInfo !== 'object') {
          throw new Error('Must pass a hash of extractor types to constructor functions to ChunkSource().');
@@ -42,12 +42,20 @@ class ChunkSource {
       if (this._allTextAdded) {
          throw new Error('Can not add text after endText() has been called.');
       }
+
       if (text.length === 0) {
          this._orphanedRange = range;
          return;
       }
 
+      if (range) {
+         range.endIndex = range.startIndex;
+         range.endRow = range.startRow;
+         range.endColumn = range.startColumn;
+      }
+
       this._segments.push(new Segment(text, range || this._orphanedRange));
+      delete this._orphanedRange;
 
       this._resumeOperation();
    }
@@ -58,13 +66,38 @@ class ChunkSource {
    }
 
    extract(type, deliverChunk, params) {
-      const extractorConstructor = this._extractorInfo[type];
+      const extractorDefinition = this._extractorInfo[type];
+      let extractorConstructor;
 
-      if (!extractorConstructor) {
+      if (!extractorDefinition) {
          throw new Error(`"${type}" is not a known extractor type.`);
       }
       if (typeof deliverChunk !== 'function') {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
+      }
+
+      /*
+       * The extractor definition can be:
+       *    * An extractor constructor function
+       *    * an object like: {
+       *       extractorConstructor,
+       *       params (overwride whatever passed to this function)
+       *      }
+       *    * an object like: {
+       *       extractorConstructor,
+       *       params: { extractorConstructor }
+       *      }
+       */
+      if (typeof extractorDefinition === 'object') {
+         extractorConstructor = extractorDefinition.extractorConstructor;
+
+         if (extractorDefinition.params.extractorConstructor) {
+            params = new extractorDefinition.params.extractorConstructor(params);
+         } else {
+            params = extractorDefinition.params;
+         }
+      } else {
+         extractorConstructor = extractorDefinition;
       }
 
       const instance = new extractorConstructor(this._version, params);
@@ -84,6 +117,9 @@ class ChunkSource {
          const nextSegment = this._segments.shift();
 
          if (nextSegment) {
+            if (extContext.startIndex === undefined) {
+               extContext.startIndex = nextSegment.index;
+            }
             extractor.process(nextSegment);
 
             if (extractor.state === Extractor.STATE.WORKING) {
@@ -98,7 +134,18 @@ class ChunkSource {
          const segInfo = results.segments;
          const ranges = [];
          const returnedSegments = [];
-         let current;
+         let currentRange;
+         let unchanged;
+
+         if (segInfo.length === 0) {
+            unchanged = true;
+         } else {
+            unchanged = segInfo[0].segment.index === extContext.startIndex;
+            currentRange = segInfo[0].segment.range || this._lastRange;
+            currentRange = currentRange.clone();
+
+            ranges.push(currentRange);
+         }
 
          for (let index = 0; index < segInfo.length; index++) {
             const item = segInfo[index];
@@ -110,22 +157,22 @@ class ChunkSource {
             let range = item.segment.range;
 
             if (!range) {
-               if (current) {
-                  range = current;
-               } else {
-                  range = this._lastRange;
-               }
+               range = currentRange;
             }
 
-            if (!current || current.location !== range.location) {
-               current = new Range(range.location, range.startIndex, range.startRow, range.startColumn,
+            if (!currentRange || currentRange.location !== range.location) {
+               currentRange = new Range(range.location, range.startIndex, range.startRow, range.startColumn,
                   range.startIndex, range.startRow, range.startColumn);
-               ranges.push(current);
+               ranges.push(currentRange);
             }
 
-            current.endIndex += item.chars;
-            current.endRow += item.rows;
-            current.endColumn += item.columns;
+            currentRange.endIndex += item.chars;
+            currentRange.endRow += item.rows;
+            currentRange.endColumn += item.columns;
+         }
+
+         if (returnedSegments.length > 0) {
+            this._segments = returnedSegments.concat(this._segments);
          }
 
          if (extractor.state === Extractor.STATE.SUCCESS) {
@@ -133,55 +180,15 @@ class ChunkSource {
          } else {
             extContext.callback();
          }
+
+         if (!unchanged) {
+            this._lastRange = ranges[ranges.length - 1].clone();
+            this._lastRange.startIndex = this._lastRange.endIndex;
+            this._lastRange.endRow = this._lastRange.endRow;
+            this._lastRange.endColumn = this._lastRange.endColumn;
+         }
       }
    }
 }
 
 module.exports = ChunkSource;
-
-            // if startseg and index have not changed, then don't do this
-//               if (!(extractor.extractor instanceof Peek)) {
-//                  this._lastRange = current;
-//               }
-
-//            delete this._didReturn;
-
-//         if (extractor.extractor.unusedSegments.length > 0) {
-//            const segmentArray = extractor.extractor.unusedSegments;
-//            if (segmentArray[segmentArray.length - 1] === this._segments[0]) {
-//               this._segments.shift();
-//            }
-//            this._segments = segmentArray.concat(this._segments);
-//            extractor.extractor.unusedSegments = [];
-//         }
-
-//      if (typeof extractor === 'object') {
-//         params = this._prepParams(extractor, params);
-//         extractor = extractor.extractor;
-//      }
-//
-//            this._addExtractor(new Peek(this, new CharExtractor(this)), deliverChunk);
-//            const spaceTerminators = this._version === 1.0 ? SPACE_TERMINATORS_10 : SPACE_TERMINATORS_11;
-//            this._addExtractor(new AllExtractor(this, params, spaceTerminators), deliverChunk);
-
-//            this._addExtractor(new AllExtractor(this, params), deliverChunk);
-//            this._addExtractor(new Peek(this, new MatchExtractor(this, params), true), deliverChunk);
-//            this._addExtractor(new MultiMatchExtractor(this, [ '<!--', '<?', '<!', '</', '&', '<' ]), deliverChunk);
-//            this._addExtractor(new MultiMatchExtractor(this, [ ']]>', ']' ]), deliverChunk);
-
-//   _prepParams(extractorInfo, params) {
-//      const type = extractorInfo.subType;
-//
-//      if (!this._extractors[type]) {
-//         // throw some error
-//      }
-//
-//      const extractor = this._extractors[type];
-//
-//      if (typeof extractor === 'object') {
-//         params = this._prepParams(extractor, params);
-//         extractor = extractor.extractor;
-//      }
-//
-//      return extractor;
-//   }
