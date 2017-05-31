@@ -15,12 +15,12 @@ describe('xRange', () => {
          const range = new Range();
 
          expect(range.location).toBeUndefined();
-         expect(range.startIndex).toEqual(0);
-         expect(range.startRow).toEqual(0);
-         expect(range.startColumn).toEqual(0);
-         expect(range.endIndex).toEqual(0);
-         expect(range.endRow).toEqual(0);
-         expect(range.endColumn).toEqual(0);
+         expect(range.startIndex).toBeUndefined();
+         expect(range.startRow).toBeUndefined();
+         expect(range.startColumn).toBeUndefined();
+         expect(range.endIndex).toBeUndefined();
+         expect(range.endRow).toBeUndefined();
+         expect(range.endColumn).toBeUndefined();
       });
 
       it('it will accept all parameters', () => {

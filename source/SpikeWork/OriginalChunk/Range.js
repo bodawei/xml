@@ -21,12 +21,12 @@ class Range {
 
    constructor(location, index, row, column, endIndex, endRow, endColumn) {
       this.location = location;
-      this.startIndex = index || 0;
-      this.startRow = row || 0;
-      this.startColumn = column || 0;
-      this.endIndex = endIndex || 0;
-      this.endRow = endRow || 0;
-      this.endColumn = endColumn || 0;
+      this.startIndex = index;
+      this.startRow = row;
+      this.startColumn = column;
+      this.endIndex = endIndex;
+      this.endRow = endRow;
+      this.endColumn = endColumn;
    }
 
    clone() {

@@ -7,17 +7,15 @@ BLOG IDEAS?
 - And is the ugly simplification of the code in ExpandingEntity in sprint 35's cleanup ok?
 =============================================
 
-In this order:
-√ Need WordExtractor in some fashion
-√ Optimized AllExtractor so it does not do a multimatcher when there is only one terminator
-Need to add more integrations (go through existing tests, separate into junk, integrations, and chunksource)
-Do actual tests of chunkSource
+TODO
+- Comment chunk, including explaining the extractor contract
+- provide an index.js to chunk
+- provide terminators in finish() results hwere can
+- cleanup source and tests (can you mock out sub-matchers in all extractor)
 
 
-CLEANUP
-- Go over chunksource code and clean up
-- Range and EntityLocation seem like they belong somewhere even more low-level
-- Can you modify AllExtractor so you can mock out the sub matchers for testing?
+
+
 
 Path forward:
 - A *lot* of loose edges
@@ -27,25 +25,6 @@ Path forward:
 - Do we abandon ChunkSource and try to finish up with in memory?
 	- Or do we rebuild all on top of ChunkSource?
 
---- finish chunk source
-- ChunkSource not quite as clean as I'd like
-	- whitespace handling is ugly
-	- peekWord
-	- peekSpace 
-	- kill undo
-	- kill peekIsSpace
-	- break out sub-items
-	- extract terminators
-	- grouped extractor
-M deal with different offset passed into addSegment
-	- store loc and offset/range in segment
-	- extractor increments row and column and maybe index
-	-  main system will keep a current set of ranges. 
-	- extractors have as result:
-		state: 
-		getResults()
-		getUnused()
-		matches, original, index, row, column, unused?
 --- do an exercise to move some over onto it
 	- then decide what to do
 

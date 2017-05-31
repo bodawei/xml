@@ -38,6 +38,12 @@ const defaultExtractors = {
       params: {
          extractorConstructor: SpaceExtractor
       }
+   },
+   peekWord: {
+      extractorConstructor: PeekExtractor,
+      params: {
+         extractorConstructor: WordExtractor
+      }
    }
 };
 

@@ -2512,4 +2512,47 @@ I also have decided that the charset conversion is not necessary for "1.0" entir
 
 
 
+INTERLUDE (May 29 2017)
+=========
+When I left off after sprint 42, I felt like things were dangerously messy.  ChunkSource was taking longer than I liked, and still needed polishing and cleanup.  And the bit that I've been doing the wishful thinking saying "well, we'll be able to transition over to async in the parsing/validation layer pretty easily" was more and more clearly not goign to be that simple. I tried writing one bridging of ChunkSource to replace Cursor.  It looked like it might be less disasterous than I feared, but not as straightforward as I had hoped (e.g. the retrieval of all chunks, and a couple other bits of changed behavior would take some work).
+I debated what to do. I could probably make those changes and force ChunkSource in, but I was going to have to eventually confront that non-async behavior anyway.
+This left my project in what I felt was a really bad state.  This was a place where the whole thing could collapse on me.  That is, the obvious paths forward were:
+* Abandon ChunkSource for now and get the rest done and deal with async after 1.0
+* Bite the bullet and push the async back up the stack
+And both were ugly and expensive.
+In addition, I still wanted to get something done to show at Silicon Valley Code Camp. #1 wasn't going to do that well for me.  The mixed async and sync behavior was ugly, and really doing some of the entity expansion was just weird with cursors being sync and the entity expansion not.  Yes, I could bridge this by gathering all the async from some external stream, deliver that to the sync stream, which would work with Expension, but it would not be something I'd be proud to be showing.
+So, I decided to spend a week or two and finish Chunk Source and see what would the cost be of doing #2.  Call it a exploratory diversion.
+While I was finishing up ChunkSource (which I'm reasonably happy with at this point) I learned that SVCC was going on a more limited thing this year. highly doubtful I could make my presentation anyway.  So, that kinda took away some time pressure. Though, I would like to get this damn thing done.
+
+Yesterday and Today (having finished chunk source well enough on Sat), I started to explore what it would take to do the upper levels on top of ChunkSource.  I did a rough sketch of three solutions:
+a) One involving callbacks
+b) One involving promises and async/await
+c) A third option, introduced as I was looking at the promises one, which does callbacks differently.
+It turned out (a), which was the solution that has been in my mind for months, was really more cumbersome than I expected.  The example was 200 lines long and the callbacks from callbacks was hard to understand.
+(b) was surprisingly short and easy to understand.  About 90 lines
+(c) surprised me by being about 100 lines, and while more cumbersome to understand than (b), much better than (a).
+I really wanted to do performance measurement of these to compare and contrast. A test run on jsperf showed me that creating Promises were dramatically slower than I would have expected. However, I then ran into the "usual" fight with babel and the build system. getting a non-babelized async/await solution in place was going to take a long time (I already spent a couple hours fighting with parts of the build system, and almost made no advances at all). And what would that ultimately tell me?  The browsers will be changing their performance characteristics in this area, I'm sure.
+So, now I look at this, and I think (a) is just too ugly, and it seems unlikely that (c) is notably different than it in terms of performance. Which leaves me with (b) or (c).  I'm still suspicious of needing to create a Promise for every call to ChunkSource.extract() and whatever machinery is there for this. Furthermore, I genuinely believe that moving from (c) to (b) if that becomes a good thing to do won't be super hard.  They look very similar, and the "public semantics" are essentially the same, which means it should be possible to switch between them as needed.
+
+I also realized that bringing in streams drags in almost 2mb of code.  WTF.  I wonder if we could strip that out for a lighter weight thing that only did object streams and didn't drag in all the requirements of the native streams.  Something to consider down the road.
+
+As I've been working on this, I've been seeing that this rebuilding of the parsing and validation layer will stop when one gets to the XmlTokenStream (since that interface is already async and really shouldn't change with all this).
+I'm also horrified again at the build system which is so unflexible that I can't turn off some/most of the babel stuff easily to try stuff out in the browser. and why the heck can I not get node to get coverage on all the tests?!?!  Crazy crazy.
+
+So, my plan is to begin to shift back to a sprint system, but with a different thrust:
+1) Initial sprint is actually building up a skeletal parsing stream and a skeletal validation and tokenizing stream.  This is still proof of concept stuff
+2) If this proves out, I think we're going to basically start a new repo and put it on github and begin rebuilding this from the ground up.  This feels dispiriting, but I think it should be relatively easy to move stuff over. I've already been moving in this direction.  The biggest fear I have is how many tests I'll have to write for the new exposed api.  otoh, we found the testing system in ChunkSource with its more separated parts much more elegant.
+3) In the process, I'd like to explore gulp and/or web pack or something like that. As I've seen at work, this build stuff is made up of two parts, really: There's the "extended compiler" of babel + webpack/gulp kinds of things, and then there's the general filesystem management and running of other commands. Maybe we could switch over to some typescript in the process.
+
+So, the point here is: this is where I've gotten so far.  And the very sketchy proof of concept for the beginnings of the parser layer is promising.  It doesn't look like it is a lot of work to move the sync stuff over.  So, we should be able to do this.
+
+I still do not know the performance impact of streams on this.I know about overoptimization, but I do wonder.
+
+Performance things I'd like to see:
+- What would the cost of doing a 10-deep stream be?  Even a no-op stream.  (what I'd like to see is one continuous call stack through all the streams at once)
+- Still would like some kind of async/await comparison with callbacks, even with babel translation versions. (My guess is bable is 1.5x slower)
+
+Next thing is to begin to build out a new backlog.  I'd also like to begin to see some performance measures, though I don't know quite how to do that.  Look into Benchmark.js
+
+I also have a lot of different snapshots of the code lying around.  Should organize it and commit it as an "interlude" commit.
 

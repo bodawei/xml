@@ -39,7 +39,13 @@ var OTHER_FILE_GLOB = [
    SOURCE_DIR + '/meta/*'
 ];
 
-var BABEL_PRESETS = 'es2015';
+// var xBABEL_PRESETS = [ ['env', {
+//    targets: {
+//       chrome: 58
+//    }
+// } ] ];
+
+var BABEL_PRESETS = [ 'es2015', 'es2016', 'es2017' ];
 
 var controller;
 
@@ -54,7 +60,7 @@ module.exports = function standardBuild(grunt) {
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
-      browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
+      browsers = [ 'Chrome' ]; //, 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
    } else if (/^win/.test(process.platform)) {
       browsers = [ 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
    } else {
@@ -122,9 +128,9 @@ module.exports = function standardBuild(grunt) {
             singleRun: false,
             browserify: {
                debug: true,
-               transform: [
-                  [ 'babelify', { presets: [ BABEL_PRESETS ] } ]
-               ]
+               // transform: [
+               //    [ 'babelify', { presets: BABEL_PRESETS } ]
+               // ]
             },
             reporters: [ 'progress', 'junit' ],
             coverageReporter: {}
@@ -143,14 +149,13 @@ module.exports = function standardBuild(grunt) {
       babel: {
          options: {
             sourceMap: true,
-            presets: [ BABEL_PRESETS ]
+            presets: BABEL_PRESETS
          },
          distNpm: {
             files: [ {
                src: JS_SOURCE_FILE_GLOB,
                dest: DIST_NPM_DIR + '/lib/',
-               expand: true,
-               flatten: true
+               expand: true
             } ]
          }
       },
@@ -161,10 +166,9 @@ module.exports = function standardBuild(grunt) {
             options: {
                browserifyOptions: {
                   debug: true, // source maps!
-                  standalone: 'dxLog',
-                  transform: [
-                     [ 'babelify', { presets: [ BABEL_PRESETS ] } ]
-                  ]
+                  // transform: [
+                  //    [ 'babelify', { presets: BABEL_PRESETS } ]
+                  // ]
                }
             }
          }

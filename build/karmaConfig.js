@@ -12,7 +12,14 @@ var OUT_DIR = BASE_PATH + '/temp/';
 var BUILD_DIR = BASE_PATH + '/build/';
 var SOURCE_DIR = BASE_PATH + '/source/';
 
-var BABEL_PRESETS = 'es2015';
+// var xBABEL_PRESETS = [ ['env', {
+//    targets: {
+//       chrome: 58
+//    }
+// } ] ];
+
+//var BABEL_PRESETS = [ 'es2015', 'es2016', 'es2017' ];
+var BABEL_PRESETS = [ ];
 
 // http://karma-runner.github.io/1.0/config/configuration-file.html
 module.exports = function karmaConfig(config) {
@@ -20,7 +27,7 @@ module.exports = function karmaConfig(config) {
       basePath: './',
       logLevel: config.LOG_ERROR, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
       reportSlowerThan: 200,
-      browsers: [ 'PhantomJS' ],
+      browsers: [ 'Chrome' ],
       captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
       autoWatch: false,
       singleRun: true,
@@ -45,7 +52,7 @@ module.exports = function karmaConfig(config) {
                ignore: '**/*.test.js',
                instrumenter: isparta
             } ],
-            [ 'babelify', {presets: [ BABEL_PRESETS ]} ]
+            // [ 'babelify', { presets: BABEL_PRESETS } ]
          ]
       },
       reporters: [ 'progress', 'junit', 'coverage', 'yajson' ],
@@ -66,7 +73,7 @@ module.exports = function karmaConfig(config) {
          reporters: [
             { type: 'json', file: 'coverage.json' },
             { type: 'json-summary', file: 'coverage-summary.json' },
-//            { type: 'html', subdir: 'report-html' },
+            // { type: 'html', subdir: 'report-html' },
             { type: 'text', subdir: '.', file: 'text.txt' }
          ]
       }

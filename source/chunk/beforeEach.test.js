@@ -233,8 +233,8 @@ describe('chunk custom matchers', () => {
                pass: false,
                message: 'Chunk range does not match.\n\tActual:   {"location":{"systemId":"s","publicId":"p"},' +
                   '"startIndex":0,"startRow":1,"startColumn":2,"endIndex":3,"endRow":4,"endColumn":5}\n' +
-                  '\tExpected: {"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":0,"startColumn":0,' +
-                  '"endIndex":0,"endRow":0,"endColumn":0}\n'
+                  '\tExpected: {"location":{"systemId":"s","publicId":"p"},"startIndex":0,"startRow":0,' +
+                  '"startColumn":0,"endIndex":0,"endRow":0,"endColumn":0}\n'
             });
          });
 

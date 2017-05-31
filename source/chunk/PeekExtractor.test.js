@@ -121,7 +121,7 @@ describe('PeekExtractor', () => {
          expect(extractor.finish().text).toEqual('onenormaltwonormal');
       });
 
-      it('returns the original from the subExtractor', () => {
+      it('returns the original text from the subExtractor', () => {
          sub.process = function process(segment) {
             this._text = this._text || [];
             this._text.push(segment.text + 'xx');
@@ -187,7 +187,7 @@ describe('PeekExtractor', () => {
          expect(result.segments[2].segment).toEqual(segment3);
       });
 
-      it('returns the original from the subExtractor', () => {
+      it('returns the unchanged segments from the subExtractor', () => {
          sub.process = function process(segment) {
             this._text = this._text || [];
             this._text.push(segment.text + 'xx');
