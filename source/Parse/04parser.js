@@ -2,7 +2,7 @@ const EntityMetaData = require('../shared/EntityMetaData.js');
 
 const stream = require('readable-stream');
 const chunk = require('../chunk/index.js');
-const CallbackParser = require('./02callback.js');
+const CallbackParser = require('./04gentlecallback.js');
 
 class Parser extends stream.Readable {
 
@@ -13,10 +13,6 @@ class Parser extends stream.Readable {
 
       this._chunkSource = new chunk.ChunkSource(chunk.defaultExtractors, new EntityMetaData());
       this.callbackParser = new CallbackParser();
-
-      this.callbackParser.parseGeneral(this._chunkSource, (result) => {
-         this.push(result);
-      })
    }
 
    addText(text) {
@@ -25,9 +21,13 @@ class Parser extends stream.Readable {
 
    endText() {
       this._chunkSource.endText();
-      this.push(null);
    }
 
+   _read() {
+      this.callbackParser.parseGeneral(this._chunkSource, (result) => {
+         this.push(result ||null);
+      })
+   }
 }
 
 module.exports = Parser;

@@ -3,20 +3,20 @@
 'use strict';
 
 /**********************************************************************\
- @@@@
 \**********************************************************************/
 
-class Segment {
+class Offset {
 
-   constructor(text, range) {
-      this.text = text;
-      this.index = 0;
-      this.range = range;
+   constructor(location, index, row, column) {
+      this.location = location;
+      this.index = index || 0;
+      this.row = row || 0;
+      this.column = column || 0;
    }
 
-   atEnd() {
-      return this.index >= this.text.length;
+   clone() {
+      return this;
    }
 }
 
-module.exports = Segment;
+module.exports = Offset;

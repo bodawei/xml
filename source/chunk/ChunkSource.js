@@ -66,7 +66,17 @@ class ChunkSource {
       this._resumeOperation();
    }
 
-   extract(type, deliverChunk, params) {
+   extractToObject(type, params, obj, name) {
+      this.extract(type, params, (chunk) => {
+         obj[name] = chunk;
+      });
+   }
+
+   extract(type, params, deliverChunk) {
+      if (typeof params === 'function') {
+         deliverChunk = params;
+         params = undefined;
+      }
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor;
 
@@ -176,17 +186,17 @@ class ChunkSource {
             this._segments = returnedSegments.concat(this._segments);
          }
 
+         if (!unchanged) {
+            this._lastRange = ranges[ranges.length - 1].clone();
+            this._lastRange.startIndex = this._lastRange.endIndex;
+            this._lastRange.startRow = this._lastRange.endRow;
+            this._lastRange.startColumn = this._lastRange.endColumn;
+         }
+
          if (extractor.state === Extractor.STATE.SUCCESS) {
             extContext.callback(new Chunk(results.text, results.original, ranges));
          } else {
             extContext.callback();
-         }
-
-         if (!unchanged) {
-            this._lastRange = ranges[ranges.length - 1].clone();
-            this._lastRange.startIndex = this._lastRange.endIndex;
-            this._lastRange.endRow = this._lastRange.endRow;
-            this._lastRange.endColumn = this._lastRange.endColumn;
          }
       }
    }

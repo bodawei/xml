@@ -32,7 +32,7 @@ describe('ChunkSource (integration)', () => {
       it('delivers all the text until the specified terminator', () => {
          source.addText('test of\nall\r\nextractor', new Range(defaultLoc));
 
-         source.extract('all', chunkSpy, [ 'or' ]);
+         source.extract('all', [ 'or' ], chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith(
             new Chunk('test of\nall\nextract', 'test of\nall\r\nextract', new Range(defaultLoc, 0, 0, 0, 20, 2, 7)));
@@ -62,7 +62,7 @@ describe('ChunkSource (integration)', () => {
       it('delivers the next character from a segment', () => {
          source.addText('b', new Range(defaultLoc));
 
-         source.extract('char', chunkSpy, undefined);
+         source.extract('char', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith(new Chunk('b', 'b', new Range(defaultLoc, 0, 0, 0, 1, 0, 1)));
       });
@@ -71,13 +71,13 @@ describe('ChunkSource (integration)', () => {
          source.addText('\r', new Range(defaultLoc));
          source.addText('\nx');
 
-         source.extract('char', chunkSpy, undefined);
+         source.extract('char', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith(new Chunk('\n', '\r\n', new Range(defaultLoc, 0, 0, 0, 2, 1, 0)));
       });
 
       it('delivers no chunk if there are no characters', () => {
-         source.extract('char', chunkSpy, undefined);
+         source.extract('char', chunkSpy);
          source.endText();
 
          expect(chunkSpy).toHaveBeenCalledWith();
@@ -189,7 +189,7 @@ describe('ChunkSource (integration)', () => {
       it('delivers the the matched text', () => {
          source.addText('frogs and toads', new Range(defaultLoc));
 
-         source.extract('match', chunkSpy, 'fro');
+         source.extract('match', 'fro', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith(
             new Chunk('fro', 'fro', new Range(defaultLoc, 0, 0, 0, 3, 0, 3)));
@@ -197,14 +197,14 @@ describe('ChunkSource (integration)', () => {
 
       it('delivers no chunk if there is no match', () => {
          source.addText('frogs and toads', new Range(defaultLoc));
-         source.extract('match', chunkSpy, 'gorilla');
+         source.extract('match', 'gorilla', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith();
       });
 
       it('delivers no chunk if there is no content to match against', () => {
          source.endText();
-         source.extract('match', chunkSpy, 'gorilla');
+         source.extract('match', 'gorilla', chunkSpy);
 
          expect(chunkSpy).toHaveBeenCalledWith();
       });

@@ -1,8 +1,11 @@
+const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+
 class GentleCallback {
 
    parseGeneral(source, deliverParse) {
       const nextChar = source.extract('peekChar', (chunk) => {
          if (!chunk) {
+            deliverParse(null);
             return;
          }
 
@@ -46,7 +49,7 @@ class GentleCallback {
             results.type = 'xmldecl';
             this._getParams(source, (params) => {
                results.params = params;
-               source.extract('match', [ '?>' ], (chunk) => {
+               source.extract('match', '?>', (chunk) => {
                   results.closeChunk = chunk;
                   deliverParse(results);
                });
@@ -54,7 +57,7 @@ class GentleCallback {
          } else {
             results.type = 'processinginstruction';
             source.extractToObject('all', [ '?>' ], results, 'instructionChunk'),
-            source.extract('match', [ '?>' ], (chunk) => {
+            source.extract('match', '?>', (chunk) => {
                results.closeChunk = chunk;
                deliverParse(results);
             });
@@ -74,20 +77,22 @@ class GentleCallback {
          deliverResults(params);
          return;
       }
-      const param = {};
+      const param = {
+         nameChunk: nameChunk
+      };
       params.push(param);
 
-      source.extractToObject('space', undefined, param, 'postNameSpaceChunk'),
-      source.extractToObject('match', '=', param, 'equalChunk'),
-      source.extractToObject('space', undefined, param, 'postEqualSpaceChunk'),
+      source.extractToObject('space', undefined, param, 'postNameSpaceChunk');
+      source.extractToObject('match', '=', param, 'equalChunk');
+      source.extractToObject('space', undefined, param, 'postEqualSpaceChunk');
       source.extract('peekChar', undefined, (quoteChunk) => {
          const gotQuote = quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'');
 
          if (gotQuote) {
-            source.extractToObject('char', undefined, param, 'openQuoteChunk'),
-            source.extractToObject('all', [ quoteChunk.text ], param, 'value'),
-            source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk'),
-            source.extractToObject('space', undefined, param, 'trailingSpaceChunk'),
+            source.extractToObject('char', undefined, param, 'openQuoteChunk');
+            source.extractToObject('all', [ quoteChunk.text ], param, 'valueChunk');
+            source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk');
+            source.extractToObject('space', undefined, param, 'trailingSpaceChunk');
          }
 
          source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
@@ -98,4 +103,4 @@ class GentleCallback {
 
 }
 
-module.exports = promises;
+module.exports = GentleCallback;

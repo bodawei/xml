@@ -23,6 +23,12 @@ describe('MatchExtractor', () => {
 
    describe('basic behavior', () => {
 
+      it('throws an error if given a non-string a sa parameter', () => {
+         expect(() => {
+            extractor = new MatchExtractor(1.0, [ 'x' ]);
+         }).toThrowError('MatchExtractor expects a string as a parameter, but got ["x"]');
+      });
+
       it('reports success when it has found the requested match', () => {
          extractor = new MatchExtractor(1.0, 'x');
          extractor.process(new Segment('xy '));

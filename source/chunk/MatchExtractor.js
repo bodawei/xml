@@ -23,6 +23,10 @@ class MatchExtractor extends Extractor {
    constructor(version, candidate) {
       super(version);
 
+      if (typeof candidate !== 'string') {
+         throw new Error('MatchExtractor expects a string as a parameter, but got ' + JSON.stringify(candidate));
+      }
+
       this._candidate = candidate;
       this._candIndex = 0;
    }

@@ -285,7 +285,7 @@ describe('ChunkSource', () => {
       it('passes a version and arbitrary params to the extractor', () => {
          spyOn(testExtractors, 'foo');
 
-         source.extract('foo', () => {}, 55);
+         source.extract('foo', 55, () => {});
 
          expect(testExtractors.foo).toHaveBeenCalledWith(1.1, 55);
       });
@@ -295,8 +295,8 @@ describe('ChunkSource', () => {
             this.params = params;
          };
 
-         source.extract('foo', () => {}, 1);
-         source.extract('foo', () => {}, 2);
+         source.extract('foo', 1, () => {});
+         source.extract('foo', 2, () => {});
 
          expect(source._extractors[0].extractor.params).toEqual(1);
          expect(source._extractors[1].extractor.params).toEqual(2);

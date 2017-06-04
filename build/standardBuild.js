@@ -60,7 +60,7 @@ module.exports = function standardBuild(grunt) {
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
-      browsers = [ 'Chrome' ]; //, 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
+      browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
    } else if (/^win/.test(process.platform)) {
       browsers = [ 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
    } else {
@@ -128,9 +128,9 @@ module.exports = function standardBuild(grunt) {
             singleRun: false,
             browserify: {
                debug: true,
-               // transform: [
-               //    [ 'babelify', { presets: BABEL_PRESETS } ]
-               // ]
+                transform: [
+                   [ 'babelify', { presets: BABEL_PRESETS } ]
+                ]
             },
             reporters: [ 'progress', 'junit' ],
             coverageReporter: {}
@@ -166,9 +166,9 @@ module.exports = function standardBuild(grunt) {
             options: {
                browserifyOptions: {
                   debug: true, // source maps!
-                  // transform: [
-                  //    [ 'babelify', { presets: BABEL_PRESETS } ]
-                  // ]
+                   transform: [
+                      [ 'babelify', { presets: BABEL_PRESETS } ]
+                   ]
                }
             }
          }

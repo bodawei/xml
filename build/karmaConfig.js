@@ -27,7 +27,7 @@ module.exports = function karmaConfig(config) {
       basePath: './',
       logLevel: config.LOG_ERROR, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
       reportSlowerThan: 200,
-      browsers: [ 'Chrome' ],
+      browsers: [ 'PhantomJS' ],
       captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
       autoWatch: false,
       singleRun: true,
@@ -52,7 +52,7 @@ module.exports = function karmaConfig(config) {
                ignore: '**/*.test.js',
                instrumenter: isparta
             } ],
-            // [ 'babelify', { presets: BABEL_PRESETS } ]
+            [ 'babelify', { presets: BABEL_PRESETS } ]
          ]
       },
       reporters: [ 'progress', 'junit', 'coverage', 'yajson' ],

@@ -2,6 +2,8 @@
 
 'use strict';
 
+const Offset = require('./Offset.js');
+
 /**********************************************************************\
  A range is used to record the start and end of a range of characters
  in an entity.
@@ -36,6 +38,14 @@ class Range {
 
    toString() {
       return JSON.stringify(this);
+   }
+
+   getStartOffset() {
+      return new Offset(this.location, this.startIndex, this.startRow, this.startColumn);
+   }
+
+   getEndOffset() {
+      return new Offset(this.location, this.endIndex, this.endRow, this.endColumn);
    }
 
    equal(other) {
