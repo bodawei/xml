@@ -1,5 +1,6 @@
 const ErrorCollector = require('../Basic/ErrorCollector.js');
 const SyntaxError = require('../error/SyntaxError.js');
+const tokens = require('../XmlToken.js');
 
 const XML_DECL_PARAMS = {
    version: 'version',
@@ -11,6 +12,10 @@ const WFEID = SyntaxError.ID;
 
 function textOrBlank(chunk) {
    return chunk ? chunk.text : '';
+}
+
+function textOrUndefined(chunk) {
+   return chunk && chunk.text;
 }
 
 const XmlDeclaration = {
@@ -91,8 +96,27 @@ const XmlDeclaration = {
       err.check(!parsed.closeChunk, WFEID.XMLDECL_NO_CLOSE);
 
       return err.getErrors();
+   },
+
+   makeToken(parsed) {
+      return new tokens.XmlDeclaration(extractParams(parsed), []);
+   }
+}
+
+function extractParams(parsed) {
+   const params = [];
+
+   for (let index = 0; index < parsed.params.length; index++) {
+      const param = parsed.params[index];
+
+      params.push({
+         name: textOrBlank(param.nameChunk),
+         value: textOrUndefined(param.valueChunk)
+      });
    }
 
+   return params;
 }
+
 
 module.exports = XmlDeclaration;

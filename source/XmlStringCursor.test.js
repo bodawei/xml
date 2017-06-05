@@ -282,7 +282,7 @@ describe('XmlStringCursor', () => {
           * UTF-8 character. Really, this should be more of an error, but
           * iconv-lite just gives us a 'bad char' rather than a big complaint
           */
-         // this suddenly stopped working
+         // this suddenly stopped working. some module related to iconv upgraded and changed behavior
          xit('does a butchering job of decoding a UTF-16BE as UTF-8 if encoding is specified as UTF-8', () => {
             const c = new XmlStringCursor('\u0000\u003C\u0000\u003F\u00EF\u00BB', undefined, {
                encoding: 'UTF-8'
