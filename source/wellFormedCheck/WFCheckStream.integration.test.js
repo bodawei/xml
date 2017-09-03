@@ -63,41 +63,47 @@ describe('WFCheckStream (integration)', () => {
          const results = [];
 
          const error = new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID, [ '$badName' ],
-                  new Offset(new EntityLocation(), 10, 0, 10), new Offset(new EntityLocation(), 0, 0, 0));
+                  new Offset(new EntityLocation(), 31, 0, 31), new Offset(new EntityLocation(), 21, 0, 21));
          function evaluate() {
+            results.shift();  // remove the xml declaration
             expect(results).toEqual([
                error,
                {
                   type: 'DOCTYPE_START',
-                  openLToken: new LToken('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
+                  openLToken: new LToken('<!', '<!', new Range(new EntityLocation(), 21, 0, 21, 23, 0, 23)),
                   postOpenSpaceLToken: undefined,
-                  declTypeLToken: new LToken('DOCTYPE', 'DOCTYPE', new Range(new EntityLocation(), 2, 0, 2, 9, 0, 9)),
-                  postDeclTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 9, 0, 9, 10, 0, 10)),
-                  nameLToken: new LToken('$badName', '$badName', new Range(new EntityLocation(), 10, 0, 10, 18, 0, 18)),
-                  postNameSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+                  declTypeLToken: new LToken('DOCTYPE', 'DOCTYPE',
+                     new Range(new EntityLocation(), 23, 0, 23, 30, 0, 30)),
+                  postDeclTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 30, 0, 30, 31, 0, 31)),
+                  nameLToken: new LToken('$badName', '$badName', new Range(new EntityLocation(), 31, 0, 31, 39, 0, 39)),
+                  postNameSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 39, 0, 39, 40, 0, 40)),
                   externalId: {
                      type: 'EXTERNAL_ID',
-                     typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 19, 0, 19, 25, 0, 25)),
-                     postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 25, 0, 25, 26, 0, 26)),
-                     systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 26, 0, 26, 27, 0, 27)),
+                     typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 40, 0, 40, 46, 0, 46)),
+                     postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 46, 0, 46, 47, 0, 47)),
+                     systemOpenQuoteLToken: new LToken('"', '"',
+                        new Range(new EntityLocation(), 47, 0, 47, 48, 0, 48)),
                      systemLToken: new LToken('sys.xml', 'sys.xml',
-                        new Range(new EntityLocation(), 27, 0, 27, 34, 0, 34)),
-                     systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 34, 0, 34, 35, 0, 35)),
+                        new Range(new EntityLocation(), 48, 0, 48, 55, 0, 55)),
+                     systemCloseQuoteLToken: new LToken('"', '"',
+                        new Range(new EntityLocation(), 55, 0, 55, 56, 0, 56)),
                   },
                   postExternalIdSpaceLToken: undefined,
-                  startInternalSubsetLToken: new LToken('[', '[', new Range(new EntityLocation(), 35, 0, 35, 36, 0, 36)),
+                  startInternalSubsetLToken: new LToken('[', '[',
+                     new Range(new EntityLocation(), 56, 0, 56, 57, 0, 57)),
                }, {
                   type: 'DOCTYPE_END',
-                  closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 36, 0, 36, 37, 0, 37)),
+                  closeInternalSubsetLToken: new LToken(']', ']',
+                     new Range(new EntityLocation(), 57, 0, 57, 58, 0, 58)),
                   postCloseInternalSubsetSpaceLToken: undefined,
-                  closeLToken: new LToken('>', '>', new Range(new EntityLocation(), 37, 0, 37, 38, 0, 38)),
+                  closeLToken: new LToken('>', '>', new Range(new EntityLocation(), 58, 0, 58, 59, 0, 59)),
                },
             ]);
 
             done();
          }
 
-         parsedStream.addText('<!DOCTYPE $badName SYSTEM "sys.xml"[]>');
+         parsedStream.addText('<?xml version="1.0"?><!DOCTYPE $badName SYSTEM "sys.xml"[]>');
          parsedStream.endText();
 
          checker.on('data', (data) => results.push(data));
@@ -108,32 +114,33 @@ describe('WFCheckStream (integration)', () => {
          const results = [];
 
          const error = new WellFormedError(WellFormedError.ID.DOCTYPE_NO_CLOSE, undefined,
-                  new Offset(new EntityLocation(), 37, 0, 37), new Offset(new EntityLocation(), 0, 0, 0));
+                  new Offset(new EntityLocation(), 58, 0, 58), new Offset(new EntityLocation(), 21, 0, 21));
          function evaluate() {
+            results.shift();
             expect(results).toEqual([ {
                type: 'DOCTYPE_START',
-               openLToken: new LToken('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
+               openLToken: new LToken('<!', '<!', new Range(new EntityLocation(), 21, 0, 21, 23, 0, 23)),
                postOpenSpaceLToken: undefined,
-               declTypeLToken: new LToken('DOCTYPE', 'DOCTYPE', new Range(new EntityLocation(), 2, 0, 2, 9, 0, 9)),
-               postDeclTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 9, 0, 9, 10, 0, 10)),
-               nameLToken: new LToken('goodName', 'goodName', new Range(new EntityLocation(), 10, 0, 10, 18, 0, 18)),
-               postNameSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+               declTypeLToken: new LToken('DOCTYPE', 'DOCTYPE', new Range(new EntityLocation(), 23, 0, 23, 30, 0, 30)),
+               postDeclTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 30, 0, 30, 31, 0, 31)),
+               nameLToken: new LToken('goodName', 'goodName', new Range(new EntityLocation(), 31, 0, 31, 39, 0, 39)),
+               postNameSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 39, 0, 39, 40, 0, 40)),
                externalId: {
                   type: 'EXTERNAL_ID',
-                  typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 19, 0, 19, 25, 0, 25)),
-                  postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 25, 0, 25, 26, 0, 26)),
-                  systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 26, 0, 26, 27, 0, 27)),
+                  typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 40, 0, 40, 46, 0, 46)),
+                  postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 46, 0, 46, 47, 0, 47)),
+                  systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 47, 0, 47, 48, 0, 48)),
                   systemLToken: new LToken('sys.xml', 'sys.xml',
-                     new Range(new EntityLocation(), 27, 0, 27, 34, 0, 34)),
-                  systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 34, 0, 34, 35, 0, 35)),
+                     new Range(new EntityLocation(), 48, 0, 48, 55, 0, 55)),
+                  systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 55, 0, 55, 56, 0, 56)),
                },
                postExternalIdSpaceLToken: undefined,
-               startInternalSubsetLToken: new LToken('[', '[', new Range(new EntityLocation(), 35, 0, 35, 36, 0, 36)),
+               startInternalSubsetLToken: new LToken('[', '[', new Range(new EntityLocation(), 56, 0, 56, 57, 0, 57)),
             },
                error,
             {
                type: 'DOCTYPE_END',
-               closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 36, 0, 36, 37, 0, 37)),
+               closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 57, 0, 57, 58, 0, 58)),
                postCloseInternalSubsetSpaceLToken: undefined,
                closeLToken: undefined,
             } ]);
@@ -141,7 +148,7 @@ describe('WFCheckStream (integration)', () => {
             done();
          }
 
-         parsedStream.addText('<!DOCTYPE goodName SYSTEM "sys.xml"[]');
+         parsedStream.addText('<?xml version="1.0"?><!DOCTYPE goodName SYSTEM "sys.xml"[]');
          parsedStream.endText();
 
          checker.on('data', (data) => results.push(data));

@@ -55,7 +55,8 @@ describe('docTypeEnd', () => {
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_END',
             closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
-            postCloseInternalSubsetSpaceLToken: new LToken('\t', '\t', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
+            postCloseInternalSubsetSpaceLToken: new LToken('\t', '\t',
+               new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
             closeLToken: new LToken('>', '>', new Range(new EntityLocation(), 2, 0, 2, 3, 0, 3)),
          });
       });

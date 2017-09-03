@@ -228,8 +228,10 @@ describe('LTokenSource (integration)', () => {
          source.extract('peekSpace', lTokenSpy);
          source.extract('space', lTokenSpy);
 
-         expect(lTokenSpy.calls.argsFor(0)[0]).toEqual(new LToken(' \t', ' \t', new Range(defaultLoc, 0, 0, 0, 2, 0, 2)));
-         expect(lTokenSpy.calls.argsFor(1)[0]).toEqual(new LToken(' \t', ' \t', new Range(defaultLoc, 0, 0, 0, 2, 0, 2)));
+         expect(lTokenSpy.calls.argsFor(0)[0]).toEqual(new LToken(' \t', ' \t',
+            new Range(defaultLoc, 0, 0, 0, 2, 0, 2)));
+         expect(lTokenSpy.calls.argsFor(1)[0]).toEqual(new LToken(' \t', ' \t',
+            new Range(defaultLoc, 0, 0, 0, 2, 0, 2)));
       });
 
    });

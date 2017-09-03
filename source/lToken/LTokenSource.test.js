@@ -327,7 +327,8 @@ describe('LTokenSource', () => {
          source.endText();
          source.extract('all', lTokenSpy);
 
-         expect(lTokenSpy).toHaveBeenCalledWith(new LToken('122333', '122333', new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
+         expect(lTokenSpy).toHaveBeenCalledWith(new LToken('122333', '122333',
+            new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
       });
 
       it('returns undefined when nothing was retrieved', () => {
