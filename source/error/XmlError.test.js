@@ -1,14 +1,14 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const EntityLocation = require('../basic/EntityLocation.js');
-const Offset = require('../basic/Offset.js');
-const Range = require('../basic/Range.js');
-const StringBundle = require('../basic/StringBundle.js');
+import EntityLocation from '../basic/EntityLocation.js';
+import Offset from '../basic/Offset.js';
+import Range from '../basic/Range.js';
+import StringBundle from '../basic/StringBundle.js';
 
-const Chunk = require('../chunk/Chunk.js');
+import Chunk from '../chunk/Chunk.js';
 
-const XmlError = require('./XmlError.js');
+import XmlError from './XmlError.js';
 
 describe('XmlError()', () => {
 

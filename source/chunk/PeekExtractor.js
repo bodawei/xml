@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Extractor = require('./Extractor.js');
+import Extractor from './Extractor.js';
 
 /**********************************************************************\
  A PeekExtractor "wraps" another extractor so it can do its work, but

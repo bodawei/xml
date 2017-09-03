@@ -1,11 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const EntityLocation = require('../basic/EntityLocation.js');
-const Range = require('../basic/Range.js');
+import { EntityLocation, Range } from '../basic';
 
-const WordExtractor = require('./WordExtractor.js');
-const Segment = require('./Segment.js');
+import WordExtractor from './WordExtractor.js';
+import Segment from './Segment.js';
 
 describe('WordExtractor', () => {
    let defaultLoc;

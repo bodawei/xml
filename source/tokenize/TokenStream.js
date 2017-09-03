@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-const stream = require('readable-stream');
+import stream from 'readable-stream';
 
-const token = require('../xmlToken');
+import { docTypeStart, xmlDeclaration } from '../token';
 
 class TokenStream extends stream.Transform {
 
@@ -15,10 +15,10 @@ class TokenStream extends stream.Transform {
    _transform(parsed, ignored, done) {
       switch (parsed.type) {
          case 'xmldecl':
-            this.push(token.XmlDeclaration.makeToken(parsed));
+            this.push(xmlDeclaration.makeToken(parsed));
             break;
          case 'DOCTYPE_START':
-            this.push(token.docTypeStart.makeToken(parsed));
+            this.push(docTypeStart.makeToken(parsed));
             break;
          default:
             this.push(parsed);

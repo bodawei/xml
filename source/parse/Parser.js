@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import token from '../xmlToken';
+import { declaration, processingInstruction } from '../token';
 
 class Parser {
 
@@ -27,9 +27,9 @@ class Parser {
          }
 
          if (markupStartChunk.text === '<?') {
-            return token.processingInstruction.parse(source, markupStartChunk, deliverParse);
+            return processingInstruction.parse(source, markupStartChunk, deliverParse);
          } else if (markupStartChunk.text === '<!') {
-            return token.declaration.parse(source, markupStartChunk, deliverParse);
+            return declaration.parse(source, markupStartChunk, deliverParse);
          }
       });
    }

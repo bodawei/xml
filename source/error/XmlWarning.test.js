@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const XmlWarning = require('./XmlWarning.js');
+import XmlWarning from './XmlWarning.js';
 
 describe('XmlWarning', () => {
 

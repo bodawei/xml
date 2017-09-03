@@ -1,13 +1,11 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-
 /* eslint-env jasmine */
 
-const EntityLocation = require('../basic/EntityLocation.js');
-const Range = require('../basic/Range.js');
+import { EntityLocation, Range } from '../basic';
 
-const Extractor = require('./Extractor.js');
-const DigitExtractor = require('./DigitExtractor.js');
-const Segment = require('./Segment.js');
+import Extractor from './Extractor.js';
+import DigitExtractor from './DigitExtractor.js';
+import Segment from './Segment.js';
 
 describe('DigitExtractor', () => {
    let extractor;

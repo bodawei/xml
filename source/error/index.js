@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-const SyntaxError = require('./SyntaxError.js');
+import WellFormedError from './WellFormedError.js';
 
 module.exports = {
-   WellFormedError: SyntaxError,
+   WellFormedError: WellFormedError,
 };

@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const AllExtractor = require('./AllExtractor.js');
-const CharExtractor = require('./CharExtractor.js');
-const DigitExtractor = require('./DigitExtractor.js');
-const MatchExtractor = require('./MatchExtractor.js');
-const MultiMatchExtractor = require('./MultiMatchExtractor.js');
-const PeekExtractor = require('./PeekExtractor.js');
-const SpaceExtractor = require('./SpaceExtractor.js');
-const WordExtractor = require('./WordExtractor.js');
+import AllExtractor from './AllExtractor.js';
+import CharExtractor from './CharExtractor.js';
+import DigitExtractor from './DigitExtractor.js';
+import MatchExtractor from './MatchExtractor.js';
+import MultiMatchExtractor from './MultiMatchExtractor.js';
+import PeekExtractor from './PeekExtractor.js';
+import SpaceExtractor from './SpaceExtractor.js';
+import WordExtractor from './WordExtractor.js';
 
 const defaultExtractors = {
    all: AllExtractor,

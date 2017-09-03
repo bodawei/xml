@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import WFChecker from './WFChecker.js';
+import WFCheckStream from './WFCheckStream.js';
 
 module.exports = {
-   WFChecker,
+   WFCheckStream,
 };

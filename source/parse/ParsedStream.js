@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-const stream = require('readable-stream');
+import stream from 'readable-stream';
 
-const chunk = require('../chunk');
-const EntityMetaData = require('../basic/EntityMetaData.js');
+import { EntityMetaData, Range } from '../basic';
+import { ChunkSource, defaultExtractors } from '../chunk';
 
-const Parser = require('./Parser.js');
+import Parser from './Parser.js';
 
 class ParsedStream extends stream.Readable {
 
@@ -14,7 +14,7 @@ class ParsedStream extends stream.Readable {
          objectMode: true,
       });
 
-      this._chunkSource = new chunk.ChunkSource(chunk.defaultExtractors, new EntityMetaData());
+      this._chunkSource = new ChunkSource(defaultExtractors, new EntityMetaData());
       this.parser = new Parser();
    }
 

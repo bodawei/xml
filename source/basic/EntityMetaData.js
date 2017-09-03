@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const EntityLocation = require('./EntityLocation.js');
+import EntityLocation from './EntityLocation.js';
 
 const LAST_1DOT0_REVISION = 5;
 const LAST_1DOT1_REVISION = 2;

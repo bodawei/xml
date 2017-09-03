@@ -1,14 +1,11 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-
 /* eslint-env jasmine */
 
-const EntityLocation = require('../basic/EntityLocation.js');
-const EntityMetaData = require('../basic/EntityMetaData.js');
-const Range = require('../basic/Range.js');
+import { EntityLocation, EntityMetaData, Range } from '../basic';
 
-const Chunk = require('./Chunk.js');
-const ChunkSource = require('./ChunkSource.js');
-const defaultExtractors = require('./defaultExtractors.js');
+import Chunk from './Chunk.js';
+import ChunkSource from './ChunkSource.js';
+import defaultExtractors from './defaultExtractors.js';
 
 describe('ChunkSource (integration)', () => {
    let source;

@@ -1,23 +1,20 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const Range = require('../basic/Range.js');
-const Offset = require('../basic/Offset.js');
-const EntityLocation = require('../basic/EntityLocation.js');
-const parser = require('../parser');
-const SyntaxError = require('../error/SyntaxError.js');
+import { Offset, Range, EntityLocation } from '../basic';
+import { Chunk } from '../chunk';
+import { ParsedStream } from '../parse';
+import { WellFormedError } from '../error';
 
-const WFChecker = require('./WFChecker.js');
+import WFCheckStream from './WFCheckStream.js';
 
-describe('WFChecker', () => {
+describe('WFCheckStream', () => {
    let parsedStream;
    let checker;
 
    beforeEach(() => {
-      parsedStream = new parser.ParsedStream();
-      checker = new WFChecker();
+      parsedStream = new ParsedStream();
+      checker = new WFCheckStream();
       parsedStream.pipe(checker);
    });
 
@@ -29,7 +26,7 @@ describe('WFChecker', () => {
       });
       checker.on('end', () => {
          expect(results).toEqual([
-            new SyntaxError('XMLDECL_ATTR_INVALID_CASE', [ 'version', 'VERSION' ],
+            new WellFormedError('XMLDECL_ATTR_INVALID_CASE', [ 'version', 'VERSION' ],
                new Offset(new EntityLocation(), 6, 0, 6)),
             {
                type: 'xmldecl',

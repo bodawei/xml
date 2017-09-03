@@ -1,17 +1,23 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Extractor = require('./Extractor.js');
-const MatchExtractor = require('./MatchExtractor.js');
-const MultiMatchExtractor = require('./MultiMatchExtractor.js');
-const PeekExtractor = require('./PeekExtractor.js');
+import Extractor from './Extractor.js';
+import MatchExtractor from './MatchExtractor.js';
+import MultiMatchExtractor from './MultiMatchExtractor.js';
+import PeekExtractor from './PeekExtractor.js';
 
 const regexMemo = {};
 
 /**********************************************************************\
- A AllExtractor will look for the specified candidate string starting
+ An AllExtractor extracts a chunk from the current position until
+ either the end of all input, or one of the specified terminators is
+ encountered.
+
+ This uses the MatchExtractor, MultiMatchExtractor and/or PeekExtractor
+ to help identify whether this has encountered a terminator.
 \**********************************************************************/
 
 class AllExtractor extends Extractor {
+
    constructor(version, terminators = []) {
       super(version);
 

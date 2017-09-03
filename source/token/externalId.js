@@ -1,12 +1,12 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import basic from '../basic';
-import chunk from '../chunk';
-import error from '../error';
+import { ErrorCollector } from '../basic';
+import { Chunk } from '../chunk';
+import { WellFormedError } from '../error';
 
 import util from './util.js';
 
-const WFEID = error.WellFormedError.ID;
+const WFEID = WellFormedError.ID;
 
 const EXTERNAL_ID = 'EXTERNAL_ID';
 const TYPE_TERMINATORS = [ '"', '\'' ];
@@ -95,7 +95,7 @@ function getQuotedLiteral(source, parsed, prefix, done) {
             newRange.startIndex = newRange.endIndex;
             newRange.startRow = newRange.endRow;
             newRange.startColumn = newRange.endColumn;
-            parsed[prefix + 'Chunk'] = new chunk.Chunk('', '', newRange);
+            parsed[prefix + 'Chunk'] = new Chunk('', '', newRange);
          }
          parsed[prefix + 'CloseQuoteChunk'] = closeChunk;
          done(util.textOrBlank(closeChunk) === quoteChunk.text);
@@ -109,11 +109,9 @@ function getQuotedLiteral(source, parsed, prefix, done) {
 // rename EXTERNALID_PUBLIC_NO_LEADING_SPACE
 // add EXTERNALID_PUBLIC_NO_CLOSE_QUOTE EXTERNALID_SYSTEM_NO_CLOSE_QUOTE
 
-function checkWellFormed(parsed, systemRequired, openChunk, isDocEntity, version, revision) {
-   const ec = new basic.ErrorCollector(openChunk, error.WellFormedError);
-
+function checkWellFormed(parsed, ec, systemRequired, openChunk) {
    if (!parsed) {
-      return ec;
+      return;
    }
 
    ec.setPos(parsed.typeChunk);
@@ -135,7 +133,7 @@ function checkWellFormed(parsed, systemRequired, openChunk, isDocEntity, version
          ec.setPos(parsed.publicChunk);
          const match = PUBID_CHARS.exec(parsed.publicChunk.text);
          ec.check(!match || match[0] !== parsed.publicChunk.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ parsed.publicChunk.text[ match ? match[0].length : 0] ]);
+                  [ parsed.publicChunk.text[match ? match[0].length : 0] ]);
 
          ec.setPos(parsed.publicCloseQuoteChunk);
          ec.check(!parsed.publicCloseQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
@@ -148,7 +146,7 @@ function checkWellFormed(parsed, systemRequired, openChunk, isDocEntity, version
       if (!parsed.systemChunk) {
          ec.report(WFEID.EXTERNALID_NO_SYSTEM);
       } else {
-         if (externalId.publicId) {
+         if (parsed.publicChunk) {
             ec.check(!parsed.postPublicSpaceChunk, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
          }
 
@@ -161,8 +159,6 @@ function checkWellFormed(parsed, systemRequired, openChunk, isDocEntity, version
          ec.check(!parsed.systemCloseQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
       }
    }
-
-   return ec;
 }
 
 module.exports = {

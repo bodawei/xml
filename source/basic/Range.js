@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Offset = require('./Offset.js');
+import Offset from './Offset.js';
 
 /**********************************************************************\
  A range is used to record the start and end of a range of characters

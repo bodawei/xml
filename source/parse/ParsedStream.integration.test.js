@@ -1,11 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const EntityLocation = require('../basic/EntityLocation.js');
-const Range = require('../basic/Range.js');
+import { EntityLocation, Range } from '../basic';
+import { Chunk } from '../chunk';
 
-const ParsedStream = require('./ParsedStream.js');
+import ParsedStream from './ParsedStream.js';
 
 describe('ParsedStream', () => {
    let parser;

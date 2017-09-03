@@ -1,8 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-const stream = require('readable-stream');
+import stream from 'readable-stream';
 
-const token = require('../xmlToken');
+import { ErrorCollector } from '../basic';
+import { WellFormedError } from '../error';
+
+import { xmlDeclaration, docTypeStart } from '../token';
 
 class WFChecker extends stream.Transform {
 
@@ -13,15 +16,15 @@ class WFChecker extends stream.Transform {
    }
 
    _transform(parsed, ignored, callback) {
-      let errorCollector;
+      let errorCollector = new ErrorCollector(parsed.openChunk, WellFormedError);
 
       switch (parsed.type) {
          case 'xmldecl':
-            errorCollector = token.XmlDeclaration.checkWellFormed(parsed, true, 1.0);
+            xmlDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
             errorCollector.getErrors().forEach(error => this.push(error));
             break;
          case 'DOCTYPE_START':
-            errorCollector = token.docTypeStart.checkWellFormed(parsed, true, 1.0, 5);
+            docTypeStart.checkWellFormed(parsed, errorCollector, true, 1.0, 5);
             errorCollector.getErrors().forEach(error => this.push(error));
             break;
       }

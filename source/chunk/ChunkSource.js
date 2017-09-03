@@ -1,21 +1,73 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const EntityMetaData = require('../basic/EntityMetaData.js');
-const Range = require('../basic/Range.js');
+import { EntityMetaData, Range } from '../basic';
 
-const Chunk = require('./Chunk.js');
-const Extractor = require('./Extractor.js');
-const Segment = require('./Segment.js');
+import Chunk from './Chunk.js';
+import Extractor from './Extractor.js';
+import Segment from './Segment.js';
 
-/*
-  extractors is a hash, with keys being a type of extractor,
-  and the value being one of the following:
-      name: ConstructorFunction
-      name: {
-         extractor: ConstructorFunction
-         subType: name
-      }
-*/
+/**********************************************************************\
+ A ChunkSource combines three things, and returns Chunks using them.
+
+ 1. A hash of extractor definitions (see below) which
+    define what this can respond to.
+ 2. a series of 1 or more strings (with addText()) each of which will
+    be turned into a Segment.
+ 3. A series of calls to extract(), which will used the specified
+    extractor to carve off a chunk from the current segment.
+
+ Text and extract calls can be made independently of one another (e.g.
+ you can call extract() multipled times before providing any text).
+ The text or calls will be queued until they can be used.
+
+ Text can come from different entities. When ever text comes from a
+ new entity, a Range must be provided to addText() so it can
+ continue to build the correct ranges in the chunks that are produced.
+
+ Extractor protocol:
+ Crucially, this defines a very strict pattern of interaction with
+ each extractor:
+   * Extractor.process() will never be passed a zero-length segment.
+   * Extractor.process() will never be passed the same segment twice.
+   * Extractor.finish() will be called once Extractor.state is no
+     longer WORKING, or when end of input is reached.
+   * Extractors must update Extractor.state after each call to
+     process() so this can determine whether to keep feeding it
+     segments or call finish()
+   * finish() must return a data structure containing:
+       text : The final text extracted
+       originalText: The text extracted, before newline normalization
+       segments: An array of information about each segment that this
+          had been passed.  Each entry must have:
+             chars: The number of characters consumed from this segment
+             rows:  The number of newlines encountered
+             columns: The number of chars after the last newline
+             segment: Either the segment this had been passed, if this
+                did not fully consume it, OR a simple hash with just
+                the range from the segment that was fully consumed.
+
+ Extractor definitions:
+ There are three ways to specify an extractor:
+   name: An extractor constructor function
+   name: {
+      extractorConstructor: An Extractor constructor,
+      params: A value to be passed to the extractorConstructor
+         (this overrides whatever might be passed to the
+         extract functions)
+   }
+   name: {
+      extractorConstructor: An Extractor constructor,
+      params: {
+         extractorConstructor: : An Extractor constructor which
+            will receive the params passed to the extract function
+   }
+
+ The second is used to provide a predefined way of calling an
+ extractor like MultiMatchExtractor.
+ The third is primarily for use where the first extractorConstructor
+ is the PeekExtractor, which simply wraps the next extractor.
+\**********************************************************************/
+
 class ChunkSource {
 
    constructor(extractorInfo, info) {
@@ -85,18 +137,6 @@ class ChunkSource {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
       }
 
-      /*
-       * The extractor definition can be:
-       *    * An extractor constructor function
-       *    * an object like: {
-       *       extractorConstructor,
-       *       params (overwride whatever passed to this function)
-       *      }
-       *    * an object like: {
-       *       extractorConstructor,
-       *       params: { extractorConstructor }
-       *      }
-       */
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;
 

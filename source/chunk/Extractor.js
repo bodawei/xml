@@ -3,6 +3,13 @@
 const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
 const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 
+/**********************************************************************\
+  Extractor defines some common code for all Extractors.
+  Most notably, it provides a routine which will, given some text
+  extracted from a segment, compute the number of chars, rows and
+  columns, do text normalization, and store this for eventual return.
+\**********************************************************************/
+
 class Extractor {
 
    constructor(version) {
@@ -68,10 +75,6 @@ class Extractor {
    }
 
    _finish() {
-//      if (this.state === Extractor.STATE.WORKING) {
-//         throw new Error('need to clean this up');
-//      }
-
       return {
          text: this._normalizedText.join(''),
          original: this._text.join(''),

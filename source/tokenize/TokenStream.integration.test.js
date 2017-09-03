@@ -1,17 +1,17 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const parsed = require('../parser');
-const token = require('../xmlToken');
+import { ParsedStream } from '../parse';
+import { docTypeStart } from '../token';
 
-const TokenStream = require('./TokenStream.js');
+import TokenStream from './TokenStream.js';
 
 describe('TokenStream', () => {
    let parsedStream;
    let tokenStream;
 
    beforeEach(() => {
-      parsedStream = new parsed.ParsedStream();
+      parsedStream = new ParsedStream();
       tokenStream = new TokenStream();
       parsedStream.pipe(tokenStream);
    });
@@ -23,7 +23,7 @@ describe('TokenStream', () => {
 
          function evaluate() {
             expect(results).toEqual([
-               new token.docTypeStart.DocTypeStart('one', undefined, []),
+               new docTypeStart.DocTypeStart('one', undefined, []),
             ]);
 
             done();

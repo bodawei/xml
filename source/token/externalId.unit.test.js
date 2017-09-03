@@ -1,13 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const Range = require('../basic/Range.js');
-const EntityLocation = require('../basic/EntityLocation.js');
+import { EntityLocation, ErrorCollector, Range } from '../basic';
+import { Chunk } from '../chunk';
+import { WellFormedError } from '../error';
 
-import basic from '../basic';
 import util from '../chunk/index.test.js';
-import error from '../error';
 
 import externalId from './externalId.js';
 
@@ -112,7 +110,6 @@ describe('externalId', () => {
             systemCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
          });
       });
-
 
       it('returns a zero length chunk if there is no value between quotes', () => {
          mockSource = new util.MockChunkSource([
@@ -366,12 +363,6 @@ describe('externalId', () => {
             report: jasmine.createSpy('reportSpy'),
          };
 
-         spyOn(basic, 'ErrorCollector').and.callFake((context, type) => {
-            mockErrorCollector.context = context;
-            mockErrorCollector.type = type;
-            return mockErrorCollector;
-         });
-
          expectedRm = new util.RangeMaker(new EntityLocation());
          parsed = {
             type: 'EXTERNAL_ID',
@@ -387,26 +378,22 @@ describe('externalId', () => {
          };
       });
 
-      it('returns an an error collector', () => {
-         const errors = externalId.checkWellFormed(parsed);
-
-         expect(errors).toEqual(mockErrorCollector);
-      });
-
       it('reports an error if type is the wrong case', () => {
          parsed.typeChunk.text = 'public';
 
-         const errors = externalId.checkWellFormed(parsed);
+         externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, error.WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(true,
+            WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
       });
 
-      it('reports an error if type is the wrong case', () => {
+      it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
          delete parsed.postTypeSpaceChunk;
 
-         const errors = externalId.checkWellFormed(parsed);
+         externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, error.WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(true,
+            WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
       });
 
    });

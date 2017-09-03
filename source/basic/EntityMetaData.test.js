@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const EntityMetaData = require('./EntityMetaData.js');
-const EntityLocation = require('./EntityLocation.js');
+import EntityMetaData from './EntityMetaData.js';
+import EntityLocation from './EntityLocation.js';
 
 describe('EntityMetaData', () => {
 

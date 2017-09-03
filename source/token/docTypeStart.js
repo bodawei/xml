@@ -1,15 +1,15 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import error from '../error';
+import { ErrorCollector } from '../basic';
+import { WellFormedError } from '../error';
 
-import token from './XmlToken.js';
+import util from './util.js';
+import xmlToken from './xmlToken.js';
 
-const basic = require('../basic');
-
-const WFEID = error.WellFormedError.ID;
+const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
 
-class DocTypeStart extends token.XmlToken {
+class DocTypeStart extends xmlToken.Token {
 
    constructor(name, externalLocation, chunks) {
       super(chunks);
@@ -18,10 +18,6 @@ class DocTypeStart extends token.XmlToken {
       this.externalLoc = externalLocation;
    }
 
-}
-
-function textOrBlank(chunk) {
-   return chunk ? chunk.text : '';
 }
 
 /**********************************************************************\
@@ -61,9 +57,7 @@ function parse(source, declarationStart, deliverParsed) {
    });
 }
 
-function checkWellFormed(parsed, isDocEntity, version, revision) {
-   const ec = new basic.ErrorCollector(parsed.openChunk, error.WellFormedError);
-
+function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
    ec.setPos(parsed.nameChunk);
    ec.check(!parsed.nameChunk, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.nameChunk, WFEID.DOCTYPE_NAME_INVALID, version, revision);
@@ -72,7 +66,7 @@ function checkWellFormed(parsed, isDocEntity, version, revision) {
 }
 
 function makeToken(parsed) {
-   return new DocTypeStart(textOrBlank(parsed.nameChunk), undefined, []);
+   return new DocTypeStart(util.textOrBlank(parsed.nameChunk), undefined, []);
 }
 
 module.exports = {

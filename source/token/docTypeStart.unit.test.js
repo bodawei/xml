@@ -2,12 +2,9 @@
 
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const Range = require('../basic/Range.js');
-const EntityLocation = require('../basic/EntityLocation.js');
-
-import basic from '../basic';
-import error from '../error';
+import { Chunk } from '../chunk';
+import { Range, EntityLocation } from '../basic';
+import { WellFormedError } from '../error';
 
 import util from '../chunk/index.test.js';
 
@@ -123,12 +120,6 @@ describe('docTypeStart', () => {
             report: jasmine.createSpy('reportSpy'),
          };
 
-         spyOn(basic, 'ErrorCollector').and.callFake((context, type) => {
-            mockErrorCollector.context = context;
-            mockErrorCollector.type = type;
-            return mockErrorCollector;
-         });
-
          expectedRm = new util.RangeMaker(new EntityLocation());
          parsed = {
             openChunk: util.makeChunk('<!', expectedRm),
@@ -139,27 +130,15 @@ describe('docTypeStart', () => {
       });
 
       it('returns an an error collector', () => {
-         const errors = docTypeStart.checkWellFormed(parsed);
+         const errors = docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
          expect(errors).toEqual(mockErrorCollector);
-      });
-
-      it('passes the WellFormedError to the error collector', () => {
-         docTypeStart.checkWellFormed(parsed);
-
-         expect(mockErrorCollector.type).toEqual(error.WellFormedError);
-      });
-
-      it('passes the openChunk to the error collector', () => {
-         docTypeStart.checkWellFormed(parsed);
-
-         expect(mockErrorCollector.context).toEqual(parsed.openChunk);
       });
 
       it('sets the position before checking the name', () => {
          parsed.nameChunk = undefined;
 
-         docTypeStart.checkWellFormed(parsed);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector.setPos).toHaveBeenCalledWith(parsed.nameChunk);
          expect(mockErrorCollector.setPos).toHaveBeenCalledBefore(mockErrorCollector.check);
@@ -169,30 +148,30 @@ describe('docTypeStart', () => {
       it('reports an error if there is no elment name', () => {
          parsed.nameChunk = undefined;
 
-         docTypeStart.checkWellFormed(parsed);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, error.WellFormedError.ID.DOCTYPE_NO_NAME);
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, WellFormedError.ID.DOCTYPE_NO_NAME);
       });
 
       it('reports no error if there is an elment name', () => {
-         docTypeStart.checkWellFormed(parsed);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(false, error.WellFormedError.ID.DOCTYPE_NO_NAME);
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(false, WellFormedError.ID.DOCTYPE_NO_NAME);
       });
 
       it('does not reset the position before checking the name validity', () => {
          parsed.nameChunk = undefined;
 
-         docTypeStart.checkWellFormed(parsed);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector.setPos).toHaveBeenCalledTimes(1);
       });
 
       it('checks whether the name is valid', () => {
-         docTypeStart.checkWellFormed(parsed, true, 1, 2);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector, true, 1, 2);
 
          expect(mockErrorCollector.checkName)
-            .toHaveBeenCalledWith(parsed.nameChunk, error.WellFormedError.ID.DOCTYPE_NAME_INVALID, 1, 2);
+            .toHaveBeenCalledWith(parsed.nameChunk, WellFormedError.ID.DOCTYPE_NAME_INVALID, 1, 2);
       });
 
    });

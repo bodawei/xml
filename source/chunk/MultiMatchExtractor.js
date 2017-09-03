@@ -1,13 +1,21 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Extractor = require('./Extractor.js');
-const MatchExtractor = require('./MatchExtractor.js');
+import Extractor from './Extractor.js';
+import MatchExtractor from './MatchExtractor.js';
 
 /**********************************************************************\
- A MultiExtractor will look for the specified candidate string starting
+ A MultiMatchExtractor will look for the the best match among the
+ provided candidates, and return it.
+
+ Superficially, this is just like a "parallel" call to multiple
+ MatchExtractors.  Indeed, this is how this is implemented.
+ However, it is worth noting that it is possible to have candidates
+ like "<" and "<!--", where both would successfully match. This
+ chooses to match the longest possible match in this situation.
 \**********************************************************************/
 
 class MultiMatchExtractor extends Extractor {
+
    constructor(context, candidates) {
       super(context);
 

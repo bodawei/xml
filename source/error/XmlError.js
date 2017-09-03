@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Offset = require('../basic/Offset.js');
-const Chunk = require('../chunk/Chunk.js');
+import Offset from '../basic/Offset.js';
+import Chunk from '../chunk/Chunk.js';
 
 /**********************************************************************\
  XmlError is a base type for all error objects.  It is a subtype of

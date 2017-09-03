@@ -1,9 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const ErrorCollector = require('../basic/ErrorCollector.js');
-const SyntaxError = require('../error/SyntaxError.js');
+import { ErrorCollector } from '../basic';
+import { WellFormedError } from '../error';
 
-const token = require('./XmlToken.js');
+import util from './util.js';
+import xmlToken from './XmlToken.js';
 
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 
@@ -13,17 +14,9 @@ const XML_DECL_PARAMS = {
    standalone: 'standalone',
 };
 
-const WFEID = SyntaxError.ID;
+const WFEID = WellFormedError.ID;
 
-function textOrBlank(chunk) {
-   return chunk ? chunk.text : '';
-}
-
-function textOrUndefined(chunk) {
-   return chunk && chunk.text;
-}
-
-class XmlDeclaration extends token.XmlToken {
+class XmlDeclaration extends xmlToken.Token {
 
    constructor(params, chunks) {
       super(chunks);
@@ -80,16 +73,15 @@ function addParam(source, params, nameChunk, deliverResults) {
    });
 }
 
-function checkWellFormed(parsed, isDocEntity) { // need type and version
-   const err = new ErrorCollector(parsed.openChunk, SyntaxError);
+function checkWellFormed(parsed, err, isDocEntity) { // need type and version
    let foundEncoding;
 
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {
       const param = parsed.params[index];
-      const nameText = textOrBlank(param.nameChunk);
+      const nameText = util.textOrBlank(param.nameChunk);
       const lcName = nameText.toLocaleLowerCase();
-      const valueText = textOrBlank(param.valueChunk);
+      const valueText = util.textOrBlank(param.valueChunk);
       const lcValue = valueText.toLocaleLowerCase();
       let foundVersion;
       let seenStandalone;
@@ -156,8 +148,6 @@ function checkWellFormed(parsed, isDocEntity) { // need type and version
    }
 
    err.check(!parsed.closeChunk, WFEID.XMLDECL_NO_CLOSE);
-
-   return err;
 }
 
 function makeToken(parsed) {
@@ -171,8 +161,8 @@ function extractParams(parsed) {
       const param = parsed.params[index];
 
       params.push({
-         name: textOrBlank(param.nameChunk),
-         value: textOrUndefined(param.valueChunk),
+         name: util.textOrBlank(param.nameChunk),
+         value: util.textOrUndef(param.valueChunk),
       });
    }
 
@@ -180,7 +170,7 @@ function extractParams(parsed) {
 }
 
 module.exports = {
-   XmlDeclaration,
+   Token: XmlDeclaration,
    parse,
    checkWellFormed,
    makeToken,

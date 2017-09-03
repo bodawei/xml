@@ -1,12 +1,29 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const Range = require('../basic/Range.js');
+import { Range } from '../basic';
+
+import Chunk from './Chunk.js';
+
+/**********************************************************************\
+  Miscellaneous utilities for use in testing.
+\**********************************************************************/
+
+/**********************************************************************\
+  makeChunk() will return a Chunk using the specified text and
+  RangeMaker
+\**********************************************************************/
 
 function makeChunk(text, rangeMaker) {
    return new Chunk(text, text, rangeMaker.makeRange(text));
 }
+
+/**********************************************************************\
+  RangeMaker makes it easy to generate new ranges. Given a string
+  it will increment counters it has to produce a Range that comes
+  right after the previous one this has returned.  This makes it easy
+  to generate ordinary ranges (no newline normalization) in tests.
+\**********************************************************************/
 
 class RangeMaker {
 
@@ -28,6 +45,13 @@ class RangeMaker {
       return new Range(this.location, oldIndex, oldRow, oldColumn, this.index, this.row, this.column);
    }
 }
+
+/**********************************************************************\
+  MockChunkSource is passed a set of value to return, and then gathers
+  calls that would be made to a ChunkSource and will respond to them
+  when respondInAsyncTime() is called. This allows one to simulate
+  the asynchronous behavior of a ChunkSource more tersely in tests.
+\**********************************************************************/
 
 class MockChunkSource {
 

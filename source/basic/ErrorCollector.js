@@ -29,11 +29,36 @@ const WHOLENAME_REGEX10 = /^[_:\u0041-\u005A\u0061-\u007A\u00C0-\u00D6\u00D8-\u0
 const WHOLENAME_REGEX11 = /^[A-Za-z:_\u00C0-\u00D6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\uD800-\uDB7F\uDC00-\uDFFF][-\.A-Za-z0-9:_\u00B7\u00C0-\u00D6\u00F8-\u02FF\u0300-\u036F\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u203F-\u2040\uD800-\uDB7F\uDC00-\uDFFF]*$/;
 
 /**********************************************************************\
+ An ErrorCollector collects a set of errors together in an array
+ (retrievable with getErrors()). It provides various convenience
+ routines to make it easy to create an error.
+
+ Because Errors carry a fair bit of contextual information, one of
+ the primary purposes of the ErrorCollector is to reduce the
+ repetitive specification of that information.
+
+ Ordinarily, an error contains, in addition to the ID and any
+ parameters associated with that error, the position that the error
+ occurred, and the overall context that the error occurred in. For
+ example:
+   <?xml VERSION="1.1" ?>
+ In this case, the error is that the "version" should not be upper
+ case, so the position of the error is 6 characters in. But,
+ the context is the start of the XML Declaration, at 0 chars in.
+
+ Sometimes the position can be difficult to compute for the callers.
+ For instance, if a quote is missing but the previous couple chunks
+ have been missing as well, it can get laborious to specify the
+ best position.  This uses a heuristic which seems to always work,
+ which is that when setPos() is called with a good chunk it is assumed
+ the position for the next errors are at the start of that chunk.
+ but if setPos() is called with undefined (a missing chunk), then
+ the end of the most recently set chunk will be used for the next
+ errors instead.
 \**********************************************************************/
 
 class ErrorCollector {
 
-   // unless otherwise specified, this means all err.foo()'s have openChunk as the context
    constructor(context, ErrorConstructor) {
       this._ErrorConstructor = ErrorConstructor;
       this._context = context;

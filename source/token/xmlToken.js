@@ -21,5 +21,5 @@ class XmlToken {
 }
 
 module.exports = {
-   XmlToken,
+   Token: XmlToken,
 };

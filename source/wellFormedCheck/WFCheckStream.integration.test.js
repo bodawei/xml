@@ -1,22 +1,20 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const Chunk = require('../chunk/Chunk.js');
-const Offset = require('../basic/Offset.js');
-const Range = require('../basic/Range.js');
-const EntityLocation = require('../basic/EntityLocation.js');
-const error = require('../error');
-const parser = require('../parser');
+import { Offset, Range, EntityLocation } from '../basic';
+import { Chunk } from '../chunk';
+import { ParsedStream } from '../parse';
+import { WellFormedError } from '../error';
 
-const WFChecker = require('./WFChecker.js');
+import WFCheckStream from './WFCheckStream.js';
 
-describe('WFChecker (integration)', () => {
+describe('WFCheckStream (integration)', () => {
    let parsedStream;
    let checker;
 
    beforeEach(() => {
-      parsedStream = new parser.ParsedStream();
-      checker = new WFChecker();
+      parsedStream = new ParsedStream();
+      checker = new WFCheckStream();
       parsedStream.pipe(checker);
    });
 
@@ -27,7 +25,7 @@ describe('WFChecker (integration)', () => {
 
          function evaluate() {
             expect(results).toEqual([
-               new error.WellFormedError(error.WellFormedError.ID.DOCTYPE_NAME_INVALID, [ '$badName' ],
+               new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID, [ '$badName' ],
                   new Offset(new EntityLocation(), 10, 0, 10), new Offset(new EntityLocation(), 0, 0, 0)),
                {
                   type: 'DOCTYPE_START',

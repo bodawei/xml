@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const Extractor = require('./Extractor.js');
-const PeekExtractor = require('./PeekExtractor.js');
-const Segment = require('./Segment.js');
+import Extractor from './Extractor.js';
+import PeekExtractor from './PeekExtractor.js';
+import Segment from './Segment.js';
 
 describe('PeekExtractor', () => {
    let extractor;

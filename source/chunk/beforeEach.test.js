@@ -1,15 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-
 /* eslint-env jasmine */
 
-const Range = require('../basic/Range.js');
+import { EntityLocation, Range } from '../basic';
 
-const Chunk = require('./Chunk.js');
-const {
-   toEqualChunkText,
-   toEqualChunkTexts,
-   toEqualChunkRange,
-} = require('./beforeEach.js');
+import { toEqualChunkText, toEqualChunkTexts, toEqualChunkRange } from './beforeEach.js';
+import Chunk from './Chunk.js';
 
 describe('chunk custom matchers', () => {
 

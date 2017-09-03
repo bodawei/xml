@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const StringBundle = require('../basic/StringBundle.js');
-const XmlError = require('./XmlError.js');
-const strings = require('../derive/XmlWarning.json');
-const codes = require('../derive/XmlWarning-code.json');
+import StringBundle from '../basic/StringBundle.js';
+import XmlError from './XmlError.js';
+import strings from '../derive/XmlWarning.json';
+import codes from '../derive/XmlWarning-code.json';
 
 /**********************************************************************\
  XmlWarning is used to report messages that are not fatal in nature.

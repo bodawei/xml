@@ -1,11 +1,31 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Chunk = require('./Chunk.js');
-const ChunkSource = require('./ChunkSource.js');
-const defaultExtractors = require('./defaultExtractors.js');
+import AllExtractor from './AllExtractor.js';
+import CharExtractor from './CharExtractor.js';
+import Chunk from './Chunk.js';
+import ChunkSource from './ChunkSource.js';
+import defaultExtractors from './defaultExtractors.js';
+import DigitExtractor from './DigitExtractor.js';
+import Extractor from './Extractor.js';
+import MatchExtractor from './MatchExtractor.js';
+import MultiMatchExtractor from './MultiMatchExtractor.js';
+import PeekExtractor from './PeekExtractor.js';
+import Segment from './Segment.js';
+import SpaceExtractor from './SpaceExtractor.js';
+import WordExtractor from './WordExtractor.js';
 
 module.exports = {
+   AllExtractor,
+   CharExtractor,
    Chunk,
    ChunkSource,
    defaultExtractors,
+   DigitExtractor,
+   Extractor,
+   MatchExtractor,
+   MultiMatchExtractor,
+   PeekExtractor,
+   Segment,
+   SpaceExtractor,
+   WordExtractor,
 };
