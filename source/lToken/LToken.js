@@ -1,17 +1,18 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 /**********************************************************************\
- A Chunk represents a unit of text. The originalText property contains
- the text exactly as it came from the source, the text property
- contains the same after any newline normalization, and the range
- contains the one or more Ranges that define where this came from.
+ A LToken (Low-level token) represents a unit of text. The originalText
+ property contains the text exactly as it came from the source,
+ the text property contains the same after any newline normalization,
+ and the range contains the one or more Ranges that define where this
+ came from.
 
- It is quite possible, though not common, for a single Chunk to have
+ It is quite possible, though not common, for a single LToken to have
  come from multiple entities. in that case, range will contain
  multiple Ranges, one for each piece of each entity.
 \**********************************************************************/
 
-class Chunk {
+class LToken {
 
    constructor(text, originalText, range) {
       this.text = text;
@@ -21,4 +22,4 @@ class Chunk {
 
 }
 
-module.exports = Chunk;
+export default LToken;

@@ -10,8 +10,8 @@ const WFEID = WellFormedError.ID;
 
 class EntityReference extends xmlToken.Token {
 
-   constructor(name, chunks) {
-      super(chunks);
+   constructor(name, lTokens) {
+      super(lTokens);
 
       this.name = name;
    }
@@ -24,8 +24,8 @@ class EntityReference extends xmlToken.Token {
  This assumes that the initial & has not been read.
 
  PARAM
- source: A ChunkSource to read from
- deliverParsed: Callback to deliver the parsed chunks
+ source: A LTokenSource to read from
+ deliverParsed: Callback to deliver the parsed lTokens
 
  SYNTAX
     [67] Reference   ::= EntityRef | CharRef
@@ -38,35 +38,35 @@ function parse(source, deliverParsed) {
       type: ENTITY_REFERENCE,
    };
 
-   source.extractToObject('match', '&', parsed, 'openChunk');
-   source.extractToObject('space', parsed, 'postOpenSpaceChunk');
-   source.extractToObject('word', [ ';' ], parsed, 'entityNameChunk');
-   source.extractToObject('space', parsed, 'postEntityNameSpaceChunk');
-   source.extract('match', [ ';' ], (chunk) => {
-      parsed.closeChunk = chunk;
+   source.extractToObject('match', '&', parsed, 'openLToken');
+   source.extractToObject('space', parsed, 'postOpenSpaceLToken');
+   source.extractToObject('word', [ ';' ], parsed, 'entityNameLToken');
+   source.extractToObject('space', parsed, 'postEntityNameSpaceLToken');
+   source.extract('match', [ ';' ], (lToken) => {
+      parsed.closeLToken = lToken;
       deliverParsed(parsed);
    });
 }
 
 function checkWellFormed(parsed, ec) {
-   const entityName = util.textOrBlank(parsed.entityNameChunk);
+   const entityName = util.textOrBlank(parsed.entityNameLToken);
 
-   ec.setPos(parsed.openChunk);
-   ec.setPos(parsed.postOpenSpaceChunk);
-   ec.check(parsed.postOpenSpaceChunk, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]); // @@@ param
+   ec.setPos(parsed.openLToken);
+   ec.setPos(parsed.postOpenSpaceLToken);
+   ec.check(parsed.postOpenSpaceLToken, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]); // @@@ param
 
-   ec.setPos(parsed.entityNameChunk);
-   ec.check(!parsed.entityNameChunk, WFEID.REFERENCE_NO_NAME);
+   ec.setPos(parsed.entityNameLToken);
+   ec.check(!parsed.entityNameLToken, WFEID.REFERENCE_NO_NAME);
 
-   ec.setPos(parsed.postEntityNameSpaceChunk);
-   ec.check(parsed.postEntityNameSpaceChunk, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+   ec.setPos(parsed.postEntityNameSpaceLToken);
+   ec.check(parsed.postEntityNameSpaceLToken, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
 
-   ec.setPos(parsed.closeChunk);
-   ec.check(!parsed.closeChunk, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
+   ec.setPos(parsed.closeLToken);
+   ec.check(!parsed.closeLToken, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
 }
 
 function makeToken(parsed) {
-   return new EntityReference(util.textOrBlank(parsed.nameChunk), []);
+   return new EntityReference(util.textOrBlank(parsed.nameLToken), []);
 }
 
 module.exports = {

@@ -7,24 +7,24 @@ const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
 /**********************************************************************\
 \**********************************************************************/
 
-function parse(source, startChunk, deliverParsed) {
+function parse(source, startLToken, deliverParsed) {
    const results = {
-      openChunk: startChunk,
+      openLToken: startLToken,
    };
 
-   source.extractToObject('space', results, 'postOpenSpaceChunk');
-   source.extractToObject('word', [ '?>' ], results, 'targetChunk');
+   source.extractToObject('space', results, 'postOpenSpaceLToken');
+   source.extractToObject('word', [ '?>' ], results, 'targetLToken');
 
-   source.extract('space', (chunk) => {
-      results.postTargetSpaceChunk = chunk;
+   source.extract('space', (lToken) => {
+      results.postTargetSpaceLToken = lToken;
 
-      if (results.targetChunk && results.targetChunk.text.toLocaleLowerCase() === 'xml') {
+      if (results.targetLToken && results.targetLToken.text.toLocaleLowerCase() === 'xml') {
          xmlDeclaration.parse(source, results, deliverParsed);
       } else {
          results.type = PROCESSING_INSTRUCTION;
-         source.extractToObject('all', [ '?>' ], results, 'instructionChunk');
-         source.extract('match', '?>', (chunk) => {
-            results.closeChunk = chunk;
+         source.extractToObject('all', [ '?>' ], results, 'instructionLToken');
+         source.extract('match', '?>', (lToken) => {
+            results.closeLToken = lToken;
             deliverParsed(results);
          });
       }

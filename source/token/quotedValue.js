@@ -1,14 +1,14 @@
 function parse(source, options, deliverParsed) {
    const parsed = {};
 
-   source.extract('char', (chunk) => {
-      parsed.openQuoteChunk = chunk;
+   source.extract('char', (lToken) => {
+      parsed.openQuoteLToken = lToken;
 
-      source.extract('all', [ chunk.text ], (chunk) => {
-         parsed.valueChunk = chunk;
+      source.extract('all', [ lToken.text ], (lToken) => {
+         parsed.valueLToken = lToken;
 
-         source.extract('char', (chunk) => {
-            parsed.closeQuoteChunk = chunk;
+         source.extract('char', (lToken) => {
+            parsed.closeQuoteLToken = lToken;
 
             deliverParsed(parsed);
          });

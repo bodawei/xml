@@ -13,23 +13,23 @@ const GENERIC_DECLARATION = 'GENERIC_DECLARATION';
  the incomplete parsing
 \**********************************************************************/
 
-function parse(source, openChunk, deliverParsed) {
+function parse(source, openLToken, deliverParsed) {
    const results = {
       type: GENERIC_DECLARATION,
-      openChunk: openChunk,
+      openLToken: openLToken,
    };
-   source.extractToObject('space', undefined, results, 'postOpenSpaceChunk');
-   source.extractToObject('word', [ '>' ], results, 'declTypeChunk');
+   source.extractToObject('space', undefined, results, 'postOpenSpaceLToken');
+   source.extractToObject('word', [ '>' ], results, 'declTypeLToken');
 
-   source.extract('space', (chunk) => {
-      results.postDeclTypeSpaceChunk = chunk;
+   source.extract('space', (lToken) => {
+      results.postDeclTypeSpaceLToken = lToken;
 
-      if (!results.declTypeChunk) {
+      if (!results.declTypeLToken) {
          deliverParsed(results);
          return;
       }
 
-      switch (results.declTypeChunk.text) {
+      switch (results.declTypeLToken.text) {
          case 'DOCTYPE':
             docTypeStart.parse(source, results, deliverParsed);
             break;

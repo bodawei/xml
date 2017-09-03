@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import chunkUtil from '../chunk/test';
+import lTokenUtil from '../lToken/test';
 
 import processingInstruction from './processingInstruction.js';
 
@@ -16,26 +16,26 @@ describe('processingInstruction', () => {
       });
 
       it('does a basic PI parse', () => {
-         const startChunk = chunkUtil.makeChunk('<?');
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk('foo'),
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk('blah'),
-            chunkUtil.makeChunk('?>'),
+         const startLToken = lTokenUtil.makeLToken('<?');
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken('foo'),
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken('blah'),
+            lTokenUtil.makeLToken('?>'),
          ]);
 
-         processingInstruction.parse(mockSource, startChunk, callback);
+         processingInstruction.parse(mockSource, startLToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
             type: 'PROCESSING_INSTRUCTION',
-            openChunk: chunkUtil.makeChunk('<?'),
-            postOpenSpaceChunk: chunkUtil.makeChunk(' '),
-            targetChunk: chunkUtil.makeChunk('foo'),
-            postTargetSpaceChunk: chunkUtil.makeChunk(' '),
-            instructionChunk: chunkUtil.makeChunk('blah'),
-            closeChunk: chunkUtil.makeChunk('?>'),
+            openLToken: lTokenUtil.makeLToken('<?'),
+            postOpenSpaceLToken: lTokenUtil.makeLToken(' '),
+            targetLToken: lTokenUtil.makeLToken('foo'),
+            postTargetSpaceLToken: lTokenUtil.makeLToken(' '),
+            instructionLToken: lTokenUtil.makeLToken('blah'),
+            closeLToken: lTokenUtil.makeLToken('?>'),
          });
       });
 

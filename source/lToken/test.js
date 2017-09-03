@@ -3,7 +3,7 @@
 
 import { Range, EntityLocation } from '../basic';
 
-import Chunk from './Chunk.js';
+import LToken from './LToken.js';
 
 const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
 
@@ -12,13 +12,13 @@ const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
 \**********************************************************************/
 
 /**********************************************************************\
-  makeChunk() will return a Chunk using the specified text and
+  makeLToken() will return a LToken using the specified text and
   RangeMaker
 \**********************************************************************/
 
-function makeChunk(text, rangeMaker) {
+function makeLToken(text, rangeMaker) {
    const range = rangeMaker ? rangeMaker.makeRange(text) : PLACEHOLDER_RANGE;
-   return new Chunk(text, text, range);
+   return new LToken(text, text, range);
 }
 
 /**********************************************************************\
@@ -50,13 +50,13 @@ class RangeMaker {
 }
 
 /**********************************************************************\
-  MockChunkSource is passed a set of value to return, and then gathers
-  calls that would be made to a ChunkSource and will respond to them
+  MockLTokenSource is passed a set of value to return, and then gathers
+  calls that would be made to a LTokenSource and will respond to them
   when respondInAsyncTime() is called. This allows one to simulate
-  the asynchronous behavior of a ChunkSource more tersely in tests.
+  the asynchronous behavior of a LTokenSource more tersely in tests.
 \**********************************************************************/
 
-class MockChunkSource {
+class MockLTokenSource {
 
    constructor(returnValues) {
       this.returnValues = returnValues;
@@ -101,12 +101,12 @@ class MockChunkSource {
          calls.forEach((qc) => {
             if (qc.obj) {
                if (this.returnValues.length === 0) {
-                  throw new Error(`NO value provided to "${qc.name}" in MockChunkSource.`);
+                  throw new Error(`NO value provided to "${qc.name}" in MockLTokenSource.`);
                }
                qc.obj[qc.name] = this.returnValues.shift();
             } else {
                if (this.returnValues.length === 0) {
-                  throw new Error(`NO value provided for extraction type "${qc.type}" in MockChunkSource.`);
+                  throw new Error(`NO value provided for extraction type "${qc.type}" in MockLTokenSource.`);
                }
                qc.callback(this.returnValues.shift());
             }
@@ -116,7 +116,7 @@ class MockChunkSource {
 }
 
 module.exports = {
-   MockChunkSource,
+   MockLTokenSource,
    RangeMaker,
-   makeChunk,
+   makeLToken,
 };

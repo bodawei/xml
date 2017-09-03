@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import { EntityLocation } from '../basic';
-import { Chunk } from '../chunk';
+import { LToken } from '../lToken';
 import { WellFormedError } from '../error';
 
 import util from './util.js';
@@ -14,7 +14,7 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 
 /**********************************************************************\
  parse() tries to extract an ExternalID or a PublicID from
- the current position in the ChunkSource.
+ the current position in the LTokenSource.
 
  SYNTAX
    [75] ExternalID    ::= 'SYSTEM' S SystemLiteral |
@@ -29,8 +29,8 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
    terminators: An array of characters this should terminate parsing
    of the ID.
  RETURN
-    If this returns any value, it will always contain a typeChunk.
-    If there is no value between quotes, this will return a chunk
+    If this returns any value, it will always contain a typeLToken.
+    If there is no value between quotes, this will return a lToken
     with no contents
 \**********************************************************************/
 
@@ -44,16 +44,16 @@ function parse(source, terminators, deliverParsed) {
       type: EXTERNAL_ID,
    };
 
-   source.extract('peekWord', allTerminators, (chunk) => {
-      const capitalType = chunk && chunk.text.toLocaleUpperCase();
+   source.extract('peekWord', allTerminators, (lToken) => {
+      const capitalType = lToken && lToken.text.toLocaleUpperCase();
 
-      if (!chunk || [ 'PUBLIC', 'SYSTEM' ].indexOf(capitalType) === -1) {
+      if (!lToken || [ 'PUBLIC', 'SYSTEM' ].indexOf(capitalType) === -1) {
          deliverParsed();
          return;
       }
 
-      source.extractToObject('word', allTerminators, parsed, 'typeChunk');
-      source.extractToObject('space', parsed, 'postTypeSpaceChunk');
+      source.extractToObject('word', allTerminators, parsed, 'typeLToken');
+      source.extractToObject('space', parsed, 'postTypeSpaceLToken');
 
       if (capitalType === 'PUBLIC') {
          getQuotedLiteral(source, parsed, 'public', (success) => {
@@ -61,7 +61,7 @@ function parse(source, terminators, deliverParsed) {
                deliverParsed(parsed);
                return;
             }
-            source.extractToObject('space', parsed, 'postPublicSpaceChunk');
+            source.extractToObject('space', parsed, 'postPublicSpaceLToken');
             getSystemIfAvailable(source, allTerminators, parsed, deliverParsed);
          });
       } else {
@@ -71,8 +71,8 @@ function parse(source, terminators, deliverParsed) {
 }
 
 function getSystemIfAvailable(source, allTerminators, parsed, deliverParsed) {
-   source.extract('peekWord', allTerminators, (nDataChunk) => {
-      if (nDataChunk && nDataChunk.text.toLocaleUpperCase() === 'NDATA') {
+   source.extract('peekWord', allTerminators, (nDataLToken) => {
+      if (nDataLToken && nDataLToken.text.toLocaleUpperCase() === 'NDATA') {
          deliverParsed(parsed);
          return;
       }
@@ -84,25 +84,25 @@ function getSystemIfAvailable(source, allTerminators, parsed, deliverParsed) {
 }
 
 function getQuotedLiteral(source, parsed, prefix, done) {
-   source.extract('peekChar', (quoteChunk) => {
-      if (!quoteChunk || (quoteChunk.text !== '"' && quoteChunk.text !== '\'')) {
+   source.extract('peekChar', (quoteLToken) => {
+      if (!quoteLToken || (quoteLToken.text !== '"' && quoteLToken.text !== '\'')) {
          done(false);
          return;
       }
 
-      source.extractToObject('char', parsed, prefix + 'OpenQuoteChunk');
-      source.extractToObject('all', [ quoteChunk.text ], parsed, prefix + 'Chunk');
+      source.extractToObject('char', parsed, prefix + 'OpenQuoteLToken');
+      source.extractToObject('all', [ quoteLToken.text ], parsed, prefix + 'LToken');
 
-      source.extract('match', quoteChunk.text, (closeChunk) => {
-         if (!parsed[prefix + 'Chunk']) {
-            const newRange = quoteChunk.range[0].clone();
+      source.extract('match', quoteLToken.text, (closeLToken) => {
+         if (!parsed[prefix + 'LToken']) {
+            const newRange = quoteLToken.range[0].clone();
             newRange.startIndex = newRange.endIndex;
             newRange.startRow = newRange.endRow;
             newRange.startColumn = newRange.endColumn;
-            parsed[prefix + 'Chunk'] = new Chunk('', '', newRange);
+            parsed[prefix + 'LToken'] = new LToken('', '', newRange);
          }
-         parsed[prefix + 'CloseQuoteChunk'] = closeChunk;
-         done(util.textOrBlank(closeChunk) === quoteChunk.text);
+         parsed[prefix + 'CloseQuoteLToken'] = closeLToken;
+         done(util.textOrBlank(closeLToken) === quoteLToken.text);
       });
    });
 }
@@ -118,46 +118,46 @@ function checkWellFormed(parsed, ec, systemRequired) {
       return;
    }
 
-   ec.setPos(parsed.typeChunk);
-   const typeText = util.textOrBlank(parsed.typeChunk);
+   ec.setPos(parsed.typeLToken);
+   const typeText = util.textOrBlank(parsed.typeLToken);
    const capitalType = typeText.toLocaleUpperCase();
    ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [ capitalType, typeText ]);
 
-   ec.setPos(parsed.postTypeSpaceChunk);
-   ec.check(!parsed.postTypeSpaceChunk, WFEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE); // @@ need better name
+   ec.setPos(parsed.postTypeSpaceLToken);
+   ec.check(!parsed.postTypeSpaceLToken, WFEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE); // @@ need better name
 
    if (capitalType === 'PUBLIC') {
-      ec.setPos(parsed.publicOpenQuoteChunk);
-      ec.check(!parsed.publicOpenQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
+      ec.setPos(parsed.publicOpenQuoteLToken);
+      ec.check(!parsed.publicOpenQuoteLToken, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
 
-      ec.setPos(parsed.publicChunk);
-      if (!parsed.publicChunk) {
+      ec.setPos(parsed.publicLToken);
+      if (!parsed.publicLToken) {
          ec.report(WFEID.EXTERNALID_NO_PUBLIC);
       } else {
-         const match = PUBID_CHARS.exec(parsed.publicChunk.text);
-         ec.check(!match || match[0] !== parsed.publicChunk.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ parsed.publicChunk.text[match[0].length] ]);
+         const match = PUBID_CHARS.exec(parsed.publicLToken.text);
+         ec.check(!match || match[0] !== parsed.publicLToken.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+                  [ parsed.publicLToken.text[match[0].length] ]);
       }
 
-      ec.setPos(parsed.publicCloseQuoteChunk);
-      ec.check(!parsed.publicCloseQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
+      ec.setPos(parsed.publicCloseQuoteLToken);
+      ec.check(!parsed.publicCloseQuoteLToken, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
    }
 
-   if (systemRequired || capitalType === 'SYSTEM' || parsed.systemOpenQuoteChunk || parsed.systemChunk) {
-      if (parsed.publicChunk) {
-         ec.setPos(parsed.postPublicSpaceChunk);
-         ec.check(!parsed.postPublicSpaceChunk, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+   if (systemRequired || capitalType === 'SYSTEM' || parsed.systemOpenQuoteLToken || parsed.systemLToken) {
+      if (parsed.publicLToken) {
+         ec.setPos(parsed.postPublicSpaceLToken);
+         ec.check(!parsed.postPublicSpaceLToken, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      ec.setPos(parsed.systemOpenQuoteChunk);
-      ec.check(!parsed.systemOpenQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
+      ec.setPos(parsed.systemOpenQuoteLToken);
+      ec.check(!parsed.systemOpenQuoteLToken, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
 
-      ec.setPos(parsed.systemChunk);
-      ec.check(!parsed.systemChunk, WFEID.EXTERNALID_NO_SYSTEM);
-      // XmlText.validateText(externalId.systemId.literalChunk, this._entityMd, start, this);
+      ec.setPos(parsed.systemLToken);
+      ec.check(!parsed.systemLToken, WFEID.EXTERNALID_NO_SYSTEM);
+      // XmlText.validateText(externalId.systemId.literalLToken, this._entityMd, start, this);
 
-      ec.setPos(parsed.systemCloseQuoteChunk);
-      ec.check(!parsed.systemCloseQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
+      ec.setPos(parsed.systemCloseQuoteLToken);
+      ec.check(!parsed.systemCloseQuoteLToken, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
    }
 }
 
@@ -166,7 +166,7 @@ function makeTokenCompatible(parsed) {
       return;
    }
 
-   return new EntityLocation(util.textOrUndef(parsed.systemChunk), util.textOrUndef(parsed.publicChunk));
+   return new EntityLocation(util.textOrUndef(parsed.systemLToken), util.textOrUndef(parsed.publicLToken));
 }
 
 module.exports = {

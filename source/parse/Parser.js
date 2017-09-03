@@ -10,13 +10,13 @@ import {
 class Parser {
 
    parseGeneral(source, deliverParse) {
-      source.extract('peekChar', (chunk) => {
-         if (!chunk) {
+      source.extract('peekChar', (lToken) => {
+         if (!lToken) {
             deliverParse(null);
             return;
          }
 
-         switch (chunk.text) {
+         switch (lToken.text) {
             case '<':
                this._markupParse(source, deliverParse);
                break;
@@ -30,12 +30,12 @@ class Parser {
    }
 
    _markupParse(source, deliverParse) {
-      source.extract('markup', (markupStartChunk) => {
-         switch (markupStartChunk.text) {
+      source.extract('markup', (markupStartLToken) => {
+         switch (markupStartLToken.text) {
             case '<?':
-               return processingInstruction.parse(source, markupStartChunk, deliverParse);
+               return processingInstruction.parse(source, markupStartLToken, deliverParse);
             case '<!':
-               declaration.parse(source, markupStartChunk, (token) => {
+               declaration.parse(source, markupStartLToken, (token) => {
                   if (token.type !== docTypeStart.TYPE) {
                      deliverParse(token);
                      return;

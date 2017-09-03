@@ -28,8 +28,8 @@ const DOCTYPE_START = 'DOCTYPE_START';
 
 class DocTypeStart extends xmlToken.Token {
 
-   constructor(name, externalLocation, hasInternalSubset, chunks) {
-      super(chunks);
+   constructor(name, externalLocation, hasInternalSubset, lTokens) {
+      super(lTokens);
 
       this.name = name;
       this.externalLoc = externalLocation;
@@ -43,13 +43,13 @@ class DocTypeStart extends xmlToken.Token {
  an internal subset start.
 
  This assumes that the "<!DOCTYPE S" has already been parsed, and those
- chunks are passed in through declarationStart.
+ lTokens are passed in through declarationStart.
 
  PARAM
- source: A ChunkSource to read from
- declarationStart: A hash with the chunks from parsing "<!DOCTYPE S"
+ source: A LTokenSource to read from
+ declarationStart: A hash with the lTokens from parsing "<!DOCTYPE S"
    presumably this was parsed by code in the declaration namespace.
- deliverParsed: Callback to deliver the parsed chunks
+ deliverParsed: Callback to deliver the parsed lTokens
 
  SYNTAX
    [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S?
@@ -59,25 +59,25 @@ class DocTypeStart extends xmlToken.Token {
 function parse(source, declarationParsing, deliverParsed) {
    const parsed = util.toLocalParsing(DOCTYPE_START, declarationParsing);
 
-   source.extractToObject('word', [ '[', '>' ], parsed, 'nameChunk'); // look for quotes?
-   source.extractToObject('space', undefined, parsed, 'postNameSpaceChunk');
+   source.extractToObject('word', [ '[', '>' ], parsed, 'nameLToken'); // look for quotes?
+   source.extractToObject('space', undefined, parsed, 'postNameSpaceLToken');
 
    externalId.parse(source, [ '[', '>' ], (externalId) => {
       parsed.externalId = externalId;
 
-      source.extractToObject('space', undefined, parsed, 'postExternalIdSpaceChunk');
+      source.extractToObject('space', undefined, parsed, 'postExternalIdSpaceLToken');
 
-      source.extract('match', '[', (chunk) => {
-         parsed.startInternalSubsetChunk = chunk;
+      source.extract('match', '[', (lToken) => {
+         parsed.startInternalSubsetLToken = lToken;
          deliverParsed(parsed);
       });
    });
 }
 
 function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
-   ec.setPos(parsed.nameChunk);
-   ec.check(!parsed.nameChunk, WFEID.DOCTYPE_NO_NAME);
-   ec.checkName(parsed.nameChunk, WFEID.DOCTYPE_NAME_INVALID, version, revision);
+   ec.setPos(parsed.nameLToken);
+   ec.check(!parsed.nameLToken, WFEID.DOCTYPE_NO_NAME);
+   ec.checkName(parsed.nameLToken, WFEID.DOCTYPE_NAME_INVALID, version, revision);
 
    externalId.checkWellFormed(parsed.externalId, ec);
 
@@ -85,9 +85,9 @@ function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
 }
 
 function makeToken(parsed) {
-   return new DocTypeStart(util.textOrBlank(parsed.nameChunk),
+   return new DocTypeStart(util.textOrBlank(parsed.nameLToken),
       externalId.makeTokenCompatible(parsed.externalId),
-      !!parsed.startInternalSubsetChunk,
+      !!parsed.startInternalSubsetLToken,
       []);
 }
 

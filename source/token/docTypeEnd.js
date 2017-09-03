@@ -23,8 +23,8 @@ class DocTypeEnd extends xmlToken.Token {
  This assumes that the next character in the source is a ].
 
  PARAM
- source: A ChunkSource to read from
- deliverParsed: Callback to deliver the parsed chunks
+ source: A LTokenSource to read from
+ deliverParsed: Callback to deliver the parsed lTokens
 
  SYNTAX
    [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S?
@@ -36,27 +36,27 @@ function parse(source, deliverParsed) {
       type: DOCTYPE_END,
    };
 
-   source.extractToObject('match', ']', parsed, 'closeInternalSubsetChunk');
-   source.extractToObject('space', parsed, 'postCloseInternalSubsetSpaceChunk');
+   source.extractToObject('match', ']', parsed, 'closeInternalSubsetLToken');
+   source.extractToObject('space', parsed, 'postCloseInternalSubsetSpaceLToken');
 
-   source.extract('match', '>', (chunk) => {
-      parsed.closeChunk = chunk;
+   source.extract('match', '>', (lToken) => {
+      parsed.closeLToken = lToken;
       deliverParsed(parsed);
    });
 }
 
 function checkWellFormed(parsed, startParsed, ec) {
-   ec.setPos(startParsed.declTypeChunk);
-   ec.setPos(startParsed.postDeclTypeSpaceChunk);
-   ec.setPos(startParsed.nameChunk);
-   ec.setPos(parsed.closeInternalSubsetChunk);
+   ec.setPos(startParsed.declTypeLToken);
+   ec.setPos(startParsed.postDeclTypeSpaceLToken);
+   ec.setPos(startParsed.nameLToken);
+   ec.setPos(parsed.closeInternalSubsetLToken);
 
-   if (!startParsed.startInternalSubsetChunk) {
-      ec.check(parsed.closeInternalSubsetChunk, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
+   if (!startParsed.startInternalSubsetLToken) {
+      ec.check(parsed.closeInternalSubsetLToken, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 
-   ec.setPos(parsed.closeChunk);
-   ec.check(!parsed.closeChunk, WFEID.DOCTYPE_NO_CLOSE);
+   ec.setPos(parsed.closeLToken);
+   ec.check(!parsed.closeLToken, WFEID.DOCTYPE_NO_CLOSE);
 
    return ec;
 }

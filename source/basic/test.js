@@ -20,12 +20,12 @@ class MockErrorCollector {
       this.report = jasmine.createSpy('reportSpy').and.callFake(this.report);
    }
 
-   setPos(chunk) {
-      if (chunk) {
-         this._lastNotNull = chunk;
+   setPos(lToken) {
+      if (lToken) {
+         this._lastNotNull = lToken;
       }
 
-      this._lastPos = chunk;
+      this._lastPos = lToken;
    }
 
    report(id, params) {

@@ -2,8 +2,8 @@
 
 import AllExtractor from './AllExtractor.js';
 import CharExtractor from './CharExtractor.js';
-import Chunk from './Chunk.js';
-import ChunkSource from './ChunkSource.js';
+import LToken from './LToken.js';
+import LTokenSource from './LTokenSource.js';
 import defaultExtractors from './defaultExtractors.js';
 import DigitExtractor from './DigitExtractor.js';
 import Extractor from './Extractor.js';
@@ -17,8 +17,8 @@ import WordExtractor from './WordExtractor.js';
 module.exports = {
    AllExtractor,
    CharExtractor,
-   Chunk,
-   ChunkSource,
+   LToken,
+   LTokenSource,
    defaultExtractors,
    DigitExtractor,
    Extractor,

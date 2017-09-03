@@ -18,8 +18,8 @@ const WFEID = WellFormedError.ID;
 
 class XmlDeclaration extends xmlToken.Token {
 
-   constructor(params, chunks) {
-      super(chunks);
+   constructor(params, lTokens) {
+      super(lTokens);
 
       this.params = params;
    }
@@ -29,16 +29,16 @@ class XmlDeclaration extends xmlToken.Token {
 function parse(source, preliminary, deliverParsed) {
    const results = {
       type: XML_DECLARATION,
-      openChunk: preliminary.openChunk,
-      postOpenSpaceChunk: preliminary.postOpenSpaceChunk,
-      targetChunk: preliminary.targetChunk,
-      postTargetSpaceChunk: preliminary.postTargetSpaceChunk,
+      openLToken: preliminary.openLToken,
+      postOpenSpaceLToken: preliminary.postOpenSpaceLToken,
+      targetLToken: preliminary.targetLToken,
+      postTargetSpaceLToken: preliminary.postTargetSpaceLToken,
    };
 
    getParams(source, (params) => {
       results.params = params;
-      source.extract('match', '?>', (chunk) => {
-         results.closeChunk = chunk;
+      source.extract('match', '?>', (lToken) => {
+         results.closeLToken = lToken;
          deliverParsed(results);
       });
    });
@@ -46,37 +46,37 @@ function parse(source, preliminary, deliverParsed) {
 
 function getParams(source, deliverResults) {
    const params = [];
-   source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
-      addParam(source, params, chunk, deliverResults);
+   source.extract('word', XMLDECL_NAME_TERMINATORS, (lToken) => {
+      addParam(source, params, lToken, deliverResults);
    });
 }
 
-function addParam(source, params, nameChunk, deliverResults) {
-   if (!nameChunk) {
+function addParam(source, params, nameLToken, deliverResults) {
+   if (!nameLToken) {
       deliverResults(params);
       return;
    }
    const param = {
-      nameChunk: nameChunk,
+      nameLToken: nameLToken,
    };
    params.push(param);
 
-   source.extractToObject('space', param, 'postNameSpaceChunk');
-   source.extractToObject('match', '=', param, 'equalChunk');
-   source.extractToObject('space', param, 'postEqualSpaceChunk');
-   source.extract('peekChar', (quoteChunk) => {
-      const gotQuote = quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'');
+   source.extractToObject('space', param, 'postNameSpaceLToken');
+   source.extractToObject('match', '=', param, 'equalLToken');
+   source.extractToObject('space', param, 'postEqualSpaceLToken');
+   source.extract('peekChar', (quoteLToken) => {
+      const gotQuote = quoteLToken && (quoteLToken.text === '"' || quoteLToken.text === '\'');
 
       if (gotQuote) {
-         source.extractToObject('char', param, 'openQuoteChunk');
-         source.extractToObject('all', [ quoteChunk.text ], param, 'valueChunk');
-         source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk');
-         source.extractToObject('space', param, 'trailingSpaceChunk');
+         source.extractToObject('char', param, 'openQuoteLToken');
+         source.extractToObject('all', [ quoteLToken.text ], param, 'valueLToken');
+         source.extractToObject('match', quoteLToken.text, param, 'closeQuoteLToken');
+         source.extractToObject('space', param, 'trailingSpaceLToken');
       }
       // else may want to extract space
 
-      source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
-         addParam(source, params, chunk, deliverResults);
+      source.extract('word', XMLDECL_NAME_TERMINATORS, (lToken) => {
+         addParam(source, params, lToken, deliverResults);
       });
    });
 }
@@ -89,22 +89,22 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {
       const param = parsed.params[index];
-      const nameText = util.textOrBlank(param.nameChunk);
+      const nameText = util.textOrBlank(param.nameLToken);
       const lcName = nameText.toLocaleLowerCase();
-      const valueText = util.textOrBlank(param.valueChunk);
+      const valueText = util.textOrBlank(param.valueLToken);
       const lcValue = valueText.toLocaleLowerCase();
 
-      err.setPos(param.nameChunk);
+      err.setPos(param.nameLToken);
 
       if (index === 0) {
-         err.check(!parsed.postTargetSpaceChunk, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         err.check(!parsed.postTargetSpaceLToken, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       } else {
-         err.check(!parsed.params[index - 1].trailingSpaceChunk, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         err.check(!parsed.params[index - 1].trailingSpaceLToken, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
-//         err.checkNameInvalid(param.nameChunk, WFEID.ATTRIBUTE_INVALID_NAME);
+//         err.checkNameInvalid(param.nameLToken, WFEID.ATTRIBUTE_INVALID_NAME);
       if (XML_DECL_PARAMS[lcName]) {
-         err.check(param.nameChunk.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
+         err.check(param.nameLToken.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
 
       switch (lcName) {
@@ -124,19 +124,19 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
                err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
-            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameChunk);
+            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameLToken);
             break;
          default:
-            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
+            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameLToken.text ]);
       }
 
-      err.setPos(param.openQuoteChunk);
-      err.check(!param.equalChunk, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
-      err.check(!param.openQuoteChunk, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+      err.setPos(param.openQuoteLToken);
+      err.check(!param.equalLToken, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+      err.check(!param.openQuoteLToken, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
 
-      err.setPos(param.valueChunk);
-      err.check(!param.valueChunk, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-//         err.add(XmlText.validateText(param.valueChunk, version, parsed.openChunk));
+      err.setPos(param.valueLToken);
+      err.check(!param.valueLToken, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+//         err.add(XmlText.validateText(param.valueLToken, version, parsed.openLToken));
 
       switch (lcName) {
          case 'version':
@@ -155,7 +155,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       }
    }
 
-   err.setPos(parsed.closeChunk);
+   err.setPos(parsed.closeLToken);
 
    err.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES,
       [ isDocEntity ? WFEID.NOUN_XMLDECL : WFEID.NOUN_TEXTDECL ]);
@@ -164,7 +164,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       err.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
    }
 
-   err.check(!parsed.closeChunk, WFEID.XMLDECL_NO_CLOSE);
+   err.check(!parsed.closeLToken, WFEID.XMLDECL_NO_CLOSE);
 }
 
 function makeToken(parsed) {
@@ -178,8 +178,8 @@ function extractParams(parsed) {
       const param = parsed.params[index];
 
       params.push({
-         name: util.textOrBlank(param.nameChunk),
-         value: util.textOrUndef(param.valueChunk),
+         name: util.textOrBlank(param.nameLToken),
+         value: util.textOrUndef(param.valueLToken),
       });
    }
 

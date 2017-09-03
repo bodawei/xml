@@ -6,7 +6,7 @@ const SPACE_10_REGEX = /[ \t\n\r]+/g;
 const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
 
 /**********************************************************************\
- A SpaceExtractor extracts a chunk made up of a series of whitespace
+ A SpaceExtractor extracts an LToken made up of a series of whitespace
  characters.  This is sensitifce to the differences between 1.0 and 1.1
  of the XML standard.
 

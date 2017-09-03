@@ -12,8 +12,8 @@ const WFEID = WellFormedError.ID;
 
 class EntityDeclaration extends xmlToken.Token {
 
-   constructor(name, value, externalLoc, notationDataName, chunks) {
-      super(chunks);
+   constructor(name, value, externalLoc, notationDataName, lTokens) {
+      super(lTokens);
 
       this.name = name;
       this.value = value;
@@ -25,8 +25,8 @@ class EntityDeclaration extends xmlToken.Token {
 }
 
 class ParameterEntityDeclaration extends EntityDeclaration {
-   constructor(name, value, externalLoc, notationDataName, chunks) {
-      super(name, value, externalLoc, notationDataName, chunks);
+   constructor(name, value, externalLoc, notationDataName, lTokens) {
+      super(name, value, externalLoc, notationDataName, lTokens);
       this.isParameter = true;
    }
 }
@@ -36,12 +36,12 @@ class ParameterEntityDeclaration extends EntityDeclaration {
  an internal subset start.
 
  This assumes that the "<!DOCTYPE S" has already been parsed, and those
- chunks are passed in through declarationStart.
+ lTokens are passed in through declarationStart.
 
  PARAM
- source: A ChunkSource to read from
- declarationStart: A hash with the chunks from parsing "<!DOCTYPE S"
- deliverParsed: Callback to deliver the parsed chunks
+ source: A LTokenSource to read from
+ declarationStart: A hash with the lTokens from parsing "<!DOCTYPE S"
+ deliverParsed: Callback to deliver the parsed lTokens
 
  SYNTAX
    [70] EntityDecl  ::= GEDecl | PEDecl
@@ -57,30 +57,30 @@ class ParameterEntityDeclaration extends EntityDeclaration {
 function parse(source, declarationParsing, deliverParsed) {
    const parsed = util.toLocalParsing(ENTITY_DECL, declarationParsing);
 
-   source.extract('peekChar', (chunk) => {
-      if (!chunk) {
+   source.extract('peekChar', (lToken) => {
+      if (!lToken) {
          deliverParsed(parsed);
          return;
       }
 
-      if (chunk.text === '%') {
-         source.extractToObject('char', parsed, 'parameterChunk');
-         source.extractToObject('space', parsed, 'postParameterSpaceChunk');
+      if (lToken.text === '%') {
+         source.extractToObject('char', parsed, 'parameterLToken');
+         source.extractToObject('space', parsed, 'postParameterSpaceLToken');
       }
 
-      source.extractToObject('word', [ '>', '"', '\'' ], parsed, 'nameChunk');
-      source.extractToObject('space', parsed, 'postNameSpaceChunk');
+      source.extractToObject('word', [ '>', '"', '\'' ], parsed, 'nameLToken');
+      source.extractToObject('space', parsed, 'postNameSpaceLToken');
 
-      source.extract('peekChar', (chunk) => {
-         if (!chunk) {
+      source.extract('peekChar', (lToken) => {
+         if (!lToken) {
             deliverParsed(parsed);
             return;
          }
 
-         if (chunk.text === '"' || chunk.text === '\'') {
+         if (lToken.text === '"' || lToken.text === '\'') {
             quotedValue.parse(source, { params: true }, (result) => {
                parsed.entityValue = result;
-               parseClose(source, parsed, 'postEntityValueSpaceChunk', deliverParsed);
+               parseClose(source, parsed, 'postEntityValueSpaceLToken', deliverParsed);
             });
          } else {
             externalId.parse(source, [ '>' ], (externalId) => {
@@ -90,13 +90,13 @@ function parse(source, declarationParsing, deliverParsed) {
                   return;
                }
 
-               source.extractToObject('space', parsed, 'postExternalIdSpaceChunk');
-               source.extract('peekWord', [ '>' ], (chunk) => {
-                  if (chunk && chunk.text.toLocaleUpperCase() === 'NDATA') {
-                     source.extractToObject('word', [ '>' ], parsed, 'nDataChunk');
-                     source.extractToObject('space', parsed, 'postNDataSpaceChunk');
-                     source.extractToObject('word', [ '>' ], parsed, 'nDataNameChunk');
-                     parseClose(source, parsed, 'postNDataNameSpaceChunk', deliverParsed);
+               source.extractToObject('space', parsed, 'postExternalIdSpaceLToken');
+               source.extract('peekWord', [ '>' ], (lToken) => {
+                  if (lToken && lToken.text.toLocaleUpperCase() === 'NDATA') {
+                     source.extractToObject('word', [ '>' ], parsed, 'nDataLToken');
+                     source.extractToObject('space', parsed, 'postNDataSpaceLToken');
+                     source.extractToObject('word', [ '>' ], parsed, 'nDataNameLToken');
+                     parseClose(source, parsed, 'postNDataNameSpaceLToken', deliverParsed);
                   } else {
                      parseClose(source, parsed, undefined, deliverParsed);
                   }
@@ -111,39 +111,39 @@ function parseClose(source, parsed, propName, deliverParsed) {
    if (propName) {
       source.extractToObject('space', parsed, propName);
    }
-   source.extract('match', '>', (chunk) => {
-      parsed.closeChunk = chunk;
+   source.extract('match', '>', (lToken) => {
+      parsed.closeLToken = lToken;
       deliverParsed(parsed);
    });
 }
 
 function checkWellFormed(parsed, ec) {
-   const enNameText = util.textOrBlank(parsed.nameChunk);
-   ec.setPos(parsed.openChunk);
+   const enNameText = util.textOrBlank(parsed.nameLToken);
+   ec.setPos(parsed.openLToken);
 
    // 1. Do general check on a declaration here. including space after entity
 
-   if (parsed.parameterChunk) {
-      ec.check(!parsed.postParameterSpaceChunk, WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
+   if (parsed.parameterLToken) {
+      ec.check(!parsed.postParameterSpaceLToken, WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
    }
 
-   ec.setPos(parsed.nameChunk);
-   ec.check(!parsed.nameChunk, WFEID.ENTITYDECL_NO_NAME);
-   ec.checkName(parsed.nameChunk, WFEID.ENTITYDECL_NAME_INVALID, parsed.openChunk);
+   ec.setPos(parsed.nameLToken);
+   ec.check(!parsed.nameLToken, WFEID.ENTITYDECL_NO_NAME);
+   ec.checkName(parsed.nameLToken, WFEID.ENTITYDECL_NAME_INVALID, parsed.openLToken);
    // 2. Add name recommendations tests
    // const error = util.checkNameRecommendations(enNameText, this._entityMd,
    //    XWID.ENTITYDECL_NAME_XMLDASH_RESERVED, XWID.ENTITYDECL_NAME_XML_RESERVED);
    // this._checkWarn(!error, error, [ enNameText ]);
-   ec.setPos(parsed.postNameSpaceChunk);
-   ec.check(!parsed.postNameSpaceChunk, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+   ec.setPos(parsed.postNameSpaceLToken);
+   ec.check(!parsed.postNameSpaceLToken, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
    if (parsed.externalId) {
       this._validateExternalId(parsed.externalId, ec, true);
 
-      if (parsed.nDataChunk) {
-         ec.check(parsed.nDataChunk.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
-            [ enNameText, parsed.nDataChunk.text ]);
-         ec.check(!parsed.nDataNameChunk, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
+      if (parsed.nDataLToken) {
+         ec.check(parsed.nDataLToken.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
+            [ enNameText, parsed.nDataLToken.text ]);
+         ec.check(!parsed.nDataNameLToken, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
       // 3. XmlText.validateText(parsed.nDataName, this._entityMd, parsed.start, this);
       }
    } else if (parsed.entityValue) {
@@ -154,19 +154,19 @@ function checkWellFormed(parsed, ec) {
       ec.report(WFEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
    }
 
-   ec.setPos(parsed.closeChunk);
-   ec.check(!parsed.closeChunk, WFEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+   ec.setPos(parsed.closeLToken);
+   ec.check(!parsed.closeLToken, WFEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
 
    // 5. this._checkDeclarationState(parsed.start, WFEID.ENTITYDECL_INVALID_CONTEXT);
 }
 
 function makeToken(parsed) {
-   const entityClass = parsed.parameterChunk ? ParameterEntityDeclaration : EntityDeclaration;
+   const entityClass = parsed.parameterLToken ? ParameterEntityDeclaration : EntityDeclaration;
 
-   return new entityClass(util.textOrBlank(parsed.nameChunk),
-      util.textOrBlank(parsed.entityValue ? parsed.entityValue.valueChunk : undefined),
+   return new entityClass(util.textOrBlank(parsed.nameLToken),
+      util.textOrBlank(parsed.entityValue ? parsed.entityValue.valueLToken : undefined),
       {},
-      util.textOrBlank(parsed.nDataNameChunk),
+      util.textOrBlank(parsed.nDataNameLToken),
       []);
 }
 

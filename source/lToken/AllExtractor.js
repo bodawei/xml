@@ -8,7 +8,7 @@ import PeekExtractor from './PeekExtractor.js';
 const regexMemo = {};
 
 /**********************************************************************\
- An AllExtractor extracts a chunk from the current position until
+ An AllExtractor extracts a LToken from the current position until
  either the end of all input, or one of the specified terminators is
  encountered.
 

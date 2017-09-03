@@ -16,7 +16,7 @@ class WFChecker extends stream.Transform {
    }
 
    _transform(parsed, ignored, callback) {
-      const errorCollector = new ErrorCollector(parsed.openChunk, WellFormedError);
+      const errorCollector = new ErrorCollector(parsed.openLToken, WellFormedError);
 
       switch (parsed.type) {
          case 'XML_DECLARATION':
@@ -30,7 +30,7 @@ class WFChecker extends stream.Transform {
             break;
          case 'DOCTYPE_END':
             // if  ! this._startDocType then we have an error of another kind.
-            const specialErrorCollector = new ErrorCollector(this._startDocType.openChunk, WellFormedError);
+            const specialErrorCollector = new ErrorCollector(this._startDocType.openLToken, WellFormedError);
             docTypeEnd.checkWellFormed(parsed, this._startDocType, specialErrorCollector, true, 1.0, 5);
             delete this._startDocType;
             specialErrorCollector.getErrors().forEach(error => this.push(error));

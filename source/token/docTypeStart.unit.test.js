@@ -4,8 +4,8 @@
 
 import { Range, EntityLocation } from '../basic';
 import { MockErrorCollector } from '../basic/test';
-import { Chunk } from '../chunk';
-import chunkUtil from '../chunk/test';
+import { LToken } from '../lToken';
+import lTokenUtil from '../lToken/test';
 import { WellFormedError } from '../error';
 
 import docTypeStart from './docTypeStart.js';
@@ -20,22 +20,22 @@ describe('docTypeStart', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new chunkUtil.MockChunkSource([
-            new Chunk('a', 'a', new Range(1, 0, 0, 0, 1, 0, 1)),
-            new Chunk(' ', ' ', new Range(1, 0, 0, 0, 1, 0, 1)),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            new LToken('a', 'a', new Range(1, 0, 0, 0, 1, 0, 1)),
+            new LToken(' ', ' ', new Range(1, 0, 0, 0, 1, 0, 1)),
             undefined,
             undefined,
          ]);
-         sourceRm = new chunkUtil.RangeMaker(new EntityLocation());
+         sourceRm = new lTokenUtil.RangeMaker(new EntityLocation());
          spyOn(externalId, 'parse').and.callFake((ignored1, ignored2, cb) => {
             cb({ externalId: true });
          });
       });
 
       it('returns simple values', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('a', sourceRm),
-            chunkUtil.makeChunk(' ', sourceRm),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('a', sourceRm),
+            lTokenUtil.makeLToken(' ', sourceRm),
             undefined,
             undefined,
          ]);
@@ -46,46 +46,46 @@ describe('docTypeStart', () => {
 
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_START',
-            nameChunk: new Chunk('a', 'a', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
-            postNameSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
+            nameLToken: new LToken('a', 'a', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
+            postNameSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
             externalId: { externalId: true },
-            postExternalIdSpaceChunk: undefined,
-            startInternalSubsetChunk: undefined,
+            postExternalIdSpaceLToken: undefined,
+            startInternalSubsetLToken: undefined,
          });
       });
 
       it('uses whatever preliminary declaration values were passed in', () => {
          docTypeStart.parse(mockSource, {
-            openChunk: 'a',
-            postOpenSpaceChunk: 'b',
-            declTypeChunk: 'c',
-            postDeclTypeSpaceChunk: 'd',
+            openLToken: 'a',
+            postOpenSpaceLToken: 'b',
+            declTypeLToken: 'c',
+            postDeclTypeSpaceLToken: 'd',
          }, callback);
 
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            openChunk: 'a',
-            postOpenSpaceChunk: 'b',
-            declTypeChunk: 'c',
-            postDeclTypeSpaceChunk: 'd',
+            openLToken: 'a',
+            postOpenSpaceLToken: 'b',
+            declTypeLToken: 'c',
+            postDeclTypeSpaceLToken: 'd',
          });
       });
 
       it('returns all values', () => {
-         const expectedRm = new chunkUtil.RangeMaker(new EntityLocation());
+         const expectedRm = new lTokenUtil.RangeMaker(new EntityLocation());
          const declStart = {
-            openChunk: chunkUtil.makeChunk('<!', sourceRm),
-            postOpenSpaceChunk: chunkUtil.makeChunk(' ', sourceRm),
-            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', sourceRm),
-            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', sourceRm),
+            openLToken: lTokenUtil.makeLToken('<!', sourceRm),
+            postOpenSpaceLToken: lTokenUtil.makeLToken(' ', sourceRm),
+            declTypeLToken: lTokenUtil.makeLToken('DOCTYPE', sourceRm),
+            postDeclTypeSpaceLToken: lTokenUtil.makeLToken('\t', sourceRm),
          };
 
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('elemType', sourceRm),
-            chunkUtil.makeChunk('  ', sourceRm),
-            chunkUtil.makeChunk('\t', sourceRm),
-            chunkUtil.makeChunk('[', sourceRm),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('elemType', sourceRm),
+            lTokenUtil.makeLToken('  ', sourceRm),
+            lTokenUtil.makeLToken('\t', sourceRm),
+            lTokenUtil.makeLToken('[', sourceRm),
          ]);
 
          docTypeStart.parse(mockSource, declStart, callback);
@@ -93,15 +93,15 @@ describe('docTypeStart', () => {
 
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_START',
-            openChunk: chunkUtil.makeChunk('<!', expectedRm),
-            postOpenSpaceChunk: chunkUtil.makeChunk(' ', expectedRm),
-            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
-            nameChunk: chunkUtil.makeChunk('elemType', expectedRm),
-            postNameSpaceChunk: chunkUtil.makeChunk('  ', expectedRm),
-            postExternalIdSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
+            openLToken: lTokenUtil.makeLToken('<!', expectedRm),
+            postOpenSpaceLToken: lTokenUtil.makeLToken(' ', expectedRm),
+            declTypeLToken: lTokenUtil.makeLToken('DOCTYPE', expectedRm),
+            postDeclTypeSpaceLToken: lTokenUtil.makeLToken('\t', expectedRm),
+            nameLToken: lTokenUtil.makeLToken('elemType', expectedRm),
+            postNameSpaceLToken: lTokenUtil.makeLToken('  ', expectedRm),
+            postExternalIdSpaceLToken: lTokenUtil.makeLToken('\t', expectedRm),
             externalId: { externalId: true },
-            startInternalSubsetChunk: chunkUtil.makeChunk('[', expectedRm),
+            startInternalSubsetLToken: lTokenUtil.makeLToken('[', expectedRm),
          });
       });
 
@@ -115,12 +115,12 @@ describe('docTypeStart', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
 
-         expectedRm = new chunkUtil.RangeMaker(new EntityLocation());
+         expectedRm = new lTokenUtil.RangeMaker(new EntityLocation());
          parsed = {
-            openChunk: chunkUtil.makeChunk('<!', expectedRm),
-            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
-            nameChunk: chunkUtil.makeChunk('elmentName', expectedRm),
+            openLToken: lTokenUtil.makeLToken('<!', expectedRm),
+            declTypeLToken: lTokenUtil.makeLToken('DOCTYPE', expectedRm),
+            postDeclTypeSpaceLToken: lTokenUtil.makeLToken('\t', expectedRm),
+            nameLToken: lTokenUtil.makeLToken('elmentName', expectedRm),
          };
       });
 
@@ -131,7 +131,7 @@ describe('docTypeStart', () => {
       });
 
       it('reports an error if there is no elment name', () => {
-         parsed.nameChunk = undefined;
+         parsed.nameLToken = undefined;
 
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
@@ -158,7 +158,7 @@ describe('docTypeStart', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NAME_INVALID,
             params: [ 'elmentName' ],
-            position: parsed.nameChunk,
+            position: parsed.nameLToken,
          });
       });
 
@@ -177,7 +177,7 @@ describe('docTypeStart', () => {
 
       it('returns a token with the name found in the parsing', () => {
          const parsed = {
-            nameChunk: chunkUtil.makeChunk('elementName', new chunkUtil.RangeMaker(new EntityLocation())),
+            nameLToken: lTokenUtil.makeLToken('elementName', new lTokenUtil.RangeMaker(new EntityLocation())),
          };
 
          const token = docTypeStart.makeToken(parsed);
@@ -187,7 +187,7 @@ describe('docTypeStart', () => {
 
       it('returns a token with an empty string if no name was found', () => {
          const parsed = {
-            nameChunk: undefined,
+            nameLToken: undefined,
          };
 
          const token = docTypeStart.makeToken(parsed);
@@ -197,7 +197,7 @@ describe('docTypeStart', () => {
 
       it('asks externalId to provide an entity location', () => {
          const parsed = {
-            nameChunk: undefined,
+            nameLToken: undefined,
             externalId: { externalId: true },
          };
          spyOn(externalId, 'makeTokenCompatible');

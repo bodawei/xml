@@ -6,7 +6,7 @@ import Offset from '../basic/Offset.js';
 import Range from '../basic/Range.js';
 import StringBundle from '../basic/StringBundle.js';
 
-import Chunk from '../chunk/Chunk.js';
+import LToken from '../lToken/LToken.js';
 
 import XmlError from './XmlError.js';
 
@@ -79,9 +79,9 @@ describe('XmlError()', () => {
             .toEqual(new Offset(new EntityLocation(), 0, 1, 2));
       });
 
-      it('sets the place even if a Chunk is passed', () => {
+      it('sets the place even if a LToken is passed', () => {
          const error = new XmlError(XmlError.ID.TEST, [],
-            new Chunk('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
+            new LToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
          expect(error.place).toEqual(new Offset(new EntityLocation(), 0, 3, 4));
       });
 
@@ -107,11 +107,11 @@ describe('XmlError()', () => {
             } ]);
       });
 
-      it('wraps the context if just an Chunk is passed', () => {
+      it('wraps the context if just an LToken is passed', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
-         const chunk = new Chunk('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
+         const lToken = new LToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
 
-         expect(new XmlError(XmlError.ID.TEST, [], place, chunk).context)
+         expect(new XmlError(XmlError.ID.TEST, [], place, lToken).context)
             .toEqual([ {
                offset: place,
             } ]);

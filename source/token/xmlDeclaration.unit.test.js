@@ -4,7 +4,7 @@
 import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
 
-import * as chunkUtil from '../chunk/test';
+import * as lTokenUtil from '../lToken/test';
 
 import xmlDeclaration from './xmlDeclaration.js';
 
@@ -19,14 +19,14 @@ describe('xmlDeclaration', () => {
       });
 
       it('gathers no value if thee is no quote after the equal sign', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('version'),
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk('='),
-            chunkUtil.makeChunk(' '),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('version'),
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken('='),
+            lTokenUtil.makeLToken(' '),
             undefined,
             undefined,
-            chunkUtil.makeChunk('?>'),
+            lTokenUtil.makeLToken('?>'),
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
@@ -34,33 +34,33 @@ describe('xmlDeclaration', () => {
 
          expect(callback).toContainParsedProps({
             type: 'XML_DECLARATION',
-            openChunk: undefined,
-            postOpenSpaceChunk: undefined,
-            targetChunk: undefined,
-            postTargetSpaceChunk: undefined,
+            openLToken: undefined,
+            postOpenSpaceLToken: undefined,
+            targetLToken: undefined,
+            postTargetSpaceLToken: undefined,
             params: [ {
-               nameChunk: chunkUtil.makeChunk('version'),
-               postNameSpaceChunk: chunkUtil.makeChunk(' '),
-               equalChunk: chunkUtil.makeChunk('='),
-               postEqualSpaceChunk: chunkUtil.makeChunk(' '),
+               nameLToken: lTokenUtil.makeLToken('version'),
+               postNameSpaceLToken: lTokenUtil.makeLToken(' '),
+               equalLToken: lTokenUtil.makeLToken('='),
+               postEqualSpaceLToken: lTokenUtil.makeLToken(' '),
             } ],
-            closeChunk: chunkUtil.makeChunk('?>'),
+            closeLToken: lTokenUtil.makeLToken('?>'),
          });
       });
 
       it('gathers a value if the value is in single quotes', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('version'),
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk('='),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('version'),
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken('='),
             undefined,
-            chunkUtil.makeChunk('\''),
-            chunkUtil.makeChunk('\''),
-            chunkUtil.makeChunk('1.3'),
-            chunkUtil.makeChunk('\''),
+            lTokenUtil.makeLToken('\''),
+            lTokenUtil.makeLToken('\''),
+            lTokenUtil.makeLToken('1.3'),
+            lTokenUtil.makeLToken('\''),
             undefined,
             undefined,
-            chunkUtil.makeChunk('?>'),
+            lTokenUtil.makeLToken('?>'),
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
@@ -68,16 +68,16 @@ describe('xmlDeclaration', () => {
 
          expect(callback).toContainParsedProps({
             params: [ {
-               nameChunk: chunkUtil.makeChunk('version'),
-               postNameSpaceChunk: chunkUtil.makeChunk(' '),
-               equalChunk: chunkUtil.makeChunk('='),
-               postEqualSpaceChunk: undefined,
-               openQuoteChunk: chunkUtil.makeChunk('\''),
-               valueChunk: chunkUtil.makeChunk('1.3'),
-               closeQuoteChunk: chunkUtil.makeChunk('\''),
-               trailingSpaceChunk: undefined,
+               nameLToken: lTokenUtil.makeLToken('version'),
+               postNameSpaceLToken: lTokenUtil.makeLToken(' '),
+               equalLToken: lTokenUtil.makeLToken('='),
+               postEqualSpaceLToken: undefined,
+               openQuoteLToken: lTokenUtil.makeLToken('\''),
+               valueLToken: lTokenUtil.makeLToken('1.3'),
+               closeQuoteLToken: lTokenUtil.makeLToken('\''),
+               trailingSpaceLToken: undefined,
             } ],
-            closeChunk: chunkUtil.makeChunk('?>'),
+            closeLToken: lTokenUtil.makeLToken('?>'),
          });
       });
 
@@ -91,33 +91,33 @@ describe('xmlDeclaration', () => {
          mockErrorCollector = new MockErrorCollector();
 
          parsed = {
-            openChunk: chunkUtil.makeChunk('<?'),
-            postOpenSpaceChunk: undefined,
-            targetChunk: chunkUtil.makeChunk('xml'),
-            postTargetSpaceChunk: chunkUtil.makeChunk(' '),
+            openLToken: lTokenUtil.makeLToken('<?'),
+            postOpenSpaceLToken: undefined,
+            targetLToken: lTokenUtil.makeLToken('xml'),
+            postTargetSpaceLToken: lTokenUtil.makeLToken(' '),
             params: [ {
-               nameChunk: chunkUtil.makeChunk('version'),
-               equalChunk: chunkUtil.makeChunk('='),
-               openQuoteChunk: chunkUtil.makeChunk('"'),
-               valueChunk: chunkUtil.makeChunk('1.1'),
-               closeQuoteChunk: chunkUtil.makeChunk('"'),
-               trailingSpaceChunk: chunkUtil.makeChunk(' '),
+               nameLToken: lTokenUtil.makeLToken('version'),
+               equalLToken: lTokenUtil.makeLToken('='),
+               openQuoteLToken: lTokenUtil.makeLToken('"'),
+               valueLToken: lTokenUtil.makeLToken('1.1'),
+               closeQuoteLToken: lTokenUtil.makeLToken('"'),
+               trailingSpaceLToken: lTokenUtil.makeLToken(' '),
             }, {
-               nameChunk: chunkUtil.makeChunk('encoding'),
-               equalChunk: chunkUtil.makeChunk('='),
-               openQuoteChunk: chunkUtil.makeChunk('"'),
-               valueChunk: chunkUtil.makeChunk('ascii'),
-               closeQuoteChunk: chunkUtil.makeChunk('"'),
-               trailingSpaceChunk: chunkUtil.makeChunk(' '),
+               nameLToken: lTokenUtil.makeLToken('encoding'),
+               equalLToken: lTokenUtil.makeLToken('='),
+               openQuoteLToken: lTokenUtil.makeLToken('"'),
+               valueLToken: lTokenUtil.makeLToken('ascii'),
+               closeQuoteLToken: lTokenUtil.makeLToken('"'),
+               trailingSpaceLToken: lTokenUtil.makeLToken(' '),
             }, {
-               nameChunk: chunkUtil.makeChunk('standalone'),
-               equalChunk: chunkUtil.makeChunk('='),
-               openQuoteChunk: chunkUtil.makeChunk('"'),
-               valueChunk: chunkUtil.makeChunk('yes'),
-               closeQuoteChunk: chunkUtil.makeChunk('"'),
-               trailingSpaceChunk: chunkUtil.makeChunk(' '),
+               nameLToken: lTokenUtil.makeLToken('standalone'),
+               equalLToken: lTokenUtil.makeLToken('='),
+               openQuoteLToken: lTokenUtil.makeLToken('"'),
+               valueLToken: lTokenUtil.makeLToken('yes'),
+               closeQuoteLToken: lTokenUtil.makeLToken('"'),
+               trailingSpaceLToken: lTokenUtil.makeLToken(' '),
             } ],
-            closeChunk: chunkUtil.makeChunk('?>'),
+            closeLToken: lTokenUtil.makeLToken('?>'),
          };
       });
 
@@ -128,14 +128,14 @@ describe('xmlDeclaration', () => {
       });
 
       it('reports an error if a param is the wrong case', () => {
-         parsed.params[0].nameChunk = chunkUtil.makeChunk('VERSION');
+         parsed.params[0].nameLToken = lTokenUtil.makeLToken('VERSION');
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE,
             params: [ 'version', 'VERSION' ],
-            position: parsed.params[0].nameChunk,
+            position: parsed.params[0].nameLToken,
          });
       });
 
@@ -149,12 +149,12 @@ describe('xmlDeclaration', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
             params: undefined,
-            position: parsed.params[2].nameChunk,
+            position: parsed.params[2].nameLToken,
          });
       });
 
       it('reports an error if encoding has no value', () => {
-         parsed.params[1].valueChunk = undefined;
+         parsed.params[1].valueLToken = undefined;
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
@@ -162,7 +162,7 @@ describe('xmlDeclaration', () => {
             id: WellFormedError.ID.ATTRIBUTE_NO_VALUE,
             params: [ 'encoding' ],
             position: undefined,
-            lastPosition: parsed.params[1].openQuoteChunk,
+            lastPosition: parsed.params[1].openQuoteLToken,
          });
       });
 
@@ -172,19 +172,19 @@ describe('xmlDeclaration', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_XTRA_STANDALONE,
             params: undefined,
-            position: parsed.params[2].nameChunk,
+            position: parsed.params[2].nameLToken,
          });
       });
 
       it('reports an error if an unknown parameter is provided', () => {
-         parsed.params[2].nameChunk = chunkUtil.makeChunk('bogus');
+         parsed.params[2].nameLToken = lTokenUtil.makeLToken('bogus');
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ATTR_UNKNOWN,
             params: [ 'bogus' ],
-            position: parsed.params[2].nameChunk,
+            position: parsed.params[2].nameLToken,
          });
       });
 
@@ -195,11 +195,11 @@ describe('xmlDeclaration', () => {
       it('returns an entity reference token with the entity name', () => {
          const parsed = {
             params: [ {
-               nameChunk: chunkUtil.makeChunk('version'),
-               postNameSpaceChunk: chunkUtil.makeChunk(' '),
-               equalChunk: chunkUtil.makeChunk('='),
-               postEqualSpaceChunk: chunkUtil.makeChunk(' '),
-               valueChunk: chunkUtil.makeChunk('1.1'),
+               nameLToken: lTokenUtil.makeLToken('version'),
+               postNameSpaceLToken: lTokenUtil.makeLToken(' '),
+               equalLToken: lTokenUtil.makeLToken('='),
+               postEqualSpaceLToken: lTokenUtil.makeLToken(' '),
+               valueLToken: lTokenUtil.makeLToken('1.1'),
             } ],
          };
 

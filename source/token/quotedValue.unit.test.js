@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import * as chunkUtil from '../chunk/test';
+import * as lTokenUtil from '../lToken/test';
 
 import quotedValue from './quotedValue.js';
 
@@ -16,19 +16,19 @@ describe('quotedValue', () => {
       });
 
       it('does a basic parse', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('"'),
-            chunkUtil.makeChunk('blah'),
-            chunkUtil.makeChunk('"'),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('"'),
+            lTokenUtil.makeLToken('blah'),
+            lTokenUtil.makeLToken('"'),
          ]);
 
          quotedValue.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ {
-            openQuoteChunk: chunkUtil.makeChunk('"'),
-            valueChunk: chunkUtil.makeChunk('blah'),
-            closeQuoteChunk: chunkUtil.makeChunk('"'),
+            openQuoteLToken: lTokenUtil.makeLToken('"'),
+            valueLToken: lTokenUtil.makeLToken('blah'),
+            closeQuoteLToken: lTokenUtil.makeLToken('"'),
          } ] ]);
       });
 

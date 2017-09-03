@@ -47,13 +47,13 @@ const WHOLENAME_REGEX11 = /^[A-Za-z:_\u00C0-\u00D6\u00F8-\u02FF\u0370-\u037D\u03
  the context is the start of the XML Declaration, at 0 chars in.
 
  Sometimes the position can be difficult to compute for the callers.
- For instance, if a quote is missing but the previous couple chunks
+ For instance, if a quote is missing but the previous couple lTokens
  have been missing as well, it can get laborious to specify the
  best position.  This uses a heuristic which seems to always work,
- which is that when setPos() is called with a good chunk it is assumed
- the position for the next errors are at the start of that chunk.
- but if setPos() is called with undefined (a missing chunk), then
- the end of the most recently set chunk will be used for the next
+ which is that when setPos() is called with a good lToken it is assumed
+ the position for the next errors are at the start of that lToken.
+ but if setPos() is called with undefined (a missing lToken), then
+ the end of the most recently set lToken will be used for the next
  errors instead.
 \**********************************************************************/
 
@@ -67,9 +67,9 @@ class ErrorCollector {
       this._errors = [];
    }
 
-   setPos(currentChunk) {
-      if (currentChunk) {
-         this._position = currentChunk;
+   setPos(currentLToken) {
+      if (currentLToken) {
+         this._position = currentLToken;
          this._posStart = true;
       } else {
          this._posStart = false;
@@ -87,15 +87,15 @@ class ErrorCollector {
    }
 
    // test with both versions.
-   checkName(nameChunk, errorCode, version, revision) {
+   checkName(nameLToken, errorCode, version, revision) {
       const use11Names = version === 1.1 || (version === 1.0 && revision === 5);
       const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
-      if (!nameChunk || regEx.exec(nameChunk.text)) {
+      if (!nameLToken || regEx.exec(nameLToken.text)) {
          return;
       }
 
-      this.report(errorCode, [ nameChunk.text ]);
+      this.report(errorCode, [ nameLToken.text ]);
    }
 
    report(code, params, position) {

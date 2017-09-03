@@ -2,19 +2,19 @@
 
 import { EntityMetaData, Range } from '../basic';
 
-import Chunk from './Chunk.js';
+import LToken from './LToken.js';
 import Extractor from './Extractor.js';
 import Segment from './Segment.js';
 
 /**********************************************************************\
- A ChunkSource combines three things, and returns Chunks using them.
+ A LTokenSource combines three things, and returns LToken using them.
 
  1. A hash of extractor definitions (see below) which
     define what this can respond to.
  2. a series of 1 or more strings (with addText()) each of which will
     be turned into a Segment.
  3. A series of calls to extract(), which will used the specified
-    extractor to carve off a chunk from the current segment.
+    extractor to carve off a lToken from the current segment.
 
  Text and extract calls can be made independently of one another (e.g.
  you can call extract() multipled times before providing any text).
@@ -22,7 +22,7 @@ import Segment from './Segment.js';
 
  Text can come from different entities. When ever text comes from a
  new entity, a Range must be provided to addText() so it can
- continue to build the correct ranges in the chunks that are produced.
+ continue to build the correct ranges in the lTokens that are produced.
 
  Extractor protocol:
  Crucially, this defines a very strict pattern of interaction with
@@ -68,14 +68,14 @@ import Segment from './Segment.js';
  is the PeekExtractor, which simply wraps the next extractor.
 \**********************************************************************/
 
-class ChunkSource {
+class LTokenSource {
 
    constructor(extractorInfo, info) {
       if (typeof extractorInfo !== 'object') {
-         throw new Error('Must pass a hash of extractor types to constructor functions to ChunkSource().');
+         throw new Error('Must pass a hash of extractor types to constructor functions to LTokenSource().');
       }
       if (!(info instanceof EntityMetaData)) {
-         throw new Error('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
+         throw new Error('Must pass an EntityMetaData, or something that can become one, into LTokenSource.');
       }
 
       this._info = info;
@@ -123,21 +123,21 @@ class ChunkSource {
          params = undefined;
       }
 
-      this.extract(type, params, (chunk) => {
-         obj[name] = chunk;
+      this.extract(type, params, (lToken) => {
+         obj[name] = lToken;
       });
    }
 
-   extract(type, params, deliverChunk) {
+   extract(type, params, deliverLToken) {
       if (typeof params === 'function') {
-         deliverChunk = params;
+         deliverLToken = params;
          params = undefined;
       }
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor;
 
-      if (typeof deliverChunk !== 'function') {
-         throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
+      if (typeof deliverLToken !== 'function') {
+         throw new Error('Must pass a callback function of the form function(lToken|undefined):void to extract().');
       }
 
       if (typeof extractorDefinition === 'object') {
@@ -160,7 +160,7 @@ class ChunkSource {
 
       this._extractors.push({
          extractor: instance,
-         callback: deliverChunk,
+         callback: deliverLToken,
       });
 
       this._resumeOperation();
@@ -239,7 +239,7 @@ class ChunkSource {
          }
 
          if (extractor.state === Extractor.STATE.SUCCESS) {
-            extContext.callback(new Chunk(results.text, results.original, ranges));
+            extContext.callback(new LToken(results.text, results.original, ranges));
          } else {
             extContext.callback();
          }
@@ -247,4 +247,4 @@ class ChunkSource {
    }
 }
 
-module.exports = ChunkSource;
+export default LTokenSource;

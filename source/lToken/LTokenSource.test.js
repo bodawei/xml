@@ -3,12 +3,12 @@
 
 import { EntityLocation, EntityMetaData, Range } from '../basic';
 
-import Chunk from './Chunk.js';
-import ChunkSource from './ChunkSource.js';
+import LToken from './LToken.js';
+import LTokenSource from './LTokenSource.js';
 import Extractor from './Extractor.js';
 
-describe('ChunkSource', () => {
-   let chunkSpy;
+describe('LTokenSource', () => {
+   let lTokenSpy;
    let source;
    let defaultLoc;
    let entityMetaData1dot0;
@@ -124,22 +124,22 @@ describe('ChunkSource', () => {
          tox: ToXExtractor,
       };
 
-      source = new ChunkSource(testExtractors, entityMetaData1dot1);
-      chunkSpy = jasmine.createSpy('chunkSpy');
+      source = new LTokenSource(testExtractors, entityMetaData1dot1);
+      lTokenSpy = jasmine.createSpy('lTokenSpy');
    });
 
    describe('construction', () => {
 
       it('throws an error if called without a hash of extractors', () => {
          expect(() => {
-            new ChunkSource();
-         }).toThrowError('Must pass a hash of extractor types to constructor functions to ChunkSource().');
+            new LTokenSource();
+         }).toThrowError('Must pass a hash of extractor types to constructor functions to LTokenSource().');
       });
 
       it('throws an error if called without an entity meta data', () => {
          expect(() => {
-            new ChunkSource({});
-         }).toThrowError('Must pass an EntityMetaData, or something that can become one, into ChunkSource.');
+            new LTokenSource({});
+         }).toThrowError('Must pass an EntityMetaData, or something that can become one, into LTokenSource.');
       });
 
    });
@@ -154,11 +154,11 @@ describe('ChunkSource', () => {
             },
          };
 
-         source = new ChunkSource(testExtractors, entityMetaData1dot0);
+         source = new LTokenSource(testExtractors, entityMetaData1dot0);
          source.addText('this is yours');
-         source.extract('toy', chunkSpy);
+         source.extract('toy', lTokenSpy);
 
-         expect(chunkSpy.calls.allArgs()).toEqualChunkTexts([ 'this is ' ]);
+         expect(lTokenSpy.calls.allArgs()).toEqualLTokenTexts([ 'this is ' ]);
       });
 
       it('calls an extractor that wraps another', () => {
@@ -171,11 +171,11 @@ describe('ChunkSource', () => {
             },
          };
 
-         source = new ChunkSource(testExtractors, entityMetaData1dot0);
+         source = new LTokenSource(testExtractors, entityMetaData1dot0);
          source.addText('the lorax');
-         source.extract('pass', chunkSpy);
+         source.extract('pass', lTokenSpy);
 
-         expect(chunkSpy.calls.allArgs()).toEqualChunkTexts([ 'the lora' ]);
+         expect(lTokenSpy.calls.allArgs()).toEqualLTokenTexts([ 'the lora' ]);
       });
 
    });
@@ -196,7 +196,7 @@ describe('ChunkSource', () => {
             },
          };
 
-         source = new ChunkSource(testExtractors, entityMetaData1dot0);
+         source = new LTokenSource(testExtractors, entityMetaData1dot0);
          source.addText('1');
          source.extract('test', () => {});
 
@@ -273,7 +273,7 @@ describe('ChunkSource', () => {
       it('throws an error if no callback is provided', () => {
          expect(() => {
             source.extract('foo');
-         }).toThrowError('Must pass a callback function of the form function(chunk|undefined):void to extract().');
+         }).toThrowError('Must pass a callback function of the form function(lToken|undefined):void to extract().');
       });
 
       it('passes a version and arbitrary params to the extractor', () => {
@@ -297,58 +297,58 @@ describe('ChunkSource', () => {
       });
 
       it('can be called multiple times before any text added', () => {
-         source.extract('tox', chunkSpy);
-         source.extract('all', chunkSpy);
+         source.extract('tox', lTokenSpy);
+         source.extract('all', lTokenSpy);
 
          source.addText(' 123xTest');
          source.endText();
 
-         expect(chunkSpy.calls.allArgs()).toEqualChunkTexts([ ' 123', 'xTest' ]);
+         expect(lTokenSpy.calls.allArgs()).toEqualLTokenTexts([ ' 123', 'xTest' ]);
       });
 
       it('can be called multiple times after text added', () => {
          source.addText(' 456xTest');
          source.endText();
 
-         source.extract('tox', chunkSpy);
-         source.extract('all', chunkSpy);
+         source.extract('tox', lTokenSpy);
+         source.extract('all', lTokenSpy);
 
-         expect(chunkSpy.calls.allArgs()).toEqualChunkTexts([ ' 456', 'xTest' ]);
+         expect(lTokenSpy.calls.allArgs()).toEqualLTokenTexts([ ' 456', 'xTest' ]);
       });
 
    });
 
-   describe('chunk generation system', () => {
+   describe('lToken generation system', () => {
 
-      it('returns a chunk with text from all the segments', () => {
+      it('returns a lToken with text from all the segments', () => {
          source.addText('1');
          source.addText('22');
          source.addText('333');
          source.endText();
-         source.extract('all', chunkSpy);
+         source.extract('all', lTokenSpy);
 
-         expect(chunkSpy).toHaveBeenCalledWith(new Chunk('122333', '122333', new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
+         expect(lTokenSpy).toHaveBeenCalledWith(new LToken('122333', '122333', new Range(defaultLoc, 0, 0, 0, 6, 0, 6)));
       });
 
       it('returns undefined when nothing was retrieved', () => {
          source.endText();
-         source.extract('all', chunkSpy);
+         source.extract('all', lTokenSpy);
 
-         expect(chunkSpy).toHaveBeenCalledWith();
+         expect(lTokenSpy).toHaveBeenCalledWith();
       });
 
-      it('returns no chunks when the finish criteria for the specified extractor has not been met', () => {
+      it('returns no lTokens when the finish criteria for the specified extractor has not been met', () => {
          source.addText('these are letters without the terminating one');
-         source.extract('tox', chunkSpy);
+         source.extract('tox', lTokenSpy);
 
-         expect(chunkSpy).not.toHaveBeenCalled();
+         expect(lTokenSpy).not.toHaveBeenCalled();
       });
 
-      it('returns a chunks as soon as the finish criteria for the specified extractor has not been met', () => {
+      it('returns a lTokens as soon as the finish criteria for the specified extractor has not been met', () => {
          source.addText('these are letters with an x');
-         source.extract('tox', chunkSpy);
+         source.extract('tox', lTokenSpy);
 
-         expect(chunkSpy).toHaveBeenCalled();
+         expect(lTokenSpy).toHaveBeenCalled();
       });
 
       describe('ranges', () => {
@@ -359,12 +359,12 @@ describe('ChunkSource', () => {
             source.addText('333');
             source.endText();
 
-            source.extract('all', chunkSpy);
+            source.extract('all', lTokenSpy);
 
-            expect(chunkSpy.calls.argsFor(0)[0]).toEqualChunkRange(new Range(defaultLoc, 0, 0, 0, 6, 0, 6));
+            expect(lTokenSpy.calls.argsFor(0)[0]).toEqualLTokenRange(new Range(defaultLoc, 0, 0, 0, 6, 0, 6));
          });
 
-         it('returns a chunk with ranges for the segments', () => {
+         it('returns a lToken with ranges for the segments', () => {
             const loc2 = new EntityLocation();
             const loc3 = new EntityLocation();
             source.addText('9', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
@@ -372,12 +372,12 @@ describe('ChunkSource', () => {
             source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
             source.endText();
 
-            source.extract('all', chunkSpy);
+            source.extract('all', lTokenSpy);
 
             // cleanup todo: fix this testing
-            expect(chunkSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-            expect(chunkSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 102, 100, 102));
-            expect(chunkSpy.calls.argsFor(0)[0].range[2]).toEqual(new Range(loc3, 200, 200, 200, 205, 200, 205));
+            expect(lTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(lTokenSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 102, 100, 102));
+            expect(lTokenSpy.calls.argsFor(0)[0].range[2]).toEqual(new Range(loc3, 200, 200, 200, 205, 200, 205));
          });
 
          it('delivers a default range to a segment without a range', () => {
@@ -388,10 +388,10 @@ describe('ChunkSource', () => {
             source.addText('77777');
             source.endText();
 
-            source.extract('all', chunkSpy);
+            source.extract('all', lTokenSpy);
 
-            expect(chunkSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-            expect(chunkSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 107, 100, 107));
+            expect(lTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(lTokenSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 107, 100, 107));
          });
 
       });

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { MockErrorCollector } from '../basic/test';
-import chunkUtil from '../chunk/test';
+import lTokenUtil from '../lToken/test';
 import { WellFormedError } from '../error';
 
 import entityReference from './entityReference.js';
@@ -20,12 +20,12 @@ describe('entityReference', () => {
       });
 
       it('does a simple parse', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('&'),
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk('entityName'),
-            chunkUtil.makeChunk(' '),
-            chunkUtil.makeChunk(';'),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('&'),
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken('entityName'),
+            lTokenUtil.makeLToken(' '),
+            lTokenUtil.makeLToken(';'),
          ]);
 
          entityReference.parse(mockSource, callback);
@@ -33,21 +33,21 @@ describe('entityReference', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITY_REFERENCE',
-            openChunk: chunkUtil.makeChunk('&'),
-            postOpenSpaceChunk: chunkUtil.makeChunk(' '),
-            entityNameChunk: chunkUtil.makeChunk('entityName'),
-            postEntityNameSpaceChunk: chunkUtil.makeChunk(' '),
-            closeChunk: chunkUtil.makeChunk(';'),
+            openLToken: lTokenUtil.makeLToken('&'),
+            postOpenSpaceLToken: lTokenUtil.makeLToken(' '),
+            entityNameLToken: lTokenUtil.makeLToken('entityName'),
+            postEntityNameSpaceLToken: lTokenUtil.makeLToken(' '),
+            closeLToken: lTokenUtil.makeLToken(';'),
          });
       });
 
       it('accepts no spaces within reference', () => {
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk('&'),
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken('&'),
             undefined,
-            chunkUtil.makeChunk('entityName'),
+            lTokenUtil.makeLToken('entityName'),
             undefined,
-            chunkUtil.makeChunk(';'),
+            lTokenUtil.makeLToken(';'),
          ]);
 
          entityReference.parse(mockSource, callback);
@@ -55,23 +55,23 @@ describe('entityReference', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITY_REFERENCE',
-            openChunk: chunkUtil.makeChunk('&'),
-            postOpenSpaceChunk: undefined,
-            entityNameChunk: chunkUtil.makeChunk('entityName'),
-            postEntityNameSpaceChunk: undefined,
-            closeChunk: chunkUtil.makeChunk(';'),
+            openLToken: lTokenUtil.makeLToken('&'),
+            postOpenSpaceLToken: undefined,
+            entityNameLToken: lTokenUtil.makeLToken('entityName'),
+            postEntityNameSpaceLToken: undefined,
+            closeLToken: lTokenUtil.makeLToken(';'),
          });
       });
 
       describe('terminators', () => {
 
          it('passes quotes and > as terminators for getting the name', () => {
-            mockSource = new chunkUtil.MockChunkSource([
-               chunkUtil.makeChunk('&'),
+            mockSource = new lTokenUtil.MockLTokenSource([
+               lTokenUtil.makeLToken('&'),
                undefined,
-               chunkUtil.makeChunk('entityName'),
+               lTokenUtil.makeLToken('entityName'),
                undefined,
-               chunkUtil.makeChunk(';'),
+               lTokenUtil.makeLToken(';'),
             ]);
 
             entityReference.parse(mockSource, callback);
@@ -110,59 +110,59 @@ describe('entityReference', () => {
          mockErrorCollector = new MockErrorCollector();
 
          parsed = {
-            openChunk: chunkUtil.makeChunk('&'),
-            postOpenSpaceChunk: undefined,
-            entityNameChunk: chunkUtil.makeChunk('theName'),
-            postEntityNameSpaceChunk: undefined,
-            closeChunk: chunkUtil.makeChunk(';'),
+            openLToken: lTokenUtil.makeLToken('&'),
+            postOpenSpaceLToken: undefined,
+            entityNameLToken: lTokenUtil.makeLToken('theName'),
+            postEntityNameSpaceLToken: undefined,
+            closeLToken: lTokenUtil.makeLToken(';'),
          };
       });
 
       it('reports an error if there is a space after the opening &', () => {
-         parsed.postOpenSpaceChunk = chunkUtil.makeChunk(' ');
+         parsed.postOpenSpaceLToken = lTokenUtil.makeLToken(' ');
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
             params: [ 'theName' ],
-            position: parsed.postOpenSpaceChunk,
+            position: parsed.postOpenSpaceLToken,
          });
       });
 
       it('reports an error if there is no name', () => {
-         delete parsed.entityNameChunk;
+         delete parsed.entityNameLToken;
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_NAME,
             params: undefined,
-            lastPosition: parsed.openChunk,
+            lastPosition: parsed.openLToken,
          });
       });
 
       it('reports an error if there is a space after the entity name', () => {
-         parsed.postEntityNameSpaceChunk = chunkUtil.makeChunk(' ');
+         parsed.postEntityNameSpaceLToken = lTokenUtil.makeLToken(' ');
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
             params: [ 'theName' ],
-            position: parsed.postEntityNameSpaceChunk,
+            position: parsed.postEntityNameSpaceLToken,
          });
       });
 
       it('reports an error if there was no closing', () => {
-         delete parsed.closeChunk;
+         delete parsed.closeLToken;
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,
             params: [ 'theName' ],
-            lastPosition: parsed.entityNameChunk,
+            lastPosition: parsed.entityNameLToken,
          });
       });
 
@@ -172,7 +172,7 @@ describe('entityReference', () => {
 
       it('returns an entity reference token with the entity name', () => {
          const parsed = {
-            nameChunk: chunkUtil.makeChunk('entityName'),
+            nameLToken: lTokenUtil.makeLToken('entityName'),
          };
 
          const token = entityReference.makeToken(parsed);
@@ -182,7 +182,7 @@ describe('entityReference', () => {
 
       it('returns an entity reference token with a blank name when the name could not be found', () => {
          const parsed = {
-            nameChunk: undefined,
+            nameLToken: undefined,
          };
 
          const token = entityReference.makeToken(parsed);

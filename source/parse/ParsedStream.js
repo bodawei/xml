@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData } from '../basic';
-import { ChunkSource, defaultExtractors } from '../chunk';
+import { LTokenSource, defaultExtractors } from '../lToken';
 
 import Parser from './Parser.js';
 
@@ -14,20 +14,20 @@ class ParsedStream extends stream.Readable {
          objectMode: true,
       });
 
-      this._chunkSource = new ChunkSource(defaultExtractors, new EntityMetaData());
+      this._lTokenSource = new LTokenSource(defaultExtractors, new EntityMetaData());
       this.parser = new Parser();
    }
 
    addText(text) {
-      this._chunkSource.addText(text);
+      this._lTokenSource.addText(text);
    }
 
    endText() {
-      this._chunkSource.endText();
+      this._lTokenSource.endText();
    }
 
    _read() {
-      this.parser.parseGeneral(this._chunkSource, (result) => {
+      this.parser.parseGeneral(this._lTokenSource, (result) => {
          this.push(result || null);
       });
    }

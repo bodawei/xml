@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import chunkUtil from '../chunk/test';
+import lTokenUtil from '../lToken/test';
 
 import declaration from './declaration.js';
 
@@ -17,22 +17,22 @@ describe('declaration', () => {
       });
 
       it('does not do any other parsing if no declaration type is found', () => {
-         const openChunk = chunkUtil.makeChunk('<!');
-         mockSource = new chunkUtil.MockChunkSource([
-            chunkUtil.makeChunk(' '),
+         const openLToken = lTokenUtil.makeLToken('<!');
+         mockSource = new lTokenUtil.MockLTokenSource([
+            lTokenUtil.makeLToken(' '),
             undefined,
             undefined,
          ]);
 
-         declaration.parse(mockSource, openChunk, callback);
+         declaration.parse(mockSource, openLToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'GENERIC_DECLARATION',
-            openChunk: chunkUtil.makeChunk('<!'),
-            postOpenSpaceChunk: chunkUtil.makeChunk(' '),
-            declTypeChunk: undefined,
-            postDeclTypeSpaceChunk: undefined,
+            openLToken: lTokenUtil.makeLToken('<!'),
+            postOpenSpaceLToken: lTokenUtil.makeLToken(' '),
+            declTypeLToken: undefined,
+            postDeclTypeSpaceLToken: undefined,
          } ] ]);
       });
 
