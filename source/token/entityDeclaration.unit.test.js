@@ -1,12 +1,15 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
 import { MockErrorCollector } from '../basic/test';
+import { XmlWarning } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
 import * as entityDeclaration from './entityDeclaration.js';
 import * as externalId from './externalId.js';
+import * as misc from './misc.js';
 import * as quotedValue from './quotedValue.js';
 
 const NO_PARAMS = [ 'char', 'space', 'peekChar', 'peekSpace' ];
@@ -474,12 +477,13 @@ describe('entityDeclaration', () => {
             postEntityValueSpace: undefined,
             close: expectedLToken('>'),
          };
+         spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
       it('reports an error if % is not followed by a space', () => {
          parsed.parameter = expectedLToken('%');
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report)
             .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ]);
@@ -488,7 +492,7 @@ describe('entityDeclaration', () => {
       it('reports an error if there is no name', () => {
          delete parsed.name;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_NAME,
@@ -499,7 +503,7 @@ describe('entityDeclaration', () => {
       });
 
       it('checks the name validity', () => {
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.checkName)
             .toHaveBeenCalledWith(parsed.name, WellFormedError.ID.ENTITYDECL_NAME_INVALID, parsed.open);
@@ -521,7 +525,7 @@ describe('entityDeclaration', () => {
       it('reports an error if there is no EnitytValue or ExternalID', () => {
          delete parsed.entityValue;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
@@ -533,7 +537,7 @@ describe('entityDeclaration', () => {
       it('reports an error if there was no closing', () => {
          delete parsed.close;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
@@ -541,6 +545,16 @@ describe('entityDeclaration', () => {
             position: undefined,
             lastPosition: parsed.postNameSpace,
          });
+      });
+
+      it('calls checkWellFormedNameRecommendation() to report on bad names', () => {
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
+            mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+            XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
       });
 
    });

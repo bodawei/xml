@@ -6,7 +6,7 @@ import {
    Range,
    EntityLocation,
  } from '../basic';
-import { WellFormedError } from '../error';
+import { WellFormedError, XmlWarning } from '../error';
 import { LToken } from '../lToken';
 import { ParsedStream } from '../parse';
 import { docTypeEnd } from '../token';
@@ -142,6 +142,18 @@ describe('WFCheckStream (integration)', () => {
             expect(results[3]).toEqual(new WellFormedError('ENTITYDECL_PERCENT_NO_TRAILING_SPACE',
                [ 'entityName' ],
                new Offset(new EntityLocation(), 46, 0, 46),
+               new Offset(new EntityLocation(), 36, 0, 36)
+            ));
+            expect(results[4].type).toEqual('ENTITYDECL');
+            done();
+         });
+      });
+
+      it('reports an error when name starts with "xml" (check misc.checkWellFormedNameRecommendation())', (done) => {
+         givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xmlFoo "frog">]>', (results) => {
+            expect(results[3]).toEqual(new XmlWarning('ENTITYDECL_NAME_XML_RESERVED',
+               [ 'xmlFoo' ],
+               new Offset(new EntityLocation(), 45, 0, 45),
                new Offset(new EntityLocation(), 36, 0, 36)
             ));
             expect(results[4].type).toEqual('ENTITYDECL');

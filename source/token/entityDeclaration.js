@@ -1,8 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import { WellFormedError } from '../error';
+import { XmlWarning } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
+import * as misc from './misc.js';
 import * as externalId from './externalId.js';
 import * as quotedValue from './quotedValue.js';
 import {
@@ -19,6 +21,7 @@ import {
 
 const ENTITYDECL = 'ENTITYDECL';
 const WFEID = WellFormedError.ID;
+const WARN = XmlWarning.ID;
 
 class EntityDeclaration extends XmlToken {
 
@@ -131,7 +134,7 @@ function parseClose(source, parsed, propName, deliverParsed) {
  checkWellFormed() does normal validation.
 \**********************************************************************/
 
-function checkWellFormed(parsed, ec) {
+function checkWellFormed(parsed, ec, entityMetaData) {
    const enNameText = textOrBlank(parsed.name);
    ec.setPos(parsed.open);
 
@@ -146,10 +149,8 @@ function checkWellFormed(parsed, ec) {
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.ENTITYDECL_NO_NAME);
    ec.checkName(parsed.name, WFEID.ENTITYDECL_NAME_INVALID, parsed.open);
-   // 2. Add name recommendations tests
-   // const error = util.checkNameRecommendations(enNameText, this._entityMd,
-   //    XWID.ENTITYDECL_NAME_XMLDASH_RESERVED, XWID.ENTITYDECL_NAME_XML_RESERVED);
-   // this._checkWarn(!error, error, [ enNameText ]);
+   misc.checkWellFormedNameRecommendation(parsed.name, ec, entityMetaData,
+      WARN.ENTITYDECL_NAME_XMLDASH_RESERVED, WARN.ENTITYDECL_NAME_XML_RESERVED);
    ec.setPos(parsed.postNameSpace);
    ec.check(!parsed.postNameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 

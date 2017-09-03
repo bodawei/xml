@@ -185,6 +185,12 @@ describe('EntityMetaData', () => {
          expect(pk.revision).toEqual(4);
       });
 
+      it('allows a revision of 6 for 1.0', () => {
+         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 6);
+
+         expect(pk.revision).toEqual(6);
+      });
+
       it('sets a revision to 1', () => {
          const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 1);
 
@@ -199,8 +205,8 @@ describe('EntityMetaData', () => {
 
       it('throws an exception when a bad revision is passed in', () => {
          expect(() => {
-            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 6);
-         }).toThrowError('Version and revision do not match. Got "1" and "6".');
+            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 7);
+         }).toThrowError('Version and revision do not match. Got "1" and "7".');
       });
 
    });

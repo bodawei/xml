@@ -2,7 +2,8 @@
 
 import EntityLocation from './EntityLocation.js';
 
-const LAST_1DOT0_REVISION = 5;
+const LAST_1DOT0_REVISION = 6;
+const DEFAULT_1DOT0_REVISION = 5;
 const LAST_1DOT1_REVISION = 2;
 
 /**********************************************************************\
@@ -22,7 +23,7 @@ class EntityMetaData {
       this.type = EntityMetaData.TYPE;
       this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
       this.version = xmlVersion || 1.0;
-      this._setRevision(xmlRevision || (this.isVersion1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION));
+      this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
    }
 
@@ -73,7 +74,7 @@ class EntityMetaData {
 
       if (newValue === 1.0) {
          this._version = 1.0;
-         this._setRevision(LAST_1DOT0_REVISION);
+         this._setRevision(DEFAULT_1DOT0_REVISION);
       } else if (newValue === 1.1) {
          this._version = 1.1;
          this._setRevision(LAST_1DOT1_REVISION);

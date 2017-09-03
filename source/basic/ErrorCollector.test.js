@@ -253,4 +253,35 @@ describe('ErrorCollector', () => {
 
    });
 
+   describe('reportError()', () => {
+      let ec;
+      let loc;
+      let constructorSpy;
+      let contextStart;
+      let errorStart;
+
+      beforeEach(() => {
+         loc = new EntityLocation();
+         constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
+         contextStart = new LToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
+         errorStart = new LToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
+         ec = new ErrorCollector(contextStart, constructorSpy);
+      });
+
+      it('uses the specified constructor instead of the default', () => {
+         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
+         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], errorStart);
+
+         expect(ec.getErrors()).toEqual([ { otherError: true } ]);
+      });
+
+      it('passes the start position and the context to the error by default', () => {
+         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
+         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], errorStart);
+
+         expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
+      });
+
+   });
+
 });

@@ -100,6 +100,10 @@ class ErrorCollector {
    }
 
    report(code, params, position) {
+      this.reportError(code, this._ErrorConstructor, params, position);
+   }
+
+   reportError(code, constructor, params, position) {
       let posOffset;
 
       if (position) {
@@ -108,7 +112,7 @@ class ErrorCollector {
          posOffset = this._posStart ? this._position.range[0].getStartOffset() : this._position.range[0].getEndOffset();
       }
 
-      this._errors.push(new this._ErrorConstructor(code, params, posOffset, this._context));
+      this._errors.push(new constructor(code, params, posOffset, this._context));
    }
 }
 
