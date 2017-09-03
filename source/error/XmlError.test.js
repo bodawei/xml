@@ -17,11 +17,11 @@ describe('XmlError()', () => {
     * we need to stick data onto the supertype for the tests to work.
     */
    beforeEach(() => {
-      Error.ID = {};
-      Error.CODE = {};
-      Error.ID.TEST = 'TEST';
-      Error.CODE.TEST = 123;
-      Error.STRING = new StringBundle({
+      XmlError.ID = {};
+      XmlError.CODE = {};
+      XmlError.ID.TEST = 'TEST';
+      XmlError.CODE.TEST = 123;
+      XmlError.STRING = new StringBundle({
          base: {
             TEST: 'Test message {0}.',
          },
@@ -29,9 +29,9 @@ describe('XmlError()', () => {
    });
 
    afterEach(() => {
-      delete Error.ID;
-      delete Error.CODE;
-      delete Error.STRING;
+      delete XmlError.ID;
+      delete XmlError.CODE;
+      delete XmlError.STRING;
    });
 
    describe('construction', () => {
@@ -42,7 +42,7 @@ describe('XmlError()', () => {
 
       it('throws no error when constructed', () => {
          expect(() => {
-            new XmlError(Error.ID.TEST);
+            new XmlError(XmlError.ID.TEST);
          }).not.toThrow();
       });
 
@@ -59,28 +59,28 @@ describe('XmlError()', () => {
       });
 
       it('sets the code', () => {
-         expect(new XmlError(Error.ID.TEST).code)
+         expect(new XmlError(XmlError.ID.TEST).code)
             .toEqual(123);
       });
 
       it('sets the message', () => {
-         expect(new XmlError(Error.ID.TEST).message)
+         expect(new XmlError(XmlError.ID.TEST).message)
             .toEqual('Test message {0}.');
       });
 
       // This is mostly tested in stringbundle. just making sure basic case works
       it('fills in values in the message', () => {
-         expect(new XmlError(Error.ID.TEST, [ 'one' ]).message)
+         expect(new XmlError(XmlError.ID.TEST, [ 'one' ]).message)
             .toEqual('Test message one.');
       });
 
       it('sets the place', () => {
-         expect(new XmlError(Error.ID.TEST, [], new Offset(new EntityLocation(), 0, 1, 2)).place)
+         expect(new XmlError(XmlError.ID.TEST, [], new Offset(new EntityLocation(), 0, 1, 2)).place)
             .toEqual(new Offset(new EntityLocation(), 0, 1, 2));
       });
 
       it('sets the place even if a Chunk is passed', () => {
-         const error = new XmlError(Error.ID.TEST, [],
+         const error = new XmlError(XmlError.ID.TEST, [],
             new Chunk('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
          expect(error.place).toEqual(new Offset(new EntityLocation(), 0, 3, 4));
       });
@@ -88,20 +88,20 @@ describe('XmlError()', () => {
       it('clones the place', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
 
-         expect(new XmlError(Error.ID.TEST, [], place).place)
+         expect(new XmlError(XmlError.ID.TEST, [], place).place)
             .not.toBe(place);
       });
 
       it('sets the place even when params omitted', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
 
-         expect(new XmlError(Error.ID.TEST, place).place)
+         expect(new XmlError(XmlError.ID.TEST, place).place)
             .toEqual(place);
       });
 
       it('wraps the context if just an Offset is passed', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
-         expect(new XmlError(Error.ID.TEST, [], place, place).context)
+         expect(new XmlError(XmlError.ID.TEST, [], place, place).context)
             .toEqual([ {
                offset: place,
             } ]);
@@ -111,7 +111,7 @@ describe('XmlError()', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
          const chunk = new Chunk('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
 
-         expect(new XmlError(Error.ID.TEST, [], place, chunk).context)
+         expect(new XmlError(XmlError.ID.TEST, [], place, chunk).context)
             .toEqual([ {
                offset: place,
             } ]);
@@ -121,14 +121,14 @@ describe('XmlError()', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
          const context = [ place ];
 
-         expect(new XmlError(Error.ID.TEST, [], place, context).context[0])
+         expect(new XmlError(XmlError.ID.TEST, [], place, context).context[0])
             .not.toBe(place);
       });
 
       it('sets the context even when params omitted', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
 
-         expect(new XmlError(Error.ID.TEST, place, place).context)
+         expect(new XmlError(XmlError.ID.TEST, place, place).context)
             .toEqual([ {
                offset: place,
             } ]);

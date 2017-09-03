@@ -99,6 +99,12 @@ describe('toBeInstanceOf()', () => {
          }).toThrowError('Must pass an object to the first argument of the .toBeInstanceOf() jasmine matcher.');
       });
 
+      it('throws an error if not passed undefined rather than an object', () => {
+         expect(() => {
+            toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(undefined, Test);
+         }).toThrowError('Must pass an object to the first argument of the .toBeInstanceOf() jasmine matcher.');
+      });
+
       it('returns a message indicating failure, on success, for the .not.toBeInstanceOf() case', () => {
          expect(toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(new Test(), Test)).toEqual({
             pass: true,

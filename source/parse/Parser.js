@@ -12,8 +12,6 @@ class Parser {
          }
 
          switch (chunk.text) {
-            case '&':
-               break;
             case '<':
                return this._markupParse(source, deliverParse);
          }
@@ -22,14 +20,11 @@ class Parser {
 
    _markupParse(source, deliverParse) {
       source.extract('markup', (markupStartChunk) => {
-         if (!markupStartChunk) {
-            return;
-         }
-
-         if (markupStartChunk.text === '<?') {
-            return processingInstruction.parse(source, markupStartChunk, deliverParse);
-         } else if (markupStartChunk.text === '<!') {
-            return declaration.parse(source, markupStartChunk, deliverParse);
+         switch (markupStartChunk.text) {
+            case '<?':
+               return processingInstruction.parse(source, markupStartChunk, deliverParse);
+            case '<!':
+               return declaration.parse(source, markupStartChunk, deliverParse);
          }
       });
    }

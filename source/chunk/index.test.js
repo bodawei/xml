@@ -1,9 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range } from '../basic';
+import { Range, EntityLocation } from '../basic';
 
 import Chunk from './Chunk.js';
+
+const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing.
@@ -15,7 +17,8 @@ import Chunk from './Chunk.js';
 \**********************************************************************/
 
 function makeChunk(text, rangeMaker) {
-   return new Chunk(text, text, rangeMaker.makeRange(text));
+   const range = rangeMaker ? rangeMaker.makeRange(text) : PLACEHOLDER_RANGE;
+   return new Chunk(text, text, range);
 }
 
 /**********************************************************************\
@@ -56,7 +59,7 @@ class RangeMaker {
 class MockChunkSource {
 
    constructor(returnValues) {
-      this.returnValues = returnValues.concat([ '<< fewer values provided to MockChunkSource than were needed >>' ]);
+      this.returnValues = returnValues;
       this.queuedCalls = [];
 
       this.extractToObject = spyOn(this, 'extractToObject').and.callThrough();
@@ -85,6 +88,7 @@ class MockChunkSource {
       }
 
       this.queuedCalls.push({
+         type,
          callback,
       });
    }
@@ -96,8 +100,14 @@ class MockChunkSource {
 
          calls.forEach((qc) => {
             if (qc.obj) {
+               if (this.returnValues.length === 0) {
+                  throw new Error(`NO value provided to ${qc.name} in MockChunkSource.`);
+               }
                qc.obj[qc.name] = this.returnValues.shift();
             } else if (qc.callback) {
+               if (this.returnValues.length === 0) {
+                  throw new Error(`NO value provided for extraction type ${qc.type} in MockChunkSource.`);
+               }
                qc.callback(this.returnValues.shift());
             } else {
                throw new Error('Got an unknown queued value in MockChunkSource: ', JSON.stringify(qc));

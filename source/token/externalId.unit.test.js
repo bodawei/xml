@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, ErrorCollector, Range } from '../basic';
+import { EntityLocation, Range } from '../basic';
 import { Chunk } from '../chunk';
 import { WellFormedError } from '../error';
 
@@ -36,6 +36,24 @@ describe('externalId', () => {
 
       it('returns simple values', () => {
          externalId.parse(mockSource, [], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toHaveBeenCalledWith({
+            type: 'EXTERNAL_ID',
+            typeChunk: new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+            postTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            publicOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
+            publicChunk: new Chunk('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
+            publicCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
+            postPublicSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+            systemOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            systemChunk: new Chunk('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
+            systemCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+         });
+      });
+
+      it('accepts no terminators', () => {
+         externalId.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toHaveBeenCalledWith({
@@ -376,6 +394,12 @@ describe('externalId', () => {
             systemChunk: util.makeChunk('sys.xml', expectedRm),
             systemCloseQuoteChunk: util.makeChunk('"', expectedRm),
          };
+      });
+
+      it('reports no errors when no parsed value is passed in', () => {
+         externalId.checkWellFormed(undefined, mockErrorCollector);
+
+         expect(mockErrorCollector.check).not.toHaveBeenCalled();
       });
 
       it('reports an error if type is the wrong case', () => {

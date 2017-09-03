@@ -247,7 +247,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'babel:testNode',
       'copy:testNode',
-//      'jasmine_node:dist',
+      'jasmine_node:dist',
       'eslint',
 //      'checkkeys',
       'testreport',

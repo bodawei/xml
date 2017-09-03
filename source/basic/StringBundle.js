@@ -148,7 +148,8 @@ class StringBundle {
       if (typeof localeName !== 'string') {
          throw new Error('Must pass in the name of a locale.');
       }
-      if (typeof localeStrings !== 'object') {
+      const type = typeof localeStrings; // do this separately to help code coverage!
+      if (type !== 'object') {
          throw new Error('Must pass an object of key/strings.');
       }
 

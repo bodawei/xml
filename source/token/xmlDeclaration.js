@@ -1,6 +1,5 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from '../basic';
 import { WellFormedError } from '../error';
 
 import util from './util.js';
@@ -54,17 +53,17 @@ function addParam(source, params, nameChunk, deliverResults) {
    };
    params.push(param);
 
-   source.extractToObject('space', undefined, param, 'postNameSpaceChunk');
+   source.extractToObject('space', param, 'postNameSpaceChunk');
    source.extractToObject('match', '=', param, 'equalChunk');
-   source.extractToObject('space', undefined, param, 'postEqualSpaceChunk');
-   source.extract('peekChar', undefined, (quoteChunk) => {
+   source.extractToObject('space', param, 'postEqualSpaceChunk');
+   source.extract('peekChar', (quoteChunk) => {
       const gotQuote = quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'');
 
       if (gotQuote) {
-         source.extractToObject('char', undefined, param, 'openQuoteChunk');
+         source.extractToObject('char', param, 'openQuoteChunk');
          source.extractToObject('all', [ quoteChunk.text ], param, 'valueChunk');
          source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk');
-         source.extractToObject('space', undefined, param, 'trailingSpaceChunk');
+         source.extractToObject('space', param, 'trailingSpaceChunk');
       }
 
       source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {

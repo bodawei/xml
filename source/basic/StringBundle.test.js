@@ -199,6 +199,12 @@ describe('StringBundle', () => {
          }).toThrowError('Must pass an object of key/strings.');
       });
 
+      it('throws an error if strings is undefined', () => {
+         expect(() => {
+            bundle.addLocale('fr-CA');
+         }).toThrowError('Must pass an object of key/strings.');
+      });
+
       it('adds the strings', () => {
          bundle.addLocale('fr-CA', { TEST3: 'Je ne parlez pas francais!'});
          bundle.preferredLocale = 'fr-CA';

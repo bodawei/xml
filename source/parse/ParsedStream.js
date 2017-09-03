@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, Range } from '../basic';
+import { EntityMetaData } from '../basic';
 import { ChunkSource, defaultExtractors } from '../chunk';
 
 import Parser from './Parser.js';

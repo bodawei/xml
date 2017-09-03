@@ -266,7 +266,7 @@ describe('ChunkSource', () => {
 
       it('throws an error if type is not known', () => {
          expect(() => {
-            source.extract('bogus');
+            source.extract('bogus', () => {});
          }).toThrowError('"bogus" is not a known extractor type.');
       });
 

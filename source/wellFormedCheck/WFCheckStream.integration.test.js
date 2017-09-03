@@ -23,10 +23,11 @@ describe('WFCheckStream (integration)', () => {
       it('reports an error and the parsed value when the input name is bad', (done) => {
          const results = [];
 
+         const error = new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID, [ '$badName' ],
+                  new Offset(new EntityLocation(), 10, 0, 10), new Offset(new EntityLocation(), 0, 0, 0));
          function evaluate() {
             expect(results).toEqual([
-               new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID, [ '$badName' ],
-                  new Offset(new EntityLocation(), 10, 0, 10), new Offset(new EntityLocation(), 0, 0, 0)),
+               error,
                {
                   type: 'DOCTYPE_START',
                   openChunk: new Chunk('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),

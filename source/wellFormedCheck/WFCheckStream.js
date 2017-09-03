@@ -16,7 +16,7 @@ class WFChecker extends stream.Transform {
    }
 
    _transform(parsed, ignored, callback) {
-      let errorCollector = new ErrorCollector(parsed.openChunk, WellFormedError);
+      const errorCollector = new ErrorCollector(parsed.openChunk, WellFormedError);
 
       switch (parsed.type) {
          case 'xmldecl':

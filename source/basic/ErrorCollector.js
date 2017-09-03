@@ -95,7 +95,7 @@ class ErrorCollector {
          return;
       }
 
-      this.report(errorCode, [ nameChunk ? nameChunk.text : '' ]);
+      this.report(errorCode, [ nameChunk.text ]);
    }
 
    report(code, params, position) {

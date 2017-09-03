@@ -80,4 +80,47 @@ describe('ParsedStream', () => {
 
    });
 
+   describe('ENTITY', () => {
+
+      it('parse entity', (done) => {
+         const results = [];
+
+         function evaluate() {
+            expect(results).toEqual([ {
+               type: 'ENTITY_DECL',
+               openChunk: new Chunk('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
+               postOpenSpaceChunk: undefined,
+               declTypeChunk: new Chunk('ENTITY', 'ENTITY', new Range(new EntityLocation(), 2, 0, 2, 8, 0, 8)),
+               postDeclTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 8, 0, 8, 9, 0, 9)),
+               nameChunk: new Chunk('myEntity', 'myEntity', new Range(new EntityLocation(), 9, 0, 9, 17, 0, 17)),
+               postNameSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+               externalId: {
+                  type: 'EXTERNAL_ID',
+                  typeChunk: new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
+                  postTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+                  publicOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 25, 0, 25, 26, 0, 26)),
+                  publicChunk: new Chunk('pub.xml', 'pub.xml', new Range(new EntityLocation(), 26, 0, 26, 33, 0, 33)),
+                  publicCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 33, 0, 33, 34, 0, 34)),
+                  postPublicSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 34, 0, 34, 35, 0, 35)),
+                  systemOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 35, 0, 35, 36, 0, 36)),
+                  systemChunk: new Chunk('sys.xml', 'sys.xml', new Range(new EntityLocation(), 36, 0, 36, 43, 0, 43)),
+                  systemCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 43, 0, 43, 44, 0, 44)),
+               },
+               postExternalIdSpaceChunk: undefined,
+               closeChunk: new Chunk('>', '>', new Range(new EntityLocation(), 44, 0, 44, 45, 0, 45)),
+            } ]);
+
+            done();
+         }
+
+         parser.addText('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">');
+         parser.endText();
+
+         parser.on('data', (data) => results.push(data));
+         parser.on('end', evaluate);
+      });
+
+   });
+
+   // note '<!ENTITY myEntity SYSTEM "sys.xml" "pub.xml">'  fails right now by hanging
 });

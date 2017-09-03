@@ -4,8 +4,7 @@ import Offset from '../basic/Offset.js';
 import Chunk from '../chunk/Chunk.js';
 
 /**********************************************************************\
- XmlError is a base type for all error objects.  It is a subtype of
- Error.
+ XmlError is a base type for all error objects.
 
  This provides a bunch of common logic for setting up properties for
  all errors, but this relies on several properties defined on the
@@ -32,49 +31,49 @@ import Chunk from '../chunk/Chunk.js';
     is a shortcut for making a common calling case easier.
 \**********************************************************************/
 
-function XmlError(id, params, place, contextOffset) {
-   this.id = id;
+class XmlError {
+   constructor(id, params, place, contextOffset) {
+      this.id = id;
 
-   if (params instanceof Offset || params instanceof Chunk) {
-      contextOffset = place;
-      place = params;
-      params = [];
-   }
-
-   params = params || [];
-
-   if (place instanceof Chunk) {
-      place = place.range[0].getEndOffset();
-   } else if (place instanceof Offset) {
-      place = place.clone();
-   }
-
-   if (contextOffset) {
-      if (contextOffset instanceof Chunk) {
-         contextOffset = contextOffset.range[0].getStartOffset();
-      } else if (contextOffset instanceof Offset) {
-         contextOffset = contextOffset.clone();
+      if (params instanceof Offset || params instanceof Chunk) {
+         contextOffset = place;
+         place = params;
+         params = [];
       }
+
+      params = params || [];
+
+      if (place instanceof Chunk) {
+         place = place.range[0].getEndOffset();
+      } else if (place instanceof Offset) {
+         place = place.clone();
+      }
+
+      if (contextOffset) {
+         if (contextOffset instanceof Chunk) {
+            contextOffset = contextOffset.range[0].getStartOffset();
+         } else if (contextOffset instanceof Offset) {
+            contextOffset = contextOffset.clone();
+         }
+      }
+
+      // Get the actual constructor object used so we can get at CODE and STRING
+      const constructor = this.constructor;
+
+      if (!constructor.CODE[id]) {
+         const message = 'The Error id "' + id + '" is not a legal id.';
+
+         throw Error(id ? message : 'No error id passed.');
+      }
+
+      this.code = constructor.CODE[id];
+      this.message = constructor.STRING.substitute(id, params);
+      this.place = place ? place.clone() : undefined;
+      this.context = [ {
+         offset: contextOffset,
+      } ];
+
    }
-
-   // Get the actual constructor object used so we can get at CODE and STRING
-   const constructor = this.constructor;
-
-   if (!constructor.CODE[id]) {
-      const message = 'The Error id "' + id + '" is not a legal id.';
-
-      throw Error(id ? message : 'No error id passed.');
-   }
-
-   this.code = constructor.CODE[id];
-   this.message = constructor.STRING.substitute(id, params);
-   this.place = place ? place.clone() : undefined;
-   this.context = [ {
-      offset: contextOffset,
-   } ];
-
 }
-
-XmlError.prototype = new Error();
 
 module.exports = XmlError;

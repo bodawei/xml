@@ -27,7 +27,7 @@ describe('WFCheckStream', () => {
       checker.on('end', () => {
          expect(results).toEqual([
             new WellFormedError('XMLDECL_ATTR_INVALID_CASE', [ 'version', 'VERSION' ],
-               new Offset(new EntityLocation(), 6, 0, 6)),
+               new Offset(new EntityLocation(), 2, 0, 2), new Offset(new EntityLocation(), 0, 0, 0)),
             {
                type: 'xmldecl',
                openChunk: new Chunk('<?', '<?', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),

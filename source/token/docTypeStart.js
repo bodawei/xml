@@ -1,6 +1,5 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from '../basic';
 import { WellFormedError } from '../error';
 
 import util from './util.js';

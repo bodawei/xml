@@ -40,7 +40,7 @@ describe('docTypeStart', () => {
 
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'DOCTYPE_START',
             openChunk: undefined,
             postOpenSpaceChunk: undefined,
@@ -50,7 +50,7 @@ describe('docTypeStart', () => {
             postNameSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
             postExternalIdSpaceChunk: undefined,
             startInternalSubsetChunk: undefined,
-         });
+         } ] ]);
       });
 
       it('uses whatever preliminary declaration values were passed in', () => {
@@ -63,12 +63,12 @@ describe('docTypeStart', () => {
 
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({
+         expect(callback.calls.allArgs()).toEqual([ [ jasmine.objectContaining({
             openChunk: 'a',
             postOpenSpaceChunk: 'b',
             declTypeChunk: 'c',
             postDeclTypeSpaceChunk: 'd',
-         }));
+         }) ] ]);
       });
 
       it('returns all values', () => {
@@ -91,7 +91,7 @@ describe('docTypeStart', () => {
 
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'DOCTYPE_START',
             openChunk: util.makeChunk('<!', expectedRm),
             postOpenSpaceChunk: util.makeChunk(' ', expectedRm),
@@ -101,7 +101,7 @@ describe('docTypeStart', () => {
             postNameSpaceChunk: util.makeChunk('  ', expectedRm),
             postExternalIdSpaceChunk: util.makeChunk('\t', expectedRm),
             startInternalSubsetChunk: util.makeChunk('[', expectedRm),
-         });
+         } ] ]);
       });
 
    });

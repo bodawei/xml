@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../basic';
+import { Range } from '../basic';
 
 import { toEqualChunkText, toEqualChunkTexts, toEqualChunkRange } from './beforeEach.js';
 import Chunk from './Chunk.js';

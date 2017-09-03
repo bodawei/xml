@@ -12,7 +12,7 @@ function parse(source, startChunk, deliverParsed) {
       openChunk: startChunk,
    };
 
-   source.extractToObject('space', undefined, results, 'postOpenSpaceChunk');
+   source.extractToObject('space', results, 'postOpenSpaceChunk');
    source.extractToObject('word', [ '?>' ], results, 'targetChunk');
 
    source.extract('space', (chunk) => {
@@ -31,15 +31,7 @@ function parse(source, startChunk, deliverParsed) {
    });
 }
 
-function checkWellFormed() {
-}
-
-function makeToken() {
-}
-
 module.exports = {
    TYPE: PROCESSING_INSTRUCTION,
    parse,
-   checkWellFormed,
-   makeToken,
 };

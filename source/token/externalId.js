@@ -1,6 +1,5 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector } from '../basic';
 import { Chunk } from '../chunk';
 import { WellFormedError } from '../error';
 
@@ -34,7 +33,11 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
     with no contents
 \**********************************************************************/
 
-function parse(source, terminators = [], deliverParsed) {
+function parse(source, terminators, deliverParsed) {
+   if (typeof terminators === 'function') {
+      deliverParsed = terminators;
+      terminators = [];
+   }
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const parsed = {
       type: EXTERNAL_ID,
@@ -87,7 +90,7 @@ function getQuotedLiteral(source, parsed, prefix, done) {
       }
 
       source.extractToObject('char', parsed, prefix + 'OpenQuoteChunk');
-      source.extractToObject('all', parsed, prefix + 'Chunk');
+      source.extractToObject('all', [ quoteChunk.text ], parsed, prefix + 'Chunk');
 
       source.extract('match', quoteChunk.text, (closeChunk) => {
          if (!parsed[prefix + 'Chunk']) {
@@ -109,7 +112,7 @@ function getQuotedLiteral(source, parsed, prefix, done) {
 // rename EXTERNALID_PUBLIC_NO_LEADING_SPACE
 // add EXTERNALID_PUBLIC_NO_CLOSE_QUOTE EXTERNALID_SYSTEM_NO_CLOSE_QUOTE
 
-function checkWellFormed(parsed, ec, systemRequired, openChunk) {
+function checkWellFormed(parsed, ec, systemRequired) {
    if (!parsed) {
       return;
    }

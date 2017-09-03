@@ -21,7 +21,7 @@ class TokenStream extends stream.Transform {
             this.push(docTypeStart.makeToken(parsed));
             break;
          default:
-            this.push(parsed);
+            throw new Error(`Unknown parsed type "${parsed.type}" encountered.`);
       }
 
       done();

@@ -117,6 +117,12 @@ class ChunkSource {
    }
 
    extractToObject(type, params, obj, name) {
+      if (typeof name === 'undefined') {
+         name = obj;
+         obj = params;
+         params = undefined;
+      }
+
       this.extract(type, params, (chunk) => {
          obj[name] = chunk;
       });
@@ -130,9 +136,6 @@ class ChunkSource {
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor;
 
-      if (!extractorDefinition) {
-         throw new Error(`"${type}" is not a known extractor type.`);
-      }
       if (typeof deliverChunk !== 'function') {
          throw new Error('Must pass a callback function of the form function(chunk|undefined):void to extract().');
       }
@@ -146,6 +149,10 @@ class ChunkSource {
             params = extractorDefinition.params;
          }
       } else {
+         // put this check here to make code coverage happier. babel turns typeof object into a check for undef.
+         if (!extractorDefinition) {
+            throw new Error(`"${type}" is not a known extractor type.`);
+         }
          extractorConstructor = extractorDefinition;
       }
 

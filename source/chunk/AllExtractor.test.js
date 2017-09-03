@@ -3,7 +3,7 @@
 
 import { EntityLocation, Range } from '../basic';
 
-import AllExtractor from './AllExtractor.js'
+import AllExtractor from './AllExtractor.js';
 import Extractor from './Extractor.js';
 import Segment from './Segment.js';
 
