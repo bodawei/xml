@@ -1,6 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+const WellFormedError = require('../error').WellFormedError;
+
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
 \**********************************************************************/
@@ -43,6 +45,7 @@ class MockErrorCollector {
       this.errors.push({
          lastPosition: this._lastNotNull,
          position: this._lastPos,
+         params: name ? [ name.text ] : undefined,
          name,
          id,
          version,
@@ -73,20 +76,43 @@ function toReportError(util) {
          let message = `No error with the id ${expectedError.id} reported.`;
 
          for (let index = 0; index < errors.length; index++) {
-            const errEntry = errors[index];
+            const actual = errors[index];
 
-            if (expectedError.id === errEntry.id) {
-               if (!util.equals(expectedError.params, errEntry.params)) {
+            if (expectedError.id === actual.id) {
+               const errMsg = WellFormedError.STRING.lookup(actual.id || '');
+
+               if (!errMsg) {
+                  pass = false;
+                  message = `The error ${expectedError.id} is not a legal error ID.`;
+                  break;
+               } else {
+                  let count = 0;
+                  let offset = errMsg.indexOf('{');
+
+                  while (offset !== -1) {
+                     count++;
+                     offset = errMsg.indexOf('{', offset + 1);
+                  }
+
+                  const params = actual.params || [];
+                  if (count !== params.length) {
+                     pass = false;
+                     message = `${expectedError.id} expects ${count} parameters, but ${params.length} found.`;
+                     break;
+                  }
+               }
+
+               if (!util.equals(expectedError.params, actual.params)) {
                   message = `Parameters for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${errEntry.params}\n  Expected: ${expectedError.params}`;
-               } else if (!util.equals(expectedError.position, errEntry.position)) {
+                     `  Actual: ${actual.params}\n  Expected: ${expectedError.params}`;
+               } else if (!util.equals(expectedError.position, actual.position)) {
                   message = `Positions for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${JSON.stringify(errEntry.position)}\n` +
+                     `  Actual: ${JSON.stringify(actual.position)}\n` +
                      `  Expected: ${JSON.stringify(expectedError.position)}`;
                } else if (expectedError.lastPosition &&
-                  !util.equals(expectedError.lastPosition, errEntry.lastPosition)) {
+                  !util.equals(expectedError.lastPosition, actual.lastPosition)) {
                   message = `Last positions for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${JSON.stringify(errEntry.lastPosition)}\n` +
+                     `  Actual: ${JSON.stringify(actual.lastPosition)}\n` +
                      `  Expected: ${JSON.stringify(expectedError.lastPosition)}`;
                } else {
                   pass = true;

@@ -157,7 +157,7 @@ describe('docTypeStart', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NAME_INVALID,
-            params: undefined,
+            params: [ 'elmentName' ],
             position: parsed.nameChunk,
          });
       });
