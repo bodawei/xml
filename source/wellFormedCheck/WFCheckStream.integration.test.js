@@ -18,6 +18,45 @@ describe('WFCheckStream (integration)', () => {
       parsedStream.pipe(checker);
    });
 
+   describe('XML Declaration', () => {
+
+      it('reports an error if the version attribute is the wrong case', (done) => {
+         const results = [];
+
+         checker.on('data', (data) => {
+            results.push(data);
+         });
+         checker.on('end', () => {
+            expect(results).toEqual([
+               new WellFormedError('XMLDECL_ATTR_INVALID_CASE', [ 'version', 'VERSION' ],
+                  new Offset(new EntityLocation(), 6, 0, 6), new Offset(new EntityLocation(), 0, 0, 0)),
+               {
+                  type: 'XML_DECLARATION',
+                  openChunk: new Chunk('<?', '<?', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
+                  postOpenSpaceChunk: undefined,
+                  targetChunk: new Chunk('xml', 'xml', new Range(new EntityLocation(), 2, 0, 2, 5, 0, 5)),
+                  postTargetSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 5, 0, 5, 6, 0, 6)),
+                  params: [ {
+                     nameChunk: new Chunk('VERSION', 'VERSION', new Range(new EntityLocation(), 6, 0, 6, 13, 0, 13)),
+                     postNameSpaceChunk: undefined,
+                     equalChunk: new Chunk('=', '=', new Range(new EntityLocation(), 13, 0, 13, 14, 0, 14)),
+                     postEqualSpaceChunk: undefined,
+                     openQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
+                     valueChunk: new Chunk('1.0', '1.0', new Range(new EntityLocation(), 15, 0, 15, 18, 0, 18)),
+                     closeQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+                     trailingSpaceChunk: undefined,
+                  } ],
+                  closeChunk:  new Chunk('?>', '?>', new Range(new EntityLocation(), 19, 0, 19, 21, 0, 21)),
+               },
+            ]);
+            done();
+         });
+         parsedStream.addText('<?xml VERSION="1.0"?>');
+         parsedStream.endText();
+      });
+
+   });
+
    describe('DOCTYPE', () => {
 
       it('reports an error and the parsed value when the input name is bad', (done) => {
@@ -52,7 +91,7 @@ describe('WFCheckStream (integration)', () => {
                   closeInternalSubsetChunk: new Chunk(']', ']', new Range(new EntityLocation(), 36, 0, 36, 37, 0, 37)),
                   postCloseInternalSubsetSpaceChunk: undefined,
                   closeChunk: new Chunk('>', '>', new Range(new EntityLocation(), 37, 0, 37, 38, 0, 38)),
-               }
+               },
             ]);
 
             done();
@@ -71,7 +110,7 @@ describe('WFCheckStream (integration)', () => {
          const error = new WellFormedError(WellFormedError.ID.DOCTYPE_NO_CLOSE, undefined,
                   new Offset(new EntityLocation(), 37, 0, 37), new Offset(new EntityLocation(), 0, 0, 0));
          function evaluate() {
-            expect(results).toEqual([{
+            expect(results).toEqual([ {
                type: 'DOCTYPE_START',
                openChunk: new Chunk('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
                postOpenSpaceChunk: undefined,
@@ -91,13 +130,13 @@ describe('WFCheckStream (integration)', () => {
                postExternalIdSpaceChunk: undefined,
                startInternalSubsetChunk: new Chunk('[', '[', new Range(new EntityLocation(), 35, 0, 35, 36, 0, 36)),
             },
-            error,
+               error,
             {
                type: 'DOCTYPE_END',
                closeInternalSubsetChunk: new Chunk(']', ']', new Range(new EntityLocation(), 36, 0, 36, 37, 0, 37)),
                postCloseInternalSubsetSpaceChunk: undefined,
                closeChunk: undefined,
-            }]);
+            } ]);
 
             done();
          }

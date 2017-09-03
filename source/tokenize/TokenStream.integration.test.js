@@ -23,7 +23,7 @@ describe('TokenStream', () => {
 
          function evaluate() {
             expect(results).toEqual([
-               new docTypeStart.DocTypeStart('one', undefined, false, []),
+               new docTypeStart.Token('one', undefined, false, []),
                new docTypeEnd.Token([]),
             ]);
 

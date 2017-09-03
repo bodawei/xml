@@ -378,7 +378,7 @@ describe('externalId', () => {
             type: 'EXTERNAL_ID',
             typeChunk: chunkUtil.makeChunk('PUBLIC'),
             postTypeSpaceChunk: chunkUtil.makeChunk(' '),
-            publicOpenQuoteChunk: chunkUtil.makeChunk('""'),
+            publicOpenQuoteChunk: chunkUtil.makeChunk('"'),
             publicChunk: chunkUtil.makeChunk('pub.xml'),
             publicCloseQuoteChunk: chunkUtil.makeChunk('"'),
             postPublicSpaceChunk: chunkUtil.makeChunk(' '),
@@ -401,6 +401,11 @@ describe('externalId', () => {
 
          expect(mockErrorCollector.report)
             .toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
+            params: [ 'PUBLIC', 'public' ],
+            position: parsed.typeChunk,
+         });
       });
 
       it('reports an error if there is no PUBLIC value', () => {
@@ -408,7 +413,11 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_NO_PUBLIC);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
+            params: undefined,
+            lastPosition: parsed.publicOpenQuoteChunk,
+         });
       });
 
       it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
@@ -416,7 +425,11 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
+            params: undefined,
+            lastPosition: undefined,
+         });
       });
 
       it('reports an error if there is no system chunk when SYSTEM is specified', () => {
@@ -425,7 +438,11 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_NO_SYSTEM);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_NO_SYSTEM,
+            params: undefined,
+            lastPosition: parsed.systemOpenQuoteChunk,
+         });
       });
 
       it('reports an error if there is no space after a public part', () => {
@@ -433,16 +450,24 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
+            params: undefined,
+            lastPosition: parsed.publicCloseQuoteChunk,
+         });
       });
 
-      it('reports no an error if there is no space after a public part, and no public part', () => {
+      it('reports an error if there is no space after a public part, and no public part', () => {
          delete parsed.publicChunk;
          delete parsed.postPublicSpaceChunk;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report.calls.count()).toEqual(1); // because of no public
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
+            params: undefined,
+            lastPosition: parsed.publicOpenQuoteChunk,
+         });
       });
 
       it('reports an error if there is no quote around the system value', () => {
@@ -450,7 +475,11 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE,
+            params: undefined,
+            lastPosition: parsed.postPublicSpaceChunk,
+         });
       });
 
       it('reports an error if there is no quote at the end of the system value', () => {
@@ -458,7 +487,11 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE,
+            params: undefined,
+            lastPosition: parsed.systemChunk,
+         });
       });
 
    });

@@ -81,7 +81,7 @@ function makeToken(parsed) {
 
 module.exports = {
    TYPE: DOCTYPE_START,
-   DocTypeStart,
+   Token: DocTypeStart,
    parse,
    checkWellFormed,
    makeToken,

@@ -130,43 +130,36 @@ describe('docTypeStart', () => {
          expect(errors).toEqual(mockErrorCollector);
       });
 
-      it('sets the position before checking the name', () => {
-         parsed.nameChunk = undefined;
-
-         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
-
-         expect(mockErrorCollector.setPos).toHaveBeenCalledWith(parsed.nameChunk);
-         expect(mockErrorCollector.setPos).toHaveBeenCalledBefore(mockErrorCollector.report);
-         expect(mockErrorCollector.setPos).toHaveBeenCalledTimes(1);
-      });
-
       it('reports an error if there is no elment name', () => {
          parsed.nameChunk = undefined;
 
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_NO_NAME);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.DOCTYPE_NO_NAME,
+            params: undefined,
+            position: undefined,
+         });
       });
 
       it('reports no error if there is an elment name', () => {
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).not.toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_NO_NAME);
-      });
-
-      it('does not reset the position before checking the name validity', () => {
-         parsed.nameChunk = undefined;
-
-         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
-
-         expect(mockErrorCollector.setPos).toHaveBeenCalledTimes(1);
+         expect(mockErrorCollector).not.toReportError({
+            id: WellFormedError.ID.DOCTYPE_NO_NAME,
+            params: undefined,
+            position: undefined,
+         });
       });
 
       it('checks whether the name is valid', () => {
          docTypeStart.checkWellFormed(parsed, mockErrorCollector, true, 1, 2);
 
-         expect(mockErrorCollector.checkName)
-            .toHaveBeenCalledWith(parsed.nameChunk, WellFormedError.ID.DOCTYPE_NAME_INVALID, 1, 2);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.DOCTYPE_NAME_INVALID,
+            params: undefined,
+            position: parsed.nameChunk,
+         });
       });
 
       it('checks whether externalId is valid', () => {

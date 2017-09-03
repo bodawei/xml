@@ -5,6 +5,7 @@ import { WellFormedError } from '../error';
 import util from './util.js';
 import xmlToken from './XmlToken.js';
 
+const XML_DECLARATION = 'XML_DECLARATION';
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 
 const XML_DECL_PARAMS = {
@@ -27,7 +28,7 @@ class XmlDeclaration extends xmlToken.Token {
 
 function parse(source, preliminary, deliverParsed) {
    const results = {
-      type: 'xmldecl',
+      type: XML_DECLARATION,
       openChunk: preliminary.openChunk,
       postOpenSpaceChunk: preliminary.postOpenSpaceChunk,
       targetChunk: preliminary.targetChunk,
@@ -93,7 +94,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       const valueText = util.textOrBlank(param.valueChunk);
       const lcValue = valueText.toLocaleLowerCase();
 
-      err.setPos(parsed.nameChunk);
+      err.setPos(param.nameChunk);
 
       if (index === 0) {
          err.check(!parsed.postTargetSpaceChunk, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
@@ -106,6 +107,29 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
          err.check(param.nameChunk.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
 
+      switch (lcName) {
+         case 'version':
+            foundVersion = true;
+            err.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
+            break;
+         case 'encoding':
+            foundEncoding = true;
+            if (isDocEntity) {
+               err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
+            }
+            break;
+         case 'standalone':
+            seenStandalone = true;
+            if (!isDocEntity) {
+               err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
+            }
+
+            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameChunk);
+            break;
+         default:
+            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
+      }
+
       err.setPos(param.openQuoteChunk);
       err.check(!param.equalChunk, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
       err.check(!param.openQuoteChunk, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
@@ -116,32 +140,18 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
 
       switch (lcName) {
          case 'version':
-            foundVersion = true;
-            err.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
             err.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
-            foundEncoding = true;
-            if (isDocEntity) {
-               err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
-            }
             if (valueText) {
                err.check(!valueText.match(/^[A-Za-z][-A-Za-z0-9._]*$/), WFEID.XMLDECL_ENCODING_INVALID,
                   [ valueText ]);
             }
             break;
          case 'standalone':
-            seenStandalone = true;
-            if (!isDocEntity) {
-               err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
-            }
-
-            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameChunk);
             err.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
             err.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
             break;
-         default:
-            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
       }
    }
 
@@ -177,6 +187,7 @@ function extractParams(parsed) {
 }
 
 module.exports = {
+   TYPE: XML_DECLARATION,
    Token: XmlDeclaration,
    parse,
    checkWellFormed,

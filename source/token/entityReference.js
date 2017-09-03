@@ -51,9 +51,17 @@ function parse(source, deliverParsed) {
 function checkWellFormed(parsed, ec) {
    const entityName = util.textOrBlank(parsed.entityNameChunk);
 
+   ec.setPos(parsed.openChunk);
+   ec.setPos(parsed.postOpenSpaceChunk);
    ec.check(parsed.postOpenSpaceChunk, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]); // @@@ param
+
+   ec.setPos(parsed.entityNameChunk);
    ec.check(!parsed.entityNameChunk, WFEID.REFERENCE_NO_NAME);
+
+   ec.setPos(parsed.postEntityNameSpaceChunk);
    ec.check(parsed.postEntityNameSpaceChunk, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+
+   ec.setPos(parsed.closeChunk);
    ec.check(!parsed.closeChunk, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
 }
 

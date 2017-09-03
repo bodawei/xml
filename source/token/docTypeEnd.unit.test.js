@@ -62,7 +62,7 @@ describe('docTypeEnd', () => {
 
       it('returns after parsing an incomplete input', () => {
          mockSource = new chunkUtil.MockChunkSource([
-            undefined, 
+            undefined,
             undefined,
             undefined,
          ]);
@@ -118,7 +118,11 @@ describe('docTypeEnd', () => {
 
          docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_NO_CLOSE);
+         expect(mockErrorCollector).not.toReportError({
+            id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
+            params: undefined,
+            position: parsed.postCloseInternalSubsetSpaceChunk,
+         });
       });
 
       it('reports an error if there is a "]", but there was no opening "["', () => {
@@ -126,7 +130,11 @@ describe('docTypeEnd', () => {
 
          docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE);
+         expect(mockErrorCollector).not.toReportError({
+            id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
+            params: undefined,
+            position: parsed.postCloseInternalSubsetSpaceChunk,
+         });
       });
 
    });

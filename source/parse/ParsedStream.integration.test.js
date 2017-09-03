@@ -24,7 +24,7 @@ describe('ParsedStream', () => {
          parser.on('end', () => {
             expect(results).toEqual([
                {
-                  type: 'xmldecl',
+                  type: 'XML_DECLARATION',
                   openChunk: new Chunk('<?', '<?', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
                   postOpenSpaceChunk: undefined,
                   targetChunk: new Chunk('xml', 'xml', new Range(new EntityLocation(), 2, 0, 2, 5, 0, 5)),

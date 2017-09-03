@@ -470,7 +470,12 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_NAME);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NO_NAME,
+            params: undefined,
+            position: undefined,
+            lastPosition: undefined,
+         });
       });
 
       it('checks the name validity', () => {
@@ -485,17 +490,24 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ 'entityName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
+            params: [ 'entityName' ],
+            position: undefined,
+            lastPosition: parsed.nameChunk,
+         });
       });
 
-      it('reports an error if there is EnitytValue or ExternalID', () => {
+      it('reports an error if there is no EnitytValue or ExternalID', () => {
          delete parsed.entityValue;
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_VALUE, [ 'entityName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
+            params: [ 'entityName' ],
+            position: parsed.postNameSpaceChunk, // nothing after that
+         });
       });
 
       it('reports an error if there was no closing', () => {
@@ -503,8 +515,12 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_CLOSE, [ 'entityName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
+            params: [ 'entityName' ],
+            position: undefined,
+            lastPosition: parsed.postNameSpaceChunk,
+         });
       });
 
    });

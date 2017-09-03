@@ -19,7 +19,7 @@ class WFChecker extends stream.Transform {
       const errorCollector = new ErrorCollector(parsed.openChunk, WellFormedError);
 
       switch (parsed.type) {
-         case 'xmldecl':
+         case 'XML_DECLARATION':
             xmlDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
             errorCollector.getErrors().forEach(error => this.push(error));
             break;

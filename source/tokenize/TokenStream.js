@@ -14,13 +14,13 @@ class TokenStream extends stream.Transform {
 
    _transform(parsed, ignored, done) {
       switch (parsed.type) {
-         case 'xmldecl':
+         case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));
             break;
-         case 'DOCTYPE_START':
+         case docTypeStart.TYPE:
             this.push(docTypeStart.makeToken(parsed));
             break;
-         case 'DOCTYPE_END':
+         case docTypeEnd.TYPE:
             this.push(docTypeEnd.makeToken(parsed));
             break;
          case entityDeclaration.TYPE:

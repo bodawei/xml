@@ -2,19 +2,12 @@
 
 import { WellFormedError } from '../error';
 
-import util from './util.js';
 import xmlToken from './xmlToken.js';
-import externalId from './externalId.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_END = 'DOCTYPE_END';
 
 class DocTypeEnd extends xmlToken.Token {
-
-   constructor(chunks) {
-      super(chunks);
-   }
-
 }
 
 /**********************************************************************\
@@ -45,7 +38,7 @@ function parse(source, deliverParsed) {
    });
 }
 
-function checkWellFormed(parsed, startParsed, ec, isDocEntity, version, revision) {
+function checkWellFormed(parsed, startParsed, ec) {
    ec.setPos(startParsed.declTypeChunk);
    ec.setPos(startParsed.postDeclTypeSpaceChunk);
    ec.setPos(startParsed.nameChunk);
@@ -61,7 +54,7 @@ function checkWellFormed(parsed, startParsed, ec, isDocEntity, version, revision
    return ec;
 }
 
-function makeToken(parsed) {
+function makeToken() {
    return new DocTypeEnd([]);
 }
 

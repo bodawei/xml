@@ -33,7 +33,7 @@ describe('xmlDeclaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            type: 'xmldecl',
+            type: 'XML_DECLARATION',
             openChunk: undefined,
             postOpenSpaceChunk: undefined,
             targetChunk: undefined,
@@ -132,8 +132,11 @@ describe('xmlDeclaration', () => {
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE, [ 'version', 'VERSION' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE,
+            params: [ 'version', 'VERSION' ],
+            position: parsed.params[0].nameChunk,
+         });
       });
 
       it('reports an error if a encoding is in the wrong order', () => {
@@ -143,24 +146,34 @@ describe('xmlDeclaration', () => {
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
+            params: undefined,
+            position: parsed.params[2].nameChunk,
+         });
       });
 
-      it('reports no error if encoding has no value', () => {
+      it('reports an error if encoding has no value', () => {
          parsed.params[1].valueChunk = undefined;
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
-         expect(mockErrorCollector.report.calls.allArgs())
-            .toEqual([
-               [ WellFormedError.ID.ATTRIBUTE_NO_VALUE, [ 'encoding' ] ],
-            ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTRIBUTE_NO_VALUE,
+            params: [ 'encoding' ],
+            position: undefined,
+            lastPosition: parsed.params[1].openQuoteChunk,
+         });
       });
 
       it('reports an error if standalone specified on a non-doc entity', () => {
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.TEXTDECL_XTRA_STANDALONE);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.TEXTDECL_XTRA_STANDALONE,
+            params: undefined,
+            position: parsed.params[2].nameChunk,
+         });
       });
 
       it('reports an error if an unknown parameter is provided', () => {
@@ -168,7 +181,11 @@ describe('xmlDeclaration', () => {
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.XMLDECL_ATTR_UNKNOWN, [ 'bogus' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_ATTR_UNKNOWN,
+            params: [ 'bogus' ],
+            position: parsed.params[2].nameChunk,
+         });
       });
 
    });

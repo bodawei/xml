@@ -123,7 +123,11 @@ describe('entityReference', () => {
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.REFERENCE_XTRA_SPACE, [ 'theName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
+            params: [ 'theName' ],
+            position: parsed.postOpenSpaceChunk,
+         });
       });
 
       it('reports an error if there is no name', () => {
@@ -131,7 +135,11 @@ describe('entityReference', () => {
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.REFERENCE_NO_NAME);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.REFERENCE_NO_NAME,
+            params: undefined,
+            lastPosition: parsed.openChunk,
+         });
       });
 
       it('reports an error if there is a space after the entity name', () => {
@@ -139,8 +147,11 @@ describe('entityReference', () => {
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE, [ 'theName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
+            params: [ 'theName' ],
+            position: parsed.postEntityNameSpaceChunk,
+         });
       });
 
       it('reports an error if there was no closing', () => {
@@ -148,8 +159,11 @@ describe('entityReference', () => {
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.REFERENCE_NO_SEMICOLON, [ 'theName' ]);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,
+            params: [ 'theName' ],
+            lastPosition: parsed.entityNameChunk,
+         });
       });
 
    });

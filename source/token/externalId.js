@@ -130,10 +130,10 @@ function checkWellFormed(parsed, ec, systemRequired) {
       ec.setPos(parsed.publicOpenQuoteChunk);
       ec.check(!parsed.publicOpenQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
 
+      ec.setPos(parsed.publicChunk);
       if (!parsed.publicChunk) {
          ec.report(WFEID.EXTERNALID_NO_PUBLIC);
       } else {
-         ec.setPos(parsed.publicChunk);
          const match = PUBID_CHARS.exec(parsed.publicChunk.text);
          ec.check(!match || match[0] !== parsed.publicChunk.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
                   [ parsed.publicChunk.text[match[0].length] ]);
@@ -143,20 +143,17 @@ function checkWellFormed(parsed, ec, systemRequired) {
       ec.check(!parsed.publicCloseQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
    }
 
-   if (systemRequired || capitalType === 'SYSTEM') {
-      ec.check(!parsed.systemChunk, WFEID.EXTERNALID_NO_SYSTEM);
-   }
-
-   if (parsed.systemChunk) {
-      ec.setPos(parsed.systemOpenQuoteChunk);
-
+   if (systemRequired || capitalType === 'SYSTEM' || parsed.systemOpenQuoteChunk || parsed.systemChunk) {
       if (parsed.publicChunk) {
+         ec.setPos(parsed.postPublicSpaceChunk);
          ec.check(!parsed.postPublicSpaceChunk, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
+      ec.setPos(parsed.systemOpenQuoteChunk);
       ec.check(!parsed.systemOpenQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
 
       ec.setPos(parsed.systemChunk);
+      ec.check(!parsed.systemChunk, WFEID.EXTERNALID_NO_SYSTEM);
       // XmlText.validateText(externalId.systemId.literalChunk, this._entityMd, start, this);
 
       ec.setPos(parsed.systemCloseQuoteChunk);

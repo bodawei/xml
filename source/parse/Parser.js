@@ -19,6 +19,7 @@ class Parser {
          switch (chunk.text) {
             case '<':
                this._markupParse(source, deliverParse);
+               break;
             case ']':
                if (this.waitingForInternalClose) {
                   this._parseClose(source, deliverParse);
