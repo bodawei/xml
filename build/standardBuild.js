@@ -23,6 +23,7 @@ var DIST_DIR = './dist/';
 var NODE_MODULES_DIR = './node_modules';
 var DIST_NPM_DIR = DIST_DIR + '/npm/' + MODULE_NAME + '/';
 var DIST_FLAT_DIR = DIST_DIR + '/es5file/';
+var OUT_NODE_DIR = OUT_DIR + 'node_testing/';
 
 var JS_SOURCE_FILE_GLOB = [
    SOURCE_DIR + '**/*.js',
@@ -35,6 +36,10 @@ var JS_FILE_GLOB = [
 ];
 var OTHER_FILE_GLOB = [
    SOURCE_DIR + '/meta/*',
+];
+
+var JSON_FILES_GLOB = [
+   SOURCE_DIR + '**/*.json',
 ];
 
 // var xBABEL_PRESETS = [ ['env', {
@@ -58,7 +63,7 @@ module.exports = function standardBuild(grunt) {
 
    // Figure out what browsers we should be able to run on the current platform.
    if (/darwin/.test(process.platform)) {
-      browsers = [ 'Brave', 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
+      browsers = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
    } else if (/^win/.test(process.platform)) {
       browsers = [ 'Brave', 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
    } else {
@@ -70,14 +75,13 @@ module.exports = function standardBuild(grunt) {
       /* eslint-disable camelcase */
       jasmine_node: {
          dist: {
-            src: [ SOURCE_DIR + '**/*.js' ],
+            src: [ OUT_NODE_DIR + '**/*.js' ],
             options: {
                forceExit: true,
                jasmine: {
                   spec_dir: './',
                   spec_files: [
-                     SOURCE_DIR + '**/*.test.js',
-                     BUILD_DIR + '**/*.test.js',
+                     OUT_NODE_DIR + '**/*.test.js',
                   ],
                   reporters: {
                      // See https://github.com/bcaudan/jasmine-spec-reporter
@@ -93,7 +97,7 @@ module.exports = function standardBuild(grunt) {
                coverage: {
                   reportDir: OUT_DIR + 'nodeCoverage/node ' + process.version +
                      ' (' + os.type() + ' ' + os.release() + ')/',
-                  excludes: [ SOURCE_DIR + '**/*.test.js' ],
+                  excludes: [ OUT_NODE_DIR + '**/*.test.js' ],
                   report: [
                      'lcov',
                      'json-summary',
@@ -135,6 +139,12 @@ module.exports = function standardBuild(grunt) {
          },
       },
       copy: {
+         testNode: {
+            files: [ {
+               src: JSON_FILES_GLOB,
+               dest: OUT_NODE_DIR,
+            } ],
+         },
          distNpm: {
             files: [ {
                src: OTHER_FILE_GLOB,
@@ -153,6 +163,13 @@ module.exports = function standardBuild(grunt) {
             files: [ {
                src: JS_SOURCE_FILE_GLOB,
                dest: DIST_NPM_DIR + '/lib/',
+               expand: true,
+            } ],
+         },
+         testNode: {
+            files: [ {
+               src: JS_FILE_GLOB,
+               dest: OUT_NODE_DIR,
                expand: true,
             } ],
          },
@@ -228,6 +245,8 @@ module.exports = function standardBuild(grunt) {
       'mkout',
       'derivelocale',
       'test',
+      'babel:testNode',
+      'copy:testNode',
 //      'jasmine_node:dist',
       'eslint',
 //      'checkkeys',

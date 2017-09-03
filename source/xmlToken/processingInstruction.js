@@ -1,7 +1,5 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import error from '../error';
-
 import xmlDeclaration from './xmlDeclaration.js';
 
 const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
@@ -33,10 +31,10 @@ function parse(source, startChunk, deliverParsed) {
    });
 }
 
-function checkWellFormed(parsed, isDocEntity, version, revision) {
+function checkWellFormed() {
 }
 
-function makeToken(parsed) {
+function makeToken() {
 }
 
 module.exports = {

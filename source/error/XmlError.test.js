@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const EntityLocation = require('../Basic/EntityLocation.js');
-const Offset = require('../Basic/Offset.js');
-const Range = require('../Basic/Range.js');
-const StringBundle = require('../Basic/StringBundle.js');
+const EntityLocation = require('../basic/EntityLocation.js');
+const Offset = require('../basic/Offset.js');
+const Range = require('../basic/Range.js');
+const StringBundle = require('../basic/StringBundle.js');
 
 const Chunk = require('../chunk/Chunk.js');
 

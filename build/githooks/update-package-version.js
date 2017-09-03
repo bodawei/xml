@@ -27,10 +27,11 @@ function computeVersion(logs, final) {
       } else if (body.indexOf('BREAKING CHANGE') !== -1) {
          version = semver.inc(version, 'major');
       } else {
-         console.log('ERROR: Commit message has no keyword.', body);
+         //console.log('ERROR: Commit message has no keyword.', body);
       }
    }
 
+console.log('VERSION: ', version);
    return version;
 }
 

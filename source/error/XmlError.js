@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const Offset = require('../Basic/Offset.js');
+const Offset = require('../basic/Offset.js');
 const Chunk = require('../chunk/Chunk.js');
 
 /**********************************************************************\

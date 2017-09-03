@@ -9,6 +9,8 @@ const EntityLocation = require('../basic/EntityLocation.js');
 import basic from '../basic';
 import error from '../error';
 
+import util from '../chunk/index.test.js';
+
 import docTypeStart from './docTypeStart.js';
 
 describe('docTypeStart', () => {
@@ -20,19 +22,19 @@ describe('docTypeStart', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('a', 'a', new Range(1, 0, 0, 0, 1, 0, 1)),
             new Chunk(' ', ' ', new Range(1, 0, 0, 0, 1, 0, 1)),
             undefined,
             undefined,
          ]);
-         sourceRm = new RangeMaker(new EntityLocation());
+         sourceRm = new util.RangeMaker(new EntityLocation());
       });
 
       it('returns simple values', () => {
-         mockSource = new MockChunkSource([
-            makeChunk('a', sourceRm),
-            makeChunk(' ', sourceRm),
+         mockSource = new util.MockChunkSource([
+            util.makeChunk('a', sourceRm),
+            util.makeChunk(' ', sourceRm),
             undefined,
             undefined,
          ]);
@@ -73,19 +75,19 @@ describe('docTypeStart', () => {
       });
 
       it('returns all values', () => {
-         const expectedRm = new RangeMaker(new EntityLocation());
+         const expectedRm = new util.RangeMaker(new EntityLocation());
          const declStart = {
-            openChunk: makeChunk('<!', sourceRm),
-            postOpenSpaceChunk: makeChunk(' ', sourceRm),
-            declTypeChunk: makeChunk('DOCTYPE', sourceRm),
-            postDeclTypeSpaceChunk: makeChunk('\t', sourceRm),
+            openChunk: util.makeChunk('<!', sourceRm),
+            postOpenSpaceChunk: util.makeChunk(' ', sourceRm),
+            declTypeChunk: util.makeChunk('DOCTYPE', sourceRm),
+            postDeclTypeSpaceChunk: util.makeChunk('\t', sourceRm),
          };
 
-         mockSource = new MockChunkSource([
-            makeChunk('elemType', sourceRm),
-            makeChunk('  ', sourceRm),
-            makeChunk('\t', sourceRm),
-            makeChunk('[', sourceRm),
+         mockSource = new util.MockChunkSource([
+            util.makeChunk('elemType', sourceRm),
+            util.makeChunk('  ', sourceRm),
+            util.makeChunk('\t', sourceRm),
+            util.makeChunk('[', sourceRm),
          ]);
 
          docTypeStart.parse(mockSource, declStart, callback);
@@ -94,14 +96,14 @@ describe('docTypeStart', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'DOCTYPE_START',
-            openChunk: makeChunk('<!', expectedRm),
-            postOpenSpaceChunk: makeChunk(' ', expectedRm),
-            declTypeChunk: makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: makeChunk('\t', expectedRm),
-            nameChunk: makeChunk('elemType', expectedRm),
-            postNameSpaceChunk: makeChunk('  ', expectedRm),
-            postExternalIdSpaceChunk: makeChunk('\t', expectedRm),
-            startInternalSubsetChunk: makeChunk('[', expectedRm),
+            openChunk: util.makeChunk('<!', expectedRm),
+            postOpenSpaceChunk: util.makeChunk(' ', expectedRm),
+            declTypeChunk: util.makeChunk('DOCTYPE', expectedRm),
+            postDeclTypeSpaceChunk: util.makeChunk('\t', expectedRm),
+            nameChunk: util.makeChunk('elemType', expectedRm),
+            postNameSpaceChunk: util.makeChunk('  ', expectedRm),
+            postExternalIdSpaceChunk: util.makeChunk('\t', expectedRm),
+            startInternalSubsetChunk: util.makeChunk('[', expectedRm),
          });
       });
 
@@ -127,12 +129,12 @@ describe('docTypeStart', () => {
             return mockErrorCollector;
          });
 
-         expectedRm = new RangeMaker(new EntityLocation());
+         expectedRm = new util.RangeMaker(new EntityLocation());
          parsed = {
-            openChunk: makeChunk('<!', expectedRm),
-            declTypeChunk: makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: makeChunk('\t', expectedRm),
-            nameChunk: makeChunk('elmentName', expectedRm),
+            openChunk: util.makeChunk('<!', expectedRm),
+            declTypeChunk: util.makeChunk('DOCTYPE', expectedRm),
+            postDeclTypeSpaceChunk: util.makeChunk('\t', expectedRm),
+            nameChunk: util.makeChunk('elmentName', expectedRm),
          };
       });
 
@@ -199,7 +201,7 @@ describe('docTypeStart', () => {
 
       it('returns a token with the name found in the parsing', () => {
          const parsed = {
-            nameChunk: makeChunk('elementName', new RangeMaker(new EntityLocation())),
+            nameChunk: util.makeChunk('elementName', new util.RangeMaker(new EntityLocation())),
          };
 
          const token = docTypeStart.makeToken(parsed);
@@ -220,66 +222,3 @@ describe('docTypeStart', () => {
    });
 
 });
-
-function makeChunk(text, rangeMaker) {
-   return new Chunk(text, text, rangeMaker.makeRange(text));
-}
-
-class RangeMaker {
-
-   constructor(location) {
-      this.location = location;
-      this.index = 0;
-      this.column = 0;
-      this.row = 0;
-   }
-
-   makeRange(text) {
-      const oldIndex = this.index;
-      const oldRow = this.row;
-      const oldColumn = this.column;
-
-      this.index += text.length;
-      this.column += text.length;
-
-      return new Range(this.location, oldIndex, oldRow, oldColumn, this.index, this.row, this.column);
-   }
-}
-
-class MockChunkSource {
-
-   constructor(returnValues) {
-      this.returnValues = returnValues.concat([ '<< fewer values provided to MockChunkSource than were needed >>' ]);
-      this.queuedCalls = [];
-
-      this.extractToObject = spyOn(this, 'extractToObject').and.callThrough();
-      this.extract = spyOn(this, 'extract').and.callThrough();
-   }
-
-   extractToObject(type, params, obj, name) {
-      this.queuedCalls.push({
-         type,
-         params,
-         obj,
-         name,
-      });
-   }
-
-   extract(type, params, callback) {
-      this.queuedCalls.push({
-         callback,
-      });
-   }
-
-   respondInAsyncTime() {
-      this.queuedCalls.forEach((qc) => {
-         if (qc.obj) {
-            qc.obj[qc.name] = this.returnValues.shift();
-         } else if (qc.callback) {
-            qc.callback(this.returnValues.shift());
-         } else {
-            throw new Error('Got an unknown queued value in MockChunkSource: ', JSON.stringify(qc));
-         }
-      });
-   }
-}

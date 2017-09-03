@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-const StringBundle = require('../Basic/StringBundle.js');
+const StringBundle = require('../basic/StringBundle.js');
 const XmlError = require('./XmlError.js');
 const strings = require('../derive/SyntaxError.json');
 const codes = require('../derive/SyntaxError-code.json');
