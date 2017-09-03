@@ -1,12 +1,14 @@
 #!/bin/bash
 
+PRE_COMMIT_MSG_LOC="/tmp/git-repo-commit-temp.txt"
+
 if [ "`git rev-parse --abbrev-ref HEAD`" != "master" ]; then
    exit 0
 fi
 
-cat ./.git/.commit-temp > /tmp/xml-commit-message.txt
-cat $1 >> /tmp/xml-commit-message.txt
+# Append to what was set up in pre-commit
+cat "$1" >> "${PRE_COMMIT_MSG_LOC}"
 
-mv /tmp/xml-commit-message.txt $1
+mv "${PRE_COMMIT_MSG_LOC}" "$1"
 
 exit 0;

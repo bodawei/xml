@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.2.1",
+   "version": "0.1.0",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -15,6 +15,7 @@
       "babelify": "7.3.0",
       "browserify": "^14.4.0",
       "browserify-istanbul": "2.0.0",
+      "git-log-to-json": "1.0.2",
       "grunt": "1.0.1",
       "grunt-babel": "6.0.0",
       "grunt-browserify": "5.0.0",
@@ -30,7 +31,7 @@
       "jit-grunt": "0.10.0",
       "karma": "1.7.0",
       "karma-babel-preprocessor": "6.0.1",
-      "karma-brave-launcher": "git+https://github.com/bodawei/contrib-karma-brave-launcher.git",
+      "karma-brave-launcher": "file:contrib-karma-brave-launcher",
       "karma-browserify": "5.1.1",
       "karma-chrome-launcher": "2.1.1",
       "karma-coverage": "1.1.1",
@@ -46,10 +47,11 @@
       "karma-vivaldi-launcher": "git+https://github.com/bodawei/contrib-karma-vivaldi-launcher.git",
       "karma-yajson-reporter": "1.0.0",
       "mostly-quiet-grunt": "1.0.1",
-      "node-glob": "1.2.0",
       "node-properties-parser": "0.0.2",
       "phantomjs-prebuilt": "2.1.14",
-      "text-table-formatter": "0.1.0",
-      "git-log-to-json": "1.0.2"
+      "text-table-formatter": "0.1.0"
+   },
+   "dependencies": {
+      "npm": "^3.10.10"
    }
 }

@@ -1,33 +1,38 @@
 #!/bin/bash
 
+REPO_ROOT="`npm bin`/../../"
+PRE_COMMIT_MSG_LOC="/tmp/git-repo-commit-temp.txt"
+UPDATE_PACKAGE_SCRIPT="${REPO_ROOT}/build/githooks/update-package-version.js"
+
 if [ "`git rev-parse --abbrev-ref HEAD`" != "master" ]; then
    exit 0
 fi
 
 echo "PREPARING TO COMMIT TO MASTER"
 echo "----------------------------------------"
-git status --short
+git diff
 echo "----------------------------------------"
+
 # https://stackoverflow.com/questions/3417896/how-do-i-prompt-the-user-from-within-a-commit-msg-hook
 exec < /dev/tty
 
 read -p "Bug: " bug
-read -p "Kind [FEATURE, bugfix, incompatible]: " KIND
+read -p "Kind [feat, fix, incompatible]: " KIND
 
-if [ "$KIND" == "" -o "$KIND" == "feature" ]; then
+if [ "$KIND" == "" -o "$KIND" == "feat" ]; then
    KIND="feature"
-elif [ "$KIND" != "bugfix" -a "$KIND" != "incompatible" ]; then
+elif [ "$KIND" != "fix" -a "$KIND" != "incompatible" ]; then
    echo "Kind is not one of the required values: $KIND "
    exit -1
 fi
 
-cat << EOF > ./.git/.commit-temp
+cat << EOF > "${PRE_COMMIT_MSG_LOC}"
 $bug
 
 $KIND:
 EOF
 
-node ./.git/hooks/update-package.js $KIND
+node "${UPDATE_PACKAGE_SCRIPT}" $KIND
 
 git add package.json
 
