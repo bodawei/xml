@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import util from '../chunk/index.test.js';
+import chunkUtil from '../chunk/test';
 
 import declaration from './declaration.js';
 
@@ -17,9 +17,9 @@ describe('declaration', () => {
       });
 
       it('does not do any other parsing if no declaration type is found', () => {
-         const openChunk = util.makeChunk('<!');
-         mockSource = new util.MockChunkSource([
-            util.makeChunk(' '),
+         const openChunk = chunkUtil.makeChunk('<!');
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk(' '),
             undefined,
             undefined,
          ]);
@@ -29,8 +29,8 @@ describe('declaration', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'GENERIC_DECLARATION',
-            openChunk: util.makeChunk('<!'),
-            postOpenSpaceChunk: util.makeChunk(' '),
+            openChunk: chunkUtil.makeChunk('<!'),
+            postOpenSpaceChunk: chunkUtil.makeChunk(' '),
             declTypeChunk: undefined,
             postDeclTypeSpaceChunk: undefined,
          } ] ]);

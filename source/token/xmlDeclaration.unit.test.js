@@ -1,9 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
 
-import util from '../chunk/index.test.js';
+import * as chunkUtil from '../chunk/test';
 
 import xmlDeclaration from './xmlDeclaration.js';
 
@@ -18,14 +19,14 @@ describe('xmlDeclaration', () => {
       });
 
       it('gathers no value if thee is no quote after the equal sign', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('version'),
-            util.makeChunk(' '),
-            util.makeChunk('='),
-            util.makeChunk(' '),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('version'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('='),
+            chunkUtil.makeChunk(' '),
             undefined,
             undefined,
-            util.makeChunk('?>'),
+            chunkUtil.makeChunk('?>'),
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
@@ -38,28 +39,28 @@ describe('xmlDeclaration', () => {
             targetChunk: undefined,
             postTargetSpaceChunk: undefined,
             params: [ {
-               nameChunk: util.makeChunk('version'),
-               postNameSpaceChunk: util.makeChunk(' '),
-               equalChunk: util.makeChunk('='),
-               postEqualSpaceChunk: util.makeChunk(' '),
+               nameChunk: chunkUtil.makeChunk('version'),
+               postNameSpaceChunk: chunkUtil.makeChunk(' '),
+               equalChunk: chunkUtil.makeChunk('='),
+               postEqualSpaceChunk: chunkUtil.makeChunk(' '),
             } ],
-            closeChunk: util.makeChunk('?>'),
+            closeChunk: chunkUtil.makeChunk('?>'),
          });
       });
 
       it('gathers a value if the value is in single quotes', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('version'),
-            util.makeChunk(' '),
-            util.makeChunk('='),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('version'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('='),
             undefined,
-            util.makeChunk('\''),
-            util.makeChunk('\''),
-            util.makeChunk('1.3'),
-            util.makeChunk('\''),
+            chunkUtil.makeChunk('\''),
+            chunkUtil.makeChunk('\''),
+            chunkUtil.makeChunk('1.3'),
+            chunkUtil.makeChunk('\''),
             undefined,
             undefined,
-            util.makeChunk('?>'),
+            chunkUtil.makeChunk('?>'),
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
@@ -67,16 +68,16 @@ describe('xmlDeclaration', () => {
 
          expect(callback).toContainParsedProps({
             params: [ {
-               nameChunk: util.makeChunk('version'),
-               postNameSpaceChunk: util.makeChunk(' '),
-               equalChunk: util.makeChunk('='),
+               nameChunk: chunkUtil.makeChunk('version'),
+               postNameSpaceChunk: chunkUtil.makeChunk(' '),
+               equalChunk: chunkUtil.makeChunk('='),
                postEqualSpaceChunk: undefined,
-               openQuoteChunk: util.makeChunk('\''),
-               valueChunk: util.makeChunk('1.3'),
-               closeQuoteChunk: util.makeChunk('\''),
+               openQuoteChunk: chunkUtil.makeChunk('\''),
+               valueChunk: chunkUtil.makeChunk('1.3'),
+               closeQuoteChunk: chunkUtil.makeChunk('\''),
                trailingSpaceChunk: undefined,
             } ],
-            closeChunk: util.makeChunk('?>'),
+            closeChunk: chunkUtil.makeChunk('?>'),
          });
       });
 
@@ -87,50 +88,36 @@ describe('xmlDeclaration', () => {
       let parsed;
 
       beforeEach(() => {
-         mockErrorCollector = {
-            setPos: jasmine.createSpy('setPosSpy'),
-            getErrors: jasmine.createSpy('getErrorsSpy'),
-            check: function mockCheck(condition, id, params) {
-               if (condition) {
-                  if (params) {
-                     this.report(id, params);
-                  } else {
-                     this.report(id);
-                  }
-               }
-            },
-            checkName: jasmine.createSpy('checkNameSpy'),
-            report: jasmine.createSpy('reportSpy'),
-         };
+         mockErrorCollector = new MockErrorCollector();
 
          parsed = {
-            openChunk: util.makeChunk('<?'),
+            openChunk: chunkUtil.makeChunk('<?'),
             postOpenSpaceChunk: undefined,
-            targetChunk: util.makeChunk('xml'),
-            postTargetSpaceChunk: util.makeChunk(' '),
+            targetChunk: chunkUtil.makeChunk('xml'),
+            postTargetSpaceChunk: chunkUtil.makeChunk(' '),
             params: [ {
-               nameChunk: util.makeChunk('version'),
-               equalChunk: util.makeChunk('='),
-               openQuoteChunk: util.makeChunk('"'),
-               valueChunk: util.makeChunk('1.1'),
-               closeQuoteChunk: util.makeChunk('"'),
-               trailingSpaceChunk: util.makeChunk(' '),
+               nameChunk: chunkUtil.makeChunk('version'),
+               equalChunk: chunkUtil.makeChunk('='),
+               openQuoteChunk: chunkUtil.makeChunk('"'),
+               valueChunk: chunkUtil.makeChunk('1.1'),
+               closeQuoteChunk: chunkUtil.makeChunk('"'),
+               trailingSpaceChunk: chunkUtil.makeChunk(' '),
             }, {
-               nameChunk: util.makeChunk('encoding'),
-               equalChunk: util.makeChunk('='),
-               openQuoteChunk: util.makeChunk('"'),
-               valueChunk: util.makeChunk('ascii'),
-               closeQuoteChunk: util.makeChunk('"'),
-               trailingSpaceChunk: util.makeChunk(' '),
+               nameChunk: chunkUtil.makeChunk('encoding'),
+               equalChunk: chunkUtil.makeChunk('='),
+               openQuoteChunk: chunkUtil.makeChunk('"'),
+               valueChunk: chunkUtil.makeChunk('ascii'),
+               closeQuoteChunk: chunkUtil.makeChunk('"'),
+               trailingSpaceChunk: chunkUtil.makeChunk(' '),
             }, {
-               nameChunk: util.makeChunk('standalone'),
-               equalChunk: util.makeChunk('='),
-               openQuoteChunk: util.makeChunk('"'),
-               valueChunk: util.makeChunk('yes'),
-               closeQuoteChunk: util.makeChunk('"'),
-               trailingSpaceChunk: util.makeChunk(' '),
+               nameChunk: chunkUtil.makeChunk('standalone'),
+               equalChunk: chunkUtil.makeChunk('='),
+               openQuoteChunk: chunkUtil.makeChunk('"'),
+               valueChunk: chunkUtil.makeChunk('yes'),
+               closeQuoteChunk: chunkUtil.makeChunk('"'),
+               trailingSpaceChunk: chunkUtil.makeChunk(' '),
             } ],
-            closeChunk: util.makeChunk('?>'),
+            closeChunk: chunkUtil.makeChunk('?>'),
          };
       });
 
@@ -141,7 +128,7 @@ describe('xmlDeclaration', () => {
       });
 
       it('reports an error if a param is the wrong case', () => {
-         parsed.params[0].nameChunk = util.makeChunk('VERSION');
+         parsed.params[0].nameChunk = chunkUtil.makeChunk('VERSION');
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
 
@@ -177,7 +164,7 @@ describe('xmlDeclaration', () => {
       });
 
       it('reports an error if an unknown parameter is provided', () => {
-         parsed.params[2].nameChunk = util.makeChunk('bogus');
+         parsed.params[2].nameChunk = chunkUtil.makeChunk('bogus');
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
 
@@ -191,11 +178,11 @@ describe('xmlDeclaration', () => {
       it('returns an entity reference token with the entity name', () => {
          const parsed = {
             params: [ {
-               nameChunk: util.makeChunk('version'),
-               postNameSpaceChunk: util.makeChunk(' '),
-               equalChunk: util.makeChunk('='),
-               postEqualSpaceChunk: util.makeChunk(' '),
-               valueChunk: util.makeChunk('1.1'),
+               nameChunk: chunkUtil.makeChunk('version'),
+               postNameSpaceChunk: chunkUtil.makeChunk(' '),
+               equalChunk: chunkUtil.makeChunk('='),
+               postEqualSpaceChunk: chunkUtil.makeChunk(' '),
+               valueChunk: chunkUtil.makeChunk('1.1'),
             } ],
          };
 

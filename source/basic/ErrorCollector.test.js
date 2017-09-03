@@ -3,9 +3,8 @@
 
 import { Offset, Range, EntityLocation } from '../basic';
 import { Chunk } from '../chunk';
+import chunkUtil from '../chunk/test';
 import { WellFormedError } from '../error';
-
-import util from '../chunk/index.test.js';
 
 import ErrorCollector from './ErrorCollector.js';
 
@@ -58,7 +57,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that  is just plain letters', () => {
          const name = 'good';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -66,7 +65,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that has a hyphen, period or digit', () => {
          const name = 'on.-8';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -74,7 +73,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that has the allowable chars above ascii in it', () => {
          const name = 'o\u00B7\u0310\u2040e';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -83,7 +82,7 @@ describe('ErrorCollector', () => {
          const name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_' +
                '\u00CE\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -91,7 +90,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that has a uFDF1 in it', () => {
          const name = 'o\uFDF1e';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -99,7 +98,7 @@ describe('ErrorCollector', () => {
       it('rejects a name with a $ in it', () => {
          const name = 'o$e';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -107,7 +106,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a digit', () => {
          const name = '1ne';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -115,7 +114,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a hyphen', () => {
          const name = '-ne';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -123,7 +122,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a period', () => {
          const name = '.ne';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -131,7 +130,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a u00B7', () => {
          const name = '\u00B7ne';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -139,7 +138,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a u0320', () => {
          const name = '\u0320ne';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -147,7 +146,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that starts with a u2040', () => {
          const name = '\u2040';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -155,7 +154,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that has u03F4 in version 1.0/4', () => {
          const name = '\u03F4';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 4);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 4);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -163,7 +162,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that has u03F4 in version 1.0/5', () => {
          const name = '\u03F4';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -171,7 +170,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that has u03F4 in version 1.1', () => {
          const name = '\u03F4';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.1, 2);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.1, 2);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -179,7 +178,7 @@ describe('ErrorCollector', () => {
       it('rejects a name that contains with some bad 1.0 characters in version 1.0/4', () => {
          const name = 'f\u0eceb';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 4);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 4);
 
          expect(ec.report).toHaveBeenCalledWith(WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ]);
       });
@@ -187,7 +186,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that contains with some bad 1.0 characters in version 1.0/5', () => {
          const name = 'f\u0eceb';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.0, 5);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.0, 5);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -195,7 +194,7 @@ describe('ErrorCollector', () => {
       it('accepts a name that contains with some bad 1.0 characters in version 1.1', () => {
          const name = 'f\u0eceb';
 
-         ec.checkName(util.makeChunk(name), errorId, 1.1, 2);
+         ec.checkName(chunkUtil.makeChunk(name), errorId, 1.1, 2);
 
          expect(ec.report).not.toHaveBeenCalled();
       });

@@ -1,9 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { MockErrorCollector } from '../basic/test';
+import chunkUtil from '../chunk/test';
 import { WellFormedError } from '../error';
-
-import util from '../chunk/index.test.js';
 
 import entityDeclaration from './entityDeclaration.js';
 import externalId from './externalId.js';
@@ -19,14 +19,14 @@ describe('entityDeclaration', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
             undefined,
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
 
          spyOn(externalId, 'parse');
@@ -45,11 +45,11 @@ describe('entityDeclaration', () => {
             postOpenSpaceChunk: undefined,
             declTypeChunk: undefined,
             postDeclTypeSpaceChunk: undefined,
-            nameChunk: util.makeChunk('entityName'),
-            postNameSpaceChunk: util.makeChunk(' '),
+            nameChunk: chunkUtil.makeChunk('entityName'),
+            postNameSpaceChunk: chunkUtil.makeChunk(' '),
             externalId: { externalId: true },
             postExternalIdSpaceChunk: undefined,
-            closeChunk: util.makeChunk('>'),
+            closeChunk: chunkUtil.makeChunk('>'),
          });
       });
 
@@ -71,7 +71,7 @@ describe('entityDeclaration', () => {
       });
 
       it('returns nothing if the first peek return undefined. That is: <!ENTITY', () => {
-         mockSource = new util.MockChunkSource([
+         mockSource = new chunkUtil.MockChunkSource([
             undefined,
          ]);
 
@@ -88,16 +88,16 @@ describe('entityDeclaration', () => {
       });
 
       it('returns parameter entity info if this is a parameter entity: <!ENTITY % entityName ...', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('%'),
-            util.makeChunk('%'),
-            util.makeChunk(' '),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('%'),
+            chunkUtil.makeChunk('%'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
             undefined,
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
@@ -105,39 +105,39 @@ describe('entityDeclaration', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITY_DECL',
-            parameterChunk: util.makeChunk('%'),
-            postParameterSpaceChunk: util.makeChunk(' '),
-            nameChunk: util.makeChunk('entityName'),
+            parameterChunk: chunkUtil.makeChunk('%'),
+            postParameterSpaceChunk: chunkUtil.makeChunk(' '),
+            nameChunk: chunkUtil.makeChunk('entityName'),
          });
       });
 
       it('returns parameter entity without the trailing space if none present: <!ENTITY %entityName...', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('%'),
-            util.makeChunk('%'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('%'),
+            chunkUtil.makeChunk('%'),
             undefined,
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
             undefined,
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            parameterChunk: util.makeChunk('%'),
+            parameterChunk: chunkUtil.makeChunk('%'),
             postParameterSpaceChunk: undefined,
-            nameChunk: util.makeChunk('entityName'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
          });
       });
 
       it('returns nothing if there is no name, space, or start of value: <!ENTITY %', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('%'),
-            util.makeChunk('%'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('%'),
+            chunkUtil.makeChunk('%'),
             undefined,
             undefined,
             undefined,
@@ -148,7 +148,7 @@ describe('entityDeclaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            parameterChunk: util.makeChunk('%'),
+            parameterChunk: chunkUtil.makeChunk('%'),
             postParameterSpaceChunk: undefined,
             nameChunk: undefined,
             postNameSpaceChunk: undefined,
@@ -156,13 +156,13 @@ describe('entityDeclaration', () => {
       });
 
       it('returns the quoted value if present: <!ENTITY entityName "foo" >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('"'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('"'),
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
          spyOn(quotedValue, 'parse').and.callFake((source, options, cb) => {
             cb({ quotedValue: true });
@@ -179,13 +179,13 @@ describe('entityDeclaration', () => {
       });
 
       it('returns no space between entity name and value: <!ENTITY entityName"foo" >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
             undefined,
-            util.makeChunk('"'),
+            chunkUtil.makeChunk('"'),
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
          spyOn(quotedValue, 'parse').and.callFake((source, options, cb) => {
             cb({ quotedValue: true });
@@ -195,7 +195,7 @@ describe('entityDeclaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            nameChunk: util.makeChunk('entityName'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
             postNameSpaceChunk: undefined,
             entityValue: {
                quotedValue: true,
@@ -204,13 +204,13 @@ describe('entityDeclaration', () => {
       });
 
       it('adds trailing space after quoted value if present: <!ENTITY entityName "foo" >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('"'),
-            util.makeChunk(' '),
-            util.makeChunk('>'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('"'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('>'),
          ]);
          spyOn(quotedValue, 'parse').and.callFake((source, options, cb) => {
             cb({ quotedValue: true });
@@ -223,18 +223,18 @@ describe('entityDeclaration', () => {
             entityValue: {
                quotedValue: true,
             },
-            postEntityValueSpaceChunk: util.makeChunk(' '),
-            closeChunk: util.makeChunk('>'),
+            postEntityValueSpaceChunk: chunkUtil.makeChunk(' '),
+            closeChunk: chunkUtil.makeChunk('>'),
          });
       });
 
       it('stops if externalId returns nothing: <!ENTITY entityName >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('>'),
-            util.makeChunk('>'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
          externalId.parse.and.callFake((source, terminators, cb) => {
             cb(undefined);
@@ -244,21 +244,21 @@ describe('entityDeclaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            nameChunk: util.makeChunk('entityName'),
-            postNameSpaceChunk: util.makeChunk(' '),
+            nameChunk: chunkUtil.makeChunk('entityName'),
+            postNameSpaceChunk: chunkUtil.makeChunk(' '),
             externalId: undefined,
          });
       });
 
       it('returns a space after the externalID: <!ENTITY entityName SYSTEM "foo" >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
-            util.makeChunk(' '),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
+            chunkUtil.makeChunk(' '),
             undefined, // peekWord
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
@@ -268,102 +268,102 @@ describe('entityDeclaration', () => {
             externalId: {
                externalId: true,
             },
-            postExternalIdSpaceChunk: util.makeChunk(' '),
-            closeChunk: util.makeChunk('>'),
+            postExternalIdSpaceChunk: chunkUtil.makeChunk(' '),
+            closeChunk: chunkUtil.makeChunk('>'),
          });
       });
 
       it('returns an NDATA clause if found: <!ENTITY entityName SYSTEM "foo" NDATA testNData >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
                // externalId
-            util.makeChunk(' '),
-            util.makeChunk('NDATA'),
-            util.makeChunk('NDATA'),
-            util.makeChunk(' '),
-            util.makeChunk('testNData'),
-            util.makeChunk(' '),
-            util.makeChunk('>'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('NDATA'),
+            chunkUtil.makeChunk('NDATA'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('testNData'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            postExternalIdSpaceChunk: util.makeChunk(' '),
-            nDataChunk: util.makeChunk('NDATA'),
-            postNDataSpaceChunk: util.makeChunk(' '),
-            nDataNameChunk: util.makeChunk('testNData'),
-            postNDataNameSpaceChunk: util.makeChunk(' '),
-            closeChunk: util.makeChunk('>'),
+            postExternalIdSpaceChunk: chunkUtil.makeChunk(' '),
+            nDataChunk: chunkUtil.makeChunk('NDATA'),
+            postNDataSpaceChunk: chunkUtil.makeChunk(' '),
+            nDataNameChunk: chunkUtil.makeChunk('testNData'),
+            postNDataNameSpaceChunk: chunkUtil.makeChunk(' '),
+            closeChunk: chunkUtil.makeChunk('>'),
          });
       });
 
       it('recognizes a non-all caps NDATA: <!ENTITY entityName SYSTEM "foo" ndaTa testNData >', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
                // externalId
-            util.makeChunk(' '),
-            util.makeChunk('ndaTa'),
-            util.makeChunk('ndaTa'),
-            util.makeChunk(' '),
-            util.makeChunk('testNData'),
-            util.makeChunk(' '),
-            util.makeChunk('>'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('ndaTa'),
+            chunkUtil.makeChunk('ndaTa'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('testNData'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            nDataChunk: util.makeChunk('ndaTa'),
+            nDataChunk: chunkUtil.makeChunk('ndaTa'),
          });
       });
 
       it('does not mind no space after the ndata value: <!ENTITY entityName SYSTEM "foo" ndaTa testNData>', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
                // externalId
-            util.makeChunk(' '),
-            util.makeChunk('ndaTa'),
-            util.makeChunk('ndaTa'),
-            util.makeChunk(' '),
-            util.makeChunk('testNData'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('ndaTa'),
+            chunkUtil.makeChunk('ndaTa'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('testNData'),
             undefined,
-            util.makeChunk('>'),
+            chunkUtil.makeChunk('>'),
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            nDataChunk: util.makeChunk('ndaTa'),
-            postNDataSpaceChunk: util.makeChunk(' '),
-            nDataNameChunk: util.makeChunk('testNData'),
+            nDataChunk: chunkUtil.makeChunk('ndaTa'),
+            postNDataSpaceChunk: chunkUtil.makeChunk(' '),
+            nDataNameChunk: chunkUtil.makeChunk('testNData'),
             postNDataNameSpaceChunk: undefined,
-            closeChunk: util.makeChunk('>'),
+            closeChunk: chunkUtil.makeChunk('>'),
          });
       });
 
       it('returns if stops after NDATA: <!ENTITY entityName SYSTEM "foo" NDATA', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('e'),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk('S'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('e'),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('S'),
                // externalId
-            util.makeChunk(' '),
-            util.makeChunk('NDATA'),
-            util.makeChunk('NDATA'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('NDATA'),
+            chunkUtil.makeChunk('NDATA'),
             undefined,
             undefined,
             undefined,
@@ -374,8 +374,8 @@ describe('entityDeclaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            postExternalIdSpaceChunk: util.makeChunk(' '),
-            nDataChunk: util.makeChunk('NDATA'),
+            postExternalIdSpaceChunk: chunkUtil.makeChunk(' '),
+            nDataChunk: chunkUtil.makeChunk('NDATA'),
             postNDataSpaceChunk: undefined,
             nDataNameChunk: undefined,
             postNDataNameSpaceChunk: undefined,
@@ -386,14 +386,14 @@ describe('entityDeclaration', () => {
       describe('terminators', () => {
 
          it('passes quotes and > as terminators for getting the name', () => {
-            mockSource = new util.MockChunkSource([
-               util.makeChunk('e'),
-               util.makeChunk('entityName'),
-               util.makeChunk(' '),
-               util.makeChunk('S'),
+            mockSource = new chunkUtil.MockChunkSource([
+               chunkUtil.makeChunk('e'),
+               chunkUtil.makeChunk('entityName'),
+               chunkUtil.makeChunk(' '),
+               chunkUtil.makeChunk('S'),
                undefined,
                undefined,
-               util.makeChunk('>'),
+               chunkUtil.makeChunk('>'),
             ]);
 
             entityDeclaration.parse(mockSource, {}, callback);
@@ -403,14 +403,14 @@ describe('entityDeclaration', () => {
          });
 
          it('passes > as terminators all other requests', () => {
-            mockSource = new util.MockChunkSource([
-               util.makeChunk('e'),
-               util.makeChunk('entityName'),
-               util.makeChunk(' '),
-               util.makeChunk('S'),
+            mockSource = new chunkUtil.MockChunkSource([
+               chunkUtil.makeChunk('e'),
+               chunkUtil.makeChunk('entityName'),
+               chunkUtil.makeChunk(' '),
+               chunkUtil.makeChunk('S'),
                undefined,
                undefined,
-               util.makeChunk('>'),
+               chunkUtil.makeChunk('>'),
             ]);
 
             entityDeclaration.parse(mockSource, {}, callback);
@@ -443,36 +443,21 @@ describe('entityDeclaration', () => {
       let parsed;
 
       beforeEach(() => {
-         mockErrorCollector = {
-            setPos: jasmine.createSpy('setPosSpy'),
-            getErrors: jasmine.createSpy('getErrorsSpy'),
-            check: function mockCheck(condition, id, params) {
-               if (condition) {
-                  if (params) {
-                     this.report(id, params);
-                  } else {
-                     this.report(id);
-                  }
-               }
-            },
-            checkName: jasmine.createSpy('checkNameSpy'),
-            report: jasmine.createSpy('reportSpy'),
-         };
-
+         mockErrorCollector = new MockErrorCollector();
          parsed = {
-            openChunk: util.makeChunk('<!'),
-            declTypeChunk: util.makeChunk('ENTITY'),
-            postDeclTypeSpaceChunk: util.makeChunk('\t'),
-            nameChunk: util.makeChunk('entityName'),
-            postNameSpaceChunk: util.makeChunk(' '),
+            openChunk: chunkUtil.makeChunk('<!'),
+            declTypeChunk: chunkUtil.makeChunk('ENTITY'),
+            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
+            postNameSpaceChunk: chunkUtil.makeChunk(' '),
             entityValue: {},
             postEntityValueSpaceChunk: undefined,
-            closeChunk: util.makeChunk('>'),
+            closeChunk: chunkUtil.makeChunk('>'),
          };
       });
 
       it('reports an error if % is not followed by a space', () => {
-         parsed.parameterChunk = util.makeChunk('%');
+         parsed.parameterChunk = chunkUtil.makeChunk('%');
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
@@ -528,9 +513,9 @@ describe('entityDeclaration', () => {
 
       it('returns an entity declaration token with the name and value found in the parsing', () => {
          const parsed = {
-            nameChunk: util.makeChunk('entityName'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
             entityValue: {
-               valueChunk: util.makeChunk('value'),
+               valueChunk: chunkUtil.makeChunk('value'),
             },
          };
 
@@ -541,10 +526,10 @@ describe('entityDeclaration', () => {
 
       it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
          const parsed = {
-            parameterChunk: util.makeChunk('%'),
-            nameChunk: util.makeChunk('entityName'),
+            parameterChunk: chunkUtil.makeChunk('%'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
             entityValue: {
-               valueChunk: util.makeChunk('value'),
+               valueChunk: chunkUtil.makeChunk('value'),
             },
          };
 
@@ -557,7 +542,7 @@ describe('entityDeclaration', () => {
          const parsed = {
             nameChunk: undefined,
             entityValue: {
-               valueChunk: util.makeChunk('value'),
+               valueChunk: chunkUtil.makeChunk('value'),
             },
          };
 
@@ -568,8 +553,8 @@ describe('entityDeclaration', () => {
 
       it('returns a entity declaration with a blank value if there is no value', () => {
          const parsed = {
-            parameterChunk: util.makeChunk('%'),
-            nameChunk: util.makeChunk('entityName'),
+            parameterChunk: chunkUtil.makeChunk('%'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
          };
 
          const token = entityDeclaration.makeToken(parsed);

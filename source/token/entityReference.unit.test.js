@@ -1,9 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { MockErrorCollector } from '../basic/test';
+import chunkUtil from '../chunk/test';
 import { WellFormedError } from '../error';
-
-import util from '../chunk/index.test.js';
 
 import entityReference from './entityReference.js';
 
@@ -20,12 +20,12 @@ describe('entityReference', () => {
       });
 
       it('does a simple parse', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('&'),
-            util.makeChunk(' '),
-            util.makeChunk('entityName'),
-            util.makeChunk(' '),
-            util.makeChunk(';'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('&'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk('entityName'),
+            chunkUtil.makeChunk(' '),
+            chunkUtil.makeChunk(';'),
          ]);
 
          entityReference.parse(mockSource, callback);
@@ -33,21 +33,21 @@ describe('entityReference', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITY_REFERENCE',
-            openChunk: util.makeChunk('&'),
-            postOpenSpaceChunk: util.makeChunk(' '),
-            entityNameChunk: util.makeChunk('entityName'),
-            postEntityNameSpaceChunk: util.makeChunk(' '),
-            closeChunk: util.makeChunk(';'),
+            openChunk: chunkUtil.makeChunk('&'),
+            postOpenSpaceChunk: chunkUtil.makeChunk(' '),
+            entityNameChunk: chunkUtil.makeChunk('entityName'),
+            postEntityNameSpaceChunk: chunkUtil.makeChunk(' '),
+            closeChunk: chunkUtil.makeChunk(';'),
          });
       });
 
       it('accepts no spaces within reference', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('&'),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('&'),
             undefined,
-            util.makeChunk('entityName'),
+            chunkUtil.makeChunk('entityName'),
             undefined,
-            util.makeChunk(';'),
+            chunkUtil.makeChunk(';'),
          ]);
 
          entityReference.parse(mockSource, callback);
@@ -55,23 +55,23 @@ describe('entityReference', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITY_REFERENCE',
-            openChunk: util.makeChunk('&'),
+            openChunk: chunkUtil.makeChunk('&'),
             postOpenSpaceChunk: undefined,
-            entityNameChunk: util.makeChunk('entityName'),
+            entityNameChunk: chunkUtil.makeChunk('entityName'),
             postEntityNameSpaceChunk: undefined,
-            closeChunk: util.makeChunk(';'),
+            closeChunk: chunkUtil.makeChunk(';'),
          });
       });
 
       describe('terminators', () => {
 
          it('passes quotes and > as terminators for getting the name', () => {
-            mockSource = new util.MockChunkSource([
-               util.makeChunk('&'),
+            mockSource = new chunkUtil.MockChunkSource([
+               chunkUtil.makeChunk('&'),
                undefined,
-               util.makeChunk('entityName'),
+               chunkUtil.makeChunk('entityName'),
                undefined,
-               util.makeChunk(';'),
+               chunkUtil.makeChunk(';'),
             ]);
 
             entityReference.parse(mockSource, callback);
@@ -107,33 +107,19 @@ describe('entityReference', () => {
       let parsed;
 
       beforeEach(() => {
-         mockErrorCollector = {
-            setPos: jasmine.createSpy('setPosSpy'),
-            getErrors: jasmine.createSpy('getErrorsSpy'),
-            check: function mockCheck(condition, id, params) {
-               if (condition) {
-                  if (params) {
-                     this.report(id, params);
-                  } else {
-                     this.report(id);
-                  }
-               }
-            },
-            checkName: jasmine.createSpy('checkNameSpy'),
-            report: jasmine.createSpy('reportSpy'),
-         };
+         mockErrorCollector = new MockErrorCollector();
 
          parsed = {
-            openChunk: util.makeChunk('&'),
+            openChunk: chunkUtil.makeChunk('&'),
             postOpenSpaceChunk: undefined,
-            entityNameChunk: util.makeChunk('theName'),
+            entityNameChunk: chunkUtil.makeChunk('theName'),
             postEntityNameSpaceChunk: undefined,
-            closeChunk: util.makeChunk(';'),
+            closeChunk: chunkUtil.makeChunk(';'),
          };
       });
 
       it('reports an error if there is a space after the opening &', () => {
-         parsed.postOpenSpaceChunk = util.makeChunk(' ');
+         parsed.postOpenSpaceChunk = chunkUtil.makeChunk(' ');
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
@@ -149,7 +135,7 @@ describe('entityReference', () => {
       });
 
       it('reports an error if there is a space after the entity name', () => {
-         parsed.postEntityNameSpaceChunk = util.makeChunk(' ');
+         parsed.postEntityNameSpaceChunk = chunkUtil.makeChunk(' ');
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
@@ -172,7 +158,7 @@ describe('entityReference', () => {
 
       it('returns an entity reference token with the entity name', () => {
          const parsed = {
-            nameChunk: util.makeChunk('entityName'),
+            nameChunk: chunkUtil.makeChunk('entityName'),
          };
 
          const token = entityReference.makeToken(parsed);

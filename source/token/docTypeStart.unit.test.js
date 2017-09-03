@@ -2,11 +2,11 @@
 
 /* eslint-env jasmine */
 
+import { MockErrorCollector } from '../basic/test';
 import { Chunk } from '../chunk';
+import chunkUtil from '../chunk/test';
 import { Range, EntityLocation } from '../basic';
 import { WellFormedError } from '../error';
-
-import util from '../chunk/index.test.js';
 
 import docTypeStart from './docTypeStart.js';
 
@@ -19,19 +19,19 @@ describe('docTypeStart', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new util.MockChunkSource([
+         mockSource = new chunkUtil.MockChunkSource([
             new Chunk('a', 'a', new Range(1, 0, 0, 0, 1, 0, 1)),
             new Chunk(' ', ' ', new Range(1, 0, 0, 0, 1, 0, 1)),
             undefined,
             undefined,
          ]);
-         sourceRm = new util.RangeMaker(new EntityLocation());
+         sourceRm = new chunkUtil.RangeMaker(new EntityLocation());
       });
 
       it('returns simple values', () => {
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('a', sourceRm),
-            util.makeChunk(' ', sourceRm),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('a', sourceRm),
+            chunkUtil.makeChunk(' ', sourceRm),
             undefined,
             undefined,
          ]);
@@ -72,19 +72,19 @@ describe('docTypeStart', () => {
       });
 
       it('returns all values', () => {
-         const expectedRm = new util.RangeMaker(new EntityLocation());
+         const expectedRm = new chunkUtil.RangeMaker(new EntityLocation());
          const declStart = {
-            openChunk: util.makeChunk('<!', sourceRm),
-            postOpenSpaceChunk: util.makeChunk(' ', sourceRm),
-            declTypeChunk: util.makeChunk('DOCTYPE', sourceRm),
-            postDeclTypeSpaceChunk: util.makeChunk('\t', sourceRm),
+            openChunk: chunkUtil.makeChunk('<!', sourceRm),
+            postOpenSpaceChunk: chunkUtil.makeChunk(' ', sourceRm),
+            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', sourceRm),
+            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', sourceRm),
          };
 
-         mockSource = new util.MockChunkSource([
-            util.makeChunk('elemType', sourceRm),
-            util.makeChunk('  ', sourceRm),
-            util.makeChunk('\t', sourceRm),
-            util.makeChunk('[', sourceRm),
+         mockSource = new chunkUtil.MockChunkSource([
+            chunkUtil.makeChunk('elemType', sourceRm),
+            chunkUtil.makeChunk('  ', sourceRm),
+            chunkUtil.makeChunk('\t', sourceRm),
+            chunkUtil.makeChunk('[', sourceRm),
          ]);
 
          docTypeStart.parse(mockSource, declStart, callback);
@@ -93,14 +93,14 @@ describe('docTypeStart', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'DOCTYPE_START',
-            openChunk: util.makeChunk('<!', expectedRm),
-            postOpenSpaceChunk: util.makeChunk(' ', expectedRm),
-            declTypeChunk: util.makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: util.makeChunk('\t', expectedRm),
-            nameChunk: util.makeChunk('elemType', expectedRm),
-            postNameSpaceChunk: util.makeChunk('  ', expectedRm),
-            postExternalIdSpaceChunk: util.makeChunk('\t', expectedRm),
-            startInternalSubsetChunk: util.makeChunk('[', expectedRm),
+            openChunk: chunkUtil.makeChunk('<!', expectedRm),
+            postOpenSpaceChunk: chunkUtil.makeChunk(' ', expectedRm),
+            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', expectedRm),
+            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
+            nameChunk: chunkUtil.makeChunk('elemType', expectedRm),
+            postNameSpaceChunk: chunkUtil.makeChunk('  ', expectedRm),
+            postExternalIdSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
+            startInternalSubsetChunk: chunkUtil.makeChunk('[', expectedRm),
          } ] ]);
       });
 
@@ -112,20 +112,14 @@ describe('docTypeStart', () => {
       let parsed;
 
       beforeEach(() => {
-         mockErrorCollector = {
-            setPos: jasmine.createSpy('setPosSpy'),
-            getErrors: jasmine.createSpy('getErrorsSpy'),
-            check: jasmine.createSpy('checkSpy'),
-            checkName: jasmine.createSpy('checkNameSpy'),
-            report: jasmine.createSpy('reportSpy'),
-         };
+         mockErrorCollector = new MockErrorCollector();
 
-         expectedRm = new util.RangeMaker(new EntityLocation());
+         expectedRm = new chunkUtil.RangeMaker(new EntityLocation());
          parsed = {
-            openChunk: util.makeChunk('<!', expectedRm),
-            declTypeChunk: util.makeChunk('DOCTYPE', expectedRm),
-            postDeclTypeSpaceChunk: util.makeChunk('\t', expectedRm),
-            nameChunk: util.makeChunk('elmentName', expectedRm),
+            openChunk: chunkUtil.makeChunk('<!', expectedRm),
+            declTypeChunk: chunkUtil.makeChunk('DOCTYPE', expectedRm),
+            postDeclTypeSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
+            nameChunk: chunkUtil.makeChunk('elmentName', expectedRm),
          };
       });
 
@@ -141,7 +135,7 @@ describe('docTypeStart', () => {
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector.setPos).toHaveBeenCalledWith(parsed.nameChunk);
-         expect(mockErrorCollector.setPos).toHaveBeenCalledBefore(mockErrorCollector.check);
+         expect(mockErrorCollector.setPos).toHaveBeenCalledBefore(mockErrorCollector.report);
          expect(mockErrorCollector.setPos).toHaveBeenCalledTimes(1);
       });
 
@@ -150,13 +144,13 @@ describe('docTypeStart', () => {
 
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, WellFormedError.ID.DOCTYPE_NO_NAME);
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_NO_NAME);
       });
 
       it('reports no error if there is an elment name', () => {
          docTypeStart.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(false, WellFormedError.ID.DOCTYPE_NO_NAME);
+         expect(mockErrorCollector.report).not.toHaveBeenCalledWith(WellFormedError.ID.DOCTYPE_NO_NAME);
       });
 
       it('does not reset the position before checking the name validity', () => {
@@ -180,7 +174,7 @@ describe('docTypeStart', () => {
 
       it('returns a token with the name found in the parsing', () => {
          const parsed = {
-            nameChunk: util.makeChunk('elementName', new util.RangeMaker(new EntityLocation())),
+            nameChunk: chunkUtil.makeChunk('elementName', new chunkUtil.RangeMaker(new EntityLocation())),
          };
 
          const token = docTypeStart.makeToken(parsed);
