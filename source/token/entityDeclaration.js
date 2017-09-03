@@ -149,8 +149,10 @@ function checkWellFormed(parsed, ec) {
 
    // 1. Do general check on a declaration here. including space after entity
 
+   ec.setPos(parsed.parameterLToken);
    if (parsed.parameterLToken) {
-      ec.check(!parsed.postParameterSpaceLToken, WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
+      ec.setPos(parsed.postParameterSpaceLToken);
+      ec.check(!parsed.postParameterSpaceLToken, WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ enNameText ]);
    }
 
    ec.setPos(parsed.nameLToken);

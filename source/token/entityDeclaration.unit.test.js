@@ -462,7 +462,7 @@ describe('entityDeclaration', () => {
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ]);
       });
 
       it('reports an error if there is no name', () => {

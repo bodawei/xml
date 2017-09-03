@@ -41,7 +41,7 @@ class Parser {
                      return;
                   }
 
-                  if (token.hasInternalSubset) {
+                  if (token.startInternalSubsetLToken) {
                      this.waitingForInternalClose = true;
                      deliverParse(token);
                   } else {

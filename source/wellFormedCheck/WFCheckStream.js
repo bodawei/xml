@@ -5,7 +5,12 @@ import stream from 'readable-stream';
 import { ErrorCollector } from '../basic';
 import { WellFormedError } from '../error';
 
-import { xmlDeclaration, docTypeStart, docTypeEnd } from '../token';
+import {
+   docTypeEnd,
+   docTypeStart,
+   entityDeclaration,
+   xmlDeclaration,
+} from '../token';
 
 const STATE = {
    START: 'START',
@@ -43,7 +48,7 @@ class WFChecker extends stream.Transform {
             switch (this._state) {
                case STATE.PROLOG_PREDOCTYPE:
                   this._state = STATE.PROLOG_PREDOCTYPE;
-                  if (parsed.hasInternalSubset) {
+                  if (parsed.startInternalSubsetLToken) {
                      this._state = STATE.IN_DTD;
                   }
                   break;
@@ -71,6 +76,14 @@ class WFChecker extends stream.Transform {
                // already caught by the state check, above.
             }
 
+            errorCollector.getErrors().forEach(error => this.push(error));
+            break;
+         case 'ENTITY_DECL':
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
+            }
+
+            entityDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
             errorCollector.getErrors().forEach(error => this.push(error));
             break;
       }

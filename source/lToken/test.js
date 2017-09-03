@@ -21,6 +21,14 @@ function makeLToken(text, rangeMaker) {
    return new LToken(text, text, range);
 }
 
+function makeLTokenMaker(location = new EntityLocation(), index = 0, row = 0, column = 0) {
+   const rangeMaker = new RangeMaker(location, index, row, column);
+
+   return function maker(text) {
+      return makeLToken(text, rangeMaker);
+   };
+}
+
 /**********************************************************************\
   RangeMaker makes it easy to generate new ranges. Given a string
   it will increment counters it has to produce a Range that comes
@@ -30,11 +38,11 @@ function makeLToken(text, rangeMaker) {
 
 class RangeMaker {
 
-   constructor(location) {
+   constructor(location = new EntityLocation(), index = 0, row = 0, column = 0) {
       this.location = location;
-      this.index = 0;
-      this.column = 0;
-      this.row = 0;
+      this.index = index;
+      this.column = column;
+      this.row = row;
    }
 
    makeRange(text) {
@@ -119,4 +127,5 @@ module.exports = {
    MockLTokenSource,
    RangeMaker,
    makeLToken,
+   makeLTokenMaker,
 };
