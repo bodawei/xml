@@ -71,45 +71,6 @@ module.exports = function standardBuild(grunt) {
    }
 
    grunt.initConfig({
-      // See https://www.npmjs.com/package/grunt-jasmine-node-coverage
-      /* eslint-disable camelcase */
-      jasmine_node: {
-         dist: {
-            src: [ OUT_NODE_DIR + '**/*.js' ],
-            options: {
-               forceExit: true,
-               jasmine: {
-                  spec_dir: './',
-                  spec_files: [
-                     OUT_NODE_DIR + '**/*test.js',
-                  ],
-                  reporters: {
-                     // See https://github.com/bcaudan/jasmine-spec-reporter
-                     spec: {
-                        displaySuccessesSummary: false,
-                        displayFailuresSummary: true,
-                        displaySuccessfulSpec: false,
-                        displayFailedSpec: true,
-                        displaySpecDuration: true,
-                     },
-                  },
-               },
-               coverage: {
-                  reportDir: OUT_DIR + 'nodeCoverage/node ' + process.version +
-                     ' (' + os.type() + ' ' + os.release() + ')/',
-                  excludes: [ OUT_NODE_DIR + '**/*test.js' ],
-                  report: [
-                     'lcov',
-                     'json-summary',
-                     'text', // or text-summary
-                  ],
-                  collect: [
-                     '*coverage.json',
-                  ],
-               },
-            },
-         },
-      },
       eslint: {
          target: JS_FILE_GLOB,
          options: {
@@ -239,6 +200,23 @@ module.exports = function standardBuild(grunt) {
 
    grunt.loadNpmTasks('grunt-jasmine-node-coverage');
 
+   grunt.registerTask('nodeCoverage', 'node coverage', function nodeCoverage() {
+      const done = this.async();
+      const { exec } = require('child_process');
+
+      const reportDir = OUT_DIR + 'nodeCoverage/node ' + process.version +
+         ' (' + os.type() + ' ' + os.release() + ')/';
+      const reporters = [ 'lcov', 'text-summary', 'json-summary' ]
+         .map((reporter) => `--reporter="${reporter}"`);
+
+      const command = `nyc --require="babel-register" --report-dir="${reportDir}" ${reporters.join(' ')} jasmine`;
+
+      exec(command, {}, (error, stdout) => {
+         grunt.log.writeln(stdout);
+         done();
+      });
+   });
+
    grunt.registerTask('default', [
       'quietBuild',
       'clean',
@@ -247,7 +225,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'babel:testNode',
       'copy:testNode',
-      'jasmine_node:dist',
+      'nodeCoverage',
       'eslint',
 //      'checkkeys',
       'testreport',

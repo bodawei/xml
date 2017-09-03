@@ -61,16 +61,24 @@
       "xclap": "^0.2.9",
       "xclap-cli": "^0.1.2"
    },
-   "nyc": {
+   "x-nyc": {
       "require": [
          "babel-register"
       ],
+      "reporter": [
+         "lcov",
+         "text-summary",
+         "json-summary"
+      ],
       "sourceMap": false,
-      "instrument": false
+      "instrument": false,
+      "report-dir": "./temp/nodeCoverage/package.jsonConfig/"
    },
    "babel": {
       "presets": [
-         "es2015"
+         "es2015",
+         "es2016",
+         "es2017"
       ],
       "env": {
          "test": {
@@ -81,6 +89,6 @@
       }
    },
    "scripts": {
-      "test": "nyc --reporter=lcov --reporter=text  jasmine"
+      "test": "nyc --report-dir='./temp/nodeCoverage/nodexx' jasmine"
    }
 }

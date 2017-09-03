@@ -32,11 +32,6 @@ describe('TokenStream (integration)', () => {
    function expectInputToProduce(inputDocument, expecteds, done) {
       const results = [];
 
-      function evaluate() {
-         expect(results).toEqual(tokenArray);
-         done();
-      }
-
       parsedStream.addText(inputDocument);
       parsedStream.endText();
 
