@@ -3,7 +3,7 @@
 import { WellFormedError } from '../error';
 
 import util from './util.js';
-import xmlToken from './xmlToken.js';
+import { Token as XmlToken } from './xmlToken.js';
 import externalId from './externalId.js';
 
 const WFEID = WellFormedError.ID;
@@ -26,7 +26,7 @@ const DOCTYPE_START = 'DOCTYPE_START';
  be in the case that there is no internal subset.
 \**********************************************************************/
 
-class DocTypeStart extends xmlToken.Token {
+class DocTypeStart extends XmlToken {
 
    constructor(name, externalLocation, hasInternalSubset, lTokens) {
       super(lTokens);

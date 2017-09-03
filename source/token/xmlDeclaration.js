@@ -3,7 +3,7 @@
 import { WellFormedError } from '../error';
 
 import util from './util.js';
-import xmlToken from './XmlToken.js';
+import { Token as XmlToken } from './xmlToken.js';
 
 const XML_DECLARATION = 'XML_DECLARATION';
 const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
@@ -16,7 +16,7 @@ const XML_DECL_PARAMS = {
 
 const WFEID = WellFormedError.ID;
 
-class XmlDeclaration extends xmlToken.Token {
+class XmlDeclaration extends XmlToken {
 
    constructor(params, lTokens) {
       super(lTokens);

@@ -17,7 +17,7 @@ class TokenStream extends stream.Transform {
       });
    }
 
-   _transform(parsed, ignored, done) {
+   _transform(parsed, _, done) {
       switch (parsed.type) {
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));
@@ -32,7 +32,7 @@ class TokenStream extends stream.Transform {
             this.push(entityDeclaration.makeToken(parsed));
             break;
          default:
-            this.emit('error', new Error(`Unknown parsed type "${parsed.type}" encountered.`));
+            this.push(new Error(`Unknown parsed type "${parsed.type}" encountered.`));
       }
 
       done();

@@ -3,7 +3,7 @@
 import { WellFormedError } from '../error';
 
 import util from './util.js';
-import xmlToken from './xmlToken.js';
+import { Token as XmlToken } from './xmlToken.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_END = 'DOCTYPE_END';
@@ -15,7 +15,7 @@ const DOCTYPE_END = 'DOCTYPE_END';
  See docTypeStart for more details
 \**********************************************************************/
 
-class DocTypeEnd extends xmlToken.Token {
+class DocTypeEnd extends XmlToken {
 }
 
 /**********************************************************************\

@@ -81,7 +81,7 @@ module.exports = function standardBuild(grunt) {
                jasmine: {
                   spec_dir: './',
                   spec_files: [
-                     OUT_NODE_DIR + '**/*.test.js',
+                     OUT_NODE_DIR + '**/*test.js',
                   ],
                   reporters: {
                      // See https://github.com/bcaudan/jasmine-spec-reporter
@@ -97,7 +97,7 @@ module.exports = function standardBuild(grunt) {
                coverage: {
                   reportDir: OUT_DIR + 'nodeCoverage/node ' + process.version +
                      ' (' + os.type() + ' ' + os.release() + ')/',
-                  excludes: [ OUT_NODE_DIR + '**/*.test.js' ],
+                  excludes: [ OUT_NODE_DIR + '**/*test.js' ],
                   report: [
                      'lcov',
                      'json-summary',
@@ -247,7 +247,7 @@ module.exports = function standardBuild(grunt) {
       'test',
       'babel:testNode',
       'copy:testNode',
-//      'jasmine_node:dist',
+      'jasmine_node:dist',
       'eslint',
 //      'checkkeys',
       'testreport',

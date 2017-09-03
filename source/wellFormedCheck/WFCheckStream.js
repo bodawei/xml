@@ -31,20 +31,24 @@ class WFChecker extends stream.Transform {
       this._state = STATE.START;
    }
 
-   _transform(parsed, ignored, callback) {
-      const errorCollector = new ErrorCollector(parsed.openLToken, WellFormedError);
+   _transform(parsed, _, done) {
+      this._checkForErrors(parsed);
+      done();
+   }
+
+   _checkForErrors(parsed) {
+      let errorCollector = new ErrorCollector(parsed.openLToken, WellFormedError);
 
       switch (parsed.type) {
-         case 'XML_DECLARATION':
+         case xmlDeclaration.TYPE:
             if (this._state !== STATE.START) {
                errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
             } else {
                this._state = STATE.PROLOG_PREDOCTYPE;
             }
             xmlDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
-            errorCollector.getErrors().forEach(error => this.push(error));
             break;
-         case 'DOCTYPE_START':
+         case docTypeStart.TYPE:
             switch (this._state) {
                case STATE.PROLOG_PREDOCTYPE:
                   this._state = STATE.PROLOG_PREDOCTYPE;
@@ -58,9 +62,8 @@ class WFChecker extends stream.Transform {
             }
             this._startDocType = parsed;
             docTypeStart.checkWellFormed(parsed, errorCollector, true, 1.0, 5);
-            errorCollector.getErrors().forEach(error => this.push(error));
             break;
-         case 'DOCTYPE_END':
+         case docTypeEnd.TYPE:
             if (this._state !== STATE.PROLOG_PREDOCTYPE && this._state !== STATE.IN_DTD) {
                errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
             } else {
@@ -75,21 +78,22 @@ class WFChecker extends stream.Transform {
             } else {
                // already caught by the state check, above.
             }
-
-            errorCollector.getErrors().forEach(error => this.push(error));
             break;
-         case 'ENTITY_DECL':
+         case entityDeclaration.TYPE:
             if (this._state !== STATE.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
             entityDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
-            errorCollector.getErrors().forEach(error => this.push(error));
             break;
+         default:
+            errorCollector = undefined;
       }
 
+      if (errorCollector) {
+         errorCollector.getErrors().forEach(error => this.push(error));
+      }
       this.push(parsed);
-      callback();
    }
 
 }

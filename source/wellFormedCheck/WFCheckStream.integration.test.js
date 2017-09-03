@@ -1,9 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, EntityLocation } from '../basic';
-import { ParsedStream } from '../parse';
+import { Offset, Range, EntityLocation } from '../basic';
 import { WellFormedError } from '../error';
+import { LToken } from '../lToken';
+import { ParsedStream } from '../parse';
+import { docTypeEnd } from '../token';
 
 import WFCheckStream from './WFCheckStream.js';
 
@@ -44,6 +46,15 @@ describe('WFCheckStream (integration)', () => {
          });
       });
 
+      it('reports state error if the declaration is not the first thing in the document', (done) => {
+         givenInputExpectResult('<!DOCTYPE foo><?xml version="1.0"?>', (results) => {
+            // before this, error, doctype start, doctype end
+            expect(results[3]).toEqual(new WellFormedError('XMLDECL_INVALID_CONTEXT', undefined,
+               new Offset(new EntityLocation(), 14, 0, 14), new Offset(new EntityLocation(), 14, 0, 14)));
+            done();
+         });
+      });
+
    });
 
    describe('DOCTYPE', () => {
@@ -75,9 +86,37 @@ describe('WFCheckStream (integration)', () => {
          });
       });
 
+      it('reports state error if the start comes before the declaration', (done) => {
+         givenInputExpectResult('<!DOCTYPE foo><?xml version="1.0"?>', (results) => {
+            // before this, error, doctype start, doctype end
+            expect(results[0]).toEqual(new WellFormedError('DOCTYPE_INVALID_DOC_CONTEXT', undefined,
+               new Offset(new EntityLocation(), 0, 0, 0), new Offset(new EntityLocation(), 0, 0, 0)));
+            done();
+         });
+      });
+
+      it('reports state error if the end comes without a start', (done) => {
+         const results = [];
+
+         checker.on('data', (data) => {
+            results.push(data);
+         });
+         checker.on('end', () => {
+            expect(results[0]).toEqual(new WellFormedError('DOCTYPE_INVALID_DOC_CONTEXT', undefined,
+               new Offset(new EntityLocation(), 0, 0, 0), new Offset(new EntityLocation(), 0, 0, 0)));
+            done();
+         });
+
+         checker.write({
+            type: docTypeEnd.TYPE,
+            openLToken: new LToken('x', 'x', new Range(new EntityLocation(), 0, 0)),
+         });
+         checker.end();
+      });
+
    });
 
-   describe('ENTITY', () => {
+   describe('ENTITY_DECL', () => {
 
       it('reports an error when the entity has the wrong syntax', (done) => {
          givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>', (results) => {

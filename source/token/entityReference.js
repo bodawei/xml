@@ -2,13 +2,13 @@
 
 import { WellFormedError } from '../error';
 
-import xmlToken from './xmlToken.js';
+import { Token as XmlToken } from './xmlToken.js';
 import util from './util.js';
 
 const ENTITY_REFERENCE = 'ENTITY_REFERENCE';
 const WFEID = WellFormedError.ID;
 
-class EntityReference extends xmlToken.Token {
+class EntityReference extends XmlToken {
 
    constructor(name, lTokens) {
       super(lTokens);

@@ -2,7 +2,7 @@
 
 import { WellFormedError } from '../error';
 
-import xmlToken from './xmlToken.js';
+import { Token as XmlToken } from './xmlToken.js';
 import externalId from './externalId.js';
 import quotedValue from './quotedValue.js';
 import util from './util.js';
@@ -10,7 +10,7 @@ import util from './util.js';
 const ENTITY_DECL = 'ENTITY_DECL';
 const WFEID = WellFormedError.ID;
 
-class EntityDeclaration extends xmlToken.Token {
+class EntityDeclaration extends XmlToken {
 
    constructor(name, value, externalLoc, notationDataName, lTokens) {
       super(lTokens);
