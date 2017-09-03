@@ -87,8 +87,9 @@ class ErrorCollector {
    }
 
    // test with both versions.
-   checkName(nameLToken, errorCode, version, revision) {
-      const use11Names = version === 1.1 || (version === 1.0 && revision === 5);
+   checkName(nameLToken, errorCode, entityMetaData) {
+      const use11Names = entityMetaData.isVersion1dot1 ||
+         (entityMetaData.isVersion1dot0 && entityMetaData.revision === 5);
       const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
       if (!nameLToken || regEx.exec(nameLToken.text)) {

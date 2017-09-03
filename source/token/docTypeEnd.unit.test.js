@@ -131,6 +131,16 @@ describe('docTypeEnd', () => {
          });
       });
 
+      it('reports an error if there is a "]", but there was no start token', () => {
+         docTypeEnd.checkWellFormed(parsed, undefined, mockErrorCollector);
+
+         expect(mockErrorCollector).not.toReportError({
+            id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
+            params: undefined,
+            position: parsed.postCloseInternalSubsetSpaceLToken,
+         });
+      });
+
    });
 
    describe('makeToken()', () => {

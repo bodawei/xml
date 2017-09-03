@@ -1,6 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 
 import ParsedStream from './ParsedStream.js';
@@ -50,6 +51,7 @@ describe('ParsedStream', () => {
 
          inputToOutput('<?xml version="1.0"?>', (results) => {
             expect(results).toEqual([
+               new EntityMetaData(),
                parsedDecl,
             ]);
             done();
@@ -90,6 +92,7 @@ describe('ParsedStream', () => {
 
          inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml"[]>', (results) => {
             expect(results).toEqual([
+               new EntityMetaData(),
                startParsing,
                endParsing,
             ]);
@@ -127,6 +130,7 @@ describe('ParsedStream', () => {
 
          inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml">', (results) => {
             expect(results).toEqual([
+               new EntityMetaData(),
                startParsing,
                endParsing,
             ]);
@@ -150,6 +154,7 @@ describe('ParsedStream', () => {
 
          inputToOutput('<!BOGUS', (results) => {
             expect(results).toEqual([
+               new EntityMetaData(),
                parsedDecl,
             ]);
             done();
@@ -188,6 +193,7 @@ describe('ParsedStream', () => {
 
          inputToOutput('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', (results) => {
             expect(results).toEqual([
+               new EntityMetaData(),
                parsedDecl,
             ]);
             done();

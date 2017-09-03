@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { ErrorCollector } from '../basic';
+import { ErrorCollector, EntityMetaData } from '../basic';
 import { WellFormedError } from '../error';
 
 import {
@@ -29,6 +29,7 @@ class WFChecker extends stream.Transform {
       super({
          objectMode: true,
       });
+      this._metaData = new EntityMetaData();
       this._state = STATE.START;
    }
 
@@ -41,13 +42,16 @@ class WFChecker extends stream.Transform {
       let errorCollector = new ErrorCollector(parsed.open, WellFormedError);
 
       switch (parsed.type) {
+         case EntityMetaData.TYPE:
+            this._metaData = parsed;
+            break;
          case xmlDeclaration.TYPE:
             if (this._state !== STATE.START) {
                errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
             } else {
                this._state = STATE.PROLOG_PREDOCTYPE;
             }
-            xmlDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
+            xmlDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case docTypeStart.TYPE:
             switch (this._state) {
@@ -62,7 +66,7 @@ class WFChecker extends stream.Transform {
                   errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
             }
             this._startDocType = parsed;
-            docTypeStart.checkWellFormed(parsed, errorCollector, true, 1.0, 5);
+            docTypeStart.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case docTypeEnd.TYPE:
             if (this._state !== STATE.PROLOG_PREDOCTYPE && this._state !== STATE.IN_DTD) {
@@ -73,22 +77,22 @@ class WFChecker extends stream.Transform {
 
             if (this._startDocType) {
                const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
-               docTypeEnd.checkWellFormed(parsed, this._startDocType, specialErrorCollector, true, 1.0, 5);
+               docTypeEnd.checkWellFormed(parsed, this._startDocType, specialErrorCollector, this._metaData);
                delete this._startDocType;
                specialErrorCollector.getErrors().forEach(error => this.push(error));
             } else {
-               // already caught by the state check, above.
+               docTypeEnd.checkWellFormed(parsed, undefined, errorCollector, this._metaData);
             }
             break;
          case declaration.TYPE:
-            declaration.checkWellFormed(parsed, errorCollector);
+            declaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case entityDeclaration.TYPE:
             if (this._state !== STATE.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
-            entityDeclaration.checkWellFormed(parsed, errorCollector, true, 1.0);
+            entityDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

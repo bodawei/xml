@@ -7,7 +7,7 @@ const LAST_1DOT1_REVISION = 2;
 
 /**********************************************************************\
  EntityMetaData holds values about an entity that will influence how we
- parse it. This includes the type of the entity (document, external,
+ parse it. This includes the kind of the entity (document, external,
  external subset), what version of the XML spec it conforms to, and
  the location where it is found.
 
@@ -18,8 +18,9 @@ const LAST_1DOT1_REVISION = 2;
 
 class EntityMetaData {
 
-   constructor(entityType, xmlVersion, xmlRevision, location) {
-      this._setType(entityType || EntityMetaData.TYPE.DOCUMENT);
+   constructor(entityKind, xmlVersion, xmlRevision, location) {
+      this.type = EntityMetaData.TYPE;
+      this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
       this.version = xmlVersion || 1.0;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? LAST_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
@@ -29,15 +30,15 @@ class EntityMetaData {
     type: When setting the type, make sure it is a legal value.
    \**********************************************************************/
 
-   _setType(newValue) {
-      if (EntityMetaData.TYPE[newValue]) {
+   _setKind(newValue) {
+      if (EntityMetaData.KIND[newValue]) {
          this._type = newValue;
       } else {
          throw new Error('Unknown type passed to EntityMetaData.type.  Got "' + newValue + '".');
       }
    }
 
-   get type() {
+   get kind() {
       return this._type;
    }
 
@@ -45,16 +46,16 @@ class EntityMetaData {
     Shortcuts for getting the type
    \**********************************************************************/
 
-   get isTypeDocument() {
-      return this.type === EntityMetaData.TYPE.DOCUMENT;
+   get isDocumentKind() {
+      return this.kind === EntityMetaData.KIND.DOCUMENT;
    }
 
-   get isTypeExternal() {
-      return this.type === EntityMetaData.TYPE.EXTERNAL;
+   get isExternalKind() {
+      return this.kind === EntityMetaData.KIND.EXTERNAL;
    }
 
-   get isTypeExternalSubset() {
-      return this.type === EntityMetaData.TYPE.EXTERNALSUBSET;
+   get isExternalSubsetKind() {
+      return this.kind === EntityMetaData.KIND.EXTERNALSUBSET;
    }
 
    /**********************************************************************\
@@ -118,10 +119,12 @@ class EntityMetaData {
 
 }
 
-EntityMetaData.TYPE = {
+EntityMetaData.KIND = {
    DOCUMENT: 'DOCUMENT',
    EXTERNAL: 'EXTERNAL',
    EXTERNALSUBSET: 'EXTERNALSUBSET',
 };
+
+EntityMetaData.TYPE = 'ENTITY_META_DATA';
 
 module.exports = EntityMetaData;

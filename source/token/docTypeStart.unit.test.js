@@ -2,6 +2,7 @@
 
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
 import { MockErrorCollector } from '../basic/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
@@ -156,7 +157,9 @@ describe('docTypeStart', () => {
       });
 
       it('checks whether the name is valid', () => {
-         docTypeStart.checkWellFormed(parsed, mockErrorCollector, true, 1, 2);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector,
+            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 2));
+//         docTypeStart.checkWellFormed(parsed, mockErrorCollector, true, 1, 2);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NAME_INVALID,

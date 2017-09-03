@@ -1,6 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
 import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
@@ -124,7 +125,7 @@ describe('xmlDeclaration', () => {
       });
 
       it('reports no errors with ordinary parameters', () => {
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -133,7 +134,7 @@ describe('xmlDeclaration', () => {
          const makeToken = makeLTokenMaker();
          parsed.params[0].name = makeToken('VERSION');
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE,
@@ -147,7 +148,7 @@ describe('xmlDeclaration', () => {
          parsed.params.splice(1, 1);
          parsed.params.push(temp); // put encoding at the end.
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
@@ -159,7 +160,7 @@ describe('xmlDeclaration', () => {
       it('reports an error if encoding has no value', () => {
          parsed.params[1].value = undefined;
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, true);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_NO_VALUE,
@@ -170,7 +171,8 @@ describe('xmlDeclaration', () => {
       });
 
       it('reports an error if standalone specified on a non-doc entity', () => {
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector,
+            new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET));
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_XTRA_STANDALONE,
@@ -183,7 +185,8 @@ describe('xmlDeclaration', () => {
          const makeToken = makeLTokenMaker();
          parsed.params[2].name = makeToken('bogus');
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, false);
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector,
+            new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET));
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ATTR_UNKNOWN,

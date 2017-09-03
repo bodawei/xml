@@ -83,12 +83,12 @@ function parse(source, declarationParsing, deliverParsed) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
+function checkWellFormed(parsed, ec, entityMetaData) {
    declaration.checkWellFormed(parsed, ec);
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
-   ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, version, revision);
+   ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, entityMetaData);
 
    externalId.checkWellFormed(parsed.externalId, ec);
 

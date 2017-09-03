@@ -116,7 +116,7 @@ function addParam(source, params, name, deliverResults) {
  Do well formed checking on the parsed results from the parse().
 \**********************************************************************/
 
-function checkWellFormed(parsed, err, isDocEntity) {
+function checkWellFormed(parsed, err, entityMetaData) {
    let foundEncoding;
    let foundVersion;
    let seenStandalone;
@@ -147,13 +147,13 @@ function checkWellFormed(parsed, err, isDocEntity) {
             break;
          case 'encoding':
             foundEncoding = true;
-            if (isDocEntity) {
+            if (entityMetaData.isDocumentKind) {
                err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
             }
             break;
          case 'standalone':
             seenStandalone = true;
-            if (!isDocEntity) {
+            if (!entityMetaData.isDocumentKind) {
                err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
@@ -193,9 +193,9 @@ function checkWellFormed(parsed, err, isDocEntity) {
 
    err.setPos(parsed.close);
    err.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES,
-      [ isDocEntity ? WFEID.NOUN_XMLDECL : WFEID.NOUN_TEXTDECL ]);
+      [ entityMetaData.isDocumentKind ? WFEID.NOUN_XMLDECL : WFEID.NOUN_TEXTDECL ]);
 
-   if (!isDocEntity) {
+   if (!entityMetaData.isDocumentKind) {
       err.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
    }
 

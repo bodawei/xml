@@ -55,7 +55,7 @@ function parse(source, deliverParsed) {
 function checkWellFormed(parsed, startParsed, ec) {
    ec.setPos(parsed.closeInternalSubset);
 
-   if (!startParsed.startInternalSubset) {
+   if (!startParsed || !startParsed.startInternalSubset) {
       ec.check(parsed.closeInternalSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 

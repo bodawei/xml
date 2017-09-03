@@ -144,6 +144,14 @@ describe('LTokenSource', () => {
 
    });
 
+   describe('metadata', () => {
+
+      it('exposes the EntityMetaData it was passed as a metaData property', () => {
+         expect(source.metaData).toEqual(entityMetaData1dot1);
+      });
+
+   });
+
    describe('extractor definitions', () => {
 
       it('calls an extractor with a pre-defined parameter', () => {

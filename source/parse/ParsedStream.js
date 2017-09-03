@@ -13,12 +13,13 @@ import {
 
 class ParsedStream extends stream.Readable {
 
-   constructor() {
+   constructor(metaData = new EntityMetaData()) {
       super({
          objectMode: true,
       });
 
-      this._lTokenSource = new LTokenSource(defaultExtractors, new EntityMetaData());
+      this._lTokenSource = new LTokenSource(defaultExtractors, metaData);
+      this._reportedMetaData = false;
    }
 
    addText(text) {
@@ -31,6 +32,10 @@ class ParsedStream extends stream.Readable {
 
    _read() {
       this._parseGeneral((result) => {
+         if (!this._reportedMetaData) {
+            this._reportedMetaData = true;
+            this.push(this._lTokenSource.metaData);
+         }
          this.push(result || null);
       });
    }

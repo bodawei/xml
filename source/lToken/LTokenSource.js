@@ -89,6 +89,10 @@ class LTokenSource {
       this._lastRange = new Range(info.location, 0, 0, 0, 0, 0, 0);
    }
 
+   get metaData() {
+      return this._info;
+   }
+
    addText(text, range) {
       if (this._allTextAdded) {
          throw new Error('Can not add text after endText() has been called.');

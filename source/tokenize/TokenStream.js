@@ -1,6 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
+import { EntityMetaData } from '../basic';
 
 import {
    declaration,
@@ -20,6 +21,9 @@ class TokenStream extends stream.Transform {
 
    _transform(parsed, _, done) {
       switch (parsed.type) {
+         case EntityMetaData.TYPE:
+            this.push(parsed);
+            break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));
             break;

@@ -1,6 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
@@ -43,6 +44,7 @@ describe('TokenStream (integration)', () => {
       it('tokenized a parsed', (done) => {
          const makeLToken = makeLTokenMaker();
          inputToOutput('<?xml version="1.0"?>', [
+            new EntityMetaData(),
             new xmlDeclaration.Token([ {
                name: 'version',
                value: '1.0',
@@ -66,6 +68,7 @@ describe('TokenStream (integration)', () => {
       it('tokenize a parsed', (done) => {
          const makeLToken = makeLTokenMaker();
          inputToOutput('<!DOCTYPE one>', [
+            new EntityMetaData(),
             new docTypeStart.Token('one', undefined, false, [
                makeLToken('<!'),
                makeLToken('DOCTYPE'),
@@ -85,6 +88,7 @@ describe('TokenStream (integration)', () => {
       it('do a simple end to end process', (done) => {
          const makeLToken = makeLTokenMaker();
          inputToOutput('<!BOGUS', [
+            new EntityMetaData(),
             new declaration.Token([
                makeLToken('<!'),
                makeLToken('BOGUS'),
@@ -99,6 +103,7 @@ describe('TokenStream (integration)', () => {
       it('do a simple end to end process', (done) => {
          const makeLToken = makeLTokenMaker();
          inputToOutput('<!ENTITY entityName "value">', [
+            new EntityMetaData(),
             new entityDeclaration.Token('entityName', 'value', {}, '', [
                makeLToken('<!'),
                makeLToken('ENTITY'),
