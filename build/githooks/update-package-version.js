@@ -17,7 +17,7 @@ function computeVersion(logs, final) {
       if (index === -1) {
          body = final;
       } else {
-         body = logs[index].body;
+         body = logs[index].subject;
 console.log('BODY', logs[index].subject);
       }
 
