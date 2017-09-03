@@ -1,7 +1,4 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-
-'use strict';
-
 /* eslint-env jasmine */
 
 const Chunk = require('../chunk/Chunk.js');
@@ -11,7 +8,7 @@ const EntityLocation = require('../basic/EntityLocation.js');
 
 const error = require('../error');
 
-const Parser = require('../parser/04parser.js');
+const ParsedStream = require('../parser/ParsedStream.js');
 const WFChecker = require('./WFChecker.js');
 
 describe('WFChecker', () => {
@@ -19,7 +16,7 @@ describe('WFChecker', () => {
    let checker;
 
    beforeEach(() => {
-      parser = new Parser();
+      parser = new ParsedStream();
       checker = new WFChecker();
       parser.pipe(checker);
    });
@@ -42,8 +39,8 @@ describe('WFChecker', () => {
                   nameChunk: new Chunk('$badName', '$badName', new Range(new EntityLocation(), 10, 0, 10, 18, 0, 18)),
                   postNameSpaceChunk: undefined,
                   startInternalSubsetChunk: undefined,
-                  postExternalIdSpaceChunk: undefined
-               }
+                  postExternalIdSpaceChunk: undefined,
+               },
             ]);
 
             done();

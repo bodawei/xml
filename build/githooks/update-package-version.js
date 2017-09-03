@@ -1,13 +1,12 @@
 #!/usr/bin/env node
+/* eslint-disable no-console, no-process-exit */
 
-const child_process = require('child_process');
 const fs = require('fs');
 const semver = require('semver');
 
 const gitLogToJson = require('git-log-to-json');
 
 const promise = gitLogToJson('./');
-
 
 function computeVersion(logs, final) {
    let version = semver('0.0.0');
@@ -21,11 +20,11 @@ function computeVersion(logs, final) {
          body = logs[index].body;
       }
 
-      if (body.indexOf('bugfix') !== -1) {
+      if (body.indexOf('fix') !== -1) {
          version = semver.inc(version, 'patch');
-      } else if (body.indexOf('feature') !== -1) {
+      } else if (body.indexOf('feat') !== -1) {
          version = semver.inc(version, 'minor');
-      } else if (body.indexOf('incompatible') !== -1) {
+      } else if (body.indexOf('BREAKING CHANGE') !== -1) {
          version = semver.inc(version, 'major');
       } else {
          console.log('ERROR: Commit message has no keyword.', body);

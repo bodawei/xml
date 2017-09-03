@@ -1,23 +1,20 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-
-'use strict';
-
 /* eslint-env jasmine */
 
 const Chunk = require('../chunk/Chunk.js');
 const Range = require('../basic/Range.js');
 const EntityLocation = require('../basic/EntityLocation.js');
 
-const StringParser = require('./04parser.js');
+const ParsedStream = require('./ParsedStream.js');
 
-describe('StringParser', () => {
+describe('ParsedStream', () => {
    let parser;
 
    beforeEach(() => {
-   parser = new StringParser();
+      parser = new ParsedStream();
    });
 
-   it('one', (done) => {
+   it('XMLDECLARATION', (done) => {
       const results = [];
 
       parser.on('data', (data) => {
@@ -40,9 +37,9 @@ describe('StringParser', () => {
                   valueChunk: new Chunk('1.0', '1.0', new Range(new EntityLocation(), 15, 0, 15, 18, 0, 18)),
                   closeQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
                   trailingSpaceChunk: undefined,
-               }],
-               closeChunk:  new Chunk('?>', '?>', new Range(new EntityLocation(), 19, 0, 19, 21, 0, 21))
-            }
+               } ],
+               closeChunk:  new Chunk('?>', '?>', new Range(new EntityLocation(), 19, 0, 19, 21, 0, 21)),
+            },
          ]);
          done();
       });
@@ -56,17 +53,17 @@ describe('StringParser', () => {
          const results = [];
 
          function evaluate() {
-            expect(results).toEqual([{
-                  type: 'DOCTYPE_START',
-                  openChunk: new Chunk('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
-                  postOpenSpaceChunk: undefined,
-                  declTypeChunk: new Chunk('DOCTYPE', 'DOCTYPE', new Range(new EntityLocation(), 2, 0, 2, 9, 0, 9)),
-                  postDeclTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 9, 0, 9, 10, 0, 10)),
-                  nameChunk: new Chunk('one', 'one', new Range(new EntityLocation(), 10, 0, 10, 13, 0, 13)),
-                  postNameSpaceChunk: undefined,
-                  startInternalSubsetChunk: undefined,
-                  postExternalIdSpaceChunk: undefined
-            }]);
+            expect(results).toEqual([ {
+               type: 'DOCTYPE_START',
+               openChunk: new Chunk('<!', '<!', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)),
+               postOpenSpaceChunk: undefined,
+               declTypeChunk: new Chunk('DOCTYPE', 'DOCTYPE', new Range(new EntityLocation(), 2, 0, 2, 9, 0, 9)),
+               postDeclTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 9, 0, 9, 10, 0, 10)),
+               nameChunk: new Chunk('one', 'one', new Range(new EntityLocation(), 10, 0, 10, 13, 0, 13)),
+               postNameSpaceChunk: undefined,
+               startInternalSubsetChunk: undefined,
+               postExternalIdSpaceChunk: undefined,
+            } ]);
 
             done();
          }

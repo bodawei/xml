@@ -17,11 +17,11 @@ echo "----------------------------------------"
 exec < /dev/tty
 
 read -p "Bug: " bug
-read -p "Kind [feat, fix, incompatible]: " KIND
+read -p "Kind [feat, fix, BREAKING CHANGE]: " KIND
 
 if [ "$KIND" == "" -o "$KIND" == "feat" ]; then
    KIND="feature"
-elif [ "$KIND" != "fix" -a "$KIND" != "incompatible" ]; then
+elif [ "$KIND" != "fix" -a "$KIND" != "BREAKING CHANGE" ]; then
    echo "Kind is not one of the required values: $KIND "
    exit -1
 fi

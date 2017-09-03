@@ -1,7 +1,5 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-'use strict';
-
 /* eslint-env jasmine */
 
 const Chunk = require('../chunk/Chunk.js');
@@ -10,7 +8,7 @@ const Offset = require('../basic/Offset.js');
 const EntityLocation = require('../basic/EntityLocation.js');
 const SyntaxError = require('../error/SyntaxError.js');
 
-const StringParser = require('../parser/04parser.js');
+const ParsedStream = require('../parser/ParsedStream.js');
 const WFChecker = require('./WFChecker.js');
 
 describe('WFChecker', () => {
@@ -18,7 +16,7 @@ describe('WFChecker', () => {
    let checker;
 
    beforeEach(() => {
-      parser = new StringParser();
+      parser = new ParsedStream();
       checker = new WFChecker();
       parser.pipe(checker);
    });
@@ -47,10 +45,10 @@ describe('WFChecker', () => {
                   openQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
                   valueChunk: new Chunk('1.0', '1.0', new Range(new EntityLocation(), 15, 0, 15, 18, 0, 18)),
                   closeQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
-                  trailingSpaceChunk: undefined
+                  trailingSpaceChunk: undefined,
                } ],
-               closeChunk:  new Chunk('?>', '?>', new Range(new EntityLocation(), 19, 0, 19, 21, 0, 21))
-            }
+               closeChunk:  new Chunk('?>', '?>', new Range(new EntityLocation(), 19, 0, 19, 21, 0, 21)),
+            },
          ]);
          done();
       });
