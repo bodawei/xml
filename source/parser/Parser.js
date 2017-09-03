@@ -2,8 +2,6 @@
 
 import token from '../xmlToken';
 
-const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
-
 class Parser {
 
    parseGeneral(source, deliverParse) {
@@ -15,13 +13,9 @@ class Parser {
 
          switch (chunk.text) {
             case '&':
-   //            return reference.parse(source);
                break;
             case '<':
                return this._markupParse(source, deliverParse);
-            // must deal with close
-            // default:
-            //    return this._parseSpaceOrContent(source);
          }
       });
    }
@@ -33,92 +27,10 @@ class Parser {
          }
 
          if (markupStartChunk.text === '<?') {
-            return this.parseProcessingInstruction(source, markupStartChunk, deliverParse);
+            return token.processingInstruction.parse(source, markupStartChunk, deliverParse);
          } else if (markupStartChunk.text === '<!') {
-            return this.parseDeclaration(source, markupStartChunk, deliverParse);
+            return token.declaration.parse(source, markupStartChunk, deliverParse);
          }
-      });
-   }
-
-   parseDeclaration(source, openChunk, deliverParsed) {
-      const results = {
-         openChunk: openChunk,
-      };
-      source.extractToObject('space', undefined, results, 'postOpenSpaceChunk');
-      source.extractToObject('word', [ '>' ], results, 'declTypeChunk');
-
-      source.extract('space', (chunk) => {
-         results.postDeclTypeSpaceChunk = chunk;
-         if (results.declTypeChunk && results.declTypeChunk.text === 'DOCTYPE') {
-            token.docTypeStart.parse(source, results, deliverParsed);
-         }
-      });
-   }
-
-   parseProcessingInstruction(source, startChunk, deliverParse) {
-      const results = {
-         openChunk: startChunk,
-      };
-
-      source.extractToObject('space', undefined, results, 'postOpenSpaceChunk');
-      source.extractToObject('word', [ '?>' ], results, 'targetChunk');
-
-      source.extract('space', (chunk) => {
-         results.postTargetSpaceChunk = chunk;
-
-         if (results.targetChunk && results.targetChunk.text.toLocaleLowerCase() === 'xml') {
-            results.type = 'xmldecl';
-            this._getParams(source, (params) => {
-               results.params = params;
-               source.extract('match', '?>', (chunk) => {
-                  results.closeChunk = chunk;
-                  deliverParse(results);
-               });
-            });
-         } else {
-            results.type = 'processinginstruction';
-            source.extractToObject('all', [ '?>' ], results, 'instructionChunk');
-            source.extract('match', '?>', (chunk) => {
-               results.closeChunk = chunk;
-               deliverParse(results);
-            });
-         }
-      });
-   }
-
-   _getParams(source, deliverResults) {
-      const params = [];
-      source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
-         this._addParam(source, params, chunk, deliverResults);
-      });
-   }
-
-   _addParam(source, params, nameChunk, deliverResults) {
-      if (!nameChunk) {
-         deliverResults(params);
-         return;
-      }
-      const param = {
-         nameChunk: nameChunk,
-      };
-      params.push(param);
-
-      source.extractToObject('space', undefined, param, 'postNameSpaceChunk');
-      source.extractToObject('match', '=', param, 'equalChunk');
-      source.extractToObject('space', undefined, param, 'postEqualSpaceChunk');
-      source.extract('peekChar', undefined, (quoteChunk) => {
-         const gotQuote = quoteChunk && (quoteChunk.text === '"' || quoteChunk.text === '\'');
-
-         if (gotQuote) {
-            source.extractToObject('char', undefined, param, 'openQuoteChunk');
-            source.extractToObject('all', [ quoteChunk.text ], param, 'valueChunk');
-            source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk');
-            source.extractToObject('space', undefined, param, 'trailingSpaceChunk');
-         }
-
-         source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
-            this._addParam(source, params, chunk, deliverResults);
-         });
       });
    }
 

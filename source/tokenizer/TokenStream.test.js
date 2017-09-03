@@ -1,28 +1,28 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+const parser = require('../parser');
 const token = require('../xmlToken');
 
-const ParsedStream = require('../parser/ParsedStream.js');
-const Tokenizer = require('./Tokenizer.js');
+const TokenStream = require('./TokenStream.js');
 
-describe('Tokenizer', () => {
-   let parser;
-   let tokenizer;
+describe('TokenStream', () => {
+   let parsedStream;
+   let tokenStream;
 
    beforeEach(() => {
-      parser = new ParsedStream();
-      tokenizer = new Tokenizer();
-      parser.pipe(tokenizer);
+      parsedStream = new parser.ParsedStream();
+      tokenStream = new TokenStream();
+      parsedStream.pipe(tokenStream);
    });
 
    it('lets do it', (done) => {
       const results = [];
 
-      tokenizer.on('data', (data) => {
+      tokenStream.on('data', (data) => {
          results.push(data);
       });
-      tokenizer.on('end', () => {
+      tokenStream.on('end', () => {
          expect(results).toEqual([
             new token.XmlDeclaration.XmlDeclaration([ {
                name: 'version',
@@ -31,8 +31,8 @@ describe('Tokenizer', () => {
          ]);
          done();
       });
-      parser.addText('<?xml version="1.0"?>');
-      parser.endText();
+      parsedStream.addText('<?xml version="1.0"?>');
+      parsedStream.endText();
    });
 
 });

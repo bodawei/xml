@@ -4,7 +4,7 @@ const stream = require('readable-stream');
 
 const token = require('../xmlToken');
 
-class Tokenizer extends stream.Transform {
+class TokenStream extends stream.Transform {
 
    constructor() {
       super({
@@ -29,4 +29,4 @@ class Tokenizer extends stream.Transform {
 
 }
 
-module.exports = Tokenizer;
+module.exports = TokenStream;

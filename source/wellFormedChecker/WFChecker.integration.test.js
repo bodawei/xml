@@ -5,20 +5,19 @@ const Chunk = require('../chunk/Chunk.js');
 const Offset = require('../basic/Offset.js');
 const Range = require('../basic/Range.js');
 const EntityLocation = require('../basic/EntityLocation.js');
-
 const error = require('../error');
+const parser = require('../parser');
 
-const ParsedStream = require('../parser/ParsedStream.js');
 const WFChecker = require('./WFChecker.js');
 
-describe('WFChecker', () => {
-   let parser;
+describe('WFChecker (integration)', () => {
+   let parsedStream;
    let checker;
 
    beforeEach(() => {
-      parser = new ParsedStream();
+      parsedStream = new parser.ParsedStream();
       checker = new WFChecker();
-      parser.pipe(checker);
+      parsedStream.pipe(checker);
    });
 
    describe('DOCTYPE', () => {
@@ -46,8 +45,8 @@ describe('WFChecker', () => {
             done();
          }
 
-         parser.addText('<!DOCTYPE $badName');
-         parser.endText();
+         parsedStream.addText('<!DOCTYPE $badName');
+         parsedStream.endText();
 
          checker.on('data', (data) => results.push(data));
          checker.on('end', evaluate);

@@ -1,9 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
+const stream = require('readable-stream');
+
+const chunk = require('../chunk');
 const EntityMetaData = require('../basic/EntityMetaData.js');
 
-const stream = require('readable-stream');
-const chunk = require('../chunk/index.js');
 const Parser = require('./Parser.js');
 
 class ParsedStream extends stream.Readable {

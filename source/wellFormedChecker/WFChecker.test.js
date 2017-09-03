@@ -6,19 +6,19 @@ const Chunk = require('../chunk/Chunk.js');
 const Range = require('../basic/Range.js');
 const Offset = require('../basic/Offset.js');
 const EntityLocation = require('../basic/EntityLocation.js');
+const parser = require('../parser');
 const SyntaxError = require('../error/SyntaxError.js');
 
-const ParsedStream = require('../parser/ParsedStream.js');
 const WFChecker = require('./WFChecker.js');
 
 describe('WFChecker', () => {
-   let parser;
+   let parsedStream;
    let checker;
 
    beforeEach(() => {
-      parser = new ParsedStream();
+      parsedStream = new parser.ParsedStream();
       checker = new WFChecker();
-      parser.pipe(checker);
+      parsedStream.pipe(checker);
    });
 
    it('one', (done) => {
@@ -52,8 +52,8 @@ describe('WFChecker', () => {
          ]);
          done();
       });
-      parser.addText('<?xml VERSION="1.0"?>');
-      parser.endText();
+      parsedStream.addText('<?xml VERSION="1.0"?>');
+      parsedStream.endText();
    });
 
 });

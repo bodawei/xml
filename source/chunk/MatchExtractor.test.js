@@ -1,5 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
+'use strict';
+
 /* eslint-env jasmine */
 
 const EntityLocation = require('../basic/EntityLocation.js');
@@ -53,9 +55,9 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 5,
                segment: {
-                  range: segmentRange,
-               },
-            } ],
+                  range: segmentRange
+               }
+            } ]
          });
       });
 
@@ -75,9 +77,9 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 1,
                segment: {
-                  range: undefined,
-               },
-            } ],
+                  range: undefined
+               }
+            } ]
          });
       });
 
@@ -124,7 +126,7 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [],
+            segments: []
          });
       });
 
@@ -142,23 +144,23 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: {
-                  range: segmentRange,
-               },
+                  range: segmentRange
+               }
             }, {
                chars: 2,
                rows: 0,
                columns: 2,
                segment: {
-                  range: undefined,
-               },
+                  range: undefined
+               }
             }, {
                chars: 2,
                rows: 0,
                columns: 2,
                segment: {
-                  range: undefined,
-               },
-            } ],
+                  range: undefined
+               }
+            } ]
          });
       });
 
@@ -176,14 +178,14 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 4,
                segment: {
-                  range: segmentRange,
-               },
+                  range: segmentRange
+               }
             }, {
                chars: 3,
                rows: 0,
                columns: 3,
                segment: segment,
-            } ],
+            } ]
          });
       });
 
@@ -207,7 +209,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 0,
                segment: segment2,
-            } ],
+            } ]
          });
       });
 
@@ -225,7 +227,7 @@ describe('MatchExtractor', () => {
                rows: 0,
                columns: 2,
                segment: segment,
-            } ],
+            } ]
          });
       });
 

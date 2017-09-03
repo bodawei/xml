@@ -1,18 +1,19 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-const ParsedStream = require('../parser/ParsedStream.js');
-const Tokenizer = require('./Tokenizer.js');
+const parsed = require('../parser');
 const token = require('../xmlToken');
 
-describe('ParsedStream', () => {
-   let parser;
-   let tokenizer;
+const TokenStream = require('./TokenStream.js');
+
+describe('TokenStream', () => {
+   let parsedStream;
+   let tokenStream;
 
    beforeEach(() => {
-      parser = new ParsedStream();
-      tokenizer = new Tokenizer();
-      parser.pipe(tokenizer);
+      parsedStream = new parsed.ParsedStream();
+      tokenStream = new TokenStream();
+      parsedStream.pipe(tokenStream);
    });
 
    describe('DOCTYPE', () => {
@@ -28,11 +29,11 @@ describe('ParsedStream', () => {
             done();
          }
 
-         parser.addText('<!DOCTYPE one');
-         parser.endText();
+         parsedStream.addText('<!DOCTYPE one');
+         parsedStream.endText();
 
-         tokenizer.on('data', (data) => results.push(data));
-         tokenizer.on('end', evaluate);
+         tokenStream.on('data', (data) => results.push(data));
+         tokenStream.on('end', evaluate);
       });
 
    });

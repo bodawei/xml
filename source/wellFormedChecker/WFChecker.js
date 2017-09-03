@@ -1,6 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 const stream = require('readable-stream');
+
 const token = require('../xmlToken');
 
 class WFChecker extends stream.Transform {
