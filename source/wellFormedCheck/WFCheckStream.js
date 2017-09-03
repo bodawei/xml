@@ -6,6 +6,7 @@ import { ErrorCollector } from '../basic';
 import { WellFormedError } from '../error';
 
 import {
+   declaration,
    docTypeEnd,
    docTypeStart,
    entityDeclaration,
@@ -78,6 +79,9 @@ class WFChecker extends stream.Transform {
             } else {
                // already caught by the state check, above.
             }
+            break;
+         case declaration.TYPE:
+            declaration.checkWellFormed(parsed, errorCollector);
             break;
          case entityDeclaration.TYPE:
             if (this._state !== STATE.IN_DTD) {

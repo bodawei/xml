@@ -4,6 +4,7 @@
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
+   declaration,
    docTypeStart,
    docTypeEnd,
    entityDeclaration,
@@ -73,6 +74,20 @@ describe('TokenStream (integration)', () => {
             ]),
             new docTypeEnd.Token([
                makeLToken('>'),
+            ]),
+         ], done, parsedStream, tokenStream);
+      });
+
+   });
+
+   describe('UNKNOWNDECL', () => {
+
+      it('do a simple end to end process', (done) => {
+         const makeLToken = makeLTokenMaker();
+         inputToOutput('<!BOGUS', [
+            new declaration.Token([
+               makeLToken('<!'),
+               makeLToken('BOGUS'),
             ]),
          ], done, parsedStream, tokenStream);
       });

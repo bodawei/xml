@@ -136,6 +136,28 @@ describe('ParsedStream', () => {
 
    });
 
+   describe('UNKNOWNDECL', () => {
+
+      it('parse entity', (done) => {
+         const makeLToken = makeLTokenMaker();
+         const parsedDecl = {
+            type: 'UNKNOWNDECL',
+            open: makeLToken('<!'),
+            postOpenSpace: undefined,
+            declType: makeLToken('BOGUS'),
+            postDeclTypeSpace: undefined,
+         };
+
+         inputToOutput('<!BOGUS', (results) => {
+            expect(results).toEqual([
+               parsedDecl,
+            ]);
+            done();
+         });
+      });
+
+   });
+
    describe('ENTITY', () => {
 
       it('parse entity', (done) => {

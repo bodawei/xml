@@ -116,6 +116,21 @@ describe('WFCheckStream (integration)', () => {
 
    });
 
+   describe('UNKNOWNDECL', () => {
+
+      it('reports an error when the declaration is not complete', (done) => {
+         givenInputExpectResult('<?xml version="1.0"?><!BOGUS', (results) => {
+            expect(results[1]).toEqual(new WellFormedError('BANGITEM_UNKNOWN',
+               [ 'BOGUS' ],
+               new Offset(new EntityLocation(), 23, 0, 23),
+               new Offset(new EntityLocation(), 21, 0, 21)
+            ));
+            done();
+         });
+      });
+
+   });
+
    describe('ENTITYDECL', () => {
 
       it('reports an error when the entity has the wrong syntax', (done) => {

@@ -83,6 +83,7 @@ function parse(source, declarationParsing, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
+   // check errors on declaration part
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, version, revision);

@@ -3,6 +3,7 @@
 import stream from 'readable-stream';
 
 import {
+   declaration,
    docTypeStart,
    docTypeEnd,
    xmlDeclaration,
@@ -30,6 +31,9 @@ class TokenStream extends stream.Transform {
             break;
          case entityDeclaration.TYPE:
             this.push(entityDeclaration.makeToken(parsed));
+            break;
+         case declaration.TYPE:
+            this.push(declaration.makeToken(parsed));
             break;
          default:
             this.push(new Error(`Unknown parsed type "${parsed.type}" encountered.`));
