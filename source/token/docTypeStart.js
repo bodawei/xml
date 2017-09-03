@@ -4,6 +4,7 @@ import { WellFormedError } from '../error';
 
 import util from './util.js';
 import xmlToken from './xmlToken.js';
+import externalId from './externalId.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
@@ -48,11 +49,15 @@ function parse(source, declarationStart, deliverParsed) {
    source.extractToObject('word', [ '[', '>' ], parsed, 'nameChunk'); // look for quotes?
    source.extractToObject('space', undefined, parsed, 'postNameSpaceChunk');
 
-   source.extractToObject('space', undefined, parsed, 'postExternalIdSpaceChunk');
+   externalId.parse(source, [ '[', '>' ], (externalId) => {
+      parsed.externalId = externalId;
 
-   source.extract('match', '[', (chunk) => {
-      parsed.startInternalSubsetChunk = chunk;
-      deliverParsed(parsed);
+      source.extractToObject('space', undefined, parsed, 'postExternalIdSpaceChunk');
+
+      source.extract('match', '[', (chunk) => {
+         parsed.startInternalSubsetChunk = chunk;
+         deliverParsed(parsed);
+      });
    });
 }
 
@@ -61,11 +66,14 @@ function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
    ec.check(!parsed.nameChunk, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.nameChunk, WFEID.DOCTYPE_NAME_INVALID, version, revision);
 
+   externalId.checkWellFormed(parsed.externalId, ec);
+
    return ec;
 }
 
 function makeToken(parsed) {
-   return new DocTypeStart(util.textOrBlank(parsed.nameChunk), undefined, []);
+   return new DocTypeStart(util.textOrBlank(parsed.nameChunk),
+      externalId.makeTokenCompatible(parsed.externalId), []);
 }
 
 module.exports = {

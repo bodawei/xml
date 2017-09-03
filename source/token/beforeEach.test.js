@@ -15,7 +15,7 @@ function toContainParsedProps(util, customEqualityTesters) {
 
          if (args.length !== 1 || args[0].length !== 1) {
             throw new Error('Expected to get one call with one argument. ' +
-               `Got ${args.length} calls with ${args[0].length} arguments.`);
+               `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
          }
 
          const actualProps = args[0][0];

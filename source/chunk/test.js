@@ -101,16 +101,14 @@ class MockChunkSource {
          calls.forEach((qc) => {
             if (qc.obj) {
                if (this.returnValues.length === 0) {
-                  throw new Error(`NO value provided to ${qc.name} in MockChunkSource.`);
+                  throw new Error(`NO value provided to "${qc.name}" in MockChunkSource.`);
                }
                qc.obj[qc.name] = this.returnValues.shift();
-            } else if (qc.callback) {
+            } else {
                if (this.returnValues.length === 0) {
-                  throw new Error(`NO value provided for extraction type ${qc.type} in MockChunkSource.`);
+                  throw new Error(`NO value provided for extraction type "${qc.type}" in MockChunkSource.`);
                }
                qc.callback(this.returnValues.shift());
-            } else {
-               throw new Error('Got an unknown queued value in MockChunkSource: ', JSON.stringify(qc));
             }
          });
       }

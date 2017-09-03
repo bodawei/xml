@@ -2,13 +2,14 @@
 
 /* eslint-env jasmine */
 
+import { Range, EntityLocation } from '../basic';
 import { MockErrorCollector } from '../basic/test';
 import { Chunk } from '../chunk';
 import chunkUtil from '../chunk/test';
-import { Range, EntityLocation } from '../basic';
 import { WellFormedError } from '../error';
 
 import docTypeStart from './docTypeStart.js';
+import externalId from './externalId.js';
 
 describe('docTypeStart', () => {
 
@@ -26,6 +27,9 @@ describe('docTypeStart', () => {
             undefined,
          ]);
          sourceRm = new chunkUtil.RangeMaker(new EntityLocation());
+         spyOn(externalId, 'parse').and.callFake((ignored1, ignored2, cb) => {
+            cb({ externalId: true });
+         });
       });
 
       it('returns simple values', () => {
@@ -40,17 +44,14 @@ describe('docTypeStart', () => {
 
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.allArgs()).toEqual([ [ {
+         expect(callback).toContainParsedProps({
             type: 'DOCTYPE_START',
-            openChunk: undefined,
-            postOpenSpaceChunk: undefined,
-            declTypeChunk: undefined,
-            postDeclTypeSpaceChunk: undefined,
             nameChunk: new Chunk('a', 'a', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
             postNameSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
+            externalId: { externalId: true },
             postExternalIdSpaceChunk: undefined,
             startInternalSubsetChunk: undefined,
-         } ] ]);
+         });
       });
 
       it('uses whatever preliminary declaration values were passed in', () => {
@@ -63,12 +64,12 @@ describe('docTypeStart', () => {
 
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.allArgs()).toEqual([ [ jasmine.objectContaining({
+         expect(callback).toContainParsedProps({
             openChunk: 'a',
             postOpenSpaceChunk: 'b',
             declTypeChunk: 'c',
             postDeclTypeSpaceChunk: 'd',
-         }) ] ]);
+         });
       });
 
       it('returns all values', () => {
@@ -88,10 +89,9 @@ describe('docTypeStart', () => {
          ]);
 
          docTypeStart.parse(mockSource, declStart, callback);
-
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.allArgs()).toEqual([ [ {
+         expect(callback).toContainParsedProps({
             type: 'DOCTYPE_START',
             openChunk: chunkUtil.makeChunk('<!', expectedRm),
             postOpenSpaceChunk: chunkUtil.makeChunk(' ', expectedRm),
@@ -100,8 +100,9 @@ describe('docTypeStart', () => {
             nameChunk: chunkUtil.makeChunk('elemType', expectedRm),
             postNameSpaceChunk: chunkUtil.makeChunk('  ', expectedRm),
             postExternalIdSpaceChunk: chunkUtil.makeChunk('\t', expectedRm),
+            externalId: { externalId: true },
             startInternalSubsetChunk: chunkUtil.makeChunk('[', expectedRm),
-         } ] ]);
+         });
       });
 
    });
@@ -168,6 +169,15 @@ describe('docTypeStart', () => {
             .toHaveBeenCalledWith(parsed.nameChunk, WellFormedError.ID.DOCTYPE_NAME_INVALID, 1, 2);
       });
 
+      it('checks whether externalId is valid', () => {
+         parsed.externalId = {};
+         spyOn(externalId, 'checkWellFormed');
+
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(externalId.checkWellFormed).toHaveBeenCalledWith(parsed.externalId, mockErrorCollector);
+      });
+
    });
 
    describe('makeToken()', () => {
@@ -190,6 +200,18 @@ describe('docTypeStart', () => {
          const token = docTypeStart.makeToken(parsed);
 
          expect(token.name).toEqual('');
+      });
+
+      it('asks externalId to provide an entity location', () => {
+         const parsed = {
+            nameChunk: undefined,
+            externalId: { externalId: true },
+         };
+         spyOn(externalId, 'makeTokenCompatible');
+
+         docTypeStart.makeToken(parsed);
+
+         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(parsed.externalId);
       });
 
    });

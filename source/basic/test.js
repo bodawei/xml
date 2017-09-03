@@ -23,7 +23,6 @@ function MockErrorCollector() {
    };
 }
 
-
 module.exports = {
    MockErrorCollector,
 };
