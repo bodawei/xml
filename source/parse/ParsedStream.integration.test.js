@@ -8,19 +8,31 @@ import ParsedStream from './ParsedStream.js';
 
 describe('ParsedStream', () => {
    let parser;
+   let makeLToken;
 
    beforeEach(() => {
+      makeLToken = makeLTokenMaker();
       parser = new ParsedStream();
    });
 
-   function inputToOutput(input, evaluator) {
+   function expectInputToProduce(input, parsings, done) {
       const results = [];
 
       parser.on('data', (data) => {
          results.push(data);
       });
       parser.on('end', () => {
-         evaluator(results);
+         let expecteds = parsings;
+         if (!Array.isArray(parsings)) {
+            expecteds = [ parsings ];
+         }
+
+         expecteds.forEach((expected) => {
+            const actuals = results.filter((actual) => actual.type === expected.type);
+
+            expect(actuals[0]).toEqual(expected);
+         });
+         done();
       });
       parser.addText(input);
       parser.endText();
@@ -29,17 +41,10 @@ describe('ParsedStream', () => {
    describe('CharData', () => {
 
       it('parses character data up to a <', (done) => {
-         const makeLToken = makeLTokenMaker();
-
-         inputToOutput('blah<elementName>', (results) => {
-            const result = results.filter((item) => item.type === 'CHARDATA');
-
-            expect(result[0]).toEqual({
-               type: 'CHARDATA',
-               text: makeLToken('blah'),
-            });
-            done();
-         });
+         expectInputToProduce('blah<elementName>', {
+            type: 'CHARDATA',
+            text: makeLToken('blah'),
+         }, done);
       });
 
    });
@@ -47,8 +52,7 @@ describe('ParsedStream', () => {
    describe('DOCTYPE', () => {
 
       it('parse simple start and end', (done) => {
-         const makeLToken = makeLTokenMaker();
-         const startParsing = {
+         expectInputToProduce('<!DOCTYPE goodName SYSTEM "sys.xml"[]>', [ {
             type: 'DOCTYPE_START',
             open: makeLToken('<!'),
             postOpenSpace: undefined,
@@ -66,27 +70,16 @@ describe('ParsedStream', () => {
             },
             postExternalIdSpace: undefined,
             startInternalSubset: makeLToken('['),
-         };
-         const endParsing = {
+         }, {
             type: 'DOCTYPE_END',
             closeInternalSubset: makeLToken(']'),
             postCloseInternalSubsetSpace: undefined,
             close: makeLToken('>'),
-         };
-
-         inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml"[]>', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               startParsing,
-               endParsing,
-            ]);
-            done();
-         });
+         } ], done);
       });
 
       it('parse start and end without an internal subset', (done) => {
-         const makeLToken = makeLTokenMaker();
-         const startParsing = {
+         expectInputToProduce('<!DOCTYPE goodName SYSTEM "sys.xml">', [ {
             type: 'DOCTYPE_START',
             open: makeLToken('<!'),
             postOpenSpace: undefined,
@@ -104,45 +97,12 @@ describe('ParsedStream', () => {
             },
             postExternalIdSpace: undefined,
             startInternalSubset: undefined,
-         };
-         const endParsing = {
+         }, {
             type: 'DOCTYPE_END',
             closeInternalSubset: undefined,
             postCloseInternalSubsetSpace: undefined,
             close: makeLToken('>'),
-         };
-
-         inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml">', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               startParsing,
-               endParsing,
-            ]);
-            done();
-         });
-      });
-
-   });
-
-   describe('UNKNOWNDECL', () => {
-
-      it('parse entity', (done) => {
-         const makeLToken = makeLTokenMaker();
-         const parsedDecl = {
-            type: 'UNKNOWNDECL',
-            open: makeLToken('<!'),
-            postOpenSpace: undefined,
-            declType: makeLToken('BOGUS'),
-            postDeclTypeSpace: undefined,
-         };
-
-         inputToOutput('<!BOGUS', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               parsedDecl,
-            ]);
-            done();
-         });
+         } ], done);
       });
 
    });
@@ -150,21 +110,14 @@ describe('ParsedStream', () => {
    describe('element start', () => {
 
       it('parse tag', (done) => {
-         const makeLToken = makeLTokenMaker();
-
-         inputToOutput('<elementName\t>', (results) => {
-            const result = results.filter((item) => item.type === 'ELEMENT_START');
-
-            expect(result[0]).toEqual({
-               type: 'ELEMENT_START',
-               open: makeLToken('<'),
-               postOpenSpace: undefined,
-               name: makeLToken('elementName'),
-               postNameSpace: makeLToken('\t'),
-               close: makeLToken('>'),
-            });
-            done();
-         });
+         expectInputToProduce('<elementName\t>', {
+            type: 'ELEMENT_START',
+            open: makeLToken('<'),
+            postOpenSpace: undefined,
+            name: makeLToken('elementName'),
+            postNameSpace: makeLToken('\t'),
+            close: makeLToken('>'),
+         }, done);
       });
 
    });
@@ -172,21 +125,14 @@ describe('ParsedStream', () => {
    describe('element end', () => {
 
       it('parse tag', (done) => {
-         const makeLToken = makeLTokenMaker();
-
-         inputToOutput('</elementName\t>', (results) => {
-            const result = results.filter((item) => item.type === 'ELEMENT_END');
-
-            expect(result[0]).toEqual({
-               type: 'ELEMENT_END',
-               open: makeLToken('</'),
-               postOpenSpace: undefined,
-               name: makeLToken('elementName'),
-               postNameSpace: makeLToken('\t'),
-               close: makeLToken('>'),
-            });
-            done();
-         });
+         expectInputToProduce('</elementName\t>', {
+            type: 'ELEMENT_END',
+            open: makeLToken('</'),
+            postOpenSpace: undefined,
+            name: makeLToken('elementName'),
+            postNameSpace: makeLToken('\t'),
+            close: makeLToken('>'),
+         }, done);
       });
 
    });
@@ -194,8 +140,7 @@ describe('ParsedStream', () => {
    describe('ENTITY', () => {
 
       it('parse entity', (done) => {
-         const makeLToken = makeLTokenMaker();
-         const parsedDecl = {
+         expectInputToProduce('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', {
             type: 'ENTITYDECL',
             open: makeLToken('<!'),
             postOpenSpace: undefined,
@@ -217,15 +162,21 @@ describe('ParsedStream', () => {
             },
             postExternalIdSpace: undefined,
             close: makeLToken('>'),
-         };
+         }, done);
+      });
 
-         inputToOutput('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               parsedDecl,
-            ]);
-            done();
-         });
+   });
+
+   describe('UNKNOWNDECL', () => {
+
+      it('parse entity', (done) => {
+         expectInputToProduce('<!BOGUS', {
+            type: 'UNKNOWNDECL',
+            open: makeLToken('<!'),
+            postOpenSpace: undefined,
+            declType: makeLToken('BOGUS'),
+            postDeclTypeSpace: undefined,
+         }, done);
       });
 
    });
@@ -233,8 +184,7 @@ describe('ParsedStream', () => {
    describe('XmlDeclaration', () => {
 
       it('parses a simple declaration', (done) => {
-         const makeLToken = makeLTokenMaker();
-         const parsedDecl = {
+         expectInputToProduce('<?xml version="1.0"?>', {
             type: 'XMLDECL',
             open: makeLToken('<?'),
             postOpenSpace: undefined,
@@ -251,15 +201,7 @@ describe('ParsedStream', () => {
                trailingSpace: undefined,
             } ],
             close: makeLToken('?>'),
-         };
-
-         inputToOutput('<?xml version="1.0"?>', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               parsedDecl,
-            ]);
-            done();
-         });
+         }, done);
       });
 
    });

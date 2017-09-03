@@ -16,14 +16,6 @@ describe('TokenStream (unit)', () => {
       tokenStream = new TokenStream();
    });
 
-   it('throws an error if asked to deal with an unknown parsed type', () => {
-      tokenStream.write({ type: 'BOGUS' });
-
-      const token = tokenStream.read();
-
-      expect(token.message).toEqual('Unknown parsed type "BOGUS" encountered.');
-   });
-
    it('calls charData.makeToken()', () => {
       spyOn(charData, 'makeToken');
       const parsed = { type: charData.TYPE };
@@ -52,6 +44,14 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(elementEnd.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('throws an error if asked to deal with an unknown parsed type', () => {
+      tokenStream.write({ type: 'BOGUS' });
+
+      const token = tokenStream.read();
+
+      expect(token.message).toEqual('Unknown parsed type "BOGUS" encountered.');
    });
 
 });

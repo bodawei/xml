@@ -17,37 +17,138 @@ import {
 
 import TokenStream from './TokenStream.js';
 
-function inputToOutput(inputDocument, tokenArray, done, parsedStream, tokenStream) {
-   const results = [];
-
-   function evaluate() {
-      expect(results).toEqual(tokenArray);
-      done();
-   }
-
-   parsedStream.addText(inputDocument);
-   parsedStream.endText();
-
-   tokenStream.on('data', (data) => results.push(data));
-   tokenStream.on('end', evaluate);
-}
-
 describe('TokenStream (integration)', () => {
    let parsedStream;
    let tokenStream;
+   let makeLToken;
 
    beforeEach(() => {
+      makeLToken = makeLTokenMaker();
       parsedStream = new ParsedStream();
       tokenStream = new TokenStream();
       parsedStream.pipe(tokenStream);
    });
 
+   function expectInputToProduce(inputDocument, expecteds, done) {
+      const results = [];
+
+      function evaluate() {
+         expect(results).toEqual(tokenArray);
+         done();
+      }
+
+      parsedStream.addText(inputDocument);
+      parsedStream.endText();
+
+      tokenStream.on('data', (data) => results.push(data));
+      tokenStream.on('end', () => {
+         if (!Array.isArray(expecteds)) {
+            expecteds = [ expecteds ];
+         }
+
+         expecteds.forEach((expected) => {
+            const actuals = results.filter((actual) => actual instanceof expected.constructor);
+
+            expect(actuals[0]).toEqual(expected);
+         });
+         done();
+      });
+   }
+
+   describe('charData', () => {
+
+      it('produces a CharData token from text', (done) => {
+         expectInputToProduce('some$ text ', new charData.Token('some$ text ', [
+            makeLToken('some$ text '),
+         ]), done);
+      });
+
+   });
+
+   describe('DOCTYPE', () => {
+
+      it('tokenize a parsed', (done) => {
+         expectInputToProduce('<!DOCTYPE one>', [
+            new docTypeStart.Token('one', undefined, false, [
+               makeLToken('<!'),
+               makeLToken('DOCTYPE'),
+               makeLToken(' '),
+               makeLToken('one'),
+            ]),
+            new docTypeEnd.Token([
+               makeLToken('>'),
+            ]),
+         ], done);
+      });
+
+   });
+
+   describe('element start', () => {
+
+      it('do a simple end to end process', (done) => {
+         expectInputToProduce('<elementName>', [
+            new elementStart.Token('elementName', [], [
+               makeLToken('<'),
+               makeLToken('elementName'),
+               makeLToken('>'),
+            ]),
+         ], done);
+      });
+
+   });
+
+   describe('element end', () => {
+
+      it('tokenizes the input', (done) => {
+         expectInputToProduce('</elementName>', [
+            new elementEnd.Token('elementName', [
+               makeLToken('</'),
+               makeLToken('elementName'),
+               makeLToken('>'),
+            ]),
+         ], done);
+      });
+
+   });
+
+   describe('ENTITY', () => {
+
+      it('do a simple end to end process', (done) => {
+         expectInputToProduce('<!ENTITY entityName "value">', [
+            new entityDeclaration.Token('entityName', 'value', {}, '', [
+               makeLToken('<!'),
+               makeLToken('ENTITY'),
+               makeLToken(' '),
+               makeLToken('entityName'),
+               makeLToken(' '),
+               makeLToken('"'),
+               makeLToken('value'),
+               makeLToken('"'),
+               makeLToken('>'),
+            ]),
+         ], done);
+      });
+
+   });
+
+   describe('UNKNOWNDECL', () => {
+
+      it('do a simple end to end process', (done) => {
+         expectInputToProduce('<!BOGUS', [
+            new EntityMetaData(),
+            new declaration.Token([
+               makeLToken('<!'),
+               makeLToken('BOGUS'),
+            ]),
+         ], done);
+      });
+
+   });
+
    describe('XMLDECL', () => {
 
       it('tokenized a parsed', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('<?xml version="1.0"?>', [
-            new EntityMetaData(),
+         expectInputToProduce('<?xml version="1.0"?>', [
             new xmlDeclaration.Token([ {
                name: 'version',
                value: '1.0',
@@ -61,110 +162,7 @@ describe('TokenStream (integration)', () => {
                makeLToken('1.0'),
                makeLToken('"'),
                makeLToken('?>'),
-            ]) ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('DOCTYPE', () => {
-
-      it('tokenize a parsed', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('<!DOCTYPE one>', [
-            new EntityMetaData(),
-            new docTypeStart.Token('one', undefined, false, [
-               makeLToken('<!'),
-               makeLToken('DOCTYPE'),
-               makeLToken(' '),
-               makeLToken('one'),
-            ]),
-            new docTypeEnd.Token([
-               makeLToken('>'),
-            ]),
-         ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('UNKNOWNDECL', () => {
-
-      it('do a simple end to end process', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('<!BOGUS', [
-            new EntityMetaData(),
-            new declaration.Token([
-               makeLToken('<!'),
-               makeLToken('BOGUS'),
-            ]),
-         ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('ENTITY', () => {
-
-      it('do a simple end to end process', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('<!ENTITY entityName "value">', [
-            new EntityMetaData(),
-            new entityDeclaration.Token('entityName', 'value', {}, '', [
-               makeLToken('<!'),
-               makeLToken('ENTITY'),
-               makeLToken(' '),
-               makeLToken('entityName'),
-               makeLToken(' '),
-               makeLToken('"'),
-               makeLToken('value'),
-               makeLToken('"'),
-               makeLToken('>'),
-            ]),
-         ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('charData', () => {
-
-      it('produces a CharData token from text', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('some$ text ', [
-            new EntityMetaData(),
-            new charData.Token('some$ text ', [
-               makeLToken('some$ text '),
-            ]),
-         ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('element start', () => {
-
-      it('do a simple end to end process', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('<elementName>', [
-            new EntityMetaData(),
-            new elementStart.Token('elementName', [], [
-               makeLToken('<'),
-               makeLToken('elementName'),
-               makeLToken('>'),
-            ]),
-         ], done, parsedStream, tokenStream);
-      });
-
-   });
-
-   describe('element end', () => {
-
-      it('tokenizes the input', (done) => {
-         const makeLToken = makeLTokenMaker();
-         inputToOutput('</elementName>', [
-            new EntityMetaData(),
-            new elementEnd.Token('elementName', [
-               makeLToken('</'),
-               makeLToken('elementName'),
-               makeLToken('>'),
-            ]),
-         ], done, parsedStream, tokenStream);
+            ]) ], done);
       });
 
    });

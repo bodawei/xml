@@ -37,6 +37,49 @@ describe('WFCheckStream (unit)', () => {
       });
    });
 
+   describe('charData', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(charData, 'checkWellFormed');
+         parsed = {
+            type: charData.TYPE,
+            text: makeLToken('good'),
+         };
+      });
+
+      it('calls charData.checkWellFormed() when encountering a CHARDATA', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = charData.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports no errors when in the content state', () => {
+            spyOn(checker, 'push');
+            checker._state = 'IN_CONTENT';
+            checker.write(parsed);
+
+            expect(checker.push.calls.count()).toEqual(1);
+         });
+
+         it('reports an error if not IN_CONTENT', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
+   });
+
    it('calls declaration.checkWellFormed() when encountering an declaration parsing', () => {
       spyOn(declaration, 'checkWellFormed');
       const parsed = {
@@ -47,21 +90,6 @@ describe('WFCheckStream (unit)', () => {
       checker.write(parsed);
 
       const args = declaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
-      expect(args[2]).toEqual(metaData);
-   });
-
-   it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
-      spyOn(xmlDeclaration, 'checkWellFormed');
-      const parsed = {
-         type: xmlDeclaration.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(parsed);
-
-      const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
       expect(args[1] instanceof ErrorCollector).toEqual(true);
       expect(args[2]).toEqual(metaData);
@@ -132,64 +160,6 @@ describe('WFCheckStream (unit)', () => {
       expect(args[0]).toEqual(parsed);
       expect(args[2] instanceof ErrorCollector).toEqual(true);
       expect(args[3]).toEqual(metaData);
-   });
-
-   it('calls entityDeclaration.checkWellFormed() when encountering an ENTITY declaation parsing', () => {
-      spyOn(entityDeclaration, 'checkWellFormed');
-      const parsed = {
-         type: entityDeclaration.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(parsed);
-
-      const args = entityDeclaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
-      expect(args[2]).toEqual(metaData);
-   });
-
-   describe('charData', () => {
-      let parsed;
-
-      beforeEach(() => {
-         spyOn(charData, 'checkWellFormed');
-         parsed = {
-            type: charData.TYPE,
-            text: makeLToken('good'),
-         };
-      });
-
-      it('calls charData.checkWellFormed() when encountering a CHARDATA', () => {
-         checker.write(metaData);
-         checker.write(parsed);
-
-         const args = charData.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
-         expect(args[2]).toEqual(metaData);
-      });
-
-      describe('state checking', () => {
-
-         it('reports no errors when in the content state', () => {
-            spyOn(checker, 'push');
-            checker._state = 'IN_CONTENT';
-            checker.write(parsed);
-
-            expect(checker.push.calls.count()).toEqual(1);
-         });
-
-         it('reports an error if not IN_CONTENT', () => {
-            checker._state = 'START';
-            spyOn(checker, 'push');
-            checker.write(parsed);
-
-            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
-         });
-
-      });
-
    });
 
    describe('elementStart', () => {
@@ -371,6 +341,36 @@ describe('WFCheckStream (unit)', () => {
 
       });
 
+   });
+
+   it('calls entityDeclaration.checkWellFormed() when encountering an ENTITY declaation parsing', () => {
+      spyOn(entityDeclaration, 'checkWellFormed');
+      const parsed = {
+         type: entityDeclaration.TYPE,
+         open: makeLToken('<'),
+      };
+      checker.write(metaData);
+      checker.write(parsed);
+
+      const args = entityDeclaration.checkWellFormed.calls.argsFor(0);
+      expect(args[0]).toEqual(parsed);
+      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[2]).toEqual(metaData);
+   });
+
+   it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
+      spyOn(xmlDeclaration, 'checkWellFormed');
+      const parsed = {
+         type: xmlDeclaration.TYPE,
+         open: makeLToken('<'),
+      };
+      checker.write(metaData);
+      checker.write(parsed);
+
+      const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
+      expect(args[0]).toEqual(parsed);
+      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[2]).toEqual(metaData);
    });
 
 });
