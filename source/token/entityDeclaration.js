@@ -123,7 +123,7 @@ function parseClose(source, parsed, propName, deliverParsed) {
    });
 }
 
-function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
+function checkWellFormed(parsed, ec) {
    const enNameText = util.textOrBlank(parsed.nameChunk);
    ec.setPos(parsed.openChunk);
 
@@ -147,7 +147,8 @@ function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
       this._validateExternalId(parsed.externalId, ec, true);
 
       if (parsed.nDataChunk) {
-         ec.check(parsed.nDataChunk.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsed.nDataChunk.text ]);
+         ec.check(parsed.nDataChunk.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
+            [ enNameText, parsed.nDataChunk.text ]);
          ec.check(!parsed.nDataNameChunk, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
       // 3. XmlText.validateText(parsed.nDataName, this._entityMd, parsed.start, this);
       }

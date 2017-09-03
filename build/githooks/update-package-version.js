@@ -20,13 +20,13 @@ function computeVersion(logs, final) {
          body = logs[index].subject;
       }
 
-      if (body.indexOf('fix') !== -1) {
+      if (body.indexOf('fix') === 0) {
 console.log('PAT', body);
          version = semver.inc(version, 'patch');
-      } else if (body.indexOf('feat') !== -1) {
+      } else if (body.indexOf('feat') === 0) {
 console.log('MIN', body);
          version = semver.inc(version, 'minor');
-      } else if (body.indexOf('BREAKING CHANGE') !== -1) {
+      } else if (body.indexOf('BREAKING CHANGE') === 0) {
 console.log('MAJ', body);
          version = semver.inc(version, 'major');
       } else {

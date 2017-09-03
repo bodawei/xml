@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation } from '../basic';
 import { WellFormedError } from '../error';
 
 import util from '../chunk/index.test.js';
@@ -441,7 +440,6 @@ describe('entityDeclaration', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let expectedRm;
       let parsed;
 
       beforeEach(() => {
@@ -461,7 +459,6 @@ describe('entityDeclaration', () => {
             report: jasmine.createSpy('reportSpy'),
          };
 
-         expectedRm = new util.RangeMaker(new EntityLocation());
          parsed = {
             openChunk: util.makeChunk('<!'),
             declTypeChunk: util.makeChunk('ENTITY'),
@@ -503,7 +500,8 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ 'entityName' ]);
+         expect(mockErrorCollector.report)
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ 'entityName' ]);
       });
 
       it('reports an error if there is EnitytValue or ExternalID', () => {
@@ -511,7 +509,8 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_VALUE, [ 'entityName' ]);
+         expect(mockErrorCollector.report)
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_VALUE, [ 'entityName' ]);
       });
 
       it('reports an error if there was no closing', () => {
@@ -519,11 +518,11 @@ describe('entityDeclaration', () => {
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_CLOSE, [ 'entityName' ]);
+         expect(mockErrorCollector.report)
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_CLOSE, [ 'entityName' ]);
       });
 
    });
-
 
    describe('makeToken()', () => {
 
@@ -532,7 +531,7 @@ describe('entityDeclaration', () => {
             nameChunk: util.makeChunk('entityName'),
             entityValue: {
                valueChunk: util.makeChunk('value'),
-            }
+            },
          };
 
          const token = entityDeclaration.makeToken(parsed);
@@ -546,7 +545,7 @@ describe('entityDeclaration', () => {
             nameChunk: util.makeChunk('entityName'),
             entityValue: {
                valueChunk: util.makeChunk('value'),
-            }
+            },
          };
 
          const token = entityDeclaration.makeToken(parsed);
@@ -559,7 +558,7 @@ describe('entityDeclaration', () => {
             nameChunk: undefined,
             entityValue: {
                valueChunk: util.makeChunk('value'),
-            }
+            },
          };
 
          const token = entityDeclaration.makeToken(parsed);
