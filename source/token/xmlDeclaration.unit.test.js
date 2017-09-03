@@ -195,6 +195,19 @@ describe('xmlDeclaration', () => {
          });
       });
 
+      it('reports an error if the name is invalid', () => {
+         const makeToken = makeLTokenMaker();
+         parsed.params[2].name = makeToken('$badName');
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector,
+            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 2));
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTRIBUTE_INVALID_NAME,
+            params: [ '$badName' ],
+            position: parsed.params[2].name,
+         });
+      });
+
    });
 
    describe('makeToken()', () => {

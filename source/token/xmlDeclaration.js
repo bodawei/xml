@@ -135,7 +135,7 @@ function checkWellFormed(parsed, err, entityMetaData) {
          err.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
-//         err.checkNameInvalid(param.name, WFEID.ATTRIBUTE_INVALID_NAME);
+      err.checkName(param.name, WFEID.ATTRIBUTE_INVALID_NAME, entityMetaData);
       if (XMLDECL_PARAMS[lcName]) {
          err.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
