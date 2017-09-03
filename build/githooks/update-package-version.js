@@ -24,17 +24,16 @@ function computeVersion(logs, final) {
 
       if (body.indexOf('BREAKING CHANGE') !== -1) {
           version = semver.inc(version, 'major');
-       } else {
-         if (subject.indexOf('fix') === 0) {
-         console.log('FIX', subject);
-            version = semver.inc(version, 'patch');
-         } else if (subject.indexOf('feat') === 0) {
-         console.log('FEAT', subject);
-            version = semver.inc(version, 'minor');
-         } else {
+      } else if (subject.indexOf('fix') === 0) {
+      console.log('FIX', subject);
+         version = semver.inc(version, 'patch');
+      } else if (subject.indexOf('feat') === 0) {
+      console.log('FEAT', subject);
+         version = semver.inc(version, 'minor');
+      } else {
 //            console.log('ERROR: Commit message has no keyword.', body);
-         }
-       }
+      }
+   }
 
 console.log('VERSION: ', version);
    return version;
