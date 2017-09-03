@@ -1,12 +1,13 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation } from '../basic';
+import { EntityLocation, EntityMetaData } from '../basic';
 import { MockErrorCollector } from '../basic/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
 import * as externalId from './externalId.js';
+import * as misc from './misc.js';
 
 describe('externalId', () => {
 
@@ -374,7 +375,7 @@ describe('externalId', () => {
       });
 
       it('reports no errors when no parsed value is passed in', () => {
-         externalId.checkWellFormed(undefined, mockErrorCollector);
+         externalId.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
@@ -382,7 +383,7 @@ describe('externalId', () => {
       it('reports an error if type is the wrong case', () => {
          parsed.idType.text = 'public';
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report)
             .toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
@@ -396,7 +397,7 @@ describe('externalId', () => {
       it('reports an error if there is no PUBLIC value', () => {
          delete parsed.publicValue;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
@@ -408,7 +409,7 @@ describe('externalId', () => {
       it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
          delete parsed.postTypeSpace;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
@@ -422,7 +423,7 @@ describe('externalId', () => {
          parsed.idType = expectedLToken('SYSTEM');
          delete parsed.systemValue;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_SYSTEM,
@@ -434,7 +435,7 @@ describe('externalId', () => {
       it('reports an error if there is no space after a public part', () => {
          delete parsed.postPublicSpace;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
@@ -447,7 +448,7 @@ describe('externalId', () => {
          delete parsed.publicValue;
          delete parsed.postPublicSpace;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
@@ -459,7 +460,7 @@ describe('externalId', () => {
       it('reports an error if there is no quote around the system value', () => {
          delete parsed.systemOpenQuote;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE,
@@ -471,13 +472,22 @@ describe('externalId', () => {
       it('reports an error if there is no quote at the end of the system value', () => {
          delete parsed.systemCloseQuote;
 
-         externalId.checkWellFormed(parsed, mockErrorCollector);
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE,
             params: undefined,
             lastPosition: parsed.systemValue,
          });
+      });
+
+      it('calls on misc.checkWellFormedText() to validate system value', () => {
+         spyOn(misc, 'checkWellFormedText');
+         const emd = new EntityMetaData();
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.systemValue, mockErrorCollector, emd);
       });
 
    });

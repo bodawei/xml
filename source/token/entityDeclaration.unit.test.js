@@ -478,6 +478,7 @@ describe('entityDeclaration', () => {
             close: expectedLToken('>'),
          };
          spyOn(misc, 'checkWellFormedNameRecommendation');
+         spyOn(misc, 'checkWellFormedText');
       });
 
       it('reports an error if % is not followed by a space', () => {
@@ -555,6 +556,18 @@ describe('entityDeclaration', () => {
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
             mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
+      });
+
+      it('calls checkWellFormedText() to check on the ndata value', () => {
+         parsed.externalId = { externalId: true };
+         parsed.nData = expectedLToken('NDATA');
+         parsed.nDataName = expectedLToken('foo');
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.nDataName,
+            mockErrorCollector, emd);
       });
 
    });

@@ -2,6 +2,7 @@
 
 import { WellFormedError } from '../error';
 
+import * as misc from './misc.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -172,7 +173,7 @@ function checkWellFormed(parsed, err, entityMetaData) {
       const valueText = textOrBlank(param.value);
       const lcValue = valueText.toLocaleLowerCase();
       err.check(!param.value, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-//         err.add(XmlText.validateText(param.value, version, parsed.open));
+      misc.checkWellFormedText(param.value, err, entityMetaData);
 
       switch (lcName) {
          case 'version':

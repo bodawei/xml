@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 const WellFormedError = require('../error').WellFormedError;
+const XmlWarning = require('../error').XmlWarning;
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
@@ -62,9 +63,21 @@ class MockErrorCollector {
          }
       }
    }
+
+   reportError(id, constructor, params) {
+      this.report(id, params);
+   }
 }
 
 function toReportError(util) {
+   return makeCompareObject(util, WellFormedError);
+}
+
+function toReportWarning(util) {
+   return makeCompareObject(util, XmlWarning);
+}
+
+function makeCompareObject(util, ErrorClass) {
    return {
       compare: (mockErrorCollector, expectedError) => {
          if (!mockErrorCollector) {
@@ -79,7 +92,7 @@ function toReportError(util) {
             const actual = errors[index];
 
             if (expectedError.id === actual.id) {
-               const errMsg = WellFormedError.STRING.lookup(actual.id || '');
+               const errMsg = ErrorClass.STRING.lookup(actual.id || '');
 
                if (!errMsg) {
                   pass = false;
@@ -132,6 +145,7 @@ function toReportError(util) {
 beforeEach(() => {
    jasmine.addMatchers({
       toReportError,
+      toReportWarning,
    });
 
 });
@@ -139,4 +153,5 @@ beforeEach(() => {
 module.exports = {
    MockErrorCollector,
    toReportError,
+   toReportWarning,
 };

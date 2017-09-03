@@ -4,6 +4,7 @@ import { EntityLocation } from '../basic';
 import { LToken } from '../lToken';
 import { WellFormedError } from '../error';
 
+import * as misc from './misc.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -121,7 +122,7 @@ function getQuotedLiteral(source, parsed, prefix, done) {
    ec: An ErrorCollector instance.
 \**********************************************************************/
 
-function checkWellFormed(parsed, ec) {
+function checkWellFormed(parsed, ec, entityMetaData) {
    if (!parsed) {
       return;
    }
@@ -162,7 +163,7 @@ function checkWellFormed(parsed, ec) {
 
       ec.setPos(parsed.systemValue);
       ec.check(!parsed.systemValue, WFEID.EXTERNALID_NO_SYSTEM);
-      // XmlText.validateText(externalId.systemId.literal, this._entityMd, start, this);
+      misc.checkWellFormedText(parsed.systemValue, ec, entityMetaData);
 
       ec.setPos(parsed.systemCloseQuote);
       ec.check(!parsed.systemCloseQuote, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new

@@ -6,6 +6,7 @@ import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
+import * as misc from './misc.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 describe('xmlDeclaration', () => {
@@ -206,6 +207,15 @@ describe('xmlDeclaration', () => {
             params: [ '$badName' ],
             position: parsed.params[2].name,
          });
+      });
+
+      it('calls misc.checkWellFormedText() with the value of each token', () => {
+         spyOn(misc, 'checkWellFormedText');
+         const emd = new EntityMetaData();
+
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.params[1].value, mockErrorCollector, emd);
       });
 
    });

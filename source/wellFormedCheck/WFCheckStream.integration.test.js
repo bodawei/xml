@@ -59,6 +59,14 @@ describe('WFCheckStream (integration)', () => {
          });
       });
 
+      it('reports an error if a value contains an invalid character (validating misc.checkWellFormedText)', (done) => {
+         givenInputExpectResult('<?xml version="1.0" foo="bad\u0000"?>', (results) => {
+            expect(results[2]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR', [ 28 ],
+               new Offset(new EntityLocation(), 25, 0, 25), new Offset(new EntityLocation(), 0, 0, 0)));
+            done();
+         });
+      });
+
    });
 
    describe('DOCTYPE', () => {
@@ -118,6 +126,17 @@ describe('WFCheckStream (integration)', () => {
          checker.end();
       });
 
+      it('reports an error when the SYSTEM value has a bad char (check misc.checkWellFormedText())', (done) => {
+         givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "sys\u0000.xml">', (results) => {
+            expect(results[2]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR',
+               [ '46' ],
+               new Offset(new EntityLocation(), 43, 0, 43),
+               new Offset(new EntityLocation(), 21, 0, 21)
+            ));
+            done();
+         });
+      });
+
    });
 
    describe('UNKNOWNDECL', () => {
@@ -159,6 +178,20 @@ describe('WFCheckStream (integration)', () => {
             expect(results[4].type).toEqual('ENTITYDECL');
             done();
          });
+      });
+
+      it('reports an error when NDATA value has a bad char (check misc.checkWellFormedText())', (done) => {
+         givenInputExpectResult(
+            '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY myEnt SYSTEM "sys.xml" NDATA bad\u0000>]>',
+            (results) => {
+               expect(results[3]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR',
+                  [ '77' ],
+                  new Offset(new EntityLocation(), 50, 0, 50),
+                  new Offset(new EntityLocation(), 36, 0, 36)
+               ));
+               expect(results[4].type).toEqual('ENTITYDECL');
+               done();
+            });
       });
 
    });

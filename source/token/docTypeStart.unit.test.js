@@ -168,12 +168,13 @@ describe('docTypeStart', () => {
       });
 
       it('checks whether externalId is valid', () => {
+         const emd = new EntityMetaData();
          parsed.externalId = {};
          spyOn(externalId, 'checkWellFormed');
 
-         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(externalId.checkWellFormed).toHaveBeenCalledWith(parsed.externalId, mockErrorCollector);
+         expect(externalId.checkWellFormed).toHaveBeenCalledWith(parsed.externalId, mockErrorCollector, emd);
       });
 
    });

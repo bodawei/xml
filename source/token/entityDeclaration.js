@@ -155,13 +155,13 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.check(!parsed.postNameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
    if (parsed.externalId) {
-      this._validateExternalId(parsed.externalId, ec, true);
+      // this._validateExternalId(parsed.externalId, ec, true);
 
       if (parsed.nData) {
          ec.check(parsed.nData.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
             [ enNameText, parsed.nData.text ]);
          ec.check(!parsed.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
-      // 3. XmlText.validateText(parsed.nDataName, this._entityMd, parsed.start, this);
+         misc.checkWellFormedText(parsed.nDataName, ec, entityMetaData);
       }
    } else if (parsed.entityValue) {
       // 4. this._validateParsedQuotedValue(parsed.value, {

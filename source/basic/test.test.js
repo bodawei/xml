@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 const toReportErrorMatcher = require('./test.js').toReportError;
+const toReportWarningMatcher = require('./test.js').toReportWarning;
 
 describe('toReportError()', () => {
 
@@ -165,6 +166,43 @@ describe('toReportError()', () => {
                pass: false,
                message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual: 1\n  Expected: 2',
             });
+      });
+
+   });
+
+   describe('toReportWarning()', () => {
+
+      describe('raw matcher', () => {
+
+         it('returns a compare function', () => {
+            expect(typeof toReportWarningMatcher().compare === 'function').toEqual(true);
+         });
+
+         it('throws an error if called without a parameter', () => {
+            expect(() => {
+               toReportWarningMatcher().compare(undefined, {});
+            }).toThrowError('Did not get a mock error collector as expected');
+         });
+
+         it('returns a message if the specified string does not exist', () => {
+            expect(toReportWarningMatcher({ equals: () => true }).compare(
+               {
+                  errors: [ {
+                     id: 'BOGUS_ERR',
+                     params: undefined,
+                     position: undefined,
+                  } ],
+               },
+               {
+                  id: 'BOGUS_ERR',
+                  params: undefined,
+                  position: undefined,
+               })).toEqual({
+                  pass: false,
+                  message: 'The error BOGUS_ERR is not a legal error ID.',
+               });
+         });
+
       });
 
    });

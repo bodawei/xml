@@ -90,7 +90,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, entityMetaData);
 
-   externalId.checkWellFormed(parsed.externalId, ec);
+   externalId.checkWellFormed(parsed.externalId, ec, entityMetaData);
 
    return ec;
 }
