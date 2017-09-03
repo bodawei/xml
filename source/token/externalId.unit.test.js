@@ -43,7 +43,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -77,7 +77,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('\''),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('\''),
@@ -106,7 +106,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('SYSTEM'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),
@@ -131,7 +131,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('SYSTEM'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken(''),
             systemCloseQuote: expectedLToken('"'),
@@ -179,7 +179,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -206,7 +206,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('pUbLiC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -228,7 +228,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
          } ] ]);
       });
 
@@ -249,7 +249,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken(''),
             publicCloseQuote: undefined,
@@ -273,7 +273,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: undefined,
@@ -303,7 +303,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: undefined,
+            postIdTypeSpace: undefined,
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -337,7 +337,7 @@ describe('externalId', () => {
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -363,7 +363,7 @@ describe('externalId', () => {
          parsed = {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -380,17 +380,51 @@ describe('externalId', () => {
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
+      it('reports an error if type is neither PUBLIC or SYSTEM', () => {
+         parsed.idType.text = 'Bogus';
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_UNKNOWN,
+            params: [ 'Bogus' ],
+            position: parsed.idType,
+         });
+      });
+
       it('reports an error if type is the wrong case', () => {
          parsed.idType.text = 'public';
 
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
-         expect(mockErrorCollector.report)
-            .toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
             params: [ 'PUBLIC', 'public' ],
             position: parsed.idType,
+         });
+      });
+
+      it('reports an error if there is no space after the id type', () => {
+         delete parsed.postIdTypeSpace;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_IDTYPE_NO_SPACE,
+            params: undefined,
+            lastPosition: parsed.idType,
+         });
+      });
+
+      it('reports an error if there is no opening quote around the value', () => {
+         delete parsed.publicOpenQuote;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_OPEN_QUOTE,
+            params: undefined,
+            lastPosition: parsed.postIdTypeSpace,
          });
       });
 
@@ -406,15 +440,51 @@ describe('externalId', () => {
          });
       });
 
-      it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
-         delete parsed.postTypeSpace;
+      it('reports an error if the PUBLIC value has illegal characters', () => {
+         parsed.publicValue.text = 'bad&chars';
 
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
+            id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            params: [ '&' ],
+            position: parsed.publicValue,
+         });
+      });
+
+      it('reports an error if there is no close quote after the value', () => {
+         delete parsed.publicCloseQuote;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE,
             params: undefined,
-            lastPosition: parsed.idType,
+            lastPosition: parsed.publicValue,
+         });
+      });
+
+      it('reports an error if there is no space after a PUBLIC part', () => {
+         delete parsed.postPublicSpace;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
+            params: undefined,
+            lastPosition: parsed.publicCloseQuote,
+         });
+      });
+
+      it('reports an error if there is no opening quote around the SYSTEM value', () => {
+         delete parsed.systemOpenQuote;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_OPEN_QUOTE,
+            params: undefined,
+            lastPosition: parsed.postPublicSpace,
          });
       });
 
@@ -429,43 +499,6 @@ describe('externalId', () => {
             id: WellFormedError.ID.EXTERNALID_NO_SYSTEM,
             params: undefined,
             lastPosition: parsed.systemOpenQuote,
-         });
-      });
-
-      it('reports an error if there is no space after a public part', () => {
-         delete parsed.postPublicSpace;
-
-         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
-            params: undefined,
-            lastPosition: parsed.publicCloseQuote,
-         });
-      });
-
-      it('reports an error if there is no space after a public part, and no public part', () => {
-         delete parsed.publicValue;
-         delete parsed.postPublicSpace;
-
-         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
-            params: undefined,
-            lastPosition: parsed.publicOpenQuote,
-         });
-      });
-
-      it('reports an error if there is no quote around the system value', () => {
-         delete parsed.systemOpenQuote;
-
-         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE,
-            params: undefined,
-            lastPosition: parsed.postPublicSpace,
          });
       });
 
@@ -499,7 +532,7 @@ describe('externalId', () => {
          const parsed = {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
@@ -519,7 +552,7 @@ describe('externalId', () => {
          const parsed = {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
-            postTypeSpace: expectedLToken(' '),
+            postIdTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),

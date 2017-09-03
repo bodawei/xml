@@ -21,6 +21,7 @@ import {
 
 const WFEID = WellFormedError.ID;
 const EXTERNAL_ID = 'EXTERNAL_ID';
+const ALLOWED_TYPES = [ 'PUBLIC', 'SYSTEM' ];
 const TYPE_TERMINATORS = [ '"', '\'' ];
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 
@@ -53,13 +54,13 @@ function parse(source, terminators, deliverParsed) {
    source.extract('peekWord', allTerminators, (lToken) => {
       const capitalType = lToken && lToken.text.toLocaleUpperCase();
 
-      if (!lToken || [ 'PUBLIC', 'SYSTEM' ].indexOf(capitalType) === -1) {
+      if (!lToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
          deliverParsed();
          return;
       }
 
       source.extractToObject('word', allTerminators, parsed, 'idType');
-      source.extractToObject('space', parsed, 'postTypeSpace');
+      source.extractToObject('space', parsed, 'postIdTypeSpace');
 
       if (capitalType === 'PUBLIC') {
          getQuotedLiteral(source, parsed, 'public', (success) => {
@@ -130,14 +131,15 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.setPos(parsed.idType);
    const typeText = textOrBlank(parsed.idType);
    const capitalType = typeText.toLocaleUpperCase();
+   ec.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [ typeText ]);
    ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [ capitalType, typeText ]);
 
-   ec.setPos(parsed.postTypeSpace);
-   ec.check(!parsed.postTypeSpace, WFEID.EXTERNALID_PUBLIC_NO_LEADING_SPACE); // @@ need better name
+   ec.setPos(parsed.postIdTypeSpace);
+   ec.check(!parsed.postIdTypeSpace, WFEID.EXTERNALID_IDTYPE_NO_SPACE);
 
    if (capitalType === 'PUBLIC') {
       ec.setPos(parsed.publicOpenQuote);
-      ec.check(!parsed.publicOpenQuote, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
+      ec.check(!parsed.publicOpenQuote, WFEID.EXTERNALID_PUBLIC_NO_OPEN_QUOTE);
 
       ec.setPos(parsed.publicValue);
       if (!parsed.publicValue) {
@@ -149,7 +151,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
       }
 
       ec.setPos(parsed.publicCloseQuote);
-      ec.check(!parsed.publicCloseQuote, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
+      ec.check(!parsed.publicCloseQuote, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE);
    }
 
    if (capitalType === 'SYSTEM' || parsed.systemOpenQuote || parsed.systemValue) {
@@ -159,14 +161,14 @@ function checkWellFormed(parsed, ec, entityMetaData) {
       }
 
       ec.setPos(parsed.systemOpenQuote);
-      ec.check(!parsed.systemOpenQuote, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
+      ec.check(!parsed.systemOpenQuote, WFEID.EXTERNALID_SYSTEM_NO_OPEN_QUOTE);
 
       ec.setPos(parsed.systemValue);
       ec.check(!parsed.systemValue, WFEID.EXTERNALID_NO_SYSTEM);
       misc.checkWellFormedText(parsed.systemValue, ec, entityMetaData);
 
       ec.setPos(parsed.systemCloseQuote);
-      ec.check(!parsed.systemCloseQuote, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
+      ec.check(!parsed.systemCloseQuote, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE);
    }
 }
 
@@ -189,7 +191,7 @@ function getLTokens(results, parsed) {
    }
 
    pushNonBottom(results, parsed.idType);
-   pushNonBottom(results, parsed.postTypeSpace);
+   pushNonBottom(results, parsed.postIdTypeSpace);
 
    pushNonBottom(results, parsed.publicOpenQuote);
    pushNonBottom(results, parsed.publicValue);

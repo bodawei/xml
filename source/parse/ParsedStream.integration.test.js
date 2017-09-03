@@ -75,7 +75,7 @@ describe('ParsedStream', () => {
             externalId: {
                type: 'EXTERNAL_ID',
                idType: makeLToken('SYSTEM'),
-               postTypeSpace: makeLToken(' '),
+               postIdTypeSpace: makeLToken(' '),
                systemOpenQuote: makeLToken('"'),
                systemValue: makeLToken('sys.xml'),
                systemCloseQuote: makeLToken('"'),
@@ -113,7 +113,7 @@ describe('ParsedStream', () => {
             externalId: {
                type: 'EXTERNAL_ID',
                idType: makeLToken('SYSTEM'),
-               postTypeSpace: makeLToken(' '),
+               postIdTypeSpace: makeLToken(' '),
                systemOpenQuote: makeLToken('"'),
                systemValue: makeLToken('sys.xml'),
                systemCloseQuote: makeLToken('"'),
@@ -178,7 +178,7 @@ describe('ParsedStream', () => {
             externalId: {
                type: 'EXTERNAL_ID',
                idType: makeLToken('PUBLIC'),
-               postTypeSpace: makeLToken(' '),
+               postIdTypeSpace: makeLToken(' '),
                publicOpenQuote: makeLToken('"'),
                publicValue: makeLToken('pub.xml'),
                publicCloseQuote: makeLToken('"'),
