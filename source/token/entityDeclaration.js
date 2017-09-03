@@ -4,6 +4,7 @@ import { WellFormedError } from '../error';
 import { XmlWarning } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
+import * as declaration from './declaration.js';
 import * as misc from './misc.js';
 import * as externalId from './externalId.js';
 import * as quotedValue from './quotedValue.js';
@@ -138,7 +139,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    const enNameText = textOrBlank(parsed.name);
    ec.setPos(parsed.open);
 
-   // 1. Do general check on a declaration here. including space after entity
+   declaration.checkWellFormed(parsed, ec, entityMetaData);
 
    ec.setPos(parsed.parameter);
    if (parsed.parameter) {
@@ -155,19 +156,20 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.check(!parsed.postNameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
 
    if (parsed.externalId) {
-      // this._validateExternalId(parsed.externalId, ec, true);
+      externalId.checkWellFormed(parsed.externalId, ec, entityMetaData);
 
       if (parsed.nData) {
+         ec.setPos(parsed.nData);
          ec.check(parsed.nData.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
             [ enNameText, parsed.nData.text ]);
+         ec.setPos(parsed.nDataName);
          ec.check(!parsed.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
          misc.checkWellFormedText(parsed.nDataName, ec, entityMetaData);
       }
    } else if (parsed.entityValue) {
-      // 4. this._validateParsedQuotedValue(parsed.value, {
-      //    validateEntityValue: true
-      // });
+      quotedValue.checkWellFormed(parsed.entityValue, ec, entityMetaData);
    } else {
+      ec.setPos(undefined);
       ec.report(WFEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
    }
 

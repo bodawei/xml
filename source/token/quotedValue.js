@@ -28,6 +28,10 @@ function parse(source, deliverParsed) {
    });
 }
 
+function checkWellFormed() {
+   // When you fill this in, add to entityDeclaration.integration
+}
+
 function getChunks(results, parsed) {
    if (!parsed) {
       return;
@@ -39,5 +43,6 @@ function getChunks(results, parsed) {
 
 export {
    parse,
+   checkWellFormed,
    getChunks,
 };

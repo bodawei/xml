@@ -7,6 +7,7 @@ import { XmlWarning } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
+import * as declaration from './declaration.js';
 import * as entityDeclaration from './entityDeclaration.js';
 import * as externalId from './externalId.js';
 import * as misc from './misc.js';
@@ -481,6 +482,15 @@ describe('entityDeclaration', () => {
          spyOn(misc, 'checkWellFormedText');
       });
 
+      it('asks the declaration module to look for problems in the declaration part', () => {
+         const emd = new EntityMetaData();
+         spyOn(declaration, 'checkWellFormed');
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
+      });
+
       it('reports an error if % is not followed by a space', () => {
          parsed.parameter = expectedLToken('%');
 
@@ -510,6 +520,16 @@ describe('entityDeclaration', () => {
             .toHaveBeenCalledWith(parsed.name, WellFormedError.ID.ENTITYDECL_NAME_INVALID, parsed.open);
       });
 
+      it('calls checkWellFormedNameRecommendation() to report on bad names', () => {
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
+            mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+            XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
+      });
+
       it('reports an error if there is no space after the name', () => {
          delete parsed.postNameSpace;
 
@@ -523,6 +543,67 @@ describe('entityDeclaration', () => {
          });
       });
 
+      it('calls externalId.checkWellFormed() to check on the externalId', () => {
+         spyOn(externalId, 'checkWellFormed');
+         delete parsed.entityValue;
+         parsed.externalId = { externalId: true };
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(externalId.checkWellFormed).toHaveBeenCalledWith(parsed.externalId,
+            mockErrorCollector, emd);
+      });
+
+      it('reports an error if NDATA is the wrong case', () => {
+         parsed.externalId = { externalId: true };
+         parsed.nData = expectedLToken('nData');
+         parsed.nDataName = expectedLToken('foo');
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
+            params: [ 'entityName', 'nData' ],
+            position: parsed.nData,
+         });
+      });
+
+      it('reports an error if there is no NDATA value', () => {
+         parsed.externalId = { externalId: true };
+         parsed.nData = expectedLToken('nData');
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
+            params: [ 'entityName' ],
+            lastPosition: parsed.nData,
+         });
+      });
+
+      it('calls checkWellFormedText() to check on the ndata value', () => {
+         parsed.externalId = { externalId: true };
+         parsed.nData = expectedLToken('NDATA');
+         parsed.nDataName = expectedLToken('foo');
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.nDataName,
+            mockErrorCollector, emd);
+      });
+
+      it('calls quotedValue.checkWellFormed() to check on the entity value', () => {
+         spyOn(quotedValue, 'checkWellFormed');
+         const emd = new EntityMetaData();
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(quotedValue.checkWellFormed).toHaveBeenCalledWith(parsed.entityValue,
+            mockErrorCollector, emd);
+      });
+
       it('reports an error if there is no EnitytValue or ExternalID', () => {
          delete parsed.entityValue;
 
@@ -531,7 +612,7 @@ describe('entityDeclaration', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
             params: [ 'entityName' ],
-            position: parsed.postNameSpace, // nothing after that
+            lastPosition: parsed.postNameSpace,
          });
       });
 
@@ -546,28 +627,6 @@ describe('entityDeclaration', () => {
             position: undefined,
             lastPosition: parsed.postNameSpace,
          });
-      });
-
-      it('calls checkWellFormedNameRecommendation() to report on bad names', () => {
-         const emd = new EntityMetaData();
-
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
-
-         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
-            mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
-            XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
-      });
-
-      it('calls checkWellFormedText() to check on the ndata value', () => {
-         parsed.externalId = { externalId: true };
-         parsed.nData = expectedLToken('NDATA');
-         parsed.nDataName = expectedLToken('foo');
-         const emd = new EntityMetaData();
-
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
-
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.nDataName,
-            mockErrorCollector, emd);
       });
 
    });
