@@ -25,8 +25,15 @@ class XmlDeclaration extends xmlToken.Token {
 
 }
 
-function parse(source, results, deliverParsed) {
-   results.type = 'xmldecl';
+function parse(source, preliminary, deliverParsed) {
+   const results = {
+      type: 'xmldecl',
+      openChunk: preliminary.openChunk,
+      postOpenSpaceChunk: preliminary.postOpenSpaceChunk,
+      targetChunk: preliminary.targetChunk,
+      postTargetSpaceChunk: preliminary.postTargetSpaceChunk,
+   };
+
    getParams(source, (params) => {
       results.params = params;
       source.extract('match', '?>', (chunk) => {
@@ -65,6 +72,7 @@ function addParam(source, params, nameChunk, deliverResults) {
          source.extractToObject('match', quoteChunk.text, param, 'closeQuoteChunk');
          source.extractToObject('space', param, 'trailingSpaceChunk');
       }
+      // else may want to extract space
 
       source.extract('word', XMLDECL_NAME_TERMINATORS, (chunk) => {
          addParam(source, params, chunk, deliverResults);
@@ -74,6 +82,8 @@ function addParam(source, params, nameChunk, deliverResults) {
 
 function checkWellFormed(parsed, err, isDocEntity) { // need type and version
    let foundEncoding;
+   let foundVersion;
+   let seenStandalone;
 
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {
@@ -82,8 +92,6 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       const lcName = nameText.toLocaleLowerCase();
       const valueText = util.textOrBlank(param.valueChunk);
       const lcValue = valueText.toLocaleLowerCase();
-      let foundVersion;
-      let seenStandalone;
 
       err.setPos(parsed.nameChunk);
 
@@ -115,17 +123,17 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
          case 'encoding':
             foundEncoding = true;
             if (isDocEntity) {
-               err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER, [], param.nameChunk);
+               err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
             }
             if (valueText) {
-               err.check(valueText.match(/^[A-Za-z][-A-Za-z0-9._]*$/), WFEID.XMLDECL_ENCODING_INVALID,
+               err.check(!valueText.match(/^[A-Za-z][-A-Za-z0-9._]*$/), WFEID.XMLDECL_ENCODING_INVALID,
                   [ valueText ]);
             }
             break;
          case 'standalone':
             seenStandalone = true;
             if (!isDocEntity) {
-               err.report(WFEID.TEXTDECL_XTRA_STANDALONE, [], param.nameChunk);
+               err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
             err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameChunk);
@@ -133,7 +141,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
             err.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
             break;
          default:
-            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ], param.nameChunk);
+            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameChunk.text ]);
       }
    }
 

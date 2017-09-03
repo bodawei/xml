@@ -369,37 +369,43 @@ describe('externalId', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let expectedRm;
       let parsed;
 
       beforeEach(() => {
          mockErrorCollector = {
             setPos: jasmine.createSpy('setPosSpy'),
             getErrors: jasmine.createSpy('getErrorsSpy'),
-            check: jasmine.createSpy('checkSpy'),
+            check: function mockCheck(condition, id, params) {
+               if (condition) {
+                  if (params) {
+                     this.report(id, params);
+                  } else {
+                     this.report(id);
+                  }
+               }
+            },
             checkName: jasmine.createSpy('checkNameSpy'),
             report: jasmine.createSpy('reportSpy'),
          };
 
-         expectedRm = new util.RangeMaker(new EntityLocation());
          parsed = {
             type: 'EXTERNAL_ID',
-            typeChunk: util.makeChunk('PUBLIC', expectedRm),
-            postTypeSpaceChunk: util.makeChunk(' ', expectedRm),
-            publicOpenQuoteChunk: util.makeChunk('""', expectedRm),
-            publicChunk: util.makeChunk('pub.xml', expectedRm),
-            publicCloseQuoteChunk: util.makeChunk('"', expectedRm),
-            postPublicSpaceChunk: util.makeChunk(' ', expectedRm),
-            systemOpenQuoteChunk: util.makeChunk('"', expectedRm),
-            systemChunk: util.makeChunk('sys.xml', expectedRm),
-            systemCloseQuoteChunk: util.makeChunk('"', expectedRm),
+            typeChunk: util.makeChunk('PUBLIC'),
+            postTypeSpaceChunk: util.makeChunk(' '),
+            publicOpenQuoteChunk: util.makeChunk('""'),
+            publicChunk: util.makeChunk('pub.xml'),
+            publicCloseQuoteChunk: util.makeChunk('"'),
+            postPublicSpaceChunk: util.makeChunk(' '),
+            systemOpenQuoteChunk: util.makeChunk('"'),
+            systemChunk: util.makeChunk('sys.xml'),
+            systemCloseQuoteChunk: util.makeChunk('"'),
          };
       });
 
       it('reports no errors when no parsed value is passed in', () => {
          externalId.checkWellFormed(undefined, mockErrorCollector);
 
-         expect(mockErrorCollector.check).not.toHaveBeenCalled();
+         expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
       it('reports an error if type is the wrong case', () => {
@@ -407,8 +413,16 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true,
-            WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
+         expect(mockErrorCollector.report)
+            .toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
+      });
+
+      it('reports an error if there is no PUBLIC value', () => {
+         delete parsed.publicChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_NO_PUBLIC);
       });
 
       it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
@@ -416,22 +430,93 @@ describe('externalId', () => {
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
-         expect(mockErrorCollector.check).toHaveBeenCalledWith(true,
-            WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
+      });
+
+      it('reports an error if there is no system chunk when SYSTEM is specified', () => {
+         parsed.typeChunk = util.makeChunk('SYSTEM');
+         delete parsed.systemChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_NO_SYSTEM);
+      });
+
+      it('reports an error if there is no space after a public part', () => {
+         delete parsed.postPublicSpaceChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
+      });
+
+      it('reports no an error if there is no space after a public part, and no public part', () => {
+         delete parsed.publicChunk;
+         delete parsed.postPublicSpaceChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report.calls.count()).toEqual(1); // because of no public
+      });
+
+      it('reports an error if there is no quote around the system value', () => {
+         delete parsed.systemOpenQuoteChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE);
+      });
+
+      it('reports an error if there is no quote at the end of the system value', () => {
+         delete parsed.systemCloseQuoteChunk;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE);
       });
 
    });
 
    describe('makeToken()', () => {
 
-      it('returns a token with the name found in the parsing', () => {
-         // const parsed = {
-         //    nameChunk: util.makeChunk('elementName', new RangeMaker(new EntityLocation())),
-         // };
+      it('returns an EntityLocation with the public and system ids', () => {
+         const parsed = {
+            type: 'EXTERNAL_ID',
+            typeChunk: util.makeChunk('PUBLIC'),
+            postTypeSpaceChunk: util.makeChunk(' '),
+            publicOpenQuoteChunk: util.makeChunk('"'),
+            publicChunk: util.makeChunk('pub.xml'),
+            publicCloseQuoteChunk: util.makeChunk('"'),
+            postPublicSpaceChunk: util.makeChunk(' '),
+            systemOpenQuoteChunk: util.makeChunk('"'),
+            systemChunk: util.makeChunk('sys.xml'),
+            systemCloseQuoteChunk: util.makeChunk('"'),
+         };
 
-         // const token = docTypeStart.makeToken(parsed);
+         const externalLoc = externalId.makeTokenCompatible(parsed);
 
-         // expect(token.name).toEqual('elementName');
+         expect(externalLoc).toEqual(new EntityLocation('sys.xml', 'pub.xml'));
+      });
+
+      it('returns an EntityLocation with the system id only if there is no public', () => {
+         const parsed = {
+            type: 'EXTERNAL_ID',
+            typeChunk: util.makeChunk('PUBLIC'),
+            postTypeSpaceChunk: util.makeChunk(' '),
+            systemOpenQuoteChunk: util.makeChunk('"'),
+            systemChunk: util.makeChunk('sys.xml'),
+            systemCloseQuoteChunk: util.makeChunk('"'),
+         };
+
+         const externalLoc = externalId.makeTokenCompatible(parsed);
+
+         expect(externalLoc).toEqual(new EntityLocation('sys.xml'));
+      });
+
+      it('returns nothing if no parsed value provided', () => {
+         const externalLoc = externalId.makeTokenCompatible();
+
+         expect(externalLoc).toBeUndefined();
       });
 
    });

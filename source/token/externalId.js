@@ -1,5 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
+import { EntityLocation } from '../basic';
 import { Chunk } from '../chunk';
 import { WellFormedError } from '../error';
 
@@ -127,45 +128,53 @@ function checkWellFormed(parsed, ec, systemRequired) {
 
    if (capitalType === 'PUBLIC') {
       ec.setPos(parsed.publicOpenQuoteChunk);
+      ec.check(!parsed.publicOpenQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
 
       if (!parsed.publicChunk) {
          ec.report(WFEID.EXTERNALID_NO_PUBLIC);
       } else {
-         ec.check(!parsed.publicOpenQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_QUOTE);
-
          ec.setPos(parsed.publicChunk);
          const match = PUBID_CHARS.exec(parsed.publicChunk.text);
          ec.check(!match || match[0] !== parsed.publicChunk.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ parsed.publicChunk.text[match ? match[0].length : 0] ]);
-
-         ec.setPos(parsed.publicCloseQuoteChunk);
-         ec.check(!parsed.publicCloseQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
+                  [ parsed.publicChunk.text[match[0].length] ]);
       }
+
+      ec.setPos(parsed.publicCloseQuoteChunk);
+      ec.check(!parsed.publicCloseQuoteChunk, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE); // new
    }
 
    if (systemRequired || capitalType === 'SYSTEM') {
+      ec.check(!parsed.systemChunk, WFEID.EXTERNALID_NO_SYSTEM);
+   }
+
+   if (parsed.systemChunk) {
       ec.setPos(parsed.systemOpenQuoteChunk);
 
-      if (!parsed.systemChunk) {
-         ec.report(WFEID.EXTERNALID_NO_SYSTEM);
-      } else {
-         if (parsed.publicChunk) {
-            ec.check(!parsed.postPublicSpaceChunk, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
-         }
-
-         ec.check(!parsed.systemOpenQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
-
-         ec.setPos(parsed.systemChunk);
-         // XmlText.validateText(externalId.systemId.literalChunk, this._entityMd, start, this);
-
-         ec.setPos(parsed.systemCloseQuoteChunk);
-         ec.check(!parsed.systemCloseQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
+      if (parsed.publicChunk) {
+         ec.check(!parsed.postPublicSpaceChunk, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
+
+      ec.check(!parsed.systemOpenQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_QUOTE);
+
+      ec.setPos(parsed.systemChunk);
+      // XmlText.validateText(externalId.systemId.literalChunk, this._entityMd, start, this);
+
+      ec.setPos(parsed.systemCloseQuoteChunk);
+      ec.check(!parsed.systemCloseQuoteChunk, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE); // new
    }
+}
+
+function makeTokenCompatible(parsed) {
+   if (!parsed) {
+      return;
+   }
+
+   return new EntityLocation(util.textOrUndef(parsed.systemChunk), util.textOrUndef(parsed.publicChunk));
 }
 
 module.exports = {
    TYPE: EXTERNAL_ID,
    parse,
    checkWellFormed,
+   makeTokenCompatible,
 };
