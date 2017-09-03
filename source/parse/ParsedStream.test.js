@@ -3,6 +3,7 @@
 
 import { EntityMetaData } from '../basic';
 import {
+   charData,
    elementEnd,
    elementStart,
 } from '../xToken';
@@ -62,6 +63,19 @@ describe('ParsedStream (unit)', () => {
          parser.read();
 
          expect(elementEnd.parse).toHaveBeenCalled();
+      });
+
+   });
+
+   describe('charData', () => {
+
+      it('calls charData.parse()', () => {
+         spyOn(charData, 'parse');
+         parser.addText('asdf</foo>');
+         parser.endText();
+         parser.read();
+
+         expect(charData.parse).toHaveBeenCalled();
       });
 
    });

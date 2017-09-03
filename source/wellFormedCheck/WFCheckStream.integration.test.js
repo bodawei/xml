@@ -135,6 +135,21 @@ describe('WFCheckStream (integration)', () => {
 
    });
 
+   describe('charData', () => {
+
+      it('reports an error when the charData has an invalid char', (done) => {
+         givenInputExpectResult('<?xml version="1.0"?><one>bad\u0000data</one>', (results) => {
+            expect(results[3]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR',
+               [ 29 ],
+               new Offset(new EntityLocation(), 26, 0, 26),
+               new Offset(new EntityLocation(), 26, 0, 26)
+            ));
+            done();
+         });
+      });
+
+   });
+
    describe('element start', () => {
 
       it('reports an error when the element has the wrong syntax', (done) => {

@@ -6,6 +6,7 @@ import { ErrorCollector, EntityMetaData } from '../basic';
 import { WellFormedError } from '../error';
 
 import {
+   charData,
    declaration,
    docTypeEnd,
    docTypeStart,
@@ -42,11 +43,18 @@ class WFChecker extends stream.Transform {
    }
 
    _checkForErrors(parsed) {
-      let errorCollector = new ErrorCollector(parsed.open, WellFormedError);
+      let errorCollector = new ErrorCollector(parsed.open || parsed.text, WellFormedError);
 
       switch (parsed.type) {
          case EntityMetaData.TYPE:
             this._metaData = parsed;
+            break;
+         case charData.TYPE:
+            if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
+            }
+
+            charData.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case xmlDeclaration.TYPE:
             if (this._state !== STATE.START) {

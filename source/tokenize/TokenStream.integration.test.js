@@ -5,6 +5,7 @@ import { EntityMetaData } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
+   charData,
    declaration,
    docTypeStart,
    docTypeEnd,
@@ -116,6 +117,20 @@ describe('TokenStream (integration)', () => {
                makeLToken('value'),
                makeLToken('"'),
                makeLToken('>'),
+            ]),
+         ], done, parsedStream, tokenStream);
+      });
+
+   });
+
+   describe('charData', () => {
+
+      it('produces a CharData token from text', (done) => {
+         const makeLToken = makeLTokenMaker();
+         inputToOutput('some$ text ', [
+            new EntityMetaData(),
+            new charData.Token('some$ text ', [
+               makeLToken('some$ text '),
             ]),
          ], done, parsedStream, tokenStream);
       });

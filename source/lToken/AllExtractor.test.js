@@ -86,6 +86,23 @@ describe('AllExtractor', () => {
          });
       });
 
+      it('allows "]" as a terminator', () => {
+         const extractor = new AllExtractor(1.0, [ 'x', 'y', ']' ]);
+         const segment = new Segment('testxAll');
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: 'test',
+            original: 'test',
+            segments: [ {
+               chars: 4,
+               rows: 0,
+               columns: 4,
+               segment: segment,
+            } ],
+         });
+      });
+
    });
 
    describe('finish()', () => {

@@ -4,6 +4,7 @@ import stream from 'readable-stream';
 import { EntityMetaData } from '../basic';
 
 import {
+   charData,
    declaration,
    docTypeStart,
    docTypeEnd,
@@ -25,6 +26,9 @@ class TokenStream extends stream.Transform {
       switch (parsed.type) {
          case EntityMetaData.TYPE:
             this.push(parsed);
+            break;
+         case charData.TYPE:
+            this.push(charData.makeToken(parsed));
             break;
          case declaration.TYPE:
             this.push(declaration.makeToken(parsed));

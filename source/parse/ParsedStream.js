@@ -5,6 +5,7 @@ import stream from 'readable-stream';
 import { EntityMetaData } from '../basic';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import {
+   charData,
    declaration,
    docTypeStart,
    docTypeEnd,
@@ -58,6 +59,10 @@ class ParsedStream extends stream.Readable {
                   this._parseClose(deliverParse);
                   this.waitingForInternalClose = false;
                }
+               break;
+            default:
+               charData.parse(this._lTokenSource, deliverParse);
+               break;
          }
       });
    }
@@ -66,11 +71,14 @@ class ParsedStream extends stream.Readable {
       this._lTokenSource.extract('markup', (markupStartLToken) => {
          switch (markupStartLToken.text) {
             case '<':
-               return elementStart.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               elementStart.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               break;
             case '</':
-               return elementEnd.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               elementEnd.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               break;
             case '<?':
-               return processingInstruction.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               processingInstruction.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               break;
             case '<!':
                declaration.parse(this._lTokenSource, markupStartLToken, (token) => {
                   if (token.type !== docTypeStart.TYPE) {

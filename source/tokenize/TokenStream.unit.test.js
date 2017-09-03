@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import {
+   charData,
    elementEnd,
    elementStart,
 } from '../xToken';
@@ -21,6 +22,16 @@ describe('TokenStream (unit)', () => {
       const token = tokenStream.read();
 
       expect(token.message).toEqual('Unknown parsed type "BOGUS" encountered.');
+   });
+
+   it('calls charData.makeToken()', () => {
+      spyOn(charData, 'makeToken');
+      const parsed = { type: charData.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(charData.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('calls elementStart.makeToken()', () => {

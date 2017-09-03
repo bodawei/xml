@@ -21,10 +21,11 @@ class AllExtractor extends Extractor {
    constructor(version, terminators = []) {
       super(version);
 
-      const terminatorChars = terminators.map((term) => term[0]).join('');
+      let terminatorChars = terminators.map((term) => term[0]).join('');
       this.terminatorRegEx = regexMemo[terminatorChars];
 
       if (!this.terminatorRegEx) {
+         terminatorChars = terminatorChars.replace(']', '\\]');
          const regexString = '[^' + terminatorChars + ']*';
          this.terminatorRegEx = new RegExp(regexString, 'g');
          regexMemo[terminatorChars] = this.terminatorRegEx;

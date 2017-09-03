@@ -26,34 +26,18 @@ describe('ParsedStream', () => {
       parser.endText();
    }
 
-   describe('XmlDeclaration', () => {
+   describe('CharData', () => {
 
-      it('parses a simple declaration', (done) => {
+      it('parses character data up to a <', (done) => {
          const makeLToken = makeLTokenMaker();
-         const parsedDecl = {
-            type: 'XMLDECL',
-            open: makeLToken('<?'),
-            postOpenSpace: undefined,
-            target: makeLToken('xml'),
-            postTargetSpace: makeLToken(' '),
-            params: [ {
-               name: makeLToken('version'),
-               postNameSpace: undefined,
-               equal: makeLToken('='),
-               postEqualSpace: undefined,
-               paramOpenQuote: makeLToken('"'),
-               paramValue: makeLToken('1.0'),
-               paramCloseQuote: makeLToken('"'),
-               trailingSpace: undefined,
-            } ],
-            close: makeLToken('?>'),
-         };
 
-         inputToOutput('<?xml version="1.0"?>', (results) => {
-            expect(results).toEqual([
-               new EntityMetaData(),
-               parsedDecl,
-            ]);
+         inputToOutput('blah<elementName>', (results) => {
+            const result = results.filter((item) => item.type === 'CHARDATA');
+
+            expect(result[0]).toEqual({
+               type: 'CHARDATA',
+               text: makeLToken('blah'),
+            });
             done();
          });
       });
@@ -236,6 +220,40 @@ describe('ParsedStream', () => {
          };
 
          inputToOutput('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', (results) => {
+            expect(results).toEqual([
+               new EntityMetaData(),
+               parsedDecl,
+            ]);
+            done();
+         });
+      });
+
+   });
+
+   describe('XmlDeclaration', () => {
+
+      it('parses a simple declaration', (done) => {
+         const makeLToken = makeLTokenMaker();
+         const parsedDecl = {
+            type: 'XMLDECL',
+            open: makeLToken('<?'),
+            postOpenSpace: undefined,
+            target: makeLToken('xml'),
+            postTargetSpace: makeLToken(' '),
+            params: [ {
+               name: makeLToken('version'),
+               postNameSpace: undefined,
+               equal: makeLToken('='),
+               postEqualSpace: undefined,
+               paramOpenQuote: makeLToken('"'),
+               paramValue: makeLToken('1.0'),
+               paramCloseQuote: makeLToken('"'),
+               trailingSpace: undefined,
+            } ],
+            close: makeLToken('?>'),
+         };
+
+         inputToOutput('<?xml version="1.0"?>', (results) => {
             expect(results).toEqual([
                new EntityMetaData(),
                parsedDecl,
