@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "`git rev-parse --abbrev-ref HEAD`" != "master" ]; then
+   exit 0
+fi
+
+cat ./.git/.commit-temp > /tmp/xml-commit-message.txt
+cat $1 >> /tmp/xml-commit-message.txt
+
+mv /tmp/xml-commit-message.txt $1
+
+exit 0;

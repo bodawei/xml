@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ "`git rev-parse --abbrev-ref HEAD`" != "master" ]; then
+   exit 0
+fi
+
+echo "PREPARING TO COMMIT TO MASTER"
+echo "----------------------------------------"
+git status --short
+echo "----------------------------------------"
+# https://stackoverflow.com/questions/3417896/how-do-i-prompt-the-user-from-within-a-commit-msg-hook
+exec < /dev/tty
+
+read -p "Bug: " bug
+read -p "Kind [FEATURE, bugfix, incompatible]: " KIND
+
+if [ "$KIND" == "" -o "$KIND" == "feature" ]; then
+   KIND="feature"
+elif [ "$KIND" != "bugfix" -a "$KIND" != "incompatible" ]; then
+   echo "Kind is not one of the required values: $KIND "
+   exit -1
+fi
+
+cat << EOF > ./.git/.commit-temp
+$bug
+
+$KIND:
+EOF
+
+node ./.git/hooks/update-package.js $KIND
+
+git add package.json
+
+exit 0;
