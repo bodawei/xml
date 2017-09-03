@@ -1,6 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityLocation } from '../basic';
+import { WellFormedError } from '../error';
+
 import util from '../chunk/index.test.js';
 
 import entityDeclaration from './entityDeclaration.js';
@@ -432,6 +435,147 @@ describe('entityDeclaration', () => {
             });
          });
 
+      });
+
+   });
+
+   describe('checkWellFormed()', () => {
+      let mockErrorCollector;
+      let expectedRm;
+      let parsed;
+
+      beforeEach(() => {
+         mockErrorCollector = {
+            setPos: jasmine.createSpy('setPosSpy'),
+            getErrors: jasmine.createSpy('getErrorsSpy'),
+            check: function mockCheck(condition, id, params) {
+               if (condition) {
+                  if (params) {
+                     this.report(id, params);
+                  } else {
+                     this.report(id);
+                  }
+               }
+            },
+            checkName: jasmine.createSpy('checkNameSpy'),
+            report: jasmine.createSpy('reportSpy'),
+         };
+
+         expectedRm = new util.RangeMaker(new EntityLocation());
+         parsed = {
+            openChunk: util.makeChunk('<!'),
+            declTypeChunk: util.makeChunk('ENTITY'),
+            postDeclTypeSpaceChunk: util.makeChunk('\t'),
+            nameChunk: util.makeChunk('entityName'),
+            postNameSpaceChunk: util.makeChunk(' '),
+            entityValue: {},
+            postEntityValueSpaceChunk: undefined,
+            closeChunk: util.makeChunk('>'),
+         };
+      });
+
+      it('reports an error if % is not followed by a space', () => {
+         parsed.parameterChunk = util.makeChunk('%');
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report)
+            .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
+      });
+
+      it('reports an error if there is no name', () => {
+         delete parsed.nameChunk;
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_NAME);
+      });
+
+      it('checks the name validity', () => {
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.checkName)
+            .toHaveBeenCalledWith(parsed.nameChunk, WellFormedError.ID.ENTITYDECL_NAME_INVALID, parsed.openChunk);
+      });
+
+      it('reports an error if there is no space after the name', () => {
+         delete parsed.postNameSpaceChunk;
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ 'entityName' ]);
+      });
+
+      it('reports an error if there is EnitytValue or ExternalID', () => {
+         delete parsed.entityValue;
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_VALUE, [ 'entityName' ]);
+      });
+
+      it('reports an error if there was no closing', () => {
+         delete parsed.closeChunk;
+
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(mockErrorCollector.report).toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_NO_CLOSE, [ 'entityName' ]);
+      });
+
+   });
+
+
+   describe('makeToken()', () => {
+
+      it('returns an entity declaration token with the name and value found in the parsing', () => {
+         const parsed = {
+            nameChunk: util.makeChunk('entityName'),
+            entityValue: {
+               valueChunk: util.makeChunk('value'),
+            }
+         };
+
+         const token = entityDeclaration.makeToken(parsed);
+
+         expect(token).toEqual(new entityDeclaration.Token('entityName', 'value', {}, '', []));
+      });
+
+      it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
+         const parsed = {
+            parameterChunk: util.makeChunk('%'),
+            nameChunk: util.makeChunk('entityName'),
+            entityValue: {
+               valueChunk: util.makeChunk('value'),
+            }
+         };
+
+         const token = entityDeclaration.makeToken(parsed);
+
+         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', 'value', {}, '', []));
+      });
+
+      it('returns a entity declaration with a blank value if there is no name', () => {
+         const parsed = {
+            nameChunk: undefined,
+            entityValue: {
+               valueChunk: util.makeChunk('value'),
+            }
+         };
+
+         const token = entityDeclaration.makeToken(parsed);
+
+         expect(token).toEqual(new entityDeclaration.Token('', 'value', {}, '', []));
+      });
+
+      it('returns a entity declaration with a blank value if there is no value', () => {
+         const parsed = {
+            parameterChunk: util.makeChunk('%'),
+            nameChunk: util.makeChunk('entityName'),
+         };
+
+         const token = entityDeclaration.makeToken(parsed);
+
+         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', '', {}, '', []));
       });
 
    });

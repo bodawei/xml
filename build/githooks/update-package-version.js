@@ -18,14 +18,16 @@ function computeVersion(logs, final) {
          body = final;
       } else {
          body = logs[index].subject;
-console.log('BODY', logs[index].subject);
       }
 
       if (body.indexOf('fix') !== -1) {
+console.log('PAT', body);
          version = semver.inc(version, 'patch');
       } else if (body.indexOf('feat') !== -1) {
+console.log('MIN', body);
          version = semver.inc(version, 'minor');
       } else if (body.indexOf('BREAKING CHANGE') !== -1) {
+console.log('MAJ', body);
          version = semver.inc(version, 'major');
       } else {
          //console.log('ERROR: Commit message has no keyword.', body);

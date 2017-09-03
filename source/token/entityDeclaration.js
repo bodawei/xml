@@ -1,12 +1,14 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-//import { WellFormedError } from '../error';
-//
+import { WellFormedError } from '../error';
+
 import xmlToken from './xmlToken.js';
 import externalId from './externalId.js';
 import quotedValue from './quotedValue.js';
+import util from './util.js';
 
 const ENTITY_DECL = 'ENTITY_DECL';
+const WFEID = WellFormedError.ID;
 
 class EntityDeclaration extends xmlToken.Token {
 
@@ -17,8 +19,16 @@ class EntityDeclaration extends xmlToken.Token {
       this.value = value;
       this.externalLoc = externalLoc;
       this.notationDataName = notationDataName;
+      this.isParameter = false;
    }
 
+}
+
+class ParameterEntityDeclaration extends EntityDeclaration {
+   constructor(name, value, externalLoc, notationDataName, chunks) {
+      super(name, value, externalLoc, notationDataName, chunks);
+      this.isParameter = true;
+   }
 }
 
 /**********************************************************************\
@@ -113,16 +123,63 @@ function parseClose(source, parsed, propName, deliverParsed) {
    });
 }
 
-// function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
-// }
+function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
+   const enNameText = util.textOrBlank(parsed.nameChunk);
+   ec.setPos(parsed.openChunk);
 
-// function makeToken(parsed) {
-// }
+   // 1. Do general check on a declaration here. including space after entity
+
+   if (parsed.parameterChunk) {
+      ec.check(!parsed.postParameterSpaceChunk, WFEID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE);
+   }
+
+   ec.setPos(parsed.nameChunk);
+   ec.check(!parsed.nameChunk, WFEID.ENTITYDECL_NO_NAME);
+   ec.checkName(parsed.nameChunk, WFEID.ENTITYDECL_NAME_INVALID, parsed.openChunk);
+   // 2. Add name recommendations tests
+   // const error = util.checkNameRecommendations(enNameText, this._entityMd,
+   //    XWID.ENTITYDECL_NAME_XMLDASH_RESERVED, XWID.ENTITYDECL_NAME_XML_RESERVED);
+   // this._checkWarn(!error, error, [ enNameText ]);
+   ec.setPos(parsed.postNameSpaceChunk);
+   ec.check(!parsed.postNameSpaceChunk, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);
+
+   if (parsed.externalId) {
+      this._validateExternalId(parsed.externalId, ec, true);
+
+      if (parsed.nDataChunk) {
+         ec.check(parsed.nDataChunk.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE, [ enNameText, parsed.nDataChunk.text ]);
+         ec.check(!parsed.nDataNameChunk, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
+      // 3. XmlText.validateText(parsed.nDataName, this._entityMd, parsed.start, this);
+      }
+   } else if (parsed.entityValue) {
+      // 4. this._validateParsedQuotedValue(parsed.value, {
+      //    validateEntityValue: true
+      // });
+   } else {
+      ec.report(WFEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
+   }
+
+   ec.setPos(parsed.closeChunk);
+   ec.check(!parsed.closeChunk, WFEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+
+   // 5. this._checkDeclarationState(parsed.start, WFEID.ENTITYDECL_INVALID_CONTEXT);
+}
+
+function makeToken(parsed) {
+   const entityClass = parsed.parameterChunk ? ParameterEntityDeclaration : EntityDeclaration;
+
+   return new entityClass(util.textOrBlank(parsed.nameChunk),
+      util.textOrBlank(parsed.entityValue ? parsed.entityValue.valueChunk : undefined),
+      {},
+      util.textOrBlank(parsed.nDataNameChunk),
+      []);
+}
 
 module.exports = {
    TYPE: ENTITY_DECL,
    Token: EntityDeclaration,
+   ParamToken: ParameterEntityDeclaration,
    parse,
-   // checkWellFormed,
-   // makeToken,
+   checkWellFormed,
+   makeToken,
 };
