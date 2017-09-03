@@ -48,5 +48,8 @@
     "node-properties-parser": "0.0.2",
     "phantomjs-prebuilt": "2.1.14",
     "text-table-formatter": "0.1.0"
+  },
+  "dependencies": {
+    "git-log-to-json": "^1.0.2"
   }
 }
