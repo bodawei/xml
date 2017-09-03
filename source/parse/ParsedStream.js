@@ -11,6 +11,7 @@ import {
    docTypeEnd,
    elementStart,
    elementEnd,
+   entityReference,
    processingInstruction,
 } from '../xToken';
 
@@ -53,6 +54,9 @@ class ParsedStream extends stream.Readable {
          switch (lToken.text) {
             case '<':
                this._markupParse(deliverParse);
+               break;
+            case '&':
+               entityReference.parse(this._lTokenSource, deliverParse);
                break;
             case ']':
                if (this.waitingForInternalClose) {

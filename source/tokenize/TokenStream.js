@@ -12,6 +12,7 @@ import {
    elementEnd,
    elementStart,
    entityDeclaration,
+   entityReference,
 } from '../xToken';
 
 class TokenStream extends stream.Transform {
@@ -39,14 +40,17 @@ class TokenStream extends stream.Transform {
          case docTypeEnd.TYPE:
             this.push(docTypeEnd.makeToken(parsed));
             break;
-         case entityDeclaration.TYPE:
-            this.push(entityDeclaration.makeToken(parsed));
-            break;
          case elementEnd.TYPE:
             this.push(elementEnd.makeToken(parsed));
             break;
          case elementStart.TYPE:
             this.push(elementStart.makeToken(parsed));
+            break;
+         case entityDeclaration.TYPE:
+            this.push(entityDeclaration.makeToken(parsed));
+            break;
+         case entityReference.TYPE:
+            this.push(entityReference.makeToken(parsed));
             break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));

@@ -12,6 +12,7 @@ import {
    entityDeclaration,
    elementEnd,
    elementStart,
+   entityReference,
    xmlDeclaration,
 } from '../xToken';
 
@@ -120,6 +121,20 @@ describe('TokenStream (integration)', () => {
                makeLToken('value'),
                makeLToken('"'),
                makeLToken('>'),
+            ]),
+         ], done);
+      });
+
+   });
+
+   describe('entity references', () => {
+
+      it('input to sokens', (done) => {
+         expectInputToProduce('&entityRef;', [
+            new entityReference.Token('entityRef', [
+               makeLToken('&'),
+               makeLToken('entityRef'),
+               makeLToken(';'),
             ]),
          ], done);
       });

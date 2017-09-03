@@ -34,10 +34,10 @@ describe('entityReference', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            type: 'ENTITY_REFERENCE',
+            type: 'ENTITYREF',
             open: expectedLToken('&'),
             postOpenSpace: expectedLToken(' '),
-            entityName: expectedLToken('entityName'),
+            name: expectedLToken('entityName'),
             postEntityNameSpace: expectedLToken(' '),
             close: expectedLToken(';'),
          });
@@ -56,10 +56,10 @@ describe('entityReference', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
-            type: 'ENTITY_REFERENCE',
+            type: 'ENTITYREF',
             open: expectedLToken('&'),
             postOpenSpace: undefined,
-            entityName: expectedLToken('entityName'),
+            name: expectedLToken('entityName'),
             postEntityNameSpace: undefined,
             close: expectedLToken(';'),
          });
@@ -96,7 +96,7 @@ describe('entityReference', () => {
             expect(params).toEqual([
                '&',
                [ ';' ],
-               [ ';' ],
+               ';',
             ]);
          });
 
@@ -116,7 +116,7 @@ describe('entityReference', () => {
          parsed = {
             open: expectedLToken('&'),
             postOpenSpace: undefined,
-            entityName: expectedLToken('theName'),
+            name: expectedLToken('theName'),
             postEntityNameSpace: undefined,
             close: expectedLToken(';'),
          };
@@ -135,7 +135,7 @@ describe('entityReference', () => {
       });
 
       it('reports an error if there is no name', () => {
-         delete parsed.entityName;
+         delete parsed.name;
 
          entityReference.checkWellFormed(parsed, mockErrorCollector);
 
@@ -166,7 +166,7 @@ describe('entityReference', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,
             params: [ 'theName' ],
-            lastPosition: parsed.entityName,
+            lastPosition: parsed.name,
          });
       });
 
@@ -182,7 +182,9 @@ describe('entityReference', () => {
 
          const token = entityReference.makeToken(parsed);
 
-         expect(token).toEqual(new entityReference.Token('entityName', []));
+         expect(token).toEqual(new entityReference.Token('entityName', [
+            parsed.name,
+         ]));
       });
 
       it('returns an entity reference token with a blank name when the name could not be found', () => {

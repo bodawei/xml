@@ -5,6 +5,7 @@ import {
    charData,
    elementEnd,
    elementStart,
+   entityReference,
 } from '../xToken';
 
 import TokenStream from './TokenStream.js';
@@ -44,6 +45,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(elementEnd.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls entityReference.makeToken()', () => {
+      spyOn(entityReference, 'makeToken');
+      const parsed = { type: entityReference.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(entityReference.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('throws an error if asked to deal with an unknown parsed type', () => {

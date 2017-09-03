@@ -2,10 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
+import { LTokenSource } from '../lToken';
 import {
    charData,
    elementEnd,
    elementStart,
+   entityReference,
 } from '../xToken';
 
 import ParsedStream from './ParsedStream.js';
@@ -41,6 +43,19 @@ describe('ParsedStream (unit)', () => {
 
    });
 
+   describe('charData', () => {
+
+      it('calls charData.parse()', () => {
+         spyOn(charData, 'parse');
+         parser.addText('asdf</foo>');
+         parser.endText();
+         parser.read();
+
+         expect(charData.parse).toHaveBeenCalled();
+      });
+
+   });
+
    describe('element start', () => {
 
       it('calls elementStart.parse()', () => {
@@ -67,15 +82,16 @@ describe('ParsedStream (unit)', () => {
 
    });
 
-   describe('charData', () => {
+   describe('entity reference', () => {
 
-      it('calls charData.parse()', () => {
-         spyOn(charData, 'parse');
-         parser.addText('asdf</foo>');
+      it('calls entityReference.parse()', () => {
+         spyOn(entityReference, 'parse');
+         parser.addText('&foo;');
          parser.endText();
          parser.read();
 
-         expect(charData.parse).toHaveBeenCalled();
+         expect(entityReference.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+         expect(entityReference.parse.calls.argsFor(0)[1] instanceof Function).toEqual(true);
       });
 
    });

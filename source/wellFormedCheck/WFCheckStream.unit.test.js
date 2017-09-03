@@ -13,6 +13,7 @@ import {
    elementEnd,
    elementStart,
    entityDeclaration,
+   entityReference,
    xmlDeclaration,
 } from '../xToken';
 
@@ -356,6 +357,41 @@ describe('WFCheckStream (unit)', () => {
       expect(args[0]).toEqual(parsed);
       expect(args[1] instanceof ErrorCollector).toEqual(true);
       expect(args[2]).toEqual(metaData);
+   });
+
+   describe('entity reference', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(entityReference, 'checkWellFormed');
+         parsed = {
+            type: entityReference.TYPE,
+            open: makeLToken('&'),
+         };
+      });
+
+      it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = entityReference.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not IN_CONTENT', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
    });
 
    it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {

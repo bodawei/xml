@@ -5,7 +5,7 @@ import { makeLTokenMaker } from '../lToken/test';
 
 import ParsedStream from './ParsedStream.js';
 
-describe('ParsedStream', () => {
+describe('ParsedStream (integration)', () => {
    let parser;
    let makeLToken;
 
@@ -30,6 +30,29 @@ describe('ParsedStream', () => {
             const actuals = results.filter((actual) => actual.type === expected.type);
 
             expect(actuals[0]).toEqual(expected);
+         });
+         done();
+      });
+      parser.addText(input);
+      parser.endText();
+   }
+
+   function expectInputToProduce2(input, parsings, done) {
+      const results = [];
+
+      parser.on('data', (data) => {
+         results.push(data);
+      });
+      parser.on('end', () => {
+         let expecteds = parsings;
+         if (!Array.isArray(parsings)) {
+            expecteds = [ parsings ];
+         }
+
+         expecteds.forEach((expected) => {
+            const actuals = results.filter((actual) => actual.type === expected.type);
+
+            expect(actuals[0]).toContainParsedProps(expected);
          });
          done();
       });
@@ -161,6 +184,16 @@ describe('ParsedStream', () => {
             },
             postExternalIdSpace: undefined,
             close: makeLToken('>'),
+         }, done);
+      });
+
+   });
+
+   describe('entity reference', () => {
+
+      it('parse entity reference', (done) => {
+         expectInputToProduce2('&foo;', {
+            type: 'ENTITYREF',
          }, done);
       });
 

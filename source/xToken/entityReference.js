@@ -13,7 +13,7 @@ import {
  and parameter entity reference.
 \**********************************************************************/
 
-const ENTITY_REFERENCE = 'ENTITY_REFERENCE';
+const ENTITYREF = 'ENTITYREF';
 const WFEID = WellFormedError.ID;
 
 class EntityReference extends XmlToken {
@@ -43,14 +43,14 @@ class EntityReference extends XmlToken {
 
 function parse(source, deliverParsed) {
    const parsed = {
-      type: ENTITY_REFERENCE,
+      type: ENTITYREF,
    };
 
    source.extractToObject('match', '&', parsed, 'open');
    source.extractToObject('space', parsed, 'postOpenSpace');
-   source.extractToObject('word', [ ';' ], parsed, 'entityName');
+   source.extractToObject('word', [ ';' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postEntityNameSpace');
-   source.extract('match', [ ';' ], (lToken) => {
+   source.extract('match', ';', (lToken) => {
       parsed.close = lToken;
       deliverParsed(parsed);
    });
@@ -61,14 +61,14 @@ function parse(source, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec) {
-   const entityName = textOrBlank(parsed.entityName);
+   const entityName = textOrBlank(parsed.name);
 
    ec.setPos(parsed.open);
    ec.setPos(parsed.postOpenSpace);
    ec.check(parsed.postOpenSpace, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]);
 
-   ec.setPos(parsed.entityName);
-   ec.check(!parsed.entityName, WFEID.REFERENCE_NO_NAME);
+   ec.setPos(parsed.name);
+   ec.check(!parsed.name, WFEID.REFERENCE_NO_NAME);
 
    ec.setPos(parsed.postEntityNameSpace);
    ec.check(parsed.postEntityNameSpace, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
@@ -90,7 +90,7 @@ function getChunks(parsed) {
 
    pushNonBottom(results, parsed.open);
    pushNonBottom(results, parsed.postOpenSpace);
-   pushNonBottom(results, parsed.entityName);
+   pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postEntityNameSpace);
    pushNonBottom(results, parsed.close);
 
@@ -98,7 +98,7 @@ function getChunks(parsed) {
 }
 
 export {
-   ENTITY_REFERENCE as TYPE,
+   ENTITYREF as TYPE,
    EntityReference as Token,
    parse,
    checkWellFormed,

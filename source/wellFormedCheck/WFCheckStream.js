@@ -13,6 +13,7 @@ import {
    elementStart,
    elementEnd,
    entityDeclaration,
+   entityReference,
    xmlDeclaration,
 } from '../xToken';
 
@@ -98,13 +99,6 @@ class WFChecker extends stream.Transform {
          case declaration.TYPE:
             declaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
-         case entityDeclaration.TYPE:
-            if (this._state !== STATE.IN_DTD) {
-               errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
-            }
-
-            entityDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
-            break;
          case elementStart.TYPE:
             const nameText = parsed.name ? parsed.name.text : '';
             this._elementNameStack.push(nameText);
@@ -136,6 +130,20 @@ class WFChecker extends stream.Transform {
             }
 
             elementEnd.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case entityDeclaration.TYPE:
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
+            }
+
+            entityDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case entityReference.TYPE:
+            if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+            }
+
+            entityReference.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

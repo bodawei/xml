@@ -156,6 +156,21 @@ describe('WFCheckStream (integration)', () => {
 
    });
 
+   describe('entity reference', () => {
+
+      it('reports an error when the entity has the wrong syntax', (done) => {
+         expectInputToProduce('<?xml version="1.0"?><one>& entityRef;</one>', (results) => {
+            expect(results[3]).toEqual(new WellFormedError('REFERENCE_XTRA_SPACE',
+               [ 'entityRef' ],
+               new Offset(new EntityLocation(), 27, 0, 27),
+               new Offset(new EntityLocation(), 26, 0, 26)
+            ));
+            done();
+         });
+      });
+
+   });
+
    describe('UNKNOWNDECL', () => {
 
       it('reports an error when the declaration is not complete', (done) => {
