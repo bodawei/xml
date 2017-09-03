@@ -2,44 +2,76 @@
 
 import { WellFormedError } from '../error';
 
-import util from './util.js';
+import {
+   pushNonBottom,
+   textOrBlank,
+   textOrUndef,
+ } from './util.js';
 import { Token as XmlToken } from './xmlToken.js';
 
-const XML_DECLARATION = 'XML_DECLARATION';
-const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+/**********************************************************************\
+ The xmlDeclaration namespace contains the usual routines for parsing,
+ validating and tokenizing an XML Declaration.
+\**********************************************************************/
 
-const XML_DECL_PARAMS = {
+const WFEID = WellFormedError.ID;
+const XMLDECL = 'XMLDECL';
+const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+const XMLDECL_PARAMS = {
    version: 'version',
    encoding: 'encoding',
    standalone: 'standalone',
 };
 
-const WFEID = WellFormedError.ID;
-
 class XmlDeclaration extends XmlToken {
 
    constructor(params, lTokens) {
       super(lTokens);
-
       this.params = params;
    }
 
 }
 
-function parse(source, preliminary, deliverParsed) {
-   const results = {
-      type: XML_DECLARATION,
-      openLToken: preliminary.openLToken,
-      postOpenSpaceLToken: preliminary.postOpenSpaceLToken,
-      targetLToken: preliminary.targetLToken,
-      postTargetSpaceLToken: preliminary.postTargetSpaceLToken,
+/**********************************************************************\
+ parse() extracts the LTokens of an XML Declaration.
+
+ This assumes that the "<?xml " has already been parsed, and those
+ lTokens are passed in through piParsing.
+
+ PARAM
+ source: A LTokenSource to read from
+ piParsing: A map of values already parsed in the process of consuming
+      a processing instruction
+ deliverParsed: Callback to deliver the parsed lTokens
+
+ SYNTAX
+   [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl?
+                         SDDecl? S? '?>'
+   [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                         '"' VersionNum '"')
+   [25] Eq           ::= S? '=' S?
+   [26] VersionNum   ::= '1.' [0-9]+
+   [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
+                         ('"' ('yes' | 'no') '"'))
+   [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                         "'" EncName "'" )
+   [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+\**********************************************************************/
+
+function parse(source, piParsing, deliverParsed) {
+   const parsed = {
+      type: XMLDECL,
+      open: piParsing.open,
+      postOpenSpace: piParsing.postOpenSpace,
+      target: piParsing.target,
+      postTargetSpace: piParsing.postTargetSpace,
    };
 
    getParams(source, (params) => {
-      results.params = params;
+      parsed.params = params;
       source.extract('match', '?>', (lToken) => {
-         results.closeLToken = lToken;
-         deliverParsed(results);
+         parsed.close = lToken;
+         deliverParsed(parsed);
       });
    });
 }
@@ -51,29 +83,28 @@ function getParams(source, deliverResults) {
    });
 }
 
-function addParam(source, params, nameLToken, deliverResults) {
-   if (!nameLToken) {
+function addParam(source, params, name, deliverResults) {
+   if (!name) {
       deliverResults(params);
       return;
    }
    const param = {
-      nameLToken: nameLToken,
+      name,
    };
    params.push(param);
 
-   source.extractToObject('space', param, 'postNameSpaceLToken');
-   source.extractToObject('match', '=', param, 'equalLToken');
-   source.extractToObject('space', param, 'postEqualSpaceLToken');
-   source.extract('peekChar', (quoteLToken) => {
-      const gotQuote = quoteLToken && (quoteLToken.text === '"' || quoteLToken.text === '\'');
+   source.extractToObject('space', param, 'postNameSpace');
+   source.extractToObject('match', '=', param, 'equal');
+   source.extractToObject('space', param, 'postEqualSpace');
+   source.extract('peekChar', (quote) => {
+      const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
 
       if (gotQuote) {
-         source.extractToObject('char', param, 'openQuoteLToken');
-         source.extractToObject('all', [ quoteLToken.text ], param, 'valueLToken');
-         source.extractToObject('match', quoteLToken.text, param, 'closeQuoteLToken');
-         source.extractToObject('space', param, 'trailingSpaceLToken');
+         source.extractToObject('char', param, 'openQuote');
+         source.extractToObject('all', [ quote.text ], param, 'value');
+         source.extractToObject('match', quote.text, param, 'closeQuote');
+         source.extractToObject('space', param, 'trailingSpace');
       }
-      // else may want to extract space
 
       source.extract('word', XMLDECL_NAME_TERMINATORS, (lToken) => {
          addParam(source, params, lToken, deliverResults);
@@ -81,30 +112,11 @@ function addParam(source, params, nameLToken, deliverResults) {
    });
 }
 
-function getChunks(parsed) {
-   const results = [];
+/**********************************************************************\
+ Do well formed checking on the parsed results from the parse().
+\**********************************************************************/
 
-   util.pIfNotBottom(results, parsed.openLToken);
-   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
-   util.pIfNotBottom(results, parsed.targetLToken);
-   util.pIfNotBottom(results, parsed.postTargetSpaceLToken);
-
-   for (let index = 0; index < parsed.params.length; index++) {
-      util.pIfNotBottom(results, parsed.params[index].nameLToken);
-      util.pIfNotBottom(results, parsed.params[index].postNameSpaceLToken);
-      util.pIfNotBottom(results, parsed.params[index].equalLToken);
-      util.pIfNotBottom(results, parsed.params[index].postEqualSpaceLToken);
-      util.pIfNotBottom(results, parsed.params[index].openQuoteLToken);
-      util.pIfNotBottom(results, parsed.params[index].valueLToken);
-      util.pIfNotBottom(results, parsed.params[index].closeQuoteLToken);
-      util.pIfNotBottom(results, parsed.params[index].trailingSpaceLToken);
-   }
-   util.pIfNotBottom(results, parsed.closeLToken);
-
-   return results;
-}
-
-function checkWellFormed(parsed, err, isDocEntity) { // need type and version
+function checkWellFormed(parsed, err, isDocEntity) {
    let foundEncoding;
    let foundVersion;
    let seenStandalone;
@@ -112,22 +124,20 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {
       const param = parsed.params[index];
-      const nameText = util.textOrBlank(param.nameLToken);
+      const nameText = textOrBlank(param.name);
       const lcName = nameText.toLocaleLowerCase();
-      const valueText = util.textOrBlank(param.valueLToken);
-      const lcValue = valueText.toLocaleLowerCase();
 
-      err.setPos(param.nameLToken);
+      err.setPos(param.name);
 
       if (index === 0) {
-         err.check(!parsed.postTargetSpaceLToken, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         err.check(!parsed.postTargetSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       } else {
-         err.check(!parsed.params[index - 1].trailingSpaceLToken, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         err.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
-//         err.checkNameInvalid(param.nameLToken, WFEID.ATTRIBUTE_INVALID_NAME);
-      if (XML_DECL_PARAMS[lcName]) {
-         err.check(param.nameLToken.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
+//         err.checkNameInvalid(param.name, WFEID.ATTRIBUTE_INVALID_NAME);
+      if (XMLDECL_PARAMS[lcName]) {
+         err.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
 
       switch (lcName) {
@@ -147,19 +157,22 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
                err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
-            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.nameLToken);
+            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.name);
             break;
          default:
-            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.nameLToken.text ]);
+            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.name.text ]);
       }
 
-      err.setPos(param.openQuoteLToken);
-      err.check(!param.equalLToken, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
-      err.check(!param.openQuoteLToken, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+      err.setPos(param.equal);
+      err.check(!param.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+      err.setPos(param.openQuote);
+      err.check(!param.openQuote, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
 
-      err.setPos(param.valueLToken);
-      err.check(!param.valueLToken, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-//         err.add(XmlText.validateText(param.valueLToken, version, parsed.openLToken));
+      err.setPos(param.value);
+      const valueText = textOrBlank(param.value);
+      const lcValue = valueText.toLocaleLowerCase();
+      err.check(!param.value, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+//         err.add(XmlText.validateText(param.value, version, parsed.open));
 
       switch (lcName) {
          case 'version':
@@ -178,8 +191,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       }
    }
 
-   err.setPos(parsed.closeLToken);
-
+   err.setPos(parsed.close);
    err.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES,
       [ isDocEntity ? WFEID.NOUN_XMLDECL : WFEID.NOUN_TEXTDECL ]);
 
@@ -187,8 +199,12 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
       err.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
    }
 
-   err.check(!parsed.closeLToken, WFEID.XMLDECL_NO_CLOSE);
+   err.check(!parsed.close, WFEID.XMLDECL_NO_CLOSE);
 }
+
+/**********************************************************************\
+ Convert a parsed value into a token.
+\**********************************************************************/
 
 function makeToken(parsed) {
    return new XmlDeclaration(extractParams(parsed), getChunks(parsed));
@@ -201,17 +217,42 @@ function extractParams(parsed) {
       const param = parsed.params[index];
 
       params.push({
-         name: util.textOrBlank(param.nameLToken),
-         value: util.textOrUndef(param.valueLToken),
+         name: textOrBlank(param.name),
+         value: textOrUndef(param.value),
       });
    }
 
    return params;
 }
 
-module.exports = {
-   TYPE: XML_DECLARATION,
-   Token: XmlDeclaration,
+function getChunks(parsed) {
+   const results = [];
+
+   pushNonBottom(results, parsed.open);
+   pushNonBottom(results, parsed.postOpenSpace);
+   pushNonBottom(results, parsed.target);
+   pushNonBottom(results, parsed.postTargetSpace);
+
+   for (let index = 0; index < parsed.params.length; index++) {
+      const param = parsed.params[index];
+
+      pushNonBottom(results, param.name);
+      pushNonBottom(results, param.postNameSpace);
+      pushNonBottom(results, param.equal);
+      pushNonBottom(results, param.postEqualSpace);
+      pushNonBottom(results, param.openQuote);
+      pushNonBottom(results, param.value);
+      pushNonBottom(results, param.closeQuote);
+      pushNonBottom(results, param.trailingSpace);
+   }
+   pushNonBottom(results, parsed.close);
+
+   return results;
+}
+
+export {
+   XMLDECL as TYPE,
+   XmlDeclaration as Token,
    parse,
    checkWellFormed,
    makeToken,

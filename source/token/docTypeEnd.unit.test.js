@@ -2,81 +2,77 @@
 
 /* eslint-env jasmine */
 
-import { Range, EntityLocation } from '../basic';
 import { MockErrorCollector } from '../basic/test';
-import { LToken } from '../lToken';
-import lTokenUtil from '../lToken/test';
+import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
-import docTypeEnd from './docTypeEnd.js';
+import * as docTypeEnd from './docTypeEnd.js';
 
 describe('docTypeEnd', () => {
 
    describe('parse()', () => {
       let mockSource;
       let callback;
-      let sourceRm;
+      let sourceLToken;
+      let expectedLToken;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         sourceRm = new lTokenUtil.RangeMaker(new EntityLocation());
+         sourceLToken = makeLTokenMaker();
+         expectedLToken = makeLTokenMaker();
       });
 
       it('returns after parsing a mundane "]>"', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            lTokenUtil.makeLToken(']', sourceRm),
+         mockSource = new MockLTokenSource([
+            sourceLToken(']'),
             undefined,
-            lTokenUtil.makeLToken('>', sourceRm),
+            sourceLToken('>'),
          ]);
 
          docTypeEnd.parse(mockSource, callback);
-
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_END',
-            closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
-            postCloseInternalSubsetSpaceLToken: undefined,
-            closeLToken: new LToken('>', '>', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
+            closeInternalSubset: expectedLToken(']'),
+            postCloseInternalSubsetSpace: undefined,
+            close: expectedLToken('>'),
          });
       });
 
       it('returns after parsing a "]\\t>"', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            lTokenUtil.makeLToken(']', sourceRm),
-            lTokenUtil.makeLToken('\t', sourceRm),
-            lTokenUtil.makeLToken('>', sourceRm),
+         mockSource = new MockLTokenSource([
+            sourceLToken(']'),
+            sourceLToken('\t'),
+            sourceLToken('>'),
          ]);
 
          docTypeEnd.parse(mockSource, callback);
-
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_END',
-            closeInternalSubsetLToken: new LToken(']', ']', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
-            postCloseInternalSubsetSpaceLToken: new LToken('\t', '\t',
-               new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2)),
-            closeLToken: new LToken('>', '>', new Range(new EntityLocation(), 2, 0, 2, 3, 0, 3)),
+            closeInternalSubset: expectedLToken(']'),
+            postCloseInternalSubsetSpace: expectedLToken('\t'),
+            close: expectedLToken('>'),
          });
       });
 
       it('returns after parsing an incomplete input', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
+         mockSource = new MockLTokenSource([
             undefined,
             undefined,
             undefined,
          ]);
 
          docTypeEnd.parse(mockSource, callback);
-
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainParsedProps({
             type: 'DOCTYPE_END',
-            closeInternalSubsetLToken: undefined,
-            postCloseInternalSubsetSpaceLToken: undefined,
-            closeLToken: undefined,
+            closeInternalSubset: undefined,
+            postCloseInternalSubsetSpace: undefined,
+            close: undefined,
          });
       });
 
@@ -84,21 +80,20 @@ describe('docTypeEnd', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let sourceRm;
       let parsed;
       let startParsed;
 
       beforeEach(() => {
+         const sourceLToken = makeLTokenMaker();
          mockErrorCollector = new MockErrorCollector();
 
-         sourceRm = new lTokenUtil.RangeMaker(new EntityLocation());
          startParsed = {
-            startInternalSubsetLToken: lTokenUtil.makeLToken('[', sourceRm),
+            startInternalSubset: sourceLToken('['),
          };
          parsed = {
-            closeInternalSubsetLToken: lTokenUtil.makeLToken(']', sourceRm),
-            postCloseInternalSubsetSpaceLToken: lTokenUtil.makeLToken(' ', sourceRm),
-            closeLToken: lTokenUtil.makeLToken('>', sourceRm),
+            closeInternalSubset: sourceLToken(']'),
+            postCloseInternalSubsetSpace: sourceLToken(' '),
+            close: sourceLToken('>'),
          };
       });
 
@@ -141,17 +136,17 @@ describe('docTypeEnd', () => {
    });
 
    describe('makeToken()', () => {
-      let sourceRm;
+      let sourceLToken;
 
       beforeEach(() => {
-         sourceRm = new lTokenUtil.RangeMaker(new EntityLocation());
+         sourceLToken = makeLTokenMaker();
       });
 
       it('returns a token given a good parsing', () => {
          const parsed = {
-            closeInternalSubsetLToken: lTokenUtil.makeLToken(']', sourceRm),
-            postCloseInternalSubsetSpaceLToken: lTokenUtil.makeLToken(' ', sourceRm),
-            closeLToken: lTokenUtil.makeLToken('>', sourceRm),
+            closeInternalSubset: sourceLToken(']'),
+            postCloseInternalSubsetSpace: sourceLToken(' '),
+            close: sourceLToken('>'),
          };
 
          const token = docTypeEnd.makeToken(parsed);
@@ -161,9 +156,6 @@ describe('docTypeEnd', () => {
 
       it('returns a token given an empty parsing', () => {
          const parsed = {
-            closeInternalSubsetLToken: undefined,
-            postCloseInternalSubsetSpaceLToken: undefined,
-            closeLToken: undefined,
          };
          const token = docTypeEnd.makeToken(parsed);
 

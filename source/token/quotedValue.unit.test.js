@@ -1,9 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import * as lTokenUtil from '../lToken/test';
+import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
-import quotedValue from './quotedValue.js';
+import * as quotedValue from './quotedValue.js';
 
 describe('quotedValue', () => {
 
@@ -16,19 +16,20 @@ describe('quotedValue', () => {
       });
 
       it('does a basic parse', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            lTokenUtil.makeLToken('"'),
-            lTokenUtil.makeLToken('blah'),
-            lTokenUtil.makeLToken('"'),
+         mockSource = new MockLTokenSource([
+            '"',
+            'blah',
+            '"',
          ]);
 
-         quotedValue.parse(mockSource, {}, callback);
+         quotedValue.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
+         const expectedLToken = makeLTokenMaker();
          expect(callback.calls.allArgs()).toEqual([ [ {
-            openQuoteLToken: lTokenUtil.makeLToken('"'),
-            valueLToken: lTokenUtil.makeLToken('blah'),
-            closeQuoteLToken: lTokenUtil.makeLToken('"'),
+            openQuote: expectedLToken('"'),
+            value: expectedLToken('blah'),
+            closeQuote: expectedLToken('"'),
          } ] ]);
       });
 

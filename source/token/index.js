@@ -1,13 +1,13 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import declaration from './declaration.js';
-import docTypeStart from './docTypeStart.js';
-import docTypeEnd from './docTypeEnd.js';
-import entityDeclaration from './entityDeclaration.js';
-import entityReference from './entityReference.js';
-import externalId from './externalId.js';
-import processingInstruction from './processingInstruction.js';
-import xmlDeclaration from './xmlDeclaration.js';
+import * as declaration from './declaration.js';
+import * as docTypeStart from './docTypeStart.js';
+import * as docTypeEnd from './docTypeEnd.js';
+import * as entityDeclaration from './entityDeclaration.js';
+import * as entityReference from './entityReference.js';
+import * as externalId from './externalId.js';
+import * as processingInstruction from './processingInstruction.js';
+import * as xmlDeclaration from './xmlDeclaration.js';
 
 module.exports = {
    declaration,

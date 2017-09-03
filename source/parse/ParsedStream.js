@@ -67,7 +67,7 @@ class ParsedStream extends stream.Readable {
                      return;
                   }
 
-                  if (token.startInternalSubsetLToken) {
+                  if (token.startInternalSubset) {
                      this.waitingForInternalClose = true;
                      deliverParse(token);
                   } else {

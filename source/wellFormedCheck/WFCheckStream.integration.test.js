@@ -32,7 +32,7 @@ describe('WFCheckStream (integration)', () => {
       parsedStream.endText();
    }
 
-   describe('XML_DECLARATION', () => {
+   describe('XMLDECL', () => {
 
       it('reports an error if the version attribute is the wrong case', (done) => {
          givenInputExpectResult('<?xml VERSION="1.0"?>', (results) => {
@@ -41,7 +41,7 @@ describe('WFCheckStream (integration)', () => {
                new Offset(new EntityLocation(), 6, 0, 6),
                new Offset(new EntityLocation(), 0, 0, 0)
             ));
-            expect(results[1].type).toEqual('XML_DECLARATION');
+            expect(results[1].type).toEqual('XMLDECL');
             done();
          });
       });
@@ -74,7 +74,7 @@ describe('WFCheckStream (integration)', () => {
 
       it('reports an error and the parsed value when the close is missing', (done) => {
          givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE goodName SYSTEM "sys.xml"[]', (results) => {
-            expect(results[0].type).toEqual('XML_DECLARATION');
+            expect(results[0].type).toEqual('XMLDECL');
             expect(results[1].type).toEqual('DOCTYPE_START');
             expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.DOCTYPE_NO_CLOSE,
                undefined,
@@ -109,14 +109,14 @@ describe('WFCheckStream (integration)', () => {
 
          checker.write({
             type: docTypeEnd.TYPE,
-            openLToken: new LToken('x', 'x', new Range(new EntityLocation(), 0, 0)),
+            open: new LToken('x', 'x', new Range(new EntityLocation(), 0, 0)),
          });
          checker.end();
       });
 
    });
 
-   describe('ENTITY_DECL', () => {
+   describe('ENTITYDECL', () => {
 
       it('reports an error when the entity has the wrong syntax', (done) => {
          givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>', (results) => {
@@ -125,7 +125,7 @@ describe('WFCheckStream (integration)', () => {
                new Offset(new EntityLocation(), 46, 0, 46),
                new Offset(new EntityLocation(), 36, 0, 36)
             ));
-            expect(results[3].type).toEqual('ENTITY_DECL');
+            expect(results[3].type).toEqual('ENTITYDECL');
             done();
          });
       });

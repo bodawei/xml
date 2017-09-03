@@ -30,22 +30,22 @@ describe('ParsedStream', () => {
       it('parses a simple declaration', (done) => {
          const makeLToken = makeLTokenMaker();
          const parsedDecl = {
-            type: 'XML_DECLARATION',
-            openLToken: makeLToken('<?'),
-            postOpenSpaceLToken: undefined,
-            targetLToken: makeLToken('xml'),
-            postTargetSpaceLToken: makeLToken(' '),
+            type: 'XMLDECL',
+            open: makeLToken('<?'),
+            postOpenSpace: undefined,
+            target: makeLToken('xml'),
+            postTargetSpace: makeLToken(' '),
             params: [ {
-               nameLToken: makeLToken('version'),
-               postNameSpaceLToken: undefined,
-               equalLToken: makeLToken('='),
-               postEqualSpaceLToken: undefined,
-               openQuoteLToken: makeLToken('"'),
-               valueLToken: makeLToken('1.0'),
-               closeQuoteLToken: makeLToken('"'),
-               trailingSpaceLToken: undefined,
+               name: makeLToken('version'),
+               postNameSpace: undefined,
+               equal: makeLToken('='),
+               postEqualSpace: undefined,
+               openQuote: makeLToken('"'),
+               value: makeLToken('1.0'),
+               closeQuote: makeLToken('"'),
+               trailingSpace: undefined,
             } ],
-            closeLToken: makeLToken('?>'),
+            close: makeLToken('?>'),
          };
 
          inputToOutput('<?xml version="1.0"?>', (results) => {
@@ -64,28 +64,28 @@ describe('ParsedStream', () => {
          const makeLToken = makeLTokenMaker();
          const startParsing = {
             type: 'DOCTYPE_START',
-            openLToken: makeLToken('<!'),
-            postOpenSpaceLToken: undefined,
-            declTypeLToken: makeLToken('DOCTYPE'),
-            postDeclTypeSpaceLToken: makeLToken(' '),
-            nameLToken: makeLToken('goodName'),
-            postNameSpaceLToken: makeLToken(' '),
+            open: makeLToken('<!'),
+            postOpenSpace: undefined,
+            declType: makeLToken('DOCTYPE'),
+            postDeclTypeSpace: makeLToken(' '),
+            name: makeLToken('goodName'),
+            postNameSpace: makeLToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',
-               typeLToken: makeLToken('SYSTEM'),
-               postTypeSpaceLToken: makeLToken(' '),
-               systemOpenQuoteLToken: makeLToken('"'),
-               systemLToken: makeLToken('sys.xml'),
-               systemCloseQuoteLToken: makeLToken('"'),
+               idType: makeLToken('SYSTEM'),
+               postTypeSpace: makeLToken(' '),
+               systemOpenQuote: makeLToken('"'),
+               systemValue: makeLToken('sys.xml'),
+               systemCloseQuote: makeLToken('"'),
             },
-            postExternalIdSpaceLToken: undefined,
-            startInternalSubsetLToken: makeLToken('['),
+            postExternalIdSpace: undefined,
+            startInternalSubset: makeLToken('['),
          };
          const endParsing = {
             type: 'DOCTYPE_END',
-            closeInternalSubsetLToken: makeLToken(']'),
-            postCloseInternalSubsetSpaceLToken: undefined,
-            closeLToken: makeLToken('>'),
+            closeInternalSubset: makeLToken(']'),
+            postCloseInternalSubsetSpace: undefined,
+            close: makeLToken('>'),
          };
 
          inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml"[]>', (results) => {
@@ -101,28 +101,28 @@ describe('ParsedStream', () => {
          const makeLToken = makeLTokenMaker();
          const startParsing = {
             type: 'DOCTYPE_START',
-            openLToken: makeLToken('<!'),
-            postOpenSpaceLToken: undefined,
-            declTypeLToken: makeLToken('DOCTYPE'),
-            postDeclTypeSpaceLToken: makeLToken(' '),
-            nameLToken: makeLToken('goodName'),
-            postNameSpaceLToken: makeLToken(' '),
+            open: makeLToken('<!'),
+            postOpenSpace: undefined,
+            declType: makeLToken('DOCTYPE'),
+            postDeclTypeSpace: makeLToken(' '),
+            name: makeLToken('goodName'),
+            postNameSpace: makeLToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',
-               typeLToken: makeLToken('SYSTEM'),
-               postTypeSpaceLToken: makeLToken(' '),
-               systemOpenQuoteLToken: makeLToken('"'),
-               systemLToken: makeLToken('sys.xml'),
-               systemCloseQuoteLToken: makeLToken('"'),
+               idType: makeLToken('SYSTEM'),
+               postTypeSpace: makeLToken(' '),
+               systemOpenQuote: makeLToken('"'),
+               systemValue: makeLToken('sys.xml'),
+               systemCloseQuote: makeLToken('"'),
             },
-            postExternalIdSpaceLToken: undefined,
-            startInternalSubsetLToken: undefined,
+            postExternalIdSpace: undefined,
+            startInternalSubset: undefined,
          };
          const endParsing = {
             type: 'DOCTYPE_END',
-            closeInternalSubsetLToken: undefined,
-            postCloseInternalSubsetSpaceLToken: undefined,
-            closeLToken: makeLToken('>'),
+            closeInternalSubset: undefined,
+            postCloseInternalSubsetSpace: undefined,
+            close: makeLToken('>'),
          };
 
          inputToOutput('<!DOCTYPE goodName SYSTEM "sys.xml">', (results) => {
@@ -141,27 +141,27 @@ describe('ParsedStream', () => {
       it('parse entity', (done) => {
          const makeLToken = makeLTokenMaker();
          const parsedDecl = {
-            type: 'ENTITY_DECL',
-            openLToken: makeLToken('<!'),
-            postOpenSpaceLToken: undefined,
-            declTypeLToken: makeLToken('ENTITY'),
-            postDeclTypeSpaceLToken: makeLToken(' '),
-            nameLToken: makeLToken('myEntity'),
-            postNameSpaceLToken: makeLToken(' '),
+            type: 'ENTITYDECL',
+            open: makeLToken('<!'),
+            postOpenSpace: undefined,
+            declType: makeLToken('ENTITY'),
+            postDeclTypeSpace: makeLToken(' '),
+            name: makeLToken('myEntity'),
+            postNameSpace: makeLToken(' '),
             externalId: {
                type: 'EXTERNAL_ID',
-               typeLToken: makeLToken('PUBLIC'),
-               postTypeSpaceLToken: makeLToken(' '),
-               publicOpenQuoteLToken: makeLToken('"'),
-               publicLToken: makeLToken('pub.xml'),
-               publicCloseQuoteLToken: makeLToken('"'),
-               postPublicSpaceLToken: makeLToken(' '),
-               systemOpenQuoteLToken: makeLToken('"'),
-               systemLToken: makeLToken('sys.xml'),
-               systemCloseQuoteLToken: makeLToken('"'),
+               idType: makeLToken('PUBLIC'),
+               postTypeSpace: makeLToken(' '),
+               publicOpenQuote: makeLToken('"'),
+               publicValue: makeLToken('pub.xml'),
+               publicCloseQuote: makeLToken('"'),
+               postPublicSpace: makeLToken(' '),
+               systemOpenQuote: makeLToken('"'),
+               systemValue: makeLToken('sys.xml'),
+               systemCloseQuote: makeLToken('"'),
             },
-            postExternalIdSpaceLToken: undefined,
-            closeLToken: makeLToken('>'),
+            postExternalIdSpace: undefined,
+            close: makeLToken('>'),
          };
 
          inputToOutput('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', (results) => {

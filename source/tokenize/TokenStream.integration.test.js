@@ -37,7 +37,7 @@ describe('TokenStream (integration)', () => {
       parsedStream.pipe(tokenStream);
    });
 
-   describe('XML_DECLARATION', () => {
+   describe('XMLDECL', () => {
 
       it('tokenized a parsed', (done) => {
          const makeLToken = makeLTokenMaker();

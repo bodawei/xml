@@ -2,11 +2,10 @@
 
 import { WellFormedError } from '../error';
 
-import util from './util.js';
+import {
+   pushNonBottom,
+} from './util.js';
 import { Token as XmlToken } from './xmlToken.js';
-
-const WFEID = WellFormedError.ID;
-const DOCTYPE_END = 'DOCTYPE_END';
 
 /**********************************************************************\
  docTypeEnd is the portion of a DOCTYPE declaration that comes after
@@ -14,6 +13,9 @@ const DOCTYPE_END = 'DOCTYPE_END';
 
  See docTypeStart for more details
 \**********************************************************************/
+
+const WFEID = WellFormedError.ID;
+const DOCTYPE_END = 'DOCTYPE_END';
 
 class DocTypeEnd extends XmlToken {
 }
@@ -37,48 +39,56 @@ function parse(source, deliverParsed) {
       type: DOCTYPE_END,
    };
 
-   source.extractToObject('match', ']', parsed, 'closeInternalSubsetLToken');
-   source.extractToObject('space', parsed, 'postCloseInternalSubsetSpaceLToken');
+   source.extractToObject('match', ']', parsed, 'closeInternalSubset');
+   source.extractToObject('space', parsed, 'postCloseInternalSubsetSpace');
 
    source.extract('match', '>', (lToken) => {
-      parsed.closeLToken = lToken;
+      parsed.close = lToken;
       deliverParsed(parsed);
    });
 }
 
-function getChunks(parsed) {
-   const results = [];
-
-   util.pIfNotBottom(results, parsed.closeInternalSubsetLToken);
-   util.pIfNotBottom(results, parsed.postCloseInternalSubsetSpaceLToken);
-   util.pIfNotBottom(results, parsed.closeLToken);
-
-   return results;
-}
+/**********************************************************************\
+ checkWellFormed() does check on validity
+\**********************************************************************/
 
 function checkWellFormed(parsed, startParsed, ec) {
-   ec.setPos(startParsed.declTypeLToken);
-   ec.setPos(startParsed.postDeclTypeSpaceLToken);
-   ec.setPos(startParsed.nameLToken);
-   ec.setPos(parsed.closeInternalSubsetLToken);
+   ec.setPos(startParsed.declType);
+   ec.setPos(startParsed.postDeclTypeSpace);
+   ec.setPos(startParsed.name);
+   ec.setPos(parsed.closeInternalSubset);
 
-   if (!startParsed.startInternalSubsetLToken) {
-      ec.check(parsed.closeInternalSubsetLToken, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
+   if (!startParsed.startInternalSubset) {
+      ec.check(parsed.closeInternalSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 
-   ec.setPos(parsed.closeLToken);
-   ec.check(!parsed.closeLToken, WFEID.DOCTYPE_NO_CLOSE);
+   ec.setPos(parsed.close);
+   ec.check(!parsed.close, WFEID.DOCTYPE_NO_CLOSE);
 
    return ec;
 }
+
+/**********************************************************************\
+ makeToken() converts a parsed into a token.
+\**********************************************************************/
 
 function makeToken(parsed) {
    return new DocTypeEnd(getChunks(parsed));
 }
 
-module.exports = {
-   TYPE: DOCTYPE_END,
-   Token: DocTypeEnd,
+function getChunks(parsed) {
+   const results = [];
+
+   pushNonBottom(results, parsed.closeInternalSubset);
+   pushNonBottom(results, parsed.postCloseInternalSubsetSpace);
+   pushNonBottom(results, parsed.close);
+
+   return results;
+}
+
+export {
+   DOCTYPE_END as TYPE,
+   DocTypeEnd as Token,
    parse,
    checkWellFormed,
    makeToken,

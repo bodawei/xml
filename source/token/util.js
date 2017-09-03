@@ -12,22 +12,22 @@ function textOrUndef(lToken) {
 function toLocalParsing(type, declarationParsing) {
    return {
       type: type,
-      openLToken: declarationParsing.openLToken,
-      postOpenSpaceLToken: declarationParsing.postOpenSpaceLToken,
-      declTypeLToken: declarationParsing.declTypeLToken,
-      postDeclTypeSpaceLToken: declarationParsing.postDeclTypeSpaceLToken,
+      open: declarationParsing.open,
+      postOpenSpace: declarationParsing.postOpenSpace,
+      declType: declarationParsing.declType,
+      postDeclTypeSpace: declarationParsing.postDeclTypeSpace,
    };
 }
 
-function pIfNotBottom(results, value) {
+function pushNonBottom(results, value) {
    if (value !== undefined && value !== null) {
       results.push(value);
    }
 }
 
-module.exports = {
+export {
    textOrBlank,
    textOrUndef,
    toLocalParsing,
-   pIfNotBottom,
+   pushNonBottom,
 };

@@ -1,16 +1,26 @@
-import util from './util.js';
+/* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-function parse(source, options, deliverParsed) {
+import { pushNonBottom } from './util.js';
+
+/**********************************************************************\
+ The quotedValue namespace has utility routines for dealing with
+ values of the form "[^"]*" or '[^']*'.
+
+ This is meant to be called from contexts that have already validated
+ that the next character is a quote (e.g. through a peekChar)
+\**********************************************************************/
+
+function parse(source, deliverParsed) {
    const parsed = {};
 
    source.extract('char', (lToken) => {
-      parsed.openQuoteLToken = lToken;
+      parsed.openQuote = lToken;
 
       source.extract('all', [ lToken.text ], (lToken) => {
-         parsed.valueLToken = lToken;
+         parsed.value = lToken;
 
          source.extract('char', (lToken) => {
-            parsed.closeQuoteLToken = lToken;
+            parsed.closeQuote = lToken;
 
             deliverParsed(parsed);
          });
@@ -22,12 +32,12 @@ function getChunks(results, parsed) {
    if (!parsed) {
       return;
    }
-   util.pIfNotBottom(results, parsed.openQuoteLToken);
-   util.pIfNotBottom(results, parsed.valueLToken);
-   util.pIfNotBottom(results, parsed.closeQuoteLToken);
+   pushNonBottom(results, parsed.openQuote);
+   pushNonBottom(results, parsed.value);
+   pushNonBottom(results, parsed.closeQuote);
 }
 
-module.exports = {
+export {
    parse,
    getChunks,
 };

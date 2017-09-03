@@ -1,10 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
-
 /* eslint-env jasmine */
 
-import lTokenUtil from '../lToken/test';
+import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
-import declaration from './declaration.js';
+import * as declaration from './declaration.js';
 
 describe('declaration', () => {
 
@@ -17,9 +16,11 @@ describe('declaration', () => {
       });
 
       it('does not do any other parsing if no declaration type is found', () => {
-         const openLToken = lTokenUtil.makeLToken('<!');
-         mockSource = new lTokenUtil.MockLTokenSource([
-            lTokenUtil.makeLToken(' '),
+         const sourceLToken = makeLTokenMaker();
+         const expectedLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            sourceLToken(' '),
             undefined,
             undefined,
          ]);
@@ -28,11 +29,11 @@ describe('declaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ {
-            type: 'GENERIC_DECLARATION',
-            openLToken: lTokenUtil.makeLToken('<!'),
-            postOpenSpaceLToken: lTokenUtil.makeLToken(' '),
-            declTypeLToken: undefined,
-            postDeclTypeSpaceLToken: undefined,
+            type: 'GENERICDECL',
+            open: expectedLToken('<!'),
+            postOpenSpace: expectedLToken(' '),
+            declType: undefined,
+            postDeclTypeSpace: undefined,
          } ] ]);
       });
 

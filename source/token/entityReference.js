@@ -3,7 +3,15 @@
 import { WellFormedError } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
-import util from './util.js';
+import {
+   pushNonBottom,
+   textOrBlank,
+ } from './util.js';
+
+/**********************************************************************\
+ The entityReference namespace has routines for processing general
+ and parameter entity reference.
+\**********************************************************************/
 
 const ENTITY_REFERENCE = 'ENTITY_REFERENCE';
 const WFEID = WellFormedError.ID;
@@ -19,9 +27,9 @@ class EntityReference extends XmlToken {
 }
 
 /**********************************************************************\
- parse() extracts the pieces of an entity reference.
+ parse() extracts the LToken's that make up an entity reference.
 
- This assumes that the initial & has not been read.
+ This assumes that the initial & has not been extracted yet.
 
  PARAM
  source: A LTokenSource to read from
@@ -38,52 +46,60 @@ function parse(source, deliverParsed) {
       type: ENTITY_REFERENCE,
    };
 
-   source.extractToObject('match', '&', parsed, 'openLToken');
-   source.extractToObject('space', parsed, 'postOpenSpaceLToken');
-   source.extractToObject('word', [ ';' ], parsed, 'entityNameLToken');
-   source.extractToObject('space', parsed, 'postEntityNameSpaceLToken');
+   source.extractToObject('match', '&', parsed, 'open');
+   source.extractToObject('space', parsed, 'postOpenSpace');
+   source.extractToObject('word', [ ';' ], parsed, 'entityName');
+   source.extractToObject('space', parsed, 'postEntityNameSpace');
    source.extract('match', [ ';' ], (lToken) => {
-      parsed.closeLToken = lToken;
+      parsed.close = lToken;
       deliverParsed(parsed);
    });
+}
+
+/**********************************************************************\
+ checkWellFormed() does a well formed check on the parsed value.
+\**********************************************************************/
+
+function checkWellFormed(parsed, ec) {
+   const entityName = textOrBlank(parsed.entityName);
+
+   ec.setPos(parsed.open);
+   ec.setPos(parsed.postOpenSpace);
+   ec.check(parsed.postOpenSpace, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]);
+
+   ec.setPos(parsed.entityName);
+   ec.check(!parsed.entityName, WFEID.REFERENCE_NO_NAME);
+
+   ec.setPos(parsed.postEntityNameSpace);
+   ec.check(parsed.postEntityNameSpace, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
+
+   ec.setPos(parsed.close);
+   ec.check(!parsed.close, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
+}
+
+/**********************************************************************\
+ makeToken() converts a parsed into a token.
+\**********************************************************************/
+
+function makeToken(parsed) {
+   return new EntityReference(textOrBlank(parsed.name), getChunks(parsed));
 }
 
 function getChunks(parsed) {
    const results = [];
 
-   util.pIfNotBottom(results, parsed.openLToken);
-   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
-   util.pIfNotBottom(results, parsed.entityNameLToken);
-   util.pIfNotBottom(results, parsed.postEntityNameSpaceLToken);
-   util.pIfNotBottom(results, parsed.closeLToken);
+   pushNonBottom(results, parsed.open);
+   pushNonBottom(results, parsed.postOpenSpace);
+   pushNonBottom(results, parsed.entityName);
+   pushNonBottom(results, parsed.postEntityNameSpace);
+   pushNonBottom(results, parsed.close);
 
    return results;
 }
 
-function checkWellFormed(parsed, ec) {
-   const entityName = util.textOrBlank(parsed.entityNameLToken);
-
-   ec.setPos(parsed.openLToken);
-   ec.setPos(parsed.postOpenSpaceLToken);
-   ec.check(parsed.postOpenSpaceLToken, WFEID.REFERENCE_XTRA_SPACE, [ entityName ]); // @@@ param
-
-   ec.setPos(parsed.entityNameLToken);
-   ec.check(!parsed.entityNameLToken, WFEID.REFERENCE_NO_NAME);
-
-   ec.setPos(parsed.postEntityNameSpaceLToken);
-   ec.check(parsed.postEntityNameSpaceLToken, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);
-
-   ec.setPos(parsed.closeLToken);
-   ec.check(!parsed.closeLToken, WFEID.REFERENCE_NO_SEMICOLON, [ entityName ]);
-}
-
-function makeToken(parsed) {
-   return new EntityReference(util.textOrBlank(parsed.nameLToken), getChunks(parsed));
-}
-
-module.exports = {
-   TYPE: ENTITY_REFERENCE,
-   Token: EntityReference,
+export {
+   ENTITY_REFERENCE as TYPE,
+   EntityReference as Token,
    parse,
    checkWellFormed,
    makeToken,

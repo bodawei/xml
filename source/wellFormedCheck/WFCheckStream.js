@@ -37,7 +37,7 @@ class WFChecker extends stream.Transform {
    }
 
    _checkForErrors(parsed) {
-      let errorCollector = new ErrorCollector(parsed.openLToken, WellFormedError);
+      let errorCollector = new ErrorCollector(parsed.open, WellFormedError);
 
       switch (parsed.type) {
          case xmlDeclaration.TYPE:
@@ -52,7 +52,7 @@ class WFChecker extends stream.Transform {
             switch (this._state) {
                case STATE.PROLOG_PREDOCTYPE:
                   this._state = STATE.PROLOG_PREDOCTYPE;
-                  if (parsed.startInternalSubsetLToken) {
+                  if (parsed.startInternalSubset) {
                      this._state = STATE.IN_DTD;
                   }
                   break;
@@ -71,7 +71,7 @@ class WFChecker extends stream.Transform {
             }
 
             if (this._startDocType) {
-               const specialErrorCollector = new ErrorCollector(this._startDocType.openLToken, WellFormedError);
+               const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
                docTypeEnd.checkWellFormed(parsed, this._startDocType, specialErrorCollector, true, 1.0, 5);
                delete this._startDocType;
                specialErrorCollector.getErrors().forEach(error => this.push(error));

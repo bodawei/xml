@@ -1,35 +1,34 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import docTypeStart from './docTypeStart.js';
-import entityDeclaration from './entityDeclaration.js';
-
-const GENERIC_DECLARATION = 'GENERIC_DECLARATION';
+import * as docTypeStart from './docTypeStart.js';
+import * as entityDeclaration from './entityDeclaration.js';
 
 /**********************************************************************\
- declaration is a "bridge" token type. That is, it is used to identify
- a class of tokens that all start with <!.  If it finds <!NAME, then
- it will call the appropriate sub-token type (e.g. DOCTYPE, ENTITY,
- etc) and let them do the rest of the parsing. Otherwise it delivers
- the incomplete parsing
+ The declaration namespace contains a "bridge" parser which will
+ start parsing a declaration (<!) far enough to determine what kind
+ of declaration this is, and then hands it off to the appropriate
+ other parsers.
 \**********************************************************************/
+
+const GENERICDECL = 'GENERICDECL';
 
 function parse(source, openLToken, deliverParsed) {
    const results = {
-      type: GENERIC_DECLARATION,
-      openLToken: openLToken,
+      type: GENERICDECL,
+      open: openLToken,
    };
-   source.extractToObject('space', undefined, results, 'postOpenSpaceLToken');
-   source.extractToObject('word', [ '>' ], results, 'declTypeLToken');
+   source.extractToObject('space', undefined, results, 'postOpenSpace');
+   source.extractToObject('word', [ '>' ], results, 'declType');
 
    source.extract('space', (lToken) => {
-      results.postDeclTypeSpaceLToken = lToken;
+      results.postDeclTypeSpace = lToken;
 
-      if (!results.declTypeLToken) {
+      if (!results.declType) {
          deliverParsed(results);
          return;
       }
 
-      switch (results.declTypeLToken.text) {
+      switch (results.declType.text) {
          case 'DOCTYPE':
             docTypeStart.parse(source, results, deliverParsed);
             break;
@@ -40,7 +39,7 @@ function parse(source, openLToken, deliverParsed) {
    });
 }
 
-export default {
-   TYPE: GENERIC_DECLARATION,
+export {
+   GENERICDECL as TYPE,
    parse,
 };

@@ -1,37 +1,42 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import xmlDeclaration from './xmlDeclaration.js';
+import * as xmlDeclaration from './xmlDeclaration.js';
+
+/**********************************************************************\
+ The processingInstruction namespace has the usual parsing etc
+ routines for dealing with processing instructions.
+
+ It is notable that the XML Declaration is a special case of a
+ processing instruction, and is parsed here, but not validated etc.
+\**********************************************************************/
 
 const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
 
-/**********************************************************************\
-\**********************************************************************/
-
 function parse(source, startLToken, deliverParsed) {
-   const results = {
-      openLToken: startLToken,
+   const parsed = {
+      type: PROCESSING_INSTRUCTION,
+      open: startLToken,
    };
 
-   source.extractToObject('space', results, 'postOpenSpaceLToken');
-   source.extractToObject('word', [ '?>' ], results, 'targetLToken');
+   source.extractToObject('space', parsed, 'postOpenSpace');
+   source.extractToObject('word', [ '?>' ], parsed, 'target');
 
    source.extract('space', (lToken) => {
-      results.postTargetSpaceLToken = lToken;
+      parsed.postTargetSpace = lToken;
 
-      if (results.targetLToken && results.targetLToken.text.toLocaleLowerCase() === 'xml') {
-         xmlDeclaration.parse(source, results, deliverParsed);
+      if (parsed.target && parsed.target.text.toLocaleLowerCase() === 'xml') {
+         xmlDeclaration.parse(source, parsed, deliverParsed);
       } else {
-         results.type = PROCESSING_INSTRUCTION;
-         source.extractToObject('all', [ '?>' ], results, 'instructionLToken');
+         source.extractToObject('all', [ '?>' ], parsed, 'instruction');
          source.extract('match', '?>', (lToken) => {
-            results.closeLToken = lToken;
-            deliverParsed(results);
+            parsed.close = lToken;
+            deliverParsed(parsed);
          });
       }
    });
 }
 
-module.exports = {
-   TYPE: PROCESSING_INSTRUCTION,
+export {
+   PROCESSING_INSTRUCTION as TYPE,
    parse,
 };

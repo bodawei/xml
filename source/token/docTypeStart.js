@@ -2,9 +2,13 @@
 
 import { WellFormedError } from '../error';
 
-import util from './util.js';
+import {
+   pushNonBottom,
+   textOrBlank,
+   toLocalParsing,
+} from './util.js';
 import { Token as XmlToken } from './xmlToken.js';
-import externalId from './externalId.js';
+import * as externalId from './externalId.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
@@ -39,7 +43,7 @@ class DocTypeStart extends XmlToken {
 }
 
 /**********************************************************************\
- parse() extracts the pieces of a documenttypedecl up to the start of
+ parse() extracts the pieces of a doctypedecl up to the start of
  an internal subset start.
 
  This assumes that the "<!DOCTYPE S" has already been parsed, and those
@@ -57,62 +61,70 @@ class DocTypeStart extends XmlToken {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = util.toLocalParsing(DOCTYPE_START, declarationParsing);
+   const parsed = toLocalParsing(DOCTYPE_START, declarationParsing);
 
-   source.extractToObject('word', [ '[', '>' ], parsed, 'nameLToken'); // look for quotes?
-   source.extractToObject('space', undefined, parsed, 'postNameSpaceLToken');
+   source.extractToObject('word', [ '[', '>' ], parsed, 'name'); // look for quotes?
+   source.extractToObject('space', undefined, parsed, 'postNameSpace');
 
    externalId.parse(source, [ '[', '>' ], (externalId) => {
       parsed.externalId = externalId;
 
-      source.extractToObject('space', undefined, parsed, 'postExternalIdSpaceLToken');
+      source.extractToObject('space', undefined, parsed, 'postExternalIdSpace');
 
       source.extract('match', '[', (lToken) => {
-         parsed.startInternalSubsetLToken = lToken;
+         parsed.startInternalSubset = lToken;
          deliverParsed(parsed);
       });
    });
 }
 
-function getChunks(parsed) {
-   const results = [];
-
-   util.pIfNotBottom(results, parsed.openLToken);
-   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
-   util.pIfNotBottom(results, parsed.declTypeLToken);
-   util.pIfNotBottom(results, parsed.postDeclTypeSpaceLToken);
-
-   util.pIfNotBottom(results, parsed.nameLToken);
-   util.pIfNotBottom(results, parsed.postNameSpaceLToken);
-   externalId.getChunks(results, parsed.externalId);
-   util.pIfNotBottom(results, parsed.postExternalIdSpaceLToken);
-
-   util.pIfNotBottom(results, parsed.postPublicSpaceLToken);
-   util.pIfNotBottom(results, parsed.startInternalSubsetLToken);
-
-   return results;
-}
+/**********************************************************************\
+ checkWellFormed() does check on validity
+\**********************************************************************/
 
 function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
-   ec.setPos(parsed.nameLToken);
-   ec.check(!parsed.nameLToken, WFEID.DOCTYPE_NO_NAME);
-   ec.checkName(parsed.nameLToken, WFEID.DOCTYPE_NAME_INVALID, version, revision);
+   ec.setPos(parsed.name);
+   ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
+   ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, version, revision);
 
    externalId.checkWellFormed(parsed.externalId, ec);
 
    return ec;
 }
 
+/**********************************************************************\
+ makeToken() converts a parsed into a token.
+\**********************************************************************/
+
 function makeToken(parsed) {
-   return new DocTypeStart(util.textOrBlank(parsed.nameLToken),
+   return new DocTypeStart(textOrBlank(parsed.name),
       externalId.makeTokenCompatible(parsed.externalId),
-      !!parsed.startInternalSubsetLToken,
+      !!parsed.startInternalSubset,
       getChunks(parsed));
 }
 
-module.exports = {
-   TYPE: DOCTYPE_START,
-   Token: DocTypeStart,
+function getChunks(parsed) {
+   const results = [];
+
+   pushNonBottom(results, parsed.open);
+   pushNonBottom(results, parsed.postOpenSpace);
+   pushNonBottom(results, parsed.declType);
+   pushNonBottom(results, parsed.postDeclTypeSpace);
+
+   pushNonBottom(results, parsed.name);
+   pushNonBottom(results, parsed.postNameSpace);
+   externalId.getChunks(results, parsed.externalId);
+   pushNonBottom(results, parsed.postExternalIdSpace);
+
+   pushNonBottom(results, parsed.postPublicSpace);
+   pushNonBottom(results, parsed.startInternalSubset);
+
+   return results;
+}
+
+export {
+   DOCTYPE_START as TYPE,
+   DocTypeStart as Token,
    parse,
    checkWellFormed,
    makeToken,

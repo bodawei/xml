@@ -1,36 +1,38 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../basic';
+import { EntityLocation } from '../basic';
 import { MockErrorCollector } from '../basic/test';
-import { LToken } from '../lToken';
-import lTokenUtil from '../lToken/test';
+import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
-import externalId from './externalId.js';
+import * as externalId from './externalId.js';
 
 describe('externalId', () => {
 
    describe('parse()', () => {
       let mockSource;
       let callback;
+      let expectedLToken;
 
       beforeEach(() => {
+         expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            undefined,  // check for ndata
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            new LToken('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
+            '"',
+            ' ',
+            undefined,
+            MockLTokenSource.PEEK,
+            '"',
+            'sys.xml',
+            '"',
          ]);
       });
 
@@ -40,51 +42,33 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
-         });
-      });
-
-      it('accepts no terminators', () => {
-         externalId.parse(mockSource, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback).toHaveBeenCalledWith({
-            type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          });
       });
 
       it('accepts single quotes', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            new LToken('\'', '\'', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '\'',
+            'pub.xml',
+            '\'',
+            ' ',
             undefined,  // check for ndata
-            new LToken('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
-            new LToken('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            new LToken('\'', '\'', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+            MockLTokenSource.PEEK,
+            '\'',
+            'sys.xml',
+            '\'',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -92,28 +76,28 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('\'', '\'', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            systemOpenQuoteLToken: new LToken('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            systemCloseQuoteLToken: new LToken('\'', '\'', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('\''),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('\''),
+            postPublicSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('\''),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('\''),
          });
       });
 
       it('only finds a SystemLiteral if that is all that is offered', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'SYSTEM',
+            ' ',
             undefined,  // check forndata
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            new LToken('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+            MockLTokenSource.PEEK,
+            '"',
+            'sys.xml',
+            '"',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -121,24 +105,24 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+            idType: expectedLToken('SYSTEM'),
+            postTypeSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          });
       });
 
       it('returns a zero length lToken if there is no value between quotes', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'SYSTEM',
+            ' ',
             undefined,  // check forndata
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            MockLTokenSource.PEEK,
+            '"',
             undefined,
-            new LToken('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+            '"',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -146,15 +130,16 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
-            systemLToken: new LToken('', '', new Range(new EntityLocation(), 18, 0, 18, 18, 0, 18)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+            idType: expectedLToken('SYSTEM'),
+            postTypeSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken(''),
+            systemCloseQuote: expectedLToken('"'),
          });
       });
+
       it('returns nothing if it gets nothing back on first call', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
+         mockSource = new MockLTokenSource([
             undefined,
          ]);
 
@@ -165,8 +150,8 @@ describe('externalId', () => {
       });
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('BOGUS!', 'BOGUS!', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
+         mockSource = new MockLTokenSource([
+            'BOGUS!',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -176,16 +161,16 @@ describe('externalId', () => {
       });
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            new LToken('NDATA', 'NDATA', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
+            '"',
+            ' ',
+            'NDATA',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -193,26 +178,26 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
          });
       });
 
       it('does not mind if public or ndata are the wrong case', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('pUbLiC', 'pUbLiC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('pUbLiC', 'pUbLiC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            new LToken('nData', 'nData', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'pUbLiC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
+            '"',
+            ' ',
+            'nData',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -220,21 +205,21 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('pUbLiC', 'pUbLiC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+            idType: expectedLToken('pUbLiC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
          });
       });
 
       it('stops if it does not find an open quote', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('x', 'x', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            'x',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -242,18 +227,18 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
          });
       });
 
       it('stops if it does not find the body value', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
             undefined,
             undefined,
          ]);
@@ -263,22 +248,22 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('', '', new Range(new EntityLocation(), 8, 0, 8, 8, 0, 8)),
-            publicCloseQuoteLToken: undefined,
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken(''),
+            publicCloseQuote: undefined,
          });
       });
 
       it('stops if it does not the closing quote', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
             undefined,
          ]);
 
@@ -287,29 +272,29 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: undefined,
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: undefined,
          });
       });
 
       it('does not mind if, illegally, no space PUBLIC and PublicLiteral', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
             undefined,
-            new LToken('"', '"', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 7, 0, 7, 14, 0, 14)),
-            new LToken('"', '"', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
+            '"',
+            ' ',
             undefined,  // check for ndata
-            new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 17, 0, 17, 23, 0, 23)),
-            new LToken('"', '"', new Range(new EntityLocation(), 23, 0, 23, 24, 0, 24)),
+            MockLTokenSource.PEEK,
+            '"',
+            'sys.xml',
+            '"',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -317,33 +302,33 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: undefined,
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 7, 0, 7, 14, 0, 14)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
-            postPublicSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 17, 0, 17, 23, 0, 23)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 23, 0, 23, 24, 0, 24)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: undefined,
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          });
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
-         mockSource = new lTokenUtil.MockLTokenSource([
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
-            new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK,
+            'PUBLIC',
+            ' ',
+            MockLTokenSource.PEEK,
+            '"',
+            'pub.xml',
+            '"',
             undefined,  // space
             undefined,  // check for ndata
-            new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)), // peek
-            new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 17, 0, 17, 23, 0, 23)),
-            new LToken('"', '"', new Range(new EntityLocation(), 23, 0, 23, 24, 0, 24)),
+            MockLTokenSource.PEEK,
+            '"',
+            'sys.xml',
+            '"',
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -351,15 +336,15 @@ describe('externalId', () => {
 
          expect(callback).toHaveBeenCalledWith({
             type: 'EXTERNAL_ID',
-            typeLToken: new LToken('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
-            postTypeSpaceLToken: new LToken(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
-            publicOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicLToken: new LToken('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
-            publicCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
-            postPublicSpaceLToken: undefined,
-            systemOpenQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
-            systemLToken: new LToken('sys.xml', 'sys.xml', new Range(new EntityLocation(), 17, 0, 17, 23, 0, 23)),
-            systemCloseQuoteLToken: new LToken('"', '"', new Range(new EntityLocation(), 23, 0, 23, 24, 0, 24)),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: undefined,
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          });
       });
 
@@ -374,17 +359,18 @@ describe('externalId', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
 
+         const expectedLToken = makeLTokenMaker();
          parsed = {
             type: 'EXTERNAL_ID',
-            typeLToken: lTokenUtil.makeLToken('PUBLIC'),
-            postTypeSpaceLToken: lTokenUtil.makeLToken(' '),
-            publicOpenQuoteLToken: lTokenUtil.makeLToken('"'),
-            publicLToken: lTokenUtil.makeLToken('pub.xml'),
-            publicCloseQuoteLToken: lTokenUtil.makeLToken('"'),
-            postPublicSpaceLToken: lTokenUtil.makeLToken(' '),
-            systemOpenQuoteLToken: lTokenUtil.makeLToken('"'),
-            systemLToken: lTokenUtil.makeLToken('sys.xml'),
-            systemCloseQuoteLToken: lTokenUtil.makeLToken('"'),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          };
       });
 
@@ -395,7 +381,7 @@ describe('externalId', () => {
       });
 
       it('reports an error if type is the wrong case', () => {
-         parsed.typeLToken.text = 'public';
+         parsed.idType.text = 'public';
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
@@ -404,24 +390,24 @@ describe('externalId', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_INVALID_CASE,
             params: [ 'PUBLIC', 'public' ],
-            position: parsed.typeLToken,
+            position: parsed.idType,
          });
       });
 
       it('reports an error if there is no PUBLIC value', () => {
-         delete parsed.publicLToken;
+         delete parsed.publicValue;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
             params: undefined,
-            lastPosition: parsed.publicOpenQuoteLToken,
+            lastPosition: parsed.publicOpenQuote,
          });
       });
 
       it('reports an error if there is no space after the SYSTEM or PUBLIC value', () => {
-         delete parsed.postTypeSpaceLToken;
+         delete parsed.postTypeSpace;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
@@ -433,64 +419,65 @@ describe('externalId', () => {
       });
 
       it('reports an error if there is no system lToken when SYSTEM is specified', () => {
-         parsed.typeLToken = lTokenUtil.makeLToken('SYSTEM');
-         delete parsed.systemLToken;
+         const expectedLToken = makeLTokenMaker();
+         parsed.idType = expectedLToken('SYSTEM');
+         delete parsed.systemValue;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_SYSTEM,
             params: undefined,
-            lastPosition: parsed.systemOpenQuoteLToken,
+            lastPosition: parsed.systemOpenQuote,
          });
       });
 
       it('reports an error if there is no space after a public part', () => {
-         delete parsed.postPublicSpaceLToken;
+         delete parsed.postPublicSpace;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_LEADING_SPACE,
             params: undefined,
-            lastPosition: parsed.publicCloseQuoteLToken,
+            lastPosition: parsed.publicCloseQuote,
          });
       });
 
       it('reports an error if there is no space after a public part, and no public part', () => {
-         delete parsed.publicLToken;
-         delete parsed.postPublicSpaceLToken;
+         delete parsed.publicValue;
+         delete parsed.postPublicSpace;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_NO_PUBLIC,
             params: undefined,
-            lastPosition: parsed.publicOpenQuoteLToken,
+            lastPosition: parsed.publicOpenQuote,
          });
       });
 
       it('reports an error if there is no quote around the system value', () => {
-         delete parsed.systemOpenQuoteLToken;
+         delete parsed.systemOpenQuote;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_QUOTE,
             params: undefined,
-            lastPosition: parsed.postPublicSpaceLToken,
+            lastPosition: parsed.postPublicSpace,
          });
       });
 
       it('reports an error if there is no quote at the end of the system value', () => {
-         delete parsed.systemCloseQuoteLToken;
+         delete parsed.systemCloseQuote;
 
          externalId.checkWellFormed(parsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE,
             params: undefined,
-            lastPosition: parsed.systemLToken,
+            lastPosition: parsed.systemValue,
          });
       });
 
@@ -499,17 +486,18 @@ describe('externalId', () => {
    describe('makeToken()', () => {
 
       it('returns an EntityLocation with the public and system ids', () => {
+         const expectedLToken = makeLTokenMaker();
          const parsed = {
             type: 'EXTERNAL_ID',
-            typeLToken: lTokenUtil.makeLToken('PUBLIC'),
-            postTypeSpaceLToken: lTokenUtil.makeLToken(' '),
-            publicOpenQuoteLToken: lTokenUtil.makeLToken('"'),
-            publicLToken: lTokenUtil.makeLToken('pub.xml'),
-            publicCloseQuoteLToken: lTokenUtil.makeLToken('"'),
-            postPublicSpaceLToken: lTokenUtil.makeLToken(' '),
-            systemOpenQuoteLToken: lTokenUtil.makeLToken('"'),
-            systemLToken: lTokenUtil.makeLToken('sys.xml'),
-            systemCloseQuoteLToken: lTokenUtil.makeLToken('"'),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: expectedLToken('pub.xml'),
+            publicCloseQuote: expectedLToken('"'),
+            postPublicSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          };
 
          const externalLoc = externalId.makeTokenCompatible(parsed);
@@ -518,13 +506,14 @@ describe('externalId', () => {
       });
 
       it('returns an EntityLocation with the system id only if there is no public', () => {
+         const expectedLToken = makeLTokenMaker();
          const parsed = {
             type: 'EXTERNAL_ID',
-            typeLToken: lTokenUtil.makeLToken('PUBLIC'),
-            postTypeSpaceLToken: lTokenUtil.makeLToken(' '),
-            systemOpenQuoteLToken: lTokenUtil.makeLToken('"'),
-            systemLToken: lTokenUtil.makeLToken('sys.xml'),
-            systemCloseQuoteLToken: lTokenUtil.makeLToken('"'),
+            idType: expectedLToken('PUBLIC'),
+            postTypeSpace: expectedLToken(' '),
+            systemOpenQuote: expectedLToken('"'),
+            systemValue: expectedLToken('sys.xml'),
+            systemCloseQuote: expectedLToken('"'),
          };
 
          const externalLoc = externalId.makeTokenCompatible(parsed);

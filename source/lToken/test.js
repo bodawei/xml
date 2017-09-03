@@ -6,6 +6,7 @@ import { Range, EntityLocation } from '../basic';
 import LToken from './LToken.js';
 
 const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
+const PEEK = '___PEEK___';
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing.
@@ -67,7 +68,13 @@ class RangeMaker {
 class MockLTokenSource {
 
    constructor(returnValues) {
-      this.returnValues = returnValues;
+      const makeToken = makeLTokenMaker();
+      this.returnValues = returnValues.map((entry) => {
+         if (typeof entry === 'string') {
+            return makeToken(entry);
+         }
+         return entry;
+      });
       this.queuedCalls = [];
 
       this.extractToObject = spyOn(this, 'extractToObject').and.callThrough();
@@ -111,17 +118,46 @@ class MockLTokenSource {
                if (this.returnValues.length === 0) {
                   throw new Error(`NO value provided to "${qc.name}" in MockLTokenSource.`);
                }
-               qc.obj[qc.name] = this.returnValues.shift();
+
+               qc.obj[qc.name] = this._getAdjustedValue();
             } else {
                if (this.returnValues.length === 0) {
                   throw new Error(`NO value provided for extraction type "${qc.type}" in MockLTokenSource.`);
                }
-               qc.callback(this.returnValues.shift());
+
+               qc.callback(this._getAdjustedValue());
             }
          });
       }
    }
+
+   _getAdjustedValue() {
+      let value = this.returnValues.shift();
+
+      if (value === MockLTokenSource.PEEK) {
+         value = this.returnValues[0]; // return the next
+      } else if (value && value.type === PEEK) {
+         const next = this.returnValues[0];
+         value = new LToken(value.value, value.value, new Range(new EntityLocation(),
+            next.range[0].startIndex,
+            next.range[0].startRow,
+            next.range[0].startColumn,
+            next.range[0].startIndex + value.value.length,
+            next.range[0].startRow,
+            next.range[0].startColumn + value.value.length
+         ));
+      }
+
+      return value;
+   }
 }
+
+MockLTokenSource.PEEK = (value) => {
+   return {
+      type: PEEK,
+      value,
+   };
+};
 
 module.exports = {
    MockLTokenSource,
