@@ -6,6 +6,8 @@ import { WellFormedError } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as declaration from './declaration.js';
+import * as docTypeStart from './docTypeStart.js';
+import * as entityDeclaration from './entityDeclaration.js';
 
 describe('declaration', () => {
 
@@ -15,6 +17,53 @@ describe('declaration', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
+         spyOn(docTypeStart, 'parse');
+         spyOn(entityDeclaration, 'parse');
+      });
+
+      it('calls docTypeStart.parse() if the declType is DOCTYPE', () => {
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            undefined,
+            sourceLToken('DOCTYPE'),
+            undefined,
+         ]);
+
+         declaration.parse(mockSource, openLToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(docTypeStart.parse).toHaveBeenCalled();
+      });
+
+      it('calls docTypeStart.parse() if the declType is "docTypE"', () => {
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            undefined,
+            sourceLToken('docTypE'),
+            undefined,
+         ]);
+
+         declaration.parse(mockSource, openLToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(docTypeStart.parse).toHaveBeenCalled();
+      });
+
+      it('calls entityDeclaration.parse() if the declType is ENTITY', () => {
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            undefined,
+            sourceLToken('ENTITY'),
+            undefined,
+         ]);
+
+         declaration.parse(mockSource, openLToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(entityDeclaration.parse).toHaveBeenCalled();
       });
 
       it('does not do any other parsing if no declaration type is found', () => {
@@ -156,6 +205,30 @@ describe('declaration', () => {
             parsed.declType,
             parsed.postDeclTypeSpace,
          ]));
+      });
+
+   });
+
+   describe('appendLTokens()', () => {
+
+      it('adds all declaration LTokens', () => {
+         const results = [];
+         const sourceLToken = makeLTokenMaker();
+         const parsed = {
+            open: sourceLToken('<!'),
+            postOpenSpace: sourceLToken(' '),
+            declType: sourceLToken('DOCTYPE'),
+            postDeclTypeSpace: sourceLToken(' '),
+         };
+
+         declaration.appendLTokens(results, parsed);
+
+         expect(results).toEqual([
+            parsed.open,
+            parsed.postOpenSpace,
+            parsed.declType,
+            parsed.postDeclTypeSpace,
+         ]);
       });
 
    });

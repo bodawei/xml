@@ -9,7 +9,7 @@ import {
    processingInstruction,
    docTypeStart,
    docTypeEnd,
-} from '../token';
+} from '../xToken';
 
 class ParsedStream extends stream.Readable {
 

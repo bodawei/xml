@@ -10,7 +10,7 @@ import {
    docTypeEnd,
    entityDeclaration,
    xmlDeclaration,
-} from '../token';
+} from '../xToken';
 
 import TokenStream from './TokenStream.js';
 

@@ -1,10 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { WellFormedError, XmlWarning } from '../error';
-import { MockErrorCollector } from '../basic/test';
-import { makeLToken } from '../lToken/test';
+import { EntityMetaData } from '../../basic';
+import { WellFormedError, XmlWarning } from '../../error';
+import { MockErrorCollector } from '../../basic/test';
+import { makeLToken } from '../../lToken/test';
 
 import * as misc from './misc.js';
 

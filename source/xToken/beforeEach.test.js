@@ -70,6 +70,20 @@ describe('token custom matchers', () => {
             });
          });
 
+         it('returns a message indicating failure, when the actual is a literal value', () => {
+
+            const result = toContainParsedProps({ equals() { return true; } }).compare({
+               one: 'one',
+            }, {
+               one: 'one',
+            });
+
+            expect(result).toEqual({
+               pass: true,
+               message: 'Expected properties not to be found in callback, but they were.',
+            });
+         });
+
          it('returns a message indicating failure, when a property is not found in the actual results', () => {
             const spy = jasmine.createSpy();
             spy({

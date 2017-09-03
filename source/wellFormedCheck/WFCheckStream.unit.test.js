@@ -9,7 +9,7 @@ import {
    docTypeStart,
    entityDeclaration,
    xmlDeclaration,
-} from '../token';
+} from '../xToken';
 
 import WFCheckStream from './WFCheckStream.js';
 
@@ -75,6 +75,23 @@ describe('WFCheckStream (unit)', () => {
       expect(args[0]).toEqual(parsed);
       expect(args[1] instanceof ErrorCollector).toEqual(true);
       expect(args[2]).toEqual(metaData);
+   });
+
+   it('calls docTypeStart.checkWellFormed() after an xml declaration', () => {
+      spyOn(docTypeStart, 'checkWellFormed');
+      const parsed = {
+         type: docTypeStart.TYPE,
+         open: makeLToken('<'),
+      };
+      checker.write(metaData);
+      checker.write({
+         type: xmlDeclaration.TYPE,
+         open: makeLToken('<?'),
+         params: [],
+      });
+      checker.write(parsed);
+
+      expect(docTypeStart.checkWellFormed).toHaveBeenCalled();
    });
 
    it('calls docTypeEnd.checkWellFormed() when encountering a doctype end parsing', () => {

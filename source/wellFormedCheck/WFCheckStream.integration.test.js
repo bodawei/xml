@@ -9,7 +9,7 @@ import {
 import { WellFormedError } from '../error';
 import { LToken } from '../lToken';
 import { ParsedStream } from '../parse';
-import { docTypeEnd } from '../token';
+import { docTypeEnd } from '../xToken';
 
 import WFCheckStream from './WFCheckStream.js';
 
@@ -55,14 +55,6 @@ describe('WFCheckStream (integration)', () => {
             // before this, error, doctype start, doctype end
             expect(results[4]).toEqual(new WellFormedError('XMLDECL_INVALID_CONTEXT', undefined,
                new Offset(new EntityLocation(), 14, 0, 14), new Offset(new EntityLocation(), 14, 0, 14)));
-            done();
-         });
-      });
-
-      it('reports an error if a value contains an invalid character (validating misc.checkWellFormedText)', (done) => {
-         givenInputExpectResult('<?xml version="1.0" foo="bad\u0000"?>', (results) => {
-            expect(results[2]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR', [ 28 ],
-               new Offset(new EntityLocation(), 25, 0, 25), new Offset(new EntityLocation(), 0, 0, 0)));
             done();
          });
       });
@@ -124,17 +116,6 @@ describe('WFCheckStream (integration)', () => {
             open: new LToken('x', 'x', new Range(new EntityLocation(), 0, 0)),
          });
          checker.end();
-      });
-
-      it('reports an error when the SYSTEM value has a bad char (check misc.checkWellFormedText())', (done) => {
-         givenInputExpectResult('<?xml version="1.0"?><!DOCTYPE foo SYSTEM "sys\u0000.xml">', (results) => {
-            expect(results[2]).toEqual(new WellFormedError('CHARDATA_INVALID_CHAR',
-               [ '46' ],
-               new Offset(new EntityLocation(), 43, 0, 43),
-               new Offset(new EntityLocation(), 21, 0, 21)
-            ));
-            done();
-         });
       });
 
    });

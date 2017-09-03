@@ -11,7 +11,7 @@ import {
    docTypeStart,
    entityDeclaration,
    xmlDeclaration,
-} from '../token';
+} from '../xToken';
 
 const STATE = {
    START: 'START',

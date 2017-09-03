@@ -6,10 +6,10 @@ import {
    pushNonBottom,
    textOrBlank,
    toLocalParsing,
-} from './util.js';
-import { Token as XmlToken } from './xmlToken.js';
-import * as externalId from './externalId.js';
+} from './common/util.js';
+import * as externalId from './common/externalId.js';
 import * as declaration from './declaration.js';
+import { Token as XmlToken } from './xmlToken.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
@@ -107,14 +107,11 @@ function makeToken(parsed) {
 function getLTokens(parsed) {
    const results = [];
 
-   pushNonBottom(results, parsed.open);
-   pushNonBottom(results, parsed.postOpenSpace);
-   pushNonBottom(results, parsed.declType);
-   pushNonBottom(results, parsed.postDeclTypeSpace);
+   declaration.appendLTokens(results, parsed);
 
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
-   externalId.getLTokens(results, parsed.externalId);
+   externalId.appendLTokens(results, parsed.externalId);
    pushNonBottom(results, parsed.postExternalIdSpace);
 
    pushNonBottom(results, parsed.postPublicSpace);

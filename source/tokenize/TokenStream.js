@@ -9,7 +9,7 @@ import {
    docTypeEnd,
    xmlDeclaration,
    entityDeclaration,
-} from '../token';
+} from '../xToken';
 
 class TokenStream extends stream.Transform {
 

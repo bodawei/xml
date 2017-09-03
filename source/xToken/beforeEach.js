@@ -11,14 +11,18 @@ function toContainParsedProps(util, customEqualityTesters) {
             throw new Error('Did not get a spy as expected.');
          }
 
-         const args = callbackSpy.calls.allArgs();
+         let actualProps = callbackSpy;
 
-         if (args.length !== 1 || args[0].length !== 1) {
-            throw new Error('Expected to get one call with one argument. ' +
-               `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
+         if (callbackSpy.calls) {
+            const args = callbackSpy.calls.allArgs();
+
+            if (args.length !== 1 || args[0].length !== 1) {
+               throw new Error('Expected to get one call with one argument. ' +
+                  `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
+            }
+
+            actualProps = args[0][0];
          }
-
-         const actualProps = args[0][0];
 
          Object.keys(expectedProps).forEach((propName) => {
             if (!actualProps.hasOwnProperty(propName)) {

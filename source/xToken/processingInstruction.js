@@ -4,7 +4,7 @@ import { WellFormedError } from '../error';
 
 import {
    textOrBlank,
-} from './util.js';
+} from './common/util.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 /**********************************************************************\

@@ -2,12 +2,12 @@
 
 import { WellFormedError } from '../error';
 
-import * as docTypeStart from './docTypeStart.js';
-import * as entityDeclaration from './entityDeclaration.js';
 import {
    pushNonBottom,
    textOrBlank,
-} from './util.js';
+} from './common/util.js';
+import * as docTypeStart from './docTypeStart.js';
+import * as entityDeclaration from './entityDeclaration.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\
@@ -43,7 +43,7 @@ function parse(source, openLToken, deliverParsed) {
       type: UNKNOWNDECL,
       open: openLToken,
    };
-   source.extractToObject('space', undefined, results, 'postOpenSpace');
+   source.extractToObject('space', results, 'postOpenSpace');
    source.extractToObject('word', [ '>' ], results, 'declType');
 
    source.extract('space', (lToken) => {
@@ -54,7 +54,7 @@ function parse(source, openLToken, deliverParsed) {
          return;
       }
 
-      switch (results.declType.text) {
+      switch (results.declType.text.toLocaleUpperCase()) {
          case 'DOCTYPE':
             docTypeStart.parse(source, results, deliverParsed);
             break;
@@ -98,18 +98,17 @@ function checkWellFormed(parsed, ec) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new UnknownDeclaration(getLTokens(parsed));
-}
-
-function getLTokens(parsed) {
    const results = [];
 
+   appendLTokens(results, parsed);
+   return new UnknownDeclaration(results);
+}
+
+function appendLTokens(results, parsed) {
    pushNonBottom(results, parsed.open);
    pushNonBottom(results, parsed.postOpenSpace);
    pushNonBottom(results, parsed.declType);
    pushNonBottom(results, parsed.postDeclTypeSpace);
-
-   return results;
 }
 
 export {
@@ -118,4 +117,5 @@ export {
    parse,
    checkWellFormed,
    makeToken,
+   appendLTokens,
 };

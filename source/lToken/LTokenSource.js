@@ -148,7 +148,7 @@ class LTokenSource {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
          if (extractorDefinition.params.extractorConstructor) {
-            params = new extractorDefinition.params.extractorConstructor(params);
+            params = new extractorDefinition.params.extractorConstructor(this._version, params);
          } else {
             params = extractorDefinition.params;
          }

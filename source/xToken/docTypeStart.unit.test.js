@@ -9,7 +9,7 @@ import { WellFormedError } from '../error';
 
 import * as declaration from './declaration.js';
 import * as docTypeStart from './docTypeStart.js';
-import * as externalId from './externalId.js';
+import * as externalId from './common/externalId.js';
 
 describe('docTypeStart', () => {
 
@@ -175,12 +175,11 @@ describe('docTypeStart', () => {
    });
 
    describe('makeToken()', () => {
+      let parsed;
 
-      it('returns a token with the expected fields defined', () => {
-         spyOn(externalId, 'getLTokens');
-         spyOn(externalId, 'makeTokenCompatible');
+      beforeEach(() => {
          const expectedLToken = makeLTokenMaker();
-         const parsed = {
+         parsed = {
             type: 'DOCTYPE_START',
             open: expectedLToken('<!'),
             postOpenSpace: expectedLToken(' '),
@@ -188,19 +187,37 @@ describe('docTypeStart', () => {
             postDeclTypeSpace: expectedLToken('\t'),
             name: expectedLToken('elemType'),
             postNameSpace: expectedLToken('  '),
+            externalId: { externalId: true },
             postExternalIdSpace: expectedLToken('\t'),
             startInternalSubset: expectedLToken('['),
          };
+         spyOn(externalId, 'appendLTokens');
+         spyOn(externalId, 'makeTokenCompatible');
+         spyOn(declaration, 'appendLTokens');
+      });
 
+      it('calls declaration.appendLTokens', () => {
          const token = docTypeStart.makeToken(parsed);
 
-         expect(externalId.getLTokens).toHaveBeenCalled();
-         expect(externalId.makeTokenCompatible).toHaveBeenCalled();
+         expect(declaration.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsed);
+      });
+
+      it('calls externalId.appendLTokens', () => {
+         const token = docTypeStart.makeToken(parsed);
+
+         expect(externalId.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsed.externalId);
+      });
+
+      it('calls externalId.makeTokenCompatible', () => {
+         docTypeStart.makeToken(parsed);
+
+         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(parsed.externalId);
+      });
+
+      it('returns a token with the expected fields defined', () => {
+         const token = docTypeStart.makeToken(parsed);
+
          expect(token).toEqual(new docTypeStart.Token('elemType', undefined, true, [
-            parsed.open,
-            parsed.postOpenSpace,
-            parsed.declType,
-            parsed.postDeclTypeSpace,
             parsed.name,
             parsed.postNameSpace,
             parsed.postExternalIdSpace,
@@ -216,18 +233,6 @@ describe('docTypeStart', () => {
          const token = docTypeStart.makeToken(parsed);
 
          expect(token.name).toEqual('');
-      });
-
-      it('asks externalId to provide an entity location', () => {
-         const parsed = {
-            name: undefined,
-            externalId: { externalId: true },
-         };
-         spyOn(externalId, 'makeTokenCompatible');
-
-         docTypeStart.makeToken(parsed);
-
-         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(parsed.externalId);
       });
 
    });

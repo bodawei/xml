@@ -40,6 +40,19 @@ describe('entityDeclaration', () => {
          });
       });
 
+      it('reports errors in the literal value (quotedValue.checkWellFormed())', (done) => {
+         source.addText('entityName "entityValue');  // missing closing quote
+         source.endText();
+         entityDeclaration.parse(source, parsed, (result) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
+
+            entityDeclaration.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_CLOSE_QUOTE);
+            done();
+         });
+      });
+
       it('reports an error when name starts with "xml" (check misc.checkWellFormedNameRecommendation())', (done) => {
          source.addText('xmlFoo "frog">');
          entityDeclaration.parse(source, parsed, (result) => {
@@ -52,14 +65,14 @@ describe('entityDeclaration', () => {
          });
       });
 
-      xit('reports an error when external ID has no value (externalId.checkWellFormed())', (done) => {
+      it('reports an error when external ID has no value (externalId.checkWellFormed())', (done) => {
          source.addText('entityName SYSTEM >');
          entityDeclaration.parse(source, parsed, (result) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_OPEN_QUOTE);
             done();
          });
       });

@@ -6,7 +6,7 @@ import { Token as XmlToken } from './xmlToken.js';
 import {
    pushNonBottom,
    textOrBlank,
- } from './util.js';
+ } from './common/util.js';
 
 /**********************************************************************\
  The entityReference namespace has routines for processing general

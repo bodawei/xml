@@ -4,7 +4,7 @@ import { WellFormedError } from '../error';
 
 import {
    pushNonBottom,
-} from './util.js';
+} from './common/util.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\

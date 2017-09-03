@@ -4,14 +4,15 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
 import * as declaration from './declaration.js';
-import * as misc from './misc.js';
-import * as externalId from './externalId.js';
-import * as quotedValue from './quotedValue.js';
+import * as misc from './common/misc.js';
+import * as externalId from './common/externalId.js';
+import * as quotedValue from './common/quotedValue.js';
 import {
    pushNonBottom,
    textOrBlank,
+   textOrUndef,
    toLocalParsing,
-} from './util.js';
+} from './common/util.js';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -84,17 +85,9 @@ function parse(source, declarationParsing, deliverParsed) {
       source.extractToObject('word', [ '>', '"', '\'' ], parsed, 'name');
       source.extractToObject('space', parsed, 'postNameSpace');
 
-      source.extract('peekChar', (lToken) => {
-         if (!lToken) {
-            deliverParsed(parsed);
-            return;
-         }
-
-         if (lToken.text === '"' || lToken.text === '\'') {
-            quotedValue.parse(source, (result) => {
-               parsed.entityValue = result;
-               parseClose(source, parsed, 'postEntityValueSpace', deliverParsed);
-            });
+      quotedValue.parse('literal', source, parsed, (gotQuoted) => {
+         if (gotQuoted) {
+            parseClose(source, parsed, 'postEntityValueSpace', deliverParsed);
          } else {
             externalId.parse(source, [ '>' ], (externalId) => {
                parsed.externalId = externalId;
@@ -164,8 +157,8 @@ function checkWellFormed(parsed, ec, entityMetaData) {
          ec.check(!parsed.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
          misc.checkWellFormedText(parsed.nDataName, ec, entityMetaData);
       }
-   } else if (parsed.entityValue) {
-      quotedValue.checkWellFormed(parsed.entityValue, ec, entityMetaData);
+   } else if (parsed.literalValue) {
+      quotedValue.checkWellFormed('literal', parsed, ec, entityMetaData, WFEID.NOUN_ENTITYVALUE);
    } else {
       ec.setPos(undefined);
       ec.report(WFEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
@@ -184,7 +177,7 @@ function makeToken(parsed) {
    const entityClass = parsed.parameter ? ParameterEntityDeclaration : EntityDeclaration;
 
    return new entityClass(textOrBlank(parsed.name),
-      textOrBlank(parsed.entityValue ? parsed.entityValue.value : undefined),
+      textOrUndef(parsed.literalValue),
       {},
       textOrBlank(parsed.nDataName),
       getLTokens(parsed));
@@ -201,8 +194,8 @@ function getLTokens(parsed) {
    pushNonBottom(results, parsed.postParameterSpace);
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
-   quotedValue.getChunks(results, parsed.entityValue);
-   externalId.getLTokens(results, parsed.externalId);
+   quotedValue.appendLTokens('literal', results, parsed);
+   externalId.appendLTokens(results, parsed.externalId);
    pushNonBottom(results, parsed.postEntityValueSpace);
    pushNonBottom(results, parsed.postExternalIdSpace);
 

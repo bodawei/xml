@@ -210,6 +210,38 @@ describe('LTokenSource', () => {
 
          expect(version).toEqual(1.0);
       });
+
+      it('passes a version and parameters through a "peek"-like extractor', () => {
+         let version;
+         let params;
+         testExtractors = {
+            peek: {
+               extractorConstructor: function testExtractor() {
+                  this._infos = [];
+                  this.state = Extractor.STATE.SUCCESS;
+                  this.process = (segment) => { this._infos.push({ segment }); };
+                  this.finish = () => {
+                     return { segments: this._infos };
+                  };
+               },
+               params: {
+                  extractorConstructor: (theVersion, theParam) => {
+                     version = theVersion;
+                     params = theParam;
+                     return new ToXExtractor(version, params);
+                  },
+               },
+            },
+         };
+
+         source = new LTokenSource(testExtractors, entityMetaData1dot0);
+         source.addText('1');
+         source.extract('peek', [ 'toXParam' ], () => {});
+
+         expect(version).toEqual(1.0);
+         expect(params).toEqual([ 'toXParam' ]);
+      });
+
    });
 
    describe('addText()', () => {

@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { EntityLocation } from '../basic';
-import { LToken } from '../lToken';
-import { WellFormedError } from '../error';
+import { EntityLocation } from '../../basic';
+import { WellFormedError } from '../../error';
 
-import * as misc from './misc.js';
+import * as quotedValue from './quotedValue.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -22,6 +21,8 @@ import {
 const WFEID = WellFormedError.ID;
 const EXTERNAL_ID = 'EXTERNAL_ID';
 const ALLOWED_TYPES = [ 'PUBLIC', 'SYSTEM' ];
+const PUBLIC_PREFIX = 'public';
+const SYSTEM_PREFIX = 'system';
 const TYPE_TERMINATORS = [ '"', '\'' ];
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 
@@ -63,8 +64,8 @@ function parse(source, terminators, deliverParsed) {
       source.extractToObject('space', parsed, 'postIdTypeSpace');
 
       if (capitalType === 'PUBLIC') {
-         getQuotedLiteral(source, parsed, 'public', (success) => {
-            if (!success) {
+         quotedValue.parse(PUBLIC_PREFIX, source, parsed, (gotQuoted) => {
+            if (!gotQuoted) {
                deliverParsed(parsed);
                return;
             }
@@ -84,32 +85,8 @@ function getSystemIfAvailable(source, allTerminators, parsed, deliverParsed) {
          return;
       }
 
-      getQuotedLiteral(source, parsed, 'system', () => {
+      quotedValue.parse(SYSTEM_PREFIX, source, parsed, () => {
          deliverParsed(parsed);
-      });
-   });
-}
-
-function getQuotedLiteral(source, parsed, prefix, done) {
-   source.extract('peekChar', (quoteLToken) => {
-      if (!quoteLToken || (quoteLToken.text !== '"' && quoteLToken.text !== '\'')) {
-         done(false);
-         return;
-      }
-
-      source.extractToObject('char', parsed, prefix + 'OpenQuote');
-      source.extractToObject('all', [ quoteLToken.text ], parsed, prefix + 'Value');
-
-      source.extract('match', quoteLToken.text, (closeLToken) => {
-         if (!parsed[prefix + 'Value']) {
-            const newRange = quoteLToken.range[0].clone();
-            newRange.startIndex = newRange.endIndex;
-            newRange.startRow = newRange.endRow;
-            newRange.startColumn = newRange.endColumn;
-            parsed[prefix + 'Value'] = new LToken('', '', newRange);
-         }
-         parsed[prefix + 'CloseQuote'] = closeLToken;
-         done(textOrBlank(closeLToken) === quoteLToken.text);
       });
    });
 }
@@ -138,20 +115,11 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.check(!parsed.postIdTypeSpace, WFEID.EXTERNALID_IDTYPE_NO_SPACE);
 
    if (capitalType === 'PUBLIC') {
-      ec.setPos(parsed.publicOpenQuote);
-      ec.check(!parsed.publicOpenQuote, WFEID.EXTERNALID_PUBLIC_NO_OPEN_QUOTE);
-
-      ec.setPos(parsed.publicValue);
-      if (!parsed.publicValue) {
-         ec.report(WFEID.EXTERNALID_NO_PUBLIC);
-      } else {
+      quotedValue.checkWellFormed(PUBLIC_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
          const match = PUBID_CHARS.exec(parsed.publicValue.text);
          ec.check(!match || match[0] !== parsed.publicValue.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
                   [ parsed.publicValue.text[match[0].length] ]);
-      }
-
-      ec.setPos(parsed.publicCloseQuote);
-      ec.check(!parsed.publicCloseQuote, WFEID.EXTERNALID_PUBLIC_NO_CLOSE_QUOTE);
+      });
    }
 
    if (capitalType === 'SYSTEM' || parsed.systemOpenQuote || parsed.systemValue) {
@@ -160,15 +128,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
          ec.check(!parsed.postPublicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      ec.setPos(parsed.systemOpenQuote);
-      ec.check(!parsed.systemOpenQuote, WFEID.EXTERNALID_SYSTEM_NO_OPEN_QUOTE);
-
-      ec.setPos(parsed.systemValue);
-      ec.check(!parsed.systemValue, WFEID.EXTERNALID_NO_SYSTEM);
-      misc.checkWellFormedText(parsed.systemValue, ec, entityMetaData);
-
-      ec.setPos(parsed.systemCloseQuote);
-      ec.check(!parsed.systemCloseQuote, WFEID.EXTERNALID_SYSTEM_NO_CLOSE_QUOTE);
+      quotedValue.checkWellFormed(SYSTEM_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
 }
 
@@ -185,7 +145,7 @@ function makeTokenCompatible(parsed) {
    return new EntityLocation(textOrUndef(parsed.systemValue), textOrUndef(parsed.publicValue));
 }
 
-function getLTokens(results, parsed) {
+function appendLTokens(results, parsed) {
    if (!parsed) {
       return;
    }
@@ -193,21 +153,15 @@ function getLTokens(results, parsed) {
    pushNonBottom(results, parsed.idType);
    pushNonBottom(results, parsed.postIdTypeSpace);
 
-   pushNonBottom(results, parsed.publicOpenQuote);
-   pushNonBottom(results, parsed.publicValue);
-   pushNonBottom(results, parsed.publicCloseQuote);
-
+   quotedValue.appendLTokens(PUBLIC_PREFIX, results, parsed);
    pushNonBottom(results, parsed.postPublicSpace);
-
-   pushNonBottom(results, parsed.systemOpenQuote);
-   pushNonBottom(results, parsed.systemValue);
-   pushNonBottom(results, parsed.systemCloseQuote);
+   quotedValue.appendLTokens(SYSTEM_PREFIX, results, parsed);
 }
 
 export {
    EXTERNAL_ID as TYPE,
    parse,
-   getLTokens,
+   appendLTokens,
    checkWellFormed,
    makeTokenCompatible,
 };

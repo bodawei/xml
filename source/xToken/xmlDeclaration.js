@@ -2,13 +2,14 @@
 
 import { WellFormedError } from '../error';
 
-import * as misc from './misc.js';
+import * as misc from './common/misc.js';
 import {
    pushNonBottom,
    textOrBlank,
    textOrUndef,
-} from './util.js';
+} from './common/util.js';
 import * as pi from './processingInstruction.js';
+import * as quotedValue from './common/quotedValue.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\
@@ -99,13 +100,8 @@ function addParam(source, params, name, deliverResults) {
    source.extractToObject('space', param, 'postNameSpace');
    source.extractToObject('match', '=', param, 'equal');
    source.extractToObject('space', param, 'postEqualSpace');
-   source.extract('peekChar', (quote) => {
-      const gotQuote = quote && (quote.text === '"' || quote.text === '\'');
-
-      if (gotQuote) {
-         source.extractToObject('char', param, 'openQuote');
-         source.extractToObject('all', [ quote.text ], param, 'value');
-         source.extractToObject('match', quote.text, param, 'closeQuote');
+   quotedValue.parse('param', source, param, (gotQuoted) => {
+      if (gotQuoted) {
          source.extractToObject('space', param, 'trailingSpace');
       }
 
@@ -172,32 +168,25 @@ function checkWellFormed(parsed, ec, entityMetaData) {
       ec.setPos(param.equal);
       ec.check(!param.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
       ec.setPos(param.postEqualSpace);
-      ec.setPos(param.openQuote);
-      ec.check(!param.openQuote, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
 
-      ec.setPos(param.value);
-      const valueText = textOrBlank(param.value);
-      const lcValue = valueText.toLocaleLowerCase();
-      ec.check(!param.value, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-      misc.checkWellFormedText(param.value, ec, entityMetaData);
+      quotedValue.checkWellFormed('param', param, ec, entityMetaData, WFEID.NOUN_XMLDECL_PARAM, () => {
+         const valueText = textOrBlank(param.paramValue);
+         const lcValue = valueText.toLocaleLowerCase();
+         misc.checkWellFormedText(param.paramValue, ec, entityMetaData);
 
-      switch (lcName) {
-         case 'version':
-            ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
-            break;
-         case 'encoding':
-            if (valueText) {
+         switch (lcName) {
+            case 'version':
+               ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
+               break;
+            case 'encoding':
                ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
-            }
-            break;
-         case 'standalone':
-            ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
-            ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
-            break;
-      }
-
-      ec.setPos(param.closeQuote);
-      ec.check(!param.closeQuote, WFEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ nameText ]);
+               break;
+            case 'standalone':
+               ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
+               ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
+               break;
+         }
+      });
    }
 
    ec.setPos(parsed.close);
@@ -227,7 +216,7 @@ function extractParams(parsed) {
 
       params.push({
          name: textOrBlank(param.name),
-         value: textOrUndef(param.value),
+         value: textOrUndef(param.paramValue),
       });
    }
 
@@ -249,9 +238,7 @@ function getChunks(parsed) {
       pushNonBottom(results, param.postNameSpace);
       pushNonBottom(results, param.equal);
       pushNonBottom(results, param.postEqualSpace);
-      pushNonBottom(results, param.openQuote);
-      pushNonBottom(results, param.value);
-      pushNonBottom(results, param.closeQuote);
+      quotedValue.appendLTokens('param', results, param);
       pushNonBottom(results, param.trailingSpace);
    }
    pushNonBottom(results, parsed.close);

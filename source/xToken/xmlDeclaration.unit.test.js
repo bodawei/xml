@@ -6,8 +6,9 @@ import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
-import * as misc from './misc.js';
+import * as misc from './common/misc.js';
 import * as pi from './processingInstruction.js';
+import * as quotedValue from './common/quotedValue.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 describe('xmlDeclaration', () => {
@@ -18,15 +19,17 @@ describe('xmlDeclaration', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
+         spyOn(quotedValue, 'parse');
+         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
       });
 
       it('gathers no value if thee is no quote after the equal sign', () => {
+         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             'version',
             ' ',
             '=',
             ' ',
-            undefined,
             undefined,
             '?>',
          ]);
@@ -51,16 +54,17 @@ describe('xmlDeclaration', () => {
          });
       });
 
-      it('gathers a value if the value is in single quotes', () => {
+      it('gathers multiple parameters', () => {
          mockSource = new MockLTokenSource([
             'version',
-            ' ',
+            undefined,
             '=',
             undefined,
-            MockLTokenSource.PEEK('\''),
-            '\'',
-            '1.3',
-            '\'',
+            undefined,  // trailingSpace
+            'encoding',
+            undefined,
+            '=',
+            undefined,
             undefined,
             undefined,
             '?>',
@@ -71,14 +75,22 @@ describe('xmlDeclaration', () => {
 
          const expectedLToken = makeLTokenMaker();
          expect(callback).toContainParsedProps({
+            type: 'XMLDECL',
+            open: undefined,
+            postOpenSpace: undefined,
+            target: undefined,
+            postTargetSpace: undefined,
             params: [ {
                name: expectedLToken('version'),
-               postNameSpace: expectedLToken(' '),
+               postNameSpace: undefined,
                equal: expectedLToken('='),
                postEqualSpace: undefined,
-               openQuote: expectedLToken('\''),
-               value: expectedLToken('1.3'),
-               closeQuote: expectedLToken('\''),
+               trailingSpace: undefined,
+            }, {
+               name: expectedLToken('encoding'),
+               postNameSpace: undefined,
+               equal: expectedLToken('='),
+               postEqualSpace: undefined,
                trailingSpace: undefined,
             } ],
             close: expectedLToken('?>'),
@@ -103,28 +115,46 @@ describe('xmlDeclaration', () => {
             params: [ {
                name: makeToken('version'),
                equal: makeToken('='),
-               openQuote: makeToken('"'),
-               value: makeToken('1.1'),
-               closeQuote: makeToken('"'),
+               paramOpenQuote: makeToken('"'),
+               paramValue: makeToken('1.1'),
+               paramCloseQuote: makeToken('"'),
                trailingSpace: makeToken(' '),
             }, {
                name: makeToken('encoding'),
                equal: makeToken('='),
-               openQuote: makeToken('"'),
-               value: makeToken('ascii'),
-               closeQuote: makeToken('"'),
+               paramOpenQuote: makeToken('"'),
+               paramValue: makeToken('ascii'),
+               paramCloseQuote: makeToken('"'),
                trailingSpace: makeToken(' '),
             }, {
                name: makeToken('standalone'),
                equal: makeToken('='),
-               openQuote: makeToken('"'),
-               value: makeToken('yes'),
-               closeQuote: makeToken('"'),
+               paramOpenQuote: makeToken('"'),
+               paramValue: makeToken('yes'),
+               paramCloseQuote: makeToken('"'),
                trailingSpace: makeToken(' '),
             } ],
             close: makeToken('?>'),
          };
          spyOn(pi, 'checkWellFormed');
+         spyOn(quotedValue, 'checkWellFormed');
+         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, cb) => {
+            cb();
+         });
+      });
+
+      it('asks the quotedValue module to look for problems in the declaration part', () => {
+         const emd = new EntityMetaData();
+
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         const params = quotedValue.checkWellFormed.calls.argsFor(0);
+         expect(params[0]).toEqual('param');
+         expect(params[1]).toEqual(parsed.params[0]);
+         expect(params[2]).toEqual(mockErrorCollector);
+         expect(params[3]).toEqual(emd);
+         expect(params[4]).toEqual(WellFormedError.ID.NOUN_XMLDECL_PARAM);
+         expect(params[5] instanceof Function).toEqual(true);
       });
 
       it('calls the validation from processing instruction', () => {
@@ -205,19 +235,6 @@ describe('xmlDeclaration', () => {
          });
       });
 
-      it('reports an error if encoding has no value', () => {
-         parsed.params[1].value = undefined;
-
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTRIBUTE_NO_VALUE,
-            params: [ 'encoding' ],
-            position: undefined,
-            lastPosition: parsed.params[1].openQuote,
-         });
-      });
-
       it('reports an error if a standalone is in the wrong order', () => {
          const temp = parsed.params[2];
          parsed.params.splice(2, 1);
@@ -282,96 +299,60 @@ describe('xmlDeclaration', () => {
          });
       });
 
-      it('reports an error if there is no opening quote found', () => {
-         delete parsed.params[0].openQuote;
-
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTRIBUTE_NO_QUOTE,
-            params: [ 'version' ],
-            lastPosition: parsed.params[0].equal,
-         });
-      });
-
-      it('reports an error if there is no value found', () => {
-         delete parsed.params[0].value;
-
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTRIBUTE_NO_VALUE,
-            params: [ 'version' ],
-            lastPosition: parsed.params[0].openQuote,
-         });
-      });
-
       it('calls misc.checkWellFormedText() with the value of each token', () => {
          spyOn(misc, 'checkWellFormedText');
          const emd = new EntityMetaData();
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.params[1].value, mockErrorCollector, emd);
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.params[1].paramValue, mockErrorCollector, emd);
       });
 
       it('reports an error if the version is not a legal value', () => {
-         parsed.params[0].value.text = '1.2';
+         parsed.params[0].paramValue.text = '1.2';
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
             params: [ '1.2' ],
-            position: parsed.params[0].value,
+            lastPosition: parsed.params[0].equal,  // not right due to mocking
          });
       });
 
       it('reports an error if the encoding is not a legal value', () => {
-         parsed.params[1].value.text = '$$BAD_ENCODING$$';
+         parsed.params[1].paramValue.text = '$$BAD_ENCODING$$';
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
             params: [ '$$BAD_ENCODING$$' ],
-            position: parsed.params[1].value,
+            lastPosition: parsed.params[1].equal,  // not right due to mocking
          });
       });
 
       it('reports an error if the standalone is neither "yes" or "no"', () => {
-         parsed.params[2].value.text = 'Maybe';
+         parsed.params[2].paramValue.text = 'Maybe';
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
             params: [ 'Maybe' ],
-            position: parsed.params[2].value,
+            lastPosition: parsed.params[2].equal,  // not right due to mocking
          });
       });
 
       it('reports an error if the standalone is not all lower case', () => {
-         parsed.params[2].value.text = 'Yes';
+         parsed.params[2].paramValue.text = 'Yes';
 
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
             params: [ 'yes', 'Yes' ],
-            position: parsed.params[2].value,
-         });
-      });
-
-      it('reports an error if there is no close quote found', () => {
-         delete parsed.params[0].closeQuote;
-
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTRIBUTE_NO_CLOSE_QUOTE,
-            params: [ 'version' ],
-            lastPosition: parsed.params[0].value,
+            lastPosition: parsed.params[2].equal,  // not right due to mocking
          });
       });
 
@@ -433,13 +414,28 @@ describe('xmlDeclaration', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
             params: undefined,
-            lastPosition: parsed.params[2].closeQuote,
+            lastPosition: parsed.params[2].equal, // not quite right, due to mocking
          });
       });
 
    });
 
    describe('makeToken()', () => {
+
+      beforeEach(() => {
+         spyOn(quotedValue, 'appendLTokens');
+      });
+
+      it('asks the quotedValue module to provide LTokens', () => {
+         const parsed = {
+            params: [ {
+            } ],
+         };
+
+         const token = xmlDeclaration.makeToken(parsed);
+
+         expect(quotedValue.appendLTokens).toHaveBeenCalledWith('param', token.lTokens, parsed.params[0]);
+      });
 
       it('returns an entity reference token with the entity name', () => {
          const makeToken = makeLTokenMaker();
@@ -449,7 +445,7 @@ describe('xmlDeclaration', () => {
                postNameSpace: makeToken(' '),
                equal: makeToken('='),
                postEqualSpace: makeToken(' '),
-               value: makeToken('1.1'),
+               paramValue: makeToken('1.1'),
             } ],
          };
 
@@ -463,7 +459,6 @@ describe('xmlDeclaration', () => {
             parsed.params[0].postNameSpace,
             parsed.params[0].equal,
             parsed.params[0].postEqualSpace,
-            parsed.params[0].value,
          ]));
       });
 
