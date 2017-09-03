@@ -9,6 +9,7 @@ import {
 } from './util.js';
 import { Token as XmlToken } from './xmlToken.js';
 import * as externalId from './externalId.js';
+import * as declaration from './declaration.js';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
@@ -83,7 +84,8 @@ function parse(source, declarationParsing, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
-   // check errors on declaration part
+   declaration.checkWellFormed(parsed, ec);
+
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, version, revision);
@@ -101,10 +103,10 @@ function makeToken(parsed) {
    return new DocTypeStart(textOrBlank(parsed.name),
       externalId.makeTokenCompatible(parsed.externalId),
       !!parsed.startInternalSubset,
-      getChunks(parsed));
+      getLTokens(parsed));
 }
 
-function getChunks(parsed) {
+function getLTokens(parsed) {
    const results = [];
 
    pushNonBottom(results, parsed.open);
@@ -114,7 +116,7 @@ function getChunks(parsed) {
 
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
-   externalId.getChunks(results, parsed.externalId);
+   externalId.getLTokens(results, parsed.externalId);
    pushNonBottom(results, parsed.postExternalIdSpace);
 
    pushNonBottom(results, parsed.postPublicSpace);

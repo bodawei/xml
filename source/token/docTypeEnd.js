@@ -53,15 +53,13 @@ function parse(source, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, startParsed, ec) {
-   ec.setPos(startParsed.declType);
-   ec.setPos(startParsed.postDeclTypeSpace);
-   ec.setPos(startParsed.name);
    ec.setPos(parsed.closeInternalSubset);
 
    if (!startParsed.startInternalSubset) {
       ec.check(parsed.closeInternalSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 
+   // If there is no close, and no closeInternalSubset, this won't get a very good position.
    ec.setPos(parsed.close);
    ec.check(!parsed.close, WFEID.DOCTYPE_NO_CLOSE);
 

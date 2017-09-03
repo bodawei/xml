@@ -123,7 +123,7 @@ describe('declaration', () => {
          });
       });
 
-      it('reports an error if the type is not capitalized', () => {
+      it('reports an error if the type is not a valid type', () => {
          parsed.declType.text = 'BOGUSTYPE';
 
          declaration.checkWellFormed(parsed, mockErrorCollector);

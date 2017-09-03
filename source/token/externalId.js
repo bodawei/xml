@@ -182,7 +182,7 @@ function makeTokenCompatible(parsed) {
    return new EntityLocation(textOrUndef(parsed.systemValue), textOrUndef(parsed.publicValue));
 }
 
-function getChunks(results, parsed) {
+function getLTokens(results, parsed) {
    if (!parsed) {
       return;
    }
@@ -204,7 +204,7 @@ function getChunks(results, parsed) {
 export {
    EXTERNAL_ID as TYPE,
    parse,
-   getChunks,
+   getLTokens,
    checkWellFormed,
    makeTokenCompatible,
 };

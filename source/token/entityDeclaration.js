@@ -186,10 +186,10 @@ function makeToken(parsed) {
       textOrBlank(parsed.entityValue ? parsed.entityValue.value : undefined),
       {},
       textOrBlank(parsed.nDataName),
-      getChunks(parsed));
+      getLTokens(parsed));
 }
 
-function getChunks(parsed) {
+function getLTokens(parsed) {
    const results = [];
 
    pushNonBottom(results, parsed.open);
@@ -201,7 +201,7 @@ function getChunks(parsed) {
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
    quotedValue.getChunks(results, parsed.entityValue);
-   externalId.getChunks(results, parsed.externalId);
+   externalId.getLTokens(results, parsed.externalId);
    pushNonBottom(results, parsed.postEntityValueSpace);
    pushNonBottom(results, parsed.postExternalIdSpace);
 

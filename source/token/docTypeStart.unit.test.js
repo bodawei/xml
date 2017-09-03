@@ -6,6 +6,7 @@ import { MockErrorCollector } from '../basic/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
+import * as declaration from './declaration.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as externalId from './externalId.js';
 
@@ -14,11 +15,9 @@ describe('docTypeStart', () => {
    describe('parse()', () => {
       let mockSource;
       let callback;
-      let sourceLToken;
       let expectedLToken;
 
       beforeEach(() => {
-         sourceLToken = makeLTokenMaker();
          expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
          spyOn(externalId, 'parse').and.callFake((ignored1, ignored2, cb) => {
@@ -72,6 +71,7 @@ describe('docTypeStart', () => {
       });
 
       it('returns all values', () => {
+         const sourceLToken = makeLTokenMaker();
          const declStart = {
             open: sourceLToken('<!'),
             postOpenSpace: sourceLToken(' '),
@@ -125,6 +125,14 @@ describe('docTypeStart', () => {
          expect(errors).toEqual(mockErrorCollector);
       });
 
+      it('reports an error if the declaration portion has a problem', () => {
+         spyOn(declaration, 'checkWellFormed');
+
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
+
+         expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector);
+      });
+
       it('reports an error if there is no elment name', () => {
          parsed.name = undefined;
 
@@ -170,15 +178,36 @@ describe('docTypeStart', () => {
 
    describe('makeToken()', () => {
 
-      it('returns a token with the name found in the parsing', () => {
-         const sourceLToken = makeLTokenMaker();
+      it('returns a token with the expected fields defined', () => {
+         spyOn(externalId, 'getLTokens');
+         spyOn(externalId, 'makeTokenCompatible');
+         const expectedLToken = makeLTokenMaker();
          const parsed = {
-            name: sourceLToken('elementName'),
+            type: 'DOCTYPE_START',
+            open: expectedLToken('<!'),
+            postOpenSpace: expectedLToken(' '),
+            declType: expectedLToken('DOCTYPE'),
+            postDeclTypeSpace: expectedLToken('\t'),
+            name: expectedLToken('elemType'),
+            postNameSpace: expectedLToken('  '),
+            postExternalIdSpace: expectedLToken('\t'),
+            startInternalSubset: expectedLToken('['),
          };
 
          const token = docTypeStart.makeToken(parsed);
 
-         expect(token.name).toEqual('elementName');
+         expect(externalId.getLTokens).toHaveBeenCalled();
+         expect(externalId.makeTokenCompatible).toHaveBeenCalled();
+         expect(token).toEqual(new docTypeStart.Token('elemType', undefined, true, [
+            parsed.open,
+            parsed.postOpenSpace,
+            parsed.declType,
+            parsed.postDeclTypeSpace,
+            parsed.name,
+            parsed.postNameSpace,
+            parsed.postExternalIdSpace,
+            parsed.startInternalSubset,
+         ]));
       });
 
       it('returns a token with an empty string if no name was found', () => {
