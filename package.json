@@ -27,9 +27,9 @@
       "grunt-karma": "2.0.0",
       "iconv-lite": "0.4.17",
       "isparta": "4.0.0",
-      "jasmine": "2.6.0",
+      "jasmine": "2.7.0",
       "jit-grunt": "0.10.0",
-      "karma": "1.7.0",
+      "karma": "^1.7.0",
       "karma-babel-preprocessor": "6.0.1",
       "karma-brave-launcher": "git+https://github.com/bodawei/contrib-karma-brave-launcher.git",
       "karma-browserify": "5.1.1",
@@ -52,11 +52,35 @@
       "text-table-formatter": "0.1.0"
    },
    "dependencies": {
+      "babel-plugin-istanbul": "^4.1.4",
       "gulp": "^3.9.1",
       "gulp-cli": "^1.4.0",
       "gulp-jasmine": "^2.4.2",
       "npm": "^3.10.10",
+      "nyc": "^11.1.0",
       "xclap": "^0.2.9",
       "xclap-cli": "^0.1.2"
+   },
+   "nyc": {
+      "require": [
+         "babel-register"
+      ],
+      "sourceMap": false,
+      "instrument": false
+   },
+   "babel": {
+      "presets": [
+         "es2015"
+      ],
+      "env": {
+         "test": {
+            "plugins": [
+               "istanbul"
+            ]
+         }
+      }
+   },
+   "scripts": {
+      "test": "nyc --reporter=lcov --reporter=text  jasmine"
    }
 }

@@ -18,7 +18,9 @@ describe('externalId', () => {
       beforeEach(() => {
          expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
+      });
 
+      it('returns simple values', () => {
          mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK,
             'PUBLIC',
@@ -34,13 +36,10 @@ describe('externalId', () => {
             'sys.xml',
             '"',
          ]);
-      });
-
-      it('returns simple values', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
@@ -51,7 +50,7 @@ describe('externalId', () => {
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),
-         });
+         } ] ]);
       });
 
       it('accepts single quotes', () => {
@@ -74,7 +73,7 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
@@ -85,7 +84,7 @@ describe('externalId', () => {
             systemOpenQuote: expectedLToken('\''),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('\''),
-         });
+         } ] ]);
       });
 
       it('only finds a SystemLiteral if that is all that is offered', () => {
@@ -103,14 +102,14 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('SYSTEM'),
             postTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),
-         });
+         } ] ]);
       });
 
       it('returns a zero length lToken if there is no value between quotes', () => {
@@ -128,14 +127,14 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('SYSTEM'),
             postTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken(''),
             systemCloseQuote: expectedLToken('"'),
-         });
+         } ] ]);
       });
 
       it('returns nothing if it gets nothing back on first call', () => {
@@ -176,7 +175,7 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
@@ -184,7 +183,7 @@ describe('externalId', () => {
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
             postPublicSpace: expectedLToken(' '),
-         });
+         } ] ]);
       });
 
       it('does not mind if public or ndata are the wrong case', () => {
@@ -203,7 +202,7 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('pUbLiC'),
             postTypeSpace: expectedLToken(' '),
@@ -211,7 +210,7 @@ describe('externalId', () => {
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: expectedLToken('"'),
             postPublicSpace: expectedLToken(' '),
-         });
+         } ] ]);
       });
 
       it('stops if it does not find an open quote', () => {
@@ -225,11 +224,11 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
-         });
+         } ] ]);
       });
 
       it('stops if it does not find the body value', () => {
@@ -246,14 +245,14 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken(''),
             publicCloseQuote: undefined,
-         });
+         } ] ]);
       });
 
       it('stops if it does not the closing quote', () => {
@@ -270,14 +269,14 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
             publicValue: expectedLToken('pub.xml'),
             publicCloseQuote: undefined,
-         });
+         } ] ]);
       });
 
       it('does not mind if, illegally, no space PUBLIC and PublicLiteral', () => {
@@ -300,7 +299,7 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: undefined,
@@ -311,7 +310,7 @@ describe('externalId', () => {
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),
-         });
+         } ] ]);
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
@@ -334,7 +333,7 @@ describe('externalId', () => {
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toHaveBeenCalledWith({
+         expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'EXTERNAL_ID',
             idType: expectedLToken('PUBLIC'),
             postTypeSpace: expectedLToken(' '),
@@ -345,7 +344,7 @@ describe('externalId', () => {
             systemOpenQuote: expectedLToken('"'),
             systemValue: expectedLToken('sys.xml'),
             systemCloseQuote: expectedLToken('"'),
-         });
+         } ] ]);
       });
 
       // White box: Not testing the same cases for missing parts of the system value as this is the same code
