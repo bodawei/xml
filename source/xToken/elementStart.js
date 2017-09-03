@@ -1,11 +1,10 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import { WellFormedError, XmlWarning } from '../error';
 
 import {
    pushNonBottom,
    textOrBlank,
-   toLocalParsing,
 } from './common/util.js';
 import * as misc from './common/misc.js';
 import { Token as XmlToken } from './xmlToken.js';

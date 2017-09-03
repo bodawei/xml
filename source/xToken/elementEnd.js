@@ -1,0 +1,109 @@
+/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+
+import { WellFormedError, XmlWarning } from '../error';
+
+import {
+   pushNonBottom,
+   textOrBlank,
+} from './common/util.js';
+import * as misc from './common/misc.js';
+import { Token as XmlToken } from './xmlToken.js';
+
+const WFEID = WellFormedError.ID;
+const WARN = XmlWarning.ID;
+const ELEMENT_END = 'ELEMENT_END';
+
+/**********************************************************************\
+ The elementStart namespace contains the usual tools for processing
+ an element start tag.
+\**********************************************************************/
+
+class ElementEnd extends XmlToken {
+
+   constructor(name, lTokens) {
+      super(lTokens);
+
+      this.name = name;
+   }
+
+}
+
+/**********************************************************************\
+ parse() extracts the pieces of an element end tag.
+
+ This assumes that the "</" has already been parsed and has been passed
+ as an argument to this
+
+ PARAM
+ source: A LTokenSource to read from
+ open: the LToken corresponding to the opening </
+ deliverParsed: Callback to deliver the parsed LTokens
+
+ SYNTAX
+   [42] ETag ::= '</' Name S? '>'
+\**********************************************************************/
+
+function parse(source, open, deliverParsed) {
+   const parsed = {
+      type: ELEMENT_END,
+      open,
+   };
+
+   source.extractToObject('space', parsed, 'postOpenSpace');
+   source.extractToObject('word', [ '>' ], parsed, 'name');
+   source.extractToObject('space', parsed, 'postNameSpace');
+
+   source.extract('match', '>', (lToken) => {
+      parsed.close = lToken;
+      deliverParsed(parsed);
+   });
+}
+
+/**********************************************************************\
+ checkWellFormed() does check on validity
+\**********************************************************************/
+
+function checkWellFormed(parsed, ec, entityMetaData) {
+   ec.setPos(parsed.postOpenSpace);
+   ec.check(parsed.postOpenSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
+
+   ec.setPos(parsed.name);
+   ec.check(!parsed.name, WFEID.ELEMENT_NO_NAME);
+   ec.checkName(parsed.name, WFEID.ELEMENT_NAME_INVALID, entityMetaData);
+   misc.checkWellFormedNameRecommendation(parsed.name, ec, entityMetaData,
+      WARN.ELEMENT_NAME_XMLDASH_RESERVED,
+      WARN.ELEMENT_NAME_XML_RESERVED);
+
+   ec.setPos(parsed.postNameSpace);
+
+   ec.setPos(parsed.close);
+   ec.check(!parsed.close, WFEID.ELEMENT_NO_CLOSE);
+}
+
+/**********************************************************************\
+ makeToken() converts a parsed into a token.
+\**********************************************************************/
+
+function makeToken(parsed) {
+   return new ElementEnd(textOrBlank(parsed.name), getLTokens(parsed));
+}
+
+function getLTokens(parsed) {
+   const results = [];
+
+   pushNonBottom(results, parsed.open);
+   pushNonBottom(results, parsed.postOpenSpace);
+   pushNonBottom(results, parsed.name);
+   pushNonBottom(results, parsed.postNameSpace);
+   pushNonBottom(results, parsed.close);
+
+   return results;
+}
+
+export {
+   ELEMENT_END as TYPE,
+   ElementEnd as Token,
+   parse,
+   checkWellFormed,
+   makeToken,
+};

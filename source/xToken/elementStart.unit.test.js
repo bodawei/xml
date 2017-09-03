@@ -132,7 +132,7 @@ describe('elementStart', () => {
       });
 
       it('checks whether the name is valid', () => {
-         parsed.name.text='$badName';
+         parsed.name.text = '$badName';
 
          elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
 

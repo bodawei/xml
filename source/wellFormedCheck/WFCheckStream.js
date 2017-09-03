@@ -10,6 +10,7 @@ import {
    docTypeEnd,
    docTypeStart,
    elementStart,
+   elementEnd,
    entityDeclaration,
    xmlDeclaration,
 } from '../xToken';
@@ -32,6 +33,7 @@ class WFChecker extends stream.Transform {
       });
       this._metaData = new EntityMetaData();
       this._state = STATE.START;
+      this._elementNameStack = [];
    }
 
    _transform(parsed, _, done) {
@@ -97,6 +99,8 @@ class WFChecker extends stream.Transform {
             break;
          case elementStart.TYPE:
             const nameText = parsed.name ? parsed.name.text : '';
+            this._elementNameStack.push(nameText);
+
             if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
                this._state = STATE.IN_CONTENT;
             } else if (this._state === STATE.IN_DTD) {
@@ -106,6 +110,24 @@ class WFChecker extends stream.Transform {
             }
 
             elementStart.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case elementEnd.TYPE:
+            const endNameText = parsed.name ? parsed.name.text : '';
+            const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
+
+            if (lastElement === endNameText) {
+               this._elementNameStack.pop();
+            } else {
+               errorCollector.report(WellFormedError.ID.ELEMENT_UNBALANCED, [ lastElement || '', endNameText ]);
+            }
+
+            if (this._state === STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT, [ endNameText ]);
+            } else if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ endNameText ]);
+            }
+
+            elementEnd.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

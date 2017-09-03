@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ErrorCollector, EntityMetaData } from '../basic';
+import { ErrorCollector, EntityLocation, EntityMetaData, Offset } from '../basic';
 import { WellFormedError } from '../error';
 
 import { makeLToken } from '../lToken/test';
@@ -9,6 +9,7 @@ import {
    declaration,
    docTypeEnd,
    docTypeStart,
+   elementEnd,
    elementStart,
    entityDeclaration,
    xmlDeclaration,
@@ -168,51 +169,162 @@ describe('WFCheckStream (unit)', () => {
          expect(args[2]).toEqual(metaData);
       });
 
-      it('changes the state to be in content if in PROLOG state', () => {
-         checker._state = 'PROLOG';
-         checker.write(parsed);
+      describe('state checking', () => {
 
-         expect(checker._state).toEqual('IN_CONTENT');
+         it('changes the state to be in content if in PROLOG state', () => {
+            checker._state = 'PROLOG';
+            checker.write(parsed);
+
+            expect(checker._state).toEqual('IN_CONTENT');
+         });
+
+         it('changes the state to be in content if in PROLOG_PREDOCTYPE state', () => {
+            checker._state = 'PROLOG_PREDOCTYPE';
+            checker.write(parsed);
+
+            expect(checker._state).toEqual('IN_CONTENT');
+         });
+
+         it('reports an error if in the DTD', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT);
+         });
+
+         it('reports an error if in some other state', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
+         });
+
+         it('reports no error if in content', () => {
+            checker._state = 'IN_CONTENT';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.count()).toEqual(1);
+         });
+
+         it('errors include the element name if present', () => {
+            parsed.name = makeLToken('bogusName');
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].message).toContain('bogusName');
+         });
+
       });
 
-      it('changes the state to be in content if in PROLOG_PREDOCTYPE state', () => {
-         checker._state = 'PROLOG_PREDOCTYPE';
-         checker.write(parsed);
+   });
 
-         expect(checker._state).toEqual('IN_CONTENT');
+   describe('elementEnd', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(elementEnd, 'checkWellFormed');
+         parsed = {
+            type: elementEnd.TYPE,
+            open: makeLToken('</'),
+         };
       });
 
-      it('reports an error if in the DTD', () => {
-         checker._state = 'IN_DTD';
-         spyOn(checker, 'push');
+      it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
+         checker.write(metaData);
          checker.write(parsed);
 
-         expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT);
+         const args = elementEnd.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
       });
 
-      it('reports an error if in some other state', () => {
-         checker._state = 'START';
-         spyOn(checker, 'push');
-         checker.write(parsed);
+      describe('state checking', () => {
 
-         expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
-      });
+         beforeEach(() => {
+            checker.write(metaData);
+            checker.write({
+               type: elementStart.TYPE,
+               open: makeLToken('<'),
+            });
+         });
 
-      it('reports no error if in content', () => {
-         checker._state = 'IN_CONTENT';
-         spyOn(checker, 'push');
-         checker.write(parsed);
+         it('reports an error if in the DTD', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+            checker.write(parsed);
 
-         expect(checker.push.calls.count()).toEqual(1);
-      });
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT);
+         });
 
-      it('errors include the element name if present', () => {
-         parsed.name = makeLToken('bogusName')
-         checker._state = 'START';
-         spyOn(checker, 'push');
-         checker.write(parsed);
+         it('reports an error if in some other state', () => {
+            checker._state = 'PROLOG';
+            spyOn(checker, 'push');
+            checker.write(parsed);
 
-         expect(checker.push.calls.argsFor(0)[0].message).toContain('bogusName')
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
+         });
+
+         it('reports no error if in content', () => {
+            checker._state = 'IN_CONTENT';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.count()).toEqual(1);
+         });
+
+         it('errors include the element name if present', () => {
+            parsed.name = makeLToken('bogusName');
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].message).toContain('bogusName');
+         });
+
+         describe('tag balance', () => {
+
+            beforeEach(() => {
+               checker._state = 'PROLOG_PREDOCTYPE';
+               checker.write({
+                  type: elementStart.TYPE,
+                  open: makeLToken('<'),
+                  name: makeLToken('one'),
+               });
+            });
+
+            it('reports an error if trying to close an element that was not opened', () => {
+               parsed.name = makeLToken('two');
+               spyOn(checker, 'push');
+               checker.write(parsed);
+
+               expect(checker.push.calls.argsFor(0)[0])
+                  .toEqual(new WellFormedError(WellFormedError.ID.ELEMENT_UNBALANCED, [ 'one', 'two' ],
+                     new Offset(new EntityLocation(), 0, 0, 0),
+                     new Offset(new EntityLocation(), 0, 0, 0)));
+            });
+
+            it('reports no error if child is closed and then parent closed', () => {
+               checker.write({
+                  type: elementStart.TYPE,
+                  open: makeLToken('<'),
+                  name: makeLToken('two'),
+               });
+               parsed.name = makeLToken('two');
+               checker.write(parsed);
+               spyOn(checker, 'push');
+               parsed.name = makeLToken('one');
+               checker.write(parsed);
+
+               expect(checker.push.calls.count()).toEqual(1);  // for the parsed itself
+            });
+
+         });
+
       });
 
    });

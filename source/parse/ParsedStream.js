@@ -6,10 +6,11 @@ import { EntityMetaData } from '../basic';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import {
    declaration,
-   processingInstruction,
    docTypeStart,
    docTypeEnd,
    elementStart,
+   elementEnd,
+   processingInstruction,
 } from '../xToken';
 
 class ParsedStream extends stream.Readable {
@@ -66,6 +67,8 @@ class ParsedStream extends stream.Readable {
          switch (markupStartLToken.text) {
             case '<':
                return elementStart.parse(this._lTokenSource, markupStartLToken, deliverParse);
+            case '</':
+               return elementEnd.parse(this._lTokenSource, markupStartLToken, deliverParse);
             case '<?':
                return processingInstruction.parse(this._lTokenSource, markupStartLToken, deliverParse);
             case '<!':

@@ -2,6 +2,10 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
+import {
+   elementEnd,
+   elementStart,
+} from '../xToken';
 
 import ParsedStream from './ParsedStream.js';
 
@@ -32,6 +36,32 @@ describe('ParsedStream (unit)', () => {
          parser.read();
 
          expect(parser._parseClose).not.toHaveBeenCalled();
+      });
+
+   });
+
+   describe('element start', () => {
+
+      it('calls elementStart.parse()', () => {
+         spyOn(elementStart, 'parse');
+         parser.addText('<foo>');
+         parser.endText();
+         parser.read();
+
+         expect(elementStart.parse).toHaveBeenCalled();
+      });
+
+   });
+
+   describe('element end', () => {
+
+      it('calls elementEnd.parse()', () => {
+         spyOn(elementEnd, 'parse');
+         parser.addText('</foo>');
+         parser.endText();
+         parser.read();
+
+         expect(elementEnd.parse).toHaveBeenCalled();
       });
 
    });

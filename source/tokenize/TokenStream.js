@@ -8,6 +8,7 @@ import {
    docTypeStart,
    docTypeEnd,
    xmlDeclaration,
+   elementEnd,
    elementStart,
    entityDeclaration,
 } from '../xToken';
@@ -25,8 +26,8 @@ class TokenStream extends stream.Transform {
          case EntityMetaData.TYPE:
             this.push(parsed);
             break;
-         case xmlDeclaration.TYPE:
-            this.push(xmlDeclaration.makeToken(parsed));
+         case declaration.TYPE:
+            this.push(declaration.makeToken(parsed));
             break;
          case docTypeStart.TYPE:
             this.push(docTypeStart.makeToken(parsed));
@@ -37,11 +38,14 @@ class TokenStream extends stream.Transform {
          case entityDeclaration.TYPE:
             this.push(entityDeclaration.makeToken(parsed));
             break;
-         case declaration.TYPE:
-            this.push(declaration.makeToken(parsed));
+         case elementEnd.TYPE:
+            this.push(elementEnd.makeToken(parsed));
             break;
          case elementStart.TYPE:
             this.push(elementStart.makeToken(parsed));
+            break;
+         case xmlDeclaration.TYPE:
+            this.push(xmlDeclaration.makeToken(parsed));
             break;
          default:
             this.push(new Error(`Unknown parsed type "${parsed.type}" encountered.`));

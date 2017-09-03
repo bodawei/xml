@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import {
+   elementEnd,
    elementStart,
 } from '../xToken';
 
@@ -30,6 +31,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(elementStart.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls elementEnd.makeToken()', () => {
+      spyOn(elementEnd, 'makeToken');
+      const parsed = { type: elementEnd.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(elementEnd.makeToken).toHaveBeenCalledWith(parsed);
    });
 
 });
