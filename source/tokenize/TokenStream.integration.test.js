@@ -9,6 +9,7 @@ import {
    docTypeStart,
    docTypeEnd,
    entityDeclaration,
+   elementStart,
    xmlDeclaration,
 } from '../xToken';
 
@@ -113,6 +114,22 @@ describe('TokenStream (integration)', () => {
                makeLToken('"'),
                makeLToken('value'),
                makeLToken('"'),
+               makeLToken('>'),
+            ]),
+         ], done, parsedStream, tokenStream);
+      });
+
+   });
+
+   describe('element start', () => {
+
+      it('do a simple end to end process', (done) => {
+         const makeLToken = makeLTokenMaker();
+         inputToOutput('<elementName>', [
+            new EntityMetaData(),
+            new elementStart.Token('elementName', [], [
+               makeLToken('<'),
+               makeLToken('elementName'),
                makeLToken('>'),
             ]),
          ], done, parsedStream, tokenStream);

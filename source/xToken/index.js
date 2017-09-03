@@ -5,6 +5,7 @@ import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
 import * as entityReference from './entityReference.js';
+import * as elementStart from './elementStart.js';
 import * as processingInstruction from './processingInstruction.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
@@ -12,8 +13,9 @@ module.exports = {
    declaration,
    docTypeStart,
    docTypeEnd,
-   processingInstruction,
-   xmlDeclaration,
+   elementStart,
    entityDeclaration,
    entityReference,
+   processingInstruction,
+   xmlDeclaration,
 };

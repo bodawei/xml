@@ -9,6 +9,7 @@ import {
    processingInstruction,
    docTypeStart,
    docTypeEnd,
+   elementStart,
 } from '../xToken';
 
 class ParsedStream extends stream.Readable {
@@ -63,6 +64,8 @@ class ParsedStream extends stream.Readable {
    _markupParse(deliverParse) {
       this._lTokenSource.extract('markup', (markupStartLToken) => {
          switch (markupStartLToken.text) {
+            case '<':
+               return elementStart.parse(this._lTokenSource, markupStartLToken, deliverParse);
             case '<?':
                return processingInstruction.parse(this._lTokenSource, markupStartLToken, deliverParse);
             case '<!':

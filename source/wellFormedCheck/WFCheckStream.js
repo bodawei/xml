@@ -9,6 +9,7 @@ import {
    declaration,
    docTypeEnd,
    docTypeStart,
+   elementStart,
    entityDeclaration,
    xmlDeclaration,
 } from '../xToken';
@@ -93,6 +94,18 @@ class WFChecker extends stream.Transform {
             }
 
             entityDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case elementStart.TYPE:
+            const nameText = parsed.name ? parsed.name.text : '';
+            if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
+               this._state = STATE.IN_CONTENT;
+            } else if (this._state === STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ]);
+            } else if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ]);
+            }
+
+            elementStart.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

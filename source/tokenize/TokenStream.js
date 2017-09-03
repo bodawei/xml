@@ -8,6 +8,7 @@ import {
    docTypeStart,
    docTypeEnd,
    xmlDeclaration,
+   elementStart,
    entityDeclaration,
 } from '../xToken';
 
@@ -38,6 +39,9 @@ class TokenStream extends stream.Transform {
             break;
          case declaration.TYPE:
             this.push(declaration.makeToken(parsed));
+            break;
+         case elementStart.TYPE:
+            this.push(elementStart.makeToken(parsed));
             break;
          default:
             this.push(new Error(`Unknown parsed type "${parsed.type}" encountered.`));

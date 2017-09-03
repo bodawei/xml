@@ -67,8 +67,8 @@ class RangeMaker {
 
 class MockLTokenSource {
 
-   constructor(returnValues) {
-      const makeToken = makeLTokenMaker();
+   constructor(returnValues, index = 0, row = 0, column = 0) {
+      const makeToken = makeLTokenMaker(undefined, index, row, column);
       this.returnValues = returnValues.map((entry) => {
          if (typeof entry === 'string') {
             return makeToken(entry);

@@ -163,6 +163,28 @@ describe('ParsedStream', () => {
 
    });
 
+   describe('element start', () => {
+
+      it('parse entity', (done) => {
+         const makeLToken = makeLTokenMaker();
+
+         inputToOutput('<elementName\t>', (results) => {
+            const result = results.filter((item) => item.type === 'ELEMENT_START');
+
+            expect(result[0]).toEqual({
+               type: 'ELEMENT_START',
+               open: makeLToken('<'),
+               postOpenSpace: undefined,
+               name: makeLToken('elementName'),
+               postNameSpace: makeLToken('\t'),
+               close: makeLToken('>'),
+            });
+            done();
+         });
+      });
+
+   });
+
    describe('ENTITY', () => {
 
       it('parse entity', (done) => {

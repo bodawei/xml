@@ -135,6 +135,21 @@ describe('WFCheckStream (integration)', () => {
 
    });
 
+   describe('element start', () => {
+
+      it('reports an error when the element has the wrong syntax', (done) => {
+         givenInputExpectResult('<?xml version="1.0"?>< spaceBeforeBad>', (results) => {
+            expect(results[2]).toEqual(new WellFormedError('ELEMENT_XTRA_LEADING_SPACE',
+               [ 'spaceBeforeBad' ],
+               new Offset(new EntityLocation(), 22, 0, 22),
+               new Offset(new EntityLocation(), 21, 0, 21)
+            ));
+            done();
+         });
+      });
+
+   });
+
    describe('ENTITYDECL', () => {
 
       it('reports an error when the entity has the wrong syntax', (done) => {
