@@ -5,7 +5,9 @@ const Chunk = require('../chunk/Chunk.js');
 const Range = require('../basic/Range.js');
 const EntityLocation = require('../basic/EntityLocation.js');
 
-import chunkTestUtil from '../chunk/index.test.js';
+import basic from '../basic';
+import util from '../chunk/index.test.js';
+import error from '../error';
 
 import externalId from './externalId.js';
 
@@ -17,7 +19,7 @@ describe('externalId', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -36,7 +38,6 @@ describe('externalId', () => {
 
       it('returns simple values', () => {
          externalId.parse(mockSource, [], callback);
-
          mockSource.respondInAsyncTime();
 
          expect(callback).toHaveBeenCalledWith({
@@ -53,8 +54,42 @@ describe('externalId', () => {
          });
       });
 
+      it('accepts single quotes', () => {
+         mockSource = new util.MockChunkSource([
+            new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
+            new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+            new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)), // peek
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
+            new Chunk('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
+            new Chunk(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+            undefined,  // check for ndata
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            new Chunk('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
+            new Chunk('\'', '\'', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+         ]);
+
+         externalId.parse(mockSource, [], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toHaveBeenCalledWith({
+            type: 'EXTERNAL_ID',
+            typeChunk: new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+            postTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            publicOpenQuoteChunk: new Chunk('\'', '\'', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
+            publicChunk: new Chunk('pub.xml', 'pub.xml', new Range(new EntityLocation(), 8, 0, 8, 15, 0, 15)),
+            publicCloseQuoteChunk: new Chunk('\'', '\'', new Range(new EntityLocation(), 15, 0, 15, 16, 0, 16)),
+            postPublicSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 16, 0, 16, 17, 0, 17)),
+            systemOpenQuoteChunk: new Chunk('\'', '\'', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            systemChunk: new Chunk('sys.xml', 'sys.xml', new Range(new EntityLocation(), 18, 0, 18, 24, 0, 24)),
+            systemCloseQuoteChunk: new Chunk('\'', '\'', new Range(new EntityLocation(), 24, 0, 24, 25, 0, 25)),
+         });
+      });
+
       it('only finds a SystemLiteral if that is all that is offered', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -78,8 +113,33 @@ describe('externalId', () => {
          });
       });
 
+
+      it('returns a zero length chunk if there is no value between quotes', () => {
+         mockSource = new util.MockChunkSource([
+            new Chunk('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
+            new Chunk('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+            new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            undefined,  // check forndata
+            new Chunk('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)), // peek
+            new Chunk('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            undefined,
+            new Chunk('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+         ]);
+
+         externalId.parse(mockSource, [], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toHaveBeenCalledWith({
+            type: 'EXTERNAL_ID',
+            typeChunk: new Chunk('SYSTEM', 'SYSTEM', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
+            postTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
+            systemOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 17, 0, 17, 18, 0, 18)),
+            systemChunk: new Chunk('', '', new Range(new EntityLocation(), 18, 0, 18, 18, 0, 18)),
+            systemCloseQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 18, 0, 18, 19, 0, 19)),
+         });
+      });
       it('returns nothing if it gets nothing back on first call', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             undefined,
          ]);
 
@@ -90,7 +150,7 @@ describe('externalId', () => {
       });
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('BOGUS!', 'BOGUS!', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
          ]);
 
@@ -101,7 +161,7 @@ describe('externalId', () => {
       });
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -128,7 +188,7 @@ describe('externalId', () => {
       });
 
       it('does not mind if public or ndata are the wrong case', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('pUbLiC', 'pUbLiC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('pUbLiC', 'pUbLiC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -155,7 +215,7 @@ describe('externalId', () => {
       });
 
       it('stops if it does not find an open quote', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -172,8 +232,8 @@ describe('externalId', () => {
          });
       });
 
-      it('stops if it does not the body value', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+      it('stops if it does not find the body value', () => {
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -191,13 +251,13 @@ describe('externalId', () => {
             typeChunk: new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             postTypeSpaceChunk: new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
             publicOpenQuoteChunk: new Chunk('"', '"', new Range(new EntityLocation(), 7, 0, 7, 8, 0, 8)),
-            publicChunk: undefined,
+            publicChunk: new Chunk('', '', new Range(new EntityLocation(), 8, 0, 8, 8, 0, 8)),
             publicCloseQuoteChunk: undefined,
          });
       });
 
       it('stops if it does not the closing quote', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -221,7 +281,7 @@ describe('externalId', () => {
       });
 
       it('does not mind if, illegally, no space PUBLIC and PublicLiteral', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             undefined,
@@ -255,7 +315,7 @@ describe('externalId', () => {
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
-         mockSource = new chunkTestUtil.MockChunkSource([
+         mockSource = new util.MockChunkSource([
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)), // peek
             new Chunk('PUBLIC', 'PUBLIC', new Range(new EntityLocation(), 0, 0, 0, 6, 0, 6)),
             new Chunk(' ', ' ', new Range(new EntityLocation(), 6, 0, 6, 7, 0, 7)),
@@ -293,38 +353,60 @@ describe('externalId', () => {
    });
 
    describe('checkWellFormed()', () => {
-      // let mockErrorCollector;
-      // let expectedRm;
-      // let parsed;
+      let mockErrorCollector;
+      let expectedRm;
+      let parsed;
 
       beforeEach(() => {
-         // mockErrorCollector = {
-         //    setPos: jasmine.createSpy('setPosSpy'),
-         //    getErrors: jasmine.createSpy('getErrorsSpy'),
-         //    check: jasmine.createSpy('checkSpy'),
-         //    checkName: jasmine.createSpy('checkNameSpy'),
-         //    report: jasmine.createSpy('reportSpy'),
-         // };
+         mockErrorCollector = {
+            setPos: jasmine.createSpy('setPosSpy'),
+            getErrors: jasmine.createSpy('getErrorsSpy'),
+            check: jasmine.createSpy('checkSpy'),
+            checkName: jasmine.createSpy('checkNameSpy'),
+            report: jasmine.createSpy('reportSpy'),
+         };
 
-         // spyOn(basic, 'ErrorCollector').and.callFake((context, type) => {
-         //    mockErrorCollector.context = context;
-         //    mockErrorCollector.type = type;
-         //    return mockErrorCollector;
-         // });
+         spyOn(basic, 'ErrorCollector').and.callFake((context, type) => {
+            mockErrorCollector.context = context;
+            mockErrorCollector.type = type;
+            return mockErrorCollector;
+         });
 
-         // expectedRm = new RangeMaker(new EntityLocation());
-         // parsed = {
-         //    openChunk: makeChunk('<!', expectedRm),
-         //    declTypeChunk: makeChunk('DOCTYPE', expectedRm),
-         //    postDeclTypeSpaceChunk: makeChunk('\t', expectedRm),
-         //    nameChunk: makeChunk('elmentName', expectedRm),
-         // };
+         expectedRm = new util.RangeMaker(new EntityLocation());
+         parsed = {
+            type: 'EXTERNAL_ID',
+            typeChunk: util.makeChunk('PUBLIC', expectedRm),
+            postTypeSpaceChunk: util.makeChunk(' ', expectedRm),
+            publicOpenQuoteChunk: util.makeChunk('""', expectedRm),
+            publicChunk: util.makeChunk('pub.xml', expectedRm),
+            publicCloseQuoteChunk: util.makeChunk('"', expectedRm),
+            postPublicSpaceChunk: util.makeChunk(' ', expectedRm),
+            systemOpenQuoteChunk: util.makeChunk('"', expectedRm),
+            systemChunk: util.makeChunk('sys.xml', expectedRm),
+            systemCloseQuoteChunk: util.makeChunk('"', expectedRm),
+         };
       });
 
       it('returns an an error collector', () => {
-         // const errors = docTypeStart.checkWellFormed(parsed);
+         const errors = externalId.checkWellFormed(parsed);
 
-         // expect(errors).toEqual(mockErrorCollector);
+         expect(errors).toEqual(mockErrorCollector);
+      });
+
+      it('reports an error if type is the wrong case', () => {
+         parsed.typeChunk.text = 'public';
+
+         const errors = externalId.checkWellFormed(parsed);
+
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, error.WellFormedError.ID.EXTERNALID_INVALID_CASE, [ 'PUBLIC', 'public' ]);
+      });
+
+      it('reports an error if type is the wrong case', () => {
+         delete parsed.postTypeSpaceChunk;
+
+         const errors = externalId.checkWellFormed(parsed);
+
+         expect(mockErrorCollector.check).toHaveBeenCalledWith(true, error.WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE);
       });
 
    });
@@ -333,7 +415,7 @@ describe('externalId', () => {
 
       it('returns a token with the name found in the parsing', () => {
          // const parsed = {
-         //    nameChunk: makeChunk('elementName', new RangeMaker(new EntityLocation())),
+         //    nameChunk: util.makeChunk('elementName', new RangeMaker(new EntityLocation())),
          // };
 
          // const token = docTypeStart.makeToken(parsed);

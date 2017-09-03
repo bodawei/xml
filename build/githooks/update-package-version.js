@@ -18,6 +18,7 @@ function computeVersion(logs, final) {
          body = final;
       } else {
          body = logs[index].body;
+console.log('BODY', logs[index].subject);
       }
 
       if (body.indexOf('fix') !== -1) {
