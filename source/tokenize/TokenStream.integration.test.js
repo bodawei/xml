@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { ParsedStream } from '../parse';
-import { docTypeStart, entityDeclaration } from '../token';
+import { docTypeStart, docTypeEnd, entityDeclaration } from '../token';
 
 import TokenStream from './TokenStream.js';
 
@@ -23,13 +23,14 @@ describe('TokenStream', () => {
 
          function evaluate() {
             expect(results).toEqual([
-               new docTypeStart.DocTypeStart('one', undefined, []),
+               new docTypeStart.DocTypeStart('one', undefined, false, []),
+               new docTypeEnd.Token([]),
             ]);
 
             done();
          }
 
-         parsedStream.addText('<!DOCTYPE one');
+         parsedStream.addText('<!DOCTYPE one>');
          parsedStream.endText();
 
          tokenStream.on('data', (data) => results.push(data));

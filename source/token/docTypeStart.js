@@ -11,11 +11,12 @@ const DOCTYPE_START = 'DOCTYPE_START';
 
 class DocTypeStart extends xmlToken.Token {
 
-   constructor(name, externalLocation, chunks) {
+   constructor(name, externalLocation, hasInternalSubset, chunks) {
       super(chunks);
 
       this.name = name;
       this.externalLoc = externalLocation;
+      this.hasInternalSubset = hasInternalSubset;
    }
 
 }
@@ -73,7 +74,9 @@ function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
 
 function makeToken(parsed) {
    return new DocTypeStart(util.textOrBlank(parsed.nameChunk),
-      externalId.makeTokenCompatible(parsed.externalId), []);
+      externalId.makeTokenCompatible(parsed.externalId),
+      !!parsed.startInternalSubsetChunk,
+      []);
 }
 
 module.exports = {

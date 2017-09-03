@@ -5,7 +5,7 @@ import stream from 'readable-stream';
 import { ErrorCollector } from '../basic';
 import { WellFormedError } from '../error';
 
-import { xmlDeclaration, docTypeStart } from '../token';
+import { xmlDeclaration, docTypeStart, docTypeEnd } from '../token';
 
 class WFChecker extends stream.Transform {
 
@@ -24,8 +24,16 @@ class WFChecker extends stream.Transform {
             errorCollector.getErrors().forEach(error => this.push(error));
             break;
          case 'DOCTYPE_START':
+            this._startDocType = parsed;
             docTypeStart.checkWellFormed(parsed, errorCollector, true, 1.0, 5);
             errorCollector.getErrors().forEach(error => this.push(error));
+            break;
+         case 'DOCTYPE_END':
+            // if  ! this._startDocType then we have an error of another kind.
+            const specialErrorCollector = new ErrorCollector(this._startDocType.openChunk, WellFormedError);
+            docTypeEnd.checkWellFormed(parsed, this._startDocType, specialErrorCollector, true, 1.0, 5);
+            delete this._startDocType;
+            specialErrorCollector.getErrors().forEach(error => this.push(error));
             break;
       }
 

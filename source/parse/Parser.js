@@ -1,6 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import { declaration, processingInstruction } from '../token';
+import {
+   declaration,
+   processingInstruction,
+   docTypeStart,
+   docTypeEnd,
+} from '../token';
 
 class Parser {
 
@@ -13,7 +18,12 @@ class Parser {
 
          switch (chunk.text) {
             case '<':
-               return this._markupParse(source, deliverParse);
+               this._markupParse(source, deliverParse);
+            case ']':
+               if (this.waitingForInternalClose) {
+                  this._parseClose(source, deliverParse);
+                  this.waitingForInternalClose = false;
+               }
          }
       });
    }
@@ -24,9 +34,28 @@ class Parser {
             case '<?':
                return processingInstruction.parse(source, markupStartChunk, deliverParse);
             case '<!':
-               return declaration.parse(source, markupStartChunk, deliverParse);
+               declaration.parse(source, markupStartChunk, (token) => {
+                  if (token.type !== docTypeStart.TYPE) {
+                     deliverParse(token);
+                     return;
+                  }
+
+                  if (token.hasInternalSubset) {
+                     this.waitingForInternalClose = true;
+                     deliverParse(token);
+                  } else {
+                     docTypeEnd.parse(source, (endToken) => {
+                        deliverParse(token);
+                        deliverParse(endToken);
+                     });
+                  }
+               });
          }
       });
+   }
+
+   _parseClose(source, deliverParse) {
+      docTypeEnd.parse(source, deliverParse);
    }
 
 }

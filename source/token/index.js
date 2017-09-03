@@ -2,6 +2,7 @@
 
 import declaration from './declaration.js';
 import docTypeStart from './docTypeStart.js';
+import docTypeEnd from './docTypeEnd.js';
 import entityDeclaration from './entityDeclaration.js';
 import entityReference from './entityReference.js';
 import externalId from './externalId.js';
@@ -12,6 +13,7 @@ module.exports = {
    declaration,
    externalId,
    docTypeStart,
+   docTypeEnd,
    processingInstruction,
    xmlDeclaration,
    entityDeclaration,
