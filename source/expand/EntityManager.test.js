@@ -1,0 +1,273 @@
+/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
+/* eslint-env jasmine */
+
+import { EntityLocation } from '../basic';
+import {
+   entityDeclaration,
+   text,
+} from '../xToken';
+
+import EntityManager from './EntityManager.js';
+
+describe('EntityManager', () => {
+   let manager;
+
+   beforeEach(() => {
+      manager = new EntityManager();
+   });
+
+   function expectNameToLookupValue(name, expected, done) {
+      const source = manager.getEntity(name);
+
+      expectEntityToMatch(source, expected, done);
+   }
+
+   function expectParameterNameToLookupValue(name, expected, done) {
+      const source = manager.getParameterEntity(name);
+
+      expectEntityToMatch(source, expected, done);
+   }
+
+   function expectEntityToMatch(source, expected, done) {
+      if (!source) {
+         expect(undefined).toEqual(expected);
+         done();
+      } else {
+         source.extract('all', [], (lToken) => {
+            expect(lToken.text).toEqual(expected);
+            done();
+         });
+      }
+   }
+
+   function makeToken(name, str, location, notationName) {
+      return new entityDeclaration.Token(name, [ new text.Token(str, []) ], location, notationName, []);
+   }
+
+   function makePEToken(name, str, location, notationName) {
+      return new entityDeclaration.ParamToken(name, [ new text.Token(str, []) ], location, notationName, []);
+   }
+
+   describe('construction', () => {
+
+      it('does not throw an exception', () => {
+         expect(() => {
+            new EntityManager();
+         }).not.toThrow();
+      });
+
+   });
+
+   describe('addEntityFromInternalSubset', () => {
+
+      it('throws an exception if called without a token', () => {
+         expect(() => {
+            manager.addEntityFromInternalSubset();
+         }).toThrowError('Must call with an entity declaration token.');
+      });
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('testName', 'testValue'));
+
+         expectNameToLookupValue('testName', 'testValue', done);
+      });
+
+      it('can add multiple name-named entities, but only the first is returned', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('name', 'one'));
+         manager.addEntityFromInternalSubset(makeToken('name', 'two'));
+
+         expectNameToLookupValue('name', 'one', done);
+      });
+
+   });
+
+   describe('addEntityFromExternalSubset', () => {
+
+      it('throws an exception if called without a token', () => {
+         expect(() => {
+            manager.addEntityFromExternalSubset();
+         }).toThrowError('Must call with an entity declaration token.');
+      });
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addEntityFromExternalSubset(makeToken('testName', 'testValue'));
+
+         expectNameToLookupValue('testName', 'testValue', done);
+      });
+
+      it('can add multiple name-named entities, but only the first is returned', (done) => {
+         manager.addEntityFromExternalSubset(makeToken('name', 'one'));
+         manager.addEntityFromExternalSubset(makeToken('name', 'two'));
+
+         expectNameToLookupValue('name', 'one', done);
+      });
+
+   });
+
+   describe('add*Entity interaction', () => {
+
+      it('can add internal and external entities, but only the first internal is returned', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('testName', 'one'));
+         manager.addEntityFromInternalSubset(makeToken('testName', 'two'));
+         manager.addEntityFromExternalSubset(makeToken('testName', 'alpha'));
+         manager.addEntityFromExternalSubset(makeToken('testName', 'beta'));
+
+         expectNameToLookupValue('testName', 'one', done);
+      });
+
+      it('is unaffected by parameter entities', (done) => {
+         manager.addParameterEntityFromInternalSubset(makePEToken('test', 'two'));
+         manager.addEntityFromInternalSubset(makeToken('test', 'one'));
+
+         expectNameToLookupValue('test', 'one', done);
+      });
+
+      it('parameter entities unaffected by general entities', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('test', 'foo'));
+         manager.addParameterEntityFromInternalSubset(makePEToken('test', 'one'));
+
+         expectParameterNameToLookupValue('test', 'one', done);
+      });
+
+   });
+
+   describe('addParameterEntityFromInternalSubset()', () => {
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addParameterEntityFromInternalSubset(makePEToken('bar', 'baz'));
+
+         expectParameterNameToLookupValue('bar', 'baz', done);
+      });
+
+      it('can add multiple internal entities, but only the first is returned', (done) => {
+         manager.addParameterEntityFromInternalSubset(makePEToken('test', 'one'));
+         manager.addParameterEntityFromInternalSubset(makePEToken('test', 'two'));
+
+         expectParameterNameToLookupValue('test', 'one', done);
+      });
+
+   });
+
+   describe('addEntityFromExternalSubset()', () => {
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addParameterEntityFromExternalSubset(makePEToken('bar', 'baz'));
+
+         expectParameterNameToLookupValue('bar', 'baz', done);
+      });
+
+      it('can add multiple internal entities, but only the first is returned', (done) => {
+         manager.addParameterEntityFromExternalSubset(makePEToken('test', 'one'));
+         manager.addParameterEntityFromExternalSubset(makePEToken('test', 'two'));
+
+         expectParameterNameToLookupValue('test', 'one', done);
+      });
+
+   });
+
+   describe('getEntity', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getEntity();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns undefined when called with an entity name that does not exist', (done) => {
+         expectNameToLookupValue('test', undefined, done);
+      });
+
+      it('returns undefined if the requested entity has a notation name', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('test', undefined, undefined, 'fred'));
+
+         expectNameToLookupValue('test', undefined, done);
+      });
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('test', 'two'));
+
+         expectNameToLookupValue('test', 'two', done);
+      });
+
+      it('returns undefined when asked for a general when only parameter by that name', (done) => {
+         manager.addParameterEntityFromExternalSubset(makePEToken('test', 'baz'));
+
+         expectNameToLookupValue('test', undefined, done);
+      });
+
+   });
+
+   describe('getParameterEntity', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getParameterEntity();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns undefined when called with an entity name that does not exist', (done) => {
+         expectParameterNameToLookupValue('noName', undefined, done);
+      });
+
+      it('returns a cursor if it is called with a legitimate entity name', (done) => {
+         manager.addParameterEntityFromInternalSubset(makeToken('test', 'two'));
+
+         expectParameterNameToLookupValue('test', 'two', done);
+      });
+
+   });
+
+   describe('setExternalSubsetEntity()', () => {
+
+      it('adds nothing if no parameter is passed', () => {
+         manager.setExternalSubsetEntity();
+
+         expect(manager.getExternalSubsetEntity()).toBeUndefined();
+      });
+
+      it('adds a token for the specified location', () => {
+         manager.setExternalSubsetEntity(new EntityLocation('system', 'public'));
+
+         const source = manager.getExternalSubsetEntity();
+
+         expect(source).not.toBeUndefined();
+      });
+
+   });
+
+   describe('default entities', () => {
+
+      it('includes "lt"', (done) => {
+         expectNameToLookupValue('lt', '&#60;', done);
+      });
+
+      it('includes "amp"', (done) => {
+         expectNameToLookupValue('amp', '&#38;', done);
+      });
+
+      it('includes "gt"', (done) => {
+         expectNameToLookupValue('gt', '>', done);
+      });
+
+      it('includes "quot"', (done) => {
+         expectNameToLookupValue('quot', '"', done);
+      });
+
+      it('includes "apos"', (done) => {
+         expectNameToLookupValue('apos', '\'', done);
+      });
+
+      it('adds an external so it overrides the default', (done) => {
+         manager.addEntityFromExternalSubset(makeToken('amp', 'one'), EntityManager.EXTERNAL_SUBSET);
+
+         expectNameToLookupValue('amp', 'one', done);
+      });
+
+      it('adds an internal so it overrides the default', (done) => {
+         manager.addEntityFromInternalSubset(makeToken('amp', 'one'));
+
+         expectNameToLookupValue('amp', 'one', done);
+      });
+   });
+
+});

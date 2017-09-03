@@ -8,6 +8,7 @@ import * as entityDeclaration from './entityDeclaration.js';
 import * as entityReference from './entityReference.js';
 import * as elementStart from './elementStart.js';
 import * as elementEnd from './elementEnd.js';
+import * as text from './text.js';
 import * as processingInstruction from './processingInstruction.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
@@ -21,5 +22,6 @@ module.exports = {
    entityDeclaration,
    entityReference,
    processingInstruction,
+   text,
    xmlDeclaration,
 };
