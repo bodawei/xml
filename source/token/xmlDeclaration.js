@@ -81,6 +81,29 @@ function addParam(source, params, nameLToken, deliverResults) {
    });
 }
 
+function getChunks(parsed) {
+   const results = [];
+
+   util.pIfNotBottom(results, parsed.openLToken);
+   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
+   util.pIfNotBottom(results, parsed.targetLToken);
+   util.pIfNotBottom(results, parsed.postTargetSpaceLToken);
+
+   for (let index = 0; index < parsed.params.length; index++) {
+      util.pIfNotBottom(results, parsed.params[index].nameLToken);
+      util.pIfNotBottom(results, parsed.params[index].postNameSpaceLToken);
+      util.pIfNotBottom(results, parsed.params[index].equalLToken);
+      util.pIfNotBottom(results, parsed.params[index].postEqualSpaceLToken);
+      util.pIfNotBottom(results, parsed.params[index].openQuoteLToken);
+      util.pIfNotBottom(results, parsed.params[index].valueLToken);
+      util.pIfNotBottom(results, parsed.params[index].closeQuoteLToken);
+      util.pIfNotBottom(results, parsed.params[index].trailingSpaceLToken);
+   }
+   util.pIfNotBottom(results, parsed.closeLToken);
+
+   return results;
+}
+
 function checkWellFormed(parsed, err, isDocEntity) { // need type and version
    let foundEncoding;
    let foundVersion;
@@ -168,7 +191,7 @@ function checkWellFormed(parsed, err, isDocEntity) { // need type and version
 }
 
 function makeToken(parsed) {
-   return new XmlDeclaration(extractParams(parsed), []);
+   return new XmlDeclaration(extractParams(parsed), getChunks(parsed));
 }
 
 function extractParams(parsed) {

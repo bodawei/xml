@@ -208,7 +208,13 @@ describe('xmlDeclaration', () => {
          expect(token).toEqual(new xmlDeclaration.Token([ {
             name: 'version',
             value: '1.1',
-         } ], []));
+         } ], [
+            parsed.params[0].nameLToken,
+            parsed.params[0].postNameSpaceLToken,
+            parsed.params[0].equalLToken,
+            parsed.params[0].postEqualSpaceLToken,
+            parsed.params[0].valueLToken,
+         ]));
       });
 
    });

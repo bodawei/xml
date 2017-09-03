@@ -117,6 +117,32 @@ function parseClose(source, parsed, propName, deliverParsed) {
    });
 }
 
+function getChunks(parsed) {
+   const results = [];
+
+   util.pIfNotBottom(results, parsed.openLToken);
+   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
+   util.pIfNotBottom(results, parsed.declTypeLToken);
+   util.pIfNotBottom(results, parsed.postDeclTypeSpaceLToken);
+   util.pIfNotBottom(results, parsed.parameterLToken);
+   util.pIfNotBottom(results, parsed.postParameterSpaceLToken);
+   util.pIfNotBottom(results, parsed.nameLToken);
+   util.pIfNotBottom(results, parsed.postNameSpaceLToken);
+   quotedValue.getChunks(results, parsed.entityValue);
+   externalId.getChunks(results, parsed.externalId);
+   util.pIfNotBottom(results, parsed.postEntityValueSpaceLToken);
+   util.pIfNotBottom(results, parsed.postExternalIdSpaceLToken);
+
+   util.pIfNotBottom(results, parsed.nDataLToken);
+   util.pIfNotBottom(results, parsed.postNDataSpaceLToken);
+   util.pIfNotBottom(results, parsed.nDataNameLToken);
+   util.pIfNotBottom(results, parsed.postNDataNameSpaceLToken);
+
+   util.pIfNotBottom(results, parsed.closeLToken);
+
+   return results;
+}
+
 function checkWellFormed(parsed, ec) {
    const enNameText = util.textOrBlank(parsed.nameLToken);
    ec.setPos(parsed.openLToken);
@@ -167,7 +193,7 @@ function makeToken(parsed) {
       util.textOrBlank(parsed.entityValue ? parsed.entityValue.valueLToken : undefined),
       {},
       util.textOrBlank(parsed.nDataNameLToken),
-      []);
+      getChunks(parsed));
 }
 
 module.exports = {

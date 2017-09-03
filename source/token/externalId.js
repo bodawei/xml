@@ -107,6 +107,24 @@ function getQuotedLiteral(source, parsed, prefix, done) {
    });
 }
 
+function getChunks(results, parsed) {
+   if (!parsed) {
+      return;
+   }
+
+   util.pIfNotBottom(results, parsed.typeLToken);
+   util.pIfNotBottom(results, parsed.postTypeSpaceLToken);
+
+   util.pIfNotBottom(results, parsed.publicOpenQuoteLToken);
+   util.pIfNotBottom(results, parsed.publicLToken);
+   util.pIfNotBottom(results, parsed.publicCloseQuoteLToken);
+
+   util.pIfNotBottom(results, parsed.postPublicSpaceLToken);
+   util.pIfNotBottom(results, parsed.systemOpenQuoteLToken);
+   util.pIfNotBottom(results, parsed.systemLToken);
+   util.pIfNotBottom(results, parsed.systemCloseQuoteLToken);
+}
+
 // Nuke this error: EXTERNALID_UNKNOWN
 // not sure I like how we're testing errors
 // testing of setPos is questionable
@@ -172,6 +190,7 @@ function makeTokenCompatible(parsed) {
 module.exports = {
    TYPE: EXTERNAL_ID,
    parse,
+   getChunks,
    checkWellFormed,
    makeTokenCompatible,
 };

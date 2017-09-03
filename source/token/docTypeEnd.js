@@ -2,6 +2,7 @@
 
 import { WellFormedError } from '../error';
 
+import util from './util.js';
 import xmlToken from './xmlToken.js';
 
 const WFEID = WellFormedError.ID;
@@ -45,6 +46,16 @@ function parse(source, deliverParsed) {
    });
 }
 
+function getChunks(parsed) {
+   const results = [];
+
+   util.pIfNotBottom(results, parsed.closeInternalSubsetLToken);
+   util.pIfNotBottom(results, parsed.postCloseInternalSubsetSpaceLToken);
+   util.pIfNotBottom(results, parsed.closeLToken);
+
+   return results;
+}
+
 function checkWellFormed(parsed, startParsed, ec) {
    ec.setPos(startParsed.declTypeLToken);
    ec.setPos(startParsed.postDeclTypeSpaceLToken);
@@ -61,8 +72,8 @@ function checkWellFormed(parsed, startParsed, ec) {
    return ec;
 }
 
-function makeToken() {
-   return new DocTypeEnd([]);
+function makeToken(parsed) {
+   return new DocTypeEnd(getChunks(parsed));
 }
 
 module.exports = {

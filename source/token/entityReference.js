@@ -48,6 +48,18 @@ function parse(source, deliverParsed) {
    });
 }
 
+function getChunks(parsed) {
+   const results = [];
+
+   util.pIfNotBottom(results, parsed.openLToken);
+   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
+   util.pIfNotBottom(results, parsed.entityNameLToken);
+   util.pIfNotBottom(results, parsed.postEntityNameSpaceLToken);
+   util.pIfNotBottom(results, parsed.closeLToken);
+
+   return results;
+}
+
 function checkWellFormed(parsed, ec) {
    const entityName = util.textOrBlank(parsed.entityNameLToken);
 
@@ -66,7 +78,7 @@ function checkWellFormed(parsed, ec) {
 }
 
 function makeToken(parsed) {
-   return new EntityReference(util.textOrBlank(parsed.nameLToken), []);
+   return new EntityReference(util.textOrBlank(parsed.nameLToken), getChunks(parsed));
 }
 
 module.exports = {

@@ -74,6 +74,25 @@ function parse(source, declarationParsing, deliverParsed) {
    });
 }
 
+function getChunks(parsed) {
+   const results = [];
+
+   util.pIfNotBottom(results, parsed.openLToken);
+   util.pIfNotBottom(results, parsed.postOpenSpaceLToken);
+   util.pIfNotBottom(results, parsed.declTypeLToken);
+   util.pIfNotBottom(results, parsed.postDeclTypeSpaceLToken);
+
+   util.pIfNotBottom(results, parsed.nameLToken);
+   util.pIfNotBottom(results, parsed.postNameSpaceLToken);
+   externalId.getChunks(results, parsed.externalId);
+   util.pIfNotBottom(results, parsed.postExternalIdSpaceLToken);
+
+   util.pIfNotBottom(results, parsed.postPublicSpaceLToken);
+   util.pIfNotBottom(results, parsed.startInternalSubsetLToken);
+
+   return results;
+}
+
 function checkWellFormed(parsed, ec, isDocEntity, version, revision) {
    ec.setPos(parsed.nameLToken);
    ec.check(!parsed.nameLToken, WFEID.DOCTYPE_NO_NAME);
@@ -88,7 +107,7 @@ function makeToken(parsed) {
    return new DocTypeStart(util.textOrBlank(parsed.nameLToken),
       externalId.makeTokenCompatible(parsed.externalId),
       !!parsed.startInternalSubsetLToken,
-      []);
+      getChunks(parsed));
 }
 
 module.exports = {

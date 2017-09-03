@@ -19,8 +19,15 @@ function toLocalParsing(type, declarationParsing) {
    };
 }
 
+function pIfNotBottom(results, value) {
+   if (value !== undefined && value !== null) {
+      results.push(value);
+   }
+}
+
 module.exports = {
    textOrBlank,
    textOrUndef,
    toLocalParsing,
+   pIfNotBottom,
 };

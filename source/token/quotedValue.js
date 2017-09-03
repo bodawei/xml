@@ -1,3 +1,5 @@
+import util from './util.js';
+
 function parse(source, options, deliverParsed) {
    const parsed = {};
 
@@ -16,6 +18,16 @@ function parse(source, options, deliverParsed) {
    });
 }
 
+function getChunks(results, parsed) {
+   if (!parsed) {
+      return;
+   }
+   util.pIfNotBottom(results, parsed.openQuoteLToken);
+   util.pIfNotBottom(results, parsed.valueLToken);
+   util.pIfNotBottom(results, parsed.closeQuoteLToken);
+}
+
 module.exports = {
    parse,
+   getChunks,
 };

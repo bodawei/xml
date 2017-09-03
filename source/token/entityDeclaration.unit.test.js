@@ -537,7 +537,10 @@ describe('entityDeclaration', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.Token('entityName', 'value', {}, '', []));
+         expect(token).toEqual(new entityDeclaration.Token('entityName', 'value', {}, '', [
+            parsed.nameLToken,
+            parsed.entityValue.valueLToken,
+         ]));
       });
 
       it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
@@ -551,7 +554,11 @@ describe('entityDeclaration', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', 'value', {}, '', []));
+         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', 'value', {}, '', [
+            parsed.parameterLToken,
+            parsed.nameLToken,
+            parsed.entityValue.valueLToken,
+         ]));
       });
 
       it('returns a entity declaration with a blank value if there is no name', () => {
@@ -564,7 +571,9 @@ describe('entityDeclaration', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.Token('', 'value', {}, '', []));
+         expect(token).toEqual(new entityDeclaration.Token('', 'value', {}, '', [
+            parsed.entityValue.valueLToken,
+         ]));
       });
 
       it('returns a entity declaration with a blank value if there is no value', () => {
@@ -575,7 +584,10 @@ describe('entityDeclaration', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', '', {}, '', []));
+         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', '', {}, '', [
+            parsed.parameterLToken,
+            parsed.nameLToken,
+         ]));
       });
 
    });
