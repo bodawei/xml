@@ -2,6 +2,4 @@
 
 import WFCheckStream from './WFCheckStream.js';
 
-module.exports = {
-   WFCheckStream,
-};
+export default WFCheckStream;

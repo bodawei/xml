@@ -18,7 +18,7 @@ describe('WFCheckStream (integration)', () => {
       parsedStream.pipe(checker);
    });
 
-   describe('XML Declaration', () => {
+   describe('XML_DECLARATION', () => {
 
       it('reports an error if the version attribute is the wrong case', (done) => {
          const results = [];

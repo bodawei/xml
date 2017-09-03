@@ -10,10 +10,13 @@ describe('TokenStream (unit)', () => {
       tokenStream = new TokenStream();
    });
 
-   it('throws an error if asked to deal with an unknown parsed type', () => {
-      expect(() => {
-         tokenStream._transform({ type: 'BOGUS' }, {}, () => {});
-      }).toThrowError('Unknown parsed type "BOGUS" encountered.');
+   it('throws an error if asked to deal with an unknown parsed type', (done) => {
+      tokenStream.on('error', (error) => {
+         expect(error.message).toEqual('Unknown parsed type "BOGUS" encountered.');
+         done();
+      });
+
+      tokenStream._transform({ type: 'BOGUS' }, {}, () => {});
    });
 
 });

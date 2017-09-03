@@ -33,4 +33,4 @@ class ParsedStream extends stream.Readable {
    }
 }
 
-module.exports = ParsedStream;
+export default ParsedStream;

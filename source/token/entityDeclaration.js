@@ -54,14 +54,8 @@ class ParameterEntityDeclaration extends EntityDeclaration {
                         "'" ([^%&'] | PEReference | Reference)* "'"
 \**********************************************************************/
 
-function parse(source, declarationStart, deliverParsed) {
-   const parsed = {
-      type: ENTITY_DECL,
-      openChunk: declarationStart.openChunk,
-      postOpenSpaceChunk: declarationStart.postOpenSpaceChunk,
-      declTypeChunk: declarationStart.declTypeChunk,
-      postDeclTypeSpaceChunk: declarationStart.postDeclTypeSpaceChunk,
-   };
+function parse(source, declarationParsing, deliverParsed) {
+   const parsed = util.toLocalParsing(ENTITY_DECL, declarationParsing);
 
    source.extract('peekChar', (chunk) => {
       if (!chunk) {

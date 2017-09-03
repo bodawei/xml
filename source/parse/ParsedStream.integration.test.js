@@ -174,5 +174,4 @@ describe('ParsedStream', () => {
 
    });
 
-   // note '<!ENTITY myEntity SYSTEM "sys.xml" "pub.xml">'  fails right now by hanging
 });

@@ -43,4 +43,4 @@ class WFChecker extends stream.Transform {
 
 }
 
-module.exports = WFChecker;
+export default WFChecker;

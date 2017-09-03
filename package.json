@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.13.0",
+   "version": "0.13.1",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -46,7 +46,7 @@
       "karma-safari-launcher": "1.0.0",
       "karma-vivaldi-launcher": "git+https://github.com/bodawei/contrib-karma-vivaldi-launcher.git",
       "karma-yajson-reporter": "1.0.0",
-      "mostly-quiet-grunt": "^1.0.2",
+      "mostly-quiet-grunt": "1.0.3",
       "node-properties-parser": "0.0.2",
       "phantomjs-prebuilt": "2.1.14",
       "text-table-formatter": "0.1.0"

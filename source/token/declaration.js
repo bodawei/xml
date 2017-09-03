@@ -6,6 +6,11 @@ import entityDeclaration from './entityDeclaration.js';
 const GENERIC_DECLARATION = 'GENERIC_DECLARATION';
 
 /**********************************************************************\
+ declaration is a "bridge" token type. That is, it is used to identify
+ a class of tokens that all start with <!.  If it finds <!NAME, then
+ it will call the appropriate sub-token type (e.g. DOCTYPE, ENTITY,
+ etc) and let them do the rest of the parsing. Otherwise it delivers
+ the incomplete parsing
 \**********************************************************************/
 
 function parse(source, openChunk, deliverParsed) {
@@ -35,7 +40,7 @@ function parse(source, openChunk, deliverParsed) {
    });
 }
 
-module.exports = {
+export default {
    TYPE: GENERIC_DECLARATION,
    parse,
 };

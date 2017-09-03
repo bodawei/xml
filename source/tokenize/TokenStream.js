@@ -2,7 +2,12 @@
 
 import stream from 'readable-stream';
 
-import { docTypeStart, docTypeEnd, xmlDeclaration, entityDeclaration } from '../token';
+import {
+   docTypeStart,
+   docTypeEnd,
+   xmlDeclaration,
+   entityDeclaration,
+} from '../token';
 
 class TokenStream extends stream.Transform {
 
@@ -27,7 +32,7 @@ class TokenStream extends stream.Transform {
             this.push(entityDeclaration.makeToken(parsed));
             break;
          default:
-            throw new Error(`Unknown parsed type "${parsed.type}" encountered.`);
+            this.emit('error', new Error(`Unknown parsed type "${parsed.type}" encountered.`));
       }
 
       done();
@@ -35,4 +40,4 @@ class TokenStream extends stream.Transform {
 
 }
 
-module.exports = TokenStream;
+export default TokenStream;

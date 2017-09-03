@@ -7,21 +7,28 @@ import xmlToken from './xmlToken.js';
 const WFEID = WellFormedError.ID;
 const DOCTYPE_END = 'DOCTYPE_END';
 
+/**********************************************************************\
+ docTypeEnd is the portion of a DOCTYPE declaration that comes after
+ the internal subset (whether or not it is present).
+
+ See docTypeStart for more details
+\**********************************************************************/
+
 class DocTypeEnd extends xmlToken.Token {
 }
 
 /**********************************************************************\
  parse() extracts ]> from the end of a DOCTYPE statement.
 
- This assumes that the next character is a ].
+ This assumes that the next character in the source is a ].
 
  PARAM
  source: A ChunkSource to read from
  deliverParsed: Callback to deliver the parsed chunks
 
  SYNTAX
-   [28] doctypedecl ::= '<!DOCTYPE' S
-      Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
+   [28] doctypedecl ::= '<!DOCTYPE' S Name (S ExternalID)? S?
+      ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
 function parse(source, deliverParsed) {
