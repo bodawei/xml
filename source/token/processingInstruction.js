@@ -1,5 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
+import { WellFormedError } from '../error';
+
+import {
+   textOrBlank,
+} from './util.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 /**********************************************************************\
@@ -10,6 +15,7 @@ import * as xmlDeclaration from './xmlDeclaration.js';
  processing instruction, and is parsed here, but not validated etc.
 \**********************************************************************/
 
+const WFEID = WellFormedError.ID;
 const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
 
 function parse(source, startLToken, deliverParsed) {
@@ -36,7 +42,14 @@ function parse(source, startLToken, deliverParsed) {
    });
 }
 
+function checkWellFormed(parsed, ec) {
+   ec.setPos(parsed.open);
+   ec.setPos(parsed.postOpenSpace);
+   ec.check(parsed.postOpenSpace, WFEID.PI_SPACE_BEFORE_TARGET, [ textOrBlank(parsed.target) ]);
+}
+
 export {
    PROCESSING_INSTRUCTION as TYPE,
    parse,
+   checkWellFormed,
 };

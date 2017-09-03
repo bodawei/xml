@@ -478,13 +478,13 @@ describe('entityDeclaration', () => {
             postEntityValueSpace: undefined,
             close: expectedLToken('>'),
          };
+         spyOn(declaration, 'checkWellFormed');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(misc, 'checkWellFormedText');
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
          const emd = new EntityMetaData();
-         spyOn(declaration, 'checkWellFormed');
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
 
@@ -509,7 +509,7 @@ describe('entityDeclaration', () => {
             id: WellFormedError.ID.ENTITYDECL_NO_NAME,
             params: undefined,
             position: undefined,
-            lastPosition: undefined,
+            lastPosition: undefined,   // normally would be the space after ENTITY, but it is mocked out
          });
       });
 

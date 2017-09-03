@@ -1,6 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData } from '../basic';
+import { MockErrorCollector } from '../basic/test';
+import { WellFormedError } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as processingInstruction from './processingInstruction.js';
@@ -38,6 +41,37 @@ describe('processingInstruction', () => {
             postTargetSpace: expectedLToken(' '),
             instruction: expectedLToken('blah'),
             close: expectedLToken('?>'),
+         });
+      });
+
+   });
+
+   describe('checkWellFormed()', () => {
+      let mockErrorCollector;
+      let parsed;
+      let expectedLToken;
+
+      beforeEach(() => {
+         mockErrorCollector = new MockErrorCollector();
+         expectedLToken = makeLTokenMaker();
+         parsed = {
+            type: 'PROCESSING_INSTRUCTION',
+            open: expectedLToken('<?'),
+            postOpenSpace: undefined,
+            target: expectedLToken('foo'),
+            postTargetSpace: expectedLToken(' '),
+         };
+      });
+
+      it('reports an error if there is a space after the "<?"', () => {
+         parsed.postOpenSpace = expectedLToken(' ');
+
+         processingInstruction.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_SPACE_BEFORE_TARGET,
+            params: [ 'foo' ],
+            position: parsed.postOpenSpace,
          });
       });
 

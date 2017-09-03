@@ -122,7 +122,7 @@ function makeCompareObject(util, ErrorClass) {
                   message = `Positions for ${expectedError.id} do not match:\n` +
                      `  Actual: ${JSON.stringify(actual.position)}\n` +
                      `  Expected: ${JSON.stringify(expectedError.position)}`;
-               } else if (expectedError.lastPosition &&
+               } else if ((expectedError.lastPosition || !expectedError.position) &&
                   !util.equals(expectedError.lastPosition, actual.lastPosition)) {
                   message = `Last positions for ${expectedError.id} do not match:\n` +
                      `  Actual: ${JSON.stringify(actual.lastPosition)}\n` +

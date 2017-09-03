@@ -118,20 +118,15 @@ describe('docTypeStart', () => {
             postDeclTypeSpace: sourceLToken('\t'),
             name: sourceLToken('elmentName'),
          };
-      });
-
-      it('returns an an error collector', () => {
-         const errors = docTypeStart.checkWellFormed(parsed, mockErrorCollector);
-
-         expect(errors).toEqual(mockErrorCollector);
-      });
-
-      it('reports an error if the declaration portion has a problem', () => {
          spyOn(declaration, 'checkWellFormed');
+      });
 
-         docTypeStart.checkWellFormed(parsed, mockErrorCollector);
+      it('asks the declaration module to look for problems in the declaration part', () => {
+         const emd = new EntityMetaData();
 
-         expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector);
+         docTypeStart.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
       });
 
       it('reports an error if there is no elment name', () => {
@@ -142,7 +137,7 @@ describe('docTypeStart', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,
             params: undefined,
-            position: undefined,
+            lastPosition: undefined, // would be parsed.postDeclTypeSpace, but we're mocking that out
          });
       });
 

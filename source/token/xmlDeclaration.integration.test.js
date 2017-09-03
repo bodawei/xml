@@ -1,0 +1,57 @@
+/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* eslint-env jasmine */
+
+import { EntityMetaData, ErrorCollector } from '../basic';
+import { WellFormedError } from '../error';
+import { LTokenSource, defaultExtractors } from '../lToken';
+import { makeLTokenMaker } from '../lToken/test';
+
+import * as xmlDeclaration from './xmlDeclaration.js';
+
+describe('xmlDeclaration (integration)', () => {
+
+   describe('checkWellFormed()', () => {
+      let parsed;
+      let expectedLToken;
+      let emd;
+      let source;
+
+      beforeEach(() => {
+         expectedLToken = makeLTokenMaker();
+         parsed = {
+            open: expectedLToken('<?'),
+            target: expectedLToken('xml'),
+            postTargetSpace: expectedLToken(' '),
+         };
+         emd = new EntityMetaData();
+         source = new LTokenSource(defaultExtractors, emd);
+      });
+
+      it('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
+         parsed.postOpenSpace = expectedLToken(' ');
+         source.addText('version="1.1"?>');
+         xmlDeclaration.parse(source, parsed, (result) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
+
+            xmlDeclaration.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_BEFORE_TARGET);
+            done();
+         });
+      });
+
+      it('reports an error when a value has bad text (check misc.checkWellFormedText())', (done) => {
+         source.addText('version="1.0" encoding="bad\u0000"?>');
+         xmlDeclaration.parse(source, parsed, (result) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
+
+            xmlDeclaration.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      });
+
+   });
+
+});

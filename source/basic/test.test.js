@@ -168,6 +168,26 @@ describe('toReportError()', () => {
             });
       });
 
+      it('reports a failure if both expected last position and position are undefined', () => {
+         expect(toReportErrorMatcher({ equals: (a, b) => (a === b) }).compare(
+            {
+               errors: [ {
+                  id: 'XMLDECL_NO_CLOSE',
+                  params: undefined,
+                  position: undefined,
+                  lastPosition: 1,
+               } ],
+            }, {
+               id: 'XMLDECL_NO_CLOSE',
+               params: undefined,
+               position: undefined,
+               lastPosition: undefined,
+            })).toEqual({
+               pass: false,
+               message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual: 1\n  Expected: undefined',
+            });
+      });
+
    });
 
    describe('toReportWarning()', () => {

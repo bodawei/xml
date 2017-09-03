@@ -84,15 +84,13 @@ function parse(source, declarationParsing, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec, entityMetaData) {
-   declaration.checkWellFormed(parsed, ec);
+   declaration.checkWellFormed(parsed, ec, entityMetaData);
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
    ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, entityMetaData);
 
    externalId.checkWellFormed(parsed.externalId, ec, entityMetaData);
-
-   return ec;
 }
 
 /**********************************************************************\

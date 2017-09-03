@@ -7,7 +7,8 @@ import {
    pushNonBottom,
    textOrBlank,
    textOrUndef,
- } from './util.js';
+} from './util.js';
+import * as pi from './processingInstruction.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\
@@ -23,6 +24,7 @@ const XMLDECL_PARAMS = {
    encoding: 'encoding',
    standalone: 'standalone',
 };
+const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 
 class XmlDeclaration extends XmlToken {
 
@@ -117,10 +119,12 @@ function addParam(source, params, name, deliverResults) {
  Do well formed checking on the parsed results from the parse().
 \**********************************************************************/
 
-function checkWellFormed(parsed, err, entityMetaData) {
+function checkWellFormed(parsed, ec, entityMetaData) {
    let foundEncoding;
    let foundVersion;
    let seenStandalone;
+
+   pi.checkWellFormed(parsed, ec, entityMetaData);
 
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {
@@ -128,79 +132,83 @@ function checkWellFormed(parsed, err, entityMetaData) {
       const nameText = textOrBlank(param.name);
       const lcName = nameText.toLocaleLowerCase();
 
-      err.setPos(param.name);
+      ec.setPos(param.name);
 
       if (index === 0) {
-         err.check(!parsed.postTargetSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         ec.check(!parsed.postTargetSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       } else {
-         err.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+         ec.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
-      err.checkName(param.name, WFEID.ATTRIBUTE_INVALID_NAME, entityMetaData);
+      ec.checkName(param.name, WFEID.ATTRIBUTE_INVALID_NAME, entityMetaData);
       if (XMLDECL_PARAMS[lcName]) {
-         err.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
+         ec.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
 
       switch (lcName) {
          case 'version':
             foundVersion = true;
-            err.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
+            ec.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
             break;
          case 'encoding':
             foundEncoding = true;
             if (entityMetaData.isDocumentKind) {
-               err.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
+               ec.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
             }
             break;
          case 'standalone':
             seenStandalone = true;
             if (!entityMetaData.isDocumentKind) {
-               err.report(WFEID.TEXTDECL_XTRA_STANDALONE);
+               ec.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
-            err.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER, param.name);
+            ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
             break;
          default:
-            err.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.name.text ]);
+            ec.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.name.text ]);
       }
 
-      err.setPos(param.equal);
-      err.check(!param.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
-      err.setPos(param.openQuote);
-      err.check(!param.openQuote, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
+      ec.setPos(param.postNameSpace);
+      ec.setPos(param.equal);
+      ec.check(!param.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+      ec.setPos(param.postEqualSpace);
+      ec.setPos(param.openQuote);
+      ec.check(!param.openQuote, WFEID.ATTRIBUTE_NO_QUOTE, [ nameText ]);
 
-      err.setPos(param.value);
+      ec.setPos(param.value);
       const valueText = textOrBlank(param.value);
       const lcValue = valueText.toLocaleLowerCase();
-      err.check(!param.value, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
-      misc.checkWellFormedText(param.value, err, entityMetaData);
+      ec.check(!param.value, WFEID.ATTRIBUTE_NO_VALUE, [ nameText ]);
+      misc.checkWellFormedText(param.value, ec, entityMetaData);
 
       switch (lcName) {
          case 'version':
-            err.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
+            ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
             if (valueText) {
-               err.check(!valueText.match(/^[A-Za-z][-A-Za-z0-9._]*$/), WFEID.XMLDECL_ENCODING_INVALID,
-                  [ valueText ]);
+               ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
             }
             break;
          case 'standalone':
-            err.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
-            err.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
+            ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
+            ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
             break;
       }
+
+      ec.setPos(param.closeQuote);
+      ec.check(!param.closeQuote, WFEID.ATTRIBUTE_NO_CLOSE_QUOTE, [ nameText ]);
    }
 
-   err.setPos(parsed.close);
-   err.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES,
-      [ entityMetaData.isDocumentKind ? WFEID.NOUN_XMLDECL : WFEID.NOUN_TEXTDECL ]);
-
-   if (!entityMetaData.isDocumentKind) {
-      err.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
+   ec.setPos(parsed.close);
+   if (entityMetaData.isDocumentKind) {
+      ec.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES);
+   } else {
+      ec.check(parsed.params.length === 0, WFEID.TEXTDECL_NO_ATTRIBUTES);
+      ec.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
    }
 
-   err.check(!parsed.close, WFEID.XMLDECL_NO_CLOSE);
+   ec.check(!parsed.close, WFEID.XMLDECL_NO_CLOSE);
 }
 
 /**********************************************************************\

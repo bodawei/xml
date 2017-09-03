@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
-import { XmlWarning } from '../error';
+import { WellFormedError, XmlWarning } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
 import * as declaration from './declaration.js';
@@ -137,7 +136,6 @@ function parseClose(source, parsed, propName, deliverParsed) {
 
 function checkWellFormed(parsed, ec, entityMetaData) {
    const enNameText = textOrBlank(parsed.name);
-   ec.setPos(parsed.open);
 
    declaration.checkWellFormed(parsed, ec, entityMetaData);
 

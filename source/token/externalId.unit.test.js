@@ -414,7 +414,7 @@ describe('externalId', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_NO_LEADING_SPACE,
             params: undefined,
-            lastPosition: undefined,
+            lastPosition: parsed.idType,
          });
       });
 
