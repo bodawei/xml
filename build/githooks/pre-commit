@@ -20,16 +20,23 @@ read -p "Bug: " bug
 read -p "Kind [feat, fix, BREAKING CHANGE]: " KIND
 
 if [ "$KIND" == "" -o "$KIND" == "feat" ]; then
-   KIND="feature"
+   KIND="feat"
 elif [ "$KIND" != "fix" -a "$KIND" != "BREAKING CHANGE" ]; then
    echo "Kind is not one of the required values: $KIND "
    exit -1
 fi
 
-cat << EOF > "${PRE_COMMIT_MSG_LOC}"
-$bug
+if [ "$KIND" = "BREAKING CHANGE" ]; then
+   MSG="BREAKING CHANGE"
+   KIND="feat"
+fi
 
-$KIND:
+cat << EOF > "${PRE_COMMIT_MSG_LOC}"
+$KIND():
+
+$MSG
+
+$bug
 EOF
 
 node "${UPDATE_PACKAGE_SCRIPT}" $KIND

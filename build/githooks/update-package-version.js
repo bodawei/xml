@@ -13,30 +13,33 @@ function computeVersion(logs, final) {
 
    for (let index = logs.length - 1; index >= -1; index--) {
       let body;
+      let subject = '';
 
       if (index === -1) {
          body = final;
       } else {
-         body = logs[index].subject;
+         body = logs[index].body;
+         subject = logs[index].subject;
       }
 
-      if (body.indexOf('fix') === 0) {
-console.log('PAT', body);
-         version = semver.inc(version, 'patch');
-      } else if (body.indexOf('feat') === 0) {
-console.log('MIN', body);
-         version = semver.inc(version, 'minor');
-      } else if (body.indexOf('BREAKING CHANGE') === 0) {
-console.log('MAJ', body);
-         version = semver.inc(version, 'major');
-      } else {
-         //console.log('ERROR: Commit message has no keyword.', body);
-      }
-   }
+      if (body.indexOf('BREAKING CHANGE') !== -1) {
+          version = semver.inc(version, 'major');
+       } else {
+         if (subject.indexOf('fix') === 0) {
+         console.log('FIX', subject);
+            version = semver.inc(version, 'patch');
+         } else if (subject.indexOf('feat') === 0) {
+         console.log('FEAT', subject);
+            version = semver.inc(version, 'minor');
+         } else {
+//            console.log('ERROR: Commit message has no keyword.', body);
+         }
+       }
 
 console.log('VERSION: ', version);
    return version;
 }
+
 
 function updateVersion(version) {
    const packageString = fs.readFileSync('./package.json');
