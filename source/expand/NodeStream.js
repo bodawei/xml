@@ -2,7 +2,6 @@
 
 import { Transform } from 'readable-stream';
 
-//import { WellFormedError } from '../error';
 import { ParsedStream } from '../parse';
 import { TokenStream } from '../tokenize';
 import {
