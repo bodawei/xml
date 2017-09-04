@@ -67,14 +67,54 @@ class RangeMaker {
 
 class MockLTokenSource {
 
-   constructor(returnValues, index = 0, row = 0, column = 0) {
+   /*
+    * We can accept
+    *  - a string: It gets mapped to [ ltoken(str) ]
+    *  - undefined: It gets mapped to [ undefined ]
+    *  - A PEEK: It gets mapped to [ ltoken(next str) ]
+    *  - An array with a string first element: [ ltoken(str), ...]
+    *  - An array with a PEEK in the first element: [ ltoken(next str) ]
+    */
+   constructor(expectedValues, index = 0, row = 0, column = 0) {
       const makeToken = makeLTokenMaker(undefined, index, row, column);
-      this.returnValues = returnValues.map((entry) => {
+
+      this.expectedValues = expectedValues.map((entry) => {
          if (typeof entry === 'string') {
-            return makeToken(entry);
+            return { token: makeToken(entry) };
+         } else if (Array.isArray(entry)) {
+            if (typeof entry[0] === 'string') {
+               entry[0] = makeToken(entry[0]);
+            }
+            return {
+               token: entry[0],
+               type: entry[1],
+               param: entry[2],
+            };
          }
-         return entry;
+
+         return { token: entry };
       });
+
+      // Replace PEEK's with the next value
+      for (let index = this.expectedValues.length - 1; index >= 0; index--) {
+         if (!this.expectedValues[index].token) {
+            continue;
+         }
+
+         if (this.expectedValues[index].token.type === PEEK) {
+            const following = this.expectedValues[index + 1];
+            const peekString = this.expectedValues[index].token.value;
+            const token = new LToken(peekString, peekString, new Range(new EntityLocation(),
+               following.token.range[0].startIndex,
+               following.token.range[0].startRow,
+               following.token.range[0].startColumn,
+               following.token.range[0].startIndex + peekString.length,
+               following.token.range[0].startRow,
+               following.token.range[0].startColumn + peekString.length));
+
+            this.expectedValues[index].token = token;
+         }
+      }
       this.queuedCalls = [];
 
       this.extractToObject = spyOn(this, 'extractToObject').and.callThrough();
@@ -104,6 +144,7 @@ class MockLTokenSource {
 
       this.queuedCalls.push({
          type,
+         params,
          callback,
       });
    }
@@ -115,40 +156,45 @@ class MockLTokenSource {
 
          calls.forEach((qc) => {
             if (qc.obj) {
-               if (this.returnValues.length === 0) {
+               if (this.expectedValues.length === 0) {
                   throw new Error(`NO value provided to "${qc.name}" in MockLTokenSource.`);
                }
 
-               qc.obj[qc.name] = this._getAdjustedValue();
+               qc.obj[qc.name] = this._getAdjustedValue(qc);
             } else {
-               if (this.returnValues.length === 0) {
+               if (this.expectedValues.length === 0) {
                   throw new Error(`NO value provided for extraction type "${qc.type}" in MockLTokenSource.`);
                }
 
-               qc.callback(this._getAdjustedValue());
+               qc.callback(this._getAdjustedValue(qc));
             }
          });
       }
    }
 
-   _getAdjustedValue() {
-      let value = this.returnValues.shift();
+   _getAdjustedValue(actualCall) {
+      const expected = this.expectedValues.shift();
 
-      if (value === MockLTokenSource.PEEK) {
-         value = this.returnValues[0]; // return the next
-      } else if (value && value.type === PEEK) {
-         const next = this.returnValues[0];
-         value = new LToken(value.value, value.value, new Range(new EntityLocation(),
-            next.range[0].startIndex,
-            next.range[0].startRow,
-            next.range[0].startColumn,
-            next.range[0].startIndex + value.value.length,
-            next.range[0].startRow,
-            next.range[0].startColumn + value.value.length
-         ));
+      if (expected.type && expected.type !== actualCall.type) {
+         throw new Error('Type of call did not match expectation. ' +
+            `Expected "${expected.type}" but got "${actualCall.type}".`);
       }
 
-      return value;
+      if (expected.param) {
+         if (Array.isArray(expected.param)) {
+            for (let paramIndex = 0; paramIndex < expected.param.length; paramIndex++) {
+               if (expected.param[paramIndex] !== actualCall.params[paramIndex]) {
+                  throw new Error('Parameters passed to LTokenSource did not match expectation. ' +
+                     `Expected "${expected.param[paramIndex]}" but got "${actualCall.params[paramIndex]}".`);
+               }
+            }
+         } else if (expected.param !== actualCall.params) {
+            throw new Error('Parameters passed to LTokenSource did not match expectation. ' +
+               `Expected "${expected.param}" but got "${actualCall.params}".`);
+         }
+      }
+
+      return expected.token;
    }
 }
 

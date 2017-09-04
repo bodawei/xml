@@ -11,7 +11,7 @@ import * as pi from './processingInstruction.js';
 import * as quotedValue from './common/quotedValue.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
-describe('xmlDeclaration', () => {
+describe('xmlDeclaration (unit)', () => {
 
    describe('parse()', () => {
       let mockSource;

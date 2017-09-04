@@ -18,7 +18,7 @@ describe('quotedValue', () => {
       it('does a basic parse', () => {
          const container = {};
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('"'),
             '"',
             'blah',
             '"',
@@ -39,7 +39,7 @@ describe('quotedValue', () => {
       it('acepts single quotes', () => {
          const container = {};
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('"'),
             '\'',
             'blah',
             '\'',
@@ -60,7 +60,7 @@ describe('quotedValue', () => {
       it('fills in a blank string if there is nothing between the quotes', () => {
          const container = {};
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('"'),
             '"',
             undefined,
             '"',

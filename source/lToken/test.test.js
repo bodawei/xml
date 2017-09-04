@@ -63,6 +63,40 @@ describe('lToken test utils', () => {
          }).toThrowError('NO value provided to "name" in MockLTokenSource.');
       });
 
+      it('throws an error if the operation type does not match the expected', () => {
+         const mock = new MockLTokenSource([
+            [ 'one', 'all' ],
+         ]);
+
+         expect(() => {
+            mock.extract('word', [], () => {});
+            mock.respondInAsyncTime();
+         }).toThrowError('Type of call did not match expectation. Expected "all" but got "word".');
+      });
+
+      it('throws an error if the operation param do not match', () => {
+         const mock = new MockLTokenSource([
+            [ 'one', 'word', '<' ],
+         ]);
+
+         expect(() => {
+            mock.extract('word', [], () => {});
+            mock.respondInAsyncTime();
+         }).toThrowError('Parameters passed to LTokenSource did not match expectation. Expected "<" but got "".');
+      });
+
+      it('throws an error if the operation param is an array and does not match', () => {
+         const mock = new MockLTokenSource([
+            [ 'one', 'word', [ '<', '!' ] ],
+         ]);
+
+         expect(() => {
+            mock.extract('word', [ '<' ], () => {});
+            mock.respondInAsyncTime();
+         }).toThrowError('Parameters passed to LTokenSource did not match expectation. ' +
+            'Expected "!" but got "undefined".');
+      });
+
    });
 
 });

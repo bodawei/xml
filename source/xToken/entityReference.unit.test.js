@@ -21,13 +21,13 @@ describe('entityReference', () => {
          expectedLToken = makeLTokenMaker();
       });
 
-      it('does a simple parse', () => {
+      it('does a full parse', () => {
          mockSource = new MockLTokenSource([
-            '&',
-            ' ',
-            'entityName',
-            ' ',
-            ';',
+            [ '&', 'match', '&' ],
+            [ ' ', 'space' ],
+            [ 'entityName', 'word', [ ';' ] ],
+            [ ' ', 'space' ],
+            [ ';', 'match', ';' ],
          ]);
 
          entityReference.parse(mockSource, callback);

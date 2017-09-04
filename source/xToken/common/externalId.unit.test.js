@@ -9,7 +9,7 @@ import { WellFormedError } from '../../error';
 import * as externalId from './externalId.js';
 import * as quotedValue from './quotedValue.js';
 
-describe('externalId', () => {
+describe('externalId (unit)', () => {
 
    describe('parse()', () => {
       let mockSource;
@@ -25,7 +25,7 @@ describe('externalId', () => {
 
       it('returns simple values', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
             // quotedValue
@@ -46,7 +46,7 @@ describe('externalId', () => {
 
       it('only finds a SystemLiteral if that is all that is offered', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('SYSTEM'),
             'SYSTEM',
             ' ',
             undefined,  // check forndata
@@ -87,7 +87,7 @@ describe('externalId', () => {
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
             // quotedValue
@@ -108,7 +108,7 @@ describe('externalId', () => {
 
       it('does not mind if public or ndata are the wrong case', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('pUbLiC'),
             'pUbLiC',
             ' ',
             // quotedValue
@@ -130,7 +130,7 @@ describe('externalId', () => {
       it('stops if it does not find an open quote', () => {
          quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
             'x',
@@ -148,7 +148,7 @@ describe('externalId', () => {
 
       it('does not mind if, illegally, no space PUBLIC and PublicLiteral', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             undefined,
             // quotedValue
@@ -170,7 +170,7 @@ describe('externalId', () => {
 
       it('does not mind if, illegally, no space between public and system literals', () => {
          mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK,
+            MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
             // quotedValue
