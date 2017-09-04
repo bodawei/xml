@@ -9,7 +9,7 @@ import {
 
 import EntityManager from './EntityManager.js';
 
-describe('EntityManager', () => {
+describe('EntityManager (unit)', () => {
    let manager;
 
    beforeEach(() => {
@@ -258,7 +258,7 @@ describe('EntityManager', () => {
       });
 
       it('adds an external so it overrides the default', (done) => {
-         manager.addEntityFromExternalSubset(makeToken('amp', 'one'), EntityManager.EXTERNAL_SUBSET);
+         manager.addEntityFromExternalSubset(makeToken('amp', 'one'));
 
          expectNameToLookupValue('amp', 'one', done);
       });

@@ -17,12 +17,17 @@ import {
 
 class ParsedStream extends stream.Readable {
 
-   constructor(metaData = new EntityMetaData()) {
+   constructor(metaDataOrTokenSource) {
       super({
          objectMode: true,
       });
 
-      this._lTokenSource = new LTokenSource(defaultExtractors, metaData);
+      if (metaDataOrTokenSource instanceof LTokenSource) {
+         this._lTokenSource = metaDataOrTokenSource;
+      } else {
+         this._lTokenSource = new LTokenSource(defaultExtractors, metaDataOrTokenSource || new EntityMetaData());
+      }
+
       this._reportedMetaData = false;
    }
 

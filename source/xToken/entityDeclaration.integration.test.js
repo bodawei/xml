@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, ErrorCollector } from '../basic';
+import { EntityLocation, EntityMetaData, ErrorCollector } from '../basic';
 import { WellFormedError, XmlWarning } from '../error';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import { makeLTokenMaker } from '../lToken/test';
@@ -85,6 +85,45 @@ describe('entityDeclaration', () => {
             entityDeclaration.checkWellFormed(result, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      });
+
+   });
+
+   describe('makeToken()', () => {
+      let parsed;
+      let expectedLToken;
+      let emd;
+      let source;
+
+      beforeEach(() => {
+         expectedLToken = makeLTokenMaker();
+         parsed = {
+            open: expectedLToken('<!'),
+            declType: expectedLToken('ENTITY'),
+            postDeclTypeSpace: expectedLToken('\t'),
+         };
+         emd = new EntityMetaData();
+         source = new LTokenSource(defaultExtractors, emd);
+      });
+
+      it('creates a token with the externalLoc set', (done) => {
+         source.addText('entityName SYSTEM "sys.xml" >');
+         entityDeclaration.parse(source, parsed, (parsed) => {
+            const token = entityDeclaration.makeToken(parsed);
+
+            expect(token.externalLoc).toEqual(new EntityLocation('sys.xml'));
+            done();
+         });
+      });
+
+      it('adds the token to the lToken list', (done) => {
+         source.addText('entityName SYSTEM "sys.xml" >');
+         entityDeclaration.parse(source, parsed, (parsed) => {
+            const token = entityDeclaration.makeToken(parsed);
+
+            expect(token.lTokens[8].text).toEqual('sys.xml');
             done();
          });
       });

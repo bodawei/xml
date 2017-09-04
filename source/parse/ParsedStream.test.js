@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { LTokenSource } from '../lToken';
+import { defaultExtractors, LTokenSource } from '../lToken';
 import {
    charData,
    elementEnd,
@@ -27,6 +27,15 @@ describe('ParsedStream (unit)', () => {
          const stream = new ParsedStream(entityMetaData);
 
          expect(stream._lTokenSource.metaData).toBe(entityMetaData);
+      });
+
+      it('uses the passed token source', () => {
+         const entityMetaData = new EntityMetaData();
+         const tokenSource = new LTokenSource(defaultExtractors, entityMetaData);
+
+         const stream = new ParsedStream(tokenSource);
+
+         expect(stream._lTokenSource).toBe(tokenSource);
       });
 
    });

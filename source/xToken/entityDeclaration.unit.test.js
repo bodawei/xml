@@ -9,13 +9,14 @@ import { WellFormedError } from '../error';
 
 import * as declaration from './declaration.js';
 import * as entityDeclaration from './entityDeclaration.js';
+import * as text from './text.js';
 import * as externalId from './common/externalId.js';
 import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
 
 const NO_PARAMS = [ 'char', 'space', 'peekChar', 'peekSpace' ];
 
-describe('entityDeclaration', () => {
+describe('entityDeclaration (unit)', () => {
 
    describe('parse()', () => {
       let mockSource;
@@ -659,6 +660,7 @@ describe('entityDeclaration', () => {
       beforeEach(() => {
          expectedLToken = makeLTokenMaker();
          spyOn(quotedValue, 'appendLTokens');
+         spyOn(externalId, 'makeTokenCompatible');
          spyOn(externalId, 'appendLTokens');
       });
 
@@ -671,6 +673,17 @@ describe('entityDeclaration', () => {
          const token = entityDeclaration.makeToken(parsed);
 
          expect(quotedValue.appendLTokens).toHaveBeenCalledWith('literal', token.lTokens, parsed);
+      });
+
+      it('calls externalId.makeTokenCompatible()', () => {
+         const parsed = {
+            name: expectedLToken('entityName'),
+            externalId: { externalId: true },
+         };
+
+         entityDeclaration.makeToken(parsed);
+
+         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(parsed.externalId);
       });
 
       it('calls externalId.appendLTokens()', () => {
@@ -689,12 +702,14 @@ describe('entityDeclaration', () => {
             name: expectedLToken('entityName'),
             literalValue: expectedLToken('value'),
          };
+         const expectedText = new text.Token('value', [ parsed.literalValue ]);
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.Token('entityName', 'value', {}, '', [
-            parsed.name,
-         ]));
+         expect(token).toEqual(new entityDeclaration.Token('entityName', [ expectedText ],
+            undefined, '', [
+               parsed.name,
+            ]));
       });
 
       it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
@@ -703,13 +718,15 @@ describe('entityDeclaration', () => {
             name: expectedLToken('entityName'),
             literalValue: expectedLToken('value'),
          };
+         const expectedText = new text.Token('value', [ parsed.literalValue ]);
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', 'value', {}, '', [
-            parsed.parameter,
-            parsed.name,
-         ]));
+         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', [ expectedText ],
+            undefined, '', [
+               parsed.parameter,
+               parsed.name,
+            ]));
       });
 
       it('returns a entity declaration with a blank name if there is no name', () => {
@@ -717,10 +734,11 @@ describe('entityDeclaration', () => {
             name: undefined,
             literalValue: expectedLToken('value'),
          };
+         const expectedText = new text.Token('value', [ parsed.literalValue ]);
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.Token('', 'value', {}, '', []));
+         expect(token).toEqual(new entityDeclaration.Token('', [ expectedText ], undefined, '', []));
       });
 
       it('returns a entity declaration with an undefined value if there is no value', () => {
@@ -730,7 +748,7 @@ describe('entityDeclaration', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(token).toEqual(new entityDeclaration.Token('aName', undefined, {}, '', [
+         expect(token).toEqual(new entityDeclaration.Token('aName', undefined, undefined, '', [
             parsed.name,
          ]));
       });

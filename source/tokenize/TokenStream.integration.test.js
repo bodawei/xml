@@ -13,6 +13,7 @@ import {
    elementEnd,
    elementStart,
    entityReference,
+   text,
    xmlDeclaration,
 } from '../xToken';
 
@@ -110,18 +111,21 @@ describe('TokenStream (integration)', () => {
    describe('ENTITY', () => {
 
       it('do a simple end to end process', (done) => {
+         const lTokens = [
+            makeLToken('<!'),
+            makeLToken('ENTITY'),
+            makeLToken(' '),
+            makeLToken('entityName'),
+            makeLToken(' '),
+            makeLToken('"'),
+            makeLToken('value'),
+            makeLToken('"'),
+            makeLToken('>'),
+         ];
+         const value = new text.Token('value', [ lTokens[6] ]);
+
          expectInputToProduce('<!ENTITY entityName "value">', [
-            new entityDeclaration.Token('entityName', 'value', {}, '', [
-               makeLToken('<!'),
-               makeLToken('ENTITY'),
-               makeLToken(' '),
-               makeLToken('entityName'),
-               makeLToken(' '),
-               makeLToken('"'),
-               makeLToken('value'),
-               makeLToken('"'),
-               makeLToken('>'),
-            ]),
+            new entityDeclaration.Token('entityName', [ value ], undefined, '', lTokens),
          ], done);
       });
 

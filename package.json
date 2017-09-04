@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.28.0",
+   "version": "0.10.0",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -58,7 +58,7 @@
       "gulp-jasmine": "^2.4.2",
       "npm": "^3.10.10",
       "nyc": "^11.1.0",
-      "xclap": "^0.2.9",
+      "xclap": "^0.2.12",
       "xclap-cli": "^0.1.2"
    },
    "x-nyc": {

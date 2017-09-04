@@ -2,6 +2,8 @@
 /* eslint-env jasmine */
 
 import { makeLTokenMaker } from '../lToken/test';
+import { EntityMetaData } from '../basic';
+import { defaultExtractors, LTokenSource } from '../lToken';
 
 import ParsedStream from './ParsedStream.js';
 
@@ -59,6 +61,35 @@ describe('ParsedStream (integration)', () => {
       parser.addText(input);
       parser.endText();
    }
+
+   describe('parameters', () => {
+
+      it('uses the provided LTokenSource', (done) => {
+         const emd = new EntityMetaData();
+         const source = new LTokenSource(defaultExtractors, emd);
+         parser = new ParsedStream(source);
+         const results = [];
+         const expecteds = [ {
+            type: 'CHARDATA',
+            text: makeLToken('blah'),
+         } ];
+         parser.on('data', (data) => {
+            results.push(data);
+         });
+         parser.on('end', () => {
+            expecteds.forEach((expected) => {
+               const actuals = results.filter((actual) => actual.type === expected.type);
+
+               expect(actuals[0]).toContainParsedProps(expected);
+            });
+            done();
+         });
+
+         source.addText('blah<elementName>');
+         source.endText();
+      });
+
+   });
 
    describe('CharData', () => {
 

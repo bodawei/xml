@@ -128,7 +128,6 @@ class EntityManager {
       }
 
       const source = new LTokenSource(defaultExtractors, new EntityMetaData());
-
       for (let index = 0; index < token.value.length; index++) {
          source.addText(token.value[index].text);
       }
