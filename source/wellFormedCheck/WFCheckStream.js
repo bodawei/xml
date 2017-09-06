@@ -145,6 +145,7 @@ class WFChecker extends stream.Transform {
 
             entityReference.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
+         // notation decl needs to be in dtd
          default:
             errorCollector = undefined;
       }

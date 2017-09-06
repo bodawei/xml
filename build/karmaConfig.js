@@ -70,7 +70,7 @@ module.exports = function karmaConfig(config) {
          reporters: [
             { type: 'json', file: 'coverage.json' },
             { type: 'json-summary', file: 'coverage-summary.json' },
-            // { type: 'html', subdir: 'report-html' },
+            { type: 'html', subdir: 'report-html' },
             { type: 'text', subdir: '.', file: 'text.txt' },
          ],
       },
@@ -79,9 +79,6 @@ module.exports = function karmaConfig(config) {
    // Need to configure this "externally" for the dynamic key. note: Order matters
    config.preprocessors[SOURCE_DIR + '/**/*.js'] = [ 'browserify' ];
    config.preprocessors[SOURCE_DIR + '/*.js'] = [ 'coverage' ];
-   config.preprocessors[SOURCE_DIR + '/error/*.js'] = [ 'coverage' ];
-   config.preprocessors[SOURCE_DIR + '/shared/*.js'] = [ 'coverage' ];
-   config.preprocessors[SOURCE_DIR + '/meta/*.js'] = [ 'coverage' ];
    config.preprocessors[BUILD_DIR + '/**/*.js'] = [ 'browserify' ];
    config.preprocessors[BUILD_DIR + '*.js'] = [ 'coverage' ];
 };

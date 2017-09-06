@@ -7,8 +7,6 @@ import { WellFormedError } from '../error';
 
 import * as entityReference from './entityReference.js';
 
-const NO_PARAMS = [ 'char', 'space', 'peekChar', 'peekSpace' ];
-
 describe('entityReference', () => {
 
    describe('parse()', () => {
@@ -63,43 +61,6 @@ describe('entityReference', () => {
             postEntityNameSpace: undefined,
             close: expectedLToken(';'),
          });
-      });
-
-      describe('terminators', () => {
-
-         it('passes quotes and > as terminators for getting the name', () => {
-            mockSource = new MockLTokenSource([
-               '&',
-               undefined,
-               'entityName',
-               undefined,
-               ';',
-            ]);
-
-            entityReference.parse(mockSource, callback);
-            mockSource.respondInAsyncTime();
-
-            // TODO Generalize this
-            const params = mockSource.extractToObject.calls.allArgs().reduce((assembled, args) => {
-               if (NO_PARAMS.indexOf(args[0]) === -1) {
-                  assembled.push(args[1]);
-               }
-               return assembled;
-            }, []);
-            mockSource.extract.calls.allArgs().reduce((assembled, args) => {
-               if (NO_PARAMS.indexOf(args[0]) === -1) {
-                  assembled.push(args[1]);
-               }
-               return assembled;
-            }, params);
-
-            expect(params).toEqual([
-               '&',
-               [ ';' ],
-               ';',
-            ]);
-         });
-
       });
 
    });

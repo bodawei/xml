@@ -3,9 +3,8 @@
 
 import { EntityMetaData } from '../basic';
 import { MockErrorCollector } from '../basic/test';
-import { XmlWarning } from '../error';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
-import { WellFormedError } from '../error';
+import { WellFormedError, XmlWarning } from '../error';
 
 import * as declaration from './declaration.js';
 import * as entityDeclaration from './entityDeclaration.js';
@@ -13,8 +12,6 @@ import * as text from './text.js';
 import * as externalId from './common/externalId.js';
 import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
-
-const NO_PARAMS = [ 'char', 'space', 'peekChar', 'peekSpace' ];
 
 describe('entityDeclaration (unit)', () => {
 
@@ -429,7 +426,7 @@ describe('entityDeclaration (unit)', () => {
          it('passes quotes and > as terminators for getting the name', () => {
             mockSource = new MockLTokenSource([
                MockLTokenSource.PEEK('e'),
-               'entityName',
+               [ 'entityName', 'word', [ '>' ] ],
                ' ',
                undefined,
                undefined,
@@ -440,37 +437,6 @@ describe('entityDeclaration (unit)', () => {
             mockSource.respondInAsyncTime();
 
             expect(mockSource.extractToObject.calls.argsFor(0)[1]).toEqual([ '>', '"', '\'' ]);
-         });
-
-         it('passes > as terminators all other requests', () => {
-            mockSource = new MockLTokenSource([
-               MockLTokenSource.PEEK('e'),
-               'entityName',
-               ' ',
-               undefined,
-               undefined,
-               '>',
-            ]);
-
-            entityDeclaration.parse(mockSource, {}, callback);
-            mockSource.respondInAsyncTime();
-
-            const allArgs = mockSource.extractToObject.calls.allArgs().concat(mockSource.extract.calls.allArgs());
-            allArgs.forEach((args) => {
-               if (NO_PARAMS.indexOf(args[0]) !== -1) {
-                  return;
-               }
-               // skip the  name call
-               if (args[1].length === 3 && args[0] === 'word') {
-                  return;
-               }
-               // skip the match one
-               if (args[1] === '>' && args[0] === 'match') {
-                  return;
-               }
-
-               expect(args[1]).toEqual([ '>' ]);
-            });
          });
 
       });
