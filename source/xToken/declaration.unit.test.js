@@ -8,8 +8,9 @@ import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import * as declaration from './declaration.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as entityDeclaration from './entityDeclaration.js';
+import * as notationDeclaration from './notationDeclaration.js';
 
-describe('declaration', () => {
+describe('declaration (unit)', () => {
 
    describe('parse()', () => {
       let mockSource;
@@ -64,6 +65,22 @@ describe('declaration', () => {
          mockSource.respondInAsyncTime();
 
          expect(entityDeclaration.parse).toHaveBeenCalled();
+      });
+
+      it('calls notationDeclaration.parse() if the declType is NOTATION', () => {
+         spyOn(notationDeclaration, 'parse');
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            undefined,
+            sourceLToken('NOTATION'),
+            undefined,
+         ]);
+
+         declaration.parse(mockSource, openLToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(notationDeclaration.parse).toHaveBeenCalled();
       });
 
       it('does not do any other parsing if no declaration type is found', () => {

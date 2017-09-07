@@ -14,6 +14,7 @@ import {
    elementStart,
    entityDeclaration,
    entityReference,
+   notationDeclaration,
    xmlDeclaration,
 } from '../xToken';
 
@@ -392,6 +393,35 @@ describe('WFCheckStream (unit)', () => {
 
       });
 
+   });
+
+   it('calls notationDeclaration.checkWellFormed() when encountering a notation declaration', () => {
+      spyOn(notationDeclaration, 'checkWellFormed');
+      const parsed = {
+         type: notationDeclaration.TYPE,
+         open: makeLToken('<!'),
+      };
+      checker.write(metaData);
+      checker.write(parsed);
+
+      const args = notationDeclaration.checkWellFormed.calls.argsFor(0);
+      expect(args[0]).toEqual(parsed);
+      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[2]).toEqual(metaData);
+   });
+
+   it('reports an error if a NOTATION declaration is encountered not in the DTD', () => {
+      checker._state = 'START';
+      checker.write(metaData);
+      const parsed = {
+         type: notationDeclaration.TYPE,
+         open: makeLToken('<!'),
+      };
+
+      spyOn(checker, 'push');
+      checker.write(parsed);
+
+      expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
    });
 
    it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {

@@ -14,6 +14,7 @@ import {
    elementEnd,
    entityDeclaration,
    entityReference,
+   notationDeclaration,
    xmlDeclaration,
 } from '../xToken';
 
@@ -145,7 +146,13 @@ class WFChecker extends stream.Transform {
 
             entityReference.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
-         // notation decl needs to be in dtd
+         case notationDeclaration.TYPE:
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
+            }
+
+            notationDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
          default:
             errorCollector = undefined;
       }

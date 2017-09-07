@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
+import { EntityLocation, EntityMetaData } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
@@ -13,6 +13,7 @@ import {
    elementEnd,
    elementStart,
    entityReference,
+   notationDeclaration,
    text,
    xmlDeclaration,
 } from '../xToken';
@@ -45,6 +46,10 @@ describe('TokenStream (integration)', () => {
 
          expecteds.forEach((expected) => {
             const actuals = results.filter((actual) => actual instanceof expected.constructor);
+
+            if (expected.lTokens && expected.lTokens.length === 0) {
+               actuals[0].lTokens = [];
+            }
 
             expect(actuals[0]).toEqual(expected);
          });
@@ -140,6 +145,16 @@ describe('TokenStream (integration)', () => {
                makeLToken('entityRef'),
                makeLToken(';'),
             ]),
+         ], done);
+      });
+
+   });
+
+   describe('NOTATIONDECL', () => {
+
+      it('do a simple end to end process', (done) => {
+         expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
+            new notationDeclaration.Token('myNotation', new EntityLocation('sys.xml', 'pub.xml'), []),
          ], done);
       });
 

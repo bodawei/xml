@@ -13,6 +13,7 @@ import {
    elementStart,
    entityDeclaration,
    entityReference,
+   notationDeclaration,
 } from '../xToken';
 
 class TokenStream extends stream.Transform {
@@ -51,6 +52,9 @@ class TokenStream extends stream.Transform {
             break;
          case entityReference.TYPE:
             this.push(entityReference.makeToken(parsed));
+            break;
+         case notationDeclaration.TYPE:
+            this.push(notationDeclaration.makeToken(parsed));
             break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));

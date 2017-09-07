@@ -8,6 +8,7 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as declaration from './declaration.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as entityDeclaration from './entityDeclaration.js';
+import * as notationDeclaration from './notationDeclaration.js';
 
 describe('declaration (integration)', () => {
 
@@ -51,6 +52,19 @@ describe('declaration (integration)', () => {
                declType: expectedLToken('ENTITY'),
                postDeclTypeSpace: expectedLToken(' '),
                name: expectedLToken('bar'),
+            });
+            done();
+         });
+      });
+
+      it('processes a notation start', (done) => {
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         source.addText('NOTATION bar>');
+
+         declaration.parse(source, openLToken, (result) => {
+            expect(result).toContainParsedProps({
+               type: notationDeclaration.TYPE,
             });
             done();
          });

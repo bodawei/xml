@@ -140,50 +140,49 @@ describe('WFCheckStream (integration)', () => {
 
    });
 
-   describe('ENTITYDECL', () => {
+   it('reports an error when an ENTITY declaration has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>', (results) => {
+         expect(results[3]).toEqual(new WellFormedError('ENTITYDECL_PERCENT_NO_TRAILING_SPACE',
+            [ 'entityName' ],
+            new Offset(new EntityLocation(), 46, 0, 46),
+            new Offset(new EntityLocation(), 36, 0, 36)
+         ));
+         done();
+      });
+   });
 
-      it('reports an error when the entity has the wrong syntax', (done) => {
-         expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>', (results) => {
-            expect(results[3]).toEqual(new WellFormedError('ENTITYDECL_PERCENT_NO_TRAILING_SPACE',
-               [ 'entityName' ],
-               new Offset(new EntityLocation(), 46, 0, 46),
+   it('reports an error when an entity reference has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><one>& entityRef;</one>', (results) => {
+         expect(results[3]).toEqual(new WellFormedError('REFERENCE_XTRA_SPACE',
+            [ 'entityRef' ],
+            new Offset(new EntityLocation(), 27, 0, 27),
+            new Offset(new EntityLocation(), 26, 0, 26)
+         ));
+         done();
+      });
+   });
+
+   it('reports an error when a NOTATION declaration has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!NOTATION $badName SYSTEM "sys.xml">]>',
+         (results) => {
+            expect(results[3]).toEqual(new WellFormedError('NOTATIONDECL_NAME_INVALID',
+               [ '$badName' ],
+               new Offset(new EntityLocation(), 47, 0, 47),
                new Offset(new EntityLocation(), 36, 0, 36)
             ));
-            expect(results[4].type).toEqual('ENTITYDECL');
             done();
          });
-      });
-
    });
 
-   describe('entity reference', () => {
-
-      it('reports an error when the entity has the wrong syntax', (done) => {
-         expectInputToProduce('<?xml version="1.0"?><one>& entityRef;</one>', (results) => {
-            expect(results[3]).toEqual(new WellFormedError('REFERENCE_XTRA_SPACE',
-               [ 'entityRef' ],
-               new Offset(new EntityLocation(), 27, 0, 27),
-               new Offset(new EntityLocation(), 26, 0, 26)
-            ));
-            done();
-         });
+   it('reports an error when an UNKNOWN declaration is found', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!BOGUS', (results) => {
+         expect(results[2]).toEqual(new WellFormedError('BANGITEM_UNKNOWN',
+            [ 'BOGUS' ],
+            new Offset(new EntityLocation(), 23, 0, 23),
+            new Offset(new EntityLocation(), 21, 0, 21)
+         ));
+         done();
       });
-
-   });
-
-   describe('UNKNOWNDECL', () => {
-
-      it('reports an error when the declaration is not complete', (done) => {
-         expectInputToProduce('<?xml version="1.0"?><!BOGUS', (results) => {
-            expect(results[2]).toEqual(new WellFormedError('BANGITEM_UNKNOWN',
-               [ 'BOGUS' ],
-               new Offset(new EntityLocation(), 23, 0, 23),
-               new Offset(new EntityLocation(), 21, 0, 21)
-            ));
-            done();
-         });
-      });
-
    });
 
    describe('XMLDECL', () => {
