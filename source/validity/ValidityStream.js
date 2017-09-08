@@ -7,6 +7,7 @@ import { ValidityError } from '../error';
 import {
    docTypeStart,
    elementStart,
+   notationDeclaration,
 } from '../xToken';
 
 class ValidityStream extends stream.Transform {
@@ -19,10 +20,18 @@ class ValidityStream extends stream.Transform {
       this._queued = [];
       this._docType = undefined;
       this._holding = false;
+      this._notations = {};
    }
 
    _transform(xToken, _, done) {
-      if (xToken instanceof docTypeStart.Token) {
+      if (xToken instanceof notationDeclaration.Token) {
+         if (this._notations[xToken.name]) {
+            this._queued.push(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ xToken.name ],
+               xToken.lTokens[0], xToken.lTokens[0]));
+         } else {
+            this._notations[xToken.name] = xToken;
+         }
+      } else if (xToken instanceof docTypeStart.Token) {
          this._docType = xToken;
          this._holding = true;
       } else if (!this._seenRoot && xToken instanceof elementStart.Token) {
@@ -47,6 +56,16 @@ class ValidityStream extends stream.Transform {
          this.push(xToken);
       }
 
+      done();
+   }
+
+   _flush(done) {
+      let token = this._queued.shift();
+
+      while (token) {
+         this.push(token);
+         token = this._queued.shift();
+      }
       done();
    }
 

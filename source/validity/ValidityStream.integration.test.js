@@ -32,4 +32,18 @@ describe('ValidityStream (integration)', () => {
       parser.endText();
    });
 
+   it('reports an error when the NOTATION is added twice', (done) => {
+      const results = [];
+      validator.on('data', result => results.push(result));
+      validator.on('end', () => {
+         expect(results[4]).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ],
+            new Offset(new EntityLocation(), 70, 0, 70), new Offset(new EntityLocation(), 68, 0, 68)));
+         done();
+      });
+
+      parser.addText('<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
+         '<!NOTATION one SYSTEM "-//foo">]>');
+      parser.endText();
+   });
+
 });
