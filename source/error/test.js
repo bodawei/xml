@@ -13,11 +13,9 @@ class MockErrorCollector {
       this.errors = [];
       this.setPos = this.setPos.bind(this);
       this.report = this.report.bind(this);
-      this.checkName = this.checkName.bind(this);
 
       this.setPos = jasmine.createSpy('setPosSpy').and.callFake(this.setPos);
       this.getErrors = jasmine.createSpy('getErrorsSpy');
-      this.checkName = jasmine.createSpy('checkNameSpy').and.callFake(this.checkName);
       this.report = jasmine.createSpy('reportSpy').and.callFake(this.report);
    }
 
@@ -40,18 +38,6 @@ class MockErrorCollector {
       }
 
       this.errors.push(info);
-   }
-
-   checkName(name, id, version, revision) {
-      this.errors.push({
-         lastPosition: this._lastNotNull,
-         position: this._lastPos,
-         params: name ? [ name.text ] : undefined,
-         name,
-         id,
-         version,
-         revision,
-      });
    }
 
    check(condition, id, params) {

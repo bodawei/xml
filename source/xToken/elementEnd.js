@@ -69,7 +69,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.ELEMENT_NO_NAME);
-   ec.checkName(parsed.name, WFEID.ELEMENT_NAME_INVALID, entityMetaData);
+   misc.checkName(parsed.name, ec, entityMetaData, WFEID.ELEMENT_NAME_INVALID);
    misc.checkWellFormedNameRecommendation(parsed.name, ec, entityMetaData,
       WARN.ELEMENT_NAME_XMLDASH_RESERVED,
       WARN.ELEMENT_NAME_XML_RESERVED);

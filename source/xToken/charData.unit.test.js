@@ -3,7 +3,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as misc from './common/misc.js';

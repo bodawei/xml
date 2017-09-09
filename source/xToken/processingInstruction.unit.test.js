@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as processingInstruction from './processingInstruction.js';

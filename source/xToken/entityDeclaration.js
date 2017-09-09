@@ -11,7 +11,6 @@ import * as quotedValue from './common/quotedValue.js';
 import {
    pushNonBottom,
    textOrBlank,
-   toLocalParsing,
 } from './common/util.js';
 
 /**********************************************************************\
@@ -69,7 +68,7 @@ class ParameterEntityDeclaration extends EntityDeclaration {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = toLocalParsing(ENTITYDECL, declarationParsing);
+   const parsed = declaration.toLocalParsing(ENTITYDECL, declarationParsing);
 
    source.extract('peekChar', (lToken) => {
       if (!lToken) {
@@ -140,7 +139,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.ENTITYDECL_NO_NAME);
-   ec.checkName(parsed.name, WFEID.ENTITYDECL_NAME_INVALID, parsed.open);
+   misc.checkName(parsed.name, ec, entityMetaData, WFEID.ENTITYDECL_NAME_INVALID);
    misc.checkWellFormedNameRecommendation(parsed.name, ec, entityMetaData,
       WARN.ENTITYDECL_NAME_XMLDASH_RESERVED, WARN.ENTITYDECL_NAME_XML_RESERVED);
    ec.setPos(parsed.postNameSpace);

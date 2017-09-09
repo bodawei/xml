@@ -32,7 +32,7 @@ if [ "$KIND" = "BREAKING CHANGE" ]; then
 fi
 
 cat << EOF > "${PRE_COMMIT_MSG_LOC}"
-$KIND():
+$KIND()
 
 $MSG
 

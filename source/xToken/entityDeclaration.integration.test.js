@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, ErrorCollector } from '../basic';
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityLocation, EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import { makeLTokenMaker } from '../lToken/test';
 
@@ -49,6 +49,18 @@ describe('entityDeclaration', () => {
             entityDeclaration.checkWellFormed(result, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_CLOSE_QUOTE);
+            done();
+         });
+      });
+
+      it('reports an error when name used an invalid char(check misc.checkName())', (done) => {
+         source.addText('$foo "frog">');
+         entityDeclaration.parse(source, parsed, (result) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
+
+            entityDeclaration.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_NAME_INVALID);
             done();
          });
       });

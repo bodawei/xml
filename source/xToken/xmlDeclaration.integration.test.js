@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, ErrorCollector } from '../basic';
-import { WellFormedError } from '../error';
+import { EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError } from '../error';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import { makeLTokenMaker } from '../lToken/test';
 
@@ -48,6 +48,18 @@ describe('xmlDeclaration (integration)', () => {
             xmlDeclaration.checkWellFormed(result, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      });
+
+      it('reports an error when a a name is bad (check misc.checkName())', (done) => {
+         source.addText('ver$sion="1.0" encoding="bad\u0000"?>');
+         xmlDeclaration.parse(source, parsed, (result) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
+
+            xmlDeclaration.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
             done();
          });
       });

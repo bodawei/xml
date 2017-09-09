@@ -2,13 +2,13 @@
 
 import { WellFormedError } from '../error';
 
-import * as misc from './common/misc.js';
 import {
    pushNonBottom,
    textOrBlank,
    textOrUndef,
 } from './common/util.js';
 import * as pi from './processingInstruction.js';
+import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
 import { Token as XmlToken } from './xmlToken.js';
 
@@ -136,7 +136,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
          ec.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
-      ec.checkName(param.name, WFEID.ATTRIBUTE_INVALID_NAME, entityMetaData);
+      misc.checkName(param.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
       if (XMLDECL_PARAMS[lcName]) {
          ec.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }

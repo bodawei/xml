@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, ErrorCollector } from '../basic';
-import { WellFormedError } from '../error';
+import { EntityLocation, EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { defaultExtractors, LTokenSource } from '../lToken';
 import { makeLTokenMaker } from '../lToken/test';
 
@@ -71,9 +71,23 @@ describe('notationdeDlaration (integration)', () => {
          });
       });
 
+      it('calls misc.checkName() to report on invalid names', (done) => {
+         const source = new LTokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('$foo system "sys.dtd">');
+         source.endText();
+         notationDeclaration.parse(source, parsedDeclaration, (result) => {
+            const ec = new ErrorCollector(result.open, WellFormedError);
+
+            notationDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
+            done();
+         });
+      });
+
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', (done) => {
          const source = new LTokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('f\u0000o system "sys.dtd">');
+         source.addText('xmlOne system "sys.dtd">');
          source.endText();
 
          notationDeclaration.parse(source, parsedDeclaration, (parsing) => {
@@ -81,7 +95,7 @@ describe('notationdeDlaration (integration)', () => {
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
+            expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
             done();
          });
       });

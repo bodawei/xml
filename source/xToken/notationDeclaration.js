@@ -5,7 +5,6 @@ import { WellFormedError, XmlWarning } from '../error';
 import {
    pushNonBottom,
    textOrBlank,
-   toLocalParsing,
 } from './common/util.js';
 import * as declaration from './declaration.js';
 import * as externalId from './common/externalId.js';
@@ -49,7 +48,7 @@ class NotationDeclaration extends XmlToken {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = toLocalParsing(NOTATIONDECL, declarationParsing);
+   const parsed = declaration.toLocalParsing(NOTATIONDECL, declarationParsing);
 
    source.extractToObject('word', [ '>' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postNameSpace');
@@ -76,7 +75,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.NOTATIONDECL_NO_NAME);
-   ec.checkName(parsed.name, WFEID.NOTATIONDECL_NAME_INVALID, entityMetaData);
+   misc.checkName(parsed.name, ec, entityMetaData, WFEID.NOTATIONDECL_NAME_INVALID);
    misc.checkWellFormedNameRecommendation(parsed.name, ec, entityMetaData,
       WARN.NOTATIONDECL_NAME_XMLDASH_RESERVED,
       WARN.NOTATIONDECL_NAME_XML_RESERVED);

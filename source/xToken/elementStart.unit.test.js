@@ -3,14 +3,14 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError, XmlWarning } from '../error';
 
 import * as misc from './common/misc.js';
 import * as elementStart from './elementStart.js';
 
-describe('elementStart', () => {
+describe('elementStart (unit)', () => {
    let parsed;
    let sourceLToken;
 
@@ -90,10 +90,18 @@ describe('elementStart', () => {
          emd = new EntityMetaData();
          mockErrorCollector = new MockErrorCollector();
 
+         spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
-      it('asks the misc module to look for problems in the name', () => {
+      it('asks the misc module to look for errors in the name', () => {
+         elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(parsed.name,
+            mockErrorCollector, emd, WellFormedError.ID.ELEMENT_NAME_INVALID);
+      });
+
+      it('asks the misc module to look for warning problems in the name', () => {
          elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
@@ -101,7 +109,7 @@ describe('elementStart', () => {
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
       });
 
-      xit('reports no errors if everything is in order', () => {
+      it('reports no errors if everything is in order', () => {
          elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors).toEqual([]);
@@ -128,18 +136,6 @@ describe('elementStart', () => {
             id: WellFormedError.ID.ELEMENT_NO_NAME,
             params: undefined,
             lastPosition: undefined,
-         });
-      });
-
-      it('checks whether the name is valid', () => {
-         parsed.name.text = '$badName';
-
-         elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ELEMENT_NAME_INVALID,
-            params: [ '$badName' ],
-            position: parsed.name,
          });
       });
 

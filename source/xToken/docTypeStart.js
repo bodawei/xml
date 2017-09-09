@@ -5,10 +5,10 @@ import { WellFormedError } from '../error';
 import {
    pushNonBottom,
    textOrBlank,
-   toLocalParsing,
 } from './common/util.js';
 import * as externalId from './common/externalId.js';
 import * as declaration from './declaration.js';
+import * as misc from './common/misc.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 const WFEID = WellFormedError.ID;
@@ -62,7 +62,7 @@ class DocTypeStart extends XmlToken {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = toLocalParsing(DOCTYPE_START, declarationParsing);
+   const parsed = declaration.toLocalParsing(DOCTYPE_START, declarationParsing);
 
    source.extractToObject('word', [ '[', '>' ], parsed, 'name'); // look for quotes?
    source.extractToObject('space', undefined, parsed, 'postNameSpace');
@@ -88,7 +88,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    ec.setPos(parsed.name);
    ec.check(!parsed.name, WFEID.DOCTYPE_NO_NAME);
-   ec.checkName(parsed.name, WFEID.DOCTYPE_NAME_INVALID, entityMetaData);
+   misc.checkName(parsed.name, ec, entityMetaData, WFEID.DOCTYPE_NAME_INVALID);
 
    externalId.checkWellFormed(parsed.externalId, ec, entityMetaData);
 }

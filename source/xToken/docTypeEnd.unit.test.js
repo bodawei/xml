@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { MockErrorCollector } from '../basic/test';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 

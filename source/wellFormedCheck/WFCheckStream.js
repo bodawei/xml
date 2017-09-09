@@ -2,8 +2,8 @@
 
 import stream from 'readable-stream';
 
-import { ErrorCollector, EntityMetaData } from '../basic';
-import { WellFormedError } from '../error';
+import { EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError } from '../error';
 
 import {
    charData,

@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as declaration from './declaration.js';
@@ -11,6 +11,19 @@ import * as entityDeclaration from './entityDeclaration.js';
 import * as notationDeclaration from './notationDeclaration.js';
 
 describe('declaration (unit)', () => {
+   let defaultParsed;
+
+   beforeEach(() => {
+      const sourceLToken = makeLTokenMaker();
+      defaultParsed = {
+         type: declaration.TYPE,
+         open: sourceLToken('<!'),
+         postOpenSpace: sourceLToken(' '),
+         declType: sourceLToken('DOCTYPE'),
+         postDeclTypeSpace: sourceLToken(' '),
+      };
+
+   });
 
    describe('parse()', () => {
       let mockSource;
@@ -83,6 +96,23 @@ describe('declaration (unit)', () => {
          expect(notationDeclaration.parse).toHaveBeenCalled();
       });
 
+      it('does an ordinary full parsing', () => {
+         const sourceLToken = makeLTokenMaker();
+         const openLToken = sourceLToken('<!');
+         mockSource = new MockLTokenSource([
+            sourceLToken(' '),
+            sourceLToken('TESTVAL'),
+            sourceLToken(' '),
+         ]);
+         defaultParsed.declType.text = 'TESTVAL';
+         defaultParsed.declType.originalText = 'TESTVAL';
+
+         declaration.parse(mockSource, openLToken, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback.calls.allArgs()).toEqual([ [ defaultParsed ] ]);
+      });
+
       it('does not do any other parsing if no declaration type is found', () => {
          const sourceLToken = makeLTokenMaker();
          const expectedLToken = makeLTokenMaker();
@@ -131,73 +161,65 @@ describe('declaration (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let sourceLToken;
-      let parsed;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         sourceLToken = makeLTokenMaker();
-         parsed = {
-            type: declaration.TYPE,
-            open: sourceLToken('<!'),
-            postOpenSpace: undefined,
-            declType: sourceLToken('DOCTYPE'),
-            postDeclTypeSpace: sourceLToken(' '),
-         };
+         delete defaultParsed.postOpenSpace;
       });
 
       it('returns an an error collector', () => {
-         const errors = declaration.checkWellFormed(parsed, mockErrorCollector);
+         const errors = declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(errors).toEqual(mockErrorCollector);
       });
 
       it('reports an error if there is a space after the opening <!', () => {
-         parsed.postOpenSpace = sourceLToken(' ');
+         const sourceLToken = makeLTokenMaker();
+         defaultParsed.postOpenSpace = sourceLToken(' ');
 
-         declaration.checkWellFormed(parsed, mockErrorCollector);
+         declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.BANGITEM_OPEN_XTRA_SPACE_AFTER,
             params: undefined,
-            position: parsed.postOpenSpace,
+            position: defaultParsed.postOpenSpace,
          });
       });
 
       it('reports an error if there is no declaration type provided', () => {
-         delete parsed.declType;
+         delete defaultParsed.declType;
 
-         declaration.checkWellFormed(parsed, mockErrorCollector);
+         declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.BANGITEM_NO_DECLTYPE,
             params: undefined,
             position: undefined,
-            lastPosition: parsed.open,
+            lastPosition: defaultParsed.open,
          });
       });
 
       it('reports an error if the type is not capitalized', () => {
-         parsed.declType.text = 'docType';
+         defaultParsed.declType.text = 'docType';
 
-         declaration.checkWellFormed(parsed, mockErrorCollector);
+         declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.BANGITEM_DECLTYPE_INVALID_CASE,
             params: [ 'DOCTYPE', 'docType' ],
-            position: parsed.declType,
+            position: defaultParsed.declType,
          });
       });
 
       it('reports an error if the type is not a valid type', () => {
-         parsed.declType.text = 'BOGUSTYPE';
+         defaultParsed.declType.text = 'BOGUSTYPE';
 
-         declaration.checkWellFormed(parsed, mockErrorCollector);
+         declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.BANGITEM_UNKNOWN,
             params: [ 'BOGUSTYPE' ],
-            position: parsed.declType,
+            position: defaultParsed.declType,
          });
       });
 
@@ -206,21 +228,13 @@ describe('declaration (unit)', () => {
    describe('makeToken()', () => {
 
       it('returns a token with the tokens found in the parsed value', () => {
-         const sourceLToken = makeLTokenMaker();
-         const parsed = {
-            open: sourceLToken('<!'),
-            postOpenSpace: sourceLToken(' '),
-            declType: sourceLToken('DOCTYPE'),
-            postDeclTypeSpace: sourceLToken(' '),
-         };
-
-         const token = declaration.makeToken(parsed);
+         const token = declaration.makeToken(defaultParsed);
 
          expect(token).toEqual(new declaration.Token([
-            parsed.open,
-            parsed.postOpenSpace,
-            parsed.declType,
-            parsed.postDeclTypeSpace,
+            defaultParsed.open,
+            defaultParsed.postOpenSpace,
+            defaultParsed.declType,
+            defaultParsed.postDeclTypeSpace,
          ]));
       });
 
@@ -230,22 +244,31 @@ describe('declaration (unit)', () => {
 
       it('adds all declaration LTokens', () => {
          const results = [];
-         const sourceLToken = makeLTokenMaker();
-         const parsed = {
-            open: sourceLToken('<!'),
-            postOpenSpace: sourceLToken(' '),
-            declType: sourceLToken('DOCTYPE'),
-            postDeclTypeSpace: sourceLToken(' '),
-         };
 
-         declaration.appendLTokens(results, parsed);
+         declaration.appendLTokens(results, defaultParsed);
 
          expect(results).toEqual([
-            parsed.open,
-            parsed.postOpenSpace,
-            parsed.declType,
-            parsed.postDeclTypeSpace,
+            defaultParsed.open,
+            defaultParsed.postOpenSpace,
+            defaultParsed.declType,
+            defaultParsed.postDeclTypeSpace,
          ]);
+      });
+
+   });
+
+   describe('toLocalParsing()', () => {
+
+      it('adds all declaration items as well as the specified type', () => {
+         const results = declaration.toLocalParsing('foo', defaultParsed);
+
+         expect(results).toEqual({
+            type: 'foo',
+            open: defaultParsed.open,
+            postOpenSpace: defaultParsed.postOpenSpace,
+            declType: defaultParsed.declType,
+            postDeclTypeSpace: defaultParsed.postDeclTypeSpace,
+         });
       });
 
    });

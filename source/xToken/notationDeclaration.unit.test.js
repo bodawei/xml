@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
 import { XmlWarning } from '../error';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError } from '../error';
 
@@ -41,6 +41,24 @@ describe('notationdeDlaration (unit)', () => {
          externalId.parse.and.callFake((source, terminators, cb) => {
             cb({ externalId: true });
          });
+         spyOn(declaration, 'toLocalParsing').and.returnValues({
+            type: notationDeclaration.TYPE,
+         });
+      });
+
+      it('calls declaration.toLocalParsing()', () => {
+         const mockSource = new MockLTokenSource([
+            'name',
+            ' ',
+            undefined,
+            '>',
+         ]);
+         const decl = {};
+
+         notationDeclaration.parse(mockSource, decl, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(declaration.toLocalParsing).toHaveBeenCalledWith(notationDeclaration.TYPE, decl);
       });
 
       it('calls externalId.parse()', () => {
@@ -60,6 +78,11 @@ describe('notationdeDlaration (unit)', () => {
       });
 
       it('does a simple parse', () => {
+         // delete the things that our mocking of declaration will not return
+         delete defaultParsed.open;
+         delete defaultParsed.postOpenSpace;
+         delete defaultParsed.declType;
+         delete defaultParsed.postDeclTypeSpace;
          const mockSource = new MockLTokenSource([
             'notationName',
             ' ',
@@ -70,10 +93,6 @@ describe('notationdeDlaration (unit)', () => {
 
          notationDeclaration.parse(mockSource, {
             type: defaultParsed.type,
-            open: defaultParsed.open,
-            postOpenSpace: defaultParsed.postOpenSpace,
-            declType: defaultParsed.declType,
-            postDeclTypeSpace: defaultParsed.postDeclTypeSpace,
          }, callback);
          mockSource.respondInAsyncTime();
 
@@ -89,6 +108,7 @@ describe('notationdeDlaration (unit)', () => {
          mockErrorCollector = new MockErrorCollector();
          spyOn(declaration, 'checkWellFormed');
          spyOn(externalId, 'checkWellFormed');
+         spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
@@ -122,12 +142,13 @@ describe('notationdeDlaration (unit)', () => {
          });
       });
 
-      it('checks the name validity', () => {
-         notationDeclaration.checkWellFormed(defaultParsed, mockErrorCollector, new EntityMetaData());
+      it('calls misc.checkName() to report on bad names', () => {
+         const emd = new EntityMetaData();
 
-         expect(mockErrorCollector.checkName)
-            .toHaveBeenCalledWith(defaultParsed.name, WellFormedError.ID.NOTATIONDECL_NAME_INVALID,
-               new EntityMetaData());
+         notationDeclaration.checkWellFormed(defaultParsed, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(defaultParsed.name,
+            mockErrorCollector, emd, WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {

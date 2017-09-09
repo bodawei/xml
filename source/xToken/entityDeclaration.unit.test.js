@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError, XmlWarning } from '../error';
 
@@ -28,6 +28,26 @@ describe('entityDeclaration (unit)', () => {
             cb({ externalId: true });
          });
          spyOn(quotedValue, 'parse');
+         spyOn(declaration, 'toLocalParsing').and.returnValues({ type: 'ENTITYDECL' });
+      });
+
+      it('calls declaration.toLocalParsing()', () => {
+         mockSource = new MockLTokenSource([
+            MockLTokenSource.PEEK('e'),
+            'entityName',
+            ' ',
+            MockLTokenSource.PEEK('S'),
+            // Skipping externalId parsing here
+            ' ',
+            undefined,
+            '>',
+         ]);
+         const decl = {};
+
+         entityDeclaration.parse(mockSource, decl, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(declaration.toLocalParsing).toHaveBeenCalledWith('ENTITYDECL', decl);
       });
 
       it('calls quotedValue.parse()', () => {
@@ -49,10 +69,6 @@ describe('entityDeclaration (unit)', () => {
          expect(quotedValue.parse.calls.argsFor(0)[1]).toEqual(mockSource);
          expect(quotedValue.parse.calls.argsFor(0)[2]).toEqual({
             type: 'ENTITYDECL',
-            open: undefined,
-            postOpenSpace: undefined,
-            declType: undefined,
-            postDeclTypeSpace: undefined,
             name: makeToken('entityName'),
             postNameSpace: makeToken(' '),
          });
@@ -94,42 +110,11 @@ describe('entityDeclaration (unit)', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITYDECL',
-            open: undefined,
-            postOpenSpace: undefined,
-            declType: undefined,
-            postDeclTypeSpace: undefined,
             name: expectedLToken('entityName'),
             postNameSpace: expectedLToken(' '),
             externalId: { externalId: true },
             postExternalIdSpace: expectedLToken(' '),
             close: expectedLToken('>'),
-         });
-      });
-
-      it('uses whatever preliminary declaration values were passed in', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
-         mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK('e'),
-            'entityName',
-            ' ',
-            // Skipping externalId parsing here
-            ' ',
-            undefined,
-            '>',
-         ]);
-         entityDeclaration.parse(mockSource, {
-            open: 'a',
-            postOpenSpace: 'b',
-            declType: 'c',
-            postDeclTypeSpace: 'd',
-         }, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback).toContainParsedProps({
-            open: 'a',
-            postOpenSpace: 'b',
-            declType: 'c',
-            postDeclTypeSpace: 'd',
          });
       });
 
@@ -143,10 +128,6 @@ describe('entityDeclaration (unit)', () => {
 
          expect(callback.calls.allArgs()).toEqual([ [ {
             type: 'ENTITYDECL',
-            open: undefined,
-            postOpenSpace: undefined,
-            declType: undefined,
-            postDeclTypeSpace: undefined,
          } ] ]);
       });
 
@@ -464,6 +445,7 @@ describe('entityDeclaration (unit)', () => {
             close: expectedLToken('>'),
          };
          spyOn(declaration, 'checkWellFormed');
+         spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(misc, 'checkWellFormedText');
          spyOn(quotedValue, 'checkWellFormed');
@@ -508,11 +490,13 @@ describe('entityDeclaration (unit)', () => {
          });
       });
 
-      it('checks the name validity', () => {
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+      it('calls misc.checkName() to report on name validity', () => {
+         const emd = new EntityMetaData();
 
-         expect(mockErrorCollector.checkName)
-            .toHaveBeenCalledWith(parsed.name, WellFormedError.ID.ENTITYDECL_NAME_INVALID, parsed.open);
+         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(parsed.name,
+            mockErrorCollector, emd, WellFormedError.ID.ENTITYDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {

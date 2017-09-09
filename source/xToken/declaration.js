@@ -115,6 +115,20 @@ function appendLTokens(results, parsed) {
    pushNonBottom(results, parsed.postDeclTypeSpace);
 }
 
+/**********************************************************************\
+ Converts the parsing returned by declaraction.parse() into another type.
+\**********************************************************************/
+
+function toLocalParsing(type, declarationParsing) {
+   return {
+      type: type,
+      open: declarationParsing.open,
+      postOpenSpace: declarationParsing.postOpenSpace,
+      declType: declarationParsing.declType,
+      postDeclTypeSpace: declarationParsing.postDeclTypeSpace,
+   };
+}
+
 export {
    UNKNOWNDECL as TYPE,
    UnknownDeclaration as Token,
@@ -122,4 +136,5 @@ export {
    checkWellFormed,
    makeToken,
    appendLTokens,
+   toLocalParsing,
 };

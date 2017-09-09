@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../basic/test';
 import { WellFormedError } from '../error';
+import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as misc from './common/misc.js';
@@ -138,6 +138,7 @@ describe('xmlDeclaration (unit)', () => {
          };
          spyOn(pi, 'checkWellFormed');
          spyOn(quotedValue, 'checkWellFormed');
+         spyOn(misc, 'checkName');
          quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, cb) => {
             cb();
          });
@@ -162,6 +163,14 @@ describe('xmlDeclaration (unit)', () => {
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
 
          expect(pi.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
+      });
+
+      it('calls the misc.checkName() routine', () => {
+         const emd = new EntityMetaData();
+         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(parsed.params[0].name, mockErrorCollector, emd,
+            WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
       });
 
       it('reports no errors with ordinary parameters', () => {
@@ -270,19 +279,6 @@ describe('xmlDeclaration (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_ATTR_UNKNOWN,
             params: [ 'bogus' ],
-            position: parsed.params[2].name,
-         });
-      });
-
-      it('reports an error if the name is invalid', () => {
-         const makeToken = makeLTokenMaker();
-         parsed.params[2].name = makeToken('$badName');
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector,
-            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 2));
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.ATTRIBUTE_INVALID_NAME,
-            params: [ '$badName' ],
             position: parsed.params[2].name,
          });
       });
