@@ -27,7 +27,7 @@ describe('xmlDeclaration (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
+      xit('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
          parsed.postOpenSpace = expectedLToken(' ');
          source.addText('version="1.1"?>');
          xmlDeclaration.parse(source, parsed, (result) => {

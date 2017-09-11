@@ -1,7 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import * as charData from './charData.js';
 import * as declaration from './declaration.js';
+import * as instruction from './instruction.js';
+
+import * as charData from './charData.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
@@ -16,8 +18,10 @@ import * as processingInstruction from './processingInstruction.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 module.exports = {
-   charData,
    declaration,
+   instruction,
+
+   charData,
    docTypeStart,
    docTypeEnd,
    elementStart,

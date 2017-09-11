@@ -46,7 +46,7 @@ describe('processingInstruction', () => {
 
    });
 
-   describe('checkWellFormed()', () => {
+   xdescribe('checkWellFormed()', () => {
       let mockErrorCollector;
       let parsed;
       let expectedLToken;
