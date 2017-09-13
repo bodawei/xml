@@ -6,8 +6,9 @@ import { EntityMetaData } from '../basic';
 import { ErrorCollector, WellFormedError } from '../error';
 
 import {
-   charData,
    declaration,
+   instruction,
+   charData,
    docTypeEnd,
    docTypeStart,
    elementStart,
@@ -15,6 +16,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
+   processingInstruction,
    xmlDeclaration,
 } from '../xToken';
 
@@ -48,6 +50,12 @@ class WFChecker extends stream.Transform {
       let errorCollector = new ErrorCollector(parsed.open || parsed.text, WellFormedError);
 
       switch (parsed.type) {
+         case declaration.TYPE:
+            declaration.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case instruction.TYPE:
+            instruction.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
          case EntityMetaData.TYPE:
             this._metaData = parsed;
             break;
@@ -96,9 +104,6 @@ class WFChecker extends stream.Transform {
             } else {
                docTypeEnd.checkWellFormed(parsed, undefined, errorCollector, this._metaData);
             }
-            break;
-         case declaration.TYPE:
-            declaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case elementStart.TYPE:
             const nameText = parsed.name ? parsed.name.text : '';
@@ -152,6 +157,12 @@ class WFChecker extends stream.Transform {
             }
 
             notationDeclaration.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case processingInstruction.TYPE:
+            if (this._state === STATE.START) {
+               errorCollector.report(WellFormedError.ID.PI_INVALID_CONTEXT);
+            }
+            processingInstruction.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

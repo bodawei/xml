@@ -36,6 +36,21 @@ describe('WFCheckStream (integration)', () => {
       parsedStream.endText();
    }
 
+   describe('processingInstruction', () => {
+
+      it('reports an error when the processingInstruction has a missing space', (done) => {
+         expectInputToProduce('<?xml version="1.0"?><? aTarget', (results) => {
+            expect(results[2]).toEqual(new WellFormedError('PI_SPACE_AFTER_OPEN',
+               [ 'aTarget' ],
+               new Offset(new EntityLocation(), 23, 0, 23),
+               new Offset(new EntityLocation(), 21, 0, 21)
+            ));
+            done();
+         });
+      });
+
+   });
+
    describe('charData', () => {
 
       it('reports an error when the charData has an invalid char', (done) => {

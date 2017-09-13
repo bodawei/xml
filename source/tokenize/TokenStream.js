@@ -4,8 +4,9 @@ import stream from 'readable-stream';
 import { EntityMetaData } from '../basic';
 
 import {
-   charData,
    declaration,
+   instruction,
+   charData,
    docTypeStart,
    docTypeEnd,
    xmlDeclaration,
@@ -14,6 +15,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
+   processingInstruction,
 } from '../xToken';
 
 class TokenStream extends stream.Transform {
@@ -29,11 +31,14 @@ class TokenStream extends stream.Transform {
          case EntityMetaData.TYPE:
             this.push(parsed);
             break;
-         case charData.TYPE:
-            this.push(charData.makeToken(parsed));
-            break;
          case declaration.TYPE:
             this.push(declaration.makeToken(parsed));
+            break;
+         case instruction.TYPE:
+            this.push(instruction.makeToken(parsed));
+            break;
+         case charData.TYPE:
+            this.push(charData.makeToken(parsed));
             break;
          case docTypeStart.TYPE:
             this.push(docTypeStart.makeToken(parsed));
@@ -55,6 +60,9 @@ class TokenStream extends stream.Transform {
             break;
          case notationDeclaration.TYPE:
             this.push(notationDeclaration.makeToken(parsed));
+            break;
+         case processingInstruction.TYPE:
+            this.push(processingInstruction.makeToken(parsed));
             break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));

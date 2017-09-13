@@ -6,8 +6,9 @@ import { ErrorCollector, WellFormedError } from '../error';
 
 import { makeLToken } from '../lToken/test';
 import {
-   charData,
    declaration,
+   instruction,
+   charData,
    docTypeEnd,
    docTypeStart,
    elementEnd,
@@ -15,6 +16,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
+   processingInstruction,
    xmlDeclaration,
 } from '../xToken';
 
@@ -92,6 +94,21 @@ describe('WFCheckStream (unit)', () => {
       checker.write(parsed);
 
       const args = declaration.checkWellFormed.calls.argsFor(0);
+      expect(args[0]).toEqual(parsed);
+      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[2]).toEqual(metaData);
+   });
+
+   it('calls instruction.checkWellFormed() when encountering an declaration parsing', () => {
+      spyOn(instruction, 'checkWellFormed');
+      const parsed = {
+         type: instruction.TYPE,
+         open: makeLToken('<?'),
+      };
+      checker.write(metaData);
+      checker.write(parsed);
+
+      const args = instruction.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
       expect(args[1] instanceof ErrorCollector).toEqual(true);
       expect(args[2]).toEqual(metaData);
@@ -422,6 +439,41 @@ describe('WFCheckStream (unit)', () => {
       checker.write(parsed);
 
       expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
+   });
+
+   describe('processingInstruction', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(processingInstruction, 'checkWellFormed');
+         parsed = {
+            type: processingInstruction.TYPE,
+            open: makeLToken('<?'),
+         };
+      });
+
+      it('calls processingInstruction.checkWellFormed()', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = processingInstruction.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not yet started', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PI_INVALID_CONTEXT);
+         });
+
+      });
+
    });
 
    it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {

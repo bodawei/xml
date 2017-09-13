@@ -12,7 +12,9 @@ import {
    elementStart,
    elementEnd,
    entityReference,
+   instruction,
    processingInstruction,
+   xmlDeclaration,
 } from '../xToken';
 
 class ParsedStream extends stream.Readable {
@@ -86,7 +88,15 @@ class ParsedStream extends stream.Readable {
                elementEnd.parse(this._lTokenSource, markupStartLToken, deliverParse);
                break;
             case '<?':
-               processingInstruction.parse(this._lTokenSource, markupStartLToken, deliverParse);
+               instruction.parse(this._lTokenSource, markupStartLToken, (parsed) => {
+                  const target = parsed.target ? parsed.target.text : '';
+
+                  if (target.toLocaleUpperCase() === 'XML') {
+                     xmlDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                  } else {
+                     processingInstruction.parse(this._lTokenSource, parsed, deliverParse);
+                  }
+               });
                break;
             case '<!':
                declaration.parse(this._lTokenSource, markupStartLToken, (token) => {

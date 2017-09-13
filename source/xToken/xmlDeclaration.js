@@ -7,7 +7,7 @@ import {
    textOrBlank,
    textOrUndef,
 } from './common/util.js';
-import * as pi from './processingInstruction.js';
+import * as instruction from './instruction.js';
 import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
 import { Token as XmlToken } from './xmlToken.js';
@@ -120,7 +120,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    let foundVersion;
    let seenStandalone;
 
-   pi.checkWellFormed(parsed, ec, entityMetaData);
+   instruction.checkWellFormed(parsed, ec, entityMetaData, true);
 
    // check that the parameters are in the right order and have the right values
    for (let index = 0; index < parsed.params.length; index++) {

@@ -5,8 +5,8 @@ import { EntityLocation, EntityMetaData } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
-   charData,
    declaration,
+   charData,
    docTypeStart,
    docTypeEnd,
    entityDeclaration,
@@ -14,6 +14,7 @@ import {
    elementStart,
    entityReference,
    notationDeclaration,
+   processingInstruction,
    text,
    xmlDeclaration,
 } from '../xToken';
@@ -56,6 +57,20 @@ describe('TokenStream (integration)', () => {
          done();
       });
    }
+
+   describe('UNKNOWNDECL', () => {
+
+      it('do a simple end to end process', (done) => {
+         expectInputToProduce('<!BOGUS', [
+            new EntityMetaData(),
+            new declaration.Token([
+               makeLToken('<!'),
+               makeLToken('BOGUS'),
+            ]),
+         ], done);
+      });
+
+   });
 
    describe('charData', () => {
 
@@ -160,18 +175,10 @@ describe('TokenStream (integration)', () => {
 
    });
 
-   describe('UNKNOWNDECL', () => {
-
-      it('do a simple end to end process', (done) => {
-         expectInputToProduce('<!BOGUS', [
-            new EntityMetaData(),
-            new declaration.Token([
-               makeLToken('<!'),
-               makeLToken('BOGUS'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes a processing instruction', (done) => {
+      expectInputToProduce('<?frozboz askfhasdfkh kje  adsf ?>', [
+         new processingInstruction.Token('frozboz', 'askfhasdfkh kje  adsf ', []),
+      ], done);
    });
 
    describe('XMLDECL', () => {

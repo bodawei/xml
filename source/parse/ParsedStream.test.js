@@ -8,6 +8,9 @@ import {
    elementEnd,
    elementStart,
    entityReference,
+   instruction,
+   processingInstruction,
+   xmlDeclaration,
 } from '../xToken';
 
 import ParsedStream from './ParsedStream.js';
@@ -103,6 +106,50 @@ describe('ParsedStream (unit)', () => {
          expect(entityReference.parse.calls.argsFor(0)[1] instanceof Function).toEqual(true);
       });
 
+   });
+
+   it('calls instruction.parse()', () => {
+      spyOn(instruction, 'parse');
+      parser.addText('<?something foo?>');
+      parser.endText();
+      parser.read();
+
+      expect(instruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(instruction.parse.calls.argsFor(0)[1].text).toEqual('<?');
+      expect(instruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+   });
+
+   it('calls processingInstruction.parse()', () => {
+      spyOn(processingInstruction, 'parse');
+      parser.addText('<?something foo?>');
+      parser.endText();
+      parser.read();
+
+      expect(processingInstruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[1].target.text).toEqual('something');
+      expect(processingInstruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+   });
+
+   it('calls processingInstruction.parse() when there is no target name', () => {
+      spyOn(processingInstruction, 'parse');
+      parser.addText('<??>');
+      parser.endText();
+      parser.read();
+
+      expect(processingInstruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[1].target).toBeUndefined();
+      expect(processingInstruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+   });
+
+   it('calls xmlDeclaration.parse()', () => {
+      spyOn(xmlDeclaration, 'parse');
+      parser.addText('<?xml version="1.0"?>');
+      parser.endText();
+      parser.read();
+
+      expect(xmlDeclaration.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(xmlDeclaration.parse.calls.argsFor(0)[1].target.text).toEqual('xml');
+      expect(xmlDeclaration.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
    });
 
 });

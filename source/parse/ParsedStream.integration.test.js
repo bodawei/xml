@@ -190,44 +190,42 @@ describe('ParsedStream (integration)', () => {
 
    });
 
-   describe('ENTITY', () => {
-
-      it('parse entity', (done) => {
-         expectInputToProduce('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', {
-            type: 'ENTITYDECL',
-            open: makeLToken('<!'),
-            postOpenSpace: undefined,
-            declType: makeLToken('ENTITY'),
-            postDeclTypeSpace: makeLToken(' '),
-            name: makeLToken('myEntity'),
-            postNameSpace: makeLToken(' '),
-            externalId: {
-               type: 'EXTERNAL_ID',
-               idType: makeLToken('PUBLIC'),
-               postIdTypeSpace: makeLToken(' '),
-               publicOpenQuote: makeLToken('"'),
-               publicValue: makeLToken('pub.xml'),
-               publicCloseQuote: makeLToken('"'),
-               postPublicSpace: makeLToken(' '),
-               systemOpenQuote: makeLToken('"'),
-               systemValue: makeLToken('sys.xml'),
-               systemCloseQuote: makeLToken('"'),
-            },
-            postExternalIdSpace: undefined,
-            close: makeLToken('>'),
-         }, done);
-      });
-
+   it('parsees an ENTITY', (done) => {
+      expectInputToProduce('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', {
+         type: 'ENTITYDECL',
+         open: makeLToken('<!'),
+         postOpenSpace: undefined,
+         declType: makeLToken('ENTITY'),
+         postDeclTypeSpace: makeLToken(' '),
+         name: makeLToken('myEntity'),
+         postNameSpace: makeLToken(' '),
+         externalId: {
+            type: 'EXTERNAL_ID',
+            idType: makeLToken('PUBLIC'),
+            postIdTypeSpace: makeLToken(' '),
+            publicOpenQuote: makeLToken('"'),
+            publicValue: makeLToken('pub.xml'),
+            publicCloseQuote: makeLToken('"'),
+            postPublicSpace: makeLToken(' '),
+            systemOpenQuote: makeLToken('"'),
+            systemValue: makeLToken('sys.xml'),
+            systemCloseQuote: makeLToken('"'),
+         },
+         postExternalIdSpace: undefined,
+         close: makeLToken('>'),
+      }, done);
    });
 
-   describe('entity reference', () => {
+   it('parse entity reference', (done) => {
+      expectInputToProduce2('&foo;', {
+         type: 'ENTITYREF',
+      }, done);
+   });
 
-      it('parse entity reference', (done) => {
-         expectInputToProduce2('&foo;', {
-            type: 'ENTITYREF',
-         }, done);
-      });
-
+   it('parses a processing instruction', (done) => {
+      expectInputToProduce2('<?froz adfasdf ?>', {
+         type: 'PROCESSING_INSTRUCTION',
+      }, done);
    });
 
    describe('UNKNOWNDECL', () => {

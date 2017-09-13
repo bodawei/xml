@@ -27,7 +27,7 @@ describe('xmlDeclaration (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      xit('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
+      it('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
          parsed.postOpenSpace = expectedLToken(' ');
          source.addText('version="1.1"?>');
          xmlDeclaration.parse(source, parsed, (result) => {
@@ -35,7 +35,7 @@ describe('xmlDeclaration (integration)', () => {
 
             xmlDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_BEFORE_TARGET);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
             done();
          });
       });

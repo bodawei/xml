@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as misc from './common/misc.js';
-import * as pi from './processingInstruction.js';
+import * as instruction from './instruction.js';
 import * as quotedValue from './common/quotedValue.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
@@ -136,7 +136,7 @@ describe('xmlDeclaration (unit)', () => {
             } ],
             close: makeToken('?>'),
          };
-         spyOn(pi, 'checkWellFormed');
+         spyOn(instruction, 'checkWellFormed');
          spyOn(quotedValue, 'checkWellFormed');
          spyOn(misc, 'checkName');
          quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, cb) => {
@@ -162,7 +162,7 @@ describe('xmlDeclaration (unit)', () => {
          const emd = new EntityMetaData();
          xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(pi.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
+         expect(instruction.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd, true);
       });
 
       it('calls the misc.checkName() routine', () => {

@@ -2,11 +2,14 @@
 /* eslint-env jasmine */
 
 import {
+   declaration,
+   instruction,
    charData,
    elementEnd,
    elementStart,
    entityReference,
    notationDeclaration,
+   processingInstruction,
 } from '../xToken';
 
 import TokenStream from './TokenStream.js';
@@ -16,6 +19,26 @@ describe('TokenStream (unit)', () => {
 
    beforeEach(() => {
       tokenStream = new TokenStream();
+   });
+
+   it('calls declaration.makeToken()', () => {
+      spyOn(declaration, 'makeToken');
+      const parsed = { type: declaration.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(declaration.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls instruction.makeToken()', () => {
+      spyOn(instruction, 'makeToken');
+      const parsed = { type: instruction.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(instruction.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('calls charData.makeToken()', () => {
@@ -66,6 +89,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(notationDeclaration.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls processingInstruction.makeToken()', () => {
+      spyOn(processingInstruction, 'makeToken');
+      const parsed = { type: processingInstruction.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(processingInstruction.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('throws an error if asked to deal with an unknown parsed type', () => {
