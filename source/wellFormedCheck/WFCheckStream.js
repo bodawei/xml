@@ -47,7 +47,9 @@ class WFChecker extends stream.Transform {
    }
 
    _checkForErrors(parsed) {
-      let errorCollector = new ErrorCollector(parsed.open || parsed.text, WellFormedError);
+      const startContext = parsed.open || parsed.text ||
+         (this._startDocType ? this._startDocType.open : parsed.closeInternalSubset);
+      let errorCollector = new ErrorCollector(startContext, WellFormedError);
 
       switch (parsed.type) {
          case declaration.TYPE:

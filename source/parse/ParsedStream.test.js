@@ -55,57 +55,41 @@ describe('ParsedStream (unit)', () => {
 
    });
 
-   describe('charData', () => {
+   it('calls charData.parse()', () => {
+      spyOn(charData, 'parse');
+      parser.addText('asdf</foo>');
+      parser.endText();
+      parser.read();
 
-      it('calls charData.parse()', () => {
-         spyOn(charData, 'parse');
-         parser.addText('asdf</foo>');
-         parser.endText();
-         parser.read();
-
-         expect(charData.parse).toHaveBeenCalled();
-      });
-
+      expect(charData.parse).toHaveBeenCalled();
    });
 
-   describe('element start', () => {
+   it('calls elementStart.parse()', () => {
+      spyOn(elementStart, 'parse');
+      parser.addText('<foo>');
+      parser.endText();
+      parser.read();
 
-      it('calls elementStart.parse()', () => {
-         spyOn(elementStart, 'parse');
-         parser.addText('<foo>');
-         parser.endText();
-         parser.read();
-
-         expect(elementStart.parse).toHaveBeenCalled();
-      });
-
+      expect(elementStart.parse).toHaveBeenCalled();
    });
 
-   describe('element end', () => {
+   it('calls elementEnd.parse()', () => {
+      spyOn(elementEnd, 'parse');
+      parser.addText('</foo>');
+      parser.endText();
+      parser.read();
 
-      it('calls elementEnd.parse()', () => {
-         spyOn(elementEnd, 'parse');
-         parser.addText('</foo>');
-         parser.endText();
-         parser.read();
-
-         expect(elementEnd.parse).toHaveBeenCalled();
-      });
-
+      expect(elementEnd.parse).toHaveBeenCalled();
    });
 
-   describe('entity reference', () => {
+   it('calls entityReference.parse()', () => {
+      spyOn(entityReference, 'parse');
+      parser.addText('&foo;');
+      parser.endText();
+      parser.read();
 
-      it('calls entityReference.parse()', () => {
-         spyOn(entityReference, 'parse');
-         parser.addText('&foo;');
-         parser.endText();
-         parser.read();
-
-         expect(entityReference.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
-         expect(entityReference.parse.calls.argsFor(0)[1] instanceof Function).toEqual(true);
-      });
-
+      expect(entityReference.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(entityReference.parse.calls.argsFor(0)[1] instanceof Function).toEqual(true);
    });
 
    it('calls instruction.parse()', () => {

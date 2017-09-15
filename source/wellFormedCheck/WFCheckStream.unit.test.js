@@ -114,71 +114,80 @@ describe('WFCheckStream (unit)', () => {
       expect(args[2]).toEqual(metaData);
    });
 
-   it('calls docTypeStart.checkWellFormed() when encountering an DOCTYPE start parsing', () => {
-      spyOn(docTypeStart, 'checkWellFormed');
-      const parsed = {
-         type: docTypeStart.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(parsed);
+   describe('docTypeStart', () => {
+      let parsed;
 
-      const args = docTypeStart.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
-      expect(args[2]).toEqual(metaData);
-   });
-
-   it('calls docTypeStart.checkWellFormed() after an xml declaration', () => {
-      spyOn(docTypeStart, 'checkWellFormed');
-      const parsed = {
-         type: docTypeStart.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write({
-         type: xmlDeclaration.TYPE,
-         open: makeLToken('<?'),
-         params: [],
+      beforeEach(() => {
+         spyOn(docTypeStart, 'checkWellFormed');
+         parsed = {
+            type: docTypeStart.TYPE,
+            open: makeLToken('<'),
+         };
       });
-      checker.write(parsed);
 
-      expect(docTypeStart.checkWellFormed).toHaveBeenCalled();
-   });
+      it('calls docTypeStart.checkWellFormed() when encountering an DOCTYPE start parsing', () => {
+         checker.write(parsed);
 
-   it('calls docTypeEnd.checkWellFormed() when encountering a doctype end parsing', () => {
-      spyOn(docTypeEnd, 'checkWellFormed');
-      const parsed = {
-         type: docTypeEnd.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(parsed);
-
-      const args = docTypeEnd.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[2] instanceof ErrorCollector).toEqual(true);
-      expect(args[3]).toEqual(metaData);
-   });
-
-   it('calls docTypeEnd.checkWellFormed() when encountering a DOCTYPE end after a start', () => {
-      spyOn(docTypeStart, 'checkWellFormed');
-      spyOn(docTypeEnd, 'checkWellFormed');
-      const parsed = {
-         type: docTypeEnd.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write({
-         type: docTypeStart.TYPE,
-         open: makeLToken('<'),
+         const args = docTypeStart.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
       });
-      checker.write(parsed);
 
-      const args = docTypeEnd.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[2] instanceof ErrorCollector).toEqual(true);
-      expect(args[3]).toEqual(metaData);
+      describe('state checking', () => {
+
+         it('reports an error if in the DTD', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
+   });
+
+   describe('docTypeEnd', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(docTypeEnd, 'checkWellFormed');
+         parsed = {
+            type: docTypeEnd.TYPE,
+            closeInternalSubset: makeLToken(']'),
+         };
+      });
+
+      it('calls docTypeEnd.checkWellFormed() when encountering a doctype end parsing', () => {
+         checker.write(parsed);
+
+         const args = docTypeEnd.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[2] instanceof ErrorCollector).toEqual(true);
+         expect(args[3]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports state error if the end comes without a start', (done) => {
+            const results = [];
+
+            checker.on('data', (data) => {
+               results.push(data);
+            });
+            checker.on('end', () => {
+               expect(results[0]).toEqual(new WellFormedError('DOCTYPE_INVALID_DOC_CONTEXT', undefined,
+                  new Offset(new EntityLocation(), 0, 0, 0), new Offset(new EntityLocation(), 0, 0, 0)));
+               done();
+            });
+
+            checker.write(parsed);
+            checker.end();
+         });
+
+      });
+
    });
 
    describe('elementStart', () => {
@@ -476,19 +485,40 @@ describe('WFCheckStream (unit)', () => {
 
    });
 
-   it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
-      spyOn(xmlDeclaration, 'checkWellFormed');
-      const parsed = {
-         type: xmlDeclaration.TYPE,
-         open: makeLToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(parsed);
+   describe('xmlDeclaration', () => {
+      let parsed;
 
-      const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
-      expect(args[2]).toEqual(metaData);
+      beforeEach(() => {
+         spyOn(xmlDeclaration, 'checkWellFormed');
+         parsed = {
+            type: xmlDeclaration.TYPE,
+            open: makeLToken('<?'),
+         };
+      });
+
+      it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if encountered ', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
+         });
+
+      });
+
    });
 
 });

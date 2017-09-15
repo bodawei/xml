@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from '../basic';
+import { EntityLocation } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
@@ -48,8 +48,13 @@ describe('TokenStream (integration)', () => {
          expecteds.forEach((expected) => {
             const actuals = results.filter((actual) => actual instanceof expected.constructor);
 
-            if (expected.lTokens && expected.lTokens.length === 0) {
-               actuals[0].lTokens = [];
+            actuals[0].lTokens = [];
+            if (Array.isArray(actuals[0].value)) {
+               actuals[0].value.forEach((element) => {
+                  if (element.lTokens) {
+                     element.lTokens = [];
+                  }
+               });
             }
 
             expect(actuals[0]).toEqual(expected);
@@ -58,121 +63,53 @@ describe('TokenStream (integration)', () => {
       });
    }
 
-   describe('UNKNOWNDECL', () => {
-
-      it('do a simple end to end process', (done) => {
-         expectInputToProduce('<!BOGUS', [
-            new EntityMetaData(),
-            new declaration.Token([
-               makeLToken('<!'),
-               makeLToken('BOGUS'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes an UNKNOWN declaration', (done) => {
+      expectInputToProduce('<!BOGUS', [
+         new declaration.Token([]),
+      ], done);
    });
 
-   describe('charData', () => {
-
-      it('produces a CharData token from text', (done) => {
-         expectInputToProduce('some$ text ', new charData.Token('some$ text ', [
-            makeLToken('some$ text '),
-         ]), done);
-      });
-
+   it('tokenizes a charData', (done) => {
+      expectInputToProduce('some$ text ', new charData.Token('some$ text ', []), done);
    });
 
-   describe('DOCTYPE', () => {
-
-      it('tokenize a parsed', (done) => {
-         expectInputToProduce('<!DOCTYPE one>', [
-            new docTypeStart.Token('one', undefined, false, [
-               makeLToken('<!'),
-               makeLToken('DOCTYPE'),
-               makeLToken(' '),
-               makeLToken('one'),
-            ]),
-            new docTypeEnd.Token([
-               makeLToken('>'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes a DOCTYPE start and end', (done) => {
+      expectInputToProduce('<!DOCTYPE one>', [
+         new docTypeStart.Token('one', undefined, false, []),
+         new docTypeEnd.Token([]),
+      ], done);
    });
 
-   describe('element start', () => {
-
-      it('do a simple end to end process', (done) => {
-         expectInputToProduce('<elementName>', [
-            new elementStart.Token('elementName', [], [
-               makeLToken('<'),
-               makeLToken('elementName'),
-               makeLToken('>'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes an element start', (done) => {
+      expectInputToProduce('<elementName>', [
+         new elementStart.Token('elementName', [], []),
+      ], done);
    });
 
-   describe('element end', () => {
-
-      it('tokenizes the input', (done) => {
-         expectInputToProduce('</elementName>', [
-            new elementEnd.Token('elementName', [
-               makeLToken('</'),
-               makeLToken('elementName'),
-               makeLToken('>'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes an element end', (done) => {
+      expectInputToProduce('</elementName>', [
+         new elementEnd.Token('elementName', []),
+      ], done);
    });
 
-   describe('ENTITY', () => {
+   it('tokenizes an ENTITY declaration', (done) => {
+      const value = new text.Token('value', []);
 
-      it('do a simple end to end process', (done) => {
-         const lTokens = [
-            makeLToken('<!'),
-            makeLToken('ENTITY'),
-            makeLToken(' '),
-            makeLToken('entityName'),
-            makeLToken(' '),
-            makeLToken('"'),
-            makeLToken('value'),
-            makeLToken('"'),
-            makeLToken('>'),
-         ];
-         const value = new text.Token('value', [ lTokens[6] ]);
-
-         expectInputToProduce('<!ENTITY entityName "value">', [
-            new entityDeclaration.Token('entityName', [ value ], undefined, '', lTokens),
-         ], done);
-      });
-
+      expectInputToProduce('<!ENTITY entityName "value">', [
+         new entityDeclaration.Token('entityName', [ value ], undefined, '', []),
+      ], done);
    });
 
-   describe('entity references', () => {
-
-      it('input to sokens', (done) => {
-         expectInputToProduce('&entityRef;', [
-            new entityReference.Token('entityRef', [
-               makeLToken('&'),
-               makeLToken('entityRef'),
-               makeLToken(';'),
-            ]),
-         ], done);
-      });
-
+   it('tokenizes an entity reference', (done) => {
+      expectInputToProduce('&entityRef;', [
+         new entityReference.Token('entityRef', []),
+      ], done);
    });
 
-   describe('NOTATIONDECL', () => {
-
-      it('do a simple end to end process', (done) => {
-         expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
-            new notationDeclaration.Token('myNotation', new EntityLocation('sys.xml', 'pub.xml'), []),
-         ], done);
-      });
-
+   it('nokenizes a NOTATION declaration', (done) => {
+      expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
+         new notationDeclaration.Token('myNotation', new EntityLocation('sys.xml', 'pub.xml'), []),
+      ], done);
    });
 
    it('tokenizes a processing instruction', (done) => {
@@ -181,26 +118,12 @@ describe('TokenStream (integration)', () => {
       ], done);
    });
 
-   describe('XMLDECL', () => {
-
-      it('tokenized a parsed', (done) => {
-         expectInputToProduce('<?xml version="1.0"?>', [
-            new xmlDeclaration.Token([ {
-               name: 'version',
-               value: '1.0',
-            } ], [
-               makeLToken('<?'),
-               makeLToken('xml'),
-               makeLToken(' '),
-               makeLToken('version'),
-               makeLToken('='),
-               makeLToken('"'),
-               makeLToken('1.0'),
-               makeLToken('"'),
-               makeLToken('?>'),
-            ]) ], done);
-      });
-
+   it('tokenized an Xml Declaration', (done) => {
+      expectInputToProduce('<?xml version="1.0"?>', [
+         new xmlDeclaration.Token([ {
+            name: 'version',
+            value: '1.0',
+         } ], []) ], done);
    });
 
 });

@@ -1,7 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { makeLTokenMaker } from '../lToken/test';
 import { EntityMetaData } from '../basic';
 import { defaultExtractors, LTokenSource } from '../lToken';
 
@@ -9,262 +8,89 @@ import ParsedStream from './ParsedStream.js';
 
 describe('ParsedStream (integration)', () => {
    let parser;
-   let makeLToken;
 
    beforeEach(() => {
-      makeLToken = makeLTokenMaker();
       parser = new ParsedStream();
    });
 
-   function expectInputToProduce(input, parsings, done) {
+   function expectInputToProduceTypes(input, types, done) {
       const results = [];
 
       parser.on('data', (data) => {
          results.push(data);
       });
       parser.on('end', () => {
-         let expecteds = parsings;
-         if (!Array.isArray(parsings)) {
-            expecteds = [ parsings ];
+         let expecteds = types;
+         if (!Array.isArray(types)) {
+            expecteds = [ types ];
          }
 
          expecteds.forEach((expected) => {
-            const actuals = results.filter((actual) => actual.type === expected.type);
+            const actuals = results.filter((actual) => actual.type === expected);
 
-            expect(actuals[0]).toEqual(expected);
+            expect(actuals[0]).toContainParsedProps({
+               type: expected,
+            });
          });
          done();
       });
-      parser.addText(input);
-      parser.endText();
+
+      if (input) {
+         parser.addText(input);
+         parser.endText();
+      }
    }
 
-   function expectInputToProduce2(input, parsings, done) {
-      const results = [];
-
-      parser.on('data', (data) => {
-         results.push(data);
-      });
-      parser.on('end', () => {
-         let expecteds = parsings;
-         if (!Array.isArray(parsings)) {
-            expecteds = [ parsings ];
-         }
-
-         expecteds.forEach((expected) => {
-            const actuals = results.filter((actual) => actual.type === expected.type);
-
-            expect(actuals[0]).toContainParsedProps(expected);
-         });
-         done();
-      });
-      parser.addText(input);
-      parser.endText();
-   }
-
-   describe('parameters', () => {
+   describe('construction', () => {
 
       it('uses the provided LTokenSource', (done) => {
          const emd = new EntityMetaData();
          const source = new LTokenSource(defaultExtractors, emd);
          parser = new ParsedStream(source);
-         const results = [];
-         const expecteds = [ {
-            type: 'CHARDATA',
-            text: makeLToken('blah'),
-         } ];
-         parser.on('data', (data) => {
-            results.push(data);
-         });
-         parser.on('end', () => {
-            expecteds.forEach((expected) => {
-               const actuals = results.filter((actual) => actual.type === expected.type);
-
-               expect(actuals[0]).toContainParsedProps(expected);
-            });
-            done();
-         });
 
          source.addText('blah<elementName>');
          source.endText();
+
+         expectInputToProduceTypes(undefined, 'CHARDATA', done);
       });
 
    });
 
-   describe('CharData', () => {
-
-      it('parses character data up to a <', (done) => {
-         expectInputToProduce('blah<elementName>', {
-            type: 'CHARDATA',
-            text: makeLToken('blah'),
-         }, done);
-      });
-
+   it('parses character data up to a <', (done) => {
+      expectInputToProduceTypes('blah<elementName>', 'CHARDATA', done);
    });
 
-   describe('DOCTYPE', () => {
-
-      it('parse simple start and end', (done) => {
-         expectInputToProduce('<!DOCTYPE goodName SYSTEM "sys.xml"[]>', [ {
-            type: 'DOCTYPE_START',
-            open: makeLToken('<!'),
-            postOpenSpace: undefined,
-            declType: makeLToken('DOCTYPE'),
-            postDeclTypeSpace: makeLToken(' '),
-            name: makeLToken('goodName'),
-            postNameSpace: makeLToken(' '),
-            externalId: {
-               type: 'EXTERNAL_ID',
-               idType: makeLToken('SYSTEM'),
-               postIdTypeSpace: makeLToken(' '),
-               systemOpenQuote: makeLToken('"'),
-               systemValue: makeLToken('sys.xml'),
-               systemCloseQuote: makeLToken('"'),
-            },
-            postExternalIdSpace: undefined,
-            startInternalSubset: makeLToken('['),
-         }, {
-            type: 'DOCTYPE_END',
-            closeInternalSubset: makeLToken(']'),
-            postCloseInternalSubsetSpace: undefined,
-            close: makeLToken('>'),
-         } ], done);
-      });
-
-      it('parse start and end without an internal subset', (done) => {
-         expectInputToProduce('<!DOCTYPE goodName SYSTEM "sys.xml">', [ {
-            type: 'DOCTYPE_START',
-            open: makeLToken('<!'),
-            postOpenSpace: undefined,
-            declType: makeLToken('DOCTYPE'),
-            postDeclTypeSpace: makeLToken(' '),
-            name: makeLToken('goodName'),
-            postNameSpace: makeLToken(' '),
-            externalId: {
-               type: 'EXTERNAL_ID',
-               idType: makeLToken('SYSTEM'),
-               postIdTypeSpace: makeLToken(' '),
-               systemOpenQuote: makeLToken('"'),
-               systemValue: makeLToken('sys.xml'),
-               systemCloseQuote: makeLToken('"'),
-            },
-            postExternalIdSpace: undefined,
-            startInternalSubset: undefined,
-         }, {
-            type: 'DOCTYPE_END',
-            closeInternalSubset: undefined,
-            postCloseInternalSubsetSpace: undefined,
-            close: makeLToken('>'),
-         } ], done);
-      });
-
+   it('parse start and end without an internal subset', (done) => {
+      expectInputToProduceTypes('<!DOCTYPE goodName SYSTEM "sys.xml">',
+         [ 'DOCTYPE_START', 'DOCTYPE_END' ], done);
    });
 
-   describe('element start', () => {
-
-      it('parse tag', (done) => {
-         expectInputToProduce('<elementName\t>', {
-            type: 'ELEMENT_START',
-            open: makeLToken('<'),
-            postOpenSpace: undefined,
-            name: makeLToken('elementName'),
-            postNameSpace: makeLToken('\t'),
-            close: makeLToken('>'),
-         }, done);
-      });
-
+   it('parses an element start', (done) => {
+      expectInputToProduceTypes('<elementName\t>', 'ELEMENT_START', done);
    });
 
-   describe('element end', () => {
-
-      it('parse tag', (done) => {
-         expectInputToProduce('</elementName\t>', {
-            type: 'ELEMENT_END',
-            open: makeLToken('</'),
-            postOpenSpace: undefined,
-            name: makeLToken('elementName'),
-            postNameSpace: makeLToken('\t'),
-            close: makeLToken('>'),
-         }, done);
-      });
-
+   it('parses an element end', (done) => {
+      expectInputToProduceTypes('</elementName\t>', 'ELEMENT_END', done);
    });
 
    it('parsees an ENTITY', (done) => {
-      expectInputToProduce('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', {
-         type: 'ENTITYDECL',
-         open: makeLToken('<!'),
-         postOpenSpace: undefined,
-         declType: makeLToken('ENTITY'),
-         postDeclTypeSpace: makeLToken(' '),
-         name: makeLToken('myEntity'),
-         postNameSpace: makeLToken(' '),
-         externalId: {
-            type: 'EXTERNAL_ID',
-            idType: makeLToken('PUBLIC'),
-            postIdTypeSpace: makeLToken(' '),
-            publicOpenQuote: makeLToken('"'),
-            publicValue: makeLToken('pub.xml'),
-            publicCloseQuote: makeLToken('"'),
-            postPublicSpace: makeLToken(' '),
-            systemOpenQuote: makeLToken('"'),
-            systemValue: makeLToken('sys.xml'),
-            systemCloseQuote: makeLToken('"'),
-         },
-         postExternalIdSpace: undefined,
-         close: makeLToken('>'),
-      }, done);
+      expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', 'ENTITYDECL', done);
    });
 
    it('parse entity reference', (done) => {
-      expectInputToProduce2('&foo;', {
-         type: 'ENTITYREF',
-      }, done);
+      expectInputToProduceTypes('&foo;', 'ENTITYREF', done);
    });
 
    it('parses a processing instruction', (done) => {
-      expectInputToProduce2('<?froz adfasdf ?>', {
-         type: 'PROCESSING_INSTRUCTION',
-      }, done);
+      expectInputToProduceTypes('<?froz adfasdf ?>', 'PROCESSING_INSTRUCTION', done);
    });
 
-   describe('UNKNOWNDECL', () => {
-
-      it('parse entity', (done) => {
-         expectInputToProduce('<!BOGUS', {
-            type: 'UNKNOWNDECL',
-            open: makeLToken('<!'),
-            postOpenSpace: undefined,
-            declType: makeLToken('BOGUS'),
-            postDeclTypeSpace: undefined,
-         }, done);
-      });
-
+   it('parses an unknown declaration', (done) => {
+      expectInputToProduceTypes('<!BOGUS', 'UNKNOWNDECL', done);
    });
 
-   describe('XmlDeclaration', () => {
-
-      it('parses a simple declaration', (done) => {
-         expectInputToProduce('<?xml version="1.0"?>', {
-            type: 'XMLDECL',
-            open: makeLToken('<?'),
-            postOpenSpace: undefined,
-            target: makeLToken('xml'),
-            postTargetSpace: makeLToken(' '),
-            params: [ {
-               name: makeLToken('version'),
-               postNameSpace: undefined,
-               equal: makeLToken('='),
-               postEqualSpace: undefined,
-               paramOpenQuote: makeLToken('"'),
-               paramValue: makeLToken('1.0'),
-               paramCloseQuote: makeLToken('"'),
-               trailingSpace: undefined,
-            } ],
-            close: makeLToken('?>'),
-         }, done);
-      });
-
+   it('parses a simple XML Declaration', (done) => {
+      expectInputToProduceTypes('<?xml version="1.0"?>', 'XMLDECL', done);
    });
 
 });
