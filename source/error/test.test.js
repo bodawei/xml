@@ -126,7 +126,7 @@ describe('toReportError()', () => {
                position: undefined,
             })).toEqual({
                pass: false,
-               message: 'Parameters for XMLDECL_NO_CLOSE do not match:\n  Actual: undefined\n  Expected: 1',
+               message: 'Parameters for XMLDECL_NO_CLOSE do not match:\n  Actual:   undefined\n  Expected: 1',
             });
       });
 
@@ -144,7 +144,7 @@ describe('toReportError()', () => {
                position: 6,
             })).toEqual({
                pass: false,
-               message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual: 5\n  Expected: 6',
+               message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   5\n  Expected: 6',
             });
       });
 
@@ -164,7 +164,7 @@ describe('toReportError()', () => {
                lastPosition: 2,
             })).toEqual({
                pass: false,
-               message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual: 1\n  Expected: 2',
+               message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   1\n  Expected: 2',
             });
       });
 
@@ -184,7 +184,7 @@ describe('toReportError()', () => {
                lastPosition: undefined,
             })).toEqual({
                pass: false,
-               message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual: 1\n  Expected: undefined',
+               message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   1\n  Expected: undefined',
             });
       });
 

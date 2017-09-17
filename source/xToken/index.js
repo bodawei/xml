@@ -4,6 +4,7 @@ import * as declaration from './declaration.js';
 import * as instruction from './instruction.js';
 
 import * as charData from './charData.js';
+import * as comment from './comment.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
@@ -22,6 +23,7 @@ module.exports = {
    instruction,
 
    charData,
+   comment,
    docTypeStart,
    docTypeEnd,
    elementStart,

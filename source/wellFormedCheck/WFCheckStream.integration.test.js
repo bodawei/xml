@@ -56,6 +56,15 @@ describe('WFCheckStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when the comment has no close', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!-- foo',
+         new WellFormedError('COMMENT_NO_CLOSE',
+            undefined,
+            new Offset(new EntityLocation(), 29, 0, 29),
+            new Offset(new EntityLocation(), 21, 0, 21)
+         ), done);
+   });
+
    it('reports an error and the parsed value when the DOCTYPE type is a bad valud', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE $badName SYSTEM "sys.xml"[]>',
          new WellFormedError(WellFormedError.ID.DOCTYPE_NAME_INVALID,

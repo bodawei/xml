@@ -9,6 +9,7 @@ import {
    declaration,
    instruction,
    charData,
+   comment,
    docTypeEnd,
    docTypeStart,
    elementStart,
@@ -67,6 +68,12 @@ class WFChecker extends stream.Transform {
             }
 
             charData.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case comment.TYPE:
+            if (this._state === STATE.START) {
+               errorCollector.report(WellFormedError.ID.COMMENT_INVALID_CONTEXT);
+            }
+            comment.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case xmlDeclaration.TYPE:
             if (this._state !== STATE.START) {

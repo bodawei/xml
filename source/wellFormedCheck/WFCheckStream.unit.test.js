@@ -9,6 +9,7 @@ import {
    declaration,
    instruction,
    charData,
+   comment,
    docTypeEnd,
    docTypeStart,
    elementEnd,
@@ -78,6 +79,49 @@ describe('WFCheckStream (unit)', () => {
             checker.write(parsed);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
+   });
+
+   describe('comment', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(comment, 'checkWellFormed');
+         parsed = {
+            type: comment.TYPE,
+            text: makeLToken('good'),
+            close: makeLToken('-->'),
+         };
+      });
+
+      it('calls comment.checkWellFormed() when encountering a COMMENT', () => {
+         checker.write(parsed);
+
+         const args = comment.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports no errors when in non-start state', () => {
+            spyOn(checker, 'push');
+            checker._state = 'IN_CONTENT';
+            checker.write(parsed);
+
+            expect(checker.push.calls.count()).toEqual(1); // for the parsed itself
+         });
+
+         it('reports an error if in start', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.COMMENT_INVALID_CONTEXT);
          });
 
       });

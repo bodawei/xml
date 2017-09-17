@@ -1,5 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
+import { Offset } from '../basic';
+
 /**********************************************************************\
  An ErrorCollector collects a set of errors together in an array
  (retrievable with getErrors()). It provides various convenience
@@ -65,7 +67,9 @@ class ErrorCollector {
    reportError(code, constructor, params, position) {
       let posOffset;
 
-      if (position) {
+      if (position instanceof Offset) {
+         posOffset = position.clone();
+      } else if (position) {
          posOffset = position.range[0].getStartOffset();
       } else {
          posOffset = this._posStart ? this._position.range[0].getStartOffset() : this._position.range[0].getEndOffset();

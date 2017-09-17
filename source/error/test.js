@@ -27,9 +27,9 @@ class MockErrorCollector {
       this._lastPos = lToken;
    }
 
-   report(id, params) {
+   report(id, params, position) {
       const info = {
-         position: this._lastPos,
+         position: position || this._lastPos,
          id,
          params,
       };
@@ -103,15 +103,15 @@ function makeCompareObject(util, ErrorClass) {
 
                if (!util.equals(expectedError.params, actual.params)) {
                   message = `Parameters for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${actual.params}\n  Expected: ${expectedError.params}`;
+                     `  Actual:   ${actual.params}\n  Expected: ${expectedError.params}`;
                } else if (!util.equals(expectedError.position, actual.position)) {
                   message = `Positions for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${JSON.stringify(actual.position)}\n` +
+                     `  Actual:   ${JSON.stringify(actual.position)}\n` +
                      `  Expected: ${JSON.stringify(expectedError.position)}`;
                } else if ((expectedError.lastPosition || !expectedError.position) &&
                   !util.equals(expectedError.lastPosition, actual.lastPosition)) {
                   message = `Last positions for ${expectedError.id} do not match:\n` +
-                     `  Actual: ${JSON.stringify(actual.lastPosition)}\n` +
+                     `  Actual:   ${JSON.stringify(actual.lastPosition)}\n` +
                      `  Expected: ${JSON.stringify(expectedError.lastPosition)}`;
                } else {
                   pass = true;

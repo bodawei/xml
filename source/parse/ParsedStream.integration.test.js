@@ -60,6 +60,10 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('blah<elementName>', 'CHARDATA', done);
    });
 
+   it('parses a comment', (done) => {
+      expectInputToProduceTypes('<!-- my comment-->', 'COMMENT', done);
+   });
+
    it('parse start and end without an internal subset', (done) => {
       expectInputToProduceTypes('<!DOCTYPE goodName SYSTEM "sys.xml">',
          [ 'DOCTYPE_START', 'DOCTYPE_END' ], done);

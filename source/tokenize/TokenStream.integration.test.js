@@ -2,11 +2,11 @@
 /* eslint-env jasmine */
 
 import { EntityLocation } from '../basic';
-import { makeLTokenMaker } from '../lToken/test';
 import { ParsedStream } from '../parse';
 import {
    declaration,
    charData,
+   comment,
    docTypeStart,
    docTypeEnd,
    entityDeclaration,
@@ -24,10 +24,8 @@ import TokenStream from './TokenStream.js';
 describe('TokenStream (integration)', () => {
    let parsedStream;
    let tokenStream;
-   let makeLToken;
 
    beforeEach(() => {
-      makeLToken = makeLTokenMaker();
       parsedStream = new ParsedStream();
       tokenStream = new TokenStream();
       parsedStream.pipe(tokenStream);
@@ -71,6 +69,10 @@ describe('TokenStream (integration)', () => {
 
    it('tokenizes a charData', (done) => {
       expectInputToProduce('some$ text ', new charData.Token('some$ text ', []), done);
+   });
+
+   it('tokenizes a comment', (done) => {
+      expectInputToProduce('<!--foo-->', new comment.Token('foo', []), done);
    });
 
    it('tokenizes a DOCTYPE start and end', (done) => {

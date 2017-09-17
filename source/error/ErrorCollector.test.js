@@ -117,6 +117,13 @@ describe('ErrorCollector', () => {
          expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
       });
 
+      it('accepts an offset as the position', () => {
+         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
+         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], new Offset(loc, 5, 5, 5));
+
+         expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 5, 5, 5), contextStart);
+      });
+
    });
 
 });

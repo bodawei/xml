@@ -5,6 +5,7 @@ import { EntityMetaData } from '../basic';
 import { defaultExtractors, LTokenSource } from '../lToken';
 import {
    charData,
+   comment,
    elementEnd,
    elementStart,
    entityReference,
@@ -62,6 +63,15 @@ describe('ParsedStream (unit)', () => {
       parser.read();
 
       expect(charData.parse).toHaveBeenCalled();
+   });
+
+   it('calls comment.parse()', () => {
+      spyOn(comment, 'parse');
+      parser.addText('<!--asdf-->');
+      parser.endText();
+      parser.read();
+
+      expect(comment.parse).toHaveBeenCalled();
    });
 
    it('calls elementStart.parse()', () => {

@@ -6,6 +6,7 @@ import { EntityMetaData } from '../basic';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import {
    charData,
+   comment,
    declaration,
    docTypeStart,
    docTypeEnd,
@@ -97,6 +98,9 @@ class ParsedStream extends stream.Readable {
                      processingInstruction.parse(this._lTokenSource, parsed, deliverParse);
                   }
                });
+               break;
+            case '<!--':
+               comment.parse(this._lTokenSource, markupStartLToken, deliverParse);
                break;
             case '<!':
                declaration.parse(this._lTokenSource, markupStartLToken, (token) => {

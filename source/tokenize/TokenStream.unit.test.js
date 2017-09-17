@@ -5,6 +5,7 @@ import {
    declaration,
    instruction,
    charData,
+   comment,
    elementEnd,
    elementStart,
    entityReference,
@@ -49,6 +50,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(charData.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls comment.makeToken()', () => {
+      spyOn(comment, 'makeToken');
+      const parsed = { type: comment.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(comment.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('calls elementStart.makeToken()', () => {

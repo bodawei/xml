@@ -7,6 +7,7 @@ import {
    declaration,
    instruction,
    charData,
+   comment,
    docTypeStart,
    docTypeEnd,
    xmlDeclaration,
@@ -39,6 +40,9 @@ class TokenStream extends stream.Transform {
             break;
          case charData.TYPE:
             this.push(charData.makeToken(parsed));
+            break;
+         case comment.TYPE:
+            this.push(comment.makeToken(parsed));
             break;
          case docTypeStart.TYPE:
             this.push(docTypeStart.makeToken(parsed));
