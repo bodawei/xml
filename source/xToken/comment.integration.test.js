@@ -48,6 +48,7 @@ describe('comment (integration)', () => {
                expectedLToken('my '),
                expectedLToken('--'),
                expectedLToken('comment'),
+               expectedLToken('--'),
             ],
             close: undefined,
          };

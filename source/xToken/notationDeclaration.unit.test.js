@@ -74,7 +74,7 @@ describe('notationdeDlaration (unit)', () => {
 
          expect(externalId.parse.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(externalId.parse.calls.argsFor(0)[1]).toEqual([ '>' ]);
-         expect(externalId.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+         expect(externalId.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
       });
 
       it('does a simple parse', () => {

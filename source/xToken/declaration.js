@@ -50,25 +50,7 @@ function parse(source, openLToken, deliverParsed) {
    source.extract('space', (lToken) => {
       results.postDeclTypeSpace = lToken;
 
-      if (!results.declType) {
-         deliverParsed(results);
-         return;
-      }
-
-      switch (results.declType.text.toLocaleUpperCase()) {
-         case 'DOCTYPE':
-            docTypeStart.parse(source, results, deliverParsed);
-            break;
-         case 'ENTITY':
-            entityDeclaration.parse(source, results, deliverParsed);
-            break;
-         case 'NOTATION':
-            notationDeclaration.parse(source, results, deliverParsed);
-            break;
-         default:
-            deliverParsed(results);
-            break;
-      }
+      deliverParsed(results);
    });
 }
 

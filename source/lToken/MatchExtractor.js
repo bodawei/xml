@@ -27,10 +27,14 @@ class MatchExtractor extends Extractor {
 
       this._candidate = candidate;
       this._candIndex = 0;
+      this._firstIndex = undefined;
+      this._firstSegment = undefined;
    }
 
    process(segment) {
       const info = this._makeInfo(segment);
+      this._firstSegment = this._firstSegment || segment;
+      this._firstIndex = this._firstIndex || segment.index;
       this._segInfo.push(info);
 
       const segmentRemainder = segment.text.length - segment.index;
@@ -66,6 +70,11 @@ class MatchExtractor extends Extractor {
             this.state = Extractor.STATE.FAILURE;
             this._text = [];
             this._normalizedText = [];
+
+            if (this._firstSegment) {
+               this._firstSegment.index = this._firstIndex;
+            }
+
             this._segInfo.forEach((info) => {
                info.chars = 0;
                info.columns = 0;

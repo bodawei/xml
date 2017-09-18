@@ -9,22 +9,21 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as charData from './charData.js';
 
 describe('charData (integration)', () => {
-   let expectedLToken;
    let emd;
    let source;
 
    beforeEach(() => {
-      expectedLToken = makeLTokenMaker();
       emd = new EntityMetaData();
       source = new LTokenSource(defaultExtractors, emd);
    });
 
    describe('parse()', () => {
       it('parses up to a <', (done) => {
+         const expectedLToken = makeLTokenMaker();
          source.addText('some text<foo>');
 
          charData.parse(source, (result) => {
-            expect(result).toContainParsedProps({
+            expect(result).toEqual({
                type: charData.TYPE,
                text: expectedLToken('some text'),
             });
@@ -39,6 +38,7 @@ describe('charData (integration)', () => {
       it('reports an error a bad character is in the text', (done) => {
          source.addText('bad\u0000&');
          source.endText();
+
          charData.parse(source, (parsed) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 

@@ -35,67 +35,6 @@ describe('declaration (unit)', () => {
          spyOn(entityDeclaration, 'parse');
       });
 
-      it('calls docTypeStart.parse() if the declType is DOCTYPE', () => {
-         const sourceLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            undefined,
-            sourceLToken('DOCTYPE'),
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(docTypeStart.parse).toHaveBeenCalled();
-      });
-
-      it('calls docTypeStart.parse() if the declType is "docTypE"', () => {
-         const sourceLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            undefined,
-            sourceLToken('docTypE'),
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(docTypeStart.parse).toHaveBeenCalled();
-      });
-
-      it('calls entityDeclaration.parse() if the declType is ENTITY', () => {
-         const sourceLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            undefined,
-            sourceLToken('ENTITY'),
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(entityDeclaration.parse).toHaveBeenCalled();
-      });
-
-      it('calls notationDeclaration.parse() if the declType is NOTATION', () => {
-         spyOn(notationDeclaration, 'parse');
-         const sourceLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            undefined,
-            sourceLToken('NOTATION'),
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(notationDeclaration.parse).toHaveBeenCalled();
-      });
-
       it('does an ordinary full parsing', () => {
          const sourceLToken = makeLTokenMaker();
          const openLToken = sourceLToken('<!');
@@ -111,50 +50,6 @@ describe('declaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ defaultParsed ] ]);
-      });
-
-      it('does not do any other parsing if no declaration type is found', () => {
-         const sourceLToken = makeLTokenMaker();
-         const expectedLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            sourceLToken(' '),
-            undefined,
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback.calls.allArgs()).toEqual([ [ {
-            type: 'UNKNOWNDECL',
-            open: expectedLToken('<!'),
-            postOpenSpace: expectedLToken(' '),
-            declType: undefined,
-            postDeclTypeSpace: undefined,
-         } ] ]);
-      });
-
-      it('does not do any other parsing if the declaration type is not known', () => {
-         const sourceLToken = makeLTokenMaker();
-         const expectedLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
-         mockSource = new MockLTokenSource([
-            sourceLToken(' '),
-            sourceLToken('BOGUS'),
-            undefined,
-         ]);
-
-         declaration.parse(mockSource, openLToken, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback.calls.allArgs()).toEqual([ [ {
-            type: 'UNKNOWNDECL',
-            open: expectedLToken('<!'),
-            postOpenSpace: expectedLToken(' '),
-            declType: expectedLToken('BOGUS'),
-            postDeclTypeSpace: undefined,
-         } ] ]);
       });
 
    });

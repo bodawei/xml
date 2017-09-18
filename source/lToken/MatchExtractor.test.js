@@ -92,8 +92,17 @@ describe('MatchExtractor', () => {
       });
 
       it('does not change segment index when no match found', () => {
+         const extractor = new MatchExtractor(1.0, 'xyzzy');
          const segment = new Segment('hi there');
-         extractor.process(segment, 'xyzzy');
+         extractor.process(segment);
+
+         expect(segment.index).toEqual(0);
+      });
+
+      it('does not change segment index when a misleading partial match found', () => {
+         const extractor = new MatchExtractor(1.0, 'hi!');
+         const segment = new Segment('hi there');
+         extractor.process(segment);
 
          expect(segment.index).toEqual(0);
       });

@@ -10,19 +10,17 @@ import * as misc from './common/misc.js';
 import * as charData from './charData.js';
 
 describe('charData', () => {
-   let parsed;
-   let expectedLToken;
+   let parsedCharData;
 
    beforeEach(() => {
-      expectedLToken = makeLTokenMaker();
-      parsed = {
+      const expectedLToken = makeLTokenMaker();
+      parsedCharData = {
          type: 'CHARDATA',
          text: expectedLToken('test text'),
       };
    });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
 
       beforeEach(() => {
@@ -30,18 +28,18 @@ describe('charData', () => {
       });
 
       it('returns simple values', () => {
-         mockSource = new MockLTokenSource([
-            'test text',
+         const mockSource = new MockLTokenSource([
+            [ 'test text', 'all', [ '<', '&', ']]>' ] ],
          ]);
 
          charData.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)).toEqual([ parsed ]);
+         expect(callback).toContainParsedProps(parsedCharData);
       });
 
       it('returns undefined if no text returned', () => {
-         mockSource = new MockLTokenSource([
+         const mockSource = new MockLTokenSource([
             undefined,
          ]);
 
@@ -66,9 +64,9 @@ describe('charData', () => {
       it('asks the checks the text is well formed', () => {
          const emd = new EntityMetaData();
 
-         charData.checkWellFormed(parsed, mockErrorCollector, emd);
+         charData.checkWellFormed(parsedCharData, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.text, mockErrorCollector, emd);
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsedCharData.text, mockErrorCollector, emd);
       });
 
    });
@@ -76,10 +74,10 @@ describe('charData', () => {
    describe('makeToken()', () => {
 
       it('returns a token with the expected fields defined', () => {
-         const token = charData.makeToken(parsed);
+         const token = charData.makeToken(parsedCharData);
 
          expect(token).toEqual(new charData.Token('test text', [
-            parsed.text,
+            parsedCharData.text,
          ]));
       });
 

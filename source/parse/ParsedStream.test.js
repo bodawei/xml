@@ -6,10 +6,14 @@ import { defaultExtractors, LTokenSource } from '../lToken';
 import {
    charData,
    comment,
+   declaration,
+   docTypeStart,
    elementEnd,
    elementStart,
+   entityDeclaration,
    entityReference,
    instruction,
+   notationDeclaration,
    processingInstruction,
    xmlDeclaration,
 } from '../xToken';
@@ -83,6 +87,28 @@ describe('ParsedStream (unit)', () => {
       expect(elementStart.parse).toHaveBeenCalled();
    });
 
+   it('calls docTypeStart.parse()', () => {
+      spyOn(docTypeStart, 'parse');
+      parser.addText('<!DOCTYPE theType>');
+      parser.endText();
+      parser.read();
+
+      expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('DOCTYPE');
+      expect(docTypeStart.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
+   it('calls docTypeStart.parse() even when the declType is the wrong case', () => {
+      spyOn(docTypeStart, 'parse');
+      parser.addText('<!docType theType>');
+      parser.endText();
+      parser.read();
+
+      expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('docType');
+      expect(docTypeStart.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
    it('calls elementEnd.parse()', () => {
       spyOn(elementEnd, 'parse');
       parser.addText('</foo>');
@@ -92,14 +118,36 @@ describe('ParsedStream (unit)', () => {
       expect(elementEnd.parse).toHaveBeenCalled();
    });
 
+   it('calls entityDeclaration.parse()', () => {
+      spyOn(entityDeclaration, 'parse');
+      parser.addText('<!ENTITY something "foo">');
+      parser.endText();
+      parser.read();
+
+      expect(entityDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(entityDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('ENTITY');
+      expect(entityDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
    it('calls entityReference.parse()', () => {
       spyOn(entityReference, 'parse');
       parser.addText('&foo;');
       parser.endText();
       parser.read();
 
-      expect(entityReference.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
-      expect(entityReference.parse.calls.argsFor(0)[1] instanceof Function).toEqual(true);
+      expect(entityReference.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(entityReference.parse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+   });
+
+   it('calls notationDeclaration.parse()', () => {
+      spyOn(notationDeclaration, 'parse');
+      parser.addText('<!NOTATION something>');
+      parser.endText();
+      parser.read();
+
+      expect(notationDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(notationDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('NOTATION');
+      expect(notationDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
    it('calls instruction.parse()', () => {
@@ -108,9 +156,9 @@ describe('ParsedStream (unit)', () => {
       parser.endText();
       parser.read();
 
-      expect(instruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(instruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(instruction.parse.calls.argsFor(0)[1].text).toEqual('<?');
-      expect(instruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+      expect(instruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
    it('calls processingInstruction.parse()', () => {
@@ -119,9 +167,9 @@ describe('ParsedStream (unit)', () => {
       parser.endText();
       parser.read();
 
-      expect(processingInstruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(processingInstruction.parse.calls.argsFor(0)[1].target.text).toEqual('something');
-      expect(processingInstruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
    it('calls processingInstruction.parse() when there is no target name', () => {
@@ -130,10 +178,23 @@ describe('ParsedStream (unit)', () => {
       parser.endText();
       parser.read();
 
-      expect(processingInstruction.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(processingInstruction.parse.calls.argsFor(0)[1].target).toBeUndefined();
-      expect(processingInstruction.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+      expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
+
+   it('calls declaration.parse()', () => {
+      spyOn(declaration, 'parse');
+      parser.addText('<!FOO >');
+      parser.endText();
+      parser.read();
+
+      expect(declaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(declaration.parse.calls.argsFor(0)[1].text).toEqual('<!');
+      expect(declaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
+   // unknnown if type missing or unknown
 
    it('calls xmlDeclaration.parse()', () => {
       spyOn(xmlDeclaration, 'parse');
@@ -141,9 +202,9 @@ describe('ParsedStream (unit)', () => {
       parser.endText();
       parser.read();
 
-      expect(xmlDeclaration.parse.calls.argsFor(0)[0] instanceof LTokenSource).toEqual(true);
+      expect(xmlDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(xmlDeclaration.parse.calls.argsFor(0)[1].target.text).toEqual('xml');
-      expect(xmlDeclaration.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+      expect(xmlDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
 });

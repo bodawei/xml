@@ -12,8 +12,10 @@ import {
    docTypeEnd,
    elementStart,
    elementEnd,
+   entityDeclaration,
    entityReference,
    instruction,
+   notationDeclaration,
    processingInstruction,
    xmlDeclaration,
 } from '../xToken';
@@ -103,22 +105,38 @@ class ParsedStream extends stream.Readable {
                comment.parse(this._lTokenSource, markupStartLToken, deliverParse);
                break;
             case '<!':
-               declaration.parse(this._lTokenSource, markupStartLToken, (token) => {
-                  if (token.type !== docTypeStart.TYPE) {
-                     deliverParse(token);
+               declaration.parse(this._lTokenSource, markupStartLToken, (parsed) => {
+                  if (!parsed.declType) {
+                     deliverParse(parsed);
                      return;
                   }
 
-                  if (token.startInternalSubset) {
-                     this.waitingForInternalClose = true;
-                     deliverParse(token);
-                  } else {
-                     docTypeEnd.parse(this._lTokenSource, (endToken) => {
-                        deliverParse(token);
-                        deliverParse(endToken);
-                     });
+                  switch (parsed.declType.text.toLocaleUpperCase()) {
+                     case 'DOCTYPE':
+                        docTypeStart.parse(this._lTokenSource, parsed, (docTypeStart) => {
+                           if (docTypeStart.startInternalSubset) {
+                              this.waitingForInternalClose = true;
+                              deliverParse(docTypeStart);
+                           } else {
+                              docTypeEnd.parse(this._lTokenSource, (endToken) => {
+                                 deliverParse(docTypeStart);
+                                 deliverParse(endToken);
+                              });
+                           }
+                        });
+                        break;
+                     case 'ENTITY':
+                        entityDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                        break;
+                     case 'NOTATION':
+                        notationDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                        break;
+                     default:
+                        deliverParse(parsed);
+                        break;
                   }
                });
+               break;
          }
       });
    }

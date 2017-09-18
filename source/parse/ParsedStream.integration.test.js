@@ -85,6 +85,10 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('&foo;', 'ENTITYREF', done);
    });
 
+   it('parse NOTATION declaration', (done) => {
+      expectInputToProduceTypes('<!NOTATION foo>', 'NOTATIONDECL', done);
+   });
+
    it('parses a processing instruction', (done) => {
       expectInputToProduceTypes('<?froz adfasdf ?>', 'PROCESSING_INSTRUCTION', done);
    });
