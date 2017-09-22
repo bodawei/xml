@@ -1,13 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityLocation } from '../basic';
-import { LTokenSource, defaultExtractors } from '../lToken';
+import { EntityLocation } from '../basic';
 import { makeLTokenMaker } from '../lToken/test';
 
-import * as declaration from './declaration.js';
 import * as docTypeStart from './docTypeStart.js';
-import * as entityDeclaration from './entityDeclaration.js';
 
 describe('docTypeStart (integration)', () => {
 

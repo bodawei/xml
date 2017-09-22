@@ -6,9 +6,6 @@ import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
 import * as declaration from './declaration.js';
-import * as docTypeStart from './docTypeStart.js';
-import * as entityDeclaration from './entityDeclaration.js';
-import * as notationDeclaration from './notationDeclaration.js';
 
 describe('declaration (unit)', () => {
    let defaultParsed;
@@ -31,8 +28,6 @@ describe('declaration (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(docTypeStart, 'parse');
-         spyOn(entityDeclaration, 'parse');
       });
 
       it('does an ordinary full parsing', () => {

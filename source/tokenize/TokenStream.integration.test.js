@@ -15,6 +15,7 @@ import {
    entityReference,
    notationDeclaration,
    processingInstruction,
+   space,
    text,
    xmlDeclaration,
 } from '../xToken';
@@ -117,6 +118,12 @@ describe('TokenStream (integration)', () => {
    it('tokenizes a processing instruction', (done) => {
       expectInputToProduce('<?frozboz askfhasdfkh kje  adsf ?>', [
          new processingInstruction.Token('frozboz', 'askfhasdfkh kje  adsf ', []),
+      ], done);
+   });
+
+   it('tokenizes spaces', (done) => {
+      expectInputToProduce('<?xml version="1.0"?>   <one></one>', [
+         new space.Token('   ', []),
       ], done);
    });
 

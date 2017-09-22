@@ -43,7 +43,7 @@ function toBeInstanceOf() {
          if (typeof expected !== 'function') {
             throw new Error('Must pass a function to the second argument of the .toBeInstanceOf() jasmine matcher.');
          }
-         if (typeof actual !== 'object') {
+         if (typeof actual !== 'object' && typeof actual !== 'function') {
             throw new Error('Must pass an object to the first argument of the .toBeInstanceOf() jasmine matcher.');
          }
 

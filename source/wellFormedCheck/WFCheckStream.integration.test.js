@@ -128,6 +128,15 @@ describe('WFCheckStream (integration)', () => {
             ), done);
    });
 
+   it('reports an error when a space is found in the wrong place', (done) => {
+      expectInputToProduce('  ',
+            new WellFormedError('SPACE_INVALID_CONTEXT',
+               undefined,
+               new Offset(new EntityLocation(), 0, 0, 0),
+               new Offset(new EntityLocation(), 0, 0, 0)
+            ), done);
+   });
+
    it('reports an error when an UNKNOWN declaration is found', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!BOGUS',
          new WellFormedError('BANGITEM_UNKNOWN',

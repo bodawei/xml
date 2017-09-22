@@ -6,9 +6,6 @@ import {
    pushNonBottom,
    textOrBlank,
 } from './common/util.js';
-import * as docTypeStart from './docTypeStart.js';
-import * as entityDeclaration from './entityDeclaration.js';
-import * as notationDeclaration from './notationDeclaration.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\

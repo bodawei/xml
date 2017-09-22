@@ -17,6 +17,7 @@ import {
    instruction,
    notationDeclaration,
    processingInstruction,
+   space,
    xmlDeclaration,
 } from '../xToken';
 
@@ -55,29 +56,35 @@ class ParsedStream extends stream.Readable {
    }
 
    _parseGeneral(deliverParse) {
-      this._lTokenSource.extract('peekChar', (lToken) => {
-         if (!lToken) {
-            deliverParse(null);
-            return;
+      space.parse(this._lTokenSource, (pToken) => {
+         if (pToken.text) {
+            deliverParse(pToken);
          }
 
-         switch (lToken.text) {
-            case '<':
-               this._markupParse(deliverParse);
-               break;
-            case '&':
-               entityReference.parse(this._lTokenSource, deliverParse);
-               break;
-            case ']':
-               if (this.waitingForInternalClose) {
-                  this._parseClose(deliverParse);
-                  this.waitingForInternalClose = false;
-               }
-               break;
-            default:
-               charData.parse(this._lTokenSource, deliverParse);
-               break;
-         }
+         this._lTokenSource.extract('peekChar', (lToken) => {
+            if (!lToken) {
+               deliverParse(null);
+               return;
+            }
+
+            switch (lToken.text) {
+               case '<':
+                  this._markupParse(deliverParse);
+                  break;
+               case '&':
+                  entityReference.parse(this._lTokenSource, deliverParse);
+                  break;
+               case ']':
+                  if (this.waitingForInternalClose) {
+                     this._parseClose(deliverParse);
+                     this.waitingForInternalClose = false;
+                  }
+                  break;
+               default:
+                  charData.parse(this._lTokenSource, deliverParse);
+                  break;
+            }
+         });
       });
    }
 

@@ -11,6 +11,7 @@ import {
    entityReference,
    notationDeclaration,
    processingInstruction,
+   space,
 } from '../xToken';
 
 import TokenStream from './TokenStream.js';
@@ -110,6 +111,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(processingInstruction.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls space.makeToken()', () => {
+      spyOn(space, 'makeToken');
+      const parsed = { type: space.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(space.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('throws an error if asked to deal with an unknown parsed type', () => {

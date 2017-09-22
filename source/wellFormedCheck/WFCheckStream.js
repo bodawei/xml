@@ -18,6 +18,7 @@ import {
    entityReference,
    notationDeclaration,
    processingInstruction,
+   space,
    xmlDeclaration,
 } from '../xToken';
 
@@ -172,6 +173,12 @@ class WFChecker extends stream.Transform {
                errorCollector.report(WellFormedError.ID.PI_INVALID_CONTEXT);
             }
             processingInstruction.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
+         case space.TYPE:
+            if (this._state === STATE.START) {
+               errorCollector.report(WellFormedError.ID.SPACE_INVALID_CONTEXT);
+            }
+            space.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          default:
             errorCollector = undefined;

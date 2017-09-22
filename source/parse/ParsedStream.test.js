@@ -15,6 +15,7 @@ import {
    instruction,
    notationDeclaration,
    processingInstruction,
+   space,
    xmlDeclaration,
 } from '../xToken';
 
@@ -181,6 +182,15 @@ describe('ParsedStream (unit)', () => {
       expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(processingInstruction.parse.calls.argsFor(0)[1].target).toBeUndefined();
       expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
+   it('calls space.parse()', () => {
+      spyOn(space, 'parse');
+      parser.addText('   x');
+      parser.endText();
+      parser.read();
+
+      expect(space.parse).toHaveBeenCalled();
    });
 
    it('calls declaration.parse()', () => {

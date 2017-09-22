@@ -112,7 +112,14 @@ describe('toBeInstanceOf()', () => {
          });
       });
 
-      it('returns a message indicating failure, on failure, for the .toEqualProps() case', () => {
+      it('returns a message indicating failure, on success, when passed a function', () => {
+         expect(toBeInstanceOfMatcher({ equals: () => true }, () => true).compare(Test, Function)).toEqual({
+            pass: true,
+            message: 'Expected instance not to be an instance of Function.',
+         });
+      });
+
+      it('returns a message indicating failure, on failure, for the .toBeInstanceOf() case', () => {
          expect(toBeInstanceOfMatcher({ equals: () => false }, () => true).compare(new Test(), Test2)).toEqual({
             pass: false,
             message: 'Expected instance to be an instance of Test2.',

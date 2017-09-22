@@ -93,6 +93,10 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('<?froz adfasdf ?>', 'PROCESSING_INSTRUCTION', done);
    });
 
+   it('parses a space', (done) => {
+      expectInputToProduceTypes('\t\n ', 'SPACE', done);
+   });
+
    it('parses an unknown declaration', (done) => {
       expectInputToProduceTypes('<!BOGUS', 'UNKNOWNDECL', done);
    });

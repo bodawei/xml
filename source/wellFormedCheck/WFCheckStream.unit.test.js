@@ -18,6 +18,7 @@ import {
    entityReference,
    notationDeclaration,
    processingInstruction,
+   space,
    xmlDeclaration,
 } from '../xToken';
 
@@ -59,7 +60,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = charData.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -102,7 +103,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = comment.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -139,7 +140,7 @@ describe('WFCheckStream (unit)', () => {
 
       const args = declaration.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
@@ -154,7 +155,7 @@ describe('WFCheckStream (unit)', () => {
 
       const args = instruction.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
@@ -174,7 +175,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = docTypeStart.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -208,7 +209,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = docTypeEnd.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[2] instanceof ErrorCollector).toEqual(true);
+         expect(args[2]).toBeInstanceOf(ErrorCollector);
          expect(args[3]).toEqual(metaData);
       });
 
@@ -251,7 +252,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = elementStart.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -325,7 +326,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = elementEnd.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -426,7 +427,7 @@ describe('WFCheckStream (unit)', () => {
 
       const args = entityDeclaration.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
@@ -447,7 +448,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = entityReference.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -476,7 +477,7 @@ describe('WFCheckStream (unit)', () => {
 
       const args = notationDeclaration.checkWellFormed.calls.argsFor(0);
       expect(args[0]).toEqual(parsed);
-      expect(args[1] instanceof ErrorCollector).toEqual(true);
+      expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
@@ -511,7 +512,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = processingInstruction.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
@@ -523,6 +524,41 @@ describe('WFCheckStream (unit)', () => {
             checker.write(parsed);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PI_INVALID_CONTEXT);
+         });
+
+      });
+
+   });
+
+   describe('space', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(space, 'checkWellFormed');
+         parsed = {
+            type: space.TYPE,
+            text: makeLToken(' '),
+         };
+      });
+
+      it('calls space.checkWellFormed() when encountering a space parsing', () => {
+         checker.write(parsed);
+
+         const args = space.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if found at the start of a file', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.SPACE_INVALID_CONTEXT);
          });
 
       });
@@ -546,7 +582,7 @@ describe('WFCheckStream (unit)', () => {
 
          const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
          expect(args[0]).toEqual(parsed);
-         expect(args[1] instanceof ErrorCollector).toEqual(true);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 

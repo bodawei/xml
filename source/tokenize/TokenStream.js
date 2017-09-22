@@ -10,13 +10,14 @@ import {
    comment,
    docTypeStart,
    docTypeEnd,
-   xmlDeclaration,
    elementEnd,
    elementStart,
    entityDeclaration,
    entityReference,
    notationDeclaration,
    processingInstruction,
+   space,
+   xmlDeclaration,
 } from '../xToken';
 
 class TokenStream extends stream.Transform {
@@ -67,6 +68,9 @@ class TokenStream extends stream.Transform {
             break;
          case processingInstruction.TYPE:
             this.push(processingInstruction.makeToken(parsed));
+            break;
+         case space.TYPE:
+            this.push(space.makeToken(parsed));
             break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(parsed));

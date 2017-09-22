@@ -13,6 +13,7 @@ import * as entityReference from './entityReference.js';
 import * as entityStart from './entityStart.js';
 import * as elementStart from './elementStart.js';
 import * as elementEnd from './elementEnd.js';
+import * as space from './space.js';
 import * as text from './text.js';
 import * as notationDeclaration from './notationDeclaration.js';
 import * as processingInstruction from './processingInstruction.js';
@@ -34,6 +35,7 @@ module.exports = {
    entityStart,
    notationDeclaration,
    processingInstruction,
+   space,
    text,
    xmlDeclaration,
 };
