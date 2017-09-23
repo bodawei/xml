@@ -77,39 +77,56 @@ class MultiMatchExtractor extends Extractor {
    finish() {
       switch (this.state) {
          case Extractor.STATE.WORKING:
+            // If we're being asked to finish, but are still working,
+            // AND we have indeed found a match (even if there are still)
+            // outstanding candidates) then consider it a successful match.
+            if (this._match) {
+               return this._finishWithSuccess();
+            }
+
+            return this._finishWithFailure();
          case Extractor.STATE.FAILURE:
-            this.state = Extractor.STATE.FAILURE;
-            this._segInfo.forEach((info) => { info.segment.index = 0; });
-
-            if (this._firstSegment) {
-               this._firstSegment.index = this._firstIndex;
-            }
-
-            return {
-               text: '',
-               original: '',
-               segments: this._segInfo,
-            };
+            return this._finishWithFailure();
          case Extractor.STATE.SUCCESS:
-            const result = this._match.finish();
-            const newInfo = [];
-
-            for (let index = 0; index < this._segInfo.length; index++) {
-               const usedInfo = result.segments[index];
-
-               if (usedInfo) {
-                  newInfo.push(usedInfo);
-               } else {
-                  const unused = this._segInfo[index];
-                  unused.segment.index = 0;
-                  newInfo.push(unused);
-               }
-            }
-            this._lastSegment.index = this._lastIndex;
-            result.segments = newInfo;
-
-            return result;
+            return this._finishWithSuccess();
       }
+   }
+
+   _finishWithFailure() {
+      this.state = Extractor.STATE.FAILURE;
+      this._segInfo.forEach((info) => { info.segment.index = 0; });
+
+      if (this._firstSegment) {
+         this._firstSegment.index = this._firstIndex;
+      }
+
+      return {
+         text: '',
+         original: '',
+         segments: this._segInfo,
+      };
+   }
+
+   _finishWithSuccess() {
+      this.state = Extractor.STATE.SUCCESS;
+      const result = this._match.finish();
+      const newInfo = [];
+
+      for (let index = 0; index < this._segInfo.length; index++) {
+         const usedInfo = result.segments[index];
+
+         if (usedInfo) {
+            newInfo.push(usedInfo);
+         } else {
+            const unused = this._segInfo[index];
+            unused.segment.index = 0;
+            newInfo.push(unused);
+         }
+      }
+      this._lastSegment.index = this._lastIndex;
+      result.segments = newInfo;
+
+      return result;
    }
 
 }

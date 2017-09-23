@@ -204,7 +204,14 @@ describe('ParsedStream (unit)', () => {
       expect(declaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
-   // unknnown if type missing or unknown
+   it('returns the undefined declaration if none provided', () => {
+      parser.addText('<!');
+      parser.endText();
+      parser.read(); // ignore entity meta data
+      const result = parser.read();
+
+      expect(result.type).toEqual('UNKNOWNDECL');
+   });
 
    it('calls xmlDeclaration.parse()', () => {
       spyOn(xmlDeclaration, 'parse');

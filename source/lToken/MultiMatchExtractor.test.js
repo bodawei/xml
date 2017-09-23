@@ -346,6 +346,34 @@ describe('MultiMatchExtractor', () => {
 
       });
 
+      it('returns a shorter match when EOF is encountered and that shorter is fully matched', () => {
+         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<--' ]);
+
+         extractor.process(new Segment('<!'));
+
+         expect(extractor.finish()).toEqual({
+            text: '<!',
+            original: '<!',
+            segments: [ {
+               chars: 2,
+               rows: 0,
+               columns: 2,
+               segment: {
+                  range: undefined,
+               },
+            } ],
+         });
+      });
+
+      it('sets a success state when there is a shorter match at EOF', () => {
+         extractor = new MultiMatchExtractor(1.0, [ '<!', '<!--', '<--' ]);
+
+         extractor.process(new Segment('<!'));
+         extractor.finish();
+
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
    });
 
 });
