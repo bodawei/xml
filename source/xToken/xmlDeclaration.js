@@ -8,6 +8,7 @@ import {
    textOrUndef,
 } from './common/util.js';
 import * as instruction from './instruction.js';
+import * as attribute from './common/attribute.js';
 import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
 import { Token as XmlToken } from './xmlToken.js';
@@ -19,7 +20,7 @@ import { Token as XmlToken } from './xmlToken.js';
 
 const WFEID = WellFormedError.ID;
 const XMLDECL = 'XMLDECL';
-const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+const XMLDECL_NAME_TERMINATORS = [ '?>' ];
 const XMLDECL_PARAMS = {
    version: 'version',
    encoding: 'encoding',
@@ -71,42 +72,11 @@ function parse(source, piParsing, deliverParsed) {
       postTargetSpace: piParsing.postTargetSpace,
    };
 
-   getParams(source, (params) => {
+   attribute.parse(source, { terminators: XMLDECL_NAME_TERMINATORS}, (params) => {
       parsed.params = params;
       source.extract('match', '?>', (lToken) => {
          parsed.close = lToken;
          deliverParsed(parsed);
-      });
-   });
-}
-
-function getParams(source, deliverResults) {
-   const params = [];
-   source.extract('word', XMLDECL_NAME_TERMINATORS, (lToken) => {
-      addParam(source, params, lToken, deliverResults);
-   });
-}
-
-function addParam(source, params, name, deliverResults) {
-   if (!name) {
-      deliverResults(params);
-      return;
-   }
-   const param = {
-      name,
-   };
-   params.push(param);
-
-   source.extractToObject('space', param, 'postNameSpace');
-   source.extractToObject('match', '=', param, 'equal');
-   source.extractToObject('space', param, 'postEqualSpace');
-   quotedValue.parse('param', source, param, (gotQuoted) => {
-      if (gotQuoted) {
-         source.extractToObject('space', param, 'trailingSpace');
-      }
-
-      source.extract('word', XMLDECL_NAME_TERMINATORS, (lToken) => {
-         addParam(source, params, lToken, deliverResults);
       });
    });
 }

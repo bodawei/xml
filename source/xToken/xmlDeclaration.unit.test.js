@@ -6,8 +6,9 @@ import { WellFormedError } from '../error';
 import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 
-import * as misc from './common/misc.js';
 import * as instruction from './instruction.js';
+import * as attribute from './common/attribute.js';
+import * as misc from './common/misc.js';
 import * as quotedValue from './common/quotedValue.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
@@ -19,19 +20,13 @@ describe('xmlDeclaration (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(quotedValue, 'parse');
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
+         spyOn(attribute, 'parse');
+         attribute.parse.and.callFake((_1, _2, callback) => { callback([]); });
       });
 
-      it('gathers no value if thee is no quote after the equal sign', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
+      it('does a basic parsing', () => {
          mockSource = new MockLTokenSource([
-            'version',
-            ' ',
-            '=',
-            ' ',
-            undefined,
-            '?>',
+            [ '?>', 'match', '?>' ],
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
@@ -44,57 +39,25 @@ describe('xmlDeclaration (unit)', () => {
             postOpenSpace: undefined,
             target: undefined,
             postTargetSpace: undefined,
-            params: [ {
-               name: expectedLToken('version'),
-               postNameSpace: expectedLToken(' '),
-               equal: expectedLToken('='),
-               postEqualSpace: expectedLToken(' '),
-            } ],
+            params: [ ],
             close: expectedLToken('?>'),
          });
       });
 
-      it('gathers multiple parameters', () => {
+      it('calls attribute.parse()', () => {
          mockSource = new MockLTokenSource([
-            'version',
-            undefined,
-            '=',
-            undefined,
-            undefined,  // trailingSpace
-            'encoding',
-            undefined,
-            '=',
-            undefined,
-            undefined,
-            undefined,
             '?>',
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         const expectedLToken = makeLTokenMaker();
-         expect(callback).toContainParsedProps({
-            type: 'XMLDECL',
-            open: undefined,
-            postOpenSpace: undefined,
-            target: undefined,
-            postTargetSpace: undefined,
-            params: [ {
-               name: expectedLToken('version'),
-               postNameSpace: undefined,
-               equal: expectedLToken('='),
-               postEqualSpace: undefined,
-               trailingSpace: undefined,
-            }, {
-               name: expectedLToken('encoding'),
-               postNameSpace: undefined,
-               equal: expectedLToken('='),
-               postEqualSpace: undefined,
-               trailingSpace: undefined,
-            } ],
-            close: expectedLToken('?>'),
+         const args = attribute.parse.calls.argsFor(0);
+         expect(args[0]).toEqual(mockSource);
+         expect(args[1]).toEqual({
+            terminators: [ '?>' ],
          });
+         expect(args[2]).toBeInstanceOf(Function);
       });
 
    });
