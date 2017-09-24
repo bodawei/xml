@@ -62,7 +62,7 @@ class DocTypeStart extends XmlToken {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = declaration.toLocalParsing(DOCTYPE_START, declarationParsing);
+   const parsed = declaration.makeTypedDeclaration(DOCTYPE_START, declarationParsing);
 
    source.extractToObject('word', [ '[', '>' ], parsed, 'name'); // look for quotes?
    source.extractToObject('space', undefined, parsed, 'postNameSpace');

@@ -28,10 +28,10 @@ describe('entityDeclaration (unit)', () => {
             cb({ externalId: true });
          });
          spyOn(quotedValue, 'parse');
-         spyOn(declaration, 'toLocalParsing').and.returnValues({ type: 'ENTITYDECL' });
+         spyOn(declaration, 'makeTypedDeclaration').and.returnValues({ type: 'ENTITYDECL' });
       });
 
-      it('calls declaration.toLocalParsing()', () => {
+      it('calls declaration.makeTypedDeclaration()', () => {
          mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -47,7 +47,7 @@ describe('entityDeclaration (unit)', () => {
          entityDeclaration.parse(mockSource, decl, callback);
          mockSource.respondInAsyncTime();
 
-         expect(declaration.toLocalParsing).toHaveBeenCalledWith('ENTITYDECL', decl);
+         expect(declaration.makeTypedDeclaration).toHaveBeenCalledWith('ENTITYDECL', decl);
       });
 
       it('calls quotedValue.parse()', () => {

@@ -35,7 +35,7 @@ describe('entityDeclaration', () => {
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.BANGITEM_OPEN_XTRA_SPACE_AFTER);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
             done();
          });
       });

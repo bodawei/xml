@@ -25,10 +25,10 @@ describe('docTypeStart', () => {
          spyOn(externalId, 'parse').and.callFake((ignored1, ignored2, cb) => {
             cb({ externalId: true });
          });
-         spyOn(declaration, 'toLocalParsing').and.returnValues({ type: 'DOCTYPE_START' });
+         spyOn(declaration, 'makeTypedDeclaration').and.returnValues({ type: 'DOCTYPE_START' });
       });
 
-      it('calls declaration.toLocalParsing', () => {
+      it('calls declaration.makeTypedDeclaration', () => {
          const sourceLToken = makeLTokenMaker();
          mockSource = new MockLTokenSource([
             sourceLToken('elemType'),
@@ -41,7 +41,7 @@ describe('docTypeStart', () => {
          docTypeStart.parse(mockSource, decl, callback);
          mockSource.respondInAsyncTime();
 
-         expect(declaration.toLocalParsing).toHaveBeenCalledWith('DOCTYPE_START', decl);
+         expect(declaration.makeTypedDeclaration).toHaveBeenCalledWith('DOCTYPE_START', decl);
       });
 
       it('returns simple values', () => {

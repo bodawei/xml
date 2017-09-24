@@ -19,7 +19,6 @@ describe('declaration (unit)', () => {
          declType: sourceLToken('DOCTYPE'),
          postDeclTypeSpace: sourceLToken(' '),
       };
-
    });
 
    describe('parse()', () => {
@@ -31,20 +30,32 @@ describe('declaration (unit)', () => {
       });
 
       it('does an ordinary full parsing', () => {
-         const sourceLToken = makeLTokenMaker();
-         const openLToken = sourceLToken('<!');
          mockSource = new MockLTokenSource([
-            sourceLToken(' '),
-            sourceLToken('TESTVAL'),
-            sourceLToken(' '),
-         ]);
-         defaultParsed.declType.text = 'TESTVAL';
-         defaultParsed.declType.originalText = 'TESTVAL';
+            [ ' ', 'space' ],
+            [ 'DOCTYPE', 'word', [ '>' ] ],
+            [ ' ', 'space' ],
+         ], 2, 0, 2);
 
-         declaration.parse(mockSource, openLToken, callback);
+         declaration.parse(mockSource, defaultParsed.open, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.allArgs()).toEqual([ [ defaultParsed ] ]);
+         expect(callback).toContainParsedProps(defaultParsed);
+      });
+
+      it('copes with EOF', () => {
+         mockSource = new MockLTokenSource([
+            undefined,
+            undefined,
+            undefined,
+         ]);
+         defaultParsed.postOpenSpace = undefined;
+         defaultParsed.declType = undefined;
+         defaultParsed.postDeclTypeSpace = undefined;
+
+         declaration.parse(mockSource, defaultParsed.open, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps(defaultParsed);
       });
 
    });
@@ -70,7 +81,7 @@ describe('declaration (unit)', () => {
          declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.BANGITEM_OPEN_XTRA_SPACE_AFTER,
+            id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
             params: undefined,
             position: defaultParsed.postOpenSpace,
          });
@@ -82,7 +93,7 @@ describe('declaration (unit)', () => {
          declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.BANGITEM_NO_DECLTYPE,
+            id: WellFormedError.ID.DECL_NO_DECLTYPE,
             params: undefined,
             position: undefined,
             lastPosition: defaultParsed.open,
@@ -95,7 +106,7 @@ describe('declaration (unit)', () => {
          declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.BANGITEM_DECLTYPE_INVALID_CASE,
+            id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
             params: [ 'DOCTYPE', 'docType' ],
             position: defaultParsed.declType,
          });
@@ -107,7 +118,7 @@ describe('declaration (unit)', () => {
          declaration.checkWellFormed(defaultParsed, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.BANGITEM_UNKNOWN,
+            id: WellFormedError.ID.DECL_UNKNOWN,
             params: [ 'BOGUSTYPE' ],
             position: defaultParsed.declType,
          });
@@ -147,10 +158,10 @@ describe('declaration (unit)', () => {
 
    });
 
-   describe('toLocalParsing()', () => {
+   describe('makeTypedDeclaration()', () => {
 
       it('adds all declaration items as well as the specified type', () => {
-         const results = declaration.toLocalParsing('foo', defaultParsed);
+         const results = declaration.makeTypedDeclaration('foo', defaultParsed);
 
          expect(results).toEqual({
             type: 'foo',

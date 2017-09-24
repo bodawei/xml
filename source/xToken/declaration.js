@@ -59,19 +59,19 @@ function checkWellFormed(parsed, ec) {
    ec.setPos(parsed.open);
 
    ec.setPos(parsed.postOpenSpace);
-   ec.check(parsed.postOpenSpace, WFEID.BANGITEM_OPEN_XTRA_SPACE_AFTER);
+   ec.check(parsed.postOpenSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
 
    ec.setPos(parsed.declType);
 
    if (parsed.declType) {
       const upperCase = parsed.declType.text.toLocaleUpperCase();
       ec.check(parsed.declType.text !== upperCase,
-         WFEID.BANGITEM_DECLTYPE_INVALID_CASE, [ upperCase, parsed.declType.text ]);
+         WFEID.DECL_DECLTYPE_INVALID_CASE, [ upperCase, parsed.declType.text ]);
    } else {
-      ec.report(WFEID.BANGITEM_NO_DECLTYPE);
+      ec.report(WFEID.DECL_NO_DECLTYPE);
    }
 
-   ec.check(parsed.declType && parsed.type === UNKNOWNDECL, WFEID.BANGITEM_UNKNOWN, [ textOrBlank(parsed.declType) ]);
+   ec.check(parsed.declType && parsed.type === UNKNOWNDECL, WFEID.DECL_UNKNOWN, [ textOrBlank(parsed.declType) ]);
 
    return ec;
 }
@@ -98,7 +98,7 @@ function appendLTokens(results, parsed) {
  Converts the parsing returned by declaraction.parse() into another type.
 \**********************************************************************/
 
-function toLocalParsing(type, declarationParsing) {
+function makeTypedDeclaration(type, declarationParsing) {
    return {
       type: type,
       open: declarationParsing.open,
@@ -115,5 +115,5 @@ export {
    checkWellFormed,
    makeToken,
    appendLTokens,
-   toLocalParsing,
+   makeTypedDeclaration,
 };

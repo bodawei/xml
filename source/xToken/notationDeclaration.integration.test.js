@@ -51,7 +51,7 @@ describe('notationdeDlaration (integration)', () => {
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.BANGITEM_OPEN_XTRA_SPACE_AFTER);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
             done();
          });
       });

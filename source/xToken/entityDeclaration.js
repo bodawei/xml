@@ -68,7 +68,7 @@ class ParameterEntityDeclaration extends EntityDeclaration {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = declaration.toLocalParsing(ENTITYDECL, declarationParsing);
+   const parsed = declaration.makeTypedDeclaration(ENTITYDECL, declarationParsing);
 
    source.extract('peekChar', (lToken) => {
       if (!lToken) {

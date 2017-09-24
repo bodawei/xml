@@ -41,12 +41,12 @@ describe('notationdeDlaration (unit)', () => {
          externalId.parse.and.callFake((source, terminators, cb) => {
             cb({ externalId: true });
          });
-         spyOn(declaration, 'toLocalParsing').and.returnValues({
+         spyOn(declaration, 'makeTypedDeclaration').and.returnValues({
             type: notationDeclaration.TYPE,
          });
       });
 
-      it('calls declaration.toLocalParsing()', () => {
+      it('calls declaration.makeTypedDeclaration()', () => {
          const mockSource = new MockLTokenSource([
             'name',
             ' ',
@@ -58,7 +58,7 @@ describe('notationdeDlaration (unit)', () => {
          notationDeclaration.parse(mockSource, decl, callback);
          mockSource.respondInAsyncTime();
 
-         expect(declaration.toLocalParsing).toHaveBeenCalledWith(notationDeclaration.TYPE, decl);
+         expect(declaration.makeTypedDeclaration).toHaveBeenCalledWith(notationDeclaration.TYPE, decl);
       });
 
       it('calls externalId.parse()', () => {

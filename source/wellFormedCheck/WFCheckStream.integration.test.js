@@ -139,7 +139,7 @@ describe('WFCheckStream (integration)', () => {
 
    it('reports an error when an UNKNOWN declaration is found', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!BOGUS',
-         new WellFormedError('BANGITEM_UNKNOWN',
+         new WellFormedError('DECL_UNKNOWN',
             [ 'BOGUS' ],
             new Offset(new EntityLocation(), 23, 0, 23),
             new Offset(new EntityLocation(), 21, 0, 21)

@@ -9,76 +9,74 @@ import { WellFormedError } from '../error';
 import * as docTypeEnd from './docTypeEnd.js';
 
 describe('docTypeEnd', () => {
+   let parsedDocTypeEnd;
+
+   beforeEach(() => {
+      const expectedLToken = makeLTokenMaker();
+      parsedDocTypeEnd = {
+         type: 'DOCTYPE_END',
+         closeInternalSubset: expectedLToken(']'),
+         postCloseInternalSubsetSpace: undefined,
+         close: expectedLToken('>'),
+      };
+   });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
-      let expectedLToken;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         expectedLToken = makeLTokenMaker();
       });
 
       it('returns after parsing a mundane "]>"', () => {
-         mockSource = new MockLTokenSource([
-            ']',
-            undefined,
-            '>',
+         const mockSource = new MockLTokenSource([
+            [ ']', 'match', ']' ],
+            [ undefined, 'space' ],
+            [ '>', 'match', '>' ],
          ]);
 
          docTypeEnd.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'DOCTYPE_END',
-            closeInternalSubset: expectedLToken(']'),
-            postCloseInternalSubsetSpace: undefined,
-            close: expectedLToken('>'),
-         });
+         expect(callback).toContainParsedProps(parsedDocTypeEnd);
       });
 
       it('returns after parsing a "]\\t>"', () => {
-         mockSource = new MockLTokenSource([
+         const mockSource = new MockLTokenSource([
             ']',
             '\t',
             '>',
          ]);
+         const expectedLToken = makeLTokenMaker(undefined, 1, 0, 1);
+         parsedDocTypeEnd.postCloseInternalSubsetSpace = expectedLToken('\t');
+         parsedDocTypeEnd.close = expectedLToken('>');
 
          docTypeEnd.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'DOCTYPE_END',
-            closeInternalSubset: expectedLToken(']'),
-            postCloseInternalSubsetSpace: expectedLToken('\t'),
-            close: expectedLToken('>'),
-         });
+         expect(callback).toContainParsedProps(parsedDocTypeEnd);
       });
 
-      it('returns after parsing an incomplete input', () => {
-         mockSource = new MockLTokenSource([
+      it('copes with EOF', () => {
+         const mockSource = new MockLTokenSource([
             undefined,
             undefined,
             undefined,
          ]);
+         parsedDocTypeEnd.closeInternalSubset = undefined;
+         parsedDocTypeEnd.postCloseInternalSubsetSpace = undefined;
+         parsedDocTypeEnd.close = undefined;
 
          docTypeEnd.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'DOCTYPE_END',
-            closeInternalSubset: undefined,
-            postCloseInternalSubsetSpace: undefined,
-            close: undefined,
-         });
+         expect(callback).toContainParsedProps(parsedDocTypeEnd);
       });
 
    });
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let parsed;
       let startParsed;
 
       beforeEach(() => {
@@ -88,56 +86,51 @@ describe('docTypeEnd', () => {
          startParsed = {
             startInternalSubset: expectedLToken('['),
          };
-         parsed = {
-            closeInternalSubset: expectedLToken(']'),
-            postCloseInternalSubsetSpace: expectedLToken(' '),
-            close: expectedLToken('>'),
-         };
       });
 
       it('returns an an error collector', () => {
-         const errors = docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
+         const errors = docTypeEnd.checkWellFormed(parsedDocTypeEnd, startParsed, mockErrorCollector);
 
          expect(errors).toEqual(mockErrorCollector);
       });
 
       it('returns no errors if no problems ', () => {
-         const errors = docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
+         const errors = docTypeEnd.checkWellFormed(parsedDocTypeEnd, startParsed, mockErrorCollector);
 
          expect(errors.report).not.toHaveBeenCalled();
       });
 
       it('reports an error if there is no close', () => {
-         parsed.closeLToken = undefined;
+         parsedDocTypeEnd.closeLToken = undefined;
 
-         docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
+         docTypeEnd.checkWellFormed(parsedDocTypeEnd, startParsed, mockErrorCollector);
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
             params: undefined,
-            position: parsed.postCloseInternalSubsetSpaceLToken,
+            position: parsedDocTypeEnd.postCloseInternalSubsetSpaceLToken,
          });
       });
 
       it('reports an error if there is a "]", but there was no opening "["', () => {
          delete startParsed.startInternalSubsetLToken;
 
-         docTypeEnd.checkWellFormed(parsed, startParsed, mockErrorCollector);
+         docTypeEnd.checkWellFormed(parsedDocTypeEnd, startParsed, mockErrorCollector);
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
-            position: parsed.postCloseInternalSubsetSpaceLToken,
+            position: parsedDocTypeEnd.postCloseInternalSubsetSpaceLToken,
          });
       });
 
       it('reports an error if there is a "]", but there was no start token', () => {
-         docTypeEnd.checkWellFormed(parsed, undefined, mockErrorCollector);
+         docTypeEnd.checkWellFormed(parsedDocTypeEnd, undefined, mockErrorCollector);
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
-            position: parsed.postCloseInternalSubsetSpaceLToken,
+            position: parsedDocTypeEnd.postCloseInternalSubsetSpaceLToken,
          });
       });
 
@@ -146,26 +139,24 @@ describe('docTypeEnd', () => {
    describe('makeToken()', () => {
 
       it('returns a token given a good parsing', () => {
-         const expectedLToken = makeLTokenMaker();
-         const parsed = {
-            closeInternalSubset: expectedLToken(']'),
-            postCloseInternalSubsetSpace: expectedLToken(' '),
-            close: expectedLToken('>'),
-         };
+         const expectedLToken = makeLTokenMaker(undefined, 1, 0, 1);
+         parsedDocTypeEnd.postCloseInternalSubsetSpace = expectedLToken('\t');
 
-         const token = docTypeEnd.makeToken(parsed);
+         const token = docTypeEnd.makeToken(parsedDocTypeEnd);
 
          expect(token).toEqual(new docTypeEnd.Token([
-            parsed.closeInternalSubset,
-            parsed.postCloseInternalSubsetSpace,
-            parsed.close,
+            parsedDocTypeEnd.closeInternalSubset,
+            parsedDocTypeEnd.postCloseInternalSubsetSpace,
+            parsedDocTypeEnd.close,
          ]));
       });
 
       it('returns a token given an empty parsing', () => {
-         const parsed = {
-         };
-         const token = docTypeEnd.makeToken(parsed);
+         parsedDocTypeEnd.closeInternalSubset = undefined;
+         parsedDocTypeEnd.postCloseInternalSubsetSpace = undefined;
+         parsedDocTypeEnd.close = undefined;
+
+         const token = docTypeEnd.makeToken(parsedDocTypeEnd);
 
          expect(token).toEqual(new docTypeEnd.Token([]));
       });

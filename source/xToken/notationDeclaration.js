@@ -48,7 +48,7 @@ class NotationDeclaration extends XmlToken {
 \**********************************************************************/
 
 function parse(source, declarationParsing, deliverParsed) {
-   const parsed = declaration.toLocalParsing(NOTATIONDECL, declarationParsing);
+   const parsed = declaration.makeTypedDeclaration(NOTATIONDECL, declarationParsing);
 
    source.extractToObject('word', [ '>' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postNameSpace');
