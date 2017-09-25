@@ -7,6 +7,7 @@ import { MockErrorCollector } from '../error/test';
 import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
 import { WellFormedError, XmlWarning } from '../error';
 
+import * as attribute from './common/attribute.js';
 import * as misc from './common/misc.js';
 import * as elementStart from './elementStart.js';
 
@@ -22,6 +23,7 @@ describe('elementStart (unit)', () => {
          postOpenSpace: undefined,
          name: sourceLToken('elemName'),
          postNameSpace: sourceLToken(' '),
+         attributes: [],
          close: sourceLToken('>'),
       };
    });
@@ -30,10 +32,33 @@ describe('elementStart (unit)', () => {
       let mockSource;
       let callback;
       let expectedLToken;
+      let attrArray;
 
       beforeEach(() => {
          expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
+         attrArray = [];
+         spyOn(attribute, 'parse').and.callFake((_1, _2, deliverParsed) => {
+            deliverParsed(attrArray);
+         });
+      });
+
+      it('calls attribute.parse()', () => {
+         const open = expectedLToken('<');
+         mockSource = new MockLTokenSource([
+            undefined,
+            'elemName',
+            ' ',
+            '>',
+         ], 1, 0, 1);
+
+         elementStart.parse(mockSource, open, callback);
+         mockSource.respondInAsyncTime();
+
+         const args = attribute.parse.calls.argsFor(0);
+         expect(args[0]).toEqual(mockSource);
+         expect(args[1]).toEqual({ terminators: [ '>' ]});
+         expect(args[2]).toBeInstanceOf(Function);
       });
 
       it('returns simple values', () => {
@@ -54,6 +79,7 @@ describe('elementStart (unit)', () => {
             postOpenSpace: undefined,
             name: expectedLToken('elemName'),
             postNameSpace: expectedLToken(' '),
+            attributes: [],
             close: expectedLToken('>'),
          });
       });
@@ -76,6 +102,7 @@ describe('elementStart (unit)', () => {
             postOpenSpace: undefined,
             name: undefined,
             postNameSpace: undefined,
+            attributes: [],
             close: undefined,
          });
       });
@@ -92,6 +119,7 @@ describe('elementStart (unit)', () => {
 
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
+         spyOn(attribute, 'checkWellFormed');
       });
 
       it('asks the misc module to look for errors in the name', () => {
@@ -107,6 +135,17 @@ describe('elementStart (unit)', () => {
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
             mockErrorCollector, emd, XmlWarning.ID.ELEMENT_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
+      });
+
+      it('calls attribute.checkWellFormed', () => {
+         const emd = new EntityMetaData();
+         elementStart.checkWellFormed(parsed, mockErrorCollector, emd);
+
+         const args = attribute.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed.attributes);
+         expect(args[1]).toEqual(mockErrorCollector);
+         expect(args[2]).toEqual(emd);
+         expect(args[3]).toEqual(parsed.postNameSpace);
       });
 
       it('reports no errors if everything is in order', () => {
@@ -157,12 +196,32 @@ describe('elementStart (unit)', () => {
 
       beforeEach(() => {
          parsed.postOpenSpace = sourceLToken(' ');
+         spyOn(attribute, 'makeTokenCompatible');
+         spyOn(attribute, 'appendLTokens');
+      });
+
+      it('asks the attribute to provide the attributes', () => {
+         parsed.attributes = [ {} ];
+
+         elementStart.makeToken(parsed);
+
+         expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(parsed.attributes);
+      });
+
+      it('asks the attribute to provide the lTokens', () => {
+         parsed.attributes = [ {} ];
+
+         const token = elementStart.makeToken(parsed);
+
+         expect(attribute.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsed.attributes);
       });
 
       it('returns a token with the expected fields defined', () => {
+         attribute.makeTokenCompatible.and.returnValue([ { attributes: true } ]);
+
          const token = elementStart.makeToken(parsed);
 
-         expect(token).toEqual(new elementStart.Token('elemName', [], [
+         expect(token).toEqual(new elementStart.Token('elemName', [ { attributes: true } ], [
             parsed.open,
             parsed.postOpenSpace,
             parsed.name,

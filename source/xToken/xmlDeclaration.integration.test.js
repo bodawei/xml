@@ -27,7 +27,7 @@ describe('xmlDeclaration (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('reports errors in the PI initial part (pi.checkWellFormed())', (done) => {
+      it('reports errors in the PI initial part (instruction.checkWellFormed())', (done) => {
          parsed.postOpenSpace = expectedLToken(' ');
          source.addText('version="1.1"?>');
          xmlDeclaration.parse(source, parsed, (result) => {
@@ -40,26 +40,14 @@ describe('xmlDeclaration (integration)', () => {
          });
       });
 
-      it('reports an error when a value has bad text (check misc.checkWellFormedText())', (done) => {
-         source.addText('version="1.0" encoding="bad\u0000"?>');
+      it('reports an error when a param is malformed (check attribute.checkWellFormed())', (done) => {
+         source.addText('version "1.0" encoding="usascii"?>');
          xmlDeclaration.parse(source, parsed, (result) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             xmlDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
-      it('reports an error when a a name is bad (check misc.checkName())', (done) => {
-         source.addText('ver$sion="1.0" encoding="bad\u0000"?>');
-         xmlDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
-
-            xmlDeclaration.checkWellFormed(result, ec, emd);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
          });
       });

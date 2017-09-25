@@ -6,6 +6,7 @@ import {
    pushNonBottom,
    textOrBlank,
 } from './common/util.js';
+import * as attribute from './common/attribute.js';
 import * as misc from './common/misc.js';
 import { Token as XmlToken } from './xmlToken.js';
 
@@ -56,9 +57,13 @@ function parse(source, open, deliverParsed) {
    source.extractToObject('word', [ '>' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postNameSpace');
 
-   source.extract('match', '>', (lToken) => {
-      parsed.close = lToken;
-      deliverParsed(parsed);
+   attribute.parse(source, { terminators: [ '>' ]}, (attributes) => {
+      parsed.attributes = attributes;
+
+      source.extract('match', '>', (lToken) => {
+         parsed.close = lToken;
+         deliverParsed(parsed);
+      });
    });
 }
 
@@ -79,6 +84,9 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    ec.setPos(parsed.postNameSpace);
 
+   const attribs = parsed.attributes || [];
+   attribute.checkWellFormed(attribs, ec, entityMetaData, parsed.postNameSpace, WFEID.NOUN_ATTRIBUTE);
+
    ec.setPos(parsed.close);
    ec.check(!parsed.close, WFEID.ELEMENT_NO_CLOSE);
 }
@@ -88,7 +96,8 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new ElementStart(textOrBlank(parsed.name), [], getLTokens(parsed));
+   return new ElementStart(textOrBlank(parsed.name),
+      attribute.makeTokenCompatible(parsed.attributes), getLTokens(parsed));
 }
 
 function getLTokens(parsed) {
@@ -98,6 +107,7 @@ function getLTokens(parsed) {
    pushNonBottom(results, parsed.postOpenSpace);
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
+   attribute.appendLTokens(results, parsed.attributes);
    pushNonBottom(results, parsed.close);
 
    return results;

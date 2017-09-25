@@ -8,7 +8,59 @@ import { makeLTokenMaker } from '../lToken/test';
 
 import * as elementStart from './elementStart.js';
 
-describe('elementStart', () => {
+describe('elementStart (integratio)', () => {
+
+   describe('parse()', () => {
+      let open;
+      let expectedLToken;
+      let emd;
+      let source;
+
+      beforeEach(() => {
+         expectedLToken = makeLTokenMaker();
+         open = expectedLToken('<');
+         emd = new EntityMetaData();
+         source = new LTokenSource(defaultExtractors, emd);
+      });
+
+      it('parses a set of attributes', (done) => {
+         const expectedLToken = makeLTokenMaker();
+         source.addText(' aName attr1="value1" attr2="value two">');
+         source.endText();
+
+         elementStart.parse(source, open, (parsed) => {
+            expect(parsed).toEqual({
+               type: 'ELEMENT_START',
+               open: open,
+               postOpenSpace: expectedLToken(' '),
+               name: expectedLToken('aName'),
+               postNameSpace: expectedLToken(' '),
+               attributes: [ {
+                  name: expectedLToken('attr1'),
+                  postNameSpace: undefined,
+                  equal: expectedLToken('='),
+                  postEqualSpace: undefined,
+                  attrOpenQuote: expectedLToken('"'),
+                  attrValue: expectedLToken('value1'),
+                  attrCloseQuote: expectedLToken('"'),
+                  trailingSpace: expectedLToken(' '),
+               }, {
+                  name: expectedLToken('attr2'),
+                  postNameSpace: undefined,
+                  equal: expectedLToken('='),
+                  postEqualSpace: undefined,
+                  attrOpenQuote: expectedLToken('"'),
+                  attrValue: expectedLToken('value two'),
+                  attrCloseQuote: expectedLToken('"'),
+                  trailingSpace: undefined,
+               } ],
+               close: expectedLToken('>'),
+            });
+            done();
+         });
+      });
+
+   });
 
    describe('checkWellFormed()', () => {
       let open;
@@ -45,6 +97,48 @@ describe('elementStart', () => {
             elementStart.checkWellFormed(parsed, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
+            done();
+         });
+      });
+
+      it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
+         source.addText('foo blah "value">');
+         elementStart.parse(source, open, (result) => {
+            const ec = new ErrorCollector(open, WellFormedError);
+
+            elementStart.checkWellFormed(result, ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
+            done();
+         });
+      });
+
+   });
+
+   describe('makeToken()', () => {
+      let open;
+      let source;
+
+      beforeEach(() => {
+         const expectedLToken = makeLTokenMaker();
+         open = expectedLToken('<');
+         source = new LTokenSource(defaultExtractors, new EntityMetaData());
+      });
+
+      it('generates a full token with attributes', (done) => {
+         source.addText(' aName attr1="value1" attr2="value two">');
+         source.endText();
+         elementStart.parse(source, open, (parsed) => {
+            const token = elementStart.makeToken(parsed);
+
+            token.lTokens = [];
+            expect(token).toEqual(new elementStart.Token('aName', [ {
+               name: 'attr1',
+               value: 'value1',
+            }, {
+               name: 'attr2',
+               value: 'value two',
+            } ], []));
             done();
          });
       });

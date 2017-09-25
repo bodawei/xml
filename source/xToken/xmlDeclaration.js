@@ -5,12 +5,9 @@ import { WellFormedError } from '../error';
 import {
    pushNonBottom,
    textOrBlank,
-   textOrUndef,
 } from './common/util.js';
 import * as instruction from './instruction.js';
 import * as attribute from './common/attribute.js';
-import * as misc from './common/misc.js';
-import * as quotedValue from './common/quotedValue.js';
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\
@@ -86,29 +83,42 @@ function parse(source, piParsing, deliverParsed) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec, entityMetaData) {
-   let foundEncoding;
-   let foundVersion;
-   let seenStandalone;
+   const checks = makeNameCheckClosure();
 
    instruction.checkWellFormed(parsed, ec, entityMetaData, true);
 
    // check that the parameters are in the right order and have the right values
-   for (let index = 0; index < parsed.params.length; index++) {
-      const param = parsed.params[index];
-      const nameText = textOrBlank(param.name);
+   attribute.checkWellFormed(parsed.params, ec, entityMetaData,
+      parsed.postTargetSpace, WFEID.NOUN_XMLDECL_PARAM, checks.checkName, checkValue);
+
+   ec.setPos(parsed.close);
+   if (entityMetaData.isDocumentKind) {
+      ec.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES);
+   } else {
+      ec.check(parsed.params.length === 0, WFEID.TEXTDECL_NO_ATTRIBUTES);
+      ec.check(!checks.foundEncoding(), WFEID.TEXTDECL_NO_ENCODING);
+   }
+
+   ec.check(!parsed.close, WFEID.XMLDECL_NO_CLOSE);
+}
+
+/*
+ * This odd function exists because we need a checkName() function to pass
+ * to attribute.checkWellFormed() which maintains state across calls, as
+ * well as a flag whether an ancoding was found.
+ */
+function makeNameCheckClosure() {
+   let foundEncoding;
+   let foundVersion;
+   let seenStandalone;
+
+   // Inner function as we need to have closure over a couple variables that exist across calls.
+   function checkName(name, index, ec, entityMetaData) {
+      const nameText = textOrBlank(name);
       const lcName = nameText.toLocaleLowerCase();
 
-      ec.setPos(param.name);
-
-      if (index === 0) {
-         ec.check(!parsed.postTargetSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
-      } else {
-         ec.check(!parsed.params[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
-      }
-
-      misc.checkName(param.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
       if (XMLDECL_PARAMS[lcName]) {
-         ec.check(param.name.text !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
+         ec.check(nameText !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
       }
 
       switch (lcName) {
@@ -131,43 +141,38 @@ function checkWellFormed(parsed, ec, entityMetaData) {
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
             break;
          default:
-            ec.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ param.name.text ]);
+            ec.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ nameText ]);
       }
-
-      ec.setPos(param.postNameSpace);
-      ec.setPos(param.equal);
-      ec.check(!param.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
-      ec.setPos(param.postEqualSpace);
-
-      quotedValue.checkWellFormed('param', param, ec, entityMetaData, WFEID.NOUN_XMLDECL_PARAM, () => {
-         const valueText = textOrBlank(param.paramValue);
-         const lcValue = valueText.toLocaleLowerCase();
-         misc.checkWellFormedText(param.paramValue, ec, entityMetaData);
-
-         switch (lcName) {
-            case 'version':
-               ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
-               break;
-            case 'encoding':
-               ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
-               break;
-            case 'standalone':
-               ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
-               ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
-               break;
-         }
-      });
    }
 
-   ec.setPos(parsed.close);
-   if (entityMetaData.isDocumentKind) {
-      ec.check(parsed.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES);
-   } else {
-      ec.check(parsed.params.length === 0, WFEID.TEXTDECL_NO_ATTRIBUTES);
-      ec.check(!foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
+   function getFoundEncoding() {
+      return foundEncoding;
    }
 
-   ec.check(!parsed.close, WFEID.XMLDECL_NO_CLOSE);
+   return {
+      checkName,
+      foundEncoding: getFoundEncoding,
+   };
+}
+
+function checkValue(name, value, ec) {
+   const nameText = textOrBlank(name);
+   const lcName = nameText.toLocaleLowerCase();
+   const valueText = textOrBlank(value);
+   const lcValue = valueText.toLocaleLowerCase();
+
+   switch (lcName) {
+      case 'version':
+         ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
+         break;
+      case 'encoding':
+         ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
+         break;
+      case 'standalone':
+         ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
+         ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
+         break;
+   }
 }
 
 /**********************************************************************\
@@ -175,22 +180,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new XmlDeclaration(extractParams(parsed), getChunks(parsed));
-}
-
-function extractParams(parsed) {
-   const params = [];
-
-   for (let index = 0; index < parsed.params.length; index++) {
-      const param = parsed.params[index];
-
-      params.push({
-         name: textOrBlank(param.name),
-         value: textOrUndef(param.paramValue),
-      });
-   }
-
-   return params;
+   return new XmlDeclaration(attribute.makeTokenCompatible(parsed.params), getChunks(parsed));
 }
 
 function getChunks(parsed) {
@@ -200,17 +190,7 @@ function getChunks(parsed) {
    pushNonBottom(results, parsed.postOpenSpace);
    pushNonBottom(results, parsed.target);
    pushNonBottom(results, parsed.postTargetSpace);
-
-   for (let index = 0; index < parsed.params.length; index++) {
-      const param = parsed.params[index];
-
-      pushNonBottom(results, param.name);
-      pushNonBottom(results, param.postNameSpace);
-      pushNonBottom(results, param.equal);
-      pushNonBottom(results, param.postEqualSpace);
-      quotedValue.appendLTokens('param', results, param);
-      pushNonBottom(results, param.trailingSpace);
-   }
+   attribute.appendLTokens(results, parsed.params);
    pushNonBottom(results, parsed.close);
 
    return results;
