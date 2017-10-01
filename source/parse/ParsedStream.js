@@ -82,7 +82,7 @@ class ParsedStream extends stream.Readable {
                   } else {
                      // This is a temporary hack
                      charData.parse(this._lTokenSource, (result) => {
-                        if (result) {
+                        if (result && result.text) {
                            deliverParse(result);
                         } else {
                            // ugly hack
@@ -97,7 +97,12 @@ class ParsedStream extends stream.Readable {
                   }
                   break;
                default:
-                  charData.parse(this._lTokenSource, deliverParse);
+                  charData.parse(this._lTokenSource, (result) => {
+                     // if (result && result.text && result.text.text === '/greeting>') {
+                     //    console.log('yowza');
+                     // }
+                     deliverParse(result);
+                  });
                   break;
             }
          });

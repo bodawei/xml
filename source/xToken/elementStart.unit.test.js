@@ -57,8 +57,32 @@ describe('elementStart (unit)', () => {
 
          const args = attribute.parse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
-         expect(args[1]).toEqual({ terminators: [ '>' ]});
+         expect(args[1]).toEqual({ terminators: [ '>', '/>' ]});
          expect(args[2]).toBeInstanceOf(Function);
+      });
+
+      it('returns an empty element if appropriate', () => {
+         const open = expectedLToken('<');
+         mockSource = new MockLTokenSource([
+            undefined,
+            'elemName',
+            ' ',
+            undefined,
+            '/>',
+         ], 1, 0, 1);
+
+         elementStart.parse(mockSource, open, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps({
+            type: 'ELEMENT_EMPTY',
+            open: open,
+            postOpenSpace: undefined,
+            name: expectedLToken('elemName'),
+            postNameSpace: expectedLToken(' '),
+            attributes: [],
+            close: expectedLToken('/>'),
+         });
       });
 
       it('returns simple values', () => {
@@ -87,6 +111,7 @@ describe('elementStart (unit)', () => {
       it('no values if at the end of input', () => {
          const open = expectedLToken('<');
          mockSource = new MockLTokenSource([
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -222,6 +247,21 @@ describe('elementStart (unit)', () => {
          const token = elementStart.makeToken(parsed);
 
          expect(token).toEqual(new elementStart.Token('elemName', [ { attributes: true } ], [
+            parsed.open,
+            parsed.postOpenSpace,
+            parsed.name,
+            parsed.postNameSpace,
+            parsed.close,
+         ]));
+      });
+
+      it('returns an empty elment token if an empty element was parsed', () => {
+         attribute.makeTokenCompatible.and.returnValue([ { attributes: true } ]);
+
+         parsed.type = elementStart.EMPTY_TYPE;
+         const token = elementStart.makeToken(parsed);
+
+         expect(token).toEqual(new elementStart.EmptyToken('elemName', [ { attributes: true } ], [
             parsed.open,
             parsed.postOpenSpace,
             parsed.name,

@@ -13,6 +13,7 @@ import { Token as XmlToken } from './xmlToken.js';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 const ELEMENT_START = 'ELEMENT_START';
+const ELEMENT_EMPTY = 'ELEMENT_EMPTY';
 
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
@@ -20,6 +21,17 @@ const ELEMENT_START = 'ELEMENT_START';
 \**********************************************************************/
 
 class ElementStart extends XmlToken {
+
+   constructor(name, attributes, lTokens) {
+      super(lTokens);
+
+      this.name = name;
+      this.attributes = attributes;
+   }
+
+}
+
+class ElementEmpty extends XmlToken {
 
    constructor(name, attributes, lTokens) {
       super(lTokens);
@@ -54,15 +66,28 @@ function parse(source, open, deliverParsed) {
    };
 
    source.extractToObject('space', parsed, 'postOpenSpace');
-   source.extractToObject('word', [ '>' ], parsed, 'name');
+   source.extractToObject('word', [ '>', '/>' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postNameSpace');
 
-   attribute.parse(source, { terminators: [ '>' ]}, (attributes) => {
+   attribute.parse(source, { terminators: [ '>', '/>' ]}, (attributes) => {
       parsed.attributes = attributes;
 
       source.extract('match', '>', (lToken) => {
-         parsed.close = lToken;
-         deliverParsed(parsed);
+         if (lToken) {
+            parsed.close = lToken;
+            deliverParsed(parsed);
+            return;
+         }
+
+         source.extract('match', '/>', (lToken) => {
+            parsed.close = lToken;
+
+            if (lToken) {
+               parsed.type = ELEMENT_EMPTY;
+            }
+
+            deliverParsed(parsed);
+         });
       });
    });
 }
@@ -96,7 +121,9 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new ElementStart(textOrBlank(parsed.name),
+   const className = (parsed.type === ELEMENT_START) ? ElementStart : ElementEmpty;
+
+   return new className(textOrBlank(parsed.name),
       attribute.makeTokenCompatible(parsed.attributes), getLTokens(parsed));
 }
 
@@ -116,6 +143,8 @@ function getLTokens(parsed) {
 export {
    ELEMENT_START as TYPE,
    ElementStart as Token,
+   ELEMENT_EMPTY as EMPTY_TYPE,
+   ElementEmpty as EmptyToken,
    parse,
    checkWellFormed,
    makeToken,

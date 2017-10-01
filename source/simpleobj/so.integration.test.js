@@ -51,6 +51,9 @@ describe('SimpleObjStream (integration)', () => {
       const parsedStream = new ParsedStream();
       const tokenStream = new TokenStream();
       const objStream = new SimpleObjStream();
+      parsedStream.on('end', () => {
+         console.log('Got the end');
+      });
 
       parsedStream.pipe(tokenStream).pipe(objStream);
       //const data = fs.readFileSync('./REC-xml-20081126.xml');
@@ -58,13 +61,16 @@ describe('SimpleObjStream (integration)', () => {
 
       console.log('LENGTH', data.data.length);
       parsedStream.addText(data.data);
+      // parsedStream.addText(data.data.substr(15000, 15000));
+      // parsedStream.addText(data.data.substr(30000, 15000));
+      // parsedStream.addText(data.data.substr(45000, 5000));
       parsedStream.endText();
 
       parsedStream.on('end', () => console.log('PARSED ENDING'));
       parsedStream.on('close', () => console.log('PARSED CLOSE'));
       parsedStream.on('finish', () => console.log('PARSED FINISH'));
       objStream.on('data', () => {
-         console.log('HERE');
+//         console.log('HERE', JSON.stringify(result, undefined, 2));
          done();
       });
 

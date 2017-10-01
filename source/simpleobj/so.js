@@ -48,7 +48,9 @@ class SimpleObj extends stream.Transform {
          // for (var index = 0; index < this._stack.length; index++) {
          //    padding += ' ';
          // }
-         // console.log('PUSH ', padding + parsed.name)
+         // if (this._stack.length < 5) {
+         //    //console.log('PUSH ', padding + parsed.name)
+         // }
          this._stack.push(el);
       } else if (parsed instanceof elementEnd.Token) {
          this._stack.pop();
@@ -56,8 +58,11 @@ class SimpleObj extends stream.Transform {
          // for (var index = 0; index < this._stack.length; index++) {
          //    padding2 += ' ';
          // }
-         // console.log('POP  ', padding2 + parsed.name)
+         // if (this._stack.length < 5) {
+         //    //console.log('POP  ', padding2 + '/' + parsed.name)
+         // }
       } else if (parsed instanceof charData.Token) {
+//         console.log('TEXT ', parsed.text)
          leaf.addContent(parsed.text);
       }
 

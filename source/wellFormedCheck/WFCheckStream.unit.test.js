@@ -256,6 +256,17 @@ describe('WFCheckStream (unit)', () => {
          expect(args[2]).toEqual(metaData);
       });
 
+      it('calls elementStart.checkWellFormed() when encountering an empty element', () => {
+         parsed.type = elementStart.EMPTY_TYPE;
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = elementStart.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
       describe('state checking', () => {
 
          it('changes the state to be in content if in PROLOG state', () => {
@@ -403,6 +414,19 @@ describe('WFCheckStream (unit)', () => {
                });
                parsed.name = makeLToken('two');
                checker.write(parsed);
+               spyOn(checker, 'push');
+               parsed.name = makeLToken('one');
+               checker.write(parsed);
+
+               expect(checker.push.calls.count()).toEqual(1);  // for the parsed itself
+            });
+
+            it('reports no error if an empty element is found between start and end', () => {
+               checker.write({
+                  type: elementStart.EMPTY_TYPE,
+                  open: makeLToken('<'),
+                  name: makeLToken('two'),
+               });
                spyOn(checker, 'push');
                parsed.name = makeLToken('one');
                checker.write(parsed);

@@ -116,8 +116,11 @@ class WFChecker extends stream.Transform {
             }
             break;
          case elementStart.TYPE:
+         case elementStart.EMPTY_TYPE:
             const nameText = parsed.name ? parsed.name.text : '';
-            this._elementNameStack.push(nameText);
+            if (parsed.type === elementStart.TYPE) {
+               this._elementNameStack.push(nameText);
+            }
 
             if (this._state === STATE.PROLOG_PREDOCTYPE || this._state === STATE.PROLOG) {
                this._state = STATE.IN_CONTENT;

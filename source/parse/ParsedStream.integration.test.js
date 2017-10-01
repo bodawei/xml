@@ -73,6 +73,10 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('<elementName\t>', 'ELEMENT_START', done);
    });
 
+   it('parses an empty element', (done) => {
+      expectInputToProduceTypes('<elementName/>', 'ELEMENT_EMPTY', done);
+   });
+
    it('parses an element end', (done) => {
       expectInputToProduceTypes('</elementName\t>', 'ELEMENT_END', done);
    });

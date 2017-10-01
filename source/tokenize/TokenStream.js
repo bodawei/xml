@@ -55,6 +55,7 @@ class TokenStream extends stream.Transform {
             this.push(elementEnd.makeToken(parsed));
             break;
          case elementStart.TYPE:
+         case elementStart.EMPTY_TYPE:
             this.push(elementStart.makeToken(parsed));
             break;
          case entityDeclaration.TYPE:

@@ -73,6 +73,16 @@ describe('TokenStream (unit)', () => {
       expect(elementStart.makeToken).toHaveBeenCalledWith(parsed);
    });
 
+   it('calls elementStart.makeToken() with an empty element', () => {
+      spyOn(elementStart, 'makeToken');
+      const parsed = { type: elementStart.EMPTY_TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(elementStart.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
    it('calls elementEnd.makeToken()', () => {
       spyOn(elementEnd, 'makeToken');
       const parsed = { type: elementEnd.TYPE };

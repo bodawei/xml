@@ -92,6 +92,15 @@ describe('WFCheckStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when the empty element has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?>< spaceBeforeBad/>',
+         new WellFormedError('ELEMENT_XTRA_LEADING_SPACE',
+            [ 'spaceBeforeBad' ],
+            new Offset(new EntityLocation(), 22, 0, 22),
+            new Offset(new EntityLocation(), 21, 0, 21)
+         ), done);
+   });
+
    it('reports an error when the element end tag has the wrong syntax', (done) => {
       expectInputToProduce('<?xml version="1.0"?><spaceBeforeBad></ spaceBeforeBad>',
          new WellFormedError('ELEMENT_XTRA_LEADING_SPACE',

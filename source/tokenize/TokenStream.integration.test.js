@@ -89,6 +89,12 @@ describe('TokenStream (integration)', () => {
       ], done);
    });
 
+   it('tokenizes an empty element', (done) => {
+      expectInputToProduce('<elementName/>', [
+         new elementStart.EmptyToken('elementName', [], []),
+      ], done);
+   });
+
    it('tokenizes an element end', (done) => {
       expectInputToProduce('</elementName>', [
          new elementEnd.Token('elementName', []),
