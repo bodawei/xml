@@ -86,14 +86,15 @@ function checkWellFormed(parsed, ec, entityMetaData, preceedingSpace, type, chec
       const attr = parsed[index];
       const nameText = textOrBlank(attr.name);
 
-      ec.setPos(attr.name);
-
       if (index === 0) {
+         ec.setPos(preceedingSpace);
          ec.check(!preceedingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       } else {
+         ec.setPos(parsed[index - 1].trailingSpace);
          ec.check(!parsed[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
       }
 
+      ec.setPos(attr.name);
       misc.checkName(attr.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
 
       if (checkName) {

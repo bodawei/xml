@@ -229,7 +229,7 @@ describe('attribute (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
             params: [ 'version' ],
-            position: parsedAttributes[0].name,
+            position: undefined,
          });
       });
 
@@ -242,7 +242,7 @@ describe('attribute (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
             params: [ 'another' ],
-            position: parsedAttributes[1].name,
+            lastPosition: parsedAttributes[0].postEqualSpace,
          });
       });
 
