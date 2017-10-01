@@ -11,12 +11,11 @@ import * as misc from './common/misc.js';
 import * as elementEnd from './elementEnd.js';
 
 describe('elementEnd', () => {
-   let parsed;
-   let sourceLToken;
+   let elementEndParsed;
 
    beforeEach(() => {
-      sourceLToken = makeLTokenMaker();
-      parsed = {
+      const sourceLToken = makeLTokenMaker();
+      elementEndParsed = {
          type: 'ELEMENT_END',
          open: sourceLToken('</'),
          postOpenSpace: undefined,
@@ -27,57 +26,41 @@ describe('elementEnd', () => {
    });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
-      let expectedLToken;
 
       beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
       });
 
-      it('returns simple values', () => {
-         const open = expectedLToken('</');
-         mockSource = new MockLTokenSource([
-            undefined,
-            'elemName',
-            ' ',
-            '>',
+      it('returns a common parsing', () => {
+         const mockSource = new MockLTokenSource([
+            [ undefined, 'space' ],
+            [ 'elemName', 'word', [ '>' ] ],
+            [ ' ', 'space' ],
+            [ '>', 'match', '>' ],
          ], 2, 0, 2);
 
-         elementEnd.parse(mockSource, open, callback);
+         elementEnd.parse(mockSource, elementEndParsed.open, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'ELEMENT_END',
-            open: open,
-            postOpenSpace: undefined,
-            name: expectedLToken('elemName'),
-            postNameSpace: expectedLToken(' '),
-            close: expectedLToken('>'),
-         });
+         expect(callback).toContainParsedProps(elementEndParsed);
       });
 
       it('no values if at the end of input', () => {
-         const open = expectedLToken('</');
-         mockSource = new MockLTokenSource([
+         const mockSource = new MockLTokenSource([
             undefined,
             undefined,
             undefined,
             undefined,
          ], 1, 0, 1);
+         elementEndParsed.name = undefined;
+         elementEndParsed.postNameSpace = undefined;
+         elementEndParsed.close = undefined;
 
-         elementEnd.parse(mockSource, open, callback);
+         elementEnd.parse(mockSource, elementEndParsed.open, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'ELEMENT_END',
-            open: open,
-            postOpenSpace: undefined,
-            name: undefined,
-            postNameSpace: undefined,
-            close: undefined,
-         });
+         expect(callback).toContainParsedProps(elementEndParsed);
       });
 
    });
@@ -95,42 +78,43 @@ describe('elementEnd', () => {
       });
 
       it('asks the misc module to look for errors in the name', () => {
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
-         expect(misc.checkName).toHaveBeenCalledWith(parsed.name,
+         expect(misc.checkName).toHaveBeenCalledWith(elementEndParsed.name,
             mockErrorCollector, emd, WellFormedError.ID.ELEMENT_NAME_INVALID);
       });
 
       it('asks the misc module to look for warnings in the name', () => {
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementEndParsed.name,
             mockErrorCollector, emd, XmlWarning.ID.ELEMENT_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
       });
 
       it('reports no errors if everything is in order', () => {
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('reports an error if there is a space after the opening "<"', () => {
-         parsed.postOpenSpace = sourceLToken(' ');
+         const sourceLToken = makeLTokenMaker();
+         elementEndParsed.postOpenSpace = sourceLToken(' ');
 
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             params: undefined,
-            position: parsed.postOpenSpace,
+            position: elementEndParsed.postOpenSpace,
          });
       });
 
       it('reports an error if there is no elment name', () => {
-         parsed.name = undefined;
+         elementEndParsed.name = undefined;
 
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_NAME,
@@ -140,14 +124,14 @@ describe('elementEnd', () => {
       });
 
       it('reports whether there is a close', () => {
-         parsed.close = undefined;
+         elementEndParsed.close = undefined;
 
-         elementEnd.checkWellFormed(parsed, mockErrorCollector, emd);
+         elementEnd.checkWellFormed(elementEndParsed, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_CLOSE,
             params: undefined,
-            lastPosition: parsed.postNameSpace,
+            lastPosition: elementEndParsed.postNameSpace,
          });
       });
 
@@ -156,23 +140,24 @@ describe('elementEnd', () => {
    describe('makeToken()', () => {
 
       it('returns a token with the expected fields defined', () => {
-         parsed.postOpenSpace = sourceLToken(' ');
+         const sourceLToken = makeLTokenMaker();
+         elementEndParsed.postOpenSpace = sourceLToken(' ');
 
-         const token = elementEnd.makeToken(parsed);
+         const token = elementEnd.makeToken(elementEndParsed);
 
          expect(token).toEqual(new elementEnd.Token('elemName', [
-            parsed.open,
-            parsed.postOpenSpace,
-            parsed.name,
-            parsed.postNameSpace,
-            parsed.close,
+            elementEndParsed.open,
+            elementEndParsed.postOpenSpace,
+            elementEndParsed.name,
+            elementEndParsed.postNameSpace,
+            elementEndParsed.close,
          ]));
       });
 
       it('returns a token with an empty string if no name was found', () => {
-         parsed.name = undefined;
+         elementEndParsed.name = undefined;
 
-         const token = elementEnd.makeToken(parsed);
+         const token = elementEnd.makeToken(elementEndParsed);
 
          expect(token.name).toEqual('');
       });

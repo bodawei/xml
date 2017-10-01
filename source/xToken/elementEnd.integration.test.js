@@ -9,24 +9,48 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as elementEnd from './elementEnd.js';
 
 describe('elementEnd', () => {
+   let elementEndParsed;
+
+   beforeEach(() => {
+      const sourceLToken = makeLTokenMaker();
+      elementEndParsed = {
+         type: 'ELEMENT_END',
+         postOpenSpace: undefined,
+         name: sourceLToken('elemName'),
+         postNameSpace: sourceLToken(' '),
+         close: sourceLToken('>'),
+      };
+      elementEndParsed.open = sourceLToken('</');
+   });
+
+   describe('parse()', () => {
+
+      it('parses the end of the element when called', (done) => {
+         const source = new LTokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elemName >');
+         source.endText();
+
+         elementEnd.parse(source, elementEndParsed.open, (parsing) => {
+            expect(parsing).toEqual(elementEndParsed);
+            done();
+         });
+      });
+
+   });
 
    describe('checkWellFormed()', () => {
-      let open;
-      let expectedLToken;
       let emd;
       let source;
 
       beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
-         open = expectedLToken('</');
          emd = new EntityMetaData();
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('reports an error when name starts with "xml" (check misc callthrough)', (done) => {
+      it('reports an error with "xml" in name (check misc.checkWellFormedNameRecommendation)', (done) => {
          source.addText('xmlElementName>');
          source.endText();
-         elementEnd.parse(source, open, (parsed) => {
+         elementEnd.parse(source, elementEndParsed.open, (parsed) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             elementEnd.checkWellFormed(parsed, ec, emd);
@@ -39,7 +63,7 @@ describe('elementEnd', () => {
       it('reports an error when name starts with "$" (check misc.checkName)', (done) => {
          source.addText('$elementName>');
          source.endText();
-         elementEnd.parse(source, open, (parsed) => {
+         elementEnd.parse(source, elementEndParsed.open, (parsed) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             elementEnd.checkWellFormed(parsed, ec, emd);
