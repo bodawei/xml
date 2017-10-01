@@ -281,6 +281,28 @@ describe('attribute (unit)', () => {
          });
       });
 
+      it('reports an error if attributes have duplicate names', () => {
+         parsedAttributes[1].name.text = parsedAttributes[0].name.text;
+
+         attribute.checkWellFormed(parsedAttributes, mockErrorCollector, emd,
+            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTRIBUTE_DUPLICATE_NAME,
+            params: [ 'version' ],
+            position: parsedAttributes[1].name,
+         });
+      });
+
+      it('reports no error if there is a duplicate name but it is not an attribute', () => {
+         parsedAttributes[1].name.text = parsedAttributes[0].name.text;
+
+         attribute.checkWellFormed(parsedAttributes, mockErrorCollector, emd,
+            previousSpace, 'other');
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
    });
 
    describe('makeTokenCompatible()', () => {

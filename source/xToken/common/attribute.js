@@ -82,6 +82,8 @@ function addAttribute(source, attrs, options, name, deliverResults) {
 \**********************************************************************/
 
 function checkWellFormed(parsed, ec, entityMetaData, preceedingSpace, type, checkName, checkValue) {
+   const attrNames = {};
+
    for (let index = 0; index < parsed.length; index++) {
       const attr = parsed[index];
       const nameText = textOrBlank(attr.name);
@@ -95,6 +97,12 @@ function checkWellFormed(parsed, ec, entityMetaData, preceedingSpace, type, chec
       }
 
       ec.setPos(attr.name);
+
+      if (type === WFEID.NOUN_ATTRIBUTE) {
+         ec.check(attrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
+         attrNames[nameText] = true;
+      }
+
       misc.checkName(attr.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
 
       if (checkName) {
