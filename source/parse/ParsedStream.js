@@ -51,6 +51,7 @@ class ParsedStream extends stream.Readable {
             this._reportedMetaData = true;
             this.push(this._lTokenSource.metaData);
          }
+
          this.push(result || null);
       });
    }
@@ -78,6 +79,21 @@ class ParsedStream extends stream.Readable {
                   if (this.waitingForInternalClose) {
                      this._parseClose(deliverParse);
                      this.waitingForInternalClose = false;
+                  } else {
+                     // This is a temporary hack
+                     charData.parse(this._lTokenSource, (result) => {
+                        if (result) {
+                           deliverParse(result);
+                        } else {
+                           // ugly hack
+                           this._lTokenSource.extract('match', ']]>', (lToken) => {
+                              deliverParse({
+                                 type: 'CHARDATA',
+                                 text: lToken,
+                              });
+                           });
+                        }
+                     });
                   }
                   break;
                default:
