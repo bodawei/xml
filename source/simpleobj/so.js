@@ -3,6 +3,7 @@
 import stream from 'readable-stream';
 
 import {
+   cdata,
    charData,
    elementStart,
    elementEnd,
@@ -48,8 +49,8 @@ class SimpleObj extends stream.Transform {
          // for (var index = 0; index < this._stack.length; index++) {
          //    padding += ' ';
          // }
-         // if (this._stack.length < 5) {
-         //    //console.log('PUSH ', padding + parsed.name)
+         // if (this._stack.length < 50) {
+         //    console.log('PUSH ', padding + '\\' + parsed.name)
          // }
          this._stack.push(el);
       } else if (parsed instanceof elementEnd.Token) {
@@ -58,11 +59,14 @@ class SimpleObj extends stream.Transform {
          // for (var index = 0; index < this._stack.length; index++) {
          //    padding2 += ' ';
          // }
-         // if (this._stack.length < 5) {
-         //    //console.log('POP  ', padding2 + '/' + parsed.name)
+         // if (this._stack.length < 50) {
+         //    console.log('POP  ', padding2 + '/' + parsed.name)
          // }
       } else if (parsed instanceof charData.Token) {
-//         console.log('TEXT ', parsed.text)
+         // console.log('TEXT ', parsed.text)
+         leaf.addContent(parsed.text);
+      } else if (parsed instanceof cdata.Token) {
+         // console.log('TEXT ', parsed.text)
          leaf.addContent(parsed.text);
       }
 

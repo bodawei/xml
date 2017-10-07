@@ -40,43 +40,40 @@ describe('SimpleObjStream (integration)', () => {
       });
    });
 
-   xit('does everything', (done) => {
-      const SRC_ROOT = '..';
-      /* eslint-disable no-console, global-require */
+   // it('does everything', (done) => {
+   //    const SRC_ROOT = '..';
+   //    /* eslint-disable no-console, global-require */
 
-      const ParsedStream = require(SRC_ROOT + '/parse').ParsedStream;
-      const TokenStream = require(SRC_ROOT + '/tokenize').TokenStream;
-      const SimpleObjStream = require('./so.js').default;
+   //    const ParsedStream = require(SRC_ROOT + '/parse').ParsedStream;
+   //    const TokenStream = require(SRC_ROOT + '/tokenize').TokenStream;
+   //    const SimpleObjStream = require('./so.js').default;
 
-      const parsedStream = new ParsedStream();
-      const tokenStream = new TokenStream();
-      const objStream = new SimpleObjStream();
-      parsedStream.on('end', () => {
-         console.log('Got the end');
-      });
+   //    const parsedStream = new ParsedStream();
+   //    const tokenStream = new TokenStream();
+   //    const objStream = new SimpleObjStream();
+   //    parsedStream.on('end', () => {
+   //       // console.log('Got the end');
+   //    });
 
-      parsedStream.pipe(tokenStream).pipe(objStream);
-      //const data = fs.readFileSync('./REC-xml-20081126.xml');
-      const data = require('./foo.json');
+   //    parsedStream.pipe(tokenStream).pipe(objStream);
+   //    //const data = fs.readFileSync('./REC-xml-20081126.xml');
+   //    const data = require('./foo.json');
 
-      console.log('LENGTH', data.data.length);
-      parsedStream.addText(data.data);
-      // parsedStream.addText(data.data.substr(15000, 15000));
-      // parsedStream.addText(data.data.substr(30000, 15000));
-      // parsedStream.addText(data.data.substr(45000, 5000));
-      parsedStream.endText();
+   //    // console.log('LENGTH', data.data.length);
+   //    parsedStream.addText(data.data);
+   //    parsedStream.endText();
 
-      parsedStream.on('end', () => console.log('PARSED ENDING'));
-      parsedStream.on('close', () => console.log('PARSED CLOSE'));
-      parsedStream.on('finish', () => console.log('PARSED FINISH'));
-      objStream.on('data', () => {
-//         console.log('HERE', JSON.stringify(result, undefined, 2));
-         done();
-      });
+   //    // parsedStream.on('end', () => console.log('PARSED ENDING'));
+   //    // parsedStream.on('close', () => console.log('PARSED CLOSE'));
+   //    // parsedStream.on('finish', () => console.log('PARSED FINISH'));
+   //    objStream.on('data', (result) => {
+   //      console.log('HERE', JSON.stringify(result, undefined, 2));
+   //       done();
+   //    });
 
-      parsedStream.on('error', (x) => {
-         console.log('ERROR', x);
-      });
-   });
+   //    parsedStream.on('error', (x) => {
+   //       console.log('ERROR', x);
+   //    });
+   // });
 
 });
