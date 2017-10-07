@@ -3,7 +3,10 @@
 
 import {
    declaration,
+   envelope,
    instruction,
+
+   cdata,
    charData,
    comment,
    elementEnd,
@@ -33,6 +36,16 @@ describe('TokenStream (unit)', () => {
       expect(declaration.makeToken).toHaveBeenCalledWith(parsed);
    });
 
+   it('calls envelope.makeToken()', () => {
+      spyOn(envelope, 'makeToken');
+      const parsed = { type: envelope.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(envelope.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
    it('calls instruction.makeToken()', () => {
       spyOn(instruction, 'makeToken');
       const parsed = { type: instruction.TYPE };
@@ -41,6 +54,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(instruction.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls cdata.makeToken()', () => {
+      spyOn(cdata, 'makeToken');
+      const parsed = { type: cdata.TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(cdata.makeToken).toHaveBeenCalledWith(parsed);
    });
 
    it('calls charData.makeToken()', () => {

@@ -155,6 +155,24 @@ describe('WFCheckStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when an UNKNOWN envelope is found', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><![BOGUS[foo]]>',
+         new WellFormedError('ENVELOPE_UNKNOWN',
+            [ 'BOGUS' ],
+            new Offset(new EntityLocation(), 24, 0, 24),
+            new Offset(new EntityLocation(), 21, 0, 21)
+         ), done);
+   });
+
+   it('reports an error when an CDATA has a bad character in its content', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><![CDATA[foo\u0000 bad',
+         new WellFormedError(WellFormedError.ID.CDATA_NO_CLOSE,
+            [ 'CDATA' ],
+            new Offset(new EntityLocation(), 38, 0, 38),
+            new Offset(new EntityLocation(), 21, 0, 21)
+         ), done);
+   });
+
    it('reports an error if the XML DEclaration version attribute is the wrong case', (done) => {
       expectInputToProduce('<?xml VERSION="1.0"?>', new WellFormedError('XMLDECL_ATTR_INVALID_CASE',
             [ 'version', 'VERSION' ],

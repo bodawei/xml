@@ -5,6 +5,9 @@ import { EntityLocation } from '../basic';
 import { ParsedStream } from '../parse';
 import {
    declaration,
+   envelope,
+
+   cdata,
    charData,
    comment,
    docTypeStart,
@@ -48,6 +51,7 @@ describe('TokenStream (integration)', () => {
             const actuals = results.filter((actual) => actual instanceof expected.constructor);
 
             actuals[0].lTokens = [];
+            delete actuals[0].parsed;
             if (Array.isArray(actuals[0].value)) {
                actuals[0].value.forEach((element) => {
                   if (element.lTokens) {
@@ -66,6 +70,16 @@ describe('TokenStream (integration)', () => {
       expectInputToProduce('<!BOGUS', [
          new declaration.Token([]),
       ], done);
+   });
+
+   it('tokenizes an UNKNOWN envelope', (done) => {
+      expectInputToProduce('<![BOGUS[', [
+         new envelope.Token([]),
+      ], done);
+   });
+
+   it('tokenizes a CDATA element', (done) => {
+      expectInputToProduce('<![CDATA[zowie<one> ]]>', new cdata.Token('zowie<one> ', []), done);
    });
 
    it('tokenizes a charData', (done) => {

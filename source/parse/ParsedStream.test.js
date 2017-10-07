@@ -4,15 +4,18 @@
 import { EntityMetaData } from '../basic';
 import { defaultExtractors, LTokenSource } from '../lToken';
 import {
+   declaration,
+   envelope,
+   instruction,
+
+   cdata,
    charData,
    comment,
-   declaration,
    docTypeStart,
    elementEnd,
    elementStart,
    entityDeclaration,
    entityReference,
-   instruction,
    notationDeclaration,
    processingInstruction,
    space,
@@ -211,6 +214,37 @@ describe('ParsedStream (unit)', () => {
       const result = parser.read();
 
       expect(result.type).toEqual('UNKNOWNDECL');
+   });
+
+   it('calls envelope.parse()', () => {
+      spyOn(envelope, 'parse');
+      parser.addText('<![FOO [');
+      parser.endText();
+      parser.read();
+
+      expect(envelope.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(envelope.parse.calls.argsFor(0)[1].text).toEqual('<![');
+      expect(envelope.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
+   it('returns the undefined envelope if none provided', () => {
+      parser.addText('<![[');
+      parser.endText();
+      parser.read(); // ignore entity meta data
+      const result = parser.read();
+
+      expect(result.type).toEqual('UNKNOWNENVELOPE');
+   });
+
+   it('calls cdata.parse()', () => {
+      spyOn(cdata, 'parse');
+      parser.addText('<![CDATA[] something]]>');
+      parser.endText();
+      parser.read();
+
+      expect(cdata.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(cdata.parse.calls.argsFor(0)[1].envelopeType.text).toEqual('CDATA');
+      expect(cdata.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
    it('calls xmlDeclaration.parse()', () => {

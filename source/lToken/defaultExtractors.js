@@ -19,7 +19,7 @@ const defaultExtractors = {
    word: WordExtractor,
    markup: {
       extractorConstructor: MultiMatchExtractor,
-      params: [ '<!--', '<?', '<!', '</', '&', '<' ],
+      params: [ '<!--', '<?', '<!', '</', '&', '<', '<![' ],
    },
    close: {
       extractorConstructor: MultiMatchExtractor,

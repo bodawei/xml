@@ -1,8 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import * as declaration from './declaration.js';
+import * as envelope from './envelope.js';
 import * as instruction from './instruction.js';
 
+import * as cdata from './cdata.js';
 import * as charData from './charData.js';
 import * as comment from './comment.js';
 import * as docTypeStart from './docTypeStart.js';
@@ -21,8 +23,10 @@ import * as xmlDeclaration from './xmlDeclaration.js';
 
 module.exports = {
    declaration,
+   envelope,
    instruction,
 
+   cdata,
    charData,
    comment,
    docTypeStart,

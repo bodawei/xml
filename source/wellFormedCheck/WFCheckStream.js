@@ -7,7 +7,10 @@ import { ErrorCollector, WellFormedError } from '../error';
 
 import {
    declaration,
+   envelope,
    instruction,
+
+   cdata,
    charData,
    comment,
    docTypeEnd,
@@ -57,11 +60,21 @@ class WFChecker extends stream.Transform {
          case declaration.TYPE:
             declaration.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
+         case envelope.TYPE:
+            envelope.checkWellFormed(parsed, true, errorCollector, this._metaData);
+            break;
          case instruction.TYPE:
             instruction.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case EntityMetaData.TYPE:
             this._metaData = parsed;
+            break;
+         case cdata.TYPE:
+            if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.CDATA_INVALID_DOC_CONTEXT);
+            }
+
+            cdata.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
          case charData.TYPE:
             if (this._state !== STATE.IN_CONTENT) {

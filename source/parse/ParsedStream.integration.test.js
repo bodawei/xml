@@ -105,6 +105,14 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('<!BOGUS', 'UNKNOWNDECL', done);
    });
 
+   it('parses an unknown envelope', (done) => {
+      expectInputToProduceTypes('<![BOGUS[', 'UNKNOWNENVELOPE', done);
+   });
+
+   it('parses an CDATA elment', (done) => {
+      expectInputToProduceTypes('<![CDATA[asdf]]>', 'CDATA', done);
+   });
+
    it('parses a simple XML Declaration', (done) => {
       expectInputToProduceTypes('<?xml version="1.0"?>', 'XMLDECL', done);
    });

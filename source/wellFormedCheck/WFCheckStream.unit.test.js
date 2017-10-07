@@ -7,7 +7,10 @@ import { ErrorCollector, WellFormedError } from '../error';
 import { makeLToken } from '../lToken/test';
 import {
    declaration,
+   envelope,
    instruction,
+
+   cdata,
    charData,
    comment,
    docTypeEnd,
@@ -41,6 +44,72 @@ describe('WFCheckStream (unit)', () => {
       expect(checker.read()).toEqual({
          type: 'BOGUS',
       });
+   });
+
+   describe('envelope', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(envelope, 'checkWellFormed');
+         parsed = {
+            type: envelope.TYPE,
+         };
+      });
+
+      it('calls envelope.checkWellFormed() when encountering a CDATA', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = envelope.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1]).toEqual(true);
+         expect(args[2]).toBeInstanceOf(ErrorCollector);
+         expect(args[3]).toEqual(metaData);
+      });
+
+   });
+
+   describe('cdata', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(cdata, 'checkWellFormed');
+         parsed = {
+            type: cdata.TYPE,
+            text: makeLToken('good'),
+         };
+      });
+
+      it('calls cdata.checkWellFormed() when encountering a CDATA', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = cdata.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports no errors when in the content state', () => {
+            spyOn(checker, 'push');
+            checker._state = 'IN_CONTENT';
+            checker.write(parsed);
+
+            expect(checker.push.calls.count()).toEqual(1);
+         });
+
+         it('reports an error if not IN_CONTENT', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CDATA_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
    });
 
    describe('charData', () => {

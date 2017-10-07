@@ -5,16 +5,19 @@ import stream from 'readable-stream';
 import { EntityMetaData } from '../basic';
 import { LTokenSource, defaultExtractors } from '../lToken';
 import {
+   declaration,
+   envelope,
+   instruction,
+
+   cdata,
    charData,
    comment,
-   declaration,
    docTypeStart,
    docTypeEnd,
    elementStart,
    elementEnd,
    entityDeclaration,
    entityReference,
-   instruction,
    notationDeclaration,
    processingInstruction,
    space,
@@ -158,6 +161,23 @@ class ParsedStream extends stream.Readable {
                         break;
                      case 'NOTATION':
                         notationDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                        break;
+                     default:
+                        deliverParse(parsed);
+                        break;
+                  }
+               });
+               break;
+            case '<![':
+               envelope.parse(this._lTokenSource, markupStartLToken, (parsed) => {
+                  if (!parsed.envelopeType) {
+                     deliverParse(parsed);
+                     return;
+                  }
+
+                  switch (parsed.envelopeType.text.toLocaleUpperCase()) {
+                     case 'CDATA':
+                        cdata.parse(this._lTokenSource, parsed, deliverParse);
                         break;
                      default:
                         deliverParse(parsed);

@@ -5,7 +5,10 @@ import { EntityMetaData } from '../basic';
 
 import {
    declaration,
+   envelope,
    instruction,
+
+   cdata,
    charData,
    comment,
    docTypeStart,
@@ -36,8 +39,14 @@ class TokenStream extends stream.Transform {
          case declaration.TYPE:
             this.push(declaration.makeToken(parsed));
             break;
+         case envelope.TYPE:
+            this.push(envelope.makeToken(parsed));
+            break;
          case instruction.TYPE:
             this.push(instruction.makeToken(parsed));
+            break;
+         case cdata.TYPE:
+            this.push(cdata.makeToken(parsed));
             break;
          case charData.TYPE:
             this.push(charData.makeToken(parsed));
