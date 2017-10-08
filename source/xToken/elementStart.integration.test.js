@@ -9,37 +9,45 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as elementStart from './elementStart.js';
 
 describe('elementStart (integratio)', () => {
+   let parsedElementStart;
+   let emd;
+   let source;
+
+   beforeEach(() => {
+      const sourceLToken = makeLTokenMaker();
+      emd = new EntityMetaData();
+      source = new LTokenSource(defaultExtractors, emd);
+      const makeSequentialToken = makeLTokenMaker();
+      parsedElementStart = {
+         type: 'ELEMENT_START',
+         open: makeSequentialToken('<'),
+         postOpenSpace: undefined,
+         name: makeSequentialToken('elemName'),
+         postNameSpace: makeSequentialToken(' '),
+         attributes: [],
+         close: makeSequentialToken('>'),
+      };
+   });
 
    describe('parse()', () => {
-      let open;
-      let expectedLToken;
-      let emd;
-      let source;
-
-      beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
-         open = expectedLToken('<');
-         emd = new EntityMetaData();
-         source = new LTokenSource(defaultExtractors, emd);
-      });
 
       it('parses a set of attributes', (done) => {
          const expectedLToken = makeLTokenMaker();
-         source.addText(' aName attr1="value1" attr2="value two">');
+         source.addText(' aName attr1 =\t\t"value1" attr2="value two">');
          source.endText();
 
-         elementStart.parse(source, open, (parsed) => {
+         elementStart.parse(source, parsedElementStart.open, (parsed) => {
             expect(parsed).toEqual({
                type: 'ELEMENT_START',
-               open: open,
+               open: parsedElementStart.open,
                postOpenSpace: expectedLToken(' '),
                name: expectedLToken('aName'),
                postNameSpace: expectedLToken(' '),
                attributes: [ {
                   name: expectedLToken('attr1'),
-                  postNameSpace: undefined,
+                  postNameSpace: expectedLToken(' '),
                   equal: expectedLToken('='),
-                  postEqualSpace: undefined,
+                  postEqualSpace: expectedLToken('\t\t'),
                   attrOpenQuote: expectedLToken('"'),
                   attrValue: expectedLToken('value1'),
                   attrCloseQuote: expectedLToken('"'),
@@ -63,22 +71,12 @@ describe('elementStart (integratio)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let open;
-      let expectedLToken;
-      let emd;
-      let source;
 
-      beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
-         open = expectedLToken('<');
-         emd = new EntityMetaData();
-         source = new LTokenSource(defaultExtractors, emd);
-      });
-
-      it('reports an error when name starts with "xml" (check misc callthrough)', (done) => {
+      it('reports an error when name starts with "xml" (check misc.check...Recommendation)', (done) => {
          source.addText('xmlElementName>');
          source.endText();
-         elementStart.parse(source, open, (parsed) => {
+
+         elementStart.parse(source, parsedElementStart.open, (parsed) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             elementStart.checkWellFormed(parsed, ec, emd);
@@ -91,7 +89,8 @@ describe('elementStart (integratio)', () => {
       it('reports an error when name starts with "$" (check misc.checkName)', (done) => {
          source.addText('$elementName>');
          source.endText();
-         elementStart.parse(source, open, (parsed) => {
+
+         elementStart.parse(source, parsedElementStart.open, (parsed) => {
             const ec = new ErrorCollector(parsed.open, WellFormedError);
 
             elementStart.checkWellFormed(parsed, ec, emd);
@@ -103,6 +102,7 @@ describe('elementStart (integratio)', () => {
 
       it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
          source.addText('foo blah "value">');
+
          elementStart.parse(source, open, (result) => {
             const ec = new ErrorCollector(open, WellFormedError);
 
@@ -116,21 +116,13 @@ describe('elementStart (integratio)', () => {
    });
 
    describe('makeToken()', () => {
-      let open;
-      let source;
-
-      beforeEach(() => {
-         const expectedLToken = makeLTokenMaker();
-         open = expectedLToken('<');
-         source = new LTokenSource(defaultExtractors, new EntityMetaData());
-      });
 
       it('generates a full token with attributes', (done) => {
          source.addText(' aName attr1="value1" attr2="value two">');
          source.endText();
-         elementStart.parse(source, open, (parsed) => {
-            const token = elementStart.makeToken(parsed);
 
+         elementStart.parse(source, parsedElementStart.open, (parsed) => {
+            const token = elementStart.makeToken(parsed)
             token.lTokens = [];
             expect(token).toEqual(new elementStart.Token('aName', [ {
                name: 'attr1',
