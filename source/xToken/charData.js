@@ -29,18 +29,27 @@ class CharData extends XmlToken {
 
  PARAM
  source: A LTokenSource to read from
+ otherTerminators: (optional) An array of strings that can serve
+   as terminators for the character data
  deliverParsed: Callback to deliver the parsed LTokens
 
  SYNTAX
    [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
-function parse(source, deliverParsed) {
+function parse(source, otherTerminators, deliverParsed) {
+   let terminators = [ '<', '&', ']]>' ];
+   if (typeof otherTerminators === 'function') {
+      deliverParsed = otherTerminators;
+   } else {
+      terminators = terminators.concat(otherTerminators);
+   }
+
    const parsed = {
       type: CHARDATA,
    };
 
-   source.extract('all', [ '<', '&', ']]>' ], (lToken) => {
+   source.extract('all', terminators, (lToken) => {
       parsed.text = lToken;
       deliverParsed(parsed);
    });

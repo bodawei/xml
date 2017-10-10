@@ -38,6 +38,17 @@ describe('charData', () => {
          expect(callback).toContainParsedProps(parsedCharData);
       });
 
+      it('responds to other terminators passed in', () => {
+         const mockSource = new MockLTokenSource([
+            [ 'test text', 'all', [ '<', '&', ']]>', '$' ] ],
+         ]);
+
+         charData.parse(mockSource, [ '$' ], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps(parsedCharData);
+      });
+
       it('returns undefined if no text returned', () => {
          const mockSource = new MockLTokenSource([
             undefined,

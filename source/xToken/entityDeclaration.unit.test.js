@@ -39,7 +39,6 @@ describe('entityDeclaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
 
       beforeEach(() => {
@@ -72,7 +71,6 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('calls quotedValue.parse()', () => {
-         const makeToken = makeLTokenMaker();
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',

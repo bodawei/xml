@@ -78,17 +78,18 @@ class ParsedStream extends stream.Readable {
                case '&':
                   entityReference.parse(this._lTokenSource, deliverParse);
                   break;
+               case '%':
+                  entityReference.paramParse(this._lTokenSource, deliverParse);
+                  break;
                case ']':
                   if (this.waitingForInternalClose) {
                      this._parseClose(deliverParse);
                      this.waitingForInternalClose = false;
                   } else {
-                     // This is a temporary hack
                      charData.parse(this._lTokenSource, (result) => {
                         if (result && result.text) {
                            deliverParse(result);
                         } else {
-                           // ugly hack
                            this._lTokenSource.extract('match', ']]>', (lToken) => {
                               deliverParse({
                                  type: 'CHARDATA',
@@ -100,10 +101,13 @@ class ParsedStream extends stream.Readable {
                   }
                   break;
                default:
-                  charData.parse(this._lTokenSource, (result) => {
-                     // if (result && result.text && result.text.text === '/greeting>') {
-                     //    console.log('yowza');
-                     // }
+                  let terminators = [];
+
+                  if (this.waitingForInternalClose) {
+                     terminators = [ '%' ];
+                  }
+
+                  charData.parse(this._lTokenSource, terminators, (result) => {
                      deliverParse(result);
                   });
                   break;

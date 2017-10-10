@@ -70,7 +70,21 @@ describe('ParsedStream (unit)', () => {
       parser.endText();
       parser.read();
 
-      expect(charData.parse).toHaveBeenCalled();
+      expect(charData.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(charData.parse.calls.argsFor(0)[1]).toEqual([]);
+      expect(charData.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+   });
+
+   it('calls charData.parse() in the internal subset', () => {
+      spyOn(charData, 'parse');
+      parser.addText('<!DOCTYPE foo [ asdf</foo>');
+      parser.endText();
+      parser.read();
+      parser.read();
+
+      expect(charData.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(charData.parse.calls.argsFor(0)[1]).toEqual([ '%' ]);
+      expect(charData.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
    it('calls comment.parse()', () => {
@@ -141,6 +155,16 @@ describe('ParsedStream (unit)', () => {
 
       expect(entityReference.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(entityReference.parse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+   });
+
+   it('calls entityReference.paramParse()', () => {
+      spyOn(entityReference, 'paramParse');
+      parser.addText('%foo;');
+      parser.endText();
+      parser.read();
+
+      expect(entityReference.paramParse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
+      expect(entityReference.paramParse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
    });
 
    it('calls notationDeclaration.parse()', () => {

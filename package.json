@@ -7,7 +7,9 @@
    "license": "UNLICENCED",
    "private": true,
    "devDependencies": {
-      "babel-preset-env": "^1.5.1",
+      "@types/jasmine": "^2.6.0",
+      "babel-plugin-istanbul": "^4.1.5",
+      "babel-preset-env": "^1.6.0",
       "babel-preset-es2015": "^6.24.1",
       "babel-preset-es2016": "^6.24.1",
       "babel-preset-es2017": "^6.24.1",
@@ -25,17 +27,21 @@
       "grunt-exorcise": "2.1.1",
       "grunt-jasmine-node-coverage": "1.2.0",
       "grunt-karma": "2.0.0",
+      "gulp": "^3.9.1",
+      "gulp-cli": "^1.4.0",
+      "gulp-jasmine": "^2.4.2",
       "iconv-lite": "0.4.17",
       "isparta": "4.0.0",
-      "jasmine": "2.7.0",
+      "jasmine": "^2.8.0",
+      "jasmine-core": "^2.8.0",
       "jit-grunt": "0.10.0",
-      "karma": "^1.7.0",
-      "karma-babel-preprocessor": "6.0.1",
+      "karma": "^1.7.1",
+      "karma-babel-preprocessor": "^7.0.0",
       "karma-brave-launcher": "git+https://github.com/bodawei/contrib-karma-brave-launcher.git",
       "karma-browserify": "5.1.1",
-      "karma-chrome-launcher": "2.1.1",
+      "karma-chrome-launcher": "^2.2.0",
       "karma-coverage": "1.1.1",
-      "karma-edge-launcher": "0.4.1",
+      "karma-edge-launcher": "^0.4.2",
       "karma-firefox-launcher": "1.0.1",
       "karma-html2js-preprocessor": "1.1.0",
       "karma-ie-launcher": "1.0.0",
@@ -44,22 +50,18 @@
       "karma-opera-launcher": "1.0.0",
       "karma-phantomjs-launcher": "1.0.4",
       "karma-safari-launcher": "1.0.0",
+      "karma-typescript": "^3.0.7",
       "karma-vivaldi-launcher": "git+https://github.com/bodawei/contrib-karma-vivaldi-launcher.git",
       "karma-yajson-reporter": "1.0.0",
       "mostly-quiet-grunt": "^1.0.3",
       "node-properties-parser": "0.0.2",
-      "phantomjs-prebuilt": "2.1.14",
-      "text-table-formatter": "0.1.0"
-   },
-   "dependencies": {
-      "babel-plugin-istanbul": "^4.1.4",
-      "gulp": "^3.9.1",
-      "gulp-cli": "^1.4.0",
-      "gulp-jasmine": "^2.4.2",
-      "npm": "^3.10.10",
-      "nyc": "^11.1.0",
-      "xclap": "^0.2.12",
-      "xclap-cli": "^0.1.2"
+      "npm": "^5.5.1",
+      "nyc": "^11.2.1",
+      "phantomjs-prebuilt": "^2.1.15",
+      "text-table-formatter": "0.1.0",
+      "typescript": "^2.5.3",
+      "xclap": "^0.2.14",
+      "xclap-cli": "^0.1.3"
    },
    "x-nyc": {
       "require": [
@@ -90,5 +92,8 @@
    },
    "scripts": {
       "test": "nyc --report-dir='./temp/nodeCoverage/nodexx' jasmine"
+   },
+   "dependencies": {
+      "karma-typescript-es6-transform": "^1.0.2"
    }
 }

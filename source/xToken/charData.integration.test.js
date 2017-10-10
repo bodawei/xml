@@ -31,6 +31,18 @@ describe('charData (integration)', () => {
          });
       });
 
+      it('parses up to a the specified terminator', (done) => {
+         const expectedLToken = makeLTokenMaker();
+         source.addText('some textfoo#>');
+
+         charData.parse(source, [ '#' ], (result) => {
+            expect(result).toEqual({
+               type: charData.TYPE,
+               text: expectedLToken('some textfoo'),
+            });
+            done();
+         });
+      });
    });
 
    describe('checkWellFormed()', () => {

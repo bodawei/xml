@@ -89,6 +89,10 @@ describe('ParsedStream (integration)', () => {
       expectInputToProduceTypes('&foo;', 'ENTITYREF', done);
    });
 
+   it('parse parameter entity reference', (done) => {
+      expectInputToProduceTypes('%foo;', 'PARAMETERENTITYREF', done);
+   });
+
    it('parse NOTATION declaration', (done) => {
       expectInputToProduceTypes('<!NOTATION foo>', 'NOTATIONDECL', done);
    });

@@ -14,6 +14,7 @@ import {
 \**********************************************************************/
 
 const ENTITYREF = 'ENTITYREF';
+const PARAMETERENTITYREF = 'PARAMETERENTITYREF';
 const WFEID = WellFormedError.ID;
 
 class EntityReference extends XmlToken {
@@ -26,8 +27,18 @@ class EntityReference extends XmlToken {
 
 }
 
+class ParameterEntityReference extends XmlToken {
+
+   constructor(name, lTokens) {
+      super(lTokens);
+
+      this.name = name;
+   }
+
+}
+
 /**********************************************************************\
- parse() extracts the LToken's that make up an entity reference.
+ parse() extracts the LToken's that make up a general entity reference.
 
  This assumes that the initial & has not been extracted yet.
 
@@ -38,7 +49,6 @@ class EntityReference extends XmlToken {
  SYNTAX
     [67] Reference   ::= EntityRef | CharRef
     [68] EntityRef   ::= '&' Name ';'
-    [69] PEReference ::= '%' Name ';'
 \**********************************************************************/
 
 function parse(source, deliverParsed) {
@@ -47,6 +57,32 @@ function parse(source, deliverParsed) {
    };
 
    source.extractToObject('match', '&', parsed, 'open');
+   parseRef(source, parsed, deliverParsed);
+}
+
+/**********************************************************************\
+ parse() extracts the LToken's that make up a parameter entity ref.
+
+ This assumes that the initial % has not been extracted yet.
+
+ PARAM
+ source: A LTokenSource to read from
+ deliverParsed: Callback to deliver the parsed lTokens
+
+ SYNTAX
+    [69] PEReference ::= '%' Name ';'
+\**********************************************************************/
+
+function paramParse(source, deliverParsed) {
+   const parsed = {
+      type: PARAMETERENTITYREF,
+   };
+
+   source.extractToObject('match', '%', parsed, 'open');
+   parseRef(source, parsed, deliverParsed);
+}
+
+function parseRef(source, parsed, deliverParsed) {
    source.extractToObject('space', parsed, 'postOpenSpace');
    source.extractToObject('word', [ ';' ], parsed, 'name');
    source.extractToObject('space', parsed, 'postEntityNameSpace');
@@ -82,7 +118,13 @@ function checkWellFormed(parsed, ec) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new EntityReference(textOrBlank(parsed.name), getChunks(parsed));
+   let refClass = EntityReference;
+
+   if (parsed.open && parsed.open.text === '%') {
+      refClass = ParameterEntityReference;
+   }
+
+   return new refClass(textOrBlank(parsed.name), getChunks(parsed));
 }
 
 function getChunks(parsed) {
@@ -99,8 +141,11 @@ function getChunks(parsed) {
 
 export {
    ENTITYREF as TYPE,
+   PARAMETERENTITYREF as PARAM_TYPE,
    EntityReference as Token,
+   ParameterEntityReference as ParamToken,
    parse,
+   paramParse,
    checkWellFormed,
    makeToken,
 };

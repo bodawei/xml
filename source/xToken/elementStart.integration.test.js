@@ -14,7 +14,6 @@ describe('elementStart (integratio)', () => {
    let source;
 
    beforeEach(() => {
-      const sourceLToken = makeLTokenMaker();
       emd = new EntityMetaData();
       source = new LTokenSource(defaultExtractors, emd);
       const makeSequentialToken = makeLTokenMaker();
@@ -122,7 +121,7 @@ describe('elementStart (integratio)', () => {
          source.endText();
 
          elementStart.parse(source, parsedElementStart.open, (parsed) => {
-            const token = elementStart.makeToken(parsed)
+            const token = elementStart.makeToken(parsed);
             token.lTokens = [];
             expect(token).toEqual(new elementStart.Token('aName', [ {
                name: 'attr1',

@@ -8,19 +8,40 @@ import { WellFormedError } from '../error';
 import * as entityReference from './entityReference.js';
 
 describe('entityReference', () => {
+   let parsedGeneralEntity;
+   let parsedParameterEntity;
+
+   beforeEach(() => {
+      const expectedLToken = makeLTokenMaker();
+      parsedGeneralEntity = {
+         type: 'ENTITYREF',
+         open: expectedLToken('&'),
+         postOpenSpace: expectedLToken(' '),
+         name: expectedLToken('entityName'),
+         postEntityNameSpace: expectedLToken(' '),
+         close: expectedLToken(';'),
+      };
+
+      const makeToken = makeLTokenMaker();
+      parsedParameterEntity = {
+         type: 'PARAMETERENTITYREF',
+         open: makeToken('%'),
+         postOpenSpace: makeToken(' '),
+         name: makeToken('entityName'),
+         postEntityNameSpace: makeToken(' '),
+         close: makeToken(';'),
+      };
+   });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
-      let expectedLToken;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         expectedLToken = makeLTokenMaker();
       });
 
       it('does a full parse', () => {
-         mockSource = new MockLTokenSource([
+         const mockSource = new MockLTokenSource([
             [ '&', 'match', '&' ],
             [ ' ', 'space' ],
             [ 'entityName', 'word', [ ';' ] ],
@@ -31,23 +52,16 @@ describe('entityReference', () => {
          entityReference.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps({
-            type: 'ENTITYREF',
-            open: expectedLToken('&'),
-            postOpenSpace: expectedLToken(' '),
-            name: expectedLToken('entityName'),
-            postEntityNameSpace: expectedLToken(' '),
-            close: expectedLToken(';'),
-         });
+         expect(callback).toContainParsedProps(parsedGeneralEntity);
       });
 
-      it('accepts no spaces within reference', () => {
-         mockSource = new MockLTokenSource([
-            '&',
+      it('copes with eof', () => {
+         const mockSource = new MockLTokenSource([
             undefined,
-            'entityName',
             undefined,
-            ';',
+            undefined,
+            undefined,
+            undefined,
          ]);
 
          entityReference.parse(mockSource, callback);
@@ -55,11 +69,57 @@ describe('entityReference', () => {
 
          expect(callback).toContainParsedProps({
             type: 'ENTITYREF',
-            open: expectedLToken('&'),
+            open: undefined,
             postOpenSpace: undefined,
-            name: expectedLToken('entityName'),
+            name: undefined,
             postEntityNameSpace: undefined,
-            close: expectedLToken(';'),
+            close: undefined,
+         });
+      });
+
+   });
+
+   describe('parse()', () => {
+      let callback;
+
+      beforeEach(() => {
+         callback = jasmine.createSpy('callbackSpy');
+      });
+
+      it('does a full parse', () => {
+         const mockSource = new MockLTokenSource([
+            [ '%', 'match', '%' ],
+            [ ' ', 'space' ],
+            [ 'entityName', 'word', [ ';' ] ],
+            [ ' ', 'space' ],
+            [ ';', 'match', ';' ],
+         ]);
+
+         entityReference.paramParse(mockSource, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps(parsedParameterEntity);
+      });
+
+      it('copes with eof', () => {
+         const mockSource = new MockLTokenSource([
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+         ]);
+
+         entityReference.paramParse(mockSource, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps({
+            type: 'PARAMETERENTITYREF',
+            open: undefined,
+            postOpenSpace: undefined,
+            name: undefined,
+            postEntityNameSpace: undefined,
+            close: undefined,
          });
       });
 
@@ -136,28 +196,36 @@ describe('entityReference', () => {
    describe('makeToken()', () => {
 
       it('returns an entity reference token with the entity name', () => {
-         const expectedLToken = makeLTokenMaker();
-         const parsed = {
-            name: expectedLToken('entityName'),
-         };
-
-         const token = entityReference.makeToken(parsed);
+         const token = entityReference.makeToken(parsedGeneralEntity);
 
          expect(token).toEqual(new entityReference.Token('entityName', [
-            parsed.name,
+            parsedGeneralEntity.open,
+            parsedGeneralEntity.postOpenSpace,
+            parsedGeneralEntity.name,
+            parsedGeneralEntity.postEntityNameSpace,
+            parsedGeneralEntity.close,
          ]));
       });
 
       it('returns an entity reference token with a blank name when the name could not be found', () => {
-         const parsed = {
-            name: undefined,
-         };
-
-         const token = entityReference.makeToken(parsed);
+         delete parsedGeneralEntity.name;
+         const token = entityReference.makeToken(parsedGeneralEntity);
+         token.lTokens = [];
 
          expect(token).toEqual(new entityReference.Token('', []));
       });
 
+      it('returns a ParameterEntityReference if the parsed is a parameterEntity', () => {
+         const token = entityReference.makeToken(parsedParameterEntity);
+
+         expect(token).toEqual(new entityReference.ParamToken('entityName', [
+            parsedParameterEntity.open,
+            parsedParameterEntity.postOpenSpace,
+            parsedParameterEntity.name,
+            parsedParameterEntity.postEntityNameSpace,
+            parsedParameterEntity.close,
+         ]));
+      });
    });
 
 });
