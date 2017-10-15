@@ -559,6 +559,41 @@ describe('WFCheckStream (unit)', () => {
 
    });
 
+   describe('parameter entity reference', () => {
+      let parsed;
+
+      beforeEach(() => {
+         spyOn(entityReference, 'checkWellFormed');
+         parsed = {
+            type: entityReference.PARAM_TYPE,
+            open: makeLToken('%'),
+         };
+      });
+
+      it('calls elementEnd.checkWellFormed() when encountering PEReference', () => {
+         checker.write(metaData);
+         checker.write(parsed);
+
+         const args = entityReference.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(parsed);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not IN_DTD', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+            checker.write(parsed);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
+         });
+
+      });
+
+   });
+
    it('calls notationDeclaration.checkWellFormed() when encountering a notation declaration', () => {
       spyOn(notationDeclaration, 'checkWellFormed');
       const parsed = {

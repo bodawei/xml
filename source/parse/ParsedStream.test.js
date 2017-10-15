@@ -282,4 +282,15 @@ describe('ParsedStream (unit)', () => {
       expect(xmlDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
    });
 
+   it('parses a single "]" as a charData', () => {
+      parser.addText('<?xml version="1.0"?><one>]</one>');
+      parser.endText();
+      parser.read(); // metadata
+      parser.read(); // xml declaration
+      parser.read(); // "one" element open
+      const result = parser.read();
+
+      expect(result.text.text).toEqual(']');
+   });
+
 });

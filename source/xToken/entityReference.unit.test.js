@@ -7,7 +7,7 @@ import { WellFormedError } from '../error';
 
 import * as entityReference from './entityReference.js';
 
-describe('entityReference', () => {
+describe('entityReference (unit)', () => {
    let parsedGeneralEntity;
    let parsedParameterEntity;
 
@@ -79,7 +79,7 @@ describe('entityReference', () => {
 
    });
 
-   describe('parse()', () => {
+   describe('(peref) parse()', () => {
       let callback;
 
       beforeEach(() => {

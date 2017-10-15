@@ -177,6 +177,13 @@ class WFChecker extends stream.Transform {
 
             entityReference.checkWellFormed(parsed, errorCollector, this._metaData);
             break;
+         case entityReference.PARAM_TYPE:
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
+            }
+
+            entityReference.checkWellFormed(parsed, errorCollector, this._metaData);
+            break;
          case notationDeclaration.TYPE:
             if (this._state !== STATE.IN_DTD) {
                errorCollector.report(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);

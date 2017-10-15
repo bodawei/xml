@@ -128,6 +128,15 @@ describe('WFCheckStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when a parameter entity reference has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><one>% peRef;</one>',
+         new WellFormedError('REFERENCE_XTRA_SPACE',
+            [ 'peRef' ],
+            new Offset(new EntityLocation(), 27, 0, 27),
+            new Offset(new EntityLocation(), 26, 0, 26)
+         ), done);
+   });
+
    it('reports an error when a NOTATION declaration has the wrong syntax', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!NOTATION $badName SYSTEM "sys.xml">]>',
             new WellFormedError('NOTATIONDECL_NAME_INVALID',

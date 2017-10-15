@@ -70,6 +70,7 @@ class TokenStream extends stream.Transform {
          case entityDeclaration.TYPE:
             this.push(entityDeclaration.makeToken(parsed));
             break;
+         case entityReference.PARAM_TYPE:
          case entityReference.TYPE:
             this.push(entityReference.makeToken(parsed));
             break;

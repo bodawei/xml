@@ -129,6 +129,12 @@ describe('TokenStream (integration)', () => {
       ], done);
    });
 
+   it('tokenizes a parameter entity reference', (done) => {
+      expectInputToProduce('%peRef;', [
+         new entityReference.ParamToken('peRef', []),
+      ], done);
+   });
+
    it('nokenizes a NOTATION declaration', (done) => {
       expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
          new notationDeclaration.Token('myNotation', new EntityLocation('sys.xml', 'pub.xml'), []),

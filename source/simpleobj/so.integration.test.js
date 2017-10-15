@@ -40,6 +40,24 @@ describe('SimpleObjStream (integration)', () => {
       });
    });
 
+   it('includes CDATA', (done) => {
+      parsedStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
+      parsedStream.endText();
+
+      objStream.on('data', (final) => {
+         const result = JSON.parse(JSON.stringify(final));
+         expect(result).toEqual({
+            type: 'one',
+            content: [
+               '1',
+               '<two>2</two>',
+               '1',
+            ],
+         });
+         done();
+      });
+   });
+
    // it('does everything', (done) => {
    //    const SRC_ROOT = '..';
    //    /* eslint-disable no-console, global-require */

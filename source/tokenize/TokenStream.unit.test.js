@@ -116,6 +116,16 @@ describe('TokenStream (unit)', () => {
       expect(elementEnd.makeToken).toHaveBeenCalledWith(parsed);
    });
 
+   it('calls entityReference.makeToken() with a parameter entity reference', () => {
+      spyOn(entityReference, 'makeToken');
+      const parsed = { type: entityReference.PARAM_TYPE };
+
+      tokenStream.write(parsed);
+      tokenStream.read();
+
+      expect(entityReference.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
    it('calls entityReference.makeToken()', () => {
       spyOn(entityReference, 'makeToken');
       const parsed = { type: entityReference.TYPE };

@@ -8,7 +8,7 @@ import { makeLTokenMaker } from '../lToken/test';
 
 import * as elementStart from './elementStart.js';
 
-describe('elementStart (integratio)', () => {
+describe('elementStart (integration)', () => {
    let parsedElementStart;
    let emd;
    let source;
@@ -102,10 +102,10 @@ describe('elementStart (integratio)', () => {
       it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
          source.addText('foo blah "value">');
 
-         elementStart.parse(source, open, (result) => {
-            const ec = new ErrorCollector(open, WellFormedError);
+         elementStart.parse(source, parsedElementStart.open, (parsed) => {
+            const ec = new ErrorCollector(parsed.open, WellFormedError);
 
-            elementStart.checkWellFormed(result, ec, emd);
+            elementStart.checkWellFormed(parsed, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
