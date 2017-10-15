@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, Range } from '../basic';
+import { EntityMetaData, Offset, Range } from '../basic';
 
 import LToken from './LToken.js';
 import Extractor from './Extractor.js';
@@ -85,8 +85,7 @@ class LTokenSource {
       this._extractors = [];
 
       this._version = this._info.isVersion1dot0 ? 1.0 : 1.1;
-
-      this._lastRange = new Range(info.location, 0, 0, 0, 0, 0, 0);
+      this._lastOffset = undefined;
    }
 
    get metaData() {
@@ -103,14 +102,21 @@ class LTokenSource {
          return;
       }
 
-      if (range) {
-         range.endIndex = range.startIndex;
-         range.endRow = range.startRow;
-         range.endColumn = range.startColumn;
+      const rangeToUse = range || this._orphanedRange;
+      delete this._orphanedRange;
+
+      // If this is the first segment we are adding, then make sure lastOffset contains
+      // the starting range which will either be the range associated with this
+      // first segment, or a default range that starts at 0
+      if (this._segments.length === 0) {
+         if (rangeToUse) {
+            this._lastOffset = rangeToUse.getStartOffset();
+         } else {
+            this._lastOffset = new Offset(this._info.location, 0, 0, 0);
+         }
       }
 
-      this._segments.push(new Segment(text, range || this._orphanedRange));
-      delete this._orphanedRange;
+      this._segments.push(new Segment(text, rangeToUse));
 
       this._resumeOperation();
    }
@@ -187,66 +193,78 @@ class LTokenSource {
             }
          }
 
-         const results = extractor.finish();
-
+         // Extractor has finished extraction (either through SUCCESS or FAILURE)
          this._extractors.shift();
+         const results = extractor.finish();
+         const ranges = this._computeRanges(results.segments);
 
-         const segInfo = results.segments;
-         const ranges = [];
-         const returnedSegments = [];
-         let currentRange;
-         let unchanged;
+         this._restorePartiallyAndUnusedSegments(results.segments);
 
-         if (segInfo.length === 0) {
-            unchanged = true;
-         } else {
-            unchanged = segInfo[0].segment.index === extContext.startIndex;
-            currentRange = segInfo[0].segment.range || this._lastRange;
-            currentRange = currentRange.clone();
-
-            ranges.push(currentRange);
+         // Store where we left off, unless we got no ranges, or we didn't actually consume any segments
+         if (results.segments.length > 0 &&
+            results.segments[0].segment.index !== extContext.startIndex) {
+            this._lastOffset = ranges[ranges.length - 1].getEndOffset();
          }
 
-         for (let index = 0; index < segInfo.length; index++) {
-            const item = segInfo[index];
+         this._reportResults(extContext, results.text, results.original, ranges);
+      }
+   }
 
-            if (item.segment.text) {
-               returnedSegments.push(item.segment);
-            }
+   _restorePartiallyAndUnusedSegments(segInfos) {
+      const returnedSegments = [];
 
-            let range = item.segment.range;
+      for (let index = 0; index < segInfos.length; index++) {
+         const info = segInfos[index];
 
-            if (!range) {
-               range = currentRange;
-            }
+         if (info.segment.text) {
+            returnedSegments.push(info.segment);
+         }
+      }
 
-            if (!currentRange || currentRange.location !== range.location) {
-               currentRange = new Range(range.location, range.startIndex, range.startRow, range.startColumn,
-                  range.startIndex, range.startRow, range.startColumn);
+      this._segments = returnedSegments.concat(this._segments);
+   }
+
+   _computeRanges(segInfos) {
+      if (segInfos.length === 0) {
+         return [];
+      }
+
+      const ranges = [];
+      let currentRange = new Range(this._lastOffset);  // start off where we left off
+
+      // Just iterate through the segInfos, and accumulate the chars consumed
+      for (let index = 0; index < segInfos.length; index++) {
+         const info = segInfos[index];
+         const segment = info.segment;
+
+         // If we seem to have changed which entity we are reading from, create a new range.
+         if (segment.range && !currentRange.location.equals(segment.range.location)) {
+            // store the range if it actually has changed
+            if (!currentRange.getEndOffset().equals(this._lastOffset)) {
                ranges.push(currentRange);
             }
 
-            currentRange.endIndex += item.chars;
-            currentRange.endRow += item.rows;
-            currentRange.endColumn += item.columns;
+            currentRange = segment.range.clone();
+            currentRange.endIndex = segment.range.startIndex;
+            currentRange.endRow = segment.range.startRow;
+            currentRange.endColumn = segment.range.startColumn;
          }
 
-         if (returnedSegments.length > 0) {
-            this._segments = returnedSegments.concat(this._segments);
-         }
+         currentRange.endIndex += info.chars;
+         currentRange.endRow += info.rows;
+         currentRange.endColumn += info.columns;
+      }
 
-         if (!unchanged) {
-            this._lastRange = ranges[ranges.length - 1].clone();
-            this._lastRange.startIndex = this._lastRange.endIndex;
-            this._lastRange.startRow = this._lastRange.endRow;
-            this._lastRange.startColumn = this._lastRange.endColumn;
-         }
+      ranges.push(currentRange);
 
-         if (extractor.state === Extractor.STATE.SUCCESS) {
-            extContext.callback(new LToken(results.text, results.original, ranges));
-         } else {
-            extContext.callback();
-         }
+      return ranges;
+   }
+
+   _reportResults(extractorContext, text, originalText, ranges) {
+      if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
+         extractorContext.callback(new LToken(text, originalText, ranges));
+      } else {
+         extractorContext.callback();
       }
    }
 }

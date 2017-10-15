@@ -63,6 +63,13 @@ class EntityLocation {
       return this.resolvedSystemId || this.systemId;
    }
 
+   equals(other) {
+      if (!other) {
+         return false;
+      }
+      return this.systemId === other.systemId && this.publicId === other.publicId;
+   }
+
    _getSystemProtocol() {
       const matchResults = RELATIVE_REGEX.exec(this.systemId);
       return matchResults[1];

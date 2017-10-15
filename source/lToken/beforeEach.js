@@ -122,7 +122,7 @@ function toEqualLTokenRange() {
             throw new Error('LToken is undefined, but should not be.');
          }
 
-         if (expectedRange.equal(actualLToken.range[0])) {
+         if (expectedRange.equals(actualLToken.range[0])) {
             pass = true;
             message = `Expected range not to match. ("${actualLToken.range[0].toString()}").\n`;
          } else {

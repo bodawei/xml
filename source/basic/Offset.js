@@ -17,6 +17,23 @@ class Offset {
    clone() {
       return new Offset(this.location, this.index, this.row, this.column);
    }
+
+   equals(other) {
+      let locationsEqual = false;
+
+      if (!this.location && !other.location) {
+         locationsEqual = true;
+      } else if (!this.location) {
+         locationsEqual = false;
+      } else {
+         locationsEqual = this.location.equals(other.location);
+      }
+
+      return locationsEqual &&
+         this.index === other.index &&
+         this.row === other.row &&
+         this.column === other.column;
+   }
 }
 
 module.exports = Offset;

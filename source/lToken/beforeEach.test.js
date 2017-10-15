@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range } from '../basic';
+import { EntityLocation, Range } from '../basic';
 
 import { toEqualLTokenText, toEqualLTokenTexts, toEqualLTokenRange } from './beforeEach.js';
 import LToken from './LToken.js';
@@ -170,14 +170,14 @@ describe('lToken custom matchers', () => {
       let range;
 
       beforeEach(() => {
-         range = new Range({ systemId: 's', publicId: 'p' }, 0, 1, 2, 3, 4, 5);
+         range = new Range(new EntityLocation('s', 'p'), 0, 1, 2, 3, 4, 5);
       });
 
       describe('jasmine use', () => {
 
          it('reports pass when the range matches', () => {
             expect(new LToken('one', 'two', [ range ]))
-               .toEqualLTokenRange(new Range({ systemId: 's', publicId: 'p' }, 0, 1, 2, 3, 4, 5));
+               .toEqualLTokenRange(new Range(new EntityLocation('s', 'p'), 0, 1, 2, 3, 4, 5));
          });
 
          it('reports an exception if the lToken is undefined', () => {
@@ -188,7 +188,7 @@ describe('lToken custom matchers', () => {
 
          it('reports no pass if the range does not match', () => {
             expect(new LToken('one', 'one', range)).not
-               .toEqualLTokenText(new Range({ systemId: 's', publicId: 'p' }, 3, 3, 3, 3, 3));
+               .toEqualLTokenText(new Range(new EntityLocation('s', 'p'), 3, 3, 3, 3, 3));
          });
 
       });
@@ -220,7 +220,7 @@ describe('lToken custom matchers', () => {
 
          it('returns a message indicating failure, on success, when range does not match', () => {
             const result = toEqualLTokenRange().compare(new LToken('testValue', 'testValue', range),
-               new Range({ systemId: 's', publicId: 'p' }, 0, 0, 0, 0, 0, 0));
+               new Range(new EntityLocation('s', 'p'), 0, 0, 0, 0, 0, 0));
 
             expect(result).toEqual({
                pass: false,

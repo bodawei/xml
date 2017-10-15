@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import Offset from './Offset.js';
 import Range from './Range.js';
 import EntityLocation from './EntityLocation.js';
 
@@ -8,7 +9,7 @@ describe('Range', () => {
 
    describe('construction', () => {
 
-      it('it will accept no parameters', () => {
+      it('accepts no parameters', () => {
          const range = new Range();
 
          expect(range.location).toBeUndefined();
@@ -20,7 +21,7 @@ describe('Range', () => {
          expect(range.endColumn).toEqual(0);
       });
 
-      it('it will accept all parameters', () => {
+      it('accepts all parameters', () => {
          const range = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
 
          expect(range.location.systemId).toEqual('s');
@@ -31,6 +32,19 @@ describe('Range', () => {
          expect(range.endIndex).toEqual(4);
          expect(range.endRow).toEqual(5);
          expect(range.endColumn).toEqual(6);
+      });
+
+      it('can be constructed with an offset', () => {
+         const range = new Range(new Offset(new EntityLocation('s', 'p'), 6, 5, 4));
+
+         expect(range.location.systemId).toEqual('s');
+         expect(range.location.publicId).toEqual('p');
+         expect(range.startIndex).toEqual(6);
+         expect(range.startRow).toEqual(5);
+         expect(range.startColumn).toEqual(4);
+         expect(range.endIndex).toEqual(6);
+         expect(range.endRow).toEqual(5);
+         expect(range.endColumn).toEqual(4);
       });
 
    });
@@ -64,27 +78,41 @@ describe('Range', () => {
 
    });
 
-   describe('equal()', () => {
+   describe('equals()', () => {
 
       it('reports true when ranges match', () => {
          const range1 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
          const range2 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
 
-         expect(range1.equal(range2)).toEqual(true);
+         expect(range1.equals(range2)).toEqual(true);
       });
 
       it('reports false when ranges do not match', () => {
          const range1 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
          const range2 = new Range(new EntityLocation('s', 'p'), 1, 999, 3, 4, 5, 6);
 
-         expect(range1.equal(range2)).toEqual(false);
+         expect(range1.equals(range2)).toEqual(false);
       });
 
       it('reports false when location in ranges do not match', () => {
          const range1 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
          const range2 = new Range(new EntityLocation('s', 'p2'), 1, 2, 3, 4, 5, 6);
 
-         expect(range1.equal(range2)).toEqual(false);
+         expect(range1.equals(range2)).toEqual(false);
+      });
+
+      it('reports false when only one location is undefined', () => {
+         const range1 = new Range(undefined, 1, 2, 3, 4, 5, 6);
+         const range2 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
+
+         expect(range1.equals(range2)).toEqual(false);
+      });
+
+      it('reports true when both locations are undefined', () => {
+         const range1 = new Range(undefined, 1, 2, 3, 4, 5, 6);
+         const range2 = new Range(undefined, 1, 2, 3, 4, 5, 6);
+
+         expect(range1.equals(range2)).toEqual(true);
       });
 
    });

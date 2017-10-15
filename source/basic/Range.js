@@ -20,6 +20,17 @@ import Offset from './Offset.js';
 class Range {
 
    constructor(location, index, row, column, endIndex, endRow, endColumn) {
+      if (location instanceof Offset) {
+         this.location = location.location;
+         this.startIndex = location.index;
+         this.startRow = location.row;
+         this.startColumn = location.column;
+         this.endIndex = location.index;
+         this.endRow = location.row;
+         this.endColumn = location.column;
+         return;
+      }
+
       this.location = location;
       this.startIndex = index || 0;
       this.startRow = row || 0;
@@ -46,9 +57,18 @@ class Range {
       return new Offset(this.location, this.endIndex, this.endRow, this.endColumn);
    }
 
-   equal(other) {
-      return this.location.publicId === other.location.publicId &&
-         this.location.systemId === other.location.systemId &&
+   equals(other) {
+      let locationsEqual = false;
+
+      if (!this.location && !other.location) {
+         locationsEqual = true;
+      } else if (!this.location) {
+         locationsEqual = false;
+      } else {
+         locationsEqual = this.location.equals(other.location);
+      }
+
+      return locationsEqual &&
          this.startIndex === other.startIndex &&
          this.startRow === other.startRow &&
          this.startColumn === other.startColumn &&

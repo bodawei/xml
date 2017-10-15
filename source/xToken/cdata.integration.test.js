@@ -36,8 +36,7 @@ describe('cdata (integration)', () => {
 
    describe('parse()', () => {
 
-      // commented out due to 97 bug with range in cdata integration
-      xit('parses up to the ]]>', (done) => {
+      it('parses up to the ]]>', (done) => {
          source.addText('some text<foo>]]>other', new Range(new EntityLocation(), 9, 0, 9));
 
          cdata.parse(source, parsedEnvelope, (result) => {

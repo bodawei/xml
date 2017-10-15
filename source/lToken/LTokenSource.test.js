@@ -52,13 +52,13 @@ describe('LTokenSource', () => {
       }
 
       process(segment) {
-         const index = segment.text.indexOf(this.param);
+         const index = segment.text.indexOf(this.param, segment.index + 1);
          let str;
 
          if (index === -1) {
             str = segment.text;
          } else {
-            str = segment.text.substr(0, index);
+            str = segment.text.substring(segment.index, index);
             this.state = Extractor.STATE.SUCCESS;
          }
 
@@ -406,8 +406,8 @@ describe('LTokenSource', () => {
          });
 
          it('returns a lToken with ranges for the segments', () => {
-            const loc2 = new EntityLocation();
-            const loc3 = new EntityLocation();
+            const loc2 = new EntityLocation('sys2', 'pub2');
+            const loc3 = new EntityLocation('sys3', 'pub3');
             source.addText('9', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
             source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
             source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
@@ -422,7 +422,7 @@ describe('LTokenSource', () => {
          });
 
          it('delivers a default range to a segment without a range', () => {
-            const loc2 = new EntityLocation();
+            const loc2 = new EntityLocation('sys2', 'pub2');
 
             source.addText('9', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
             source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
@@ -433,6 +433,30 @@ describe('LTokenSource', () => {
 
             expect(lTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
             expect(lTokenSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 107, 100, 107));
+         });
+
+         it('treats equal locations, that are different instances, as the same', () => {
+            const loc2 = new EntityLocation();  // same location as the defaultLoc
+
+            source.addText('9', new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            source.addText('88', new Range(loc2, 4, 2, 2, 6, 2, 4));
+            source.addText('77777');
+            source.endText();
+
+            source.extract('all', lTokenSpy);
+
+            expect(lTokenSpy.calls.argsFor(0)[0].range).toEqual([ new Range(defaultLoc, 3, 2, 1, 11, 2, 9) ]);
+         });
+
+         it('correctly computes range when retrieving multiple LTokens from a ranged segment', () => {
+            source.addText('a]b', new Range(defaultLoc, 3, 2, 1, 9, 9, 9));
+            source.endText();
+
+            source.extract('tox', ']', lTokenSpy);
+            source.extract('tox', 'b', lTokenSpy);
+
+            expect(lTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(lTokenSpy.calls.argsFor(1)[0].range[0]).toEqual(new Range(defaultLoc, 4, 2, 2, 5, 2, 3));
          });
 
       });
