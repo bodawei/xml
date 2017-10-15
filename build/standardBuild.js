@@ -170,6 +170,7 @@ module.exports = function standardBuild(grunt) {
             },
          },
       },
+      // DONE
       coveragereport:  {
          dist: {
             options: {
@@ -188,6 +189,7 @@ module.exports = function standardBuild(grunt) {
             },
          },
       },
+      // DONE
       derivelocale: {
          default: {
             options: {
@@ -218,32 +220,36 @@ module.exports = function standardBuild(grunt) {
    });
 
    grunt.registerTask('default', [
-      'quietBuild',
-      'clean',
-      'mkout',
-      'derivelocale',
+      'quietBuild', // DONE-- ish
+      'clean', // DONE
+      'mkout', // DONE
+      'derivelocale', // DONE
+
       'test',
       'babel:testNode',
       'copy:testNode',
       'nodeCoverage',
-      'eslint',
+      'eslint', // DONE
 //      'checkkeys',
       'testreport',
-      'coveragereport',
+      'coveragereport', // DONE
       '_dist',
-      'dumpReports',
+      'dumpReports', // DONE
    ]);
 
+   // DONE
    grunt.registerTask('dev', [ 'derivelocale', 'karma:dev' ]);
 
    grunt.registerTask('test', [ 'karma:dist', '_testreport' ]);
 
+   // DONE
    grunt.registerTask('quietBuild', '@@@', () => {
       controller = require('mostly-quiet-grunt');
       controller.showDots(false);
       process.passthroughWrite = controller.passthroughWrite.bind(controller);
    });
 
+   // DONE
    grunt.registerTask('mkout', 'Make the output directory', () => {
       grunt.file.mkdir(OUT_DIR);
    });
@@ -265,6 +271,7 @@ module.exports = function standardBuild(grunt) {
       grunt.task.run('exorcise:distFlatfile');
    });
 
+   // DONE
    grunt.registerTask('dumpReports', '', () => {
       const coverageReport = fs.readFileSync(path.join(OUT_DIR, './coverage-summary.txt'));
       const testReport = fs.readFileSync(path.join(OUT_DIR, './test-summary.txt'));
@@ -277,12 +284,14 @@ module.exports = function standardBuild(grunt) {
       }
    });
 
+   // DONE
    grunt.registerTask('clean', 'Delete non-essential files.', () => {
       grunt.file.delete(OUT_DIR, {force: true});
       grunt.file.delete(DIST_DIR, {force: true});
       grunt.file.delete(SOURCE_DERIVED_DIR, {force: true});
    });
 
+   // DONE
    grunt.registerTask('deepclean', 'Deep clean (clean, remove node_modules).', () => {
       grunt.task.run('clean');
       grunt.file.delete(NODE_MODULES_DIR);
