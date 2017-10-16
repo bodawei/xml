@@ -27,14 +27,7 @@ class EntityReference extends XmlToken {
 
 }
 
-class ParameterEntityReference extends XmlToken {
-
-   constructor(name, lTokens) {
-      super(lTokens);
-
-      this.name = name;
-   }
-
+class ParameterEntityReference extends EntityReference {
 }
 
 /**********************************************************************\

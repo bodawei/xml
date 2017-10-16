@@ -71,6 +71,7 @@ module.exports = function standardBuild(grunt) {
    }
 
    grunt.initConfig({
+      // DONE
       eslint: {
          target: JS_FILE_GLOB,
          options: {

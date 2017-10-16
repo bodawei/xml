@@ -7,6 +7,7 @@ import { Token as XmlToken } from './xmlToken.js';
 \**********************************************************************/
 
 const ENTITY_END = 'ENTITY_END';
+const PARAMETERENTITY_END = 'PARAMETERENTITY_END';
 
 class EntityEnd extends XmlToken {
 
@@ -18,7 +19,12 @@ class EntityEnd extends XmlToken {
 
 }
 
+class ParameterEntityEnd extends XmlToken {
+}
+
 export {
    ENTITY_END as TYPE,
    EntityEnd as Token,
+   PARAMETERENTITY_END as PARAM_TYPE,
+   ParameterEntityEnd as ParamToken,
 };

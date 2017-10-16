@@ -3,10 +3,11 @@
 import { Token as XmlToken } from './xmlToken.js';
 
 /**********************************************************************\
- Defines a simple token that tracks the start of an entity expansion.
+ Defines simple token that tracks the start of an entity expansion.
 \**********************************************************************/
 
 const ENTITY_START = 'ENTITY_START';
+const PARAMETERENTITY_START = 'PARAMETERENTITY_START';
 
 class EntityStart extends XmlToken {
 
@@ -18,7 +19,12 @@ class EntityStart extends XmlToken {
 
 }
 
+class ParameterEntityStart extends EntityStart {
+}
+
 export {
    ENTITY_START as TYPE,
    EntityStart as Token,
+   PARAMETERENTITY_START as PARAM_TYPE,
+   ParameterEntityStart as ParamToken,
 };

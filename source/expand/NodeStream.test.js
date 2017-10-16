@@ -6,7 +6,7 @@ import * as xToken from '../xToken';
 import NodeStream from './NodeStream.js';
 import EntityManager from './EntityManager.js';
 
-describe('NodeStream', () => {
+describe('NodeStream (unit)', () => {
 
    describe('does recursive', () => {
 
@@ -27,13 +27,22 @@ describe('NodeStream', () => {
          nodeStream = new NodeStream(entityManager);
       });
 
-      it('adds any entity declarations to the entity manager', () => {
+      it('adds any general entity declarations to the entity manager', () => {
          spyOn(entityManager, 'addEntityFromInternalSubset');
          const token = new xToken.entityDeclaration.Token('fred', [], undefined, undefined, []);
 
          nodeStream.write(token);
 
          expect(entityManager.addEntityFromInternalSubset).toHaveBeenCalledWith(token);
+      });
+
+      it('adds any parameter entity declarations to the entity manager', () => {
+         spyOn(entityManager, 'addParameterEntityFromInternalSubset');
+         const token = new xToken.entityDeclaration.ParamToken('fred', [], undefined, undefined, []);
+
+         nodeStream.write(token);
+
+         expect(entityManager.addParameterEntityFromInternalSubset).toHaveBeenCalledWith(token);
       });
 
       it('passes tokens through', () => {
@@ -63,6 +72,17 @@ describe('NodeStream', () => {
 
             nodeStream.read(); // decl token
             expect(nodeStream.read()).toEqual(new xToken.entityStart.Token('test'));
+         });
+
+         it('adds a start entity token to the stream when it encounters a parameter entity ref', () => {
+            const declToken = new xToken.entityDeclaration.ParamToken('test', [], undefined, undefined, []);
+            const refToken = new xToken.entityReference.ParamToken('test', []);
+
+            nodeStream.write(declToken);
+            nodeStream.write(refToken);
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(new xToken.entityStart.ParamToken('test'));
          });
 
       });
