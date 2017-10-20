@@ -4,10 +4,6 @@ function textOrBlank(lToken) {
    return lToken ? lToken.text : '';
 }
 
-function textOrUndef(lToken) {
-   return lToken && lToken.text;
-}
-
 function pushNonBottom(results, value) {
    if (value !== undefined && value !== null) {
       results.push(value);
@@ -16,6 +12,5 @@ function pushNonBottom(results, value) {
 
 export {
    textOrBlank,
-   textOrUndef,
    pushNonBottom,
 };

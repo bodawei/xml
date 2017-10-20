@@ -68,7 +68,10 @@ function addAttribute(source, attrs, options, name, deliverResults) {
    source.extractToObject('space', attr, 'postNameSpace');
    source.extractToObject('match', '=', attr, 'equal');
    source.extractToObject('space', attr, 'postEqualSpace');
-   quotedValue.parse('attr', source, attr, (gotQuoted) => {
+   quotedValue.parse(source, {
+      prefix: 'attr',
+      parsed: attr,
+   }, (gotQuoted) => {
       if (gotQuoted) {
          source.extractToObject('space', attr, 'trailingSpace');
       }
@@ -115,8 +118,6 @@ function checkWellFormed(parsed, ec, entityMetaData, preceedingSpace, type, chec
       ec.setPos(attr.postEqualSpace);
 
       quotedValue.checkWellFormed('attr', attr, ec, entityMetaData, type, () => {
-         misc.checkWellFormedText(attr.attrValue, ec, entityMetaData);
-
          if (checkValue) {
             checkValue(attr.name, attr.attrValue, ec, entityMetaData);
          }
@@ -137,7 +138,22 @@ function makeTokenCompatible(attributes = []) {
 
       attrs.push({
          name: textOrBlank(attr.name),
-         value: textOrBlank(attr.attrValue),
+         value: quotedValue.makeTokenCompatible('attr', attr),
+      });
+   }
+
+   return attrs;
+}
+
+function makeOneTokenCompatible(attributes = []) {
+   const attrs = [];
+
+   for (let index = 0; index < attributes.length; index++) {
+      const attr = attributes[index];
+
+      attrs.push({
+         name: textOrBlank(attr.name),
+         value: quotedValue.makeOneTokenCompatible('attr', attr),
       });
    }
 
@@ -161,5 +177,6 @@ export {
    parse,
    checkWellFormed,
    makeTokenCompatible,
+   makeOneTokenCompatible,
    appendLTokens,
 };

@@ -20,7 +20,7 @@ describe('externalId (unit)', () => {
          expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
          spyOn(quotedValue, 'parse');
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
       });
 
       it('returns simple values', () => {
@@ -128,7 +128,7 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it does not find an open quote', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
@@ -207,11 +207,11 @@ describe('externalId (unit)', () => {
             idType: expectedLToken('PUBLIC'),
             postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
-            publicValue: expectedLToken('pub.xml'),
+            publicValue: [ expectedLToken('pub.xml') ],
             publicCloseQuote: expectedLToken('"'),
             postPublicSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
-            systemValue: expectedLToken('sys.xml'),
+            systemValue: [ expectedLToken('sys.xml') ],
             systemCloseQuote: expectedLToken('"'),
          };
          spyOn(quotedValue, 'checkWellFormed');
@@ -242,7 +242,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if the PUBLIC value has illegal characters', () => {
-         parsed.publicValue.text = 'bad&chars';
+         parsed.publicValue[0].text = 'bad&chars';
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          // invoke the callback function
@@ -259,6 +259,29 @@ describe('externalId (unit)', () => {
          externalId.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
+      });
+
+      it('reports no errors if the public value is undefined (this can not happen naturally', () => {
+         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) =>
+            { return callback ? callback() : undefined; });
+         delete parsed.publicValue;
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.report).not.toHaveBeenCalled();
+      });
+
+      it('reports an error if the public value contains invalid characters', () => {
+         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) =>
+            { return callback ? callback() : undefined; });
+         parsed.publicValue[0].text = '{}{}{}{}';
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
+            params: [ '{' ],
+            position: parsed.postIdTypeSpace,   // wrong due to mocking
+         });
       });
 
       it('reports an error if type is neither PUBLIC or SYSTEM', () => {
@@ -320,11 +343,11 @@ describe('externalId (unit)', () => {
             idType: expectedLToken('PUBLIC'),
             postIdTypeSpace: expectedLToken(' '),
             publicOpenQuote: expectedLToken('"'),
-            publicValue: expectedLToken('pub.xml'),
+            publicValue: [ expectedLToken('pub.xml') ],
             publicCloseQuote: expectedLToken('"'),
             postPublicSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
-            systemValue: expectedLToken('sys.xml'),
+            systemValue: [ expectedLToken('sys.xml') ],
             systemCloseQuote: expectedLToken('"'),
          };
 
@@ -340,13 +363,29 @@ describe('externalId (unit)', () => {
             idType: expectedLToken('PUBLIC'),
             postIdTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
-            systemValue: expectedLToken('sys.xml'),
+            systemValue: [ expectedLToken('sys.xml') ],
             systemCloseQuote: expectedLToken('"'),
          };
 
          const externalLoc = externalId.makeTokenCompatible(parsed);
 
          expect(externalLoc).toEqual(new EntityLocation('sys.xml'));
+      });
+
+      it('returns an EntityLocation with the public only if there is no system', () => {
+         const expectedLToken = makeLTokenMaker();
+         const parsed = {
+            type: 'EXTERNAL_ID',
+            idType: expectedLToken('PUBLIC'),
+            postIdTypeSpace: expectedLToken(' '),
+            publicOpenQuote: expectedLToken('"'),
+            publicValue: [ expectedLToken('pub.xml') ],
+            publicCloseQuote: expectedLToken('"'),
+         };
+
+         const externalLoc = externalId.makeTokenCompatible(parsed);
+
+         expect(externalLoc).toEqual(new EntityLocation(undefined, 'pub.xml'));
       });
 
       it('returns nothing if no parsed value provided', () => {

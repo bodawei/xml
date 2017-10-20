@@ -30,11 +30,11 @@ describe('externalId (integration)', () => {
                idType: makeLToken('PUBLIC'),
                postIdTypeSpace: makeLToken(' '),
                publicOpenQuote: makeLToken('"'),
-               publicValue: makeLToken('pub.xml'),
+               publicValue: [ makeLToken('pub.xml') ],
                publicCloseQuote: makeLToken('"'),
                postPublicSpace: makeLToken('\t'),
                systemOpenQuote: makeLToken('"'),
-               systemValue: makeLToken('sys.xml'),
+               systemValue: [ makeLToken('sys.xml') ],
                systemCloseQuote: makeLToken('"'),
             });
             done();

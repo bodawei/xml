@@ -24,14 +24,17 @@ describe('quotedValue', () => {
             '"',
          ]);
 
-         quotedValue.parse('foo', mockSource, container, callback);
+         quotedValue.parse(mockSource, {
+            prefix: 'foo',
+            parsed: container,
+         }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedLToken = makeLTokenMaker();
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             fooOpenQuote: expectedLToken('"'),
-            fooValue: expectedLToken('blah'),
+            fooValue: [ expectedLToken('blah') ],
             fooCloseQuote: expectedLToken('"'),
          });
       });
@@ -45,14 +48,17 @@ describe('quotedValue', () => {
             '\'',
          ]);
 
-         quotedValue.parse('foo', mockSource, container, callback);
+         quotedValue.parse(mockSource, {
+            prefix: 'foo',
+            parsed: container,
+         }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedLToken = makeLTokenMaker();
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             fooOpenQuote: expectedLToken('\''),
-            fooValue: expectedLToken('blah'),
+            fooValue: [ expectedLToken('blah') ],
             fooCloseQuote: expectedLToken('\''),
          });
       });
@@ -66,15 +72,39 @@ describe('quotedValue', () => {
             '"',
          ]);
 
-         quotedValue.parse('foo', mockSource, container, callback);
+         quotedValue.parse(mockSource, {
+            prefix: 'foo',
+            parsed: container,
+         }, callback);
          mockSource.respondInAsyncTime();
 
          const expectedLToken = makeLTokenMaker();
          expect(container).toEqual({
             fooOpenQuote: expectedLToken('"'),
-            fooValue: expectedLToken(''),
+            fooValue: [ expectedLToken('') ],
             fooCloseQuote: expectedLToken('"'),
          });
+      });
+
+   });
+
+   describe('makeOneTokenCompatible()', () => {
+
+      it('returns the string from the parsed result', () => {
+         const expectedLToken = makeLTokenMaker();
+         const result = quotedValue.makeOneTokenCompatible('foo', {
+            fooOpenQuote: expectedLToken('"'),
+            fooValue: [ expectedLToken('blah') ],
+            fooCloseQuote: expectedLToken('"'),
+         });
+
+         expect(result).toEqual('blah');
+      });
+
+      it('copes with no quoted value at all', () => {
+         const result = quotedValue.makeOneTokenCompatible('foo', {});
+
+         expect(result).toEqual(undefined);
       });
 
    });
@@ -85,7 +115,7 @@ describe('quotedValue', () => {
          const expectedLToken = makeLTokenMaker();
          const parsed = {
             fooOpenQuote: expectedLToken('"'),
-            fooValue: expectedLToken('blah'),
+            fooValue: [ expectedLToken('blah') ],
             fooCloseQuote: expectedLToken('"'),
          };
          const results = [];
@@ -94,7 +124,7 @@ describe('quotedValue', () => {
 
          expect(results).toEqual([
             parsed.fooOpenQuote,
-            parsed.fooValue,
+            parsed.fooValue[0],
             parsed.fooCloseQuote,
          ]);
       });

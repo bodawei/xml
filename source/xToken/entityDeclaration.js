@@ -4,7 +4,6 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import { Token as XmlToken } from './xmlToken.js';
 import * as declaration from './declaration.js';
-import * as text from './text.js';
 import * as misc from './common/misc.js';
 import * as externalId from './common/externalId.js';
 import * as quotedValue from './common/quotedValue.js';
@@ -84,7 +83,10 @@ function parse(source, declarationParsing, deliverParsed) {
       source.extractToObject('word', [ '>', '"', '\'' ], parsed, 'name');
       source.extractToObject('space', parsed, 'postNameSpace');
 
-      quotedValue.parse('literal', source, parsed, (gotQuoted) => {
+      quotedValue.parse(source, {
+         prefix: 'literal',
+         parsed,
+      }, (gotQuoted) => {
          if (gotQuoted) {
             parseClose(source, parsed, 'postEntityValueSpace', deliverParsed);
          } else {
@@ -174,11 +176,9 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
 function makeToken(parsed) {
    const entityClass = parsed.parameter ? ParameterEntityDeclaration : EntityDeclaration;
-   const value = parsed.literalValue ?
-      [ new text.Token(parsed.literalValue.text, [ parsed.literalValue ]) ] : undefined;
 
    return new entityClass(textOrBlank(parsed.name),
-      value,
+      quotedValue.makeTokenCompatible('literal', parsed),
       externalId.makeTokenCompatible(parsed.externalId),
       textOrBlank(parsed.nDataName),
       getLTokens(parsed));

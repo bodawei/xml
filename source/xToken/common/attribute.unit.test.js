@@ -37,11 +37,10 @@ describe('attribute (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          spyOn(quotedValue, 'parse');
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
       });
 
       it('parses an attribute', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
          mockSource = new MockLTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ ' ', 'space' ],
@@ -59,7 +58,6 @@ describe('attribute (unit)', () => {
       });
 
       it('parses multiple attributes', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
          mockSource = new MockLTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ ' ', 'space' ],
@@ -81,7 +79,6 @@ describe('attribute (unit)', () => {
       });
 
       it('accepts no options', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
          mockSource = new MockLTokenSource([
             'version',
             ' ',
@@ -99,7 +96,6 @@ describe('attribute (unit)', () => {
       });
 
       it('accepts options with no terminators', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(true); });
          mockSource = new MockLTokenSource([
             'version',
             ' ',
@@ -117,7 +113,7 @@ describe('attribute (unit)', () => {
       });
 
       it('stops at the specified name terminator', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ 'versi', 'word', [ '=', 'x' ] ],
             [ undefined, 'space' ],
@@ -140,7 +136,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF where the attribute name should be', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ undefined, 'word', [ '=', '>' ] ],
          ]);
@@ -152,7 +148,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF after the name', () => {
-         quotedValue.parse.and.callFake((_1, _2, _3, callback) => { callback(false); });
+         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ undefined, 'space' ],
@@ -207,17 +203,6 @@ describe('attribute (unit)', () => {
          expect(params[3]).toEqual(emd);
          expect(params[4]).toEqual(WellFormedError.ID.NOUN_ATTRIBUTE);
          expect(params[5] instanceof Function).toEqual(true);
-      });
-
-      it('calls misc.checkWellFormedText', () => {
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
-            callback();
-         });
-
-         attribute.checkWellFormed(parsedAttributes, mockErrorCollector, emd,
-            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
-
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(undefined, mockErrorCollector, emd);
       });
 
       it('reports an error if there is no space before the first attribute name', () => {
@@ -307,15 +292,27 @@ describe('attribute (unit)', () => {
 
    describe('makeTokenCompatible()', () => {
 
+      beforeEach(() => {
+         spyOn(quotedValue, 'makeTokenCompatible');
+      });
+
+      it('calls quotedValue.appendLTokens()', () => {
+         parsedAttributes.pop();
+
+         attribute.makeTokenCompatible(parsedAttributes);
+
+         expect(quotedValue.makeTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
+      });
+
       it('returns name value pairs from the parsing', () => {
          const attrs = attribute.makeTokenCompatible(parsedAttributes);
 
          expect(attrs).toEqual([ {
             name: 'version',
-            value: '',
+            value: undefined,
          }, {
             name: 'another',
-            value: '',
+            value: undefined,
          } ]);
       });
 
@@ -327,6 +324,46 @@ describe('attribute (unit)', () => {
 
       it('copes with not even an array as parameters', () => {
          const attrs = attribute.makeTokenCompatible(undefined);
+
+         expect(attrs).toEqual([]);
+      });
+
+   });
+
+   describe('makeOneTokenCompatible()', () => {
+
+      beforeEach(() => {
+         spyOn(quotedValue, 'makeOneTokenCompatible');
+      });
+
+      it('calls quotedValue.makeOneTokenCompatible()', () => {
+         parsedAttributes.pop();
+
+         attribute.makeOneTokenCompatible(parsedAttributes);
+
+         expect(quotedValue.makeOneTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
+      });
+
+      it('returns name value pairs', () => {
+         const attrs = attribute.makeOneTokenCompatible(parsedAttributes);
+
+         expect(attrs).toEqual([ {
+            name: 'version',
+            value: undefined,
+         }, {
+            name: 'another',
+            value: undefined,
+         } ]);
+      });
+
+      it('copes with no attributes at all', () => {
+         const attrs = attribute.makeOneTokenCompatible([]);
+
+         expect(attrs).toEqual([]);
+      });
+
+      it('copes with not even an array as parameters', () => {
+         const attrs = attribute.makeOneTokenCompatible(undefined);
 
          expect(attrs).toEqual([]);
       });

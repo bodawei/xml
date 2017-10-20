@@ -11,10 +11,32 @@ import * as attribute from './attribute.js';
 describe('attribute (integration)', () => {
    let emd;
    let source;
+   let parsedAttributes;
 
    beforeEach(() => {
+      const makeLToken = makeLTokenMaker();
+
       emd = new EntityMetaData();
       source = new LTokenSource(defaultExtractors, emd);
+      parsedAttributes = [ {
+         name: makeLToken('one'),
+         postNameSpace: undefined,
+         equal: makeLToken('='),
+         postEqualSpace: undefined,
+         attrOpenQuote: makeLToken('"'),
+         attrValue: [ makeLToken('1') ],
+         attrCloseQuote: makeLToken('"'),
+         trailingSpace: makeLToken('  '),
+      }, {
+         name: makeLToken('two'),
+         postNameSpace: makeLToken(' '),
+         equal: makeLToken('='),
+         postEqualSpace: makeLToken(' '),
+         attrOpenQuote: makeLToken('"'),
+         attrValue: [ makeLToken('two') ],
+         attrCloseQuote: makeLToken('"'),
+         trailingSpace: makeLToken(' '),
+      } ];
    });
 
    describe('parse()', () => {
@@ -31,7 +53,7 @@ describe('attribute (integration)', () => {
                equal: makeLToken('='),
                postEqualSpace: undefined,
                attrOpenQuote: makeLToken('"'),
-               attrValue: makeLToken('1'),
+               attrValue: [ makeLToken('1') ],
                attrCloseQuote: makeLToken('"'),
                trailingSpace: makeLToken('  '),
             }, {
@@ -40,7 +62,7 @@ describe('attribute (integration)', () => {
                equal: makeLToken('='),
                postEqualSpace: makeLToken(' '),
                attrOpenQuote: makeLToken('"'),
-               attrValue: makeLToken('two'),
+               attrValue: [ makeLToken('two') ],
                attrCloseQuote: makeLToken('"'),
                trailingSpace: makeLToken(' '),
             }, {
@@ -117,6 +139,21 @@ describe('attribute (integration)', () => {
          });
       });
 
+   });
+
+   describe('makeOneTokenCompatible()', () => {
+
+      it('returns name value pairs', () => {
+         const attrs = attribute.makeOneTokenCompatible(parsedAttributes);
+
+         expect(attrs).toEqual([ {
+            name: 'one',
+            value: '1',
+         }, {
+            name: 'two',
+            value: 'two',
+         } ]);
+      });
    });
 
    describe('appendLTokens()', () => {

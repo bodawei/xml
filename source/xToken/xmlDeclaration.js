@@ -158,7 +158,7 @@ function makeNameCheckClosure() {
 function checkValue(name, value, ec) {
    const nameText = textOrBlank(name);
    const lcName = nameText.toLocaleLowerCase();
-   const valueText = textOrBlank(value);
+   const valueText = textOrBlank(value[0]);  // @@@ value
    const lcValue = valueText.toLocaleLowerCase();
 
    switch (lcName) {
@@ -180,7 +180,7 @@ function checkValue(name, value, ec) {
 \**********************************************************************/
 
 function makeToken(parsed) {
-   return new XmlDeclaration(attribute.makeTokenCompatible(parsed.params), getChunks(parsed));
+   return new XmlDeclaration(attribute.makeOneTokenCompatible(parsed.params), getChunks(parsed));
 }
 
 function getChunks(parsed) {

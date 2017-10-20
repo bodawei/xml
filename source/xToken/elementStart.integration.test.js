@@ -7,6 +7,7 @@ import { LTokenSource, defaultExtractors } from '../lToken';
 import { makeLTokenMaker } from '../lToken/test';
 
 import * as elementStart from './elementStart.js';
+import * as text from './text.js';
 
 describe('elementStart (integration)', () => {
    let parsedElementStart;
@@ -48,7 +49,7 @@ describe('elementStart (integration)', () => {
                   equal: expectedLToken('='),
                   postEqualSpace: expectedLToken('\t\t'),
                   attrOpenQuote: expectedLToken('"'),
-                  attrValue: expectedLToken('value1'),
+                  attrValue: [ expectedLToken('value1') ],
                   attrCloseQuote: expectedLToken('"'),
                   trailingSpace: expectedLToken(' '),
                }, {
@@ -57,7 +58,7 @@ describe('elementStart (integration)', () => {
                   equal: expectedLToken('='),
                   postEqualSpace: undefined,
                   attrOpenQuote: expectedLToken('"'),
-                  attrValue: expectedLToken('value two'),
+                  attrValue: [ expectedLToken('value two') ],
                   attrCloseQuote: expectedLToken('"'),
                   trailingSpace: undefined,
                } ],
@@ -123,12 +124,15 @@ describe('elementStart (integration)', () => {
          elementStart.parse(source, parsedElementStart.open, (parsed) => {
             const token = elementStart.makeToken(parsed);
             token.lTokens = [];
+            token.attributes[0].value[0].lTokens = [];
+            token.attributes[1].value[0].lTokens = [];
+
             expect(token).toEqual(new elementStart.Token('aName', [ {
                name: 'attr1',
-               value: 'value1',
+               value: [ new text.Token('value1', []) ],
             }, {
                name: 'attr2',
-               value: 'value two',
+               value: [ new text.Token('value two', []) ],
             } ], []));
             done();
          });

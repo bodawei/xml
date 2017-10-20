@@ -22,7 +22,7 @@ describe('docTypeStart (integration)', () => {
             idType: expectedLToken('SYSTEM'),
             postIdTypeSpace: expectedLToken(' '),
             systemOpenQuote: expectedLToken('"'),
-            systemValue: expectedLToken('sys.dtd'),
+            systemValue: [ expectedLToken('sys.dtd') ],
             systemCloseQuote: expectedLToken('"'),
          },
          postExternalIdSpace: expectedLToken(' '),

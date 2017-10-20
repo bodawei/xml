@@ -7,7 +7,6 @@ import * as quotedValue from './quotedValue.js';
 import {
    pushNonBottom,
    textOrBlank,
-   textOrUndef,
  } from './util.js';
 
 /**********************************************************************\
@@ -64,7 +63,10 @@ function parse(source, terminators, deliverParsed) {
       source.extractToObject('space', parsed, 'postIdTypeSpace');
 
       if (capitalType === 'PUBLIC') {
-         quotedValue.parse(PUBLIC_PREFIX, source, parsed, (gotQuoted) => {
+         quotedValue.parse(source, {
+            prefix: PUBLIC_PREFIX,
+            parsed,
+         }, (gotQuoted) => {
             if (!gotQuoted) {
                deliverParsed(parsed);
                return;
@@ -85,7 +87,10 @@ function getSystemIfAvailable(source, allTerminators, parsed, deliverParsed) {
          return;
       }
 
-      quotedValue.parse(SYSTEM_PREFIX, source, parsed, () => {
+      quotedValue.parse(source, {
+         prefix: SYSTEM_PREFIX,
+         parsed,
+      }, () => {
          deliverParsed(parsed);
       });
    });
@@ -116,9 +121,12 @@ function checkWellFormed(parsed, ec, entityMetaData) {
 
    if (capitalType === 'PUBLIC') {
       quotedValue.checkWellFormed(PUBLIC_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
-         const match = PUBID_CHARS.exec(parsed.publicValue.text);
-         ec.check(!match || match[0] !== parsed.publicValue.text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ parsed.publicValue.text[match[0].length] ]);
+         if (!parsed.publicValue) {
+            return;
+         }
+         const match = PUBID_CHARS.exec(parsed.publicValue[0].text);
+         ec.check(!match || match[0] !== parsed.publicValue[0].text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+                  [ parsed.publicValue[0].text[match[0].length] ]);
       });
    }
 
@@ -142,7 +150,10 @@ function makeTokenCompatible(parsed) {
       return;
    }
 
-   return new EntityLocation(textOrUndef(parsed.systemValue), textOrUndef(parsed.publicValue));
+   const systemValue = parsed.systemValue ? parsed.systemValue[0].text : undefined;
+   const publicValue = parsed.publicValue ? parsed.publicValue[0].text : undefined;
+
+   return new EntityLocation(systemValue, publicValue);
 }
 
 function appendLTokens(results, parsed) {

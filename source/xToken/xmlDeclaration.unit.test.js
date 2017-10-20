@@ -257,7 +257,7 @@ describe('xmlDeclaration (unit)', () => {
             it('reports an error if the version is not a legal value', () => {
                const mockErrorCollector = new MockErrorCollector();
 
-               checkValue(makeToken('version'), makeToken('1.2'), mockErrorCollector, emd);
+               checkValue(makeToken('version'), [ makeToken('1.2') ], mockErrorCollector, emd);
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
@@ -269,7 +269,7 @@ describe('xmlDeclaration (unit)', () => {
             it('reports an error if the encoding is not a legal value', () => {
                const mockErrorCollector = new MockErrorCollector();
 
-               checkValue(makeToken('encoding'), makeToken('$$BAD_ENCODING$$'), mockErrorCollector, emd);
+               checkValue(makeToken('encoding'), [ makeToken('$$BAD_ENCODING$$') ], mockErrorCollector, emd);
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
@@ -281,7 +281,7 @@ describe('xmlDeclaration (unit)', () => {
             it('reports an error if the standalone is neither "yes" or "no"', () => {
                const mockErrorCollector = new MockErrorCollector();
 
-               checkValue(makeToken('standalone'), makeToken('Maybe'), mockErrorCollector, emd);
+               checkValue(makeToken('standalone'), [ makeToken('Maybe') ], mockErrorCollector, emd);
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
@@ -293,7 +293,7 @@ describe('xmlDeclaration (unit)', () => {
             it('reports an error if the standalone is not all lower case', () => {
                const mockErrorCollector = new MockErrorCollector();
 
-               checkValue(makeToken('standalone'), makeToken('Yes'), mockErrorCollector, emd);
+               checkValue(makeToken('standalone'), [ makeToken('Yes') ], mockErrorCollector, emd);
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
@@ -311,7 +311,7 @@ describe('xmlDeclaration (unit)', () => {
    describe('makeToken()', () => {
 
       beforeEach(() => {
-         spyOn(attribute, 'makeTokenCompatible');
+         spyOn(attribute, 'makeOneTokenCompatible');
          spyOn(attribute, 'appendLTokens');
       });
 
@@ -323,7 +323,7 @@ describe('xmlDeclaration (unit)', () => {
 
          xmlDeclaration.makeToken(parsed);
 
-         expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(parsed.params);
+         expect(attribute.makeOneTokenCompatible).toHaveBeenCalledWith(parsed.params);
       });
 
       it('asks the attribute to provide the lTokens', () => {
