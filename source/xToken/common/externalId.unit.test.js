@@ -262,8 +262,9 @@ describe('externalId (unit)', () => {
       });
 
       it('reports no errors if the public value is undefined (this can not happen naturally', () => {
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) =>
-            { return callback ? callback() : undefined; });
+         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
+            return callback ? callback() : undefined;
+         });
          delete parsed.publicValue;
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
@@ -271,8 +272,9 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if the public value contains invalid characters', () => {
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) =>
-            { return callback ? callback() : undefined; });
+         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
+            return callback ? callback() : undefined;
+         });
          parsed.publicValue[0].text = '{}{}{}{}';
 
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());

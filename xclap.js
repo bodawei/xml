@@ -1,4 +1,5 @@
 const fs = require('fs');
+var os = require('os');
 const path = require('path');
 
 const xclap = require('xclap');
@@ -20,6 +21,11 @@ const JS_FILE_GLOB = [
    SOURCE_DIR + '**/*.js'
 ];
 
+
+const reportDir = OUT_DIR + 'nodeCoverage/node ' + process.version +
+   ' (' + os.type() + ' ' + os.release() + ')/';
+const reporters = [ 'lcov', 'text', 'json-summary' ]
+   .map((reporter) => `--reporter="${reporter}"`);
 
 
 const tasks = {
@@ -44,6 +50,9 @@ const tasks = {
       mkdir -p ${DIST_DIR};
       `.replace(/\n/g, ' '),
 
+
+   nodeCoverage: `nyc --require="babel-register" --report-dir="${reportDir}" ${reporters.join(' ')} jasmine`,
+
    dumpReports:  () => {
       const coverageReport = fs.readFileSync(path.join(OUT_DIR, './coverage-summary.txt'));
       const testReport = fs.readFileSync(path.join(OUT_DIR, './test-summary.txt'));
@@ -62,6 +71,7 @@ const tasks = {
          destDir: SOURCE_DERIVED_DIR,
       }),
       'eslint',
+      'nodeCoverage',
       () => coverageReport({
          // filesToSkip: [ ],
          reportDir: OUT_DIR,

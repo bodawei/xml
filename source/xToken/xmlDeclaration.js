@@ -61,13 +61,7 @@ class XmlDeclaration extends XmlToken {
 \**********************************************************************/
 
 function parse(source, piParsing, deliverParsed) {
-   const parsed = {
-      type: XMLDECL,
-      open: piParsing.open,
-      postOpenSpace: piParsing.postOpenSpace,
-      target: piParsing.target,
-      postTargetSpace: piParsing.postTargetSpace,
-   };
+   const parsed = instruction.retype(XMLDECL, piParsing);
 
    attribute.parse(source, { terminators: XMLDECL_NAME_TERMINATORS}, (params) => {
       parsed.params = params;

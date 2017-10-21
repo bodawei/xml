@@ -11,39 +11,62 @@ import * as attribute from './common/attribute.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 describe('xmlDeclaration (unit)', () => {
+   let parsedXmlDecl;
+
+   beforeEach(() => {
+      const makeToken = makeLTokenMaker();
+      parsedXmlDecl = {
+         open: makeToken('<?'),
+         postOpenSpace: undefined,
+         target: makeToken('xml'),
+         postTargetSpace: makeToken(' '),
+         params: [],
+         close: makeToken('?>'),
+      };
+   });
 
    describe('parse()', () => {
-      let mockSource;
       let callback;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          spyOn(attribute, 'parse');
+         spyOn(instruction, 'retype');
          attribute.parse.and.callFake((_1, _2, callback) => { callback([]); });
+         instruction.retype.and.returnValue({});
       });
 
       it('does a basic parsing', () => {
-         mockSource = new MockLTokenSource([
+         instruction.retype.and.callThrough();
+         const mockSource = new MockLTokenSource([
             [ '?>', 'match', '?>' ],
+         ], 6, 0, 6);
+
+         xmlDeclaration.parse(mockSource, {
+            open: parsedXmlDecl.open,
+            target: parsedXmlDecl.target,
+            postTargetSpace: parsedXmlDecl.postTargetSpace,
+         }, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainParsedProps(parsedXmlDecl);
+      });
+
+      it('calls instruction.retype()', () => {
+         const mockSource = new MockLTokenSource([
+            '?>',
          ]);
 
          xmlDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         const expectedLToken = makeLTokenMaker();
-         expect(callback).toContainParsedProps({
-            type: 'XMLDECL',
-            open: undefined,
-            postOpenSpace: undefined,
-            target: undefined,
-            postTargetSpace: undefined,
-            params: [ ],
-            close: expectedLToken('?>'),
-         });
+         const args = instruction.retype.calls.argsFor(0);
+         expect(args[0]).toEqual(xmlDeclaration.TYPE);
+         expect(args[1]).toEqual({});
       });
 
       it('calls attribute.parse()', () => {
-         mockSource = new MockLTokenSource([
+         const mockSource = new MockLTokenSource([
             '?>',
          ]);
 
@@ -62,94 +85,81 @@ describe('xmlDeclaration (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let parsed;
 
       beforeEach(() => {
-         const makeToken = makeLTokenMaker();
          mockErrorCollector = new MockErrorCollector();
-
-         parsed = {
-            open: makeToken('<?'),
-            postOpenSpace: undefined,
-            target: makeToken('xml'),
-            postTargetSpace: makeToken(' '),
-            params: [ {
-               foo: true,
-            } ],
-            close: makeToken('?>'),
-         };
          spyOn(instruction, 'checkWellFormed');
          spyOn(attribute, 'checkWellFormed');
       });
 
       it('calls instruction.checkWellFormed', () => {
          const emd = new EntityMetaData();
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, emd);
 
-         expect(instruction.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd, true);
+         expect(instruction.checkWellFormed)
+            .toHaveBeenCalledWith(parsedXmlDecl, mockErrorCollector, emd, true);
       });
 
       it('calls attribute.checkWellFormed', () => {
          const emd = new EntityMetaData();
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, emd);
 
          const args = attribute.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed.params);
+         expect(args[0]).toEqual(parsedXmlDecl.params);
          expect(args[1]).toEqual(mockErrorCollector);
          expect(args[2]).toEqual(emd);
-         expect(args[3]).toEqual(parsed.postTargetSpace);
+         expect(args[3]).toEqual(parsedXmlDecl.postTargetSpace);
          expect(args[4]).toEqual(WellFormedError.ID.NOUN_XMLDECL_PARAM);
          expect(args[5]).toBeInstanceOf(Function);
          expect(args[6]).toBeInstanceOf(Function);
       });
 
       it('reports no errors with ordinary parameters', () => {
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         parsedXmlDecl.params = [ { fakeParam: true } ];
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
       it('reports an error if there are no parameters in the base document entity', () => {
-         parsed.params = [];
-
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_ATTRIBUTES,
             params: undefined,
-            position: parsed.close,
+            position: parsedXmlDecl.close,
          });
       });
 
       it('reports an error if there are no parameters in the text declaration', () => {
          const emd = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
-         parsed.params = [];
+         parsedXmlDecl.params = [];
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_NO_ATTRIBUTES,
             params: undefined,
-            position: parsed.close,
+            position: parsedXmlDecl.close,
          });
       });
 
       it('reports an error if there is no encoding in the text declaration', () => {
          const emd = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.TEXTDECL_NO_ENCODING,
             params: undefined,
-            position: parsed.close,
+            position: parsedXmlDecl.close,
          });
       });
 
       it('reports an error if there is no close', () => {
-         delete parsed.close;
+         delete parsedXmlDecl.close;
 
-         xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         xmlDeclaration.checkWellFormed(parsedXmlDecl, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
@@ -163,15 +173,13 @@ describe('xmlDeclaration (unit)', () => {
          let emd;
          let checkName;
          let checkValue;
-         let mockErrorCollector;
 
          beforeEach(() => {
             makeToken = makeLTokenMaker();
             emd = new EntityMetaData();
-            mockErrorCollector = new MockErrorCollector();
 
             // Gather parameters
-            xmlDeclaration.checkWellFormed(parsed, new MockErrorCollector(), emd);
+            xmlDeclaration.checkWellFormed(parsedXmlDecl, new MockErrorCollector(), emd);
             checkName = attribute.checkWellFormed.calls.argsFor(0)[5];
             checkValue = attribute.checkWellFormed.calls.argsFor(0)[6];
          });
@@ -240,8 +248,6 @@ describe('xmlDeclaration (unit)', () => {
 
             it('reports an error if a param is the wrong case', () => {
                checkName(makeToken('VERSION'), 0, mockErrorCollector, emd);
-
-               xmlDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE,
@@ -316,25 +322,26 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       it('asks the attribute to provide the attributes', () => {
-         const parsed = {
-            params: [ {
-            } ],
-         };
+         xmlDeclaration.makeToken(parsedXmlDecl);
 
-         xmlDeclaration.makeToken(parsed);
-
-         expect(attribute.makeOneTokenCompatible).toHaveBeenCalledWith(parsed.params);
+         expect(attribute.makeOneTokenCompatible).toHaveBeenCalledWith(parsedXmlDecl.params);
       });
 
       it('asks the attribute to provide the lTokens', () => {
-         const parsed = {
-            params: [ {
-            } ],
-         };
+         const token = xmlDeclaration.makeToken(parsedXmlDecl);
 
-         const token = xmlDeclaration.makeToken(parsed);
+         expect(attribute.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsedXmlDecl.params);
+      });
 
-         expect(attribute.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsed.params);
+      it('creates a token', () => {
+         const token = xmlDeclaration.makeToken(parsedXmlDecl);
+
+         expect(token).toEqual(new xmlDeclaration.Token(undefined, [
+            parsedXmlDecl.open,
+            parsedXmlDecl.target,
+            parsedXmlDecl.postTargetSpace,
+            parsedXmlDecl.close,
+         ]));
       });
 
    });
