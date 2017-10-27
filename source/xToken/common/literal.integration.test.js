@@ -7,9 +7,9 @@ import { defaultExtractors, LTokenSource } from '../../lToken';
 import { makeLTokenMaker } from '../../lToken/test';
 
 import * as entityReference from '../entityReference.js';
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 
-describe('quotedValue (integration)', () => {
+describe('literal (integration)', () => {
 
    describe('parse()', () => {
       let emd;
@@ -25,7 +25,7 @@ describe('quotedValue (integration)', () => {
          source.addText('"one%peref;two&geref;&geref2;three"');
          source.endText();
 
-         quotedValue.parse(source, {
+         literal.parse(source, {
             prefix: 'x',
             parsed: parsed,
          }, () => {
@@ -46,7 +46,7 @@ describe('quotedValue (integration)', () => {
          source.addText('"one%peref;two&geref;&geref2;three"');
          source.endText();
 
-         quotedValue.parse(source, {
+         literal.parse(source, {
             prefix: 'x',
             parsed: parsed,
             peRef: true,
@@ -102,13 +102,13 @@ describe('quotedValue (integration)', () => {
          const pToken = {};
          source.addText('"b\u0000d"');
          source.endText();
-         quotedValue.parse(source, {
+         literal.parse(source, {
             prefix: 'x',
             parsed: pToken,
          }, () => {
             const ec = new ErrorCollector({}, WellFormedError);
 
-            quotedValue.checkWellFormed('x', pToken, ec, emd, 'aType');
+            literal.checkWellFormed('x', pToken, ec, emd, 'aType');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -119,14 +119,14 @@ describe('quotedValue (integration)', () => {
          const pToken = {};
          source.addText('"good& bad;"');
          source.endText();
-         quotedValue.parse(source, {
+         literal.parse(source, {
             prefix: 'x',
             parsed: pToken,
             geRef: true,
          }, () => {
             const ec = new ErrorCollector({}, WellFormedError);
 
-            quotedValue.checkWellFormed('x', pToken, ec, emd, 'aType');
+            literal.checkWellFormed('x', pToken, ec, emd, 'aType');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.REFERENCE_XTRA_SPACE);
             done();

@@ -3,7 +3,7 @@
 import { WellFormedError } from '../../error';
 
 import * as misc from './misc.js';
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -68,7 +68,7 @@ function addAttribute(source, attrs, options, name, deliverResults) {
    source.extractToObject('space', attr, 'postNameSpace');
    source.extractToObject('match', '=', attr, 'equal');
    source.extractToObject('space', attr, 'postEqualSpace');
-   quotedValue.parse(source, {
+   literal.parse(source, {
       prefix: 'attr',
       parsed: attr,
    }, (gotQuoted) => {
@@ -117,7 +117,7 @@ function checkWellFormed(parsed, ec, entityMetaData, preceedingSpace, type, chec
       ec.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
       ec.setPos(attr.postEqualSpace);
 
-      quotedValue.checkWellFormed('attr', attr, ec, entityMetaData, type, () => {
+      literal.checkWellFormed('attr', attr, ec, entityMetaData, type, () => {
          if (checkValue) {
             checkValue(attr.name, attr.attrValue, ec, entityMetaData);
          }
@@ -138,7 +138,7 @@ function makeTokenCompatible(attributes = []) {
 
       attrs.push({
          name: textOrBlank(attr.name),
-         value: quotedValue.makeTokenCompatible('attr', attr),
+         value: literal.makeTokenCompatible('attr', attr),
       });
    }
 
@@ -153,7 +153,7 @@ function makeOneTokenCompatible(attributes = []) {
 
       attrs.push({
          name: textOrBlank(attr.name),
-         value: quotedValue.makeOneTokenCompatible('attr', attr),
+         value: literal.makeOneTokenCompatible('attr', attr),
       });
    }
 
@@ -168,7 +168,7 @@ function appendLTokens(results, attributes = []) {
       pushNonBottom(results, attr.postNameSpace);
       pushNonBottom(results, attr.equal);
       pushNonBottom(results, attr.postEqualSpace);
-      quotedValue.appendLTokens('attr', results, attr);
+      literal.appendLTokens('attr', results, attr);
       pushNonBottom(results, attr.trailingSpace);
    }
 }

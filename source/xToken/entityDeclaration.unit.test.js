@@ -11,7 +11,7 @@ import * as entityDeclaration from './entityDeclaration.js';
 import * as text from './text.js';
 import * as externalId from './common/externalId.js';
 import * as misc from './common/misc.js';
-import * as quotedValue from './common/quotedValue.js';
+import * as literal from './common/literal.js';
 
 describe('entityDeclaration (unit)', () => {
    let parsedEntityDeclaration;
@@ -47,7 +47,7 @@ describe('entityDeclaration (unit)', () => {
          externalId.parse.and.callFake((source, terminators, cb) => {
             cb({ externalId: true });
          });
-         spyOn(quotedValue, 'parse');
+         spyOn(literal, 'parse');
          spyOn(declaration, 'makeTypedDeclaration').and.returnValues({ type: 'ENTITYDECL' });
       });
 
@@ -70,7 +70,7 @@ describe('entityDeclaration (unit)', () => {
          expect(declaration.makeTypedDeclaration).toHaveBeenCalledWith('ENTITYDECL', decl);
       });
 
-      it('calls quotedValue.parse()', () => {
+      it('calls literal.parse()', () => {
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('a'),
             'anEntity',
@@ -81,17 +81,17 @@ describe('entityDeclaration (unit)', () => {
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         expect(quotedValue.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(quotedValue.parse.calls.argsFor(0)[1]).toEqual({
+         expect(literal.parse.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(literal.parse.calls.argsFor(0)[1]).toEqual({
             prefix: 'literal',
             parsed: parsedEntityDeclaration,
             peRef: true,
          });
-         expect(quotedValue.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+         expect(literal.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
       });
 
       it('calls externalId.parse()', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -110,12 +110,12 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('does a parse of a general entity with a literal value', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             [ 'anEntity', 'word', [ '>' ] ],
             [ ' ', 'space' ],
-            // Skipping quotedValue parsing here
+            // Skipping literal parsing here
             // Skipping externalId parsing here
             [ ' ', 'space' ],
             [ undefined, 'peekWord', [ '>' ] ],
@@ -142,14 +142,14 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns parameter entity info if this is a parameter entity: <!ENTITY % entityName ...', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('%'),
             [ '%', 'char' ],
             [ ' ', 'space' ],
             [ 'anEntity', 'word', [ '>' ] ],
             [ ' ', 'space' ],
-            // Skipping quotedValue parsing here
+            // Skipping literal parsing here
             // Skipping externalId parsing here
             [ undefined, 'space' ],
             [ undefined, 'peekWord', [ '>' ] ],
@@ -164,7 +164,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns parameter entity without the trailing space if none present: <!ENTITY %entityName...', () => {
          const expectedLToken = makeLTokenMaker();
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('%'),
             '%',
@@ -188,7 +188,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns nothing if there is no name, space, or start of value: <!ENTITY %', () => {
          const expectedLToken = makeLTokenMaker();
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          externalId.parse.and.callFake((_1, _2, callback) => { callback(undefined); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('%'),
@@ -213,7 +213,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns no space between entity name and value: <!ENTITY entityName"foo" >', () => {
          const expectedLToken = makeLTokenMaker();
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -232,7 +232,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('adds trailing space after quoted value if present: <!ENTITY entityName "foo" >', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -253,7 +253,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('stops if externalId returns nothing: <!ENTITY entityName >', () => {
          const expectedLToken = makeLTokenMaker();
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -276,7 +276,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns a space after the externalID: <!ENTITY entityName SYSTEM "foo" >', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -300,7 +300,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns an NDATA clause if found: <!ENTITY entityName SYSTEM "foo" NDATA testNData >', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -330,7 +330,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('recognizes a non-all caps NDATA: <!ENTITY entityName SYSTEM "foo" ndaTa testNData >', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -355,7 +355,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('does not mind no space after the ndata value: <!ENTITY entityName SYSTEM "foo" ndaTa testNData>', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -384,7 +384,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns if stops after NDATA: <!ENTITY entityName SYSTEM "foo" NDATA', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('e'),
             'entityName',
@@ -459,7 +459,7 @@ describe('entityDeclaration (unit)', () => {
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(misc, 'checkWellFormedText');
-         spyOn(quotedValue, 'checkWellFormed');
+         spyOn(literal, 'checkWellFormed');
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
@@ -470,12 +470,12 @@ describe('entityDeclaration (unit)', () => {
          expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
       });
 
-      it('asks the quotedValue module to look for problems in the declaration part', () => {
+      it('asks the literal module to look for problems in the declaration part', () => {
          const emd = new EntityMetaData();
 
          entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(quotedValue.checkWellFormed).toHaveBeenCalledWith('literal', parsed, mockErrorCollector, emd,
+         expect(literal.checkWellFormed).toHaveBeenCalledWith('literal', parsed, mockErrorCollector, emd,
             WellFormedError.ID.NOUN_ENTITYVALUE);
       });
 
@@ -620,12 +620,12 @@ describe('entityDeclaration (unit)', () => {
 
       beforeEach(() => {
          expectedLToken = makeLTokenMaker();
-         spyOn(quotedValue, 'appendLTokens');
+         spyOn(literal, 'appendLTokens');
          spyOn(externalId, 'makeTokenCompatible');
          spyOn(externalId, 'appendLTokens');
       });
 
-      it('calls quotedValue.appendLTokens()', () => {
+      it('calls literal.appendLTokens()', () => {
          const parsed = {
             name: expectedLToken('entityName'),
             literalValue: [ expectedLToken('value') ],
@@ -633,7 +633,7 @@ describe('entityDeclaration (unit)', () => {
 
          const token = entityDeclaration.makeToken(parsed);
 
-         expect(quotedValue.appendLTokens).toHaveBeenCalledWith('literal', token.lTokens, parsed);
+         expect(literal.appendLTokens).toHaveBeenCalledWith('literal', token.lTokens, parsed);
       });
 
       it('calls externalId.makeTokenCompatible()', () => {

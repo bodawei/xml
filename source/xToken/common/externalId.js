@@ -3,7 +3,7 @@
 import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -63,7 +63,7 @@ function parse(source, terminators, deliverParsed) {
       source.extractToObject('space', parsed, 'postIdTypeSpace');
 
       if (capitalType === 'PUBLIC') {
-         quotedValue.parse(source, {
+         literal.parse(source, {
             prefix: PUBLIC_PREFIX,
             parsed,
          }, (gotQuoted) => {
@@ -87,7 +87,7 @@ function getSystemIfAvailable(source, allTerminators, parsed, deliverParsed) {
          return;
       }
 
-      quotedValue.parse(source, {
+      literal.parse(source, {
          prefix: SYSTEM_PREFIX,
          parsed,
       }, () => {
@@ -120,7 +120,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
    ec.check(!parsed.postIdTypeSpace, WFEID.EXTERNALID_IDTYPE_NO_SPACE);
 
    if (capitalType === 'PUBLIC') {
-      quotedValue.checkWellFormed(PUBLIC_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
+      literal.checkWellFormed(PUBLIC_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_PUBLIC, () => {
          if (!parsed.publicValue) {
             return;
          }
@@ -136,7 +136,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
          ec.check(!parsed.postPublicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
-      quotedValue.checkWellFormed(SYSTEM_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
+      literal.checkWellFormed(SYSTEM_PREFIX, parsed, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
 }
 
@@ -164,9 +164,9 @@ function appendLTokens(results, parsed) {
    pushNonBottom(results, parsed.idType);
    pushNonBottom(results, parsed.postIdTypeSpace);
 
-   quotedValue.appendLTokens(PUBLIC_PREFIX, results, parsed);
+   literal.appendLTokens(PUBLIC_PREFIX, results, parsed);
    pushNonBottom(results, parsed.postPublicSpace);
-   quotedValue.appendLTokens(SYSTEM_PREFIX, results, parsed);
+   literal.appendLTokens(SYSTEM_PREFIX, results, parsed);
 }
 
 export {

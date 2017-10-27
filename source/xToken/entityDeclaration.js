@@ -6,7 +6,7 @@ import { Token as XmlToken } from './xmlToken.js';
 import * as declaration from './declaration.js';
 import * as misc from './common/misc.js';
 import * as externalId from './common/externalId.js';
-import * as quotedValue from './common/quotedValue.js';
+import * as literal from './common/literal.js';
 import {
    pushNonBottom,
    textOrBlank,
@@ -83,7 +83,7 @@ function parse(source, declarationParsing, deliverParsed) {
       source.extractToObject('word', [ '>', '"', '\'' ], parsed, 'name');
       source.extractToObject('space', parsed, 'postNameSpace');
 
-      quotedValue.parse(source, {
+      literal.parse(source, {
          prefix: 'literal',
          parsed,
          peRef: true,
@@ -160,7 +160,7 @@ function checkWellFormed(parsed, ec, entityMetaData) {
          misc.checkWellFormedText(parsed.nDataName, ec, entityMetaData);
       }
    } else if (parsed.literalValue) {
-      quotedValue.checkWellFormed('literal', parsed, ec, entityMetaData, WFEID.NOUN_ENTITYVALUE);
+      literal.checkWellFormed('literal', parsed, ec, entityMetaData, WFEID.NOUN_ENTITYVALUE);
    } else {
       ec.setPos(undefined);
       ec.report(WFEID.ENTITYDECL_NO_VALUE, [ enNameText ]);
@@ -179,7 +179,7 @@ function makeToken(parsed) {
    const entityClass = parsed.parameter ? ParameterEntityDeclaration : EntityDeclaration;
 
    return new entityClass(textOrBlank(parsed.name),
-      quotedValue.makeTokenCompatible('literal', parsed),
+      literal.makeTokenCompatible('literal', parsed),
       externalId.makeTokenCompatible(parsed.externalId),
       textOrBlank(parsed.nDataName),
       getLTokens(parsed));
@@ -196,7 +196,7 @@ function getLTokens(parsed) {
    pushNonBottom(results, parsed.postParameterSpace);
    pushNonBottom(results, parsed.name);
    pushNonBottom(results, parsed.postNameSpace);
-   quotedValue.appendLTokens('literal', results, parsed);
+   literal.appendLTokens('literal', results, parsed);
    externalId.appendLTokens(results, parsed.externalId);
    pushNonBottom(results, parsed.postEntityValueSpace);
    pushNonBottom(results, parsed.postExternalIdSpace);

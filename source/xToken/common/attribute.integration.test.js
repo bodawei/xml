@@ -158,7 +158,7 @@ describe('attribute (integration)', () => {
 
    describe('appendLTokens()', () => {
 
-      it('adds LTokens from the quoted value (calling quotedValue.appendLTokens()', (done) => {
+      it('adds LTokens from the quoted value (calling literal.appendLTokens()', (done) => {
          source.addText('name="value">');
          source.endText();
 

@@ -8,7 +8,7 @@ import { WellFormedError } from '../../error';
 
 import * as attribute from './attribute.js';
 import * as misc from './misc.js';
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 
 describe('attribute (unit)', () => {
    let parsedAttributes;
@@ -36,8 +36,8 @@ describe('attribute (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(quotedValue, 'parse');
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         spyOn(literal, 'parse');
+         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
       });
 
       it('parses an attribute', () => {
@@ -113,7 +113,7 @@ describe('attribute (unit)', () => {
       });
 
       it('stops at the specified name terminator', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ 'versi', 'word', [ '=', 'x' ] ],
             [ undefined, 'space' ],
@@ -136,7 +136,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF where the attribute name should be', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ undefined, 'word', [ '=', '>' ] ],
          ]);
@@ -148,7 +148,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF after the name', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ undefined, 'space' ],
@@ -182,7 +182,7 @@ describe('attribute (unit)', () => {
          mockErrorCollector = new MockErrorCollector();
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedText');
-         spyOn(quotedValue, 'checkWellFormed');
+         spyOn(literal, 'checkWellFormed');
       });
 
       it('calls the misc.checkName() routine', () => {
@@ -192,11 +192,11 @@ describe('attribute (unit)', () => {
             WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
       });
 
-      it('asks the quotedValue module to look for problems in the declaration part', () => {
+      it('asks the literal module to look for problems in the declaration part', () => {
          attribute.checkWellFormed(parsedAttributes, mockErrorCollector, emd,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         const params = quotedValue.checkWellFormed.calls.argsFor(0);
+         const params = literal.checkWellFormed.calls.argsFor(0);
          expect(params[0]).toEqual('attr');
          expect(params[1]).toEqual(parsedAttributes[0]);
          expect(params[2]).toEqual(mockErrorCollector);
@@ -242,7 +242,7 @@ describe('attribute (unit)', () => {
 
       it('calls the checkValue function, if provided', () => {
          const checkValue = jasmine.createSpy('checkValue spy');
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
+         literal.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
             callback();
          });
 
@@ -293,15 +293,15 @@ describe('attribute (unit)', () => {
    describe('makeTokenCompatible()', () => {
 
       beforeEach(() => {
-         spyOn(quotedValue, 'makeTokenCompatible');
+         spyOn(literal, 'makeTokenCompatible');
       });
 
-      it('calls quotedValue.appendLTokens()', () => {
+      it('calls literal.appendLTokens()', () => {
          parsedAttributes.pop();
 
          attribute.makeTokenCompatible(parsedAttributes);
 
-         expect(quotedValue.makeTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
+         expect(literal.makeTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
       });
 
       it('returns name value pairs from the parsing', () => {
@@ -333,15 +333,15 @@ describe('attribute (unit)', () => {
    describe('makeOneTokenCompatible()', () => {
 
       beforeEach(() => {
-         spyOn(quotedValue, 'makeOneTokenCompatible');
+         spyOn(literal, 'makeOneTokenCompatible');
       });
 
-      it('calls quotedValue.makeOneTokenCompatible()', () => {
+      it('calls literal.makeOneTokenCompatible()', () => {
          parsedAttributes.pop();
 
          attribute.makeOneTokenCompatible(parsedAttributes);
 
-         expect(quotedValue.makeOneTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
+         expect(literal.makeOneTokenCompatible).toHaveBeenCalledWith('attr', parsedAttributes[0]);
       });
 
       it('returns name value pairs', () => {
@@ -373,16 +373,16 @@ describe('attribute (unit)', () => {
    describe('appendLTokens', () => {
 
       beforeEach(() => {
-         spyOn(quotedValue, 'appendLTokens');
+         spyOn(literal, 'appendLTokens');
       });
 
-      it('calls quotedValue.appendLTokens()', () => {
+      it('calls literal.appendLTokens()', () => {
          const results = [];
          parsedAttributes.pop();
 
          attribute.appendLTokens(results, parsedAttributes);
 
-         expect(quotedValue.appendLTokens).toHaveBeenCalledWith('attr', results, parsedAttributes[0]);
+         expect(literal.appendLTokens).toHaveBeenCalledWith('attr', results, parsedAttributes[0]);
       });
 
       it('returns the LTokens that made up the attribute', () => {

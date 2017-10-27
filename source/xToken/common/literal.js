@@ -11,7 +11,7 @@ import { pushNonBottom } from './util.js';
 const WFEID = WellFormedError.ID;
 
 /**********************************************************************\
- The quotedValue namespace has utility routines for dealing with
+ The literal namespace has utility routines for dealing with
  values of the form "[^"]*" or '[^']*'.
 
  This is meant to be called from contexts that have already validated
@@ -95,7 +95,7 @@ function getPiece(source, terminators, chunksDone) {
 
 function checkWellFormed(prefix, parsed, ec, entityMetaData, type, checkValue) {
    ec.setPos(parsed[prefix + 'OpenQuote']);
-   ec.check(!parsed[prefix + 'OpenQuote'], WFEID.QUOTEDVALUE_NO_OPEN_QUOTE, [ type ]);
+   ec.check(!parsed[prefix + 'OpenQuote'], WFEID.LITERAL_NO_OPEN_QUOTE, [ type ]);
 
    const pieces = parsed[prefix + 'Value'] || [];
    for (let index = 0; index < pieces.length; index++) {
@@ -112,7 +112,7 @@ function checkWellFormed(prefix, parsed, ec, entityMetaData, type, checkValue) {
    }
 
    ec.setPos(parsed[prefix + 'CloseQuote']);
-   ec.check(!parsed[prefix + 'CloseQuote'], WFEID.QUOTEDVALUE_NO_CLOSE_QUOTE, [ type ]);
+   ec.check(!parsed[prefix + 'CloseQuote'], WFEID.LITERAL_NO_CLOSE_QUOTE, [ type ]);
 }
 
 function makeTokenCompatible(prefix, parsed) {

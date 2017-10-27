@@ -102,15 +102,36 @@ class MockLTokenSource {
          }
 
          if (this.expectedValues[index].token.type === PEEK) {
-            const following = this.expectedValues[index + 1];
             const peekString = this.expectedValues[index].token.value;
-            const token = new LToken(peekString, peekString, new Range(new EntityLocation(),
-               following.token.range[0].startIndex,
-               following.token.range[0].startRow,
-               following.token.range[0].startColumn,
-               following.token.range[0].startIndex + peekString.length,
-               following.token.range[0].startRow,
-               following.token.range[0].startColumn + peekString.length));
+            let token;
+
+            if (this.expectedValues[index + 1] && this.expectedValues[index + 1].token) {
+               const following = this.expectedValues[index + 1];
+               token = new LToken(peekString, peekString, new Range(new EntityLocation(),
+                  following.token.range[0].startIndex,
+                  following.token.range[0].startRow,
+                  following.token.range[0].startColumn,
+                  following.token.range[0].startIndex + peekString.length,
+                  following.token.range[0].startRow,
+                  following.token.range[0].startColumn + peekString.length));
+            } else if (this.expectedValues[index - 1] && this.expectedValues[index - 1].token) {
+               const following = this.expectedValues[index - 1];
+               token = new LToken(peekString, peekString, new Range(new EntityLocation(),
+                  following.token.range[0].endIndex,
+                  following.token.range[0].endRow,
+                  following.token.range[0].endColumn,
+                  following.token.range[0].endIndex + peekString.length,
+                  following.token.range[0].endRow,
+                  following.token.range[0].endColumn + peekString.length));
+            } else {
+               token = new LToken(peekString, peekString, new Range(new EntityLocation(),
+                  0,
+                  0,
+                  0,
+                  peekString.length,
+                  0,
+                  peekString.length));
+            }
 
             this.expectedValues[index].token = token;
          }

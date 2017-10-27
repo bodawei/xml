@@ -63,7 +63,7 @@ describe('entityDeclaration', () => {
          });
       });
 
-      it('reports errors in the literal value (quotedValue.checkWellFormed())', (done) => {
+      it('reports errors in the literal value (literal.checkWellFormed())', (done) => {
          source.addText('entityName "entityValue');  // missing closing quote
          source.endText();
          entityDeclaration.parse(source, parsed, (result) => {
@@ -71,7 +71,7 @@ describe('entityDeclaration', () => {
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_CLOSE_QUOTE);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
          });
       });
@@ -107,7 +107,7 @@ describe('entityDeclaration', () => {
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_OPEN_QUOTE);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_OPEN_QUOTE);
             done();
          });
       });

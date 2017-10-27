@@ -8,10 +8,10 @@ import { makeLTokenMaker, MockLTokenSource } from '../../lToken/test';
 
 import * as entityReference from '../entityReference.js';
 import * as misc from './misc.js';
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 import * as text from '../text.js';
 
-describe('quotedValue', () => {
+describe('literal', () => {
 
    describe('parse()', () => {
       let mockSource;
@@ -31,7 +31,7 @@ describe('quotedValue', () => {
             '"',
          ]);
 
-         quotedValue.parse(mockSource, {
+         literal.parse(mockSource, {
             prefix: 'foo',
             parsed: container,
          }, callback);
@@ -56,7 +56,7 @@ describe('quotedValue', () => {
             '\'',
          ]);
 
-         quotedValue.parse(mockSource, {
+         literal.parse(mockSource, {
             prefix: 'foo',
             parsed: container,
          }, callback);
@@ -81,7 +81,7 @@ describe('quotedValue', () => {
             '"',
          ]);
 
-         quotedValue.parse(mockSource, {
+         literal.parse(mockSource, {
             prefix: 'foo',
             parsed: container,
          }, callback);
@@ -108,10 +108,9 @@ describe('quotedValue', () => {
                '"',
                undefined,
                MockLTokenSource.PEEK('%'),
-               '"',
             ]);
 
-            quotedValue.parse(mockSource, {
+            literal.parse(mockSource, {
                prefix: 'foo',
                parsed: {},
                peRef: true,
@@ -127,10 +126,9 @@ describe('quotedValue', () => {
                '"',
                undefined,
                MockLTokenSource.PEEK('&'),
-               '"',
             ]);
 
-            quotedValue.parse(mockSource, {
+            literal.parse(mockSource, {
                prefix: 'foo',
                parsed: {},
                geRef: true,
@@ -162,7 +160,7 @@ describe('quotedValue', () => {
                '"',
             ]);
 
-            quotedValue.parse(mockSource, {
+            literal.parse(mockSource, {
                prefix: 'foo',
                parsed: pToken,
                peRef: true,
@@ -193,14 +191,14 @@ describe('quotedValue', () => {
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
       let emd;
-      let parsedQuotedValue;
+      let parsedliteral;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
 
          const expectedLToken = makeLTokenMaker();
-         parsedQuotedValue = {
+         parsedliteral = {
             parsedOpenQuote: expectedLToken('"'),
             parsedValue: [ expectedLToken('xxx') ],
             parsedCloseQuote: expectedLToken('"'),
@@ -211,45 +209,45 @@ describe('quotedValue', () => {
       });
 
       it('calls misc.checkWellFormedText() to check the value', () => {
-         quotedValue.checkWellFormed('parsed', parsedQuotedValue, mockErrorCollector, emd);
+         literal.checkWellFormed('parsed', parsedliteral, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText.calls.argsFor(0)[0]).toEqual(parsedQuotedValue.parsedValue[0]);
+         expect(misc.checkWellFormedText.calls.argsFor(0)[0]).toEqual(parsedliteral.parsedValue[0]);
          expect(misc.checkWellFormedText.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
          expect(misc.checkWellFormedText.calls.argsFor(0)[2]).toEqual(emd);
       });
 
       it('reports an error if there is no opening quote', () => {
-         delete parsedQuotedValue.parsedOpenQuote;
+         delete parsedliteral.parsedOpenQuote;
 
-         quotedValue.checkWellFormed('parsed', parsedQuotedValue, mockErrorCollector, emd, 'aType');
+         literal.checkWellFormed('parsed', parsedliteral, mockErrorCollector, emd, 'aType');
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.QUOTEDVALUE_NO_OPEN_QUOTE,
+            id: WellFormedError.ID.LITERAL_NO_OPEN_QUOTE,
             params: [ 'aType' ],
             lastPosition: undefined,
          });
       });
 
       it('reports an error if there is no close quote', () => {
-         delete parsedQuotedValue.parsedCloseQuote;
+         delete parsedliteral.parsedCloseQuote;
 
-         quotedValue.checkWellFormed('parsed', parsedQuotedValue, mockErrorCollector, emd, 'aType');
+         literal.checkWellFormed('parsed', parsedliteral, mockErrorCollector, emd, 'aType');
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.QUOTEDVALUE_NO_CLOSE_QUOTE,
+            id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,
             params: [ 'aType' ],
-            lastPosition: parsedQuotedValue.parsedValue[0],
+            lastPosition: parsedliteral.parsedValue[0],
          });
       });
 
       it('calls entityReference.checkWellFormed if an entity reference PToken is found', () => {
-         parsedQuotedValue.parsedValue.push({
+         parsedliteral.parsedValue.push({
             type: entityReference.TYPE,
          });
 
-         quotedValue.checkWellFormed('parsed', parsedQuotedValue, mockErrorCollector, emd, 'aType');
+         literal.checkWellFormed('parsed', parsedliteral, mockErrorCollector, emd, 'aType');
 
-         expect(entityReference.checkWellFormed.calls.argsFor(0)[0]).toEqual(parsedQuotedValue.parsedValue[1]);
+         expect(entityReference.checkWellFormed.calls.argsFor(0)[0]).toEqual(parsedliteral.parsedValue[1]);
          expect(entityReference.checkWellFormed.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
          expect(entityReference.checkWellFormed.calls.argsFor(0)[2]).toEqual(emd);
       });
@@ -265,7 +263,7 @@ describe('quotedValue', () => {
             fooValue: [ expectedLToken('blah') ],
             fooCloseQuote: expectedLToken('"'),
          };
-         const result = quotedValue.makeTokenCompatible('foo', pToken);
+         const result = literal.makeTokenCompatible('foo', pToken);
 
          expect(result).toEqual([ new text.Token('blah', pToken.fooValue) ]);
       });
@@ -282,7 +280,7 @@ describe('quotedValue', () => {
             } ],
             fooCloseQuote: expectedLToken('"'),
          };
-         quotedValue.makeTokenCompatible('foo', pToken);
+         literal.makeTokenCompatible('foo', pToken);
 
          expect(entityReference.makeToken.calls.count()).toEqual(2);
          expect(entityReference.makeToken.calls.argsFor(0)[0]).toEqual(pToken.fooValue[1]);
@@ -290,7 +288,7 @@ describe('quotedValue', () => {
       });
 
       it('copes with no quoted value at all', () => {
-         const result = quotedValue.makeTokenCompatible('foo', {});
+         const result = literal.makeTokenCompatible('foo', {});
 
          expect(result).toEqual(undefined);
       });
@@ -301,7 +299,7 @@ describe('quotedValue', () => {
 
       it('returns the string from the parsed result', () => {
          const expectedLToken = makeLTokenMaker();
-         const result = quotedValue.makeOneTokenCompatible('foo', {
+         const result = literal.makeOneTokenCompatible('foo', {
             fooOpenQuote: expectedLToken('"'),
             fooValue: [ expectedLToken('blah') ],
             fooCloseQuote: expectedLToken('"'),
@@ -311,7 +309,7 @@ describe('quotedValue', () => {
       });
 
       it('copes with no quoted value at all', () => {
-         const result = quotedValue.makeOneTokenCompatible('foo', {});
+         const result = literal.makeOneTokenCompatible('foo', {});
 
          expect(result).toEqual(undefined);
       });
@@ -329,7 +327,7 @@ describe('quotedValue', () => {
          };
          const results = [];
 
-         quotedValue.appendLTokens('foo', results, parsed);
+         literal.appendLTokens('foo', results, parsed);
 
          expect(results).toEqual([
             parsed.fooOpenQuote,
@@ -341,7 +339,7 @@ describe('quotedValue', () => {
       it('adds nothing if the parsed value is undefined', () => {
          const results = [];
 
-         quotedValue.appendLTokens('foo', results, undefined);
+         literal.appendLTokens('foo', results, undefined);
 
          expect(results).toEqual([
          ]);
@@ -359,7 +357,7 @@ describe('quotedValue', () => {
          };
          const results = [];
 
-         quotedValue.appendLTokens('foo', results, parsed);
+         literal.appendLTokens('foo', results, parsed);
 
          expect(results).toEqual([
             parsed.fooOpenQuote,

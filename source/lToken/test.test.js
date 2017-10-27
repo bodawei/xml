@@ -41,6 +41,33 @@ describe('lToken test utils', () => {
 
    describe('MockLTokenSource()', () => {
 
+      it('uses the following LToken to populate the value for a peek', () => {
+         const mock = new MockLTokenSource([
+            'ww',
+            MockLTokenSource.PEEK('x'),
+            'xyzzy',
+         ]);
+
+         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(2);
+      });
+
+      it('uses the previous LToken to populate the value for a peek if there is no following', () => {
+         const mock = new MockLTokenSource([
+            'www',
+            MockLTokenSource.PEEK('x'),
+         ]);
+
+         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(3);
+      });
+
+      it('uses starting values if there is no previous or following ltoken when a peek is done', () => {
+         const mock = new MockLTokenSource([
+            MockLTokenSource.PEEK('x'),
+         ]);
+
+         expect(mock.expectedValues[0].token.range[0].startIndex).toEqual(0);
+      });
+
       it('throws an error if there are insuficient values to satisfy an extract()', () => {
          const mock = new MockLTokenSource([ 'one' ]);
          mock.extract('foo', [], () => {});

@@ -19,7 +19,7 @@ describe('externalId (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('parses the public and system value (check quotedValue.parse())', (done) => {
+      it('parses the public and system value (check literal.parse())', (done) => {
 
          source.addText('PUBLIC "pub.xml"\t"sys.xml">');
          externalId.parse(source, [], (result) => {
@@ -52,7 +52,7 @@ describe('externalId (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('reports an error when the SYSTEM is missing a quote (check quotedValue.checkWellFormedText())', (done) => {
+      it('reports an error when the SYSTEM is missing a quote (check literal.checkWellFormedText())', (done) => {
          source.addText('SYSTEM "bad');
          source.endText();
          externalId.parse(source, [], (result) => {
@@ -60,7 +60,7 @@ describe('externalId (integration)', () => {
 
             externalId.checkWellFormed(result, ec, emd);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.QUOTEDVALUE_NO_CLOSE_QUOTE);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
          });
       });
@@ -76,7 +76,7 @@ describe('externalId (integration)', () => {
          source = new LTokenSource(defaultExtractors, emd);
       });
 
-      it('adds all tokens (check quotedValue.appendLTokens())', (done) => {
+      it('adds all tokens (check literal.appendLTokens())', (done) => {
          source.addText('PUBLIC "pub.xml"\t"sys.xml">');
          externalId.parse(source, [], (parsed) => {
             const results = [];

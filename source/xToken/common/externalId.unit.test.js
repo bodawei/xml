@@ -7,7 +7,7 @@ import { makeLTokenMaker, MockLTokenSource } from '../../lToken/test';
 import { WellFormedError } from '../../error';
 
 import * as externalId from './externalId.js';
-import * as quotedValue from './quotedValue.js';
+import * as literal from './literal.js';
 
 describe('externalId (unit)', () => {
 
@@ -19,8 +19,8 @@ describe('externalId (unit)', () => {
       beforeEach(() => {
          expectedLToken = makeLTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(quotedValue, 'parse');
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         spyOn(literal, 'parse');
+         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
       });
 
       it('returns simple values', () => {
@@ -28,10 +28,10 @@ describe('externalId (unit)', () => {
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
-            // quotedValue
+            // literal
             ' ',
             undefined,
-            // quotedValue
+            // literal
          ]);
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
@@ -50,7 +50,7 @@ describe('externalId (unit)', () => {
             'SYSTEM',
             ' ',
             undefined,  // check forndata
-            // quotedValue
+            // literal
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -90,7 +90,7 @@ describe('externalId (unit)', () => {
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
-            // quotedValue
+            // literal
             ' ',
             'NDATA',
          ]);
@@ -111,7 +111,7 @@ describe('externalId (unit)', () => {
             MockLTokenSource.PEEK('pUbLiC'),
             'pUbLiC',
             ' ',
-            // quotedValue
+            // literal
             ' ',
             'nData',
          ]);
@@ -128,7 +128,7 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it does not find an open quote', () => {
-         quotedValue.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockLTokenSource([
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
@@ -151,10 +151,10 @@ describe('externalId (unit)', () => {
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             undefined,
-            // quotedValue
+            // literal
             ' ',
             undefined,  // check for ndata
-            // quotedValue
+            // literal
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -173,10 +173,10 @@ describe('externalId (unit)', () => {
             MockLTokenSource.PEEK('PUBLIC'),
             'PUBLIC',
             ' ',
-            // quotedValue
+            // literal
             undefined,  // space
             undefined,  // check for ndata
-            // quotedValue
+            // literal
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -214,31 +214,31 @@ describe('externalId (unit)', () => {
             systemValue: [ expectedLToken('sys.xml') ],
             systemCloseQuote: expectedLToken('"'),
          };
-         spyOn(quotedValue, 'checkWellFormed');
+         spyOn(literal, 'checkWellFormed');
       });
 
-      it('calls quotedValue.checkWellFormed() to check the PUBLIC value', () => {
+      it('calls literal.checkWellFormed() to check the PUBLIC value', () => {
          const emd = new EntityMetaData();
          externalId.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[0]).toEqual('public');
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[1]).toEqual(parsed);
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[2]).toEqual(mockErrorCollector);
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[3]).toEqual(emd);
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[4]).toEqual(undefined);
-         expect(quotedValue.checkWellFormed.calls.argsFor(0)[5] instanceof Function).toEqual(true);
+         expect(literal.checkWellFormed.calls.argsFor(0)[0]).toEqual('public');
+         expect(literal.checkWellFormed.calls.argsFor(0)[1]).toEqual(parsed);
+         expect(literal.checkWellFormed.calls.argsFor(0)[2]).toEqual(mockErrorCollector);
+         expect(literal.checkWellFormed.calls.argsFor(0)[3]).toEqual(emd);
+         expect(literal.checkWellFormed.calls.argsFor(0)[4]).toEqual(undefined);
+         expect(literal.checkWellFormed.calls.argsFor(0)[5] instanceof Function).toEqual(true);
       });
 
-      it('calls quotedValue.checkWellFormed() to check the SYSTEM value', () => {
+      it('calls literal.checkWellFormed() to check the SYSTEM value', () => {
          const emd = new EntityMetaData();
          externalId.checkWellFormed(parsed, mockErrorCollector, emd);
 
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[0]).toEqual('system');
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[1]).toEqual(parsed);
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[2]).toEqual(mockErrorCollector);
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[3]).toEqual(emd);
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[4]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_SYSTEM);
-         expect(quotedValue.checkWellFormed.calls.argsFor(1)[5]).toEqual(undefined);
+         expect(literal.checkWellFormed.calls.argsFor(1)[0]).toEqual('system');
+         expect(literal.checkWellFormed.calls.argsFor(1)[1]).toEqual(parsed);
+         expect(literal.checkWellFormed.calls.argsFor(1)[2]).toEqual(mockErrorCollector);
+         expect(literal.checkWellFormed.calls.argsFor(1)[3]).toEqual(emd);
+         expect(literal.checkWellFormed.calls.argsFor(1)[4]).toEqual(WellFormedError.ID.NOUN_EXTERNALID_SYSTEM);
+         expect(literal.checkWellFormed.calls.argsFor(1)[5]).toEqual(undefined);
       });
 
       it('reports an error if the PUBLIC value has illegal characters', () => {
@@ -246,7 +246,7 @@ describe('externalId (unit)', () => {
          externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
 
          // invoke the callback function
-         quotedValue.checkWellFormed.calls.argsFor(0)[5]();
+         literal.checkWellFormed.calls.argsFor(0)[5]();
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.EXTERNALID_PUBLIC_INVALID_CHARS,
@@ -262,7 +262,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports no errors if the public value is undefined (this can not happen naturally', () => {
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
+         literal.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
             return callback ? callback() : undefined;
          });
          delete parsed.publicValue;
@@ -272,7 +272,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if the public value contains invalid characters', () => {
-         quotedValue.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
+         literal.checkWellFormed.and.callFake((_1, _2, _3, _4, _5, callback) => {
             return callback ? callback() : undefined;
          });
          parsed.publicValue[0].text = '{}{}{}{}';
@@ -401,25 +401,25 @@ describe('externalId (unit)', () => {
    describe('appendLTokens', () => {
 
       beforeEach(() => {
-         spyOn(quotedValue, 'appendLTokens');
+         spyOn(literal, 'appendLTokens');
       });
 
-      it('calls quotedValue.appendLTokens() for the PUBLIC value', () => {
+      it('calls literal.appendLTokens() for the PUBLIC value', () => {
          const parsed = {};
          const results = [];
 
          externalId.appendLTokens(results, parsed);
 
-         expect(quotedValue.appendLTokens).toHaveBeenCalledWith('public', results, parsed);
+         expect(literal.appendLTokens).toHaveBeenCalledWith('public', results, parsed);
       });
 
-      it('calls quotedValue.appendLTokens() for the SYSTEM value', () => {
+      it('calls literal.appendLTokens() for the SYSTEM value', () => {
          const parsed = {};
          const results = [];
 
          externalId.appendLTokens(results, parsed);
 
-         expect(quotedValue.appendLTokens).toHaveBeenCalledWith('system', results, parsed);
+         expect(literal.appendLTokens).toHaveBeenCalledWith('system', results, parsed);
       });
 
       it('returns the LTokens that made up the external ID', () => {
