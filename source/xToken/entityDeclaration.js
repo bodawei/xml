@@ -86,6 +86,7 @@ function parse(source, declarationParsing, deliverParsed) {
       quotedValue.parse(source, {
          prefix: 'literal',
          parsed,
+         peRef: true,
       }, (gotQuoted) => {
          if (gotQuoted) {
             parseClose(source, parsed, 'postEntityValueSpace', deliverParsed);

@@ -72,21 +72,21 @@ describe('entityDeclaration (unit)', () => {
 
       it('calls quotedValue.parse()', () => {
          const mockSource = new MockLTokenSource([
-            MockLTokenSource.PEEK('e'),
-            'entityName',
+            MockLTokenSource.PEEK('a'),
+            'anEntity',
             ' ',
-            MockLTokenSource.PEEK('S'),
-            // Skipping externalId parsing here
-            ' ',
-            undefined,
-            '>',
          ]);
+         delete parsedEntityDeclaration.postExternalIdSpace;
+         delete parsedEntityDeclaration.close;
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(quotedValue.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(quotedValue.parse.calls.argsFor(0)[1].prefix).toEqual('literal');
-         expect(quotedValue.parse.calls.argsFor(0)[1].parsed.type).toEqual('ENTITYDECL');
+         expect(quotedValue.parse.calls.argsFor(0)[1]).toEqual({
+            prefix: 'literal',
+            parsed: parsedEntityDeclaration,
+            peRef: true,
+         });
          expect(quotedValue.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
       });
 

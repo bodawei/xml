@@ -9,6 +9,29 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as entityDeclaration from './entityDeclaration.js';
 
 describe('entityDeclaration', () => {
+   let emd;
+   let source;
+
+   beforeEach(() => {
+      emd = new EntityMetaData();
+      source = new LTokenSource(defaultExtractors, emd);
+   });
+
+   describe('parse()', () => {
+
+      it('parses an enty declaration with a PEReference', (done) => {
+         const expectedLToken = makeLTokenMaker();
+         source.addText('aName "frog%foo;">');
+         source.endText();
+
+         entityDeclaration.parse(source, expectedLToken('<'), (pToken) => {
+            expect(pToken.type).toEqual(entityDeclaration.TYPE);
+            expect(pToken.literalValue[1].type).toEqual('PARAMETERENTITYREF');
+            done();
+         });
+      });
+
+   });
 
    describe('checkWellFormed()', () => {
       let parsed;
