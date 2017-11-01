@@ -20,6 +20,7 @@ import {
    notationDeclaration,
    processingInstruction,
    space,
+   text,
    xmlDeclaration,
 } from '../xToken';
 
@@ -31,63 +32,66 @@ class TokenStream extends stream.Transform {
       });
    }
 
-   _transform(parsed, _, done) {
-      switch (parsed.type) {
+   _transform(pToken, _, done) {
+      switch (pToken.type) {
          case EntityMetaData.TYPE:
-            this.push(parsed);
+            this.push(pToken);
             break;
          case declaration.TYPE:
-            this.push(declaration.makeToken(parsed));
+            this.push(declaration.makeToken(pToken));
             break;
          case envelope.TYPE:
-            this.push(envelope.makeToken(parsed));
+            this.push(envelope.makeToken(pToken));
             break;
          case instruction.TYPE:
-            this.push(instruction.makeToken(parsed));
+            this.push(instruction.makeToken(pToken));
             break;
          case cdata.TYPE:
-            this.push(cdata.makeToken(parsed));
+            this.push(cdata.makeToken(pToken));
             break;
          case charData.TYPE:
-            this.push(charData.makeToken(parsed));
+            this.push(charData.makeToken(pToken));
             break;
          case comment.TYPE:
-            this.push(comment.makeToken(parsed));
+            this.push(comment.makeToken(pToken));
             break;
          case docTypeStart.TYPE:
-            this.push(docTypeStart.makeToken(parsed));
+            this.push(docTypeStart.makeToken(pToken));
             break;
          case docTypeEnd.TYPE:
-            this.push(docTypeEnd.makeToken(parsed));
+            this.push(docTypeEnd.makeToken(pToken));
             break;
          case elementEnd.TYPE:
-            this.push(elementEnd.makeToken(parsed));
+            this.push(elementEnd.makeToken(pToken));
             break;
          case elementStart.TYPE:
          case elementStart.EMPTY_TYPE:
-            this.push(elementStart.makeToken(parsed));
+            this.push(elementStart.makeToken(pToken));
             break;
          case entityDeclaration.TYPE:
-            this.push(entityDeclaration.makeToken(parsed));
+            this.push(entityDeclaration.makeToken(pToken));
             break;
          case entityReference.PARAM_TYPE:
          case entityReference.TYPE:
-            this.push(entityReference.makeToken(parsed));
+            this.push(entityReference.makeToken(pToken));
             break;
          case notationDeclaration.TYPE:
-            this.push(notationDeclaration.makeToken(parsed));
+            this.push(notationDeclaration.makeToken(pToken));
             break;
          case processingInstruction.TYPE:
-            this.push(processingInstruction.makeToken(parsed));
+            this.push(processingInstruction.makeToken(pToken));
             break;
          case space.TYPE:
-            this.push(space.makeToken(parsed));
+            this.push(space.makeToken(pToken));
+            break;
+         case text.TYPE:
+            this.push(text.makeToken(pToken));
             break;
          case xmlDeclaration.TYPE:
-            this.push(xmlDeclaration.makeToken(parsed));
+            this.push(xmlDeclaration.makeToken(pToken));
             break;
          default:
-            this.push(new Error(`Unknown parsed type "${parsed.type}" encountered.`));
+            this.push(new Error(`Unknown parsed type "${pToken.type}" encountered.`));
       }
 
       done();

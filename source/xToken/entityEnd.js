@@ -19,7 +19,7 @@ class EntityEnd extends XmlToken {
 
 }
 
-class ParameterEntityEnd extends XmlToken {
+class ParameterEntityEnd extends EntityEnd {
 }
 
 export {

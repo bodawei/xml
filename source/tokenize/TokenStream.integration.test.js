@@ -22,6 +22,7 @@ import {
    text,
    xmlDeclaration,
 } from '../xToken';
+import { makeLTokenMaker } from '../lToken/test';
 
 import TokenStream from './TokenStream.js';
 
@@ -151,6 +152,22 @@ describe('TokenStream (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?>   <one></one>', [
          new space.Token('   ', []),
       ], done);
+   });
+
+   it('tokenizes text', (done) => {
+      const results = [];
+      const lTokenMaker = makeLTokenMaker();
+      tokenStream.write({
+         type: text.TYPE,
+         text: lTokenMaker('foo'),
+      });
+      tokenStream.end();
+      tokenStream.on('data', (xToken) => results.push(xToken));
+
+      tokenStream.on('end', () => {
+         expect(results[0].text).toEqual('foo');
+         done();
+      });
    });
 
    it('tokenized an Xml Declaration', (done) => {

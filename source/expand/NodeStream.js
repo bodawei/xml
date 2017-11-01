@@ -4,6 +4,7 @@ import { Transform } from 'readable-stream';
 
 import { ParsedStream } from '../parse';
 import { TokenStream } from '../tokenize';
+import { LiteralPTokenStream } from '../literalPTokenStream'
 import {
    entityDeclaration,
    entityEnd,
@@ -41,10 +42,21 @@ class NodeStream extends Transform {
    }
 
    _transform(xToken, encoding, callback) {
-      if (xToken instanceof entityDeclaration.ParamToken) {
-         this._entityManager.addParameterEntityFromInternalSubset(xToken);
-      } else if (xToken instanceof entityDeclaration.Token) {
-         this._entityManager.addEntityFromInternalSubset(xToken);
+      if (xToken instanceof entityDeclaration.Token) {
+         const func = (xToken instanceof entityDeclaration.ParamToken) ?
+            this._entityManager.addParameterEntityFromInternalSubset :
+            this._entityManager.addEntityFromInternalSubset;
+
+         if (xToken.value && xToken.value.length > 0) {
+            this._populateEntityValue(xToken, () => {
+               func.call(this._entityManager, xToken);
+               this.push(xToken);
+               callback();
+            });
+            return;
+         } else {
+            func.call(this._entityManager, xToken);
+         }
       } else if (xToken instanceof entityReference.Token) {
          const isPeRef = (xToken instanceof entityReference.ParamToken);
          const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
@@ -90,6 +102,98 @@ class NodeStream extends Transform {
       const temp = this._child.callback;
       delete this._child;
       temp();
+   }
+
+   _populateEntityValue(entityDeclaration, done) {
+      let self = this;
+      let inProgress = {
+         count: 0,
+      };
+
+      function finished() {
+         inProgress.count --;
+         if (inProgress.count === 0) {
+            let combined = [];
+
+            for (let index = 0; index < entityDeclaration.value.length; index++) {
+               const item = entityDeclaration.value[index];
+
+               if (item instanceof entityReference.ParamToken) {
+                  if (inProgress[index]) {
+                     combined.push(new entityStart.ParamToken(item.name));
+                     combined = combined.concat(self._processArray(inProgress[index].data, index.toString(), inProgress));
+                     combined.push(new entityEnd.ParamToken(item.name));
+                  }
+               } else {
+                  combined.push(item);
+               }
+            }
+
+            entityDeclaration.value = combined;
+            done();
+         }
+      }
+
+      for (let index = 0; index < entityDeclaration.value.length; index++) {
+         const item = entityDeclaration.value[index];
+
+         if (item instanceof entityReference.ParamToken) {
+            this._addEntityExpansion(item, inProgress, index.toString(), finished);
+         }
+      }
+
+      if (inProgress.count === 0) {
+         done();
+      }
+   }
+
+   _processArray(anArray, base, workingSet) {
+      let combined = [];
+
+      for (let index = 0; index < anArray.length; index++) {
+         const item = anArray[index];
+
+         if (item instanceof entityReference.ParamToken) {
+            const ctr = `${base}.${index}`;
+            if (workingSet[ctr]) {
+               combined.push(new entityStart.ParamToken(item.name));
+               combined = combined.concat(this._processArray(workingSet[ctr].data, index.toString(), workingSet));
+               combined.push(new entityEnd.ParamToken(item.name));
+            }
+         } else {
+            combined.push(item);
+         }
+      }
+
+      return combined;
+   }
+
+   _addEntityExpansion(xToken, workingSet, baseRef, finished) {
+      const lTokenStream = this._entityManager.getParameterEntity(xToken.name);
+
+      if (!lTokenStream) {
+         return;
+      }
+
+      const literalStream = new LiteralPTokenStream(lTokenStream, { peRef: true });
+      const xTokenStream = new TokenStream();
+      literalStream.pipe(xTokenStream);
+      let literalIndex = 0;
+
+      workingSet.count ++;
+
+      workingSet[baseRef] = {
+         stream: literalStream,
+         data: [],
+      };
+      xTokenStream.on('end', finished);
+      xTokenStream.on('data', (xToken) => {
+         literalIndex ++;
+         workingSet[baseRef].data.push(xToken);
+         if (xToken instanceof entityReference.ParamToken) {
+            this._addEntityExpansion(item, workingSet, `${baseRef}.${literalIndex}`);
+         }
+      });
    }
 }
 

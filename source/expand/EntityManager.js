@@ -63,6 +63,14 @@ class EntityManager {
       return this._internalGet(name, true);
    }
 
+   getEntityToken(name) {
+      return this._internalGetToken(name, false);
+   }
+
+   getParameterEntityToken(name) {
+      return this._internalGetToken(name, true);
+   }
+
    /**********************************************************************\
     setExternalSubsetEntity() Adds the specified EntityLocation as the
     location of the external subset entity.
@@ -111,6 +119,24 @@ class EntityManager {
    \**********************************************************************/
 
    _internalGet(name, isParameter) {
+      const token = this._internalGetToken(name, isParameter);
+
+      if (!token || token.notationDataName) {
+         return;
+      }
+
+      const source = new LTokenSource(defaultExtractors, new EntityMetaData());
+      for (let index = 0; index < token.value.length; index++) {
+         if (token.value[index].text) {
+            source.addText(token.value[index].text);
+         }
+      }
+      source.endText();
+
+      return source;
+   }
+
+   _internalGetToken(name, isParameter) {
       if (!name) {
          throw new Error('Must call with the name of an entity.');
       }
@@ -121,22 +147,10 @@ class EntityManager {
          return;
       }
 
-      const token = entityEntry.getBestEntityDeclaration(isParameter);
-
-      if (!token || token.notationDataName) {
-         return;
-      }
-
-      const source = new LTokenSource(defaultExtractors, new EntityMetaData());
-      for (let index = 0; index < token.value.length; index++) {
-         source.addText(token.value[index].text);
-      }
-      source.endText();
-
-      return source;
+      return entityEntry.getBestEntityDeclaration(isParameter);
    }
-
 }
+
 
 /**********************************************************************\
  EntityEntry() is an internal structure which keeps all the entity

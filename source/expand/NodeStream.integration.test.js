@@ -97,4 +97,54 @@ describe('NodeStream (integration)', () => {
       parsed.endText();
    });
 
+   it('expands an parameter entity values in an EntityValue', (done) => {
+      const results = [];
+      const manager = new EntityManager();
+      const pTokenStream = new ParsedStream();
+      const xTokenStream = new TokenStream();
+      const node = new NodeStream(manager);
+      pTokenStream.pipe(xTokenStream).pipe(node);
+
+      node.on('data', (token) => results.push(token));
+      node.on('end', () => {
+         matchTokenTypes(results[4].value, [
+            xtoken.text.Token,
+            xtoken.entityStart.ParamToken,
+            xtoken.text.Token,
+            xtoken.entityEnd.ParamToken,
+         ]);
+         done();
+      });
+      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
+         '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>');
+      pTokenStream.endText();
+   });
+
+   it('expands an parameter entity inside a parameter entity', (done) => {
+      const results = [];
+      const manager = new EntityManager();
+      const pTokenStream = new ParsedStream();
+      const xTokenStream = new TokenStream();
+      const node = new NodeStream(manager);
+      pTokenStream.pipe(xTokenStream).pipe(node);
+
+      node.on('data', (token) => results.push(token));
+      node.on('end', () => {
+         matchTokenTypes(results[5].value, [
+            xtoken.text.Token,
+            xtoken.entityStart.ParamToken,
+            xtoken.text.Token,
+            xtoken.entityEnd.ParamToken,
+            xtoken.text.Token,
+         ]);
+         done();
+      });
+      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+         '<!ENTITY % peTwo "inner">' +
+         '<!ENTITY % peOne "(%peTwo;)">' +
+         '<!ENTITY child "[%peOne;]">' +
+      ']>');
+      pTokenStream.endText();
+   });
+
 });

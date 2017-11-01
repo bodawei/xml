@@ -15,6 +15,7 @@ import {
    notationDeclaration,
    processingInstruction,
    space,
+   text,
 } from '../xToken';
 
 import TokenStream from './TokenStream.js';
@@ -164,6 +165,16 @@ describe('TokenStream (unit)', () => {
       tokenStream.read();
 
       expect(space.makeToken).toHaveBeenCalledWith(parsed);
+   });
+
+   it('calls text.makeToken()', () => {
+      spyOn(text, 'makeToken');
+      const pToken = { type: text.TYPE };
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(text.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('throws an error if asked to deal with an unknown parsed type', () => {
