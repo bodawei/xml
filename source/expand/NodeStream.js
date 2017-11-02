@@ -2,9 +2,8 @@
 
 import { Transform } from 'readable-stream';
 
-import { ParsedStream } from '../parse';
+import { LiteralPTokenStream, ParsedStream } from '../pToken';
 import { TokenStream } from '../tokenize';
-import { LiteralPTokenStream } from '../literalPTokenStream'
 import {
    entityDeclaration,
    entityEnd,
@@ -105,8 +104,8 @@ class NodeStream extends Transform {
    }
 
    _populateEntityValue(entityDeclaration, done) {
-      let self = this;
-      let inProgress = {
+      const self = this;
+      const inProgress = {
          count: 0,
       };
 
@@ -121,7 +120,9 @@ class NodeStream extends Transform {
                if (item instanceof entityReference.ParamToken) {
                   if (inProgress[index]) {
                      combined.push(new entityStart.ParamToken(item.name));
-                     combined = combined.concat(self._processArray(inProgress[index].data, index.toString(), inProgress));
+                     combined = combined.concat(
+                        self._processArray(inProgress[index].data, index.toString(),
+                        inProgress));
                      combined.push(new entityEnd.ParamToken(item.name));
                   }
                } else {
@@ -171,16 +172,16 @@ class NodeStream extends Transform {
    _addEntityExpansion(xToken, workingSet, baseRef, finished) {
       const lTokenStream = this._entityManager.getParameterEntity(xToken.name);
 
-      if (!lTokenStream) {
-         return;
-      }
+      // if (!lTokenStream) {
+      //    return;
+      // }
 
       const literalStream = new LiteralPTokenStream(lTokenStream, { peRef: true });
       const xTokenStream = new TokenStream();
       literalStream.pipe(xTokenStream);
       let literalIndex = 0;
 
-      workingSet.count ++;
+      workingSet.count++;
 
       workingSet[baseRef] = {
          stream: literalStream,
@@ -188,10 +189,10 @@ class NodeStream extends Transform {
       };
       xTokenStream.on('end', finished);
       xTokenStream.on('data', (xToken) => {
-         literalIndex ++;
+         literalIndex++;
          workingSet[baseRef].data.push(xToken);
          if (xToken instanceof entityReference.ParamToken) {
-            this._addEntityExpansion(item, workingSet, `${baseRef}.${literalIndex}`);
+            this._addEntityExpansion(xToken, workingSet, `${baseRef}.${literalIndex}`);
          }
       });
    }

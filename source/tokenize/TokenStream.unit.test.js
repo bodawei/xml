@@ -168,13 +168,13 @@ describe('TokenStream (unit)', () => {
    });
 
    it('calls text.makeToken()', () => {
-      spyOn(text, 'makeToken');
+      spyOn(text, 'makeXToken');
       const pToken = { type: text.TYPE };
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(text.makeToken).toHaveBeenCalledWith(pToken);
+      expect(text.makeXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('throws an error if asked to deal with an unknown parsed type', () => {

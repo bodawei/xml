@@ -151,7 +151,6 @@ class EntityManager {
    }
 }
 
-
 /**********************************************************************\
  EntityEntry() is an internal structure which keeps all the entity
  declarations with a particular name. It separates the kind and

@@ -6,7 +6,7 @@ import {
    EntityLocation,
  } from '../basic';
 import { WellFormedError } from '../error';
-import { ParsedStream } from '../parse';
+import { ParsedStream } from '../pToken';
 
 import WFCheckStream from './WFCheckStream.js';
 

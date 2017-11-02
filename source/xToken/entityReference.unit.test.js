@@ -8,22 +8,22 @@ import { WellFormedError } from '../error';
 import * as entityReference from './entityReference.js';
 
 describe('entityReference (unit)', () => {
-   let parsedGeneralEntity;
-   let parsedParameterEntity;
+   let generalEntityPToken;
+   let parameterEntityPToken;
 
    beforeEach(() => {
-      const expectedLToken = makeLTokenMaker();
-      parsedGeneralEntity = {
+      const makeLToken = makeLTokenMaker();
+      generalEntityPToken = {
          type: 'ENTITYREF',
-         open: expectedLToken('&'),
-         postOpenSpace: expectedLToken(' '),
-         name: expectedLToken('entityName'),
-         postEntityNameSpace: expectedLToken(' '),
-         close: expectedLToken(';'),
+         open: makeLToken('&'),
+         postOpenSpace: makeLToken(' '),
+         name: makeLToken('entityName'),
+         postEntityNameSpace: makeLToken(' '),
+         close: makeLToken(';'),
       };
 
       const makeToken = makeLTokenMaker();
-      parsedParameterEntity = {
+      parameterEntityPToken = {
          type: 'PARAMETERENTITYREF',
          open: makeToken('%'),
          postOpenSpace: makeToken(' '),
@@ -52,7 +52,7 @@ describe('entityReference (unit)', () => {
          entityReference.parse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps(parsedGeneralEntity);
+         expect(callback).toContainParsedProps(generalEntityPToken);
       });
 
       it('copes with eof', () => {
@@ -79,7 +79,7 @@ describe('entityReference (unit)', () => {
 
    });
 
-   describe('(peref) parse()', () => {
+   describe('paramParse()', () => {
       let callback;
 
       beforeEach(() => {
@@ -98,7 +98,7 @@ describe('entityReference (unit)', () => {
          entityReference.paramParse(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps(parsedParameterEntity);
+         expect(callback).toContainParsedProps(parameterEntityPToken);
       });
 
       it('copes with eof', () => {
@@ -196,34 +196,34 @@ describe('entityReference (unit)', () => {
    describe('makeToken()', () => {
 
       it('returns an entity reference token with the entity name', () => {
-         const token = entityReference.makeToken(parsedGeneralEntity);
+         const token = entityReference.makeToken(generalEntityPToken);
 
          expect(token).toEqual(new entityReference.Token('entityName', [
-            parsedGeneralEntity.open,
-            parsedGeneralEntity.postOpenSpace,
-            parsedGeneralEntity.name,
-            parsedGeneralEntity.postEntityNameSpace,
-            parsedGeneralEntity.close,
+            generalEntityPToken.open,
+            generalEntityPToken.postOpenSpace,
+            generalEntityPToken.name,
+            generalEntityPToken.postEntityNameSpace,
+            generalEntityPToken.close,
          ]));
       });
 
       it('returns an entity reference token with a blank name when the name could not be found', () => {
-         delete parsedGeneralEntity.name;
-         const token = entityReference.makeToken(parsedGeneralEntity);
+         delete generalEntityPToken.name;
+         const token = entityReference.makeToken(generalEntityPToken);
          token.lTokens = [];
 
          expect(token).toEqual(new entityReference.Token('', []));
       });
 
       it('returns a ParameterEntityReference if the parsed is a parameterEntity', () => {
-         const token = entityReference.makeToken(parsedParameterEntity);
+         const token = entityReference.makeToken(parameterEntityPToken);
 
          expect(token).toEqual(new entityReference.ParamToken('entityName', [
-            parsedParameterEntity.open,
-            parsedParameterEntity.postOpenSpace,
-            parsedParameterEntity.name,
-            parsedParameterEntity.postEntityNameSpace,
-            parsedParameterEntity.close,
+            parameterEntityPToken.open,
+            parameterEntityPToken.postOpenSpace,
+            parameterEntityPToken.name,
+            parameterEntityPToken.postEntityNameSpace,
+            parameterEntityPToken.close,
          ]));
       });
    });

@@ -3,7 +3,7 @@
 
 import { EntityLocation, Offset } from '../basic';
 import { ValidityError } from '../error';
-import { ParsedStream } from '../parse';
+import { ParsedStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 
 import ValidityStream from './ValidityStream.js';

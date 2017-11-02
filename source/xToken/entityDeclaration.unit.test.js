@@ -8,27 +8,26 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import * as declaration from './declaration.js';
 import * as entityDeclaration from './entityDeclaration.js';
-import * as text from './text.js';
 import * as externalId from './common/externalId.js';
 import * as misc from './common/misc.js';
 import * as literal from './common/literal.js';
 
 describe('entityDeclaration (unit)', () => {
-   let parsedEntityDeclaration;
-   let parsedParamEntityDeclaration;
+   let entityDeclarationPToken;
+   let paramEntityDeclarationPToken;
 
    beforeEach(() => {
-      const expectedLToken = makeLTokenMaker();
-      parsedEntityDeclaration = {
+      const makeLToken = makeLTokenMaker();
+      entityDeclarationPToken = {
          type: 'ENTITYDECL',
-         name: expectedLToken('anEntity'),
-         postNameSpace: expectedLToken(' '),
-         postExternalIdSpace: expectedLToken(' '),
-         close: expectedLToken('>'),
+         name: makeLToken('anEntity'),
+         postNameSpace: makeLToken(' '),
+         postExternalIdSpace: makeLToken(' '),
+         close: makeLToken('>'),
       };
 
       const makeToken = makeLTokenMaker();
-      parsedParamEntityDeclaration = {
+      paramEntityDeclarationPToken = {
          type: 'ENTITYDECL',
          parameter: makeToken('%'),
          postParameterSpace: makeToken(' '),
@@ -76,15 +75,15 @@ describe('entityDeclaration (unit)', () => {
             'anEntity',
             ' ',
          ]);
-         delete parsedEntityDeclaration.postExternalIdSpace;
-         delete parsedEntityDeclaration.close;
+         delete entityDeclarationPToken.postExternalIdSpace;
+         delete entityDeclarationPToken.close;
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
          expect(literal.parse.calls.argsFor(0)[0]).toEqual(mockSource);
          expect(literal.parse.calls.argsFor(0)[1]).toEqual({
             prefix: 'literal',
-            parsed: parsedEntityDeclaration,
+            parsed: entityDeclarationPToken,
             peRef: true,
          });
          expect(literal.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
@@ -125,7 +124,7 @@ describe('entityDeclaration (unit)', () => {
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps(parsedEntityDeclaration);
+         expect(callback).toContainParsedProps(entityDeclarationPToken);
       });
 
       it('returns nothing if at EOF. That is: <!ENTITY', () => {
@@ -159,7 +158,7 @@ describe('entityDeclaration (unit)', () => {
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainParsedProps(parsedParamEntityDeclaration);
+         expect(callback).toContainParsedProps(paramEntityDeclarationPToken);
       });
 
       it('returns parameter entity without the trailing space if none present: <!ENTITY %entityName...', () => {
@@ -437,13 +436,13 @@ describe('entityDeclaration (unit)', () => {
 
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
-      let parsed;
+      let pToken;
       let expectedLToken;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          expectedLToken = makeLTokenMaker();
-         parsed = {
+         pToken = {
             open: expectedLToken('<!'),
             declType: expectedLToken('ENTITY'),
             postDeclTypeSpace: expectedLToken('\t'),
@@ -459,39 +458,40 @@ describe('entityDeclaration (unit)', () => {
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(misc, 'checkWellFormedText');
+         spyOn(externalId, 'checkWellFormed');
          spyOn(literal, 'checkWellFormed');
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(declaration.checkWellFormed).toHaveBeenCalledWith(parsed, mockErrorCollector, emd);
+         expect(declaration.checkWellFormed).toHaveBeenCalledWith(pToken, mockErrorCollector, emd);
       });
 
       it('asks the literal module to look for problems in the declaration part', () => {
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(literal.checkWellFormed).toHaveBeenCalledWith('literal', parsed, mockErrorCollector, emd,
+         expect(literal.checkWellFormed).toHaveBeenCalledWith('literal', pToken, mockErrorCollector, emd,
             WellFormedError.ID.NOUN_ENTITYVALUE);
       });
 
       it('reports an error if % is not followed by a space', () => {
-         parsed.parameter = expectedLToken('%');
+         pToken.parameter = expectedLToken('%');
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report)
             .toHaveBeenCalledWith(WellFormedError.ID.ENTITYDECL_PERCENT_NO_TRAILING_SPACE, [ 'entityName' ]);
       });
 
       it('reports an error if there is no name', () => {
-         delete parsed.name;
+         delete pToken.name;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_NAME,
@@ -504,213 +504,206 @@ describe('entityDeclaration (unit)', () => {
       it('calls misc.checkName() to report on name validity', () => {
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(misc.checkName).toHaveBeenCalledWith(parsed.name,
+         expect(misc.checkName).toHaveBeenCalledWith(pToken.name,
             mockErrorCollector, emd, WellFormedError.ID.ENTITYDECL_NAME_INVALID);
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(parsed.name,
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(pToken.name,
             mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
       });
 
       it('reports an error if there is no space after the name', () => {
-         delete parsed.postNameSpace;
+         delete pToken.postNameSpace;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
             params: [ 'entityName' ],
             position: undefined,
-            lastPosition: parsed.name,
+            lastPosition: pToken.name,
          });
       });
 
       it('calls externalId.checkWellFormed() to check on the externalId', () => {
-         spyOn(externalId, 'checkWellFormed');
-         delete parsed.literalOpenQuote;
-         delete parsed.literalValue;
-         delete parsed.literalCloseQuote;
-         parsed.externalId = { externalId: true };
+         delete pToken.literalOpenQuote;
+         delete pToken.literalValue;
+         delete pToken.literalCloseQuote;
+         pToken.externalId = { externalId: true };
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(externalId.checkWellFormed).toHaveBeenCalledWith(parsed.externalId,
+         expect(externalId.checkWellFormed).toHaveBeenCalledWith(pToken.externalId,
             mockErrorCollector, emd);
       });
 
       it('reports an error if NDATA is the wrong case', () => {
-         parsed.externalId = { externalId: true };
-         parsed.nData = expectedLToken('nData');
-         parsed.nDataName = expectedLToken('foo');
+         pToken.externalId = { externalId: true };
+         pToken.nData = expectedLToken('nData');
+         pToken.nDataName = expectedLToken('foo');
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
             params: [ 'entityName', 'nData' ],
-            position: parsed.nData,
+            position: pToken.nData,
          });
       });
 
       it('reports an error if there is no NDATA value', () => {
-         parsed.externalId = { externalId: true };
-         parsed.nData = expectedLToken('nData');
+         pToken.externalId = { externalId: true };
+         pToken.nData = expectedLToken('nData');
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
             params: [ 'entityName' ],
-            lastPosition: parsed.nData,
+            lastPosition: pToken.nData,
          });
       });
 
       it('calls checkWellFormedText() to check on the ndata value', () => {
-         parsed.externalId = { externalId: true };
-         parsed.nData = expectedLToken('NDATA');
-         parsed.nDataName = expectedLToken('foo');
+         pToken.externalId = { externalId: true };
+         pToken.nData = expectedLToken('NDATA');
+         pToken.nDataName = expectedLToken('foo');
          const emd = new EntityMetaData();
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, emd);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(parsed.nDataName,
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(pToken.nDataName,
             mockErrorCollector, emd);
       });
 
       it('reports an error if there is no EnitytValue or ExternalID', () => {
-         delete parsed.literalOpenQuote;
-         delete parsed.literalValue;
-         delete parsed.literalCloseQuote;
+         delete pToken.literalOpenQuote;
+         delete pToken.literalValue;
+         delete pToken.literalCloseQuote;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_VALUE,
             params: [ 'entityName' ],
-            lastPosition: parsed.postNameSpace,
+            lastPosition: pToken.postNameSpace,
          });
       });
 
       it('reports an error if there was no closing', () => {
-         delete parsed.close;
+         delete pToken.close;
 
-         entityDeclaration.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NO_CLOSE,
             params: [ 'entityName' ],
             position: undefined,
-            lastPosition: parsed.postNameSpace,
+            lastPosition: pToken.postNameSpace,
          });
       });
 
    });
 
    describe('makeToken()', () => {
-      let expectedLToken;
+      let pToken;
 
       beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
+         const expectedLToken = makeLTokenMaker();
+         spyOn(literal, 'makeTokenCompatible');
          spyOn(literal, 'appendLTokens');
          spyOn(externalId, 'makeTokenCompatible');
          spyOn(externalId, 'appendLTokens');
-      });
-
-      it('calls literal.appendLTokens()', () => {
-         const parsed = {
-            name: expectedLToken('entityName'),
-            literalValue: [ expectedLToken('value') ],
-         };
-
-         const token = entityDeclaration.makeToken(parsed);
-
-         expect(literal.appendLTokens).toHaveBeenCalledWith('literal', token.lTokens, parsed);
-      });
-
-      it('calls externalId.makeTokenCompatible()', () => {
-         const parsed = {
-            name: expectedLToken('entityName'),
-            externalId: { externalId: true },
-         };
-
-         entityDeclaration.makeToken(parsed);
-
-         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(parsed.externalId);
-      });
-
-      it('calls externalId.appendLTokens()', () => {
-         const parsed = {
-            name: expectedLToken('entityName'),
-            externalId: { externalId: true },
-         };
-
-         const token = entityDeclaration.makeToken(parsed);
-
-         expect(externalId.appendLTokens).toHaveBeenCalledWith(token.lTokens, parsed.externalId);
-      });
-
-      it('returns an entity declaration token with the name and value found in the parsing', () => {
-         const parsed = {
-            name: expectedLToken('entityName'),
-            literalValue: [ expectedLToken('value') ],
-         };
-         const expectedText = new text.Token('value', [ parsed.literalValue[0] ]);
-
-         const token = entityDeclaration.makeToken(parsed);
-
-         expect(token).toEqual(new entityDeclaration.Token('entityName', [ expectedText ],
-            undefined, '', [
-               parsed.name,
-            ]));
-      });
-
-      it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
-         const parsed = {
+         pToken = {
             parameter: expectedLToken('%'),
             name: expectedLToken('entityName'),
             literalValue: [ expectedLToken('value') ],
          };
-         const expectedText = new text.Token('value', [ parsed.literalValue[0] ]);
+      });
 
-         const token = entityDeclaration.makeToken(parsed);
+      it('calls literal.makeTokenCompatible()', () => {
+         delete pToken.paramater;
 
-         expect(token).toEqual(new entityDeclaration.ParamToken('entityName', [ expectedText ],
+         entityDeclaration.makeToken(pToken);
+
+         expect(literal.makeTokenCompatible).toHaveBeenCalledWith('literal', pToken);
+      });
+
+      it('calls literal.appendLTokens()', () => {
+         delete pToken.parameter;
+
+         const token = entityDeclaration.makeToken(pToken);
+
+         expect(literal.appendLTokens).toHaveBeenCalledWith('literal', token.lTokens, pToken);
+      });
+
+      it('calls externalId.makeTokenCompatible()', () => {
+         delete pToken.parameter;
+         delete pToken.literalValue;
+         pToken.externalId = { externalId: true };
+
+         entityDeclaration.makeToken(pToken);
+
+         expect(externalId.makeTokenCompatible).toHaveBeenCalledWith(pToken.externalId);
+      });
+
+      it('calls externalId.appendLTokens()', () => {
+         delete pToken.parameter;
+         delete pToken.literalValue;
+         pToken.externalId = { externalId: true };
+
+         const xToken = entityDeclaration.makeToken(pToken);
+
+         expect(externalId.appendLTokens).toHaveBeenCalledWith(xToken.lTokens, pToken.externalId);
+      });
+
+      it('returns an entity declaration token with the name and value found in the parsing', () => {
+         delete pToken.parameter;
+
+         const token = entityDeclaration.makeToken(pToken);
+
+         expect(token).toEqual(new entityDeclaration.Token('entityName', undefined,
             undefined, '', [
-               parsed.parameter,
-               parsed.name,
+               pToken.name,
+            ]));
+      });
+
+      it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
+         const xToken = entityDeclaration.makeToken(pToken);
+
+         expect(xToken).toEqual(new entityDeclaration.ParamToken('entityName', undefined,
+            undefined, '', [
+               pToken.parameter,
+               pToken.name,
             ]));
       });
 
       it('returns a entity declaration with a blank name if there is no name', () => {
-         const parsed = {
-            name: undefined,
-            literalValue: [ expectedLToken('value') ],
-         };
-         const expectedText = new text.Token('value', [ parsed.literalValue[0] ]);
+         delete pToken.parameter;
+         delete pToken.name;
 
-         const token = entityDeclaration.makeToken(parsed);
+         const xToken = entityDeclaration.makeToken(pToken);
 
-         expect(token).toEqual(new entityDeclaration.Token('', [ expectedText ], undefined, '', []));
+         expect(xToken).toEqual(new entityDeclaration.Token('', undefined, undefined, '', []));
       });
 
       it('returns a entity declaration with an undefined value if there is no value', () => {
-         const parsed = {
-            name: expectedLToken('aName'),
-         };
+         delete pToken.parameter;
+         delete pToken.literalValue;
 
-         const token = entityDeclaration.makeToken(parsed);
+         const xToken = entityDeclaration.makeToken(pToken);
 
-         expect(token).toEqual(new entityDeclaration.Token('aName', undefined, undefined, '', [
-            parsed.name,
+         expect(xToken).toEqual(new entityDeclaration.Token('entityName', undefined, undefined, '', [
+            pToken.name,
          ]));
       });
 

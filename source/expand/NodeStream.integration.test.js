@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ParsedStream } from '../parse';
+import { ParsedStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 import * as xtoken from '../xToken';
 

@@ -85,7 +85,7 @@ class TokenStream extends stream.Transform {
             this.push(space.makeToken(pToken));
             break;
          case text.TYPE:
-            this.push(text.makeToken(pToken));
+            this.push(text.makeXToken(pToken));
             break;
          case xmlDeclaration.TYPE:
             this.push(xmlDeclaration.makeToken(pToken));

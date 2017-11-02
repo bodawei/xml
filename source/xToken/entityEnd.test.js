@@ -2,8 +2,6 @@
 
 /* eslint-env jasmine */
 
-import { makeLTokenMaker, MockLTokenSource } from '../lToken/test';
-
 import * as entityEnd from './entityEnd.js';
 
 describe('entityEnd (unit)', () => {

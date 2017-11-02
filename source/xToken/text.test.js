@@ -16,7 +16,6 @@ describe('text (unit)', () => {
       };
    });
 
-
    describe('Token', () => {
 
       it('is constructed with value and LTokens', () => {
@@ -50,10 +49,10 @@ describe('text (unit)', () => {
 
    });
 
-   describe('makeToken()', () => {
+   describe('makeXToken()', () => {
 
       it('converts a PToken to an XToken', () => {
-         const token = text.makeToken(textPToken);
+         const token = text.makeXToken(textPToken);
 
          expect(token).toEqual(new text.Token('foo', [ textPToken.text ]));
       });

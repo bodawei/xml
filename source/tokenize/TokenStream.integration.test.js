@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation } from '../basic';
-import { ParsedStream } from '../parse';
+import { ParsedStream } from '../pToken';
 import {
    declaration,
    envelope,

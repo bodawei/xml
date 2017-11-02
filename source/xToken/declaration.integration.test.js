@@ -8,28 +8,28 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as declaration from './declaration.js';
 
 describe('declaration (integration)', () => {
-   let defaultParsed;
+   let declarationPToken;
 
    beforeEach(() => {
       const sourceLToken = makeLTokenMaker();
-      defaultParsed = {
+      declarationPToken = {
          type: declaration.TYPE,
          postOpenSpace: sourceLToken(' '),
          declType: sourceLToken('DOCTYPE'),
          postDeclTypeSpace: sourceLToken(' '),
       };
-      defaultParsed.open = sourceLToken('<!');
+      declarationPToken.open = sourceLToken('<!');
    });
 
    describe('parse()', () => {
 
-      it('produces a full parsed result', (done) => {
+      it('produces a full pToken', (done) => {
          const source = new LTokenSource(defaultExtractors, new EntityMetaData());
          source.addText(' DOCTYPE ');
          source.endText();
 
-         declaration.parse(source, defaultParsed.open, (parsing) => {
-            expect(parsing).toEqual(defaultParsed);
+         declaration.parse(source, declarationPToken.open, (parsing) => {
+            expect(parsing).toEqual(declarationPToken);
             done();
          });
       });

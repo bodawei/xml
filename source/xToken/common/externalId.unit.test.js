@@ -334,6 +334,16 @@ describe('externalId (unit)', () => {
          });
       });
 
+      it('reports no error if there is no system part', () => {
+         delete parsed.systemOpenQuote;
+         delete parsed.systemValue;
+         delete parsed.systemCloseQuote;
+
+         externalId.checkWellFormed(parsed, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
    });
 
    describe('makeTokenCompatible()', () => {

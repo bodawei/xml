@@ -8,10 +8,6 @@ import * as xToken from '../xToken';
 import LiteralPTokenStream from './LiteralPTokenStream.js';
 
 describe('LiteralPTokenStream (integration)', () => {
-   let lTokenStream;
-
-   beforeEach(() => {
-   });
 
    function expectInputToProduceTypes(input, options, types, done) {
       const results = [];

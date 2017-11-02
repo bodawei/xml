@@ -44,14 +44,13 @@ function parse(source, terminators, deliverPToken) {
    });
 }
 
-function makeToken(pToken) {
+function makeXToken(pToken) {
    return new Text(pToken.text.text, [ pToken.text ]);
 }
-
 
 export {
    TEXT as TYPE,
    Text as Token,
    parse,
-   makeToken,
+   makeXToken,
 };

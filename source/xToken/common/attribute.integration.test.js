@@ -11,14 +11,14 @@ import * as attribute from './attribute.js';
 describe('attribute (integration)', () => {
    let emd;
    let source;
-   let parsedAttributes;
+   let attributesPToken;
 
    beforeEach(() => {
       const makeLToken = makeLTokenMaker();
 
       emd = new EntityMetaData();
       source = new LTokenSource(defaultExtractors, emd);
-      parsedAttributes = [ {
+      attributesPToken = [ {
          name: makeLToken('one'),
          postNameSpace: undefined,
          equal: makeLToken('='),
@@ -144,7 +144,7 @@ describe('attribute (integration)', () => {
    describe('makeOneTokenCompatible()', () => {
 
       it('returns name value pairs', () => {
-         const attrs = attribute.makeOneTokenCompatible(parsedAttributes);
+         const attrs = attribute.makeOneTokenCompatible(attributesPToken);
 
          expect(attrs).toEqual([ {
             name: 'one',

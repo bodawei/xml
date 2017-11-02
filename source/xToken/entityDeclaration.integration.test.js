@@ -9,10 +9,17 @@ import { makeLTokenMaker } from '../lToken/test';
 import * as entityDeclaration from './entityDeclaration.js';
 
 describe('entityDeclaration', () => {
+   let declarationPToken;
    let emd;
    let source;
 
    beforeEach(() => {
+      const expectedLToken = makeLTokenMaker();
+      declarationPToken = {
+         open: expectedLToken('<!'),
+         declType: expectedLToken('ENTITY'),
+         postDeclTypeSpace: expectedLToken('\t'),
+      };
       emd = new EntityMetaData();
       source = new LTokenSource(defaultExtractors, emd);
    });
@@ -34,27 +41,12 @@ describe('entityDeclaration', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let parsed;
-      let expectedLToken;
-      let emd;
-      let source;
-
-      beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
-         parsed = {
-            open: expectedLToken('<!'),
-            declType: expectedLToken('ENTITY'),
-            postDeclTypeSpace: expectedLToken('\t'),
-         };
-         emd = new EntityMetaData();
-         source = new LTokenSource(defaultExtractors, emd);
-      });
 
       it('reports errors in the declaration part (declaration.checkWellFormed())', (done) => {
-         parsed.postOpenSpace = expectedLToken(' ');
+         declarationPToken.postOpenSpace = declarationPToken.postDeclTypeSpace;
          source.addText('entityName "entityValue">');
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -66,8 +58,8 @@ describe('entityDeclaration', () => {
       it('reports errors in the literal value (literal.checkWellFormed())', (done) => {
          source.addText('entityName "entityValue');  // missing closing quote
          source.endText();
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -78,8 +70,8 @@ describe('entityDeclaration', () => {
 
       it('reports an error when name used an invalid char(check misc.checkName())', (done) => {
          source.addText('$foo "frog">');
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -90,8 +82,8 @@ describe('entityDeclaration', () => {
 
       it('reports an error when name starts with "xml" (check misc.checkWellFormedNameRecommendation())', (done) => {
          source.addText('xmlFoo "frog">');
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -102,8 +94,8 @@ describe('entityDeclaration', () => {
 
       it('reports an error when external ID has no value (externalId.checkWellFormed())', (done) => {
          source.addText('entityName SYSTEM >');
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -114,8 +106,8 @@ describe('entityDeclaration', () => {
 
       it('reports an error when NDATA value has a bad char (check misc.checkWellFormedText())', (done) => {
          source.addText('entityName SYSTEM "sys.xml" NDATA bad\u0000>');
-         entityDeclaration.parse(source, parsed, (result) => {
-            const ec = new ErrorCollector(parsed.open, WellFormedError);
+         entityDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
             entityDeclaration.checkWellFormed(result, ec, emd);
 
@@ -127,38 +119,43 @@ describe('entityDeclaration', () => {
    });
 
    describe('makeToken()', () => {
-      let parsed;
-      let expectedLToken;
-      let emd;
-      let source;
 
-      beforeEach(() => {
-         expectedLToken = makeLTokenMaker();
-         parsed = {
-            open: expectedLToken('<!'),
-            declType: expectedLToken('ENTITY'),
-            postDeclTypeSpace: expectedLToken('\t'),
-         };
-         emd = new EntityMetaData();
-         source = new LTokenSource(defaultExtractors, emd);
-      });
+      it('adds the EntityValue (literal.makeTokenCompatible())', (done) => {
+         source.addText('entityName "one" >');
+         entityDeclaration.parse(source, declarationPToken, (parsed) => {
+            const xToken = entityDeclaration.makeToken(parsed);
 
-      it('creates a token with the externalLoc set', (done) => {
-         source.addText('entityName SYSTEM "sys.xml" >');
-         entityDeclaration.parse(source, parsed, (parsed) => {
-            const token = entityDeclaration.makeToken(parsed);
-
-            expect(token.externalLoc).toEqual(new EntityLocation('sys.xml'));
+            expect(xToken.value[0].text).toEqual('one');
             done();
          });
       });
 
-      it('adds the token to the lToken list', (done) => {
+      it('creates a token with the externalLoc set (externalId.makeTokenCompatible())', (done) => {
          source.addText('entityName SYSTEM "sys.xml" >');
-         entityDeclaration.parse(source, parsed, (parsed) => {
-            const token = entityDeclaration.makeToken(parsed);
+         entityDeclaration.parse(source, declarationPToken, (parsed) => {
+            const xToken = entityDeclaration.makeToken(parsed);
 
-            expect(token.lTokens[8].text).toEqual('sys.xml');
+            expect(xToken.externalLoc).toEqual(new EntityLocation('sys.xml'));
+            done();
+         });
+      });
+
+      it('adds the token to the lToken list (externalId.appendLTokens())', (done) => {
+         source.addText('entityName SYSTEM "sys.xml" >');
+         entityDeclaration.parse(source, declarationPToken, (parsed) => {
+            const xToken = entityDeclaration.makeToken(parsed);
+
+            expect(xToken.lTokens[8].text).toEqual('sys.xml');
+            done();
+         });
+      });
+
+      it('adds the token to the lToken list (literal.appendLTokens())', (done) => {
+         source.addText('entityName "dukkha" >');
+         entityDeclaration.parse(source, declarationPToken, (parsed) => {
+            const xToken = entityDeclaration.makeToken(parsed);
+
+            expect(xToken.lTokens[6].text).toEqual('dukkha');
             done();
          });
       });
