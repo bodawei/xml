@@ -31,6 +31,8 @@ const reporters = [ 'lcov', 'text', 'json-summary' ]
 const tasks = {
    karma: 'karma start ./build/karmaConfig.js',
 
+   karma2: 'karma start ./build/karmaConfig.clap.js',
+
    eslint: `eslint
       --config    ${BUILD_DIR}/style/eslintrc.js
       --rulesdir  ${BUILD_DIR}/style/customEslintRules

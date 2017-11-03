@@ -49,6 +49,10 @@ module.exports = function karmaConfig(config) {
             [ 'browserify-istanbul', {
                ignore: '**/*.test.js',
                instrumenter: isparta,
+               // bf magic: https://github.com/karma-runner/karma-coverage/issues/157#issuecomment-129636012
+               instrumenterConfig: {
+                  embedSource: true,
+               },
             } ],
          ],
       },

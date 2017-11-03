@@ -175,14 +175,14 @@ function checkWellFormed(parsed, ec, entityMetaData) {
  on the parsed value.
 \**********************************************************************/
 
-function makeToken(parsed) {
-   const entityClass = parsed.parameter ? ParameterEntityDeclaration : EntityDeclaration;
+function makeToken(pToken) {
+   const entityClass = pToken.parameter ? ParameterEntityDeclaration : EntityDeclaration;
 
-   return new entityClass(textOrBlank(parsed.name),
-      literal.makeTokenCompatible('literal', parsed),
-      externalId.makeTokenCompatible(parsed.externalId),
-      textOrBlank(parsed.nDataName),
-      getLTokens(parsed));
+   return new entityClass(textOrBlank(pToken.name),
+      literal.makeTokenCompatible('literal', pToken),
+      externalId.makeTokenCompatible(pToken.externalId),
+      textOrBlank(pToken.nDataName),
+      getLTokens(pToken));
 }
 
 function getLTokens(parsed) {
