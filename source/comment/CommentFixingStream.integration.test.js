@@ -1,25 +1,25 @@
 /* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 import * as tokens from '../xToken';
 
 import CommentFixingStream from './CommentFixingStream.js';
 
 describe('CommentFixingStream (integration)', () => {
-   let parsedStream;
+   let pTokenStream;
    let tokenStream;
 
    function testTransformation(before, after, done) {
       const cf = new CommentFixingStream();
-      parsedStream = new ParsedStream();
+      pTokenStream = new PTokenStream();
       tokenStream = new TokenStream();
       const results = [];
 
-      parsedStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
-      parsedStream.endText();
-      parsedStream.pipe(tokenStream).pipe(cf);
+      pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
+      pTokenStream.endText();
+      pTokenStream.pipe(tokenStream).pipe(cf);
 
       cf.on('data', (data) => {
          results.push(data);
@@ -61,15 +61,15 @@ describe('CommentFixingStream (integration)', () => {
    describe('passthrough', () => {
 
       it('passes all tokens through', (done) => {
-         parsedStream = new ParsedStream();
+         pTokenStream = new PTokenStream();
          tokenStream = new TokenStream();
 
-         parsedStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
-         parsedStream.endText();
+         pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
+         pTokenStream.endText();
 
          const cf = new CommentFixingStream();
          const results = [];
-         parsedStream.pipe(tokenStream).pipe(cf);
+         pTokenStream.pipe(tokenStream).pipe(cf);
 
          cf.on('data', (data) => {
             results.push(data);

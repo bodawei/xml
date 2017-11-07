@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation } from '../basic';
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import {
    declaration,
    envelope,
@@ -27,20 +27,20 @@ import { makeLTokenMaker } from '../lToken/test';
 import TokenStream from './TokenStream.js';
 
 describe('TokenStream (integration)', () => {
-   let parsedStream;
+   let pTokenStream;
    let tokenStream;
 
    beforeEach(() => {
-      parsedStream = new ParsedStream();
+      pTokenStream = new PTokenStream();
       tokenStream = new TokenStream();
-      parsedStream.pipe(tokenStream);
+      pTokenStream.pipe(tokenStream);
    });
 
    function expectInputToProduce(inputDocument, expecteds, done) {
       const results = [];
 
-      parsedStream.addText(inputDocument);
-      parsedStream.endText();
+      pTokenStream.addText(inputDocument);
+      pTokenStream.endText();
 
       tokenStream.on('data', (data) => results.push(data));
       tokenStream.on('end', () => {

@@ -22,13 +22,13 @@ import {
    xmlDeclaration,
 } from '../xToken';
 
-import ParsedStream from './ParsedStream.js';
+import PTokenStream from './PTokenStream.js';
 
-describe('ParsedStream (unit)', () => {
-   let parser;
+describe('PTokenStream (unit)', () => {
+   let pTokenStream;
 
    beforeEach(() => {
-      parser = new ParsedStream();
+      pTokenStream = new PTokenStream();
    });
 
    describe('construction', () => {
@@ -36,7 +36,7 @@ describe('ParsedStream (unit)', () => {
       it('passes the provided entity metadata to the underlying token source', () => {
          const entityMetaData = new EntityMetaData();
 
-         const stream = new ParsedStream(entityMetaData);
+         const stream = new PTokenStream(entityMetaData);
 
          expect(stream._lTokenSource.metaData).toBe(entityMetaData);
       });
@@ -45,7 +45,7 @@ describe('ParsedStream (unit)', () => {
          const entityMetaData = new EntityMetaData();
          const tokenSource = new LTokenSource(defaultExtractors, entityMetaData);
 
-         const stream = new ParsedStream(tokenSource);
+         const stream = new PTokenStream(tokenSource);
 
          expect(stream._lTokenSource).toBe(tokenSource);
       });
@@ -55,20 +55,20 @@ describe('ParsedStream (unit)', () => {
    describe('weird parse situation', () => {
 
       it('does not try to parse a close if encountering a "]" but no start was found', () => {
-         spyOn(parser, '_parseClose');
-         parser.addText(']');
-         parser.read();
+         spyOn(pTokenStream, '_parseClose');
+         pTokenStream.addText(']');
+         pTokenStream.read();
 
-         expect(parser._parseClose).not.toHaveBeenCalled();
+         expect(pTokenStream._parseClose).not.toHaveBeenCalled();
       });
 
    });
 
    it('calls charData.parse()', () => {
       spyOn(charData, 'parse');
-      parser.addText('asdf</foo>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('asdf</foo>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(charData.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(charData.parse.calls.argsFor(0)[1]).toEqual([]);
@@ -77,10 +77,10 @@ describe('ParsedStream (unit)', () => {
 
    it('calls charData.parse() in the internal subset', () => {
       spyOn(charData, 'parse');
-      parser.addText('<!DOCTYPE foo [ asdf</foo>');
-      parser.endText();
-      parser.read();
-      parser.read();
+      pTokenStream.addText('<!DOCTYPE foo [ asdf</foo>');
+      pTokenStream.endText();
+      pTokenStream.read();
+      pTokenStream.read();
 
       expect(charData.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(charData.parse.calls.argsFor(0)[1]).toEqual([ '%' ]);
@@ -89,27 +89,27 @@ describe('ParsedStream (unit)', () => {
 
    it('calls comment.parse()', () => {
       spyOn(comment, 'parse');
-      parser.addText('<!--asdf-->');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!--asdf-->');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(comment.parse).toHaveBeenCalled();
    });
 
    it('calls elementStart.parse()', () => {
       spyOn(elementStart, 'parse');
-      parser.addText('<foo>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<foo>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(elementStart.parse).toHaveBeenCalled();
    });
 
    it('calls docTypeStart.parse()', () => {
       spyOn(docTypeStart, 'parse');
-      parser.addText('<!DOCTYPE theType>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!DOCTYPE theType>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('DOCTYPE');
@@ -118,9 +118,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls docTypeStart.parse() even when the declType is the wrong case', () => {
       spyOn(docTypeStart, 'parse');
-      parser.addText('<!docType theType>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!docType theType>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('docType');
@@ -129,18 +129,18 @@ describe('ParsedStream (unit)', () => {
 
    it('calls elementEnd.parse()', () => {
       spyOn(elementEnd, 'parse');
-      parser.addText('</foo>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('</foo>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(elementEnd.parse).toHaveBeenCalled();
    });
 
    it('calls entityDeclaration.parse()', () => {
       spyOn(entityDeclaration, 'parse');
-      parser.addText('<!ENTITY something "foo">');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!ENTITY something "foo">');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(entityDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(entityDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('ENTITY');
@@ -149,9 +149,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls entityReference.parse()', () => {
       spyOn(entityReference, 'parse');
-      parser.addText('&foo;');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('&foo;');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(entityReference.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(entityReference.parse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
@@ -159,9 +159,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls entityReference.paramParse()', () => {
       spyOn(entityReference, 'paramParse');
-      parser.addText('%foo;');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('%foo;');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(entityReference.paramParse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(entityReference.paramParse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
@@ -169,9 +169,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls notationDeclaration.parse()', () => {
       spyOn(notationDeclaration, 'parse');
-      parser.addText('<!NOTATION something>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!NOTATION something>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(notationDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(notationDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('NOTATION');
@@ -180,9 +180,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls instruction.parse()', () => {
       spyOn(instruction, 'parse');
-      parser.addText('<?something foo?>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<?something foo?>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(instruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(instruction.parse.calls.argsFor(0)[1].text).toEqual('<?');
@@ -191,9 +191,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls processingInstruction.parse()', () => {
       spyOn(processingInstruction, 'parse');
-      parser.addText('<?something foo?>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<?something foo?>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(processingInstruction.parse.calls.argsFor(0)[1].target.text).toEqual('something');
@@ -202,9 +202,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls processingInstruction.parse() when there is no target name', () => {
       spyOn(processingInstruction, 'parse');
-      parser.addText('<??>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<??>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(processingInstruction.parse.calls.argsFor(0)[1].target).toBeUndefined();
@@ -213,18 +213,18 @@ describe('ParsedStream (unit)', () => {
 
    it('calls space.parse()', () => {
       spyOn(space, 'parse');
-      parser.addText('   x');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('   x');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(space.parse).toHaveBeenCalled();
    });
 
    it('calls declaration.parse()', () => {
       spyOn(declaration, 'parse');
-      parser.addText('<!FOO >');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<!FOO >');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(declaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(declaration.parse.calls.argsFor(0)[1].text).toEqual('<!');
@@ -232,19 +232,19 @@ describe('ParsedStream (unit)', () => {
    });
 
    it('returns the undefined declaration if none provided', () => {
-      parser.addText('<!');
-      parser.endText();
-      parser.read(); // ignore entity meta data
-      const result = parser.read();
+      pTokenStream.addText('<!');
+      pTokenStream.endText();
+      pTokenStream.read(); // ignore entity meta data
+      const result = pTokenStream.read();
 
       expect(result.type).toEqual('UNKNOWNDECL');
    });
 
    it('calls envelope.parse()', () => {
       spyOn(envelope, 'parse');
-      parser.addText('<![FOO [');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<![FOO [');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(envelope.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(envelope.parse.calls.argsFor(0)[1].text).toEqual('<![');
@@ -252,19 +252,19 @@ describe('ParsedStream (unit)', () => {
    });
 
    it('returns the undefined envelope if none provided', () => {
-      parser.addText('<![[');
-      parser.endText();
-      parser.read(); // ignore entity meta data
-      const result = parser.read();
+      pTokenStream.addText('<![[');
+      pTokenStream.endText();
+      pTokenStream.read(); // ignore entity meta data
+      const result = pTokenStream.read();
 
       expect(result.type).toEqual('UNKNOWNENVELOPE');
    });
 
    it('calls cdata.parse()', () => {
       spyOn(cdata, 'parse');
-      parser.addText('<![CDATA[] something]]>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<![CDATA[] something]]>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(cdata.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(cdata.parse.calls.argsFor(0)[1].envelopeType.text).toEqual('CDATA');
@@ -273,9 +273,9 @@ describe('ParsedStream (unit)', () => {
 
    it('calls xmlDeclaration.parse()', () => {
       spyOn(xmlDeclaration, 'parse');
-      parser.addText('<?xml version="1.0"?>');
-      parser.endText();
-      parser.read();
+      pTokenStream.addText('<?xml version="1.0"?>');
+      pTokenStream.endText();
+      pTokenStream.read();
 
       expect(xmlDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(LTokenSource);
       expect(xmlDeclaration.parse.calls.argsFor(0)[1].target.text).toEqual('xml');
@@ -283,12 +283,12 @@ describe('ParsedStream (unit)', () => {
    });
 
    it('parses a single "]" as a charData', () => {
-      parser.addText('<?xml version="1.0"?><one>]</one>');
-      parser.endText();
-      parser.read(); // metadata
-      parser.read(); // xml declaration
-      parser.read(); // "one" element open
-      const result = parser.read();
+      pTokenStream.addText('<?xml version="1.0"?><one>]</one>');
+      pTokenStream.endText();
+      pTokenStream.read(); // metadata
+      pTokenStream.read(); // xml declaration
+      pTokenStream.read(); // "one" element open
+      const result = pTokenStream.read();
 
       expect(result.text.text).toEqual(']');
    });

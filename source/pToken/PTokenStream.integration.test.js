@@ -4,22 +4,22 @@
 import { EntityMetaData } from '../basic';
 import { defaultExtractors, LTokenSource } from '../lToken';
 
-import ParsedStream from './ParsedStream.js';
+import PTokenStream from './PTokenStream.js';
 
-describe('ParsedStream (integration)', () => {
-   let parser;
+describe('PTokenStream (integration)', () => {
+   let pTokenStream;
 
    beforeEach(() => {
-      parser = new ParsedStream();
+      pTokenStream = new PTokenStream();
    });
 
    function expectInputToProduceTypes(input, types, done) {
       const results = [];
 
-      parser.on('data', (data) => {
+      pTokenStream.on('data', (data) => {
          results.push(data);
       });
-      parser.on('end', () => {
+      pTokenStream.on('end', () => {
          let expecteds = types;
          if (!Array.isArray(types)) {
             expecteds = [ types ];
@@ -36,8 +36,8 @@ describe('ParsedStream (integration)', () => {
       });
 
       if (input) {
-         parser.addText(input);
-         parser.endText();
+         pTokenStream.addText(input);
+         pTokenStream.endText();
       }
    }
 
@@ -46,7 +46,7 @@ describe('ParsedStream (integration)', () => {
       it('uses the provided LTokenSource', (done) => {
          const emd = new EntityMetaData();
          const source = new LTokenSource(defaultExtractors, emd);
-         parser = new ParsedStream(source);
+         pTokenStream = new PTokenStream(source);
 
          source.addText('blah<elementName>');
          source.endText();

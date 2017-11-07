@@ -217,6 +217,40 @@ describe('EntityManager (unit)', () => {
 
    });
 
+   describe('getEntityToken', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getEntityToken();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns the token asked for', () => {
+         const token = makeToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityToken('test')).toEqual(token);
+      });
+
+   });
+
+   describe('getParameterEntityToken', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getParameterEntityToken();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns the token asked for', () => {
+         const token = makeToken('test', 'two');
+         manager.addParameterEntityFromInternalSubset(token);
+
+         expect(manager.getParameterEntityToken('test')).toEqual(token);
+      });
+
+   });
+
    describe('setExternalSubsetEntity()', () => {
 
       it('adds nothing if no parameter is passed', () => {

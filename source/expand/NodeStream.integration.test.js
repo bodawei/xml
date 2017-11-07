@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 import * as xtoken from '../xToken';
 
@@ -27,10 +27,10 @@ describe('NodeStream (integration)', () => {
    it('adds two levels of entities', (done) => {
       const results = [];
       const manager = new EntityManager();
-      const parsed = new ParsedStream();
+      const pTokenStream = new PTokenStream();
       const token = new TokenStream();
       const node = new NodeStream(manager);
-      parsed.pipe(token).pipe(node);
+      pTokenStream.pipe(token).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
@@ -53,18 +53,18 @@ describe('NodeStream (integration)', () => {
          ]);
          done();
       });
-      parsed.addText('<?xml version="1.0"?><!DOCTYPE one ' +
+      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
          '[<!ENTITY child "&quot;grandchild&quot;">]><one>&child;</one>');
-      parsed.endText();
+      pTokenStream.endText();
    });
 
    it('adds the content of parameter entities, which can declare general entities', (done) => {
       const results = [];
       const manager = new EntityManager();
-      const parsed = new ParsedStream();
+      const pTokenStream = new PTokenStream();
       const token = new TokenStream();
       const node = new NodeStream(manager);
-      parsed.pipe(token).pipe(node);
+      pTokenStream.pipe(token).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
@@ -86,7 +86,7 @@ describe('NodeStream (integration)', () => {
          /* eslint-enable indent */
          done();
       });
-      parsed.addText(`<?xml version="1.0"?>
+      pTokenStream.addText(`<?xml version="1.0"?>
          <!DOCTYPE one [
             <!ENTITY % pEntity "<!ENTITY genEntity 'foo'>">
             %pEntity;
@@ -94,13 +94,13 @@ describe('NodeStream (integration)', () => {
          <one>
             &genEntity;
          </one>`);
-      parsed.endText();
+      pTokenStream.endText();
    });
 
    it('expands an parameter entity values in an EntityValue', (done) => {
       const results = [];
       const manager = new EntityManager();
-      const pTokenStream = new ParsedStream();
+      const pTokenStream = new PTokenStream();
       const xTokenStream = new TokenStream();
       const node = new NodeStream(manager);
       pTokenStream.pipe(xTokenStream).pipe(node);
@@ -123,7 +123,7 @@ describe('NodeStream (integration)', () => {
    it('expands an parameter entity inside a parameter entity', (done) => {
       const results = [];
       const manager = new EntityManager();
-      const pTokenStream = new ParsedStream();
+      const pTokenStream = new PTokenStream();
       const xTokenStream = new TokenStream();
       const node = new NodeStream(manager);
       pTokenStream.pipe(xTokenStream).pipe(node);
@@ -133,6 +133,10 @@ describe('NodeStream (integration)', () => {
          matchTokenTypes(results[5].value, [
             xtoken.text.Token,
             xtoken.entityStart.ParamToken,
+            xtoken.text.Token,
+            xtoken.entityStart.ParamToken,
+            xtoken.text.Token,
+            xtoken.entityEnd.ParamToken,
             xtoken.text.Token,
             xtoken.entityEnd.ParamToken,
             xtoken.text.Token,

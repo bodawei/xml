@@ -91,7 +91,7 @@ class TokenStream extends stream.Transform {
             this.push(xmlDeclaration.makeToken(pToken));
             break;
          default:
-            this.push(new Error(`Unknown parsed type "${pToken.type}" encountered.`));
+            this.push(new Error(`Unknown PToken type "${pToken.type}" encountered.`));
       }
 
       done();

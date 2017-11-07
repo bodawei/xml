@@ -3,7 +3,7 @@
 
 import { EntityLocation, Offset } from '../basic';
 import { ValidityError } from '../error';
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 
 import ValidityStream from './ValidityStream.js';
@@ -13,7 +13,7 @@ describe('ValidityStream (integration)', () => {
    let parser;
 
    beforeEach(() => {
-      parser = new ParsedStream();
+      parser = new PTokenStream();
       const tokenizer = new TokenStream();
       validator = new ValidityStream();
       parser.pipe(tokenizer).pipe(validator);

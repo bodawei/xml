@@ -24,7 +24,7 @@ import {
    xmlDeclaration,
 } from '../xToken';
 
-class ParsedStream extends stream.Readable {
+class PTokenStream extends stream.Readable {
 
    constructor(metaDataOrTokenSource) {
       super({
@@ -126,13 +126,13 @@ class ParsedStream extends stream.Readable {
                elementEnd.parse(this._lTokenSource, markupStartLToken, deliverParse);
                break;
             case '<?':
-               instruction.parse(this._lTokenSource, markupStartLToken, (parsed) => {
-                  const target = parsed.target ? parsed.target.text : '';
+               instruction.parse(this._lTokenSource, markupStartLToken, (pToken) => {
+                  const target = pToken.target ? pToken.target.text : '';
 
                   if (target.toLocaleUpperCase() === 'XML') {
-                     xmlDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                     xmlDeclaration.parse(this._lTokenSource, pToken, deliverParse);
                   } else {
-                     processingInstruction.parse(this._lTokenSource, parsed, deliverParse);
+                     processingInstruction.parse(this._lTokenSource, pToken, deliverParse);
                   }
                });
                break;
@@ -140,15 +140,15 @@ class ParsedStream extends stream.Readable {
                comment.parse(this._lTokenSource, markupStartLToken, deliverParse);
                break;
             case '<!':
-               declaration.parse(this._lTokenSource, markupStartLToken, (parsed) => {
-                  if (!parsed.declType) {
-                     deliverParse(parsed);
+               declaration.parse(this._lTokenSource, markupStartLToken, (pToken) => {
+                  if (!pToken.declType) {
+                     deliverParse(pToken);
                      return;
                   }
 
-                  switch (parsed.declType.text.toLocaleUpperCase()) {
+                  switch (pToken.declType.text.toLocaleUpperCase()) {
                      case 'DOCTYPE':
-                        docTypeStart.parse(this._lTokenSource, parsed, (docTypeStart) => {
+                        docTypeStart.parse(this._lTokenSource, pToken, (docTypeStart) => {
                            if (docTypeStart.startInternalSubset) {
                               this.waitingForInternalClose = true;
                               deliverParse(docTypeStart);
@@ -161,30 +161,30 @@ class ParsedStream extends stream.Readable {
                         });
                         break;
                      case 'ENTITY':
-                        entityDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                        entityDeclaration.parse(this._lTokenSource, pToken, deliverParse);
                         break;
                      case 'NOTATION':
-                        notationDeclaration.parse(this._lTokenSource, parsed, deliverParse);
+                        notationDeclaration.parse(this._lTokenSource, pToken, deliverParse);
                         break;
                      default:
-                        deliverParse(parsed);
+                        deliverParse(pToken);
                         break;
                   }
                });
                break;
             case '<![':
-               envelope.parse(this._lTokenSource, markupStartLToken, (parsed) => {
-                  if (!parsed.envelopeType) {
-                     deliverParse(parsed);
+               envelope.parse(this._lTokenSource, markupStartLToken, (pToken) => {
+                  if (!pToken.envelopeType) {
+                     deliverParse(pToken);
                      return;
                   }
 
-                  switch (parsed.envelopeType.text.toLocaleUpperCase()) {
+                  switch (pToken.envelopeType.text.toLocaleUpperCase()) {
                      case 'CDATA':
-                        cdata.parse(this._lTokenSource, parsed, deliverParse);
+                        cdata.parse(this._lTokenSource, pToken, deliverParse);
                         break;
                      default:
-                        deliverParse(parsed);
+                        deliverParse(pToken);
                         break;
                   }
                });
@@ -199,4 +199,4 @@ class ParsedStream extends stream.Readable {
 
 }
 
-export default ParsedStream;
+export default PTokenStream;

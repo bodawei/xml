@@ -85,6 +85,17 @@ describe('NodeStream (unit)', () => {
             expect(nodeStream.read()).toEqual(new xToken.entityStart.ParamToken('test'));
          });
 
+         it('passes a reference with no referent straight through', () => {
+            const declToken = new xToken.entityDeclaration.ParamToken('test', [], undefined, undefined, []);
+            const refToken = new xToken.entityReference.ParamToken('test', []);
+            declToken.value.push(refToken);
+
+            nodeStream.write(declToken);
+
+            const actualDecl = nodeStream.read();
+            expect(actualDecl.value[0]).toEqual(new xToken.entityReference.ParamToken('test', []));
+         });
+
       });
 
    });

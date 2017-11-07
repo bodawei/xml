@@ -47,21 +47,21 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('envelope', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(envelope, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: envelope.TYPE,
          };
       });
 
       it('calls envelope.checkWellFormed() when encountering a CDATA', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = envelope.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toEqual(true);
          expect(args[2]).toBeInstanceOf(ErrorCollector);
          expect(args[3]).toEqual(metaData);
@@ -70,11 +70,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('cdata', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(cdata, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: cdata.TYPE,
             text: makeLToken('good'),
          };
@@ -82,10 +82,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls cdata.checkWellFormed() when encountering a CDATA', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = cdata.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -95,7 +95,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports no errors when in the content state', () => {
             spyOn(checker, 'push');
             checker._state = 'IN_CONTENT';
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.count()).toEqual(1);
          });
@@ -103,7 +103,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if not IN_CONTENT', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CDATA_INVALID_DOC_CONTEXT);
          });
@@ -113,11 +113,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('charData', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(charData, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: charData.TYPE,
             text: makeLToken('good'),
          };
@@ -125,10 +125,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls charData.checkWellFormed() when encountering a CHARDATA', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = charData.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -138,7 +138,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports no errors when in the content state', () => {
             spyOn(checker, 'push');
             checker._state = 'IN_CONTENT';
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.count()).toEqual(1);
          });
@@ -146,7 +146,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if not IN_CONTENT', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
          });
@@ -156,11 +156,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('comment', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(comment, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: comment.TYPE,
             text: makeLToken('good'),
             close: makeLToken('-->'),
@@ -168,10 +168,10 @@ describe('WFCheckStream (unit)', () => {
       });
 
       it('calls comment.checkWellFormed() when encountering a COMMENT', () => {
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = comment.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -181,15 +181,15 @@ describe('WFCheckStream (unit)', () => {
          it('reports no errors when in non-start state', () => {
             spyOn(checker, 'push');
             checker._state = 'IN_CONTENT';
-            checker.write(parsed);
+            checker.write(pToken);
 
-            expect(checker.push.calls.count()).toEqual(1); // for the parsed itself
+            expect(checker.push.calls.count()).toEqual(1); // for the pToken itself
          });
 
          it('reports an error if in start', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.COMMENT_INVALID_CONTEXT);
          });
@@ -200,50 +200,50 @@ describe('WFCheckStream (unit)', () => {
 
    it('calls declaration.checkWellFormed() when encountering an declaration parsing', () => {
       spyOn(declaration, 'checkWellFormed');
-      const parsed = {
+      const pToken = {
          type: declaration.TYPE,
          open: makeLToken('<'),
       };
       checker.write(metaData);
-      checker.write(parsed);
+      checker.write(pToken);
 
       const args = declaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
+      expect(args[0]).toEqual(pToken);
       expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
    it('calls instruction.checkWellFormed() when encountering an declaration parsing', () => {
       spyOn(instruction, 'checkWellFormed');
-      const parsed = {
+      const pToken = {
          type: instruction.TYPE,
          open: makeLToken('<?'),
       };
       checker.write(metaData);
-      checker.write(parsed);
+      checker.write(pToken);
 
       const args = instruction.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
+      expect(args[0]).toEqual(pToken);
       expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
    describe('docTypeStart', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(docTypeStart, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: docTypeStart.TYPE,
             open: makeLToken('<'),
          };
       });
 
       it('calls docTypeStart.checkWellFormed() when encountering an DOCTYPE start parsing', () => {
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = docTypeStart.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -253,7 +253,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if in the DTD', () => {
             checker._state = 'IN_DTD';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
          });
@@ -263,21 +263,21 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('docTypeEnd', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(docTypeEnd, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: docTypeEnd.TYPE,
             closeInternalSubset: makeLToken(']'),
          };
       });
 
       it('calls docTypeEnd.checkWellFormed() when encountering a doctype end parsing', () => {
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = docTypeEnd.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[2]).toBeInstanceOf(ErrorCollector);
          expect(args[3]).toEqual(metaData);
       });
@@ -296,7 +296,7 @@ describe('WFCheckStream (unit)', () => {
                done();
             });
 
-            checker.write(parsed);
+            checker.write(pToken);
             checker.end();
          });
 
@@ -305,11 +305,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('elementStart', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(elementStart, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: elementStart.TYPE,
             open: makeLToken('<'),
          };
@@ -317,21 +317,21 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls elementStart.checkWellFormed() when encountering an element start', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = elementStart.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
 
       it('calls elementStart.checkWellFormed() when encountering an empty element', () => {
-         parsed.type = elementStart.EMPTY_TYPE;
+         pToken.type = elementStart.EMPTY_TYPE;
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = elementStart.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -340,14 +340,14 @@ describe('WFCheckStream (unit)', () => {
 
          it('changes the state to be in content if in PROLOG state', () => {
             checker._state = 'PROLOG';
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker._state).toEqual('IN_CONTENT');
          });
 
          it('changes the state to be in content if in PROLOG_PREDOCTYPE state', () => {
             checker._state = 'PROLOG_PREDOCTYPE';
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker._state).toEqual('IN_CONTENT');
          });
@@ -355,7 +355,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if in the DTD', () => {
             checker._state = 'IN_DTD';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT);
          });
@@ -363,7 +363,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if in some other state', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
          });
@@ -371,16 +371,16 @@ describe('WFCheckStream (unit)', () => {
          it('reports no error if in content', () => {
             checker._state = 'IN_CONTENT';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.count()).toEqual(1);
          });
 
          it('errors include the element name if present', () => {
-            parsed.name = makeLToken('bogusName');
+            pToken.name = makeLToken('bogusName');
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].message).toContain('bogusName');
          });
@@ -390,11 +390,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('elementEnd', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(elementEnd, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: elementEnd.TYPE,
             open: makeLToken('</'),
          };
@@ -402,10 +402,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = elementEnd.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -423,7 +423,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if in the DTD', () => {
             checker._state = 'IN_DTD';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT);
          });
@@ -431,7 +431,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if in some other state', () => {
             checker._state = 'PROLOG';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
          });
@@ -439,16 +439,16 @@ describe('WFCheckStream (unit)', () => {
          it('reports no error if in content', () => {
             checker._state = 'IN_CONTENT';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.count()).toEqual(1);
          });
 
          it('errors include the element name if present', () => {
-            parsed.name = makeLToken('bogusName');
+            pToken.name = makeLToken('bogusName');
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].message).toContain('bogusName');
          });
@@ -465,9 +465,9 @@ describe('WFCheckStream (unit)', () => {
             });
 
             it('reports an error if trying to close an element that was not opened', () => {
-               parsed.name = makeLToken('two');
+               pToken.name = makeLToken('two');
                spyOn(checker, 'push');
-               checker.write(parsed);
+               checker.write(pToken);
 
                expect(checker.push.calls.argsFor(0)[0])
                   .toEqual(new WellFormedError(WellFormedError.ID.ELEMENT_UNBALANCED, [ 'one', 'two' ],
@@ -481,13 +481,13 @@ describe('WFCheckStream (unit)', () => {
                   open: makeLToken('<'),
                   name: makeLToken('two'),
                });
-               parsed.name = makeLToken('two');
-               checker.write(parsed);
+               pToken.name = makeLToken('two');
+               checker.write(pToken);
                spyOn(checker, 'push');
-               parsed.name = makeLToken('one');
-               checker.write(parsed);
+               pToken.name = makeLToken('one');
+               checker.write(pToken);
 
-               expect(checker.push.calls.count()).toEqual(1);  // for the parsed itself
+               expect(checker.push.calls.count()).toEqual(1);  // for the pToken itself
             });
 
             it('reports no error if an empty element is found between start and end', () => {
@@ -497,10 +497,10 @@ describe('WFCheckStream (unit)', () => {
                   name: makeLToken('two'),
                });
                spyOn(checker, 'push');
-               parsed.name = makeLToken('one');
-               checker.write(parsed);
+               pToken.name = makeLToken('one');
+               checker.write(pToken);
 
-               expect(checker.push.calls.count()).toEqual(1);  // for the parsed itself
+               expect(checker.push.calls.count()).toEqual(1);  // for the pToken itself
             });
 
          });
@@ -511,25 +511,25 @@ describe('WFCheckStream (unit)', () => {
 
    it('calls entityDeclaration.checkWellFormed() when encountering an ENTITY declaation parsing', () => {
       spyOn(entityDeclaration, 'checkWellFormed');
-      const parsed = {
+      const pToken = {
          type: entityDeclaration.TYPE,
          open: makeLToken('<'),
       };
       checker.write(metaData);
-      checker.write(parsed);
+      checker.write(pToken);
 
       const args = entityDeclaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
+      expect(args[0]).toEqual(pToken);
       expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
 
    describe('entity reference', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(entityReference, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: entityReference.TYPE,
             open: makeLToken('&'),
          };
@@ -537,10 +537,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = entityReference.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -550,7 +550,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if not IN_CONTENT', () => {
             checker._state = 'IN_DTD';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
          });
@@ -560,11 +560,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('parameter entity reference', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(entityReference, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: entityReference.PARAM_TYPE,
             open: makeLToken('%'),
          };
@@ -572,10 +572,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls elementEnd.checkWellFormed() when encountering PEReference', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = entityReference.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -585,7 +585,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if not IN_DTD', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
          });
@@ -596,15 +596,15 @@ describe('WFCheckStream (unit)', () => {
 
    it('calls notationDeclaration.checkWellFormed() when encountering a notation declaration', () => {
       spyOn(notationDeclaration, 'checkWellFormed');
-      const parsed = {
+      const pToken = {
          type: notationDeclaration.TYPE,
          open: makeLToken('<!'),
       };
       checker.write(metaData);
-      checker.write(parsed);
+      checker.write(pToken);
 
       const args = notationDeclaration.checkWellFormed.calls.argsFor(0);
-      expect(args[0]).toEqual(parsed);
+      expect(args[0]).toEqual(pToken);
       expect(args[1]).toBeInstanceOf(ErrorCollector);
       expect(args[2]).toEqual(metaData);
    });
@@ -612,23 +612,23 @@ describe('WFCheckStream (unit)', () => {
    it('reports an error if a NOTATION declaration is encountered not in the DTD', () => {
       checker._state = 'START';
       checker.write(metaData);
-      const parsed = {
+      const pToken = {
          type: notationDeclaration.TYPE,
          open: makeLToken('<!'),
       };
 
       spyOn(checker, 'push');
-      checker.write(parsed);
+      checker.write(pToken);
 
       expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
    });
 
    describe('processingInstruction', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(processingInstruction, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: processingInstruction.TYPE,
             open: makeLToken('<?'),
          };
@@ -636,10 +636,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls processingInstruction.checkWellFormed()', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = processingInstruction.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -649,7 +649,7 @@ describe('WFCheckStream (unit)', () => {
          it('reports an error if not yet started', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PI_INVALID_CONTEXT);
          });
@@ -659,21 +659,21 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('space', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(space, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: space.TYPE,
             text: makeLToken(' '),
          };
       });
 
       it('calls space.checkWellFormed() when encountering a space parsing', () => {
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = space.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -684,7 +684,7 @@ describe('WFCheckStream (unit)', () => {
             checker._state = 'START';
             spyOn(checker, 'push');
 
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.SPACE_INVALID_CONTEXT);
          });
@@ -694,11 +694,11 @@ describe('WFCheckStream (unit)', () => {
    });
 
    describe('xmlDeclaration', () => {
-      let parsed;
+      let pToken;
 
       beforeEach(() => {
          spyOn(xmlDeclaration, 'checkWellFormed');
-         parsed = {
+         pToken = {
             type: xmlDeclaration.TYPE,
             open: makeLToken('<?'),
          };
@@ -706,10 +706,10 @@ describe('WFCheckStream (unit)', () => {
 
       it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
          checker.write(metaData);
-         checker.write(parsed);
+         checker.write(pToken);
 
          const args = xmlDeclaration.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(parsed);
+         expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
       });
@@ -720,7 +720,7 @@ describe('WFCheckStream (unit)', () => {
             checker._state = 'IN_DTD';
             spyOn(checker, 'push');
 
-            checker.write(parsed);
+            checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
          });

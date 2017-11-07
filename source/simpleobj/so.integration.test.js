@@ -1,26 +1,26 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 import SimpleObjStream from './so.js';
 
 describe('SimpleObjStream (integration)', () => {
-   let parsedStream;
+   let pTokenStream;
    let tokenStream;
    let objStream;
 
    beforeEach(() => {
-      parsedStream = new ParsedStream();
+      pTokenStream = new PTokenStream();
       tokenStream = new TokenStream();
       objStream = new SimpleObjStream();
 
-      parsedStream.pipe(tokenStream).pipe(objStream);
+      pTokenStream.pipe(tokenStream).pipe(objStream);
    });
 
    it('builds a simple result', (done) => {
-      parsedStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<two>2</two>1</one>');
-      parsedStream.endText();
+      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<two>2</two>1</one>');
+      pTokenStream.endText();
 
       objStream.on('data', (final) => {
          const result = JSON.parse(JSON.stringify(final));
@@ -41,8 +41,8 @@ describe('SimpleObjStream (integration)', () => {
    });
 
    it('includes CDATA', (done) => {
-      parsedStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
-      parsedStream.endText();
+      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
+      pTokenStream.endText();
 
       objStream.on('data', (final) => {
          const result = JSON.parse(JSON.stringify(final));
@@ -62,11 +62,11 @@ describe('SimpleObjStream (integration)', () => {
    //    const SRC_ROOT = '..';
    //    /* eslint-disable no-console, global-require */
 
-   //    const ParsedStream = require(SRC_ROOT + '/parse').ParsedStream;
+   //    const PTokenStream = require(SRC_ROOT + '/parse').PTokenStream;
    //    const TokenStream = require(SRC_ROOT + '/tokenize').TokenStream;
    //    const SimpleObjStream = require('./so.js').default;
 
-   //    const parsedStream = new ParsedStream();
+   //    const parsedStream = new PTokenStream();
    //    const tokenStream = new TokenStream();
    //    const objStream = new SimpleObjStream();
    //    parsedStream.on('end', () => {

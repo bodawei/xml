@@ -2,7 +2,7 @@
 
 import { Transform } from 'readable-stream';
 
-import { LiteralPTokenStream, ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 import { TokenStream } from '../tokenize';
 import {
    entityDeclaration,
@@ -64,7 +64,7 @@ class NodeStream extends Transform {
          if (declarationSource) {
             const tokenType = isPeRef ? entityStart.ParamToken : entityStart.Token;
             this.push(new tokenType(xToken.name));
-            const parser = new ParsedStream(declarationSource);
+            const pTokenStream = new PTokenStream(declarationSource);
             const tokenizer = new TokenStream();
 
             this._child = {
@@ -75,7 +75,7 @@ class NodeStream extends Transform {
 
             this._child.stream.on('data', this._childData);
             this._child.stream.on('end', this._childDone);
-            parser.pipe(tokenizer).pipe(this._child.stream);
+            pTokenStream.pipe(tokenizer).pipe(this._child.stream);
 
             return;
          }
@@ -104,98 +104,34 @@ class NodeStream extends Transform {
    }
 
    _populateEntityValue(entityDeclaration, done) {
-      const self = this;
-      const inProgress = {
-         count: 0,
-      };
-
-      function finished() {
-         inProgress.count --;
-         if (inProgress.count === 0) {
-            let combined = [];
-
-            for (let index = 0; index < entityDeclaration.value.length; index++) {
-               const item = entityDeclaration.value[index];
-
-               if (item instanceof entityReference.ParamToken) {
-                  if (inProgress[index]) {
-                     combined.push(new entityStart.ParamToken(item.name));
-                     combined = combined.concat(
-                        self._processArray(inProgress[index].data, index.toString(),
-                        inProgress));
-                     combined.push(new entityEnd.ParamToken(item.name));
-                  }
-               } else {
-                  combined.push(item);
-               }
-            }
-
-            entityDeclaration.value = combined;
-            done();
-         }
-      }
+      const newValue = [];
 
       for (let index = 0; index < entityDeclaration.value.length; index++) {
          const item = entityDeclaration.value[index];
 
          if (item instanceof entityReference.ParamToken) {
-            this._addEntityExpansion(item, inProgress, index.toString(), finished);
-         }
-      }
+            const entityToken = this._entityManager.getParameterEntityToken(item.name);
 
-      if (inProgress.count === 0) {
-         done();
-      }
-   }
+            if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
+               newValue.push(item);
+            } else {
+               newValue.push(new entityStart.ParamToken(item.name));
 
-   _processArray(anArray, base, workingSet) {
-      let combined = [];
+               for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
+                  newValue.push(entityToken.value[tokenIndex]);
+               }
 
-      for (let index = 0; index < anArray.length; index++) {
-         const item = anArray[index];
-
-         if (item instanceof entityReference.ParamToken) {
-            const ctr = `${base}.${index}`;
-            if (workingSet[ctr]) {
-               combined.push(new entityStart.ParamToken(item.name));
-               combined = combined.concat(this._processArray(workingSet[ctr].data, index.toString(), workingSet));
-               combined.push(new entityEnd.ParamToken(item.name));
+               newValue.push(new entityEnd.ParamToken(item.name));
             }
          } else {
-            combined.push(item);
+            newValue.push(item);
          }
       }
 
-      return combined;
+      entityDeclaration.value = newValue;
+      done();
    }
 
-   _addEntityExpansion(xToken, workingSet, baseRef, finished) {
-      const lTokenStream = this._entityManager.getParameterEntity(xToken.name);
-
-      // if (!lTokenStream) {
-      //    return;
-      // }
-
-      const literalStream = new LiteralPTokenStream(lTokenStream, { peRef: true });
-      const xTokenStream = new TokenStream();
-      literalStream.pipe(xTokenStream);
-      let literalIndex = 0;
-
-      workingSet.count++;
-
-      workingSet[baseRef] = {
-         stream: literalStream,
-         data: [],
-      };
-      xTokenStream.on('end', finished);
-      xTokenStream.on('data', (xToken) => {
-         literalIndex++;
-         workingSet[baseRef].data.push(xToken);
-         if (xToken instanceof entityReference.ParamToken) {
-            this._addEntityExpansion(xToken, workingSet, `${baseRef}.${literalIndex}`);
-         }
-      });
-   }
 }
 
 export default NodeStream;

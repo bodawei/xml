@@ -29,142 +29,142 @@ describe('TokenStream (unit)', () => {
 
    it('calls declaration.makeToken()', () => {
       spyOn(declaration, 'makeToken');
-      const parsed = { type: declaration.TYPE };
+      const pToken = { type: declaration.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(declaration.makeToken).toHaveBeenCalledWith(parsed);
+      expect(declaration.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls envelope.makeToken()', () => {
       spyOn(envelope, 'makeToken');
-      const parsed = { type: envelope.TYPE };
+      const pToken = { type: envelope.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(envelope.makeToken).toHaveBeenCalledWith(parsed);
+      expect(envelope.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls instruction.makeToken()', () => {
       spyOn(instruction, 'makeToken');
-      const parsed = { type: instruction.TYPE };
+      const pToken = { type: instruction.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(instruction.makeToken).toHaveBeenCalledWith(parsed);
+      expect(instruction.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls cdata.makeToken()', () => {
       spyOn(cdata, 'makeToken');
-      const parsed = { type: cdata.TYPE };
+      const pToken = { type: cdata.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(cdata.makeToken).toHaveBeenCalledWith(parsed);
+      expect(cdata.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls charData.makeToken()', () => {
       spyOn(charData, 'makeToken');
-      const parsed = { type: charData.TYPE };
+      const pToken = { type: charData.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(charData.makeToken).toHaveBeenCalledWith(parsed);
+      expect(charData.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls comment.makeToken()', () => {
       spyOn(comment, 'makeToken');
-      const parsed = { type: comment.TYPE };
+      const pToken = { type: comment.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(comment.makeToken).toHaveBeenCalledWith(parsed);
+      expect(comment.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls elementStart.makeToken()', () => {
       spyOn(elementStart, 'makeToken');
-      const parsed = { type: elementStart.TYPE };
+      const pToken = { type: elementStart.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementStart.makeToken).toHaveBeenCalledWith(parsed);
+      expect(elementStart.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls elementStart.makeToken() with an empty element', () => {
       spyOn(elementStart, 'makeToken');
-      const parsed = { type: elementStart.EMPTY_TYPE };
+      const pToken = { type: elementStart.EMPTY_TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementStart.makeToken).toHaveBeenCalledWith(parsed);
+      expect(elementStart.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls elementEnd.makeToken()', () => {
       spyOn(elementEnd, 'makeToken');
-      const parsed = { type: elementEnd.TYPE };
+      const pToken = { type: elementEnd.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementEnd.makeToken).toHaveBeenCalledWith(parsed);
+      expect(elementEnd.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls entityReference.makeToken() with a parameter entity reference', () => {
       spyOn(entityReference, 'makeToken');
-      const parsed = { type: entityReference.PARAM_TYPE };
+      const pToken = { type: entityReference.PARAM_TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(entityReference.makeToken).toHaveBeenCalledWith(parsed);
+      expect(entityReference.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls entityReference.makeToken()', () => {
       spyOn(entityReference, 'makeToken');
-      const parsed = { type: entityReference.TYPE };
+      const pToken = { type: entityReference.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(entityReference.makeToken).toHaveBeenCalledWith(parsed);
+      expect(entityReference.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls notationDeclaration.makeToken()', () => {
       spyOn(notationDeclaration, 'makeToken');
-      const parsed = { type: notationDeclaration.TYPE };
+      const pToken = { type: notationDeclaration.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(notationDeclaration.makeToken).toHaveBeenCalledWith(parsed);
+      expect(notationDeclaration.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls processingInstruction.makeToken()', () => {
       spyOn(processingInstruction, 'makeToken');
-      const parsed = { type: processingInstruction.TYPE };
+      const pToken = { type: processingInstruction.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(processingInstruction.makeToken).toHaveBeenCalledWith(parsed);
+      expect(processingInstruction.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls space.makeToken()', () => {
       spyOn(space, 'makeToken');
-      const parsed = { type: space.TYPE };
+      const pToken = { type: space.TYPE };
 
-      tokenStream.write(parsed);
+      tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(space.makeToken).toHaveBeenCalledWith(parsed);
+      expect(space.makeToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls text.makeToken()', () => {
@@ -177,12 +177,12 @@ describe('TokenStream (unit)', () => {
       expect(text.makeXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('throws an error if asked to deal with an unknown parsed type', () => {
+   it('throws an error if asked to deal with an unknown pToken type', () => {
       tokenStream.write({ type: 'BOGUS' });
 
       const token = tokenStream.read();
 
-      expect(token.message).toEqual('Unknown parsed type "BOGUS" encountered.');
+      expect(token.message).toEqual('Unknown PToken type "BOGUS" encountered.');
    });
 
 });

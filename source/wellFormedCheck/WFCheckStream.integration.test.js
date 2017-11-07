@@ -6,18 +6,18 @@ import {
    EntityLocation,
  } from '../basic';
 import { WellFormedError } from '../error';
-import { ParsedStream } from '../pToken';
+import { PTokenStream } from '../pToken';
 
 import WFCheckStream from './WFCheckStream.js';
 
 describe('WFCheckStream (integration)', () => {
-   let parsedStream;
+   let pTokenStream;
    let checker;
 
    beforeEach(() => {
-      parsedStream = new ParsedStream();
+      pTokenStream = new PTokenStream();
       checker = new WFCheckStream();
-      parsedStream.pipe(checker);
+      pTokenStream.pipe(checker);
    });
 
    function expectInputToProduce(input, error, done) {
@@ -34,8 +34,8 @@ describe('WFCheckStream (integration)', () => {
          expect(errors[0]).toEqual(error);
          done();
       });
-      parsedStream.addText(input);
-      parsedStream.endText();
+      pTokenStream.addText(input);
+      pTokenStream.endText();
    }
 
    it('reports an error when the processingInstruction has a missing space', (done) => {
