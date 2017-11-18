@@ -7,7 +7,7 @@ import {
    charData,
    elementStart,
    elementEnd,
-} from '../xToken';
+} from '../token';
 
 class Node {
 
@@ -32,14 +32,14 @@ class SimpleObj extends stream.Transform {
       this._root = undefined;
    }
 
-   _transform(parsed, _, done) {
+   _transform(xToken, _, done) {
       let leaf;
       if (this._stack.length > 0) {
          leaf = this._stack[this._stack.length - 1];
       }
 
-      if (parsed instanceof elementStart.Token) {
-         const el = new Node(parsed.name);
+      if (xToken instanceof elementStart.XToken) {
+         const el = new Node(xToken.name);
          if (!this._root) {
             this._root = el;
          } else {
@@ -50,24 +50,24 @@ class SimpleObj extends stream.Transform {
          //    padding += ' ';
          // }
          // if (this._stack.length < 50) {
-         //    console.log('PUSH ', padding + '\\' + parsed.name)
+         //    console.log('PUSH ', padding + '\\' + xToken.name)
          // }
          this._stack.push(el);
-      } else if (parsed instanceof elementEnd.Token) {
+      } else if (xToken instanceof elementEnd.XToken) {
          this._stack.pop();
          // let padding2 = '';
          // for (var index = 0; index < this._stack.length; index++) {
          //    padding2 += ' ';
          // }
          // if (this._stack.length < 50) {
-         //    console.log('POP  ', padding2 + '/' + parsed.name)
+         //    console.log('POP  ', padding2 + '/' + xToken.name)
          // }
-      } else if (parsed instanceof charData.Token) {
-         // console.log('TEXT ', parsed.text)
-         leaf.addContent(parsed.text);
-      } else if (parsed instanceof cdata.Token) {
-         // console.log('TEXT ', parsed.text)
-         leaf.addContent(parsed.text);
+      } else if (xToken instanceof charData.XToken) {
+         // console.log('TEXT ', xToken.text)
+         leaf.addContent(xToken.text);
+      } else if (xToken instanceof cdata.XToken) {
+         // console.log('TEXT ', xToken.text)
+         leaf.addContent(xToken.text);
       }
 
       done();

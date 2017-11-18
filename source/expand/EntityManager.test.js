@@ -5,7 +5,7 @@ import { EntityLocation } from '../basic';
 import {
    entityDeclaration,
    text,
-} from '../xToken';
+} from '../token';
 
 import EntityManager from './EntityManager.js';
 
@@ -33,19 +33,19 @@ describe('EntityManager (unit)', () => {
          expect(undefined).toEqual(expected);
          done();
       } else {
-         source.extract('all', [], (lToken) => {
-            expect(lToken.text).toEqual(expected);
+         source.extract('all', [], (sToken) => {
+            expect(sToken.text).toEqual(expected);
             done();
          });
       }
    }
 
-   function makeToken(name, str, location, notationName) {
-      return new entityDeclaration.Token(name, [ new text.Token(str, []) ], location, notationName, []);
+   function pTokenToXToken(name, str, location, notationName) {
+      return new entityDeclaration.XToken(name, [ new text.XToken(str, []) ], location, notationName, []);
    }
 
    function makePEToken(name, str, location, notationName) {
-      return new entityDeclaration.ParamToken(name, [ new text.Token(str, []) ], location, notationName, []);
+      return new entityDeclaration.ParamXToken(name, [ new text.XToken(str, []) ], location, notationName, []);
    }
 
    describe('construction', () => {
@@ -67,14 +67,14 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('testName', 'testValue'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'testValue'));
 
          expectNameToLookupValue('testName', 'testValue', done);
       });
 
       it('can add multiple name-named entities, but only the first is returned', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('name', 'one'));
-         manager.addEntityFromInternalSubset(makeToken('name', 'two'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('name', 'one'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('name', 'two'));
 
          expectNameToLookupValue('name', 'one', done);
       });
@@ -90,14 +90,14 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
-         manager.addEntityFromExternalSubset(makeToken('testName', 'testValue'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('testName', 'testValue'));
 
          expectNameToLookupValue('testName', 'testValue', done);
       });
 
       it('can add multiple name-named entities, but only the first is returned', (done) => {
-         manager.addEntityFromExternalSubset(makeToken('name', 'one'));
-         manager.addEntityFromExternalSubset(makeToken('name', 'two'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('name', 'one'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('name', 'two'));
 
          expectNameToLookupValue('name', 'one', done);
       });
@@ -107,23 +107,23 @@ describe('EntityManager (unit)', () => {
    describe('add*Entity interaction', () => {
 
       it('can add internal and external entities, but only the first internal is returned', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('testName', 'one'));
-         manager.addEntityFromInternalSubset(makeToken('testName', 'two'));
-         manager.addEntityFromExternalSubset(makeToken('testName', 'alpha'));
-         manager.addEntityFromExternalSubset(makeToken('testName', 'beta'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'one'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('testName', 'two'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('testName', 'alpha'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('testName', 'beta'));
 
          expectNameToLookupValue('testName', 'one', done);
       });
 
       it('is unaffected by parameter entities', (done) => {
          manager.addParameterEntityFromInternalSubset(makePEToken('test', 'two'));
-         manager.addEntityFromInternalSubset(makeToken('test', 'one'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('test', 'one'));
 
          expectNameToLookupValue('test', 'one', done);
       });
 
       it('parameter entities unaffected by general entities', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('test', 'foo'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('test', 'foo'));
          manager.addParameterEntityFromInternalSubset(makePEToken('test', 'one'));
 
          expectParameterNameToLookupValue('test', 'one', done);
@@ -178,13 +178,13 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns undefined if the requested entity has a notation name', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('test', undefined, undefined, 'fred'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('test', undefined, undefined, 'fred'));
 
          expectNameToLookupValue('test', undefined, done);
       });
 
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('test', 'two'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('test', 'two'));
 
          expectNameToLookupValue('test', 'two', done);
       });
@@ -210,7 +210,7 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns a cursor if it is called with a legitimate entity name', (done) => {
-         manager.addParameterEntityFromInternalSubset(makeToken('test', 'two'));
+         manager.addParameterEntityFromInternalSubset(pTokenToXToken('test', 'two'));
 
          expectParameterNameToLookupValue('test', 'two', done);
       });
@@ -226,7 +226,7 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns the token asked for', () => {
-         const token = makeToken('test', 'two');
+         const token = pTokenToXToken('test', 'two');
          manager.addEntityFromInternalSubset(token);
 
          expect(manager.getEntityToken('test')).toEqual(token);
@@ -243,7 +243,7 @@ describe('EntityManager (unit)', () => {
       });
 
       it('returns the token asked for', () => {
-         const token = makeToken('test', 'two');
+         const token = pTokenToXToken('test', 'two');
          manager.addParameterEntityFromInternalSubset(token);
 
          expect(manager.getParameterEntityToken('test')).toEqual(token);
@@ -292,13 +292,13 @@ describe('EntityManager (unit)', () => {
       });
 
       it('adds an external so it overrides the default', (done) => {
-         manager.addEntityFromExternalSubset(makeToken('amp', 'one'));
+         manager.addEntityFromExternalSubset(pTokenToXToken('amp', 'one'));
 
          expectNameToLookupValue('amp', 'one', done);
       });
 
       it('adds an internal so it overrides the default', (done) => {
-         manager.addEntityFromInternalSubset(makeToken('amp', 'one'));
+         manager.addEntityFromInternalSubset(pTokenToXToken('amp', 'one'));
 
          expectNameToLookupValue('amp', 'one', done);
       });

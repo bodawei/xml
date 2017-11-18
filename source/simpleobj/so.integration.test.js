@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { PTokenStream } from '../pToken';
-import { TokenStream } from '../tokenize';
+import { PTokenStream } from '../pTokenStream';
+import { PToXTokenStream } from '../xTokenStream';
 import SimpleObjStream from './so.js';
 
 describe('SimpleObjStream (integration)', () => {
@@ -12,7 +12,7 @@ describe('SimpleObjStream (integration)', () => {
 
    beforeEach(() => {
       pTokenStream = new PTokenStream();
-      tokenStream = new TokenStream();
+      tokenStream = new PToXTokenStream();
       objStream = new SimpleObjStream();
 
       pTokenStream.pipe(tokenStream).pipe(objStream);
@@ -63,33 +63,33 @@ describe('SimpleObjStream (integration)', () => {
    //    /* eslint-disable no-console, global-require */
 
    //    const PTokenStream = require(SRC_ROOT + '/parse').PTokenStream;
-   //    const TokenStream = require(SRC_ROOT + '/tokenize').TokenStream;
+   //    const TokenStream = require(SRC_ROOT + '/tokenize').XTokenStream;
    //    const SimpleObjStream = require('./so.js').default;
 
-   //    const parsedStream = new PTokenStream();
+   //    const pTokenStream = new PTokenStream();
    //    const tokenStream = new TokenStream();
    //    const objStream = new SimpleObjStream();
-   //    parsedStream.on('end', () => {
+   //    pTokenStream.on('end', () => {
    //       // console.log('Got the end');
    //    });
 
-   //    parsedStream.pipe(tokenStream).pipe(objStream);
+   //    pTokenStream.pipe(tokenStream).pipe(objStream);
    //    //const data = fs.readFileSync('./REC-xml-20081126.xml');
    //    const data = require('./foo.json');
 
    //    // console.log('LENGTH', data.data.length);
-   //    parsedStream.addText(data.data);
-   //    parsedStream.endText();
+   //    pTokenStream.addText(data.data);
+   //    pTokenStream.endText();
 
-   //    // parsedStream.on('end', () => console.log('PARSED ENDING'));
-   //    // parsedStream.on('close', () => console.log('PARSED CLOSE'));
-   //    // parsedStream.on('finish', () => console.log('PARSED FINISH'));
+   //    // pTokenStream.on('end', () => console.log('STREAM ENDING'));
+   //    // pTokenStream.on('close', () => console.log('STREAM CLOSE'));
+   //    // pTokenStream.on('finish', () => console.log('STREAM FINISH'));
    //    objStream.on('data', (result) => {
    //      console.log('HERE', JSON.stringify(result, undefined, 2));
    //       done();
    //    });
 
-   //    parsedStream.on('error', (x) => {
+   //    pTokenStream.on('error', (x) => {
    //       console.log('ERROR', x);
    //    });
    // });

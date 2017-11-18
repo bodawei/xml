@@ -1,0 +1,183 @@
+/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+
+import { WellFormedError } from '../../error';
+
+import * as misc from './misc.js';
+import * as literal from './literal.js';
+
+/**********************************************************************\
+ The attribute namespace contains the usual tools for processing
+ attributes, both as found on XML Declarations and start and empty
+ element tags.
+\**********************************************************************/
+
+const WFEID = WellFormedError.ID;
+
+/**********************************************************************\
+ parse() extracts the pieces of an attribute.
+
+ PARAM
+ source: A STokenSource to read from
+ options: Optional options that affect parsing. this includes:
+   terminators: An array of strings that may be terminators of
+   the names of attributes (this is usually [ '>' ])
+ deliverPToken: Callback to deliver the PToken
+
+ SYNTAX
+    [41] Attribute    ::= Name Eq AttValue
+    [10] AttValue     ::= '"' ([^<&"] | Reference)* '"' |
+                          "'" ([^<&'] | Reference)* "'"
+    [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                                          '"' VersionNum '"')
+    [25] Eq           ::= S? '=' S?
+    [26] VersionNum   ::= '1.' [0-9]+
+    [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no') "'") |
+                                             ('"' ('yes' | 'no') '"'))
+    [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                                           "'" EncName "'" )
+    [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+\**********************************************************************/
+
+function parse(source, options = {}, deliverPToken) {
+   const newOptions = {
+      terminators: [ '=' ].concat(options.terminators || []),
+   };
+   getNextAttribute(source, newOptions, [], deliverPToken);
+}
+
+function getNextAttribute(source, options, attrs, deliverPToken) {
+   source.extract('word', options.terminators, (sToken) => {
+      addAttribute(source, attrs, options, sToken, deliverPToken);
+   });
+}
+
+function addAttribute(source, attrs, options, name, deliverPToken) {
+   if (!name) {
+      deliverPToken(attrs);
+      return;
+   }
+   const attr = {
+      name,
+   };
+   attrs.push(attr);
+
+   source.extractToObject('space', attr, 'postNameSpace');
+   source.extractToObject('match', '=', attr, 'equal');
+   source.extractToObject('space', attr, 'postEqualSpace');
+   literal.parse(source, {
+      pToken: attr,
+   }, (gotQuoted) => {
+      if (gotQuoted) {
+         source.extractToObject('space', attr, 'trailingSpace');
+      }
+
+      getNextAttribute(source, options, attrs, deliverPToken);
+   });
+}
+
+/**********************************************************************\
+ checkWellFormed() does check on validity
+\**********************************************************************/
+
+function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type, checkName, checkValue) {
+   const attrNames = {};
+
+   for (let index = 0; index < pAttributes.length; index++) {
+      const attr = pAttributes[index];
+      const nameText = misc.textOrBlank(attr.name);
+
+      if (index === 0) {
+         ec.setPos(preceedingSpace);
+         ec.check(!preceedingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+      } else {
+         ec.setPos(pAttributes[index - 1].trailingSpace);
+         ec.check(!pAttributes[index - 1].trailingSpace, WFEID.ATTRIBUTE_NO_SPACE_BEFORE_NAME, [ nameText ]);
+      }
+
+      ec.setPos(attr.name);
+
+      if (type === WFEID.NOUN_ATTRIBUTE) {
+         ec.check(attrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
+         attrNames[nameText] = true;
+      }
+
+      misc.checkName(attr.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);
+
+      if (checkName) {
+         checkName(attr.name, index, ec, entityMetaData);
+      }
+
+      ec.setPos(attr.postNameSpace);
+      ec.setPos(attr.equal);
+      ec.check(!attr.equal, WFEID.ATTRIBUTE_NO_EQUAL, [ nameText ]);
+      ec.setPos(attr.postEqualSpace);
+
+      literal.checkWellFormed(attr, ec, entityMetaData, type, () => {
+         if (checkValue) {
+            checkValue(attr.name, attr.value, ec, entityMetaData);
+         }
+      });
+   }
+}
+
+/**********************************************************************\
+ makeTokenCompatible() converts a pToken value into a form that
+ can be inserted into a token.
+\**********************************************************************/
+
+function makeTokenCompatible(pAttributes = []) {
+   const attrs = [];
+
+   for (let index = 0; index < pAttributes.length; index++) {
+      const attr = pAttributes[index];
+
+      attrs.push({
+         name: misc.textOrBlank(attr.name),
+         value: literal.makeTokenCompatible(attr),
+      });
+   }
+
+   return attrs;
+}
+
+function makeOneTokenCompatible(attributes = []) {
+   const attrs = [];
+
+   for (let index = 0; index < attributes.length; index++) {
+      const attr = attributes[index];
+
+      attrs.push({
+         name: misc.textOrBlank(attr.name),
+         value: literal.makeOneTokenCompatible(attr),
+      });
+   }
+
+   return attrs;
+}
+
+function getSTokens(attributes = []) {
+   let results = [];
+
+   for (let index = 0; index < attributes.length; index++) {
+      const attr = attributes[index];
+
+      results.push(attr.name);
+      results.push(attr.postNameSpace);
+      results.push(attr.equal);
+      results.push(attr.postEqualSpace);
+
+      results = results.concat(literal.getSTokens(attr));
+
+      results.push(attr.trailingSpace);
+   }
+
+   return results.filter(item => item);
+}
+
+export {
+   parse,
+   checkWellFormed,
+   makeTokenCompatible,
+   makeOneTokenCompatible,
+   getSTokens,
+};

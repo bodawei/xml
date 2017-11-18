@@ -1,11 +1,12 @@
 /* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 
 import { EntityMetaData } from '../basic';
-import { defaultExtractors, LTokenSource } from '../lToken';
+import { defaultExtractors } from '../extractor';
+import { STokenSource } from '../sToken';
 import {
    entityDeclaration,
    text,
-} from '../xToken';
+} from '../token';
 
 const DEFAULT_ENTITY = 'DefaultEntity';
 const INTERNAL_SUBSET = 'EntityDeclaredInInternalSubset';
@@ -21,11 +22,11 @@ class EntityManager {
    constructor() {
       this._entityMap = {};
 
-      const ltEntity = new entityDeclaration.Token('lt', [ new text.Token('&#60;', []) ], undefined, undefined, []);
-      const gtEntity = new entityDeclaration.Token('gt', [ new text.Token('>', []) ], undefined, undefined, []);
-      const ampEntity = new entityDeclaration.Token('amp', [ new text.Token('&#38;', []) ], undefined, undefined, []);
-      const aposEntity = new entityDeclaration.Token('apos', [ new text.Token('\'', []) ], undefined, undefined, []);
-      const quotEntity = new entityDeclaration.Token('quot', [ new text.Token('"', []) ], undefined, undefined, []);
+      const ltEntity = new entityDeclaration.XToken('lt', [ new text.XToken('&#60;', []) ], undefined, undefined, []);
+      const gtEntity = new entityDeclaration.XToken('gt', [ new text.XToken('>', []) ], undefined, undefined, []);
+      const ampEntity = new entityDeclaration.XToken('amp', [ new text.XToken('&#38;', []) ], undefined, undefined, []);
+      const aposEntity = new entityDeclaration.XToken('apos', [ new text.XToken('\'', []) ], undefined, undefined, []);
+      const quotEntity = new entityDeclaration.XToken('quot', [ new text.XToken('"', []) ], undefined, undefined, []);
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
       this._internalAdd(gtEntity, DEFAULT_ENTITY, false);
@@ -51,7 +52,7 @@ class EntityManager {
    }
 
    /**********************************************************************\
-    getEntity() returns an LTokenSource with the contents of the requested
+    getEntity() returns an STokenSource with the contents of the requested
     general entity, or undefined if there is no such entity present.
    \**********************************************************************/
 
@@ -81,7 +82,7 @@ class EntityManager {
    }
 
    /**********************************************************************\
-    getExternalSubsetEntity() Retrieves a LTokenSource for the external
+    getExternalSubsetEntity() Retrieves a STokenSource for the external
     subset entity, or returns undefiend if none has been specified.
    \**********************************************************************/
 
@@ -90,7 +91,7 @@ class EntityManager {
          return;
       }
 
-      const source = new LTokenSource(defaultExtractors,
+      const source = new STokenSource(defaultExtractors,
          new EntityMetaData(EntityMetaData.EXTERNAL_SUBSET, undefined, undefined, this._externalEntityLocation));
       return source;
    }
@@ -101,7 +102,7 @@ class EntityManager {
    \**********************************************************************/
 
    _internalAdd(token, source, isParameter) {
-      if (!token || !(token instanceof entityDeclaration.Token)) {
+      if (!token || !(token instanceof entityDeclaration.XToken)) {
          throw new Error('Must call with an entity declaration token.');
       }
 
@@ -125,7 +126,7 @@ class EntityManager {
          return;
       }
 
-      const source = new LTokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors, new EntityMetaData());
       for (let index = 0; index < token.value.length; index++) {
          if (token.value[index].text) {
             source.addText(token.value[index].text);

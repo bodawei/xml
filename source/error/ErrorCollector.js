@@ -21,13 +21,13 @@ import { Offset } from '../basic';
  the context is the start of the XML Declaration, at 0 chars in.
 
  Sometimes the position can be difficult to compute for the callers.
- For instance, if a quote is missing but the previous couple lTokens
+ For instance, if a quote is missing but the previous couple STokens
  have been missing as well, it can get laborious to specify the
  best position.  This uses a heuristic which seems to always work,
- which is that when setPos() is called with a good lToken it is assumed
- the position for the next errors are at the start of that lToken.
- but if setPos() is called with undefined (a missing lToken), then
- the end of the most recently set lToken will be used for the next
+ which is that when setPos() is called with a good SToken it is assumed
+ the position for the next errors are at the start of that SToken.
+ but if setPos() is called with undefined (a missing SToken), then
+ the end of the most recently set SToken will be used for the next
  errors instead.
 \**********************************************************************/
 
@@ -41,9 +41,9 @@ class ErrorCollector {
       this._errors = [];
    }
 
-   setPos(currentLToken) {
-      if (currentLToken) {
-         this._position = currentLToken;
+   setPos(currentSToken) {
+      if (currentSToken) {
+         this._position = currentSToken;
          this._posStart = true;
       } else {
          this._posStart = false;

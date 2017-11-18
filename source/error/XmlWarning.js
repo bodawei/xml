@@ -2,8 +2,8 @@
 
 import StringBundle from '../basic/StringBundle.js';
 import XmlError from './XmlError.js';
-import strings from '../derive/XmlWarning.json';
-import codes from '../derive/XmlWarning-code.json';
+import strings from './derive/XmlWarning.json';
+import codes from './derive/XmlWarning-code.json';
 
 /**********************************************************************\
  XmlWarning is used to report messages that are not fatal in nature.

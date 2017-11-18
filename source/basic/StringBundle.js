@@ -91,7 +91,7 @@ class StringBundle {
 
     You can also use {0:key} in which case the parameter will be used as
     a key to look up a value in the string catalog. This is useful for
-    parameterizing a string with another lToken that should also be
+    parameterizing a string with another string that should also be
     internationalized.
 
     Finally, you can use the strings {{} and {}} to escape a curly brace

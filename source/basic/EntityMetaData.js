@@ -20,7 +20,7 @@ const LAST_1DOT1_REVISION = 2;
 class EntityMetaData {
 
    constructor(entityKind, xmlVersion, xmlRevision, location) {
-      this.type = EntityMetaData.TYPE;
+      this.type = EntityMetaData.PTYPE;
       this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
       this.version = xmlVersion || 1.0;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
@@ -126,6 +126,6 @@ EntityMetaData.KIND = {
    EXTERNALSUBSET: 'EXTERNALSUBSET',
 };
 
-EntityMetaData.TYPE = 'ENTITY_META_DATA';
+EntityMetaData.PTYPE = 'ENTITY_META_DATA';
 
 module.exports = EntityMetaData;

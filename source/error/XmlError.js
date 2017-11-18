@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Offset from '../basic/Offset.js';
-import LToken from '../lToken/LToken.js';
+import { Offset } from '../basic';
+import { SToken } from '../sToken';
 
 /**********************************************************************\
  XmlError is a base type for all error objects.
@@ -14,20 +14,20 @@ import LToken from '../lToken/LToken.js';
  id: The error id
  params: Optional. An array of values that should be substituted into
     the message.
- place: An Offset or a LToken  (optional only for legacy purposes)
+ place: An Offset or a SToken  (optional only for legacy purposes)
     Speifies where the error happened in the original text (before
     line ending handling etc).
     If an Offset is specified, it will be copied and used directly.
-    If a LToken is specified, it's endOffset will be used. This
+    If a SToken is specified, it's endOffset will be used. This
     is just a convenience for calling.
- contextOffset: an array of Offsets of a single LToken.
+ contextOffset: an array of Offsets of a single SToken.
     Specifies the start of each hierarchical syntactic entity we are
     in the middle of parsing. So, if we are parsing &foo: and foo
     references &bar and &bar references <%badName>, the context
     will be the offset of the & of foo, the & at the offset of bar
     and the offset to the <. in that order. The last item in the
     context may or may not be the same as place.
-    If a LToken is specified, its startOffset will be used. This
+    If a SToken is specified, its startOffset will be used. This
     is a shortcut for making a common calling case easier.
 \**********************************************************************/
 
@@ -35,7 +35,7 @@ class XmlError {
    constructor(id, params, place, contextOffset) {
       this.id = id;
 
-      if (params instanceof Offset || params instanceof LToken) {
+      if (params instanceof Offset || params instanceof SToken) {
          contextOffset = place;
          place = params;
          params = [];
@@ -43,14 +43,14 @@ class XmlError {
 
       params = params || [];
 
-      if (place instanceof LToken) {
+      if (place instanceof SToken) {
          place = place.range[0].getEndOffset();
       } else if (place instanceof Offset) {
          place = place.clone();
       }
 
       if (contextOffset) {
-         if (contextOffset instanceof LToken) {
+         if (contextOffset instanceof SToken) {
             contextOffset = contextOffset.range[0].getStartOffset();
          } else if (contextOffset instanceof Offset) {
             contextOffset = contextOffset.clone();

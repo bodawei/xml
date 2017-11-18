@@ -2,8 +2,8 @@
 
 import StringBundle from '../basic/StringBundle.js';
 import XmlError from './XmlError.js';
-import strings from '../derive/WellFormedError.json';
-import codes from '../derive/WellFormedError-code.json';
+import strings from './derive/WellFormedError.json';
+import codes from './derive/WellFormedError-code.json';
 
 /**********************************************************************\
  WellFormedError holds inforamtion about a syntax error

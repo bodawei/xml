@@ -2,8 +2,8 @@
 
 import StringBundle from '../basic/StringBundle.js';
 import XmlError from './XmlError.js';
-import strings from '../derive/ValidityError.json';
-import codes from '../derive/ValidityError-code.json';
+import strings from './derive/ValidityError.json';
+import codes from './derive/ValidityError-code.json';
 
 /**********************************************************************\
  ValidityError holds inforamtion about a validity check error

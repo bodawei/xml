@@ -6,7 +6,7 @@ import Offset from '../basic/Offset.js';
 import Range from '../basic/Range.js';
 import StringBundle from '../basic/StringBundle.js';
 
-import LToken from '../lToken/LToken.js';
+import { SToken } from '../sToken';
 
 import XmlError from './XmlError.js';
 
@@ -79,9 +79,9 @@ describe('XmlError()', () => {
             .toEqual(new Offset(new EntityLocation(), 0, 1, 2));
       });
 
-      it('sets the place even if a LToken is passed', () => {
+      it('sets the place even if a SToken is passed', () => {
          const error = new XmlError(XmlError.ID.TEST, [],
-            new LToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
+            new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4)));
          expect(error.place).toEqual(new Offset(new EntityLocation(), 0, 3, 4));
       });
 
@@ -107,11 +107,11 @@ describe('XmlError()', () => {
             } ]);
       });
 
-      it('wraps the context if just an LToken is passed', () => {
+      it('wraps the context if just an SToken is passed', () => {
          const place = new Offset(new EntityLocation(), 0, 1, 2);
-         const lToken = new LToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
+         const sToken = new SToken('foo', 'foo', new Range(new EntityLocation(), 0, 1, 2, 0, 3, 4));
 
-         expect(new XmlError(XmlError.ID.TEST, [], place, lToken).context)
+         expect(new XmlError(XmlError.ID.TEST, [], place, sToken).context)
             .toEqual([ {
                offset: place,
             } ]);

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Offset, Range, EntityLocation } from '../basic';
-import { LToken } from '../lToken';
+import { SToken } from '../sToken';
 
 import ErrorCollector from './ErrorCollector.js';
 import WellFormedError from './WellFormedError.js';
@@ -54,8 +54,8 @@ describe('ErrorCollector', () => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          loc = new EntityLocation();
          constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
-         contextStart = new LToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
-         errorStart = new LToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
+         contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
+         errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
          ec = new ErrorCollector(contextStart, constructorSpy);
       });
 
@@ -98,8 +98,8 @@ describe('ErrorCollector', () => {
       beforeEach(() => {
          loc = new EntityLocation();
          constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
-         contextStart = new LToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
-         errorStart = new LToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
+         contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
+         errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
          ec = new ErrorCollector(contextStart, constructorSpy);
       });
 

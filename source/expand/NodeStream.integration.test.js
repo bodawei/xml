@@ -1,9 +1,9 @@
 /* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { PTokenStream } from '../pToken';
-import { TokenStream } from '../tokenize';
-import * as xtoken from '../xToken';
+import { PTokenStream } from '../pTokenStream';
+import { PToXTokenStream } from '../xTokenStream';
+import * as tokenNs from '../token';
 
 import EntityManager from './EntityManager.js';
 import NodeStream from './NodeStream.js';
@@ -15,7 +15,7 @@ describe('NodeStream (integration)', () => {
 
       for (let actualIndex = 0; actualIndex < actual.length; actualIndex++) {
          if (actual[actualIndex].type === 'ENTITY_META_DATA' ||
-            actual[actualIndex] instanceof xtoken.space.Token) {
+            actual[actualIndex] instanceof tokenNs.space.XToken) {
             continue;
          }
 
@@ -28,28 +28,28 @@ describe('NodeStream (integration)', () => {
       const results = [];
       const manager = new EntityManager();
       const pTokenStream = new PTokenStream();
-      const token = new TokenStream();
+      const xTokenStream = new PToXTokenStream();
       const node = new NodeStream(manager);
-      pTokenStream.pipe(token).pipe(node);
+      pTokenStream.pipe(xTokenStream).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
          matchTokenTypes(results, [
-            xtoken.xmlDeclaration.Token,
-            xtoken.docTypeStart.Token,
-            xtoken.entityDeclaration.Token,
-            xtoken.docTypeEnd.Token,
-            xtoken.elementStart.Token,
-            xtoken.entityStart.Token,
-            xtoken.entityStart.Token,
-            xtoken.charData.Token,
-            xtoken.entityEnd.Token,
-            xtoken.charData.Token,
-            xtoken.entityStart.Token,
-            xtoken.charData.Token,
-            xtoken.entityEnd.Token,
-            xtoken.entityEnd.Token,
-            xtoken.elementEnd.Token,
+            tokenNs.xmlDeclaration.XToken,
+            tokenNs.docTypeStart.XToken,
+            tokenNs.entityDeclaration.XToken,
+            tokenNs.docTypeEnd.XToken,
+            tokenNs.elementStart.XToken,
+            tokenNs.entityStart.XToken,
+            tokenNs.entityStart.XToken,
+            tokenNs.charData.XToken,
+            tokenNs.entityEnd.XToken,
+            tokenNs.charData.XToken,
+            tokenNs.entityStart.XToken,
+            tokenNs.charData.XToken,
+            tokenNs.entityEnd.XToken,
+            tokenNs.entityEnd.XToken,
+            tokenNs.elementEnd.XToken,
          ]);
          done();
       });
@@ -62,26 +62,26 @@ describe('NodeStream (integration)', () => {
       const results = [];
       const manager = new EntityManager();
       const pTokenStream = new PTokenStream();
-      const token = new TokenStream();
+      const xTokenStream = new PToXTokenStream();
       const node = new NodeStream(manager);
-      pTokenStream.pipe(token).pipe(node);
+      pTokenStream.pipe(xTokenStream).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
          /* eslint-disable indent */
          matchTokenTypes(results, [
-            xtoken.xmlDeclaration.Token,
-            xtoken.docTypeStart.Token,
-               xtoken.entityDeclaration.ParamToken,
-               xtoken.entityStart.ParamToken,
-                  xtoken.entityDeclaration.Token,
-               xtoken.entityEnd.ParamToken,
-            xtoken.docTypeEnd.Token,
-            xtoken.elementStart.Token,
-               xtoken.entityStart.Token,
-                  xtoken.charData.Token,
-               xtoken.entityEnd.Token,
-            xtoken.elementEnd.Token,
+            tokenNs.xmlDeclaration.XToken,
+            tokenNs.docTypeStart.XToken,
+               tokenNs.entityDeclaration.ParamXToken,
+               tokenNs.entityStart.ParamXToken,
+                  tokenNs.entityDeclaration.XToken,
+               tokenNs.entityEnd.ParamXToken,
+            tokenNs.docTypeEnd.XToken,
+            tokenNs.elementStart.XToken,
+               tokenNs.entityStart.XToken,
+                  tokenNs.charData.XToken,
+               tokenNs.entityEnd.XToken,
+            tokenNs.elementEnd.XToken,
          ]);
          /* eslint-enable indent */
          done();
@@ -101,17 +101,17 @@ describe('NodeStream (integration)', () => {
       const results = [];
       const manager = new EntityManager();
       const pTokenStream = new PTokenStream();
-      const xTokenStream = new TokenStream();
+      const xTokenStream = new PToXTokenStream();
       const node = new NodeStream(manager);
       pTokenStream.pipe(xTokenStream).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
          matchTokenTypes(results[4].value, [
-            xtoken.text.Token,
-            xtoken.entityStart.ParamToken,
-            xtoken.text.Token,
-            xtoken.entityEnd.ParamToken,
+            tokenNs.text.XToken,
+            tokenNs.entityStart.ParamXToken,
+            tokenNs.text.XToken,
+            tokenNs.entityEnd.ParamXToken,
          ]);
          done();
       });
@@ -124,22 +124,22 @@ describe('NodeStream (integration)', () => {
       const results = [];
       const manager = new EntityManager();
       const pTokenStream = new PTokenStream();
-      const xTokenStream = new TokenStream();
+      const xTokenStream = new PToXTokenStream();
       const node = new NodeStream(manager);
       pTokenStream.pipe(xTokenStream).pipe(node);
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
          matchTokenTypes(results[5].value, [
-            xtoken.text.Token,
-            xtoken.entityStart.ParamToken,
-            xtoken.text.Token,
-            xtoken.entityStart.ParamToken,
-            xtoken.text.Token,
-            xtoken.entityEnd.ParamToken,
-            xtoken.text.Token,
-            xtoken.entityEnd.ParamToken,
-            xtoken.text.Token,
+            tokenNs.text.XToken,
+            tokenNs.entityStart.ParamXToken,
+            tokenNs.text.XToken,
+            tokenNs.entityStart.ParamXToken,
+            tokenNs.text.XToken,
+            tokenNs.entityEnd.ParamXToken,
+            tokenNs.text.XToken,
+            tokenNs.entityEnd.ParamXToken,
+            tokenNs.text.XToken,
          ]);
          done();
       });

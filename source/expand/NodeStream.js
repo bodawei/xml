@@ -2,14 +2,14 @@
 
 import { Transform } from 'readable-stream';
 
-import { PTokenStream } from '../pToken';
-import { TokenStream } from '../tokenize';
+import { PTokenStream } from '../pTokenStream';
+import { PToXTokenStream } from '../xTokenStream';
 import {
    entityDeclaration,
    entityEnd,
    entityReference,
    entityStart,
-} from '../xToken';
+} from '../token';
 
 import EntityManager from './EntityManager.js';
 
@@ -41,8 +41,8 @@ class NodeStream extends Transform {
    }
 
    _transform(xToken, encoding, callback) {
-      if (xToken instanceof entityDeclaration.Token) {
-         const func = (xToken instanceof entityDeclaration.ParamToken) ?
+      if (xToken instanceof entityDeclaration.XToken) {
+         const func = (xToken instanceof entityDeclaration.ParamXToken) ?
             this._entityManager.addParameterEntityFromInternalSubset :
             this._entityManager.addEntityFromInternalSubset;
 
@@ -56,16 +56,16 @@ class NodeStream extends Transform {
          } else {
             func.call(this._entityManager, xToken);
          }
-      } else if (xToken instanceof entityReference.Token) {
-         const isPeRef = (xToken instanceof entityReference.ParamToken);
+      } else if (xToken instanceof entityReference.XToken) {
+         const isPeRef = (xToken instanceof entityReference.ParamXToken);
          const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
          const declarationSource = getter.call(this._entityManager, xToken.name);
 
          if (declarationSource) {
-            const tokenType = isPeRef ? entityStart.ParamToken : entityStart.Token;
+            const tokenType = isPeRef ? entityStart.ParamXToken : entityStart.XToken;
             this.push(new tokenType(xToken.name));
             const pTokenStream = new PTokenStream(declarationSource);
-            const tokenizer = new TokenStream();
+            const tokenizer = new PToXTokenStream();
 
             this._child = {
                xToken,
@@ -90,8 +90,8 @@ class NodeStream extends Transform {
    }
 
    _childDone() {
-      const isPeRef = (this._child.xToken instanceof entityReference.ParamToken);
-      const tokenType = isPeRef ? entityEnd.ParamToken : entityEnd.Token;
+      const isPeRef = (this._child.xToken instanceof entityReference.ParamXToken);
+      const tokenType = isPeRef ? entityEnd.ParamXToken : entityEnd.XToken;
 
       this._child.stream.removeListener('data', this._childData);
       this._child.stream.removeListener('end', this._childDone);
@@ -109,19 +109,19 @@ class NodeStream extends Transform {
       for (let index = 0; index < entityDeclaration.value.length; index++) {
          const item = entityDeclaration.value[index];
 
-         if (item instanceof entityReference.ParamToken) {
+         if (item instanceof entityReference.ParamXToken) {
             const entityToken = this._entityManager.getParameterEntityToken(item.name);
 
             if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
                newValue.push(item);
             } else {
-               newValue.push(new entityStart.ParamToken(item.name));
+               newValue.push(new entityStart.ParamXToken(item.name));
 
                for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
                   newValue.push(entityToken.value[tokenIndex]);
                }
 
-               newValue.push(new entityEnd.ParamToken(item.name));
+               newValue.push(new entityEnd.ParamXToken(item.name));
             }
          } else {
             newValue.push(item);
