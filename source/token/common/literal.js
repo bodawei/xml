@@ -15,6 +15,9 @@ const WFEID = WellFormedError.ID;
 
  This is meant to be called from contexts that have already validated
  that the next character is a quote (e.g. through a peekChar)
+
+ This returns true to the done() parameter, unless the next character
+ in the source is not a quote.
 \**********************************************************************/
 
 function parse(source, options, done) {

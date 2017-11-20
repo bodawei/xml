@@ -87,7 +87,7 @@ function parse(source, deliverPToken) {
 }
 
 /**********************************************************************\
- parse() extracts the SToken's that make up a parameter entity ref.
+ paramParse() extracts the SToken's that make up a parameter entity ref.
 
  This assumes that the initial % has not been extracted yet.
 
