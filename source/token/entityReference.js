@@ -151,15 +151,17 @@ function pTokenToXToken(pToken) {
    return new refClass(textOrBlank(pToken.name), pToken);
 }
 
-export {
-   ENTITYREF as PTYPE,
-   PARAMETERENTITYREF as PARAM_PTYPE,
-   EntityReferencePToken as PToken,
-   ParameterEntityReferencePToken as ParamPToken,
-   EntityReference as XToken,
-   ParameterEntityReference as ParamXToken,
+const entityReference = {
+   PTYPE: ENTITYREF,
+   PARAM_PTYPE: PARAMETERENTITYREF,
+   PToken: EntityReferencePToken,
+   ParamPToken: ParameterEntityReferencePToken,
+   XToken: EntityReference,
+   ParamXToken: ParameterEntityReference,
    parse,
    paramParse,
    checkWellFormed,
    pTokenToXToken,
 };
+
+export default entityReference;

@@ -6,7 +6,7 @@ import { WellFormedError } from '../../error';
 import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 import * as misc from './misc.js';
 import * as literal from './literal.js';
 import * as text from '../text.js';

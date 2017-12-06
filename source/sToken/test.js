@@ -114,15 +114,17 @@ class MockSTokenSource {
                   following.token.range[0].startIndex + peekString.length,
                   following.token.range[0].startRow,
                   following.token.range[0].startColumn + peekString.length));
-            } else if (this.expectedValues[index - 1] && this.expectedValues[index - 1].token) {
-               const following = this.expectedValues[index - 1];
+            } else if (this.expectedValues[index - 1] &&
+               this.expectedValues[index - 1].token &&
+               this.expectedValues[index - 1].token.type !== PEEK) {
+               const preceding = this.expectedValues[index - 1];
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
-                  following.token.range[0].endIndex,
-                  following.token.range[0].endRow,
-                  following.token.range[0].endColumn,
-                  following.token.range[0].endIndex + peekString.length,
-                  following.token.range[0].endRow,
-                  following.token.range[0].endColumn + peekString.length));
+                  preceding.token.range[0].endIndex,
+                  preceding.token.range[0].endRow,
+                  preceding.token.range[0].endColumn,
+                  preceding.token.range[0].endIndex + peekString.length,
+                  preceding.token.range[0].endRow,
+                  preceding.token.range[0].endColumn + peekString.length));
             } else {
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
                   0,

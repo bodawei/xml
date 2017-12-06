@@ -8,6 +8,7 @@ import { WellFormedError } from '../../error';
 
 import * as externalId from './externalId.js';
 import * as literal from './literal.js';
+import * as usp from './usp.js';
 
 describe('externalId (unit)', () => {
 
@@ -26,13 +27,15 @@ describe('externalId (unit)', () => {
       it('returns simple values', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('PUBLIC'),
-            'PUBLIC',
-            ' ',
+            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('"'), 'peekChar' ],
             // literal
-            ' ',
-            undefined,
-            // literal
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
+            [ undefined, 'peekWord' ],
          ]);
          externalId.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
@@ -49,11 +52,13 @@ describe('externalId (unit)', () => {
 
       it('only finds a SystemLiteral if that is all that is offered', () => {
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('SYSTEM'),
-            'SYSTEM',
-            ' ',
-            undefined,  // check forndata
+            [ MockSTokenSource.PEEK('S'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('SYSTEM'), 'peekWord', [ '"', '\'' ] ],
+            [ 'SYSTEM', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('"'), 'peekChar' ],
             // literal
+            [ undefined, 'peekWord' ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -68,7 +73,7 @@ describe('externalId (unit)', () => {
 
       it('returns nothing if it gets nothing back on first call', () => {
          mockSource = new MockSTokenSource([
-            undefined,
+            [ undefined, 'peekChar' ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -79,7 +84,8 @@ describe('externalId (unit)', () => {
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
          mockSource = new MockSTokenSource([
-            'BOGUS!',
+            [ MockSTokenSource.PEEK('B'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('BOGUS!'), 'peekWord', [ '"', '\'' ] ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -91,12 +97,15 @@ describe('externalId (unit)', () => {
       it('stops if it finds an NDATA after finding the PublicId', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('PUBLIC'),
-            'PUBLIC',
-            ' ',
+            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
             // literal
-            ' ',
-            'NDATA',
+            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('n'), 'peekChar' ],
+            [ 'NDATA', 'peekWord', [ '"', '\'' ] ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -114,12 +123,15 @@ describe('externalId (unit)', () => {
       it('does not mind if public or ndata are the wrong case', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('pUbLiC'),
-            'pUbLiC',
-            ' ',
+            [ MockSTokenSource.PEEK('p'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('pUbLiC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'pUbLiC', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
             // literal
-            ' ',
-            'nData',
+            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
+            [ ' ', 'space' ],
+            [ MockSTokenSource.PEEK('n'), 'peekChar' ],
+            [ 'nData', 'peekWord', [ '"', '\'' ] ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -137,10 +149,12 @@ describe('externalId (unit)', () => {
       it('stops if it does not find an open quote', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('PUBLIC'),
-            'PUBLIC',
-            ' ',
-            'x',
+            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
+            // literal
+            [ 'x', 'peekChar' ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -156,12 +170,15 @@ describe('externalId (unit)', () => {
       it('does not mind if, illegally, no space between PUBLIC and PublicLiteral', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('PUBLIC'),
-            'PUBLIC',
-            undefined,
+            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+            [ undefined, 'space' ],
             // literal
-            ' ',
-            undefined,  // check for ndata
+            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
+            [ ' ', 'space' ],
+            [ undefined, 'peekChar' ],
+            [ undefined, 'peekWord' ]  // check for ndata
             // literal
          ]);
 
@@ -174,19 +191,20 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: undefined,
             public: {},
             postPublicSpace: expectedSToken(' '),
-            system: {},
          } ] ]);
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            MockSTokenSource.PEEK('PUBLIC'),
-            'PUBLIC',
-            ' ',
+            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+            [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+            [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+            [ ' ', 'space' ],
             // literal
-            undefined,  // space
-            undefined,  // check for ndata
+            [ undefined, 'peekChar' ],
+            [ undefined, 'space' ],
+            [ undefined, 'peekWord' ]  // check for ndata
             // literal
          ]);
 
@@ -197,13 +215,83 @@ describe('externalId (unit)', () => {
             type: 'EXTERNAL_ID',
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
-            public: {},
-            postPublicSpace: undefined,
-            system: {},
          } ] ]);
       });
 
       // White box: Not testing the same cases for missing parts of the system value as this is the same code
+
+      describe('parameter entity reference', () => {
+
+         beforeEach(() => {
+            spyOn(usp, 'parse');
+         });
+
+         it('stops immediately if it encounters a PERef', () => {
+            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            mockSource = new MockSTokenSource([
+               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
+            ]);
+
+            externalId.parse(mockSource, [], callback);
+            mockSource.respondInAsyncTime();
+
+            expect(callback.calls.allArgs()).toEqual([ [ {
+               type: 'EXTERNAL_ID',
+               incomplete: [ true ],
+               leftOff: 'idType',
+            } ] ]);
+         });
+
+         it('recognizes a PERef after the idType', () => {
+            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            mockSource = new MockSTokenSource([
+               [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+               [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+               [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+               [ undefined, 'space' ],
+               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
+            ]);
+
+            externalId.parse(mockSource, [], callback);
+            mockSource.respondInAsyncTime();
+
+            expect(callback.calls.allArgs()).toEqual([ [ {
+               type: 'EXTERNAL_ID',
+               idType: expectedSToken('PUBLIC'),
+               postIdTypeSpace: undefined,
+               incomplete: [ true ],
+               leftOff: 'public',
+            } ] ]);
+         });
+
+         it('recognizes a PERef after the public', () => {
+            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+            mockSource = new MockSTokenSource([
+               [ MockSTokenSource.PEEK('P'), 'peekChar' ],
+               [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
+               [ 'PUBLIC', 'word', [ '"', '\'' ] ],
+               [ undefined, 'space' ],
+               [ MockSTokenSource.PEEK(' '), 'peekChar' ],
+               [ ' ', 'space' ],
+               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
+            ]);
+
+            externalId.parse(mockSource, [], callback);
+            mockSource.respondInAsyncTime();
+
+            expect(callback.calls.allArgs()).toEqual([ [ {
+               type: 'EXTERNAL_ID',
+               idType: expectedSToken('PUBLIC'),
+               postIdTypeSpace: undefined,
+               public: {},
+               postPublicSpace: expectedSToken(' '),
+               incomplete: [ true ],
+               leftOff: 'system',
+            } ] ]);
+         });
+
+      });
 
    });
 

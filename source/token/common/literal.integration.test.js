@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 import * as literal from './literal.js';
 
 describe('literal (integration)', () => {

@@ -7,6 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
+import entityReference from '../entityReference.js';
 import * as externalId from './externalId.js';
 
 describe('externalId (integration)', () => {
@@ -21,10 +22,9 @@ describe('externalId (integration)', () => {
       });
 
       it('parses the public and system value (check literal.parse())', (done) => {
-
          source.addText('PUBLIC "pub.xml"\t"sys.xml">');
-         externalId.parse(source, [], (result) => {
 
+         externalId.parse(source, [], (result) => {
             const makeSToken = makeSTokenMaker();
             expect(result).toEqual({
                type: 'EXTERNAL_ID',
@@ -41,6 +41,38 @@ describe('externalId (integration)', () => {
                   value: [ makeSToken('sys.xml') ],
                   closeQuote: makeSToken('"'),
                },
+            });
+            done();
+         });
+      });
+
+      it('parses a PERef (check usp.parse())', (done) => {
+         source.addText('PUBLIC "pub.xml"%foo;>');
+
+         externalId.parse(source, [], (result) => {
+            const makeSToken = makeSTokenMaker();
+            expect(result).toEqual({
+               type: 'EXTERNAL_ID',
+               idType: makeSToken('PUBLIC'),
+               postIdTypeSpace: makeSToken(' '),
+               public: {
+                  openQuote: makeSToken('"'),
+                  value: [ makeSToken('pub.xml') ],
+                  closeQuote: makeSToken('"'),
+               },
+               postPublicSpace: undefined,
+               incomplete: [{
+                  type: 'peref',
+                  item: new entityReference.ParamPToken({
+                     type: 'foo',
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               }],
+               leftOff: 'system',
             });
             done();
          });

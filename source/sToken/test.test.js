@@ -68,6 +68,15 @@ describe('SToken test utils', () => {
          expect(mock.expectedValues[0].token.range[0].startIndex).toEqual(0);
       });
 
+      it('uses starting values if there is no following SToken and current and previous are PEEKs', () => {
+         const mock = new MockSTokenSource([
+            MockSTokenSource.PEEK('x'),
+            MockSTokenSource.PEEK('x'),
+         ]);
+
+         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(0);
+      });
+
       it('throws an error if there are insuficient values to satisfy an extract()', () => {
          const mock = new MockSTokenSource([ 'one' ]);
          mock.extract('foo', [], () => {});

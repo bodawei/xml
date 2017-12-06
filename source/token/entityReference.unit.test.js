@@ -5,7 +5,7 @@ import { MockErrorCollector } from '../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 import { WellFormedError } from '../error';
 
-import * as entityReference from './entityReference.js';
+import entityReference from './entityReference.js';
 
 describe('entityReference (unit)', () => {
    let generalEntityPToken;

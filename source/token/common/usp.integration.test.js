@@ -6,7 +6,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 
 import * as usp from './usp.js';
 
@@ -46,24 +46,36 @@ describe('usp (integration)', () => {
          source.endText();
 
          usp.parse(source, {}, (pieces) => {
-            expect(pieces).toEqual([
-               makeSToken(' '), {
+            expect(pieces).toEqual([ {
+                  type: 'space',
+                  item: makeSToken(' '),
+               }, {
                   type: 'literal',
-                  openQuote: makeSToken('"'),
-                  value: [ makeSToken('double') ],
-                  closeQuote: makeSToken('"'),
-               }, makeSToken('whatever'), {
+                  item: {
+                     openQuote: makeSToken('"'),
+                     value: [ makeSToken('double') ],
+                     closeQuote: makeSToken('"'),
+                  },
+               }, {
+                  type: 'word',
+                  item: makeSToken('whatever'),
+               }, {
                   type: 'literal',
-                  openQuote: makeSToken('\''),
-                  value: [ makeSToken('single') ],
-                  closeQuote: makeSToken('\''),
-               }, new entityReference.ParamPToken({
-                  open: makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name: makeSToken('peref'),
-                  postNameSpace: undefined,
-                  close: makeSToken(';'),
-               }),
+                  item: {
+                     openQuote: makeSToken('\''),
+                     value: [ makeSToken('single') ],
+                     closeQuote: makeSToken('\''),
+                  },
+               }, {
+                  type: 'peref',
+                  item: new entityReference.ParamPToken({
+                     open: makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name: makeSToken('peref'),
+                     postNameSpace: undefined,
+                     close: makeSToken(';'),
+                  }),
+               },
             ]);
             done();
          });

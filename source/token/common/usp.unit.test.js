@@ -3,7 +3,7 @@
 
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 
 import * as literal from './literal.js';
 import * as usp from './usp.js';
@@ -48,7 +48,10 @@ describe('usp (unit)', () => {
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ makeSToken('   ') ]);
+         expectDelivery(deliverySpy, [ {
+            type: 'space',
+            item: makeSToken('   ')
+         }]);
       });
 
       it('returns nothing if a ">" is found', () => {
@@ -65,7 +68,7 @@ describe('usp (unit)', () => {
 
       it('returns a literal if a double quote is entcountered', () => {
          literal.parse.and.callFake((_1, container, foundOne) => {
-            container.pToken.found = true;
+            container.pToken.isLiteral = true;
             foundOne(true);
          });
          mockSource = new MockSTokenSource([
@@ -80,13 +83,15 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'literal',
-            found: true,
+            item: {
+               isLiteral: true,
+            },
          } ]);
       });
 
       it('returns a literal if a single quote is entcountered', () => {
          literal.parse.and.callFake((_1, container, foundOne) => {
-            container.pToken.found = true;
+            container.pToken.isLiteral = true;
             foundOne(true);
          });
          mockSource = new MockSTokenSource([
@@ -101,13 +106,15 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'literal',
-            found: true,
+            item: {
+               isLiteral: true,
+            },
          } ]);
       });
 
       it('returns a parameter entity reference PToken if a "%" is found', () => {
          entityReference.paramParse.and.callFake((_1, deliver) => {
-            deliver({ type: 'peref' });
+            deliver({ isPeref: true });
          });
          mockSource = new MockSTokenSource([
             [ undefined, 'space' ],
@@ -119,7 +126,12 @@ describe('usp (unit)', () => {
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ { type: 'peref' } ]);
+         expectDelivery(deliverySpy, [ {
+            type: 'peref',
+            item: {
+               isPeref: true,
+            },
+         } ]);
       });
 
       it('returns an SToken if some other character encoutnered', () => {
@@ -134,15 +146,18 @@ describe('usp (unit)', () => {
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ makeSToken('xyzzy') ]);
+         expectDelivery(deliverySpy, [ {
+            type: 'word',
+            item: makeSToken('xyzzy'),
+         }]);
       });
 
       it('returns multiple values when presented with all', () => {
          entityReference.paramParse.and.callFake((_1, deliver) => {
-            deliver({ type: 'peref' });
+            deliver({ peRef: true });
          });
          literal.parse.and.callFake((_1, container, foundOne) => {
-            container.pToken.found = true;
+            container.pToken.isLiteral = true;
             foundOne(true);
          });
          mockSource = new MockSTokenSource([
@@ -160,13 +175,21 @@ describe('usp (unit)', () => {
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [
-            makeSToken('testWord'),
-            { type: 'peref' },
-            makeSToken(' '), {
-               type: 'literal',
-               found: true,
-            } ]);
+         expectDelivery(deliverySpy, [ {
+            type: 'word',
+            item: makeSToken('testWord'),
+         }, {
+            type: 'peref',
+            item: { peRef: true },
+         }, {
+            type: 'space',
+            item: makeSToken(' '),
+         }, {
+            type: 'literal',
+            item: {
+               isLiteral: true,
+            },
+         } ]);
       });
    });
 

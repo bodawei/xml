@@ -4,9 +4,8 @@ import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
 import * as literal from './literal.js';
-import {
-   textOrBlank,
-} from './misc.js';
+import { textOrBlank } from './misc.js';
+import * as usp from './usp.js';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -50,56 +49,171 @@ function parse(source, terminators, deliverPTokenPart) {
       type: EXTERNAL_ID,
    };
 
-   source.extract('peekWord', allTerminators, (sToken) => {
-      const capitalType = sToken && sToken.text.toLocaleUpperCase();
+   checkForPERef(source, 'idType', pTokenPart, (result) => {
+         if (result.leftOff) {
+            deliverPTokenPart(result);
+         } else {
+            deliverPTokenPart();
+         }
+      }, () => {
+      source.extract('peekWord', allTerminators, (sToken) => {
+         const capitalType = sToken && sToken.text.toLocaleUpperCase();
 
-      if (!sToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
-         deliverPTokenPart();
-         return;
-      }
-
-      source.extractToObject('word', allTerminators, pTokenPart, 'idType');
-      source.extractToObject('space', pTokenPart, 'postIdTypeSpace');
-
-      const temp = {};
-      if (capitalType === 'PUBLIC') {
-         literal.parse(source, {
-            pToken: temp,
-         }, (gotQuoted) => {
-            if (!gotQuoted) {
-               deliverPTokenPart(pTokenPart);
-               return;
-            } else {
-               pTokenPart[PUBLIC_PREFIX] = temp;
-            }
-            source.extractToObject('space', pTokenPart, 'postPublicSpace');
-            getSystemIfAvailable(source, allTerminators, pTokenPart, deliverPTokenPart);
-         });
-      } else {
-         getSystemIfAvailable(source, allTerminators, pTokenPart, deliverPTokenPart);
-      }
-   });
-}
-
-function getSystemIfAvailable(source, allTerminators, pToken, deliverPTokenPart) {
-   source.extract('peekWord', allTerminators, (nData) => {
-      if (nData && nData.text.toLocaleUpperCase() === 'NDATA') {
-         deliverPTokenPart(pToken);
-         return;
-      }
-
-      const temp = {};
-      literal.parse(source, {
-         pToken: temp,
-      }, (gotLiteral) => {
-         if (gotLiteral) {
-            pToken[SYSTEM_PREFIX] = temp;
+         if (!sToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
+            deliverPTokenPart();
+            return;
          }
 
-         deliverPTokenPart(pToken);
+         source.extractToObject('word', allTerminators, pTokenPart, 'idType');
+         source.extractToObject('space', pTokenPart, 'postIdTypeSpace');
+
+         if (capitalType === 'PUBLIC') {
+            parsePublic(source, pTokenPart, allTerminators, deliverPTokenPart);
+         } else {
+            parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart);
+         }
       });
    });
 }
+
+function checkForPERef(source, forValue, pTokenPart, deliverPTokenPart, otherwise) {
+   source.extract('peekChar', (sToken) => {
+      if (!sToken) {
+         deliverPTokenPart(pTokenPart);
+      } else if (sToken.text === '%') {
+         usp.parse(source, {}, (pieces) => {
+            pTokenPart.leftOff = forValue;
+            pTokenPart.incomplete = pieces;
+            deliverPTokenPart(pTokenPart);
+         });
+      } else {
+         otherwise();
+      }
+   });
+}
+
+function parsePublic(source, pTokenPart, allTerminators, deliverPTokenPart) {
+   checkForPERef(source, 'public', pTokenPart, deliverPTokenPart, () => {
+      const temp = {};
+
+      literal.parse(source, {
+         pToken: temp,
+      }, (gotQuoted) => {
+         if (!gotQuoted) {
+            deliverPTokenPart(pTokenPart);
+            return;
+         }
+
+         pTokenPart.public = temp;
+         source.extractToObject('space', pTokenPart, 'postPublicSpace');
+
+         parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart);
+      });
+   });
+}
+
+function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
+   checkForPERef(source, 'system', pTokenPart, deliverPTokenPart, () => {
+      source.extract('peekWord', allTerminators, (nData) => {
+         if (nData && nData.text.toLocaleUpperCase() === 'NDATA') {
+            deliverPTokenPart(pTokenPart);
+            return;
+         }
+
+         const temp = {};
+         literal.parse(source, {
+            pToken: temp,
+         }, (gotLiteral) => {
+            if (gotLiteral) {
+               pTokenPart.system = temp;
+            }
+
+            deliverPTokenPart(pTokenPart);
+         });
+      });
+   });
+}
+
+// function normalizeTokenChunks(chunks) {
+//    const newChunks = [];
+
+//    for (let index = 0; index < chunks.length; index++) {
+//       const prevChunk = chunks[index - 1] || {};
+//       const chunk = chunks[index];
+//       const nextChunk = chunks[index + 1] || {};
+
+//       switch (chunk.type) {
+//          case 'pestart':
+//          case 'peend':
+//             if (prevChunk.type !== 'space' && nextChunk.type !== 'space') {
+//                newChunks.push({
+//                   type: 'space',
+//                   optional: true,
+//                   item: new SToken(' ' , ' ', new Range(undefined, );
+//                });
+//             } else if (prevChunk.type === 'space' && nextChunk.type === 'space') {
+//                // mrge
+//             }
+//             break;
+//          default:
+//             newChunks.push(chunk);
+//             break;
+//       }
+//    }
+
+//    return newChunks;
+// }
+
+// function completeParse(externalId) {
+//    let incompleteArray = externalId.incomplete || [];
+//    let leftOff = externalId.leftOff || 'idType';
+//    let unexpandedRefs = incompleteArray.filter((item) => (item.type === 'peref'));
+
+//    if (unexpandedRefs.length !== 0) {
+//       return;
+//    }
+
+//    incompleteArray = normalizeTokenChunks(incompleteArray);
+
+//    doit(externalId, incompleteArray, [
+//       [ 'idType', 'word' ], // don't we need to validate that it is legal?
+//       [ 'postIdTypeSpace', 'space', true ],
+//       [ 'public', 'literal' ],
+//       [ 'postPublicSpace', 'space', true ],
+//       [ 'system', 'literal' ],
+//    ]);
+
+//    if (incompleteArray.length === 0) {
+//       delete externalId.incomplete;
+//    }
+
+//    function doit(pToken, tokenChunks, sTokenDescriptors) {
+//       let found = false;
+//       if (!pToken.leftOff) {
+//          found = true;
+//       }
+
+//       let prev;
+//       sTokenDescriptors.forEach((descriptor) => {
+//          if (descriptor[0] === pToken.leftOff) {
+//             found = true;
+//             if (incompleteArray[0].type === 'optional-space' || incompleteArray[0].type === 'space' && !pToken[prevDescriptor.name]) {
+//                pToken[prevDescriptor.name] = incompleteArray.shift().item;
+//             } else if (incompleteArray[0].type === 'space' && pToken[prevDescriptor.name]) {
+//                // merge
+//             } else if (incompleteArray[0].type === 'optional-space') {
+//                incompleteArray.shift();
+//             }
+//          }
+
+//          if (descriptor.type === incompleteArray[0].type) {
+//             pToken[descriptor.name] = incompleteArray.shift().item;
+//          }
+
+//          prev = descriptor;
+//       });
+//    }
+// }
 
 /**********************************************************************\
  checkWellFormed() does a well formed check on the pTokenPart value, and

@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 import * as literal from './literal.js';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
@@ -34,7 +34,7 @@ function parse(source, options = {}, deliverUsp) {
 function extract(source, result, options, deliverUsp) {
    source.extract('space', (sToken) => {
       if (sToken) {
-         result.push(sToken);
+         result.push({ type: 'space', item: sToken });
       }
 
       source.extract('peekChar', (sToken) => {
@@ -54,7 +54,7 @@ function handleChar(sToken, source, result, options, deliverUsp) {
          break;
       case '%':
          entityReference.paramParse(source, (pToken) => {
-            result.push(pToken);
+            result.push({ type: 'peref', item: pToken });
             extract(source, result, options, deliverUsp);
          });
          break;
@@ -62,14 +62,13 @@ function handleChar(sToken, source, result, options, deliverUsp) {
       case '\'':
          const container = {};
          literal.parse(source, { pToken: container }, () => {
-            container.type = 'literal';
-            result.push(container);
+            result.push({ type: 'literal', item: container });
             extract(source, result, options, deliverUsp);
          });
          break;
       default:
          source.extract('word', TERMINATORS, (sToken) => {
-            result.push(sToken);
+            result.push({ type: 'word', item: sToken });
             extract(source, result, options, deliverUsp);
          });
          break;

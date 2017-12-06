@@ -11,7 +11,7 @@ import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
 import * as entityEnd from './entityEnd.js';
-import * as entityReference from './entityReference.js';
+import entityReference from './entityReference.js';
 import * as entityStart from './entityStart.js';
 import * as elementStart from './elementStart.js';
 import * as elementEnd from './elementEnd.js';

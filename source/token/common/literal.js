@@ -3,7 +3,7 @@
 import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken';
 
-import * as entityReference from '../entityReference.js';
+import entityReference from '../entityReference.js';
 import * as text from '../text.js';
 import * as misc from './misc.js';
 
