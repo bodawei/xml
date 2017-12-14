@@ -18,8 +18,6 @@ import * as usp from './usp.js';
 const WFEID = WellFormedError.ID;
 const EXTERNAL_ID = 'EXTERNAL_ID';
 const ALLOWED_TYPES = [ 'PUBLIC', 'SYSTEM' ];
-const PUBLIC_PREFIX = 'public';
-const SYSTEM_PREFIX = 'system';
 const TYPE_TERMINATORS = [ '"', '\'' ];
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
 
@@ -50,12 +48,12 @@ function parse(source, terminators, deliverPTokenPart) {
    };
 
    checkForPERef(source, 'idType', pTokenPart, (result) => {
-         if (result.leftOff) {
-            deliverPTokenPart(result);
-         } else {
-            deliverPTokenPart();
-         }
-      }, () => {
+      if (result.leftOff) {
+         deliverPTokenPart(result);
+      } else {
+         deliverPTokenPart();
+      }
+   }, () => {
       source.extract('peekWord', allTerminators, (sToken) => {
          const capitalType = sToken && sToken.text.toLocaleUpperCase();
 
@@ -197,7 +195,8 @@ function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
 //       sTokenDescriptors.forEach((descriptor) => {
 //          if (descriptor[0] === pToken.leftOff) {
 //             found = true;
-//             if (incompleteArray[0].type === 'optional-space' || incompleteArray[0].type === 'space' && !pToken[prevDescriptor.name]) {
+//             if (incompleteArray[0].type === 'optional-space' ||
+//                incompleteArray[0].type === 'space' && !pToken[prevDescriptor.name]) {
 //                pToken[prevDescriptor.name] = incompleteArray.shift().item;
 //             } else if (incompleteArray[0].type === 'space' && pToken[prevDescriptor.name]) {
 //                // merge
@@ -225,7 +224,7 @@ function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
 \**********************************************************************/
 
 function checkWellFormed(pTokenPart, ec, entityMetaData) {
-   if (!pTokenPart) {
+   if (!pTokenPart || pTokenPart.incomplete) {
       return;
    }
 
@@ -265,7 +264,7 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
 \**********************************************************************/
 
 function makeEntityLocation(pTokenPart) {
-   if (!pTokenPart) {
+   if (!pTokenPart || pTokenPart.incomplete) {
       return;
    }
 
@@ -291,10 +290,12 @@ function getSTokens(pTokenPart) {
    return results.filter(item => item);
 }
 
-export {
-   EXTERNAL_ID as PTYPE,
+const externalId = {
+   PTYPE: EXTERNAL_ID,
    parse,
    getSTokens,
    checkWellFormed,
    makeEntityLocation,
 };
+
+export default externalId;

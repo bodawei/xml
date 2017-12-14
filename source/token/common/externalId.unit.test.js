@@ -6,7 +6,7 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 import { WellFormedError } from '../../error';
 
-import * as externalId from './externalId.js';
+import externalId from './externalId.js';
 import * as literal from './literal.js';
 import * as usp from './usp.js';
 
@@ -178,7 +178,7 @@ describe('externalId (unit)', () => {
             [ MockSTokenSource.PEEK(' '), 'peekChar' ],
             [ ' ', 'space' ],
             [ undefined, 'peekChar' ],
-            [ undefined, 'peekWord' ]  // check for ndata
+            [ undefined, 'peekWord' ],  // check for ndata
             // literal
          ]);
 
@@ -204,7 +204,7 @@ describe('externalId (unit)', () => {
             // literal
             [ undefined, 'peekChar' ],
             [ undefined, 'space' ],
-            [ undefined, 'peekWord' ]  // check for ndata
+            [ undefined, 'peekWord' ],  // check for ndata
             // literal
          ]);
 
@@ -358,6 +358,13 @@ describe('externalId (unit)', () => {
          });
       });
 
+      it('reports no errors the pToken is passed in with incomplete data', () => {
+         pTokenPart.incomplete = [];
+         externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.report).not.toHaveBeenCalled();
+      });
+
       it('reports no errors when no PToken part is passed in', () => {
          externalId.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
 
@@ -461,6 +468,25 @@ describe('externalId (unit)', () => {
    });
 
    describe('makeEntityLocation()', () => {
+
+      it('returns nothing if the pToken part has an incomplete', () => {
+         const expectedSToken = makeSTokenMaker();
+         const pTokenPart = {
+            incomplete: [],
+            type: 'EXTERNAL_ID',
+            idType: expectedSToken('PUBLIC'),
+            postIdTypeSpace: expectedSToken(' '),
+            system: {
+               openQuote: expectedSToken('"'),
+               value: [ expectedSToken('sys.xml') ],
+               closeQuote: expectedSToken('"'),
+            },
+         };
+
+         const externalLoc = externalId.makeEntityLocation(pTokenPart);
+
+         expect(externalLoc).toBeUndefined();
+      });
 
       it('returns an EntityLocation with the public and system ids', () => {
          const expectedSToken = makeSTokenMaker();

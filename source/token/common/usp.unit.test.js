@@ -50,8 +50,8 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'space',
-            item: makeSToken('   ')
-         }]);
+            item: makeSToken('   '),
+         } ]);
       });
 
       it('returns nothing if a ">" is found', () => {
@@ -149,7 +149,7 @@ describe('usp (unit)', () => {
          expectDelivery(deliverySpy, [ {
             type: 'word',
             item: makeSToken('xyzzy'),
-         }]);
+         } ]);
       });
 
       it('returns multiple values when presented with all', () => {

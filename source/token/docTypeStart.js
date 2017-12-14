@@ -2,7 +2,7 @@
 
 import { WellFormedError } from '../error';
 
-import * as externalId from './common/externalId.js';
+import externalId from './common/externalId.js';
 import * as declaration from './bridge/declaration.js';
 import * as misc from './common/misc.js';
 import * as base from './base.js';

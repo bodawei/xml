@@ -8,7 +8,7 @@ import { STokenSource } from '../sToken';
 import { makeSTokenMaker } from '../sToken/test';
 
 import * as notationDeclaration from './notationDeclaration.js';
-import * as externalId from './common/externalId.js';
+import externalId from './common/externalId.js';
 
 describe('notationdeDlaration (integration)', () => {
    let declarationPToken;

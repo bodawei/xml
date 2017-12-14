@@ -8,7 +8,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
-import * as externalId from './externalId.js';
+import externalId from './externalId.js';
 
 describe('externalId (integration)', () => {
 
@@ -61,7 +61,7 @@ describe('externalId (integration)', () => {
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: undefined,
-               incomplete: [{
+               incomplete: [ {
                   type: 'peref',
                   item: new entityReference.ParamPToken({
                      type: 'foo',
@@ -71,7 +71,7 @@ describe('externalId (integration)', () => {
                      postNameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
-               }],
+               } ],
                leftOff: 'system',
             });
             done();

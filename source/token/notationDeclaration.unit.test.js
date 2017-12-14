@@ -9,7 +9,7 @@ import { WellFormedError } from '../error';
 
 import * as declaration from './bridge/declaration.js';
 import * as notationDeclaration from './notationDeclaration.js';
-import * as externalId from './common/externalId.js';
+import externalId from './common/externalId.js';
 import * as misc from './common/misc.js';
 
 describe('notationdeDlaration (unit)', () => {

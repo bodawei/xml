@@ -47,36 +47,35 @@ describe('usp (integration)', () => {
 
          usp.parse(source, {}, (pieces) => {
             expect(pieces).toEqual([ {
-                  type: 'space',
-                  item: makeSToken(' '),
-               }, {
-                  type: 'literal',
-                  item: {
-                     openQuote: makeSToken('"'),
-                     value: [ makeSToken('double') ],
-                     closeQuote: makeSToken('"'),
-                  },
-               }, {
-                  type: 'word',
-                  item: makeSToken('whatever'),
-               }, {
-                  type: 'literal',
-                  item: {
-                     openQuote: makeSToken('\''),
-                     value: [ makeSToken('single') ],
-                     closeQuote: makeSToken('\''),
-                  },
-               }, {
-                  type: 'peref',
-                  item: new entityReference.ParamPToken({
-                     open: makeSToken('%'),
-                     postOpenSpace: undefined,
-                     name: makeSToken('peref'),
-                     postNameSpace: undefined,
-                     close: makeSToken(';'),
-                  }),
+               type: 'space',
+               item: makeSToken(' '),
+            }, {
+               type: 'literal',
+               item: {
+                  openQuote: makeSToken('"'),
+                  value: [ makeSToken('double') ],
+                  closeQuote: makeSToken('"'),
                },
-            ]);
+            }, {
+               type: 'word',
+               item: makeSToken('whatever'),
+            }, {
+               type: 'literal',
+               item: {
+                  openQuote: makeSToken('\''),
+                  value: [ makeSToken('single') ],
+                  closeQuote: makeSToken('\''),
+               },
+            }, {
+               type: 'peref',
+               item: new entityReference.ParamPToken({
+                  open: makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name: makeSToken('peref'),
+                  postNameSpace: undefined,
+                  close: makeSToken(';'),
+               }),
+            } ]);
             done();
          });
       });
