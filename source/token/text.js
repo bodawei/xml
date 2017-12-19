@@ -15,8 +15,8 @@ const TEXT = 'TEXT';
 
 class Text extends base.XToken {
 
-   constructor(text, sTokens) {
-      super(sTokens);
+   constructor(text, pToken) {
+      super(pToken);
 
       this.text = text;
    }

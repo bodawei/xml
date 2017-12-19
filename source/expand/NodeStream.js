@@ -9,6 +9,7 @@ import {
    entityEnd,
    entityReference,
    entityStart,
+   notationDeclaration,
 } from '../token';
 
 import EntityManager from './EntityManager.js';
@@ -79,6 +80,14 @@ class NodeStream extends Transform {
 
             return;
          }
+      } else if (xToken instanceof notationDeclaration.XToken) {
+         if (xToken.pToken && xToken.pToken.externalId && xToken.pToken.externalId.incomplete) {
+            this._processIncomplete(xToken, xToken.pToken.externalId, () => {
+               this.push(xToken);
+               callback();
+            });
+            return;
+         }
       }
 
       this.push(xToken);
@@ -130,6 +139,60 @@ class NodeStream extends Transform {
 
       entityDeclaration.value = newValue;
       done();
+   }
+
+   _processIncomplete(xToken, incompleteParent, done) {
+      let newIncomplete = [];
+
+      for (let index = 0; index < incompleteParent.incomplete.length; index++) {
+         const descriptor = incompleteParent.incomplete[index];
+
+         if (descriptor.type === 'peref') {
+            newIncomplete = newIncomplete.concat(this._expandPERef(descriptor));
+         } else {
+            newIncomplete.push(descriptor);
+         }
+      }
+
+      incompleteParent.incomplete = newIncomplete;
+      done();
+   }
+
+   _expandPERef(descriptor) {
+      let results = [];
+      const entityToken = this._entityManager.getParameterEntityToken(descriptor.item.name.text || '');
+
+      if (!entityToken || !entityToken.value) {
+         results.push(descriptor);
+      } else {
+         results.push({
+            type: 'pestart',
+            item: descriptor.item,
+         });
+
+         for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
+            const tokenItem = entityToken.value[tokenIndex];
+
+            if (tokenItem.text) {
+               results.push({
+                  type: 'word',
+                  item: tokenItem.pToken.text, // SToken
+               });
+            } else { // PERef
+               results = results.concat(this._expandPERef({
+                  type: 'peref',
+                  item: tokenItem.pToken, // SToken
+               }));
+            }
+         }
+
+         results.push({
+            type: 'peend',
+            item: descriptor.item,
+         });
+      }
+
+      return results;
    }
 
 }

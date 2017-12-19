@@ -227,6 +227,9 @@ function checkWellFormed(pToken, ec, entityMetaData) {
 /**********************************************************************\
  pTokenToXToken() makes either a general or parmaeter entity token based
  on the PToken value.
+
+ It is worth mentioning that the EntityValue is an array of Text and
+ EntityReference XTokens.
 \**********************************************************************/
 
 function pTokenToXToken(pToken) {

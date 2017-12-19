@@ -18,8 +18,8 @@ const WFEID = WellFormedError.ID;
 
 class NotationDeclaration extends base.XToken {
 
-   constructor(name, externalId, sTokens) {
-      super(sTokens);
+   constructor(name, externalId, pToken) {
+      super(pToken);
 
       this.name = name;
       this.externalId = externalId;

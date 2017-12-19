@@ -259,7 +259,7 @@ describe('literal (unit)', () => {
          };
          const result = literal.makeTokenCompatible(pToken);
 
-         expect(result).toEqual([ new text.XToken('blah', pToken.value) ]);
+         expect(result).toEqual([ new text.XToken('blah', { text: pToken.value[0] }) ]);
       });
 
       it('calls entityReference.makeToken for each reference in the pToken value', () => {

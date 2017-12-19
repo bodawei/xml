@@ -58,7 +58,10 @@ function parse(source, options, done) {
       });
    });
 }
-
+/*
+ * This passes to chunksDone() an array of:
+ * STokens, entityReference.PTokens and entityReference.ParamPTokens
+ */
 function getPiece(source, terminators, chunksDone) {
    const container = {};
 
@@ -127,7 +130,7 @@ function makeTokenCompatible(pToken) {
       if (item.type) {
          value.push(entityReference.pTokenToXToken(item));
       } else {
-         value.push(new text.XToken(item.text, [ item ]));
+         value.push(new text.XToken(item.text, { text: item }));
       }
    }
 
