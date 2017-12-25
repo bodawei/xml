@@ -6,6 +6,8 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 import { WellFormedError } from '../../error';
 
+import * as text from '../text.js';
+
 import externalId from './externalId.js';
 import * as literal from './literal.js';
 import * as usp from './usp.js';
@@ -309,13 +311,13 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('pub.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
             postPublicSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('sys.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -371,11 +373,11 @@ describe('externalId (unit)', () => {
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
-      it('reports no errors if the public value is undefined (this can not happen naturally', () => {
+      it('reports no errors if the public value is undefined (this can not happen naturally)', () => {
          literal.checkWellFormed.and.callFake((_1, _2, _3, _4, callback) => {
             return callback ? callback() : undefined;
          });
-         delete pTokenPart.value;
+         delete pTokenPart.public.value;
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
@@ -478,7 +480,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('sys.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -496,13 +498,13 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('pub.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
             postPublicSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('sys.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -520,7 +522,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('sys.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -538,7 +540,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ expectedSToken('pub.xml') ],
+               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };

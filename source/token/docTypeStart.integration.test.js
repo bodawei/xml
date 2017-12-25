@@ -8,6 +8,7 @@ import { STokenSource } from '../sToken';
 import { makeSTokenMaker } from '../sToken/test';
 
 import * as docTypeStart from './docTypeStart.js';
+import * as text from './text.js';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken;
@@ -24,7 +25,7 @@ describe('docTypeStart (integration)', () => {
             postIdTypeSpace: makeSToken(' '),
             system: {
                openQuote: makeSToken('"'),
-               value: [ makeSToken('sys.dtd') ],
+               value: [ new text.PToken({ text: makeSToken('sys.dtd') }) ],
                closeQuote: makeSToken('"'),
             },
          },

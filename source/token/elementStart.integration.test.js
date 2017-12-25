@@ -50,7 +50,7 @@ describe('elementStart (integration)', () => {
                   equal: makeSToken('='),
                   postEqualSpace: makeSToken('\t\t'),
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('value1') ],
+                  value: [ new text.PToken({ text: makeSToken('value1') }) ],
                   closeQuote: makeSToken('"'),
                   trailingSpace: makeSToken(' '),
                }, {
@@ -59,7 +59,7 @@ describe('elementStart (integration)', () => {
                   equal: makeSToken('='),
                   postEqualSpace: undefined,
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('value two') ],
+                  value: [ new text.PToken({ text: makeSToken('value two') }) ],
                   closeQuote: makeSToken('"'),
                   trailingSpace: undefined,
                } ],

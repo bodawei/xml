@@ -9,6 +9,7 @@ import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
 import * as literal from './literal.js';
+import * as text from '../text.js';
 
 describe('literal (integration)', () => {
 
@@ -33,7 +34,7 @@ describe('literal (integration)', () => {
             expect(pToken).toEqual({
                openQuote: makeSToken('"'),
                value: [
-                  makeSToken('one%peref;two&geref;&geref2;three'),
+                  new text.PToken({ text: makeSToken('one%peref;two&geref;&geref2;three') }),
                ],
                closeQuote: makeSToken('"'),
             });
@@ -55,7 +56,7 @@ describe('literal (integration)', () => {
             expect(pToken).toEqual({
                openQuote: makeSToken('"'),
                value: [
-                  makeSToken('one'),
+                  new text.PToken({ text: makeSToken('one') }),
                   new entityReference.ParamPToken({
                      type: entityReference.PARAM_PTYPE,
                      open: makeSToken('%'),
@@ -64,7 +65,7 @@ describe('literal (integration)', () => {
                      postNameSpace: undefined,
                      close: makeSToken(';'),
                   }),
-                  makeSToken('two'),
+                  new text.PToken({ text: makeSToken('two') }),
                   new entityReference.PToken({
                      open: makeSToken('&'),
                      postOpenSpace: undefined,
@@ -79,7 +80,7 @@ describe('literal (integration)', () => {
                      postNameSpace: undefined,
                      close: makeSToken(';'),
                   }),
-                  makeSToken('three'),
+                  new text.PToken({ text: makeSToken('three') }),
                ],
                closeQuote: makeSToken('"'),
             });

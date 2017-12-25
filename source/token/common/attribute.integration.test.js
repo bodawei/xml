@@ -7,6 +7,8 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
+import * as text from '../text.js';
+
 import * as attribute from './attribute.js';
 
 describe('attribute (integration)', () => {
@@ -25,7 +27,7 @@ describe('attribute (integration)', () => {
          equal: makeSToken('='),
          postEqualSpace: undefined,
          openQuote: makeSToken('"'),
-         value: [ makeSToken('1') ],
+         value: [ new text.PToken({ text: makeSToken('1') }) ],
          closeQuote: makeSToken('"'),
          trailingSpace: makeSToken('  '),
       }, {
@@ -34,7 +36,7 @@ describe('attribute (integration)', () => {
          equal: makeSToken('='),
          postEqualSpace: makeSToken(' '),
          openQuote: makeSToken('"'),
-         value: [ makeSToken('two') ],
+         value: [ new text.PToken({ text: makeSToken('two') }) ],
          closeQuote: makeSToken('"'),
          trailingSpace: makeSToken(' '),
       } ];
@@ -54,7 +56,7 @@ describe('attribute (integration)', () => {
                equal: makeSToken('='),
                postEqualSpace: undefined,
                openQuote: makeSToken('"'),
-               value: [ makeSToken('1') ],
+               value: [ new text.PToken({ text: makeSToken('1') }) ],
                closeQuote: makeSToken('"'),
                trailingSpace: makeSToken('  '),
             }, {
@@ -63,7 +65,7 @@ describe('attribute (integration)', () => {
                equal: makeSToken('='),
                postEqualSpace: makeSToken(' '),
                openQuote: makeSToken('"'),
-               value: [ makeSToken('two') ],
+               value: [ new text.PToken({ text: makeSToken('two') }) ],
                closeQuote: makeSToken('"'),
                trailingSpace: makeSToken(' '),
             }, {

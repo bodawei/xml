@@ -111,10 +111,11 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ENTITY declaration', (done) => {
-      const value = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
+      const pToken = new text.PToken();
+      pToken.text = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
 
       expectInputToProduce('<!ENTITY entityName "value">', [
-         new entityDeclaration.XToken('entityName', [ value ], undefined, '', []),
+         new entityDeclaration.XToken('entityName', [ pToken ], undefined, '', []),
       ], done);
    });
 

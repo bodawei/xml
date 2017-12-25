@@ -268,8 +268,8 @@ function makeEntityLocation(pTokenPart) {
       return;
    }
 
-   const value = (pTokenPart.system && pTokenPart.system.value) ? pTokenPart.system.value[0].text : undefined;
-   const publicValue = (pTokenPart.public && pTokenPart.public.value) ? pTokenPart.public.value[0].text : undefined;
+   const value = (pTokenPart.system && pTokenPart.system.value) ? pTokenPart.system.value[0].text.text : undefined;
+   const publicValue = (pTokenPart.public && pTokenPart.public.value) ? pTokenPart.public.value[0].text.text : undefined;
 
    return new EntityLocation(value, publicValue);
 }

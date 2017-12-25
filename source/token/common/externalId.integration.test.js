@@ -8,6 +8,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
+import * as text from '../text.js';
 import externalId from './externalId.js';
 
 describe('externalId (integration)', () => {
@@ -32,13 +33,13 @@ describe('externalId (integration)', () => {
                postIdTypeSpace: makeSToken(' '),
                public: {
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('pub.xml') ],
+                  value: [ new text.PToken({ text: makeSToken('pub.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: makeSToken('\t'),
                system: {
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('sys.xml') ],
+                  value: [ new text.PToken({ text: makeSToken('sys.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
             });
@@ -57,7 +58,7 @@ describe('externalId (integration)', () => {
                postIdTypeSpace: makeSToken(' '),
                public: {
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('pub.xml') ],
+                  value: [ new text.PToken({ text: makeSToken('pub.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: undefined,

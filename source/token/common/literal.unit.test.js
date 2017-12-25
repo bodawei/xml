@@ -40,7 +40,7 @@ describe('literal (unit)', () => {
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('blah') ],
+            value: [ new text.PToken({ text: expectedSToken('blah') }) ],
             closeQuote: expectedSToken('"'),
          });
       });
@@ -64,7 +64,7 @@ describe('literal (unit)', () => {
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('\''),
-            value: [ expectedSToken('blah') ],
+            value: [ new text.PToken({ text: expectedSToken('blah') }) ],
             closeQuote: expectedSToken('\''),
          });
       });
@@ -88,7 +88,7 @@ describe('literal (unit)', () => {
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('') ],
+            value: [ new text.PToken({ text: expectedSToken('') }) ],
             closeQuote: undefined,
          });
       });
@@ -112,7 +112,7 @@ describe('literal (unit)', () => {
          expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('some text') ],
+            value: [ new text.PToken({ text: expectedSToken('some text') }) ],
             closeQuote: undefined,
          });
       });
@@ -135,7 +135,7 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('') ],
+            value: [ new text.PToken({ text: expectedSToken('') }) ],
             closeQuote: expectedSToken('"'),
          });
       });
@@ -214,13 +214,13 @@ describe('literal (unit)', () => {
             expect(pToken).toEqual({
                openQuote: makeSToken('"'),
                value: [
-                  makeSToken('one'),
+                  new text.PToken({ text: makeSToken('one') }),
                   {},
-                  makeSToken('two'),
+                  new text.PToken({ text: makeSToken('two') }),
                   {},
-                  makeSToken('three'),
+                  new text.PToken({ text: makeSToken('three') }),
                   {},
-                  makeSToken('four'),
+                  new text.PToken({ text: makeSToken('four') }),
                ],
                closeQuote: makeSToken('"'),
             });
@@ -242,7 +242,7 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          literalPToken = {
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('xxx') ],
+            value: [ new text.PToken({ text: expectedSToken('xxx') }) ],
             closeQuote: expectedSToken('"'),
          };
 
@@ -253,7 +253,7 @@ describe('literal (unit)', () => {
       it('calls misc.checkWellFormedText() to check the value', () => {
          literal.checkWellFormed(literalPToken, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText.calls.argsFor(0)[0]).toEqual(literalPToken.value[0]);
+         expect(misc.checkWellFormedText.calls.argsFor(0)[0]).toEqual(literalPToken.value[0].text);
          expect(misc.checkWellFormedText.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
          expect(misc.checkWellFormedText.calls.argsFor(0)[2]).toEqual(emd);
       });
@@ -278,7 +278,7 @@ describe('literal (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE,
             params: [ 'aType' ],
-            lastPosition: literalPToken.value[0],
+            lastPosition: literalPToken.value[0].text,
          });
       });
 
@@ -302,12 +302,12 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pToken = {
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('blah') ],
+            value: [ new text.PToken({ text: expectedSToken('blah') }) ],
             closeQuote: expectedSToken('"'),
          };
          const result = literal.makeTokenCompatible(pToken);
 
-         expect(result).toEqual([ new text.XToken('blah', { text: pToken.value[0] }) ]);
+         expect(result).toEqual([ new text.XToken('blah', pToken.value[0]) ]);
       });
 
       it('calls entityReference.makeToken for each reference in the pToken value', () => {
@@ -315,7 +315,7 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pToken = {
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('blah'), {
+            value: [ new text.PToken({ text: expectedSToken('blah') }), {
                type: entityReference.PTYPE,
             }, {
                type: entityReference.PARAM_PTYPE,
@@ -343,7 +343,7 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const result = literal.makeOneTokenCompatible({
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('blah') ],
+            value: [ new text.PToken({ text: expectedSToken('blah') }) ],
             closeQuote: expectedSToken('"'),
          });
 
@@ -364,14 +364,14 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          const pToken = {
             openQuote: expectedSToken('"'),
-            value: [ expectedSToken('blah') ],
+            value: [ new text.PToken({ text: expectedSToken('blah') }) ],
             closeQuote: expectedSToken('"'),
          };
          const results = literal.getSTokens(pToken);
 
          expect(results).toEqual([
             pToken.openQuote,
-            pToken.value[0],
+            pToken.value[0].text,
             pToken.closeQuote,
          ]);
       });
@@ -387,7 +387,7 @@ describe('literal (unit)', () => {
          const pToken = {
             openQuote: expectedSToken('"'),
             value: [
-               expectedSToken('blah'),
+               new text.PToken({ text: expectedSToken('blah') }),
                new entityReference.XToken('foo', [ { stoken: true } ]),
             ],
             closeQuote: expectedSToken('"'),
@@ -396,7 +396,7 @@ describe('literal (unit)', () => {
 
          expect(results).toEqual([
             pToken.openQuote,
-            pToken.value[0],
+            pToken.value[0].text,
             { stoken: true },
             pToken.closeQuote,
          ]);

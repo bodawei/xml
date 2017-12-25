@@ -17,7 +17,11 @@ class SToken {
    constructor(text, originalText, range) {
       this.text = text;
       this.originalText = originalText;
-      this.range = Array.isArray(range) ? range : [ range ];
+      if (range) {
+         this.range = Array.isArray(range) ? range : [ range ];
+      } else {
+         this.range = [];
+      }
    }
 
 }

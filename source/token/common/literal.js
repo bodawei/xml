@@ -51,11 +51,15 @@ function parse(source, options, done) {
          pToken.value = valueArray;
          source.extract('match', quoteSToken.text, (closeSToken) => {
             if (pToken.value.length === 0) {
+               const textPToken = new text.PToken();
                const newRange = quoteSToken.range[0].clone();
                newRange.startIndex = newRange.endIndex;
                newRange.startRow = newRange.endRow;
                newRange.startColumn = newRange.endColumn;
-               pToken.value.push(new SToken('', '', newRange));
+
+               textPToken.text = new SToken('', '', newRange);
+
+               pToken.value.push(textPToken);
             }
 
             pToken.closeQuote = closeSToken;
@@ -79,7 +83,12 @@ function getRest(source, terminators, literalDone) {
 
    source.extractToObject('all', terminators, container, 'sToken');
    source.extract('peekChar', (char) => {
-      const currentPortion = container.sToken ? [ container.sToken ] : [];
+      let pToken;
+      if (container.sToken) {
+         pToken = new text.PToken();
+         pToken.text = container.sToken;
+      }
+      const currentPortion = pToken ? [ pToken ] : [];
       if (!char) {
          literalDone(currentPortion);
          return;
@@ -116,13 +125,15 @@ function checkWellFormed(pTokenPart, ec, entityMetaData, type, checkValue) {
    const pieces = pToken.value || [];
    for (let index = 0; index < pieces.length; index++) {
       const item = pieces[index];
-      if (item.type) {
-         entityReference.checkWellFormed(item, ec, entityMetaData);
+
+      if (item.type === text.PTYPE) {
+         ec.setPos(item.text);
+         misc.checkWellFormedText(item.text, ec, entityMetaData);
       } else {
-         ec.setPos(item);
-         misc.checkWellFormedText(item, ec, entityMetaData);
+         entityReference.checkWellFormed(item, ec, entityMetaData);
       }
    }
+
    if (checkValue) {
       checkValue();
    }
@@ -137,10 +148,11 @@ function makeTokenCompatible(pToken) {
 
    for (let index = 0; index < pieces.length; index++) {
       const item = pieces[index];
-      if (item.type) {
-         value.push(entityReference.pTokenToXToken(item));
+
+      if (item.type === text.PTYPE) {
+         value.push(new text.XToken(item.text.text, item));
       } else {
-         value.push(new text.XToken(item.text, { text: item }));
+         value.push(entityReference.pTokenToXToken(item));
       }
    }
 
@@ -148,7 +160,7 @@ function makeTokenCompatible(pToken) {
 }
 
 function makeOneTokenCompatible(pToken) {
-   return (pToken && pToken.value) ? pToken.value[0].text : undefined;
+   return (pToken && pToken.value) ? pToken.value[0].text.text : undefined;
 }
 
 function getSTokens(pToken) {
@@ -171,7 +183,7 @@ function getSTokens(pToken) {
             });
          }
       } else {
-         results.push(item);
+         results.push(item.text);
       }
    }
 

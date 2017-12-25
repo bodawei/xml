@@ -166,7 +166,7 @@ function makeNameCheckClosure() {
 function checkValue(name, value, ec) {
    const nameText = textOrBlank(name);
    const lcName = nameText.toLocaleLowerCase();
-   const valueText = textOrBlank(value[0]);  // @@@ value
+   const valueText = textOrBlank(value[0] ? value[0].text : undefined);
    const lcValue = valueText.toLocaleLowerCase();
 
    switch (lcName) {

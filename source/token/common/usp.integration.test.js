@@ -7,6 +7,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
+import * as text from '../text.js';
 
 import * as usp from './usp.js';
 
@@ -53,7 +54,7 @@ describe('usp (integration)', () => {
                type: 'literal',
                item: {
                   openQuote: makeSToken('"'),
-                  value: [ makeSToken('double') ],
+                  value: [ new text.PToken({ text: makeSToken('double') }) ],
                   closeQuote: makeSToken('"'),
                },
             }, {
@@ -63,7 +64,7 @@ describe('usp (integration)', () => {
                type: 'literal',
                item: {
                   openQuote: makeSToken('\''),
-                  value: [ makeSToken('single') ],
+                  value: [ new text.PToken({ text: makeSToken('single') }) ],
                   closeQuote: makeSToken('\''),
                },
             }, {
