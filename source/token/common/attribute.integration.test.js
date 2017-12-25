@@ -7,9 +7,9 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
-import * as text from '../text.js';
+import text from '../text.js';
 
-import * as attribute from './attribute.js';
+import attribute from './attribute.js';
 
 describe('attribute (integration)', () => {
    let emd;

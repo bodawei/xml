@@ -5,7 +5,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
 
-import * as literal from './literal.js';
+import literal from './literal.js';
 import * as usp from './usp.js';
 
 describe('usp (unit)', () => {

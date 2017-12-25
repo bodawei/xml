@@ -2,8 +2,8 @@
 
 import { WellFormedError } from '../../error';
 
-import * as misc from './misc.js';
-import * as literal from './literal.js';
+import misc from './misc.js';
+import literal from './literal.js';
 
 /**********************************************************************\
  The attribute namespace contains the usual tools for processing
@@ -174,10 +174,12 @@ function getSTokens(attributes = []) {
    return results.filter(item => item);
 }
 
-export {
+const attribute = {
    parse,
    checkWellFormed,
    makeTokenCompatible,
    makeOneTokenCompatible,
    getSTokens,
 };
+
+export default attribute;

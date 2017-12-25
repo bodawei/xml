@@ -60,10 +60,12 @@ function makeXToken(pToken) {
    return new Text(pToken.text.text, pToken);
 }
 
-export {
-   TEXT as PTYPE,
-   TextPToken as PToken,
-   Text as XToken,
+const text = {
+   PTYPE: TEXT,
+   PToken: TextPToken,
+   XToken: Text,
    parse,
    makeXToken,
 };
+
+export default text;

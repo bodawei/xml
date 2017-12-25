@@ -10,7 +10,7 @@ import { WellFormedError } from '../error';
 import * as declaration from './bridge/declaration.js';
 import * as docTypeStart from './docTypeStart.js';
 import externalId from './common/externalId.js';
-import * as misc from './common/misc.js';
+import misc from './common/misc.js';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken;

@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 import { WellFormedError, XmlWarning } from '../error';
 
-import * as misc from './common/misc.js';
+import misc from './common/misc.js';
 import * as elementEnd from './elementEnd.js';
 
 describe('elementEnd', () => {

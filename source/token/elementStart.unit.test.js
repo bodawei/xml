@@ -7,8 +7,8 @@ import { MockErrorCollector } from '../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 import { WellFormedError, XmlWarning } from '../error';
 
-import * as attribute from './common/attribute.js';
-import * as misc from './common/misc.js';
+import attribute from './common/attribute.js';
+import misc from './common/misc.js';
 import * as elementStart from './elementStart.js';
 
 describe('elementStart (unit)', () => {

@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
 import * as instruction from './instruction.js';
-import * as misc from '../common/misc.js';
+import misc from '../common/misc.js';
 
 describe('instruction (unit)', () => {
    let instructionPToken;

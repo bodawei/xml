@@ -2,7 +2,7 @@
 
 import { WellFormedError } from '../error';
 
-import * as misc from './common/misc.js';
+import misc from './common/misc.js';
 import * as envelope from './bridge/envelope.js';
 import * as base from './base.js';
 

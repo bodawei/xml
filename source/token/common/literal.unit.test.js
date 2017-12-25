@@ -7,9 +7,9 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
-import * as misc from './misc.js';
-import * as literal from './literal.js';
-import * as text from '../text.js';
+import misc from './misc.js';
+import literal from './literal.js';
+import text from '../text.js';
 
 describe('literal (unit)', () => {
 

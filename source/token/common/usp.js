@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import entityReference from '../entityReference.js';
-import * as literal from './literal.js';
+import literal from './literal.js';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 

@@ -7,7 +7,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
-import * as text from '../text.js';
+import text from '../text.js';
 
 import * as usp from './usp.js';
 

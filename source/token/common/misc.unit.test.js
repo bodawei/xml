@@ -6,7 +6,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { MockErrorCollector } from '../../error/test';
 import { makeSToken } from '../../sToken/test';
 
-import * as misc from './misc.js';
+import misc from './misc.js';
 
 describe('misc', () => {
 

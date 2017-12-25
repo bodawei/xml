@@ -9,8 +9,8 @@ import { WellFormedError, XmlWarning } from '../error';
 import * as declaration from './bridge/declaration.js';
 import * as entityDeclaration from './entityDeclaration.js';
 import externalId from './common/externalId.js';
-import * as misc from './common/misc.js';
-import * as literal from './common/literal.js';
+import misc from './common/misc.js';
+import literal from './common/literal.js';
 
 describe('entityDeclaration (unit)', () => {
    let entityDeclarationPToken;

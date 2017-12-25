@@ -6,7 +6,7 @@ import { WellFormedError } from '../../error';
 import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 
-import * as misc from '../common/misc.js';
+import misc from '../common/misc.js';
 import * as envelope from './envelope.js';
 
 describe('envelope (unit)', () => {

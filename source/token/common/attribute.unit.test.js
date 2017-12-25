@@ -6,9 +6,9 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 import { WellFormedError } from '../../error';
 
-import * as attribute from './attribute.js';
-import * as misc from './misc.js';
-import * as literal from './literal.js';
+import attribute from './attribute.js';
+import misc from './misc.js';
+import literal from './literal.js';
 
 describe('attribute (unit)', () => {
    let attributesPChunk;

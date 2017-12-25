@@ -7,7 +7,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 import { WellFormedError } from '../error';
 
 import * as comment from './comment.js';
-import * as misc from './common/misc.js';
+import misc from './common/misc.js';
 
 describe('comment (unit)', () => {
    let commentPToken;

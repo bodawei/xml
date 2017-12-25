@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 
 import * as instruction from './bridge/instruction.js';
-import * as attribute from './common/attribute.js';
+import attribute from './common/attribute.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 describe('xmlDeclaration (unit)', () => {

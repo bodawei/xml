@@ -2,8 +2,8 @@
 
 import { WellFormedError, XmlWarning } from '../error';
 
-import * as attribute from './common/attribute.js';
-import * as misc from './common/misc.js';
+import attribute from './common/attribute.js';
+import misc from './common/misc.js';
 import * as base from './base.js';
 
 const WFEID = WellFormedError.ID;

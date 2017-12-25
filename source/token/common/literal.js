@@ -4,8 +4,8 @@ import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken';
 
 import entityReference from '../entityReference.js';
-import * as text from '../text.js';
-import * as misc from './misc.js';
+import text from '../text.js';
+import misc from './misc.js';
 
 const WFEID = WellFormedError.ID;
 
@@ -192,10 +192,12 @@ function getSTokens(pToken) {
    return results.filter(item => item);
 }
 
-export {
+const literal = {
    parse,
    checkWellFormed,
    makeTokenCompatible,
    makeOneTokenCompatible,
    getSTokens,
 };
+
+export default literal;

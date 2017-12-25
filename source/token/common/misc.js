@@ -146,9 +146,17 @@ function textOrBlank(sToken) {
    return sToken ? sToken.text : '';
 }
 
+const misc = {
+   checkName,
+   checkWellFormedNameRecommendation,
+   checkWellFormedText,
+   textOrBlank,
+};
+
 export {
    checkName,
    checkWellFormedNameRecommendation,
    checkWellFormedText,
    textOrBlank,
 };
+export default misc;

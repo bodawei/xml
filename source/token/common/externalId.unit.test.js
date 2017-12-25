@@ -6,10 +6,10 @@ import { MockErrorCollector } from '../../error/test';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
 import { WellFormedError } from '../../error';
 
-import * as text from '../text.js';
+import text from '../text.js';
 
 import externalId from './externalId.js';
-import * as literal from './literal.js';
+import literal from './literal.js';
 import * as usp from './usp.js';
 
 describe('externalId (unit)', () => {

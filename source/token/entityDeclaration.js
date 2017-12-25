@@ -4,9 +4,9 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import * as base from './base.js';
 import * as declaration from './bridge/declaration.js';
-import * as misc from './common/misc.js';
+import misc from './common/misc.js';
 import externalId from './common/externalId.js';
-import * as literal from './common/literal.js';
+import literal from './common/literal.js';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for

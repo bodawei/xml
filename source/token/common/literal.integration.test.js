@@ -8,8 +8,8 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/test';
 
 import entityReference from '../entityReference.js';
-import * as literal from './literal.js';
-import * as text from '../text.js';
+import literal from './literal.js';
+import text from '../text.js';
 
 describe('literal (integration)', () => {
 

@@ -4,7 +4,7 @@
 
 import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
 
-import * as text from './text.js';
+import text from './text.js';
 
 describe('text (unit)', () => {
    let textPToken;

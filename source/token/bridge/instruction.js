@@ -2,7 +2,7 @@
 
 import { WellFormedError, XmlWarning } from '../../error';
 
-import * as misc from '../common/misc.js';
+import misc from '../common/misc.js';
 import * as base from '../base.js';
 
 /**********************************************************************\

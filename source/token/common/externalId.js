@@ -3,7 +3,7 @@
 import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
-import * as literal from './literal.js';
+import literal from './literal.js';
 import { textOrBlank } from './misc.js';
 import * as usp from './usp.js';
 
