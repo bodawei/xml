@@ -228,15 +228,16 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() makes either a general or parmaeter entity token based
  on the PToken value.
 
- It is worth mentioning that the EntityValue is an array of Text and
- EntityReference XTokens.
+ It is worth mentioning that the EntityValue is an array of STokens
+ and PTokens. They are not XTokenized, as every consumer will need
+ to do some kind of additional parsing of these.
 \**********************************************************************/
 
 function pTokenToXToken(pToken) {
    const entityClass = pToken.parameter ? ParameterEntityDeclaration : EntityDeclaration;
 
    return new entityClass(misc.textOrBlank(pToken.name),
-      literal.makeTokenCompatible(pToken),
+      pToken.value,
       externalId.makeEntityLocation(pToken.externalId),
       misc.textOrBlank(pToken.nDataName),
       pToken);

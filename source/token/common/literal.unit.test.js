@@ -69,6 +69,54 @@ describe('literal (unit)', () => {
          });
       });
 
+      it('returns a partial result if there is an EOF after the first quote', () => {
+         const container = {};
+         mockSource = new MockSTokenSource([
+            MockSTokenSource.PEEK('"'),
+            '"',
+            undefined,
+            undefined,
+            undefined,
+         ]);
+
+         literal.parse(mockSource, {
+            pToken: container,
+         }, callback);
+         mockSource.respondInAsyncTime();
+
+         const expectedSToken = makeSTokenMaker();
+         expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(container).toEqual({
+            openQuote: expectedSToken('"'),
+            value: [ expectedSToken('') ],
+            closeQuote: undefined,
+         });
+      });
+
+      it('returns a partial result if there is an EOF after first chunk of text', () => {
+         const container = {};
+         mockSource = new MockSTokenSource([
+            MockSTokenSource.PEEK('"'),
+            '"',
+            'some text',
+            undefined,
+            undefined,
+         ]);
+
+         literal.parse(mockSource, {
+            pToken: container,
+         }, callback);
+         mockSource.respondInAsyncTime();
+
+         const expectedSToken = makeSTokenMaker();
+         expect(callback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(container).toEqual({
+            openQuote: expectedSToken('"'),
+            value: [ expectedSToken('some text') ],
+            closeQuote: undefined,
+         });
+      });
+
       it('fills in a blank string if there is nothing between the quotes', () => {
          const container = {};
          mockSource = new MockSTokenSource([

@@ -36,6 +36,7 @@ class TextPToken extends base.PToken {
       return results;
    }
 }
+
 /**********************************************************************\
  parse() extracts a series of char data.
 

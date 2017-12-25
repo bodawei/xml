@@ -639,21 +639,12 @@ describe('entityDeclaration (unit)', () => {
 
       beforeEach(() => {
          const expectedSToken = makeSTokenMaker();
-         spyOn(literal, 'makeTokenCompatible');
          spyOn(externalId, 'makeEntityLocation');
          pToken = {
             parameter: expectedSToken('%'),
             name: expectedSToken('entityName'),
             value: [ expectedSToken('value') ],
          };
-      });
-
-      it('calls literal.makeTokenCompatible()', () => {
-         delete pToken.paramater;
-
-         entityDeclaration.pTokenToXToken(pToken);
-
-         expect(literal.makeTokenCompatible).toHaveBeenCalledWith(pToken);
       });
 
       it('calls externalId.makeEntityLocation()', () => {
@@ -671,14 +662,14 @@ describe('entityDeclaration (unit)', () => {
 
          const token = entityDeclaration.pTokenToXToken(pToken);
 
-         expect(token).toEqual(new entityDeclaration.XToken('entityName', undefined,
+         expect(token).toEqual(new entityDeclaration.XToken('entityName', pToken.value,
             undefined, '', pToken));
       });
 
       it('returns a parameter entity declaration token with the name and value found in the parsing', () => {
          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-         expect(xToken).toEqual(new entityDeclaration.ParamXToken('entityName', undefined,
+         expect(xToken).toEqual(new entityDeclaration.ParamXToken('entityName', pToken.value,
             undefined, '', pToken));
       });
 
@@ -688,7 +679,7 @@ describe('entityDeclaration (unit)', () => {
 
          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-         expect(xToken).toEqual(new entityDeclaration.XToken('', undefined, undefined, '', pToken));
+         expect(xToken).toEqual(new entityDeclaration.XToken('', pToken.value, undefined, '', pToken));
       });
 
       it('returns a entity declaration with an undefined value if there is no value', () => {

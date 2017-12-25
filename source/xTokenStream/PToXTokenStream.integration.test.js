@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation } from '../basic';
+import { EntityLocation, Range } from '../basic';
 import { PTokenStream } from '../pTokenStream';
 import {
    declaration,
@@ -22,6 +22,7 @@ import {
    text,
    xmlDeclaration,
 } from '../token';
+import { SToken } from '../sToken';
 import { makeSTokenMaker } from '../sToken/test';
 
 import PToXTokenStream from './PToXTokenStream.js';
@@ -53,13 +54,6 @@ describe('PToXTokenStream (integration)', () => {
 
             delete actuals[0].pToken;
             delete expected.pToken;
-            if (Array.isArray(actuals[0].value)) {
-               actuals[0].value.forEach((element) => {
-                  if (element.pToken) {
-                     element.pToken = [];
-                  }
-               });
-            }
 
             expect(actuals[0]).toEqual(expected);
          });
@@ -117,7 +111,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ENTITY declaration', (done) => {
-      const value = new text.XToken('value', []);
+      const value = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
 
       expectInputToProduce('<!ENTITY entityName "value">', [
          new entityDeclaration.XToken('entityName', [ value ], undefined, '', []),

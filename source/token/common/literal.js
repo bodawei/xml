@@ -18,6 +18,12 @@ const WFEID = WellFormedError.ID;
 
  This returns true to the done() parameter, unless the next character
  in the source is not a quote.
+
+ If true is returned, then this modifies the options.pToken value.
+ It does so by adding these properties to it:
+   openQuote: SToken
+   value: Array<SToken|entityReference.PToken|entityReference.ParamPToken>
+   closeQuote: SToken|void
 \**********************************************************************/
 
 function parse(source, options, done) {
@@ -41,9 +47,8 @@ function parse(source, options, done) {
          terminators.push('&');
       }
 
-      getPiece(source, terminators, (valueArray) => {
+      getRest(source, terminators, (valueArray) => {
          pToken.value = valueArray;
-
          source.extract('match', quoteSToken.text, (closeSToken) => {
             if (pToken.value.length === 0) {
                const newRange = quoteSToken.range[0].clone();
@@ -52,46 +57,51 @@ function parse(source, options, done) {
                newRange.startColumn = newRange.endColumn;
                pToken.value.push(new SToken('', '', newRange));
             }
+
             pToken.closeQuote = closeSToken;
+
             done(true); // may not be gramatically correct, but we at least think we started to get something
          });
       });
    });
 }
+
 /*
- * This passes to chunksDone() an array of:
- * STokens, entityReference.PTokens and entityReference.ParamPTokens
+ * This gets the next portion of the literal, which will, optionally, be an SToken
+ * followed by an optional entity reference. If neither is found, we're either
+ * at EOF, or have peeked the closing quote.
+ *
+ * It returns the final Array<SToken|PERefPToken|GERefPToken> through the
+ * callback, which is built up on the unwind from the recursive call.
  */
-function getPiece(source, terminators, chunksDone) {
+function getRest(source, terminators, literalDone) {
    const container = {};
 
    source.extractToObject('all', terminators, container, 'sToken');
    source.extract('peekChar', (char) => {
+      const currentPortion = container.sToken ? [ container.sToken ] : [];
       if (!char) {
-         chunksDone([]);
+         literalDone(currentPortion);
          return;
       }
 
-      function continuation(refPToken) {
-         getPiece(source, terminators, (pieces) => {
-            pieces.unshift(refPToken);
-            if (container.sToken) {
-               pieces.unshift(container.sToken);
-            }
-            chunksDone(pieces);
+      function handleRef(refPToken) {
+         getRest(source, terminators, (rest) => {
+            rest.unshift(refPToken);
+            literalDone(currentPortion.concat(rest));
          });
       }
 
       switch (char.text[0]) {
          case '"':
          case '\'':
-            chunksDone(container.sToken ? [ container.sToken ] : []);
+            literalDone(currentPortion);
             break;
          case '%':
-            entityReference.paramParse(source, continuation);
+            entityReference.paramParse(source, handleRef);
             break;
          case '&':
-            entityReference.parse(source, continuation);
+            entityReference.parse(source, handleRef);
             break;
       }
    });

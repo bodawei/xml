@@ -168,7 +168,7 @@ describe('NodeStream (unit)', () => {
             } ]);
          });
 
-         it('replaces a peref that references another pref', () => {
+         it('replaces a peref that references another peref', () => {
             const declarationPToken1 = new xToken.entityDeclaration.ParamPToken({
                name: new SToken('parentRef', 'parentRef'),
                value: [ {

@@ -118,19 +118,20 @@ class NodeStream extends Transform {
       for (let index = 0; index < entityDeclaration.value.length; index++) {
          const item = entityDeclaration.value[index];
 
-         if (item instanceof entityReference.ParamXToken) {
-            const entityToken = this._entityManager.getParameterEntityToken(item.name);
+         if (item.type === entityReference.PARAM_PTYPE) {
+            const itemName = item.name ? item.name.text : '';
+            const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
             if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
                newValue.push(item);
             } else {
-               newValue.push(new entityStart.ParamXToken(item.name));
+               newValue.push(new entityStart.ParamXToken(itemName)); // should a PToken like thing
 
                for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
                   newValue.push(entityToken.value[tokenIndex]);
                }
 
-               newValue.push(new entityEnd.ParamXToken(item.name));
+               newValue.push(new entityEnd.ParamXToken(itemName));
             }
          } else {
             newValue.push(item);
@@ -176,12 +177,12 @@ class NodeStream extends Transform {
             if (tokenItem.text) {
                results.push({
                   type: 'word',
-                  item: tokenItem.pToken.text, // SToken
+                  item: tokenItem, // SToken
                });
             } else { // PERef
                results = results.concat(this._expandPERef({
                   type: 'peref',
-                  item: tokenItem.pToken, // SToken
+                  item: tokenItem,
                }));
             }
          }

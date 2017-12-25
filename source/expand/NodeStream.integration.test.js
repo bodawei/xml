@@ -107,12 +107,11 @@ describe('NodeStream (integration)', () => {
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
-         matchTokenTypes(results[4].value, [
-            tokenNs.text.XToken,
-            tokenNs.entityStart.ParamXToken,
-            tokenNs.text.XToken,
-            tokenNs.entityEnd.ParamXToken,
-         ]);
+         const valueArray = results[4].value;
+         expect(valueArray[0].text).toEqual('one');
+         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamXToken('peOne'));
+         expect(valueArray[2].text).toEqual('two');
+         expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamXToken('peOne'));
          done();
       });
       pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
@@ -130,17 +129,16 @@ describe('NodeStream (integration)', () => {
 
       node.on('data', (token) => results.push(token));
       node.on('end', () => {
-         matchTokenTypes(results[5].value, [
-            tokenNs.text.XToken,
-            tokenNs.entityStart.ParamXToken,
-            tokenNs.text.XToken,
-            tokenNs.entityStart.ParamXToken,
-            tokenNs.text.XToken,
-            tokenNs.entityEnd.ParamXToken,
-            tokenNs.text.XToken,
-            tokenNs.entityEnd.ParamXToken,
-            tokenNs.text.XToken,
-         ]);
+         const valueArray = results[5].value;
+         expect(valueArray[0].text).toEqual('[');
+         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamXToken('peOne'));
+         expect(valueArray[2].text).toEqual('(');
+         expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamXToken('peTwo'));
+         expect(valueArray[4].text).toEqual('inner');
+         expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamXToken('peTwo'));
+         expect(valueArray[6].text).toEqual(')');
+         expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamXToken('peOne'));
+         expect(valueArray[8].text).toEqual(']');
          done();
       });
       pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
