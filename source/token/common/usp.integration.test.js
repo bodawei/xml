@@ -49,34 +49,27 @@ describe('usp (integration)', () => {
          usp.parse(source, {}, (pieces) => {
             expect(pieces).toEqual([ {
                type: 'space',
-               item: makeSToken(' '),
+               space: makeSToken(' '),
             }, {
                type: 'literal',
-               item: {
-                  openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('double') }) ],
-                  closeQuote: makeSToken('"'),
-               },
+               openQuote: makeSToken('"'),
+               value: [ new text.PToken({ text: makeSToken('double') }) ],
+               closeQuote: makeSToken('"'),
             }, {
                type: 'word',
-               item: makeSToken('whatever'),
+               word: makeSToken('whatever'),
             }, {
                type: 'literal',
-               item: {
-                  openQuote: makeSToken('\''),
-                  value: [ new text.PToken({ text: makeSToken('single') }) ],
-                  closeQuote: makeSToken('\''),
-               },
-            }, {
-               type: 'peref',
-               item: new entityReference.ParamPToken({
-                  open: makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name: makeSToken('peref'),
-                  postNameSpace: undefined,
-                  close: makeSToken(';'),
-               }),
-            } ]);
+               openQuote: makeSToken('\''),
+               value: [ new text.PToken({ text: makeSToken('single') }) ],
+               closeQuote: makeSToken('\''),
+            }, new entityReference.ParamPToken({
+               open: makeSToken('%'),
+               postOpenSpace: undefined,
+               name: makeSToken('peref'),
+               postNameSpace: undefined,
+               close: makeSToken(';'),
+            }) ]);
             done();
          });
       });

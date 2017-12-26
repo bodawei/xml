@@ -9,6 +9,7 @@ import { WellFormedError } from '../../error';
 import text from '../text.js';
 
 import externalId from './externalId.js';
+import entityReference from '../entityReference.js';
 import literal from './literal.js';
 import * as usp from './usp.js';
 
@@ -293,6 +294,26 @@ describe('externalId (unit)', () => {
             } ] ]);
          });
 
+      });
+
+   });
+
+   describe('completeParse()', () => {
+
+      it('does nothing if there is no incomplete array', () => {
+         const pToken = {};
+
+         expect(() => externalId.completeParse(pToken)).not.toThrow();
+      });
+
+      it('does nothing if there is still an unexpanded parameter entity reference', () => {
+         const pToken = {
+            incomplete: [
+               new entityReference.ParamPToken(),
+            ],
+         };
+
+         expect(() => externalId.completeParse(pToken)).not.toThrow();
       });
 
    });

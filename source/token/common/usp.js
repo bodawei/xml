@@ -21,8 +21,11 @@ const TERMINATORS = [ '>', '"', '\'', '%' ];
  This takes a set of options to specify what is potentially allowable,
  and will read in as many of the allowable things as possible until it
  encounters a ">" or something it is not allowed to recognize. It will
- then pass an array of all the bits it has found STokens, PTokens or
- PToken parts (in the case of literals).
+ then pass an array of all all that has been found: PTokens for the
+ entity references, and PToken-like things:
+   spaces: as a { type: text, space: SToken }
+   word: as a { type: word, word: SToken }
+   literal: as a { type: literal, openQuote, value, closeQuote }
 \**********************************************************************/
 
 function parse(source, options = {}, deliverUsp) {
@@ -34,7 +37,7 @@ function parse(source, options = {}, deliverUsp) {
 function extract(source, result, options, deliverUsp) {
    source.extract('space', (sToken) => {
       if (sToken) {
-         result.push({ type: 'space', item: sToken });
+         result.push({ type: 'space', space: sToken });
       }
 
       source.extract('peekChar', (sToken) => {
@@ -54,21 +57,21 @@ function handleChar(sToken, source, result, options, deliverUsp) {
          break;
       case '%':
          entityReference.paramParse(source, (pToken) => {
-            result.push({ type: 'peref', item: pToken });
+            result.push(pToken);
             extract(source, result, options, deliverUsp);
          });
          break;
       case '"':
       case '\'':
-         const container = {};
+         const container = { type: 'literal' };
          literal.parse(source, { pToken: container }, () => {
-            result.push({ type: 'literal', item: container });
+            result.push(container);
             extract(source, result, options, deliverUsp);
          });
          break;
       default:
          source.extract('word', TERMINATORS, (sToken) => {
-            result.push({ type: 'word', item: sToken });
+            result.push({ type: 'word', word: sToken });
             extract(source, result, options, deliverUsp);
          });
          break;

@@ -52,7 +52,7 @@ function parse(source, options, done) {
          source.extract('match', quoteSToken.text, (closeSToken) => {
             if (pToken.value.length === 0) {
                const textPToken = new text.PToken();
-               const newRange = quoteSToken.range[0].clone();
+               const newRange = quoteSToken.firstRange.clone();
                newRange.startIndex = newRange.endIndex;
                newRange.startRow = newRange.endRow;
                newRange.startColumn = newRange.endColumn;
@@ -71,9 +71,9 @@ function parse(source, options, done) {
 }
 
 /*
- * This gets the next portion of the literal, which will, optionally, be an SToken
- * followed by an optional entity reference. If neither is found, we're either
- * at EOF, or have peeked the closing quote.
+ * This gets the next portion of the literal, which will, optionally,
+ * be an SToken followed by an optional entity reference. If neither
+ * is found, we're either at EOF, or have peeked the closing quote.
  *
  * It returns the final Array<SToken|PERefPToken|GERefPToken> through the
  * callback, which is built up on the unwind from the recursive call.

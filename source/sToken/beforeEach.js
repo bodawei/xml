@@ -122,13 +122,13 @@ function toEqualSTokenRange() {
             throw new Error('SToken is undefined, but should not be.');
          }
 
-         if (expectedRange.equals(actualSToken.range[0])) {
+         if (expectedRange.equals(actualSToken.ranges[0])) {
             pass = true;
-            message = `Expected range not to match. ("${actualSToken.range[0].toString()}").\n`;
+            message = `Expected range not to match. ("${actualSToken.ranges[0].toString()}").\n`;
          } else {
             pass = false;
             message = 'SToken range does not match.\n';
-            message += `\tActual:   ${actualSToken.range[0].toString()}\n`;
+            message += `\tActual:   ${actualSToken.ranges[0].toString()}\n`;
             message += `\tExpected: ${expectedRange.toString()}\n`;
          }
 

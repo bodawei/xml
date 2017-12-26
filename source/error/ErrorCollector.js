@@ -70,9 +70,11 @@ class ErrorCollector {
       if (position instanceof Offset) {
          posOffset = position.clone();
       } else if (position) {
-         posOffset = position.range[0].getStartOffset();
+         posOffset = position.ranges[0].getStartOffset();
       } else {
-         posOffset = this._posStart ? this._position.range[0].getStartOffset() : this._position.range[0].getEndOffset();
+         posOffset = this._posStart ?
+            this._position.ranges[0].getStartOffset() :
+            this._position.ranges[0].getEndOffset();
       }
 
       this._errors.push(new constructor(code, params, posOffset, this._context));

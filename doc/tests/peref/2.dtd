@@ -1,0 +1,5 @@
+<!ENTITY % sysValue '"./1-entity.xml"'>
+<!ENTITY foo "foo">
+<!ENTITY % aEntityDecl "<!ENTITY a 'this is from a parameter entity'>">
+<!ENTITY external SYSTEM %sysValue;>
+%aEntityDecl;

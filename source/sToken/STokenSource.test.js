@@ -416,9 +416,9 @@ describe('STokenSource', () => {
             source.extract('all', sTokenSpy);
 
             // cleanup todo: fix this testing
-            expect(sTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-            expect(sTokenSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 102, 100, 102));
-            expect(sTokenSpy.calls.argsFor(0)[0].range[2]).toEqual(new Range(loc3, 200, 200, 200, 205, 200, 205));
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges[1]).toEqual(new Range(loc2, 100, 100, 100, 102, 100, 102));
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges[2]).toEqual(new Range(loc3, 200, 200, 200, 205, 200, 205));
          });
 
          it('delivers a default range to a segment without a range', () => {
@@ -431,8 +431,8 @@ describe('STokenSource', () => {
 
             source.extract('all', sTokenSpy);
 
-            expect(sTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-            expect(sTokenSpy.calls.argsFor(0)[0].range[1]).toEqual(new Range(loc2, 100, 100, 100, 107, 100, 107));
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges[1]).toEqual(new Range(loc2, 100, 100, 100, 107, 100, 107));
          });
 
          it('treats equal locations, that are different instances, as the same', () => {
@@ -445,7 +445,7 @@ describe('STokenSource', () => {
 
             source.extract('all', sTokenSpy);
 
-            expect(sTokenSpy.calls.argsFor(0)[0].range).toEqual([ new Range(defaultLoc, 3, 2, 1, 11, 2, 9) ]);
+            expect(sTokenSpy.calls.argsFor(0)[0].ranges).toEqual([ new Range(defaultLoc, 3, 2, 1, 11, 2, 9) ]);
          });
 
          it('correctly computes range when retrieving multiple STokens from a ranged segment', () => {
@@ -455,8 +455,8 @@ describe('STokenSource', () => {
             source.extract('tox', ']', sTokenSpy);
             source.extract('tox', 'b', sTokenSpy);
 
-            expect(sTokenSpy.calls.argsFor(0)[0].range[0]).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
-            expect(sTokenSpy.calls.argsFor(1)[0].range[0]).toEqual(new Range(defaultLoc, 4, 2, 2, 5, 2, 3));
+            expect(sTokenSpy.calls.argsFor(0)[0].firstRange).toEqual(new Range(defaultLoc, 3, 2, 1, 4, 2, 2));
+            expect(sTokenSpy.calls.argsFor(1)[0].firstRange).toEqual(new Range(defaultLoc, 4, 2, 2, 5, 2, 3));
          });
 
       });

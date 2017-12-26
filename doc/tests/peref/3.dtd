@@ -1,0 +1,6 @@
+<!ELEMENT br EMPTY>
+<!ENTITY % name.para "emph">
+<!ENTITY % content.para "(br)">
+<!ELEMENT p (#PCDATA|emph)* >
+<!ELEMENT %name.para; %content.para; >
+<!ELEMENT container ANY>

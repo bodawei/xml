@@ -50,7 +50,7 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'space',
-            item: makeSToken('   '),
+            space: makeSToken('   '),
          } ]);
       });
 
@@ -83,9 +83,7 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'literal',
-            item: {
-               isLiteral: true,
-            },
+            isLiteral: true,
          } ]);
       });
 
@@ -106,9 +104,7 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'literal',
-            item: {
-               isLiteral: true,
-            },
+            isLiteral: true,
          } ]);
       });
 
@@ -127,10 +123,7 @@ describe('usp (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expectDelivery(deliverySpy, [ {
-            type: 'peref',
-            item: {
-               isPeref: true,
-            },
+            isPeref: true,
          } ]);
       });
 
@@ -148,7 +141,7 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'word',
-            item: makeSToken('xyzzy'),
+            word: makeSToken('xyzzy'),
          } ]);
       });
 
@@ -177,18 +170,15 @@ describe('usp (unit)', () => {
 
          expectDelivery(deliverySpy, [ {
             type: 'word',
-            item: makeSToken('testWord'),
+            word: makeSToken('testWord'),
          }, {
-            type: 'peref',
-            item: { peRef: true },
+            peRef: true,
          }, {
             type: 'space',
-            item: makeSToken(' '),
+            space: makeSToken(' '),
          }, {
             type: 'literal',
-            item: {
-               isLiteral: true,
-            },
+            isLiteral: true,
          } ]);
       });
    });

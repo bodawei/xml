@@ -116,7 +116,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
       if (textItem.text.indexOf('--') !== -1) {
          ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textItem);
       } else if (lastChar === '-' && isLastItem) {
-         const offset = textItem.range[textItem.range.length - 1].getEndOffset();
+         const offset = textItem.lastRange.getEndOffset();
          offset.index --;
          offset.column --;
          ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);

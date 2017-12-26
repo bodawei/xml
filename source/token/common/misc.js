@@ -102,7 +102,7 @@ function checkWellFormedText(sToken, ec, entityMd) {
 
    if (found) {
       while (found) {
-         badIndices.push(sToken.range[0].startIndex - 1 + badRegEx.lastIndex);
+         badIndices.push(sToken.ranges[0].startIndex - 1 + badRegEx.lastIndex);
          found = badRegEx.test(sToken.text);
       }
 
@@ -134,7 +134,7 @@ function checkWellFormedText(sToken, ec, entityMd) {
 
    if (foundDiscouraged) {
       while (foundDiscouraged) {
-         discouragedIndices.push(sToken.range[0].startIndex - 1 + discouragedRegEx.lastIndex);
+         discouragedIndices.push(sToken.ranges[0].startIndex - 1 + discouragedRegEx.lastIndex);
          foundDiscouraged = discouragedRegEx.test(sToken.text);
       }
 

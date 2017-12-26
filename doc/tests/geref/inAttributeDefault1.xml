@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ENTITY before "I am before my reference">
+   <!ELEMENT one ANY>
+   <!ATTLIST one
+      a CDATA "one &before; two">
+]>
+
+<one>
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid inAttributeDefault1.xml
+]]>
+</one>

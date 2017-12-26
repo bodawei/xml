@@ -108,23 +108,23 @@ class MockSTokenSource {
             if (this.expectedValues[index + 1] && this.expectedValues[index + 1].token) {
                const following = this.expectedValues[index + 1];
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
-                  following.token.range[0].startIndex,
-                  following.token.range[0].startRow,
-                  following.token.range[0].startColumn,
-                  following.token.range[0].startIndex + peekString.length,
-                  following.token.range[0].startRow,
-                  following.token.range[0].startColumn + peekString.length));
+                  following.token.ranges[0].startIndex,
+                  following.token.ranges[0].startRow,
+                  following.token.ranges[0].startColumn,
+                  following.token.ranges[0].startIndex + peekString.length,
+                  following.token.ranges[0].startRow,
+                  following.token.ranges[0].startColumn + peekString.length));
             } else if (this.expectedValues[index - 1] &&
                this.expectedValues[index - 1].token &&
                this.expectedValues[index - 1].token.type !== PEEK) {
                const preceding = this.expectedValues[index - 1];
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
-                  preceding.token.range[0].endIndex,
-                  preceding.token.range[0].endRow,
-                  preceding.token.range[0].endColumn,
-                  preceding.token.range[0].endIndex + peekString.length,
-                  preceding.token.range[0].endRow,
-                  preceding.token.range[0].endColumn + peekString.length));
+                  preceding.token.ranges[0].endIndex,
+                  preceding.token.ranges[0].endRow,
+                  preceding.token.ranges[0].endColumn,
+                  preceding.token.ranges[0].endIndex + peekString.length,
+                  preceding.token.ranges[0].endRow,
+                  preceding.token.ranges[0].endColumn + peekString.length));
             } else {
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
                   0,

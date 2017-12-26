@@ -22,11 +22,16 @@ class EntityManager {
    constructor() {
       this._entityMap = {};
 
-      const ltEntity = new entityDeclaration.XToken('lt', [ new text.PToken({ text: new SToken('&#60;') }) ], undefined, undefined, []);
-      const gtEntity = new entityDeclaration.XToken('gt', [ new text.PToken({ text: new SToken('>') }) ], undefined, undefined, []);
-      const ampEntity = new entityDeclaration.XToken('amp', [ new text.PToken({ text: new SToken('&#38;') }) ], undefined, undefined, []);
-      const aposEntity = new entityDeclaration.XToken('apos', [ new text.PToken({ text: new SToken('\'') }) ], undefined, undefined, []);
-      const quotEntity = new entityDeclaration.XToken('quot', [ new text.PToken({ text: new SToken('"') }) ], undefined, undefined, []);
+      const ltEntity = new entityDeclaration.XToken('lt',
+         [ new text.PToken({ text: new SToken('&#60;') }) ], undefined, undefined, []);
+      const gtEntity = new entityDeclaration.XToken('gt',
+         [ new text.PToken({ text: new SToken('>') }) ], undefined, undefined, []);
+      const ampEntity = new entityDeclaration.XToken('amp',
+         [ new text.PToken({ text: new SToken('&#38;') }) ], undefined, undefined, []);
+      const aposEntity = new entityDeclaration.XToken('apos',
+         [ new text.PToken({ text: new SToken('\'') }) ], undefined, undefined, []);
+      const quotEntity = new entityDeclaration.XToken('quot',
+         [ new text.PToken({ text: new SToken('"') }) ], undefined, undefined, []);
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
       this._internalAdd(gtEntity, DEFAULT_ENTITY, false);

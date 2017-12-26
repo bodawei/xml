@@ -2,6 +2,9 @@
 
 import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
+import { SToken } from '../../stoken';
+
+import entityReference from '../entityReference.js';
 
 import literal from './literal.js';
 import { textOrBlank } from './misc.js';
@@ -132,87 +135,125 @@ function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
    });
 }
 
-// function normalizeTokenChunks(chunks) {
-//    const newChunks = [];
+/*
+ * Given a range of incomplete items, adjust the contents so that
+ * all pestart and peend's are replaced, if necessary, by spaces,
+ * and there are no runs of multiple spaces.
+ * That is, given: Array<space|pestart|peend|literal|word>,
+ * reduce this to: Array<space|literal|word>, where there is never
+ * a space next to another space. Some spaces will have a flag called
+ * "optional" if they were added to replace a pestart
+ */
+function normalizeIncomplete(items = []) {
+   // Replace all pestarts and ends with optional spaces
+   const noStartEnd = [];
+   for (let index = 0; index < items.length; index++) {
+      const current = items[index];
 
-//    for (let index = 0; index < chunks.length; index++) {
-//       const prevChunk = chunks[index - 1] || {};
-//       const chunk = chunks[index];
-//       const nextChunk = chunks[index + 1] || {};
+      switch (current.type) {
+         case 'pestart':
+         case 'peend':
+            const text = new text.PToken({ text: new SToken(' ') });
+            text.optional = true;
+            noStartEnd.push(text);
+            break;
+         default:
+            noStartEnd.push(current);
+            break;
+      }
+   }
 
-//       switch (chunk.type) {
-//          case 'pestart':
-//          case 'peend':
-//             if (prevChunk.type !== 'space' && nextChunk.type !== 'space') {
-//                newChunks.push({
-//                   type: 'space',
-//                   optional: true,
-//                   item: new SToken(' ' , ' ', new Range(undefined, );
-//                });
-//             } else if (prevChunk.type === 'space' && nextChunk.type === 'space') {
-//                // mrge
-//             }
-//             break;
-//          default:
-//             newChunks.push(chunk);
-//             break;
-//       }
-//    }
+   /*
+    * If two spaces are side-by-side, remove the optional one, or merge
+    * the two. This can happen fairly easily, even though the incomplete
+    * parser will itself never produce two adjacent spaces. This is because
+    * a parameter entity could start or end with a space, thus you could
+    * have " startPeref endPeref ". Or you could have parameter entities
+    * inside of parameter entities, each starting with spaces. That is, in
+    * the worst case, you might have thousands of parameter entities
+    * referenced, all of which only add spaces here.
+    */
+   let prev = noStartEnd[0];
+   const normalized = [ prev ];
+   for (let index = 1; index < noStartEnd.length; index++) {
+      const current = noStartEnd[index];
 
-//    return newChunks;
-// }
+      if (prev.type === 'space' && current.type === 'space') {
+         // skip the current one if it is optional, as we already have a space here.
+         if (current.optional) {
+            break;
+         }
 
-// function completeParse(externalId) {
-//    let incompleteArray = externalId.incomplete || [];
-//    let leftOff = externalId.leftOff || 'idType';
-//    let unexpandedRefs = incompleteArray.filter((item) => (item.type === 'peref'));
+         // If the last was optional, replace it with the current one.
+         if (prev.optional) {
+            normalized.pop();
+            normalized.push(current);
+            prev = current;
+            break;
+         }
 
-//    if (unexpandedRefs.length !== 0) {
-//       return;
-//    }
+         // if both the previous and the current are not optional, then merge them.
+         prev.text.merge(current);
+      } else {
+         normalized.push(current);
+         prev = current;
+      }
+   }
 
-//    incompleteArray = normalizeTokenChunks(incompleteArray);
+   // Finally, add our best estimate of the range for any optional ranges.
 
-//    doit(externalId, incompleteArray, [
-//       [ 'idType', 'word' ], // don't we need to validate that it is legal?
-//       [ 'postIdTypeSpace', 'space', true ],
-//       [ 'public', 'literal' ],
-//       [ 'postPublicSpace', 'space', true ],
-//       [ 'system', 'literal' ],
-//    ]);
+   return noStartEnd;
+}
 
-//    if (incompleteArray.length === 0) {
-//       delete externalId.incomplete;
-//    }
+function completeParse(externalId) {
+   const incompleteArray = normalizeIncomplete(externalId.incomplete);
+   const unexpandedRefs = incompleteArray.filter((item) => (item.type === entityReference.PTOKEN));
+   // let leftOff = externalId.leftOff || 'idType';
 
-//    function doit(pToken, tokenChunks, sTokenDescriptors) {
-//       let found = false;
-//       if (!pToken.leftOff) {
-//          found = true;
-//       }
+   if (incompleteArray.length === 0 || unexpandedRefs.length !== 0) {
+      return;
+   }
 
-//       let prev;
-//       sTokenDescriptors.forEach((descriptor) => {
-//          if (descriptor[0] === pToken.leftOff) {
-//             found = true;
-//             if (incompleteArray[0].type === 'optional-space' ||
-//                incompleteArray[0].type === 'space' && !pToken[prevDescriptor.name]) {
-//                pToken[prevDescriptor.name] = incompleteArray.shift().item;
-//             } else if (incompleteArray[0].type === 'space' && pToken[prevDescriptor.name]) {
-//                // merge
-//             } else if (incompleteArray[0].type === 'optional-space') {
-//                incompleteArray.shift();
-//             }
-//          }
+   // doit(externalId, incompleteArray, [
+   //    [ 'idType', 'word' ], // don't we need to validate that it is legal?
+   //    [ 'postIdTypeSpace', 'space', true ],
+   //    [ 'public', 'literal' ],
+   //    [ 'postPublicSpace', 'space', true ],
+   //    [ 'system', 'literal' ],
+   // ]);
 
-//          if (descriptor.type === incompleteArray[0].type) {
-//             pToken[descriptor.name] = incompleteArray.shift().item;
-//          }
+   // if (incompleteArray.length === 0) {
+   //    delete externalId.incomplete;
+   // }
 
-//          prev = descriptor;
-//       });
-//    }
-// }
+   // function doit(pToken, tokenChunks, sTokenDescriptors) {
+   //    let found = false;
+   //    if (!pToken.leftOff) {
+   //       found = true;
+   //    }
+
+   //    let prev;
+   //    sTokenDescriptors.forEach((descriptor) => {
+   //       if (descriptor[0] === pToken.leftOff) {
+   //          found = true;
+   //          if (incompleteArray[0].type === 'optional-space' ||
+   //             incompleteArray[0].type === 'space' && !pToken[prevDescriptor.name]) {
+   //             pToken[prevDescriptor.name] = incompleteArray.shift().item;
+   //          } else if (incompleteArray[0].type === 'space' && pToken[prevDescriptor.name]) {
+   //             // merge
+   //          } else if (incompleteArray[0].type === 'optional-space') {
+   //             incompleteArray.shift();
+   //          }
+   //       }
+
+   //       if (descriptor.type === incompleteArray[0].type) {
+   //          pToken[descriptor.name] = incompleteArray.shift().item;
+   //       }
+
+   //       prev = descriptor;
+   //    });
+   // }
+}
 
 /**********************************************************************\
  checkWellFormed() does a well formed check on the pTokenPart value, and
@@ -268,8 +309,10 @@ function makeEntityLocation(pTokenPart) {
       return;
    }
 
-   const value = (pTokenPart.system && pTokenPart.system.value) ? pTokenPart.system.value[0].text.text : undefined;
-   const publicValue = (pTokenPart.public && pTokenPart.public.value) ? pTokenPart.public.value[0].text.text : undefined;
+   const value = (pTokenPart.system && pTokenPart.system.value) ?
+      pTokenPart.system.value[0].text.text : undefined;
+   const publicValue = (pTokenPart.public && pTokenPart.public.value) ?
+      pTokenPart.public.value[0].text.text : undefined;
 
    return new EntityLocation(value, publicValue);
 }
@@ -293,6 +336,7 @@ function getSTokens(pTokenPart) {
 const externalId = {
    PTYPE: EXTERNAL_ID,
    parse,
+   completeParse,
    getSTokens,
    checkWellFormed,
    makeEntityLocation,

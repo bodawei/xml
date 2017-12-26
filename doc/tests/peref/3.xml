@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!-- xmllint - -loaddtd  - -noent  1.xml -->
+<!DOCTYPE p SYSTEM "3.dtd">
+<p>
+<emph>
+</emph>
+</p>

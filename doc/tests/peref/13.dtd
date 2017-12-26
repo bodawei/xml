@@ -1,0 +1,4 @@
+<!ENTITY % pedecl '% other "value"'>
+<!ENTITY %pedecl;>
+<!ENTITY foo "%other;">
+<!ELEMENT one ANY>

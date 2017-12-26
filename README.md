@@ -22,3 +22,4 @@ Technical goals
 
 # Other Projects
 * [https://github.com/Leonidas-from-XIV/node-xml2js](https://github.com/Leonidas-from-XIV/node-xml2js)
+* [https://github.com/EXIficient/exificient.js](https://github.com/EXIficient/exificient.js)

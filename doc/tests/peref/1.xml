@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- xmllint - -loaddtd  - -noent  - -valid 1.xml -->
+<!DOCTYPE one SYSTEM "./1.dtd">
+<one>
+&foo;
+</one>

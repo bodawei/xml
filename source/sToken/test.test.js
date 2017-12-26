@@ -48,7 +48,7 @@ describe('SToken test utils', () => {
             'xyzzy',
          ]);
 
-         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(2);
+         expect(mock.expectedValues[1].token.ranges[0].startIndex).toEqual(2);
       });
 
       it('uses the previous SToken to populate the value for a peek if there is no following', () => {
@@ -57,7 +57,7 @@ describe('SToken test utils', () => {
             MockSTokenSource.PEEK('x'),
          ]);
 
-         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(3);
+         expect(mock.expectedValues[1].token.ranges[0].startIndex).toEqual(3);
       });
 
       it('uses starting values if there is no previous or following SToken when a peek is done', () => {
@@ -65,7 +65,7 @@ describe('SToken test utils', () => {
             MockSTokenSource.PEEK('x'),
          ]);
 
-         expect(mock.expectedValues[0].token.range[0].startIndex).toEqual(0);
+         expect(mock.expectedValues[0].token.ranges[0].startIndex).toEqual(0);
       });
 
       it('uses starting values if there is no following SToken and current and previous are PEEKs', () => {
@@ -74,7 +74,7 @@ describe('SToken test utils', () => {
             MockSTokenSource.PEEK('x'),
          ]);
 
-         expect(mock.expectedValues[1].token.range[0].startIndex).toEqual(0);
+         expect(mock.expectedValues[1].token.ranges[0].startIndex).toEqual(0);
       });
 
       it('throws an error if there are insuficient values to satisfy an extract()', () => {

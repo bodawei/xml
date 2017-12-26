@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE one [
+   <!ELEMENT one ANY>
+   <!ATTLIST one
+      a CDATA "one &after; two">
+   <!ENTITY after "I am after my reference">
+]>
+
+<one a="irrelevant if we are not actually using the default">
+
+<![CDATA[
+   xmllint --loaddtd  --noent  --valid inAttributeDefault2.xml
+]]>
+</one>

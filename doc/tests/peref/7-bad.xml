@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE one SYSTEM "./7.dtd">
+<one>
+&foo;
+&a;
+&external;
+</one>

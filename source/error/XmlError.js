@@ -44,14 +44,14 @@ class XmlError {
       params = params || [];
 
       if (place instanceof SToken) {
-         place = place.range[0].getEndOffset();
+         place = place.ranges[0].getEndOffset();
       } else if (place instanceof Offset) {
          place = place.clone();
       }
 
       if (contextOffset) {
          if (contextOffset instanceof SToken) {
-            contextOffset = contextOffset.range[0].getStartOffset();
+            contextOffset = contextOffset.ranges[0].getStartOffset();
          } else if (contextOffset instanceof Offset) {
             contextOffset = contextOffset.clone();
          }

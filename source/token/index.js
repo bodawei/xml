@@ -21,6 +21,8 @@ import * as notationDeclaration from './notationDeclaration.js';
 import * as processingInstruction from './processingInstruction.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
+import * as usp from './common/usp.js';
+
 module.exports = {
    declaration,
    envelope,
@@ -42,4 +44,6 @@ module.exports = {
    space,
    text,
    xmlDeclaration,
+
+   usp,
 };

@@ -1,0 +1,3 @@
+<!ENTITY % remainder '"./1-entity.xml"'>
+<!ENTITY foo PUBLIC "foo" %remainder;>
+<!ELEMENT one ANY>

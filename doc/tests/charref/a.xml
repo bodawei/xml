@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- xmllint - -loaddtd  - -noent  - -valid 1.xml -->
+<!DOCTYPE one [
+<!ENTITY foo SYSTEM "./a-external.xml">
+<!ENTITY other "&foo;one>blah2&foo;/one>">
+<!ELEMENT one ANY>
+]>
+<one>
+&other;
+</one>

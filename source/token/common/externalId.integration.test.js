@@ -62,17 +62,14 @@ describe('externalId (integration)', () => {
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: undefined,
-               incomplete: [ {
-                  type: 'peref',
-                  item: new entityReference.ParamPToken({
-                     type: 'foo',
-                     open:  makeSToken('%'),
-                     postOpenSpace: undefined,
-                     name:  makeSToken('foo'),
-                     postNameSpace: undefined,
-                     close:  makeSToken(';'),
-                  }),
-               } ],
+               incomplete: [ new entityReference.ParamPToken({
+                  type: 'foo',
+                  open:  makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name:  makeSToken('foo'),
+                  postNameSpace: undefined,
+                  close:  makeSToken(';'),
+               }) ],
                leftOff: 'system',
             });
             done();

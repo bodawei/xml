@@ -2,7 +2,10 @@
 
 import { Transform } from 'readable-stream';
 
+import { EntityMetaData } from '../basic';
+import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
+import { STokenSource } from '../sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
    entityDeclaration,
@@ -10,6 +13,8 @@ import {
    entityReference,
    entityStart,
    notationDeclaration,
+   text,
+   usp,
 } from '../token';
 
 import EntityManager from './EntityManager.js';
@@ -143,57 +148,69 @@ class NodeStream extends Transform {
    }
 
    _processIncomplete(xToken, incompleteParent, done) {
-      let newIncomplete = [];
-
-      for (let index = 0; index < incompleteParent.incomplete.length; index++) {
-         const descriptor = incompleteParent.incomplete[index];
-
-         if (descriptor.type === 'peref') {
-            newIncomplete = newIncomplete.concat(this._expandPERef(descriptor));
-         } else {
-            newIncomplete.push(descriptor);
-         }
-      }
-
-      incompleteParent.incomplete = newIncomplete;
-      done();
+      this._processNext(incompleteParent, 0, (expandedIncomplete) => {
+         incompleteParent.incomplete = expandedIncomplete;
+         done();
+      });
    }
 
-   _expandPERef(descriptor) {
+   _processNext(incompleteParent, index, done) {
+      if (index >= incompleteParent.incomplete.length) {
+         done([]);
+         return;
+      }
+
+      const item = incompleteParent.incomplete[index];
+
+      this._expandPERef(item, (replacement) => {
+         this._processNext(incompleteParent, index + 1, (result) => {
+            done(replacement.concat(result));
+         });
+      });
+   }
+
+   _expandPERef(peRef, deliverExpanded) {
+      if (peRef.type !== entityReference.PARAM_PTYPE) {
+         deliverExpanded([ peRef ]);
+         return;
+      }
+
       let results = [];
-      const entityToken = this._entityManager.getParameterEntityToken(descriptor.item.name.text || '');
+      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.text || '');
 
       if (!entityToken || !entityToken.value) {
-         results.push(descriptor);
+         results.push(peRef);
       } else {
          results.push({
             type: 'pestart',
-            item: descriptor.item,
+            item: peRef,
          });
 
+         /* eslint-disable no-loop-func */
          for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
             const tokenItem = entityToken.value[tokenIndex];
 
-            if (tokenItem.text) {
-               results.push({
-                  type: 'word',
-                  item: tokenItem, // SToken
+            if (tokenItem.type === text.PTYPE) {
+               const source = new STokenSource(defaultExtractors, new EntityMetaData());
+               source.addText(tokenItem.text.originalText); // add the range
+               source.endText();
+               usp.parse(source, {}, (parsed) => {
+                  results = results.concat(parsed);
                });
-            } else { // PERef
-               results = results.concat(this._expandPERef({
-                  type: 'peref',
-                  item: tokenItem,
-               }));
+            } else {
+               this._expandPERef(tokenItem, (result) => {
+                  results = results.concat(result);
+               });
             }
          }
 
          results.push({
             type: 'peend',
-            item: descriptor.item,
+            item: peRef,
          });
       }
 
-      return results;
+      return deliverExpanded(results);
    }
 
 }
