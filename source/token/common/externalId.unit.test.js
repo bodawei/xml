@@ -226,13 +226,15 @@ describe('externalId (unit)', () => {
       describe('parameter entity reference', () => {
 
          beforeEach(() => {
-            spyOn(usp, 'parse');
+            spyOn(usp, 'checkForPERef');
          });
 
          it('stops immediately if it encounters a PERef', () => {
-            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef) => {
+               pToken.leftOff = type;
+               foundPeRef(pToken);
+            });
             mockSource = new MockSTokenSource([
-               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
             ]);
 
             externalId.parse(mockSource, [], callback);
@@ -240,19 +242,23 @@ describe('externalId (unit)', () => {
 
             expect(callback.calls.allArgs()).toEqual([ [ {
                type: 'EXTERNAL_ID',
-               incomplete: [ true ],
                leftOff: 'idType',
             } ] ]);
          });
 
          it('recognizes a PERef after the idType', () => {
-            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef, otherwise) => {
+               if (type === 'idType') {
+                  otherwise();
+               } else {
+                  pToken.leftOff = type;
+                  foundPeRef(pToken);
+               }
+            });
             mockSource = new MockSTokenSource([
-               [ MockSTokenSource.PEEK('P'), 'peekChar' ],
                [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
                [ 'PUBLIC', 'word', [ '"', '\'' ] ],
                [ undefined, 'space' ],
-               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
             ]);
 
             externalId.parse(mockSource, [], callback);
@@ -262,22 +268,25 @@ describe('externalId (unit)', () => {
                type: 'EXTERNAL_ID',
                idType: expectedSToken('PUBLIC'),
                postIdTypeSpace: undefined,
-               incomplete: [ true ],
                leftOff: 'public',
             } ] ]);
          });
 
          it('recognizes a PERef after the public', () => {
-            usp.parse.and.callFake((_1, _2, cb) => cb([ true ]));
+            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef, otherwise) => {
+               if (type === 'idType' || type === 'public') {
+                  otherwise();
+               } else {
+                  pToken.leftOff = type;
+                  foundPeRef(pToken);
+               }
+            });
             literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
             mockSource = new MockSTokenSource([
-               [ MockSTokenSource.PEEK('P'), 'peekChar' ],
                [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
                [ 'PUBLIC', 'word', [ '"', '\'' ] ],
                [ undefined, 'space' ],
-               [ MockSTokenSource.PEEK(' '), 'peekChar' ],
                [ ' ', 'space' ],
-               [ MockSTokenSource.PEEK('%'), 'peekChar' ],
             ]);
 
             externalId.parse(mockSource, [], callback);
@@ -289,7 +298,6 @@ describe('externalId (unit)', () => {
                postIdTypeSpace: undefined,
                public: {},
                postPublicSpace: expectedSToken(' '),
-               incomplete: [ true ],
                leftOff: 'system',
             } ] ]);
          });
