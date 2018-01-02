@@ -48,4 +48,4 @@ class DigitExtractor extends Extractor {
 
 }
 
-module.exports = DigitExtractor;
+export default DigitExtractor;

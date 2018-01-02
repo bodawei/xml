@@ -5,7 +5,7 @@ import { EntityLocation, EntityMetaData } from '../basic';
 import { ErrorCollector, WellFormedError } from '../error';
 import { defaultExtractors } from '../extractor';
 import { STokenSource } from '../sToken';
-import { makeSTokenMaker } from '../sToken/test';
+import { makeSTokenMaker } from '../sToken/@test/helper';
 
 import * as docTypeStart from './docTypeStart.js';
 import text from './text.js';

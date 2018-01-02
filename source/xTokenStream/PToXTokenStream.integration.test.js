@@ -23,7 +23,7 @@ import {
    xmlDeclaration,
 } from '../token';
 import { SToken } from '../sToken';
-import { makeSTokenMaker } from '../sToken/test';
+import { makeSTokenMaker } from '../sToken/@test/helper';
 
 import PToXTokenStream from './PToXTokenStream.js';
 

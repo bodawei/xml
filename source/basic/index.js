@@ -1,15 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import EntityLocation from './EntityLocation.js';
-import EntityMetaData from './EntityMetaData.js';
-import Offset from './Offset.js';
-import Range from './Range.js';
-import StringBundle from './StringBundle.js';
-
-module.exports = {
-   EntityLocation,
-   EntityMetaData,
-   Offset,
-   Range,
-   StringBundle,
-};
+export { default as EntityLocation } from './EntityLocation.js';
+export { default as EntityMetaData } from './EntityMetaData.js';
+export { default as Offset } from './Offset.js';
+export { default as Range } from './Range.js';
+export { default as StringBundle } from './StringBundle.js';

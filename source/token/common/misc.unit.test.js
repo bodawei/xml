@@ -3,8 +3,8 @@
 
 import { EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { MockErrorCollector } from '../../error/test';
-import { makeSToken } from '../../sToken/test';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSToken } from '../../sToken/@test/helper';
 
 import misc from './misc.js';
 

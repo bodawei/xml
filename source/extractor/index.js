@@ -12,7 +12,7 @@ import Segment from './Segment.js';
 import SpaceExtractor from './SpaceExtractor.js';
 import WordExtractor from './WordExtractor.js';
 
-module.exports = {
+export {
    AllExtractor,
    CharExtractor,
    defaultExtractors,

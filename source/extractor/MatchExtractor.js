@@ -88,4 +88,4 @@ class MatchExtractor extends Extractor {
 
 }
 
-module.exports = MatchExtractor;
+export default MatchExtractor;

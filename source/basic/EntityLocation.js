@@ -85,4 +85,4 @@ class EntityLocation {
 
 }
 
-module.exports = EntityLocation;
+export default EntityLocation;

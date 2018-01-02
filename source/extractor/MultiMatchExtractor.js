@@ -131,4 +131,4 @@ class MultiMatchExtractor extends Extractor {
 
 }
 
-module.exports = MultiMatchExtractor;
+export default MultiMatchExtractor;

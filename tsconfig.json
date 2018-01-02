@@ -1,14 +1,15 @@
 {
-   "compilerOptions": {
+    "compilerOptions": {
       "allowJs": true,
       "target": "es5",
       "sourceMap": true,
       "outDir": "./temp/typescript"
-   },
-   "include": [
-      "build/**/*.js",
-      "source/**/*.js",
-      "build/**/*.ts",
-      "source/**/*.ts"
-   ]
+    },
+    "include": [
+        "build/**/*jasmine*.js",
+        "source/**/*.js"
+    ],
+    "exclude": [
+        "node_modules",
+    ]
 }

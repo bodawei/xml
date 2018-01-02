@@ -90,4 +90,4 @@ Extractor.STATE = {
    FAILURE: 'FAILURE',
 };
 
-module.exports = Extractor;
+export default Extractor;

@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import StringBundle from '../basic/StringBundle.js';
+import { StringBundle } from '../basic';
+
 import XmlError from './XmlError.js';
 import strings from './derive/XmlWarning.json';
 import codes from './derive/XmlWarning-code.json';
@@ -20,4 +21,4 @@ for (const key in strings.base) {
    XmlWarning.ID[key] = key;
 }
 
-module.exports = XmlWarning;
+export default XmlWarning;

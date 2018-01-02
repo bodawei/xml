@@ -5,7 +5,7 @@ import { EntityLocation, EntityMetaData, Range } from '../basic';
 import { ErrorCollector, WellFormedError } from '../error';
 import { defaultExtractors } from '../extractor';
 import { STokenSource } from '../sToken';
-import { makeSTokenMaker } from '../sToken/test';
+import { makeSTokenMaker } from '../sToken/@test/helper';
 
 import * as cdata from './cdata.js';
 import * as envelope from './bridge/envelope.js';

@@ -18,6 +18,13 @@ import Offset from './Offset.js';
 \**********************************************************************/
 
 class Range {
+   // public location: EntityLocation;
+   // public startIndex: number;
+   // public startRow: number;
+   // public startColumn: number;
+   // public endIndex: number;
+   // public endRow: number;
+   // public endColumn: number;
 
    constructor(location, index, row, column, endIndex, endRow, endColumn) {
       if (location instanceof Offset) {
@@ -78,4 +85,4 @@ class Range {
    }
 }
 
-module.exports = Range;
+export default Range;

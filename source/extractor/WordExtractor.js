@@ -13,9 +13,20 @@ const SPACE_TERMINATOR_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];
 class WordExtractor extends AllExtractor {
 
    constructor(version, terminators) {
-      super(version, (version === 1.0 ? SPACE_TERMINATOR_10 : SPACE_TERMINATOR_11).concat(terminators || []));
+      /* istanbul ignore next */ // Poor istanbul is confused by something
+      super(version, buildFullTerminators(version, terminators));
    }
 
 }
 
-module.exports = WordExtractor;
+function buildFullTerminators(version, terminators) {
+   const someTerminators = terminators || [];
+
+   if (version === 1.0) {
+      return SPACE_TERMINATOR_10.concat(someTerminators);
+   } else {
+      return SPACE_TERMINATOR_11.concat(someTerminators);
+   }
+}
+
+export default WordExtractor;

@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../error/test';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
+import { MockErrorCollector } from '../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../error';
 
 import * as declaration from './bridge/declaration.js';

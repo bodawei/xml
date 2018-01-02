@@ -1,7 +1,7 @@
 .nyc_output
 .DS_Store
+admin
 temp
 node_modules
 derive
 dist
-xtra

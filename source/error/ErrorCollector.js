@@ -81,4 +81,4 @@ class ErrorCollector {
    }
 }
 
-module.exports = ErrorCollector;
+export default ErrorCollector;

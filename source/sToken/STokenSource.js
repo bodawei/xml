@@ -105,8 +105,8 @@ class STokenSource {
       delete this._orphanedRange;
 
       // If this is the first segment we are adding, then make sure lastOffset contains
-      // the starting range which will either be the range associated with this
-      // first segment, or a default range that starts at 0
+      // the starting offset which will either be the start of the range associated
+      // with this first segment, or a default offset that starts at 0
       if (this._segments.length === 0) {
          if (rangeToUse) {
             this._lastOffset = rangeToUse.getStartOffset();
@@ -239,9 +239,7 @@ class STokenSource {
          // If we seem to have changed which entity we are reading from, create a new range.
          if (segment.range && !currentRange.location.equals(segment.range.location)) {
             // store the range if it actually has changed
-            if (!currentRange.getEndOffset().equals(this._lastOffset)) {
-               ranges.push(currentRange);
-            }
+            ranges.push(currentRange);
 
             currentRange = segment.range.clone();
             currentRange.endIndex = segment.range.startIndex;

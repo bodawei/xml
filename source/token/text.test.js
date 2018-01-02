@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
+import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
 
 import text from './text.js';
 

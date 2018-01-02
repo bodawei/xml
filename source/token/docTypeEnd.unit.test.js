@@ -2,8 +2,8 @@
 
 /* eslint-env jasmine */
 
-import { MockErrorCollector } from '../error/test';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/test';
+import { MockErrorCollector } from '../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
 import { WellFormedError } from '../error';
 
 import * as docTypeEnd from './docTypeEnd.js';

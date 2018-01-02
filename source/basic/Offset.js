@@ -36,4 +36,4 @@ class Offset {
    }
 }
 
-module.exports = Offset;
+export default Offset;

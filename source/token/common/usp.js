@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import { Offset, Range } from '../../basic';
+// import { Offset, Range } from '../../basic';
 import { SToken } from '../../sToken';
 
 import entityReference from '../entityReference.js';
@@ -98,41 +98,41 @@ function checkForPERef(source, forValue, pTokenPart, deliverPTokenPart, otherwis
    });
 }
 
-function getFirstRangeOf(item) {
-   if (!item) {
-      return;
-   }
+// function getFirstRangeOf(item) {
+//    if (!item) {
+//       return;
+//    }
 
-   switch (item.type) {
-      case 'word':
-         return item.word.firstRange;
-      case 'space':
-         return item.space.firstRange;
-      case 'literal':
-         return item.openQuote && item.openQuote.firstRange;
-      case entityReference.PARAM_PTOKEN:
-         return item.open && item.open.firstRange;
-   }
-}
+//    switch (item.type) {
+//       case 'word':
+//          return item.word.firstRange;
+//       case 'space':
+//          return item.space.firstRange;
+//       case 'literal':
+//          return item.openQuote && item.openQuote.firstRange;
+//       case entityReference.PARAM_PTOKEN:
+//          return item.open && item.open.firstRange;
+//    }
+// }
 
-function getLastRangeOf(item) {
-   if (!item) {
-      return;
-   }
+// function getLastRangeOf(item) {
+//    if (!item) {
+//       return;
+//    }
 
-   switch (item.type) {
-      case 'word':
-         return item.word.lastRange;
-      case 'space':
-         return item.space.lastRange;
-      case 'literal':
-         const tokens = literal.getSTokens(item);
-         return tokens.length > 0 ? tokens[tokens.length - 1].lastRange : undefined;
-      case entityReference.PARAM_PTOKEN:
-         const refTokens = item.getSTokenArray(item);
-         return refTokens.length > 0 ? refTokens[refTokens.length - 1].lastRange : undefined;
-   }
-}
+//    switch (item.type) {
+//       case 'word':
+//          return item.word.lastRange;
+//       case 'space':
+//          return item.space.lastRange;
+//       case 'literal':
+//          const tokens = literal.getSTokens(item);
+//          return tokens.length > 0 ? tokens[tokens.length - 1].lastRange : undefined;
+//       case entityReference.PARAM_PTOKEN:
+//          const refTokens = item.getSTokenArray(item);
+//          return refTokens.length > 0 ? refTokens[refTokens.length - 1].lastRange : undefined;
+//    }
+// }
 
 /*
  * Given an array of unassigned values, return the next value.
@@ -242,11 +242,10 @@ function getNextValue(prev, theArray) {
    //    }
    // }
 
-
    return {
       count: next,
       item: candidate,
-   }
+   };
 }
 
 /*
@@ -270,7 +269,6 @@ function getNextValue(prev, theArray) {
  */
 function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
    let nextValue = getNextValue({}, unassignedValues);
-   let found = false;
    let index = 0;
    let prev;
 
@@ -284,7 +282,7 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
 
    leftOff = leftOff || propertyDescriptors[0].id;
    for (; index < propertyDescriptors.length; index++) {
-      const descriptor = propertyDescriptors[index]
+      const descriptor = propertyDescriptors[index];
 
       // Identify the descriptor
       if (descriptor.id === leftOff) {
@@ -324,7 +322,7 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
 
    // Now processs all the remaining descriptors
    for (; index < propertyDescriptors.length; index++) {
-      const descriptor = propertyDescriptors[index]
+      const descriptor = propertyDescriptors[index];
 
       // If we've got an optional space and the descriptor is not a space, then ignore the space
       if (descriptor.type !== 'space' && nextValue.item.optional) {

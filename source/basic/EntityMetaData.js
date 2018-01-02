@@ -128,4 +128,4 @@ EntityMetaData.KIND = {
 
 EntityMetaData.PTYPE = 'ENTITY_META_DATA';
 
-module.exports = EntityMetaData;
+export default EntityMetaData;

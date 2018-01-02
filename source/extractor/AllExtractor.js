@@ -130,4 +130,4 @@ class AllExtractor extends Extractor {
 
 }
 
-module.exports = AllExtractor;
+export default AllExtractor;

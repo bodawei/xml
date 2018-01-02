@@ -76,4 +76,4 @@ class XmlError {
    }
 }
 
-module.exports = XmlError;
+export default XmlError;

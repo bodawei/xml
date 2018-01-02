@@ -27,6 +27,9 @@
 \**********************************************************************/
 
 class SToken {
+   // public text: string;
+   // public originalText: string;
+   // public ranges: Array<Range>;
 
    constructor(text, originalText, range) {
       this.text = text;
@@ -86,7 +89,7 @@ function canFuseRanges(range1, range2) {
    }
 
    const locationsSame = range1.location === range2.location;
-   const locationsEqual = range1.location ? range1.location.equals(range2.location) : false;
+   const locationsEqual = range1.location.equals(range2.location);
 
    if (locationsSame || locationsEqual) {
       return range1.getEndOffset().equals(range2.getStartOffset());
@@ -95,10 +98,8 @@ function canFuseRanges(range1, range2) {
    return false;
 }
 
-function makeFromString(str) {
+SToken.fromString = function fromString(str) {
    return new SToken(str, str);
-}
-
-SToken.fromString = makeFromString;
+};
 
 export default SToken;

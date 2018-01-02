@@ -45,4 +45,4 @@ const defaultExtractors = {
    },
 };
 
-module.exports = defaultExtractors;
+export default defaultExtractors;

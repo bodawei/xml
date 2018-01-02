@@ -54,4 +54,4 @@ class SpaceExtractor extends Extractor {
 
 }
 
-module.exports = SpaceExtractor;
+export default SpaceExtractor;

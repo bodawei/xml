@@ -20,4 +20,4 @@ class Segment {
    }
 }
 
-module.exports = Segment;
+export default Segment;

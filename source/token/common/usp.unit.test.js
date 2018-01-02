@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/test';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
 import entityReference from '../entityReference.js';
 

@@ -185,4 +185,4 @@ function unescapeBraces(message) {
    return message.replace(BRACES, '$1');
 }
 
-module.exports = StringBundle;
+export default StringBundle;

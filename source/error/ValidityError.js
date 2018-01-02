@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import StringBundle from '../basic/StringBundle.js';
+import { StringBundle } from '../basic';
+
 import XmlError from './XmlError.js';
 import strings from './derive/ValidityError.json';
 import codes from './derive/ValidityError-code.json';

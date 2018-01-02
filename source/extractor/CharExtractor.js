@@ -65,4 +65,4 @@ class CharExtractor extends Extractor {
 
 }
 
-module.exports = CharExtractor;
+export default CharExtractor;

@@ -60,4 +60,4 @@ class PeekExtractor extends Extractor {
 
 }
 
-module.exports = PeekExtractor;
+export default PeekExtractor;

@@ -4,7 +4,7 @@
 import { EntityLocation, EntityMetaData, Offset } from '../basic';
 import { ErrorCollector, WellFormedError } from '../error';
 
-import { makeSToken } from '../sToken/test';
+import { makeSToken } from '../sToken/@test/helper';
 import {
    declaration,
    envelope,
