@@ -1,15 +1,15 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ValidityError } from '../error';
+import { ValidityError } from '../../error';
 import {
    docTypeStart,
    elementStart,
    notationDeclaration,
    xmlDeclaration,
-} from '../token';
+} from '../../token';
 
-import CheckXTokenValidStream from './CheckXTokenValidStream.js';
+import CheckXTokenValidStream from '../CheckXTokenValidStream.js';
 
 describe('CheckXTokenValidStream (unit)', () => {
    let validator;

@@ -176,6 +176,11 @@ class STokenSource {
    }
 
    _resumeOperation() {
+      if (this._resuming === true) {
+         return;
+      }
+      this._resuming = true;
+
       while ((this._segments.length !== 0 || this._allTextAdded) && this._extractors.length > 0) {
          const extContext = this._extractors[0];
          const extractor = extContext.extractor;
@@ -205,8 +210,19 @@ class STokenSource {
             this._lastOffset = ranges[ranges.length - 1].getEndOffset();
          }
 
-         this._reportResults(extContext, results.text, results.original, ranges);
+         /*
+          * Ultimately, we probably do not want to doing a setTimeout here, as
+          * there's no reason callers should not be able to deal with what turns
+          * out to be a synchronous return of values.  However, it is better for
+          * development purposes, at least, to do this to make sure the layers of
+          * our system are not dependent on the sometimes synchronous behavior.
+          */
+         setTimeout(() => {
+            this._reportResults(extContext, results.text, results.original, ranges);
+         }, 0);
+         break;
       }
+      this._resuming = false;
    }
 
    _restorePartiallyAndUnusedSegments(segInfos) {

@@ -175,44 +175,49 @@ class NodeStream extends Transform {
          return;
       }
 
-      let results = [];
+      const results = [];
       const entityToken = this._entityManager.getParameterEntityToken(peRef.name.text || '');
 
       if (!entityToken || !entityToken.value) {
          results.push(peRef);
+         deliverExpanded(results);
       } else {
          results.push({
             type: 'pestart',
             item: peRef,
          });
 
-         /* eslint-disable no-loop-func */
-         for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
-            const tokenItem = entityToken.value[tokenIndex];
+         this._insertEntityPiece(entityToken, 0, peRef, results, deliverExpanded);
+      }
+   }
 
-            if (tokenItem.type === text.PTYPE) {
-               const source = new STokenSource(defaultExtractors, new EntityMetaData());
-               source.addText(tokenItem.text.originalText); // add the range
-               source.endText();
-               usp.parse(source, {}, (parsed) => {
-                  results = results.concat(parsed);
-               });
-            } else {
-               this._expandPERef(tokenItem, (result) => {
-                  results = results.concat(result);
-               });
-            }
-         }
-
+   _insertEntityPiece(entityToken, index, peRef, results, deliverResults) {
+      if (entityToken.value.length === index) {
          results.push({
             type: 'peend',
             item: peRef,
          });
+         deliverResults(results);
+         return;
       }
 
-      return deliverExpanded(results);
-   }
+      const tokenItem = entityToken.value[index];
 
+      if (tokenItem.type === text.PTYPE) {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText(tokenItem.text.originalText); // add the range
+         source.endText();
+         usp.parse(source, {}, (parsed) => {
+            results = results.concat(parsed);
+            this._insertEntityPiece(entityToken, index + 1, peRef, results, deliverResults);
+         });
+      } else {
+         this._expandPERef(tokenItem, (result) => {
+            results = results.concat(result);
+            this._insertEntityPiece(entityToken, index + 1, peRef, results, deliverResults);
+         });
+      }
+   }
 }
 
 export default NodeStream;

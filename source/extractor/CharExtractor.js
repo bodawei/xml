@@ -24,7 +24,11 @@ class CharExtractor extends Extractor {
       }
 
       const currentChar = segment.text[segment.index];
-      this._incrementSegment(segment, info);
+      this._incrementSegment(segment, info, currentChar);
+
+      if (!currentChar) {
+         return;
+      }
 
       this._processText(currentChar, info);
 
@@ -44,8 +48,12 @@ class CharExtractor extends Extractor {
       return this._finish();
    }
 
-   _incrementSegment(segment, info) {
-      segment.index ++;
+   _incrementSegment(segment, info, foundChar) {
+      // do not increment if no character
+      if (foundChar) {
+         segment.index ++;
+      }
+
       if (segment.atEnd()) {
          info.segment = {
             range: segment.range,
@@ -59,7 +67,7 @@ class CharExtractor extends Extractor {
       if (candidate === '\n' || (candidate === '\u0085' && this._version === 1.1)) {
          this._text.push(candidate);
          info.chars ++;
-         this._incrementSegment(segment, info);
+         this._incrementSegment(segment, info, candidate);
       }
    }
 

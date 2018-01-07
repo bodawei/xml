@@ -52,7 +52,62 @@ describe('CharExtractor', () => {
 
    });
 
+   describe('process()', () => {
+
+      it('remains in WORKING when there are no characters left in the segment', () => {
+         const segment = new Segment('a');
+         segment.index = 1;
+         extractor.process(segment);
+
+         expect(extractor.state).toEqual(Extractor.STATE.WORKING);
+      });
+
+      it('alters the segment when a character found', () => {
+         const segment = new Segment('a');
+         extractor.process(segment);
+
+         expect(segment.index).toEqual(1);
+      });
+
+      it('does not alter the segment when no character found', () => {
+         const segment = new Segment('a');
+         segment.index = 1;
+         extractor.process(segment);
+
+         expect(segment.index).toEqual(1);
+      });
+
+   });
+
    describe('finish()', () => {
+
+      it('reports a failure state when asked to read beyond the end of the input', () => {
+         const segment = new Segment('a');
+         segment.index = 1;
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: '',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: {
+                  range: undefined,
+               },
+            } ],
+         });
+      });
+
+      it('leaves the extractor in a FAILURE state if no character was read', () => {
+         const segment = new Segment('a');
+         segment.index = 1;
+         extractor.process(segment);
+         extractor.finish();
+
+         expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
+      });
 
       it('returns whatever has been found at the point it is called', () => {
          extractor.process(new Segment('\r'));

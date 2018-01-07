@@ -4,11 +4,11 @@
 import {
    Offset,
    EntityLocation,
- } from '../basic';
-import { WellFormedError } from '../error';
-import { PTokenStream } from '../pTokenStream';
+ } from '../../basic';
+import { WellFormedError } from '../../error';
+import { PTokenStream } from '../../pTokenStream';
 
-import CheckPTokenWellFormedStream from './CheckPTokenWellFormedStream.js';
+import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream.js';
 
 describe('CheckPTokenWellFormedStream (integration)', () => {
    let pTokenStream;

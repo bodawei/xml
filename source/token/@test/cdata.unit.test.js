@@ -2,14 +2,14 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { WellFormedError } from '../error';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
+import { EntityMetaData } from '../../basic';
+import { WellFormedError } from '../../error';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
-import misc from './common/misc.js';
-import * as cdata from './cdata.js';
-import * as envelope from './bridge/envelope.js';
+import misc from '../common/misc.js';
+import * as cdata from '../cdata.js';
+import * as envelope from '../bridge/envelope.js';
 
 describe('cdata', () => {
    let envelopePToken;

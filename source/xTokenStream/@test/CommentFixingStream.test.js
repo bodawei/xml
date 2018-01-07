@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { comment } from '../token';
+import { comment } from '../../token';
 
-import CommentFixingStream from './CommentFixingStream.js';
+import CommentFixingStream from '../CommentFixingStream.js';
 
 describe('CommentFixingStream (unit)', () => {
    let cfs;

@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { defaultExtractors } from '../extractor';
-import { STokenSource } from '../sToken';
+import { EntityMetaData } from '../../basic';
+import { defaultExtractors } from '../../extractor';
+import { STokenSource } from '../../sToken';
 
-import PTokenStream from './PTokenStream.js';
+import PTokenStream from '../PTokenStream.js';
 
 describe('PTokenStream (integration)', () => {
    let pTokenStream;

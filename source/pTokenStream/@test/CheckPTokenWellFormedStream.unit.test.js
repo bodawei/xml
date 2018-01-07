@@ -1,10 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Offset } from '../basic';
-import { ErrorCollector, WellFormedError } from '../error';
+import { EntityLocation, EntityMetaData, Offset } from '../../basic';
+import { ErrorCollector, WellFormedError } from '../../error';
 
-import { makeSToken } from '../sToken/@test/helper';
+import { makeSToken } from '../../sToken/@test/helper';
 import {
    declaration,
    envelope,
@@ -23,9 +23,9 @@ import {
    processingInstruction,
    space,
    xmlDeclaration,
-} from '../token';
+} from '../../token';
 
-import CheckPTokenWellFormedStream from './CheckPTokenWellFormedStream.js';
+import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream.js';
 
 describe('CheckPTokenWellFormedStream (unit)', () => {
    let checker;

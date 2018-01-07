@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { PTokenStream } from '../pTokenStream';
-import * as tokens from '../token';
+import { PTokenStream } from '../../pTokenStream';
+import * as tokens from '../../token';
 
-import PToXTokenStream from './PToXTokenStream';
-import CommentFixingStream from './CommentFixingStream.js';
+import PToXTokenStream from '../PToXTokenStream';
+import CommentFixingStream from '../CommentFixingStream.js';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream;

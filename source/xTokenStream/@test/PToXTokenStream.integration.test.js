@@ -1,8 +1,8 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../basic';
-import { PTokenStream } from '../pTokenStream';
+import { EntityLocation, Range } from '../../basic';
+import { PTokenStream } from '../../pTokenStream';
 import {
    declaration,
    envelope,
@@ -21,11 +21,11 @@ import {
    space,
    text,
    xmlDeclaration,
-} from '../token';
-import { SToken } from '../sToken';
-import { makeSTokenMaker } from '../sToken/@test/helper';
+} from '../../token';
+import { SToken } from '../../sToken';
+import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import PToXTokenStream from './PToXTokenStream.js';
+import PToXTokenStream from '../PToXTokenStream.js';
 
 describe('PToXTokenStream (integration)', () => {
    let pTokenStream;

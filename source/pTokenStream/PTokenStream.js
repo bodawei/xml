@@ -50,12 +50,24 @@ class PTokenStream extends stream.Readable {
    }
 
    _read() {
+      if (this._parsing) {
+         return;
+      }
+      this._parsing = true;
       this._parseGeneral((result) => {
          if (!this._reportedMetaData) {
             this._reportedMetaData = true;
             this.push(this._sTokenSource.metaData);
          }
 
+         if (Array.isArray(result)) {
+            for (let index = 0; index < result.length - 1; index++) {
+               this.push(result[index]);
+            }
+            result = result[result.length - 1];
+         }
+
+         this._parsing = false;
          this.push(result || null);
       });
    }
@@ -64,6 +76,7 @@ class PTokenStream extends stream.Readable {
       space.parse(this._sTokenSource, (pToken) => {
          if (pToken.text) {
             deliverParse(pToken);
+            return;
          }
 
          this._sTokenSource.extract('peekChar', (sToken) => {
@@ -71,7 +84,6 @@ class PTokenStream extends stream.Readable {
                deliverParse(null);
                return;
             }
-
             switch (sToken.text) {
                case '<':
                   this._markupParse(deliverParse);
@@ -155,8 +167,7 @@ class PTokenStream extends stream.Readable {
                               deliverParse(docTypeStart);
                            } else {
                               docTypeEnd.parse(this._sTokenSource, (endToken) => {
-                                 deliverParse(docTypeStart);
-                                 deliverParse(endToken);
+                                 deliverParse([ docTypeStart, endToken ]);
                               });
                            }
                         });

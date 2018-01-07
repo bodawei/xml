@@ -1,14 +1,14 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../basic';
-import { ErrorCollector, WellFormedError } from '../error';
-import { defaultExtractors } from '../extractor';
-import { STokenSource } from '../sToken';
-import { makeSTokenMaker } from '../sToken/@test/helper';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { ErrorCollector, WellFormedError } from '../../error';
+import { defaultExtractors } from '../../extractor';
+import { STokenSource } from '../../sToken';
+import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as cdata from './cdata.js';
-import * as envelope from './bridge/envelope.js';
+import * as cdata from '../cdata.js';
+import * as envelope from '../bridge/envelope.js';
 
 describe('cdata (integration)', () => {
    let emd;

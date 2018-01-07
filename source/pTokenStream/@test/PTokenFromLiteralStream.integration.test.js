@@ -1,12 +1,12 @@
 /* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData} from '../basic';
-import { defaultExtractors } from '../extractor';
-import { STokenSource } from '../sToken';
-import * as xToken from '../token';
+import { EntityMetaData} from '../../basic';
+import { defaultExtractors } from '../../extractor';
+import { STokenSource } from '../../sToken';
+import * as xToken from '../../token';
 
-import PTokenFromLiteralStream from './PTokenFromLiteralStream.js';
+import PTokenFromLiteralStream from '../PTokenFromLiteralStream.js';
 
 describe('PTokenFromLiteralStream (integration)', () => {
 

@@ -1,12 +1,12 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Offset } from '../basic';
-import { ValidityError } from '../error';
-import { PTokenStream } from '../pTokenStream';
+import { EntityLocation, Offset } from '../../basic';
+import { ValidityError } from '../../error';
+import { PTokenStream } from '../../pTokenStream';
 
-import CheckXTokenValidStream from './CheckXTokenValidStream.js';
-import PToXTokenStream from './PToXTokenStream';
+import CheckXTokenValidStream from '../CheckXTokenValidStream.js';
+import PToXTokenStream from '../PToXTokenStream';
 
 describe('CheckXTokenValidStream (integration)', () => {
    let validator;

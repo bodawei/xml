@@ -16,9 +16,9 @@ import {
    processingInstruction,
    space,
    text,
-} from '../token';
+} from '../../token';
 
-import PToXTokenStream from './PToXTokenStream.js';
+import PToXTokenStream from '../PToXTokenStream.js';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream;
