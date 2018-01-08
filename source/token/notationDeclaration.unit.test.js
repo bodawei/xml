@@ -204,7 +204,7 @@ describe('notationdeDlaration (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_CLOSE,
-            params: [ notationPToken.name.text ],
+            params: [ notationPToken.name.str ],
             position: undefined,
             lastPosition: notationPToken.postExternalIdSpace,
          });

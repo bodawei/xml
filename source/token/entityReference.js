@@ -144,7 +144,7 @@ function checkWellFormed(pToken, ec) {
 function pTokenToXToken(pToken) {
    let refClass = EntityReference;
 
-   if (pToken.open && pToken.open.text === '%') {
+   if (pToken.open && pToken.open.str === '%') {
       refClass = ParameterEntityReference;
    }
 

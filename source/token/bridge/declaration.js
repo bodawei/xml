@@ -79,9 +79,9 @@ function checkWellFormed(pToken, ec) {
    ec.setPos(pToken.declType);
 
    if (pToken.declType) {
-      const upperCase = pToken.declType.text.toLocaleUpperCase();
-      ec.check(pToken.declType.text !== upperCase,
-         WFEID.DECL_DECLTYPE_INVALID_CASE, [ upperCase, pToken.declType.text ]);
+      const upperCase = pToken.declType.str.toLocaleUpperCase();
+      ec.check(pToken.declType.str !== upperCase,
+         WFEID.DECL_DECLTYPE_INVALID_CASE, [ upperCase, pToken.declType.str ]);
    } else {
       ec.report(WFEID.DECL_NO_DECLTYPE);
    }

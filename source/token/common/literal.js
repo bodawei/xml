@@ -30,14 +30,14 @@ function parse(source, options, done) {
    const pToken = options.pToken;
 
    source.extract('peekChar', (quoteSToken) => {
-      if (!quoteSToken || (quoteSToken.text !== '"' && quoteSToken.text !== '\'')) {
+      if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
          done(false);
          return;
       }
 
       source.extractToObject('char', pToken, 'openQuote');
 
-      const terminators = [ quoteSToken.text ];
+      const terminators = [ quoteSToken.str ];
 
       if (options.peRef) {
          terminators.push('%');
@@ -49,7 +49,7 @@ function parse(source, options, done) {
 
       getRest(source, terminators, (valueArray) => {
          pToken.value = valueArray;
-         source.extract('match', quoteSToken.text, (closeSToken) => {
+         source.extract('match', quoteSToken.str, (closeSToken) => {
             if (pToken.value.length === 0) {
                const textPToken = new text.PToken();
                const newRange = quoteSToken.firstRange.clone();
@@ -82,14 +82,14 @@ function getRest(source, terminators, literalDone) {
    const container = {};
 
    source.extractToObject('all', terminators, container, 'sToken');
-   source.extract('peekChar', (char) => {
+   source.extract('peekChar', (charSToken) => {
       let pToken;
       if (container.sToken) {
          pToken = new text.PToken();
          pToken.text = container.sToken;
       }
       const currentPortion = pToken ? [ pToken ] : [];
-      if (!char) {
+      if (!charSToken) {
          literalDone(currentPortion);
          return;
       }
@@ -101,7 +101,7 @@ function getRest(source, terminators, literalDone) {
          });
       }
 
-      switch (char.text[0]) {
+      switch (charSToken.str[0]) {
          case '"':
          case '\'':
             literalDone(currentPortion);
@@ -150,7 +150,7 @@ function makeTokenCompatible(pToken) {
       const item = pieces[index];
 
       if (item.type === text.PTYPE) {
-         value.push(new text.XToken(item.text.text, item));
+         value.push(new text.XToken(item.text.str, item));
       } else {
          value.push(entityReference.pTokenToXToken(item));
       }
@@ -160,7 +160,7 @@ function makeTokenCompatible(pToken) {
 }
 
 function makeOneTokenCompatible(pToken) {
-   return (pToken && pToken.value) ? pToken.value[0].text.text : undefined;
+   return (pToken && pToken.value) ? pToken.value[0].text.str : undefined;
 }
 
 function getSTokens(pToken) {

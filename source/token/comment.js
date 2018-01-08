@@ -71,9 +71,9 @@ function parse(source, commentOpen, deliverPToken) {
 }
 
 function extractCommentContent(source, pToken, deliverPToken) {
-   source.extract('all', [ '--' ], (textToken) => {
-      if (textToken) {
-         pToken.text.push(textToken);
+   source.extract('all', [ '--' ], (textSToken) => {
+      if (textSToken) {
+         pToken.text.push(textSToken);
       }
 
       source.extract('match', '-->', (sToken) => {
@@ -106,17 +106,17 @@ function checkWellFormed(pToken, ec, entityMetaData) {
    if (!pToken.text || pToken.text.length === 0) {
       ec.setPos(undefined);
    } else for (let index = 0; index < pToken.text.length; index++) {
-      const textItem = pToken.text[index];
-      const lastChar = textItem.text[textItem.text.length - 1];
+      const sTokenItem = pToken.text[index];
+      const lastChar = sTokenItem.str[sTokenItem.str.length - 1];
       const isLastItem = index === pToken.text.length - 1;
 
-      ec.setPos(textItem);
-      misc.checkWellFormedText(textItem, ec, entityMetaData);
+      ec.setPos(sTokenItem);
+      misc.checkWellFormedText(sTokenItem, ec, entityMetaData);
 
-      if (textItem.text.indexOf('--') !== -1) {
-         ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textItem);
+      if (sTokenItem.str.indexOf('--') !== -1) {
+         ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, sTokenItem);
       } else if (lastChar === '-' && isLastItem) {
-         const offset = textItem.lastRange.getEndOffset();
+         const offset = sTokenItem.lastRange.getEndOffset();
          offset.index --;
          offset.column --;
          ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);
@@ -133,7 +133,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
 
 function pTokenToXToken(pToken) {
    const texts = pToken.text || [];
-   const combinedTexts = texts.map((item) => item.text);
+   const combinedTexts = texts.map((item) => item.str);
    return new Comment(combinedTexts.join(''), pToken);
 }
 

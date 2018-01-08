@@ -135,7 +135,7 @@ class EntityManager {
 
       for (let index = 0; index < token.value.length; index++) {
          if (token.value[index].text) {
-            source.addText(token.value[index].text.text);
+            source.addText(token.value[index].text.str);
          }
       }
       source.endText();

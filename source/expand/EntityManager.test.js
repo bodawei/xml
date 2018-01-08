@@ -35,7 +35,7 @@ describe('EntityManager (unit)', () => {
          done();
       } else {
          source.extract('all', [], (sToken) => {
-            expect(sToken.text).toEqual(expected);
+            expect(sToken.str).toEqual(expected);
             done();
          });
       }

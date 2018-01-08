@@ -6,14 +6,14 @@ import { EntityLocation, Range } from '../../basic';
 import { toEqualSTokenText, toEqualSTokenTexts, toEqualSTokenRange } from './beforeEach.js';
 import SToken from '../SToken.js';
 
-describe('sToken', () => {
+describe('sToken beforeEach', () => {
 
    describe('toEqualSTokenText', () => {
 
       describe('jasmine use', () => {
 
          it('reports pass when the strings all match', () => {
-            expect(new SToken('one', 'two')).toEqualSTokenText({ text: 'one', originalText: 'two'});
+            expect(new SToken('one', 'two')).toEqualSTokenText({ str: 'one', originalStr: 'two'});
          });
 
          it('reports an exception if the sToken is undefined', () => {
@@ -48,7 +48,7 @@ describe('sToken', () => {
 
          it('returns a message indicating failure, when the values all match', () => {
             const result = toEqualSTokenText().compare(new SToken('testValue', 'original'),
-                  { text: 'testValue', originalText: 'original'});
+                  { str: 'testValue', originalStr: 'original'});
 
             expect(result).toEqual({
                pass: true,
@@ -84,7 +84,7 @@ describe('sToken', () => {
 
          it('reports pass when the STokens all match', () => {
             expect([ new SToken('one', 'two'), new SToken('three', 'four') ])
-               .toEqualSTokenTexts([ { text: 'one', originalText: 'two'}, { text: 'three', originalText: 'four'} ]);
+               .toEqualSTokenTexts([ { str: 'one', originalStr: 'two'}, { str: 'three', originalStr: 'four'} ]);
          });
 
          it('reports an exception if the array is undefined', () => {
@@ -124,7 +124,7 @@ describe('sToken', () => {
 
          it('returns a message indicating failure, when the array lengths do not match', () => {
             const result = toEqualSTokenTexts().compare([ new SToken('1', '2'), new SToken('3', '4') ],
-                  [ { text: '1', originalText: '2'} ]);
+                  [ {str: '1', originalStr: '2'} ]);
 
             expect(result).toEqual({
                pass: false,
@@ -134,7 +134,7 @@ describe('sToken', () => {
 
          it('returns a message indicating failure, when the values all match', () => {
             const result = toEqualSTokenTexts().compare([ new SToken('1', '2'), new SToken('3', '4') ],
-                  [ { text: '1', originalText: '2'}, { text: '3', originalText: '4'} ]);
+                  [ { str: '1', originalStr: '2'}, { str: '3', originalStr: '4'} ]);
 
             expect(result).toEqual({
                pass: true,
@@ -144,7 +144,7 @@ describe('sToken', () => {
 
          it('returns a message indicating failure, on success, when text value does not match', () => {
             const result = toEqualSTokenTexts().compare([ new SToken('1', '2'), new SToken('3', '5') ],
-                  [ { text: '1', originalText: '2'}, { text: '9', originalText: '5'} ]);
+                  [ { str: '1', originalStr: '2'}, { str: '9', originalStr: '5'} ]);
 
             expect(result).toEqual({
                pass: false,
@@ -154,7 +154,7 @@ describe('sToken', () => {
 
          it('returns a message indicating failure, on success, when original text value does not match', () => {
             const result = toEqualSTokenTexts().compare([ new SToken('1', '2'), new SToken('3', '5') ],
-                  [ { text: '1', originalText: '2'}, { text: '3', originalText: '0'} ]);
+                  [ { str: '1', originalStr: '2'}, { str: '3', originalStr: '0'} ]);
 
             expect(result).toEqual({
                pass: false,

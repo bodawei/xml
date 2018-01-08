@@ -25,7 +25,7 @@ class PTokenFromLiteralStream extends stream.Readable {
             return;
          }
 
-         if (this._peRef && sToken.text === '%') {
+         if (this._peRef && sToken.str === '%') {
             entityReference.paramParse(this._sTokenSource, (sToken) => this.push(sToken));
          } else {
             const terminators = [];

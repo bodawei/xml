@@ -266,7 +266,7 @@ describe('attribute (unit)', () => {
       });
 
       it('reports an error if attributes have duplicate names', () => {
-         attributesPChunk[1].name.text = attributesPChunk[0].name.text;
+         attributesPChunk[1].name.str = attributesPChunk[0].name.str;
 
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
@@ -279,7 +279,7 @@ describe('attribute (unit)', () => {
       });
 
       it('reports no error if there is a duplicate name but it is not an attribute', () => {
-         attributesPChunk[1].name.text = attributesPChunk[0].name.text;
+         attributesPChunk[1].name.str = attributesPChunk[0].name.str;
 
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
             previousSpace, 'other');

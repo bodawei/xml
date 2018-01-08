@@ -124,7 +124,7 @@ class NodeStream extends Transform {
          const item = entityDeclaration.value[index];
 
          if (item.type === entityReference.PARAM_PTYPE) {
-            const itemName = item.name ? item.name.text : '';
+            const itemName = item.name ? item.name.str : '';
             const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
             if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
@@ -176,7 +176,7 @@ class NodeStream extends Transform {
       }
 
       const results = [];
-      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.text || '');
+      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.str || '');
 
       if (!entityToken || !entityToken.value) {
          results.push(peRef);
@@ -205,7 +205,7 @@ class NodeStream extends Transform {
 
       if (tokenItem.type === text.PTYPE) {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText(tokenItem.text.originalText); // add the range
+         source.addText(tokenItem.text.originalStr); // add the range
          source.endText();
          usp.parse(source, {}, (parsed) => {
             results = results.concat(parsed);

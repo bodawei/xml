@@ -32,7 +32,7 @@ describe('xmlDeclaration (integration)', () => {
          source.endText();
 
          xmlDeclaration.parse(source, {}, (parsing) => {
-            expect(parsing.params[0].name.text).toEqual('version');
+            expect(parsing.params[0].name.str).toEqual('version');
             done();
          });
       });
@@ -109,7 +109,7 @@ describe('xmlDeclaration (integration)', () => {
          xmlDeclaration.parse(source, {}, (pToken) => {
             const token = xmlDeclaration.pTokenToXToken(pToken);
 
-            expect(token.pToken.params[0].name.text).toEqual('version');
+            expect(token.pToken.params[0].name.str).toEqual('version');
             done();
          });
       });

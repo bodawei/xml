@@ -9,6 +9,11 @@ import literal from './literal.js';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 
+const SUBTYPE = {
+   SPACE: 'space',
+   WORD: 'word',
+};
+
 /**********************************************************************\
  Unidentified Syntax Pieces
  This is used to extract certain items from an input stream. The
@@ -27,8 +32,8 @@ const TERMINATORS = [ '>', '"', '\'', '%' ];
  encounters a ">" or something it is not allowed to recognize. It will
  then pass an array of all all that has been found: PTokens for the
  entity references, and PToken-like things:
-   spaces: as a { type: text, space: SToken }
-   word: as a { type: word, word: SToken }
+   spaces: as a { type: text, subType: 'space', text: SToken }
+   word: as a { type: text, subType: 'word', text: SToken }
    literal: as a { type: literal, openQuote, value, closeQuote }
 \**********************************************************************/
 
@@ -41,7 +46,8 @@ function parse(source, options = {}, deliverUsp) {
 function extract(source, result, options, deliverUsp) {
    source.extract('space', (sToken) => {
       if (sToken) {
-         result.push({ type: 'space', space: sToken });
+         const pToken = spaceFromSToken(sToken);
+         result.push(pToken);
       }
 
       source.extract('peekChar', (sToken) => {
@@ -55,7 +61,7 @@ function extract(source, result, options, deliverUsp) {
 }
 
 function handleChar(sToken, source, result, options, deliverUsp) {
-   switch (sToken.text) {
+   switch (sToken.str) {
       case '>':
          deliverUsp(result);
          break;
@@ -75,7 +81,8 @@ function handleChar(sToken, source, result, options, deliverUsp) {
          break;
       default:
          source.extract('word', TERMINATORS, (sToken) => {
-            result.push({ type: 'word', word: sToken });
+            const pToken = wordFromSToken(sToken);
+            result.push(pToken);
             extract(source, result, options, deliverUsp);
          });
          break;
@@ -86,7 +93,7 @@ function checkForPERef(source, forValue, pTokenPart, deliverPTokenPart, otherwis
    source.extract('peekChar', (sToken) => {
       if (!sToken) {
          deliverPTokenPart(pTokenPart);
-      } else if (sToken.text === '%') {
+      } else if (sToken.str === '%') {
          parse(source, {}, (pieces) => {
             pTokenPart.leftOff = forValue;
             pTokenPart.incomplete = pieces;
@@ -177,11 +184,9 @@ function getNextValue(prev, theArray) {
    switch (theArray[next].type) {
       case 'pestart':
       case 'peend':
-         const textSToken = new text.PToken({ text: SToken.fromString(' ') });
-         textSToken.type = 'space'; // ick
-         textSToken.space = textSToken.text;
-         textSToken.optional = true;
-         candidate = textSToken;
+         const pToken = spaceFromSToken(SToken.fromString(' '));
+         pToken.optional = true;
+         candidate = pToken;
          break;
       default:
          candidate = theArray[next];
@@ -199,10 +204,10 @@ function getNextValue(prev, theArray) {
     * the worst case, you might have thousands of parameter entities
     * referenced, all of which only add spaces here.
     */
-   if (candidate.type === 'space') {
+   if (candidate.type === text.PTYPE && candidate.subType === SUBTYPE.SPACE) {
       let newItem = candidate;
 
-      while (theArray[next] && theArray[next].type === 'space') {
+      while (theArray[next] && theArray[next].subType === SUBTYPE.SPACE) {
          const current = theArray[next];
 
          // skip the current one if it is optional, as we already have a space
@@ -244,7 +249,7 @@ function getNextValue(prev, theArray) {
 
    return {
       count: next,
-      item: candidate,
+      pToken: candidate,
    };
 }
 
@@ -272,7 +277,7 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
    let index = 0;
    let prev;
 
-   if (!nextValue.item) {
+   if (!nextValue.pToken) {
       return;
    }
 
@@ -298,18 +303,18 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
           * not matched. However, our bias is to reproduce the parsing we
           * would have done if the PERef wasn't there.
           */
-         if (descriptor.type !== 'space' && nextValue.item.type === 'space') {
-            const prevWasSpace = prev && prev.type === 'space';
+         if (descriptor.type !== SUBTYPE.SPACE && nextValue.pToken.subType === SUBTYPE.SPACE) {
+            const prevWasSpace = prev && prev.type === SUBTYPE.SPACE;
 
-            if (prevWasSpace && !nextValue.item.optional) {
+            if (prevWasSpace && !nextValue.pToken.optional) {
                if (pToken[prev.id]) {
-                  pToken[prev.id].merge(nextValue.item.space);
+                  pToken[prev.id].merge(nextValue.pToken.text);
                } else {
-                  pToken[prev.id] = nextValue.item.space;
+                  pToken[prev.id] = nextValue.pToken.text;
                }
             }
 
-            if (prevWasSpace || nextValue.item.optional) {
+            if (prevWasSpace || nextValue.pToken.optional) {
                nextValue = getNextValue(nextValue, unassignedValues);
             }
          }
@@ -325,25 +330,25 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
       const descriptor = propertyDescriptors[index];
 
       // If we've got an optional space and the descriptor is not a space, then ignore the space
-      if (descriptor.type !== 'space' && nextValue.item.optional) {
+      if (descriptor.type !== SUBTYPE.SPACE && nextValue.pToken.optional) {
          nextValue = getNextValue(nextValue, unassignedValues);
-         if (!nextValue.item) {
+         if (!nextValue.pToken) {
             return;
          }
       }
 
-      if (descriptor.type === nextValue.item.type) {
+      if (descriptor.type === nextValue.pToken.subType || descriptor.type === nextValue.pToken.type) {
          // Don't use the value if it is an optional space and a space is not required here.
-         if (!nextValue.item.optional || descriptor.required) {
-            switch (nextValue.item.type) {
-               case 'word':
-                  pToken[descriptor.id] = nextValue.item.word;
+         if (!nextValue.pToken.optional || descriptor.required) {
+            switch (nextValue.pToken.subType) {
+               case SUBTYPE.WORD:
+                  pToken[descriptor.id] = nextValue.pToken.text;
                   break;
-               case 'space':
-                  pToken[descriptor.id] = nextValue.item.space;
+               case SUBTYPE.SPACE:
+                  pToken[descriptor.id] = nextValue.pToken.text;
                   break;
                default:
-                  pToken[descriptor.id] = nextValue.item;
+                  pToken[descriptor.id] = nextValue.pToken;
                   break;
             }
          }
@@ -351,14 +356,28 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
          nextValue = getNextValue(nextValue, unassignedValues);
       }
 
-      if (!nextValue.item) {
+      if (!nextValue.pToken) {
          return;
       }
    }
+}
+
+function wordFromSToken(sToken) {
+   const pToken = new text.PToken({ text: sToken });
+   pToken.subType = SUBTYPE.WORD;
+   return pToken;
+}
+
+function spaceFromSToken(sToken) {
+   const pToken = new text.PToken({ text: sToken });
+   pToken.subType = SUBTYPE.SPACE;
+   return pToken;
 }
 
 export {
    parse,
    checkForPERef,
    assignToProps,
+   wordFromSToken,
+   spaceFromSToken,
 };

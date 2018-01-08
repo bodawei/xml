@@ -5,6 +5,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
 import entityReference from '../entityReference.js';
+import text from '../text.js';
 
 import literal from './literal.js';
 import * as usp from './usp.js';
@@ -40,19 +41,17 @@ describe('usp (unit)', () => {
          expectDelivery(deliverySpy, []);
       });
 
-      it('returns a space SToken if that is found first', () => {
+      it('returns a text/space PToken if that is found first', () => {
          mockSource = new MockSTokenSource([
             [ '   ', 'space' ],
             [ undefined, 'peekChar' ],
          ]);
+         const pToken = usp.spaceFromSToken(makeSToken('   '));
 
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ {
-            type: 'space',
-            space: makeSToken('   '),
-         } ]);
+         expectDelivery(deliverySpy, [ pToken ]);
       });
 
       it('returns nothing if a ">" is found', () => {
@@ -136,14 +135,12 @@ describe('usp (unit)', () => {
             [ undefined, 'space' ],
             [ undefined, 'peekChar' ],
          ]);
+         const pToken = usp.wordFromSToken(makeSToken('xyzzy'));
 
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ {
-            type: 'word',
-            word: makeSToken('xyzzy'),
-         } ]);
+         expectDelivery(deliverySpy, [ pToken ]);
       });
 
       it('returns multiple values when presented with all', () => {
@@ -165,19 +162,15 @@ describe('usp (unit)', () => {
             [ undefined, 'space' ],
             [ undefined, 'peekChar' ],
          ]);
+         const pTokenWord = usp.wordFromSToken(makeSToken('testWord'));
+         const pTokenSpace = usp.spaceFromSToken(makeSToken(' '));
 
          usp.parse(mockSource, {}, deliverySpy);
          mockSource.respondInAsyncTime();
 
-         expectDelivery(deliverySpy, [ {
-            type: 'word',
-            word: makeSToken('testWord'),
-         }, {
+         expectDelivery(deliverySpy, [ pTokenWord, {
             peRef: true,
-         }, {
-            type: 'space',
-            space: makeSToken(' '),
-         }, {
+         }, pTokenSpace, {
             type: 'literal',
             isLiteral: true,
          } ]);
@@ -201,16 +194,10 @@ describe('usp (unit)', () => {
 
       it('fills in the pToken with the expected properties starting with leftOff', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('foo'),
-         }, {
-            type: 'space',
-            space: SToken.fromString('\t'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('bar'),
-         } ];
+         const space = usp.spaceFromSToken(SToken.fromString('\t'));
+         const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+         const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+         const unassigned = [ word1, space, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',
@@ -225,24 +212,18 @@ describe('usp (unit)', () => {
          usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: unassigned[0].word,
-            two: unassigned[1].space,
-            three: unassigned[2].word,
+            one: word1.text,
+            two: space.text,
+            three: word2.text,
          });
       });
 
       it('fills in the pToken with the expected properties from the first if no leftOff', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('foo'),
-         }, {
-            type: 'space',
-            space: SToken.fromString('\t'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('bar'),
-         } ];
+         const space = usp.spaceFromSToken(SToken.fromString('\t'));
+         const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+         const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+         const unassigned = [ word1, space, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',
@@ -257,21 +238,17 @@ describe('usp (unit)', () => {
          usp.assignToProps(unassigned.slice(0), pToken, undefined, descriptors);
 
          expect(pToken).toEqual({
-            one: unassigned[0].word,
-            two: unassigned[1].space,
-            three: unassigned[2].word,
+            one: word1.text,
+            two: space.text,
+            three: word2.text,
          });
       });
 
       it('skips descriptor if there is no matching unassigned item', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('foo'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('bar'),
-         } ];
+         const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+         const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+         const unassigned = [ word1, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',
@@ -286,23 +263,19 @@ describe('usp (unit)', () => {
          usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: unassigned[0].word,
-            three: unassigned[1].word,
+            one: word1.text,
+            three: word2.text,
          });
       });
 
       it('starts midway through the descriptors if asked to', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('firstWord'),
-         }, {
-            type: 'space',
-            space: SToken.fromString('\t'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('secondWord'),
-         } ];
+         const word1 = usp.wordFromSToken(SToken.fromString('firstWord'));
+         const word2 = usp.wordFromSToken(SToken.fromString('secondWord'));
+         const space = usp.wordFromSToken(SToken.fromString('\t'));
+         const expectedSpace = SToken.fromString('\t');
+         expectedSpace.subType = 'space';
+         const unassigned = [ word1, space, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',
@@ -317,7 +290,7 @@ describe('usp (unit)', () => {
          usp.assignToProps(unassigned.slice(0), pToken, 'three', descriptors);
 
          expect(pToken).toEqual({
-            three: unassigned[0].word,
+            three: word1.text,
          });
       });
 
@@ -325,15 +298,11 @@ describe('usp (unit)', () => {
 
          it('does not add an optional space if the described space is not required', () => {
             const pToken = {};
-            const unassigned = [ {
-               type: 'word',
-               word: SToken.fromString('foo'),
-            }, {
+            const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+            const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+            const unassigned = [ word1, {
                type: 'pestart',
-            }, {
-               type: 'word',
-               word: SToken.fromString('bar'),
-            }, {
+            }, word2, {
                type: 'peend',
             } ];
             const descriptors = [ {
@@ -350,22 +319,18 @@ describe('usp (unit)', () => {
             usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: unassigned[0].word,
-               three: unassigned[2].word,
+               one: word1.text,
+               three: word2.text,
             });
          });
 
          it('adds an optional space if the described space is required', () => {
             const pToken = {};
-            const unassigned = [ {
-               type: 'word',
-               word: SToken.fromString('foo'),
-            }, {
+            const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+            const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+            const unassigned = [ word1, {
                type: 'pestart',
-            }, {
-               type: 'word',
-               word: SToken.fromString('bar'),
-            }, {
+            }, word2, {
                type: 'peend',
             } ];
             const descriptors = [ {
@@ -380,26 +345,22 @@ describe('usp (unit)', () => {
                type: 'word',
             } ];
 
-            usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
+            usp.assignToProps(unassigned, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: unassigned[0].word,
+               one: word1.text,
                two: SToken.fromString(' '),
-               three: unassigned[2].word,
+               three: word2.text,
             });
          });
 
          it('ignores optional spaces when there is no space to add them', () => {
             const pToken = {};
-            const unassigned = [ {
-               type: 'word',
-               word: SToken.fromString('foo'),
-            }, {
+            const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+            const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+            const unassigned = [ word1, {
                type: 'pestart',
-            }, {
-               type: 'word',
-               word: SToken.fromString('bar'),
-            }, {
+            }, word2, {
                type: 'peend',
             } ];
             const descriptors = [ {
@@ -410,22 +371,20 @@ describe('usp (unit)', () => {
                type: 'word',
             } ];
 
-            usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
+            usp.assignToProps(unassigned, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: unassigned[0].word,
-               three: unassigned[2].word,
+               one: word1.text,
+               three: word2.text,
             });
          });
 
          it('ignores initial space if it is optional and leftOff is not a space', () => {
             const pToken = {};
+            const word = usp.wordFromSToken(SToken.fromString('firstWord'));
             const unassigned = [ {
                type: 'pestart',
-            }, {
-               type: 'word',
-               word: SToken.fromString('firstWord'),
-            }, {
+            }, word, {
                type: 'peend',
             } ];
             const descriptors = [ {
@@ -442,19 +401,15 @@ describe('usp (unit)', () => {
             usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: unassigned[1].word,
+               one: word.text,
             });
          });
 
          it('puts a leading leftover space into the next available space if it is not optional and no previous', () => {
             const pToken = {};
-            const unassigned = [ {
-               type: 'space',
-               space: SToken.fromString(' '),
-            }, {
-               type: 'word',
-               word: SToken.fromString('firstWord'),
-            } ];
+            const space = usp.spaceFromSToken(SToken.fromString(' '));
+            const word = usp.wordFromSToken(SToken.fromString('firstWord'));
+            const unassigned = [ space, word ];
             const descriptors = [ {
                id: 'one',
                type: 'word',
@@ -469,20 +424,16 @@ describe('usp (unit)', () => {
             usp.assignToProps(unassigned.slice(0), pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               two: unassigned[0].space,
-               three: unassigned[1].word,
+               two: space.text,
+               three: word.text,
             });
          });
 
          it('puts a leading leftover space into the previous if it is there', () => {
             const pToken = {};
-            const unassigned = [ {
-               type: 'space',
-               space: SToken.fromString(' '),
-            }, {
-               type: 'word',
-               word: SToken.fromString('firstWord'),
-            } ];
+            const space = usp.spaceFromSToken(SToken.fromString('\n'));
+            const word = usp.wordFromSToken(SToken.fromString('firstWord'));
+            const unassigned = [ space, word ];
             const descriptors = [ {
                id: 'one',
                type: 'space',
@@ -497,8 +448,8 @@ describe('usp (unit)', () => {
             usp.assignToProps(unassigned.slice(0), pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: unassigned[0].space,
-               two: unassigned[1].word,
+               one: space.text,
+               two: word.text,
             });
          });
 
@@ -506,13 +457,9 @@ describe('usp (unit)', () => {
             const pToken = {
                one: SToken.fromString('\t'),
             };
-            const unassigned = [ {
-               type: 'space',
-               space: SToken.fromString('\n'),
-            }, {
-               type: 'word',
-               word: SToken.fromString('firstWord'),
-            } ];
+            const space = usp.spaceFromSToken(SToken.fromString('\n'));
+            const word = usp.wordFromSToken(SToken.fromString('firstWord'));
+            const unassigned = [ space, word ];
             const descriptors = [ {
                id: 'one',
                type: 'space',
@@ -524,11 +471,11 @@ describe('usp (unit)', () => {
                type: 'word',
             } ];
 
-            usp.assignToProps(unassigned.slice(0), pToken, 'two', descriptors);
+            usp.assignToProps(unassigned, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
                one: SToken.fromString('\t\n'),
-               two: unassigned[1].word,
+               two: word.text,
             });
          });
 
@@ -536,12 +483,10 @@ describe('usp (unit)', () => {
             const pToken = {
                one: SToken.fromString('\t'),
             };
+            const word = usp.wordFromSToken(SToken.fromString('firstWord'));
             const unassigned = [ {
                type: 'pestart',
-            }, {
-               type: 'word',
-               word: SToken.fromString('firstWord'),
-            } ];
+            }, word ];
             const descriptors = [ {
                id: 'one',
                type: 'space',
@@ -553,11 +498,11 @@ describe('usp (unit)', () => {
                type: 'word',
             } ];
 
-            usp.assignToProps(unassigned.slice(0), pToken, 'two', descriptors);
+            usp.assignToProps(unassigned, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
                one: SToken.fromString('\t'),
-               two: unassigned[1].word,
+               two: word.text,
             });
          });
 
@@ -565,16 +510,10 @@ describe('usp (unit)', () => {
 
       it('empties the unassigned array of the consumed values', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('foo'),
-         }, {
-            type: 'space',
-            space: SToken.fromString('\t'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('bar'),
-         } ];
+         const space = usp.spaceFromSToken(SToken.fromString(' '));
+         const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+         const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+         const unassigned = [ word1, space, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',
@@ -593,16 +532,10 @@ describe('usp (unit)', () => {
 
       it('it leaves values in the unassigned array if they are not consumed', () => {
          const pToken = {};
-         const unassigned = [ {
-            type: 'word',
-            word: SToken.fromString('foo'),
-         }, {
-            type: 'space',
-            space: SToken.fromString('\t'),
-         }, {
-            type: 'word',
-            word: SToken.fromString('bar'),
-         } ];
+         const space = usp.spaceFromSToken(SToken.fromString('\t'));
+         const word1 = usp.wordFromSToken(SToken.fromString('foo'));
+         const word2 = usp.wordFromSToken(SToken.fromString('bar'));
+         const unassigned = [ word1, space, word2 ];
          const descriptors = [ {
             id: 'one',
             type: 'word',

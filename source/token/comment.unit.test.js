@@ -175,8 +175,8 @@ describe('comment (unit)', () => {
       });
 
       it('reports an error if the content ends with a hyphen', () => {
-         commentPToken.text[0].text += '-';
-         commentPToken.text[0].originalText += '-';
+         commentPToken.text[0].str += '-';
+         commentPToken.text[0].originalStr += '-';
 
          comment.checkWellFormed(commentPToken, mockErrorCollector, emd);
 

@@ -7,7 +7,7 @@ import { Extractor } from '../../extractor';
 import SToken from '../SToken.js';
 import STokenSource from '../STokenSource.js';
 
-describe('STokenSource', () => {
+describe('STokenSource (unit)', () => {
    let sTokenSpy;
    let source;
    let defaultLoc;
@@ -165,7 +165,7 @@ describe('STokenSource', () => {
          source = new STokenSource(testExtractors, entityMetaData1dot0);
          source.addText('this is yours');
          source.extract('toy', (sToken) => {
-            expect(sToken.text).toEqual('this is ');
+            expect(sToken.str).toEqual('this is ');
          });
       });
 
@@ -182,7 +182,7 @@ describe('STokenSource', () => {
          source = new STokenSource(testExtractors, entityMetaData1dot0);
          source.addText('the lorax');
          source.extract('pass', (sToken) => {
-            expect(sToken.text).toEqual('the lora');
+            expect(sToken.str).toEqual('the lora');
          });
       });
 
@@ -311,7 +311,7 @@ describe('STokenSource', () => {
 
          source.extractToObject('all', [], obj, 'propName');
          source.extract('all', () => {
-            expect(obj.propName.text).toEqual('1');
+            expect(obj.propName.str).toEqual('1');
             done();
          });
       });
@@ -323,7 +323,7 @@ describe('STokenSource', () => {
 
          source.extractToObject('all', obj, 'propName');
          source.extract('all', () => {
-            expect(obj.propName.text).toEqual('1');
+            expect(obj.propName.str).toEqual('1');
             done();
          });
       });

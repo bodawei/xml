@@ -31,9 +31,9 @@ class SToken {
    // public originalText: string;
    // public ranges: Array<Range>;
 
-   constructor(text, originalText, range) {
-      this.text = text;
-      this.originalText = originalText;
+   constructor(str, originalStr, range) {
+      this.str = str;
+      this.originalStr = originalStr;
       if (range) {
          this.ranges = Array.isArray(range) ? range : [ range ];
       } else {
@@ -66,8 +66,8 @@ class SToken {
          throw new Error('Can only merge with another SToken.');
       }
 
-      this.text += other.text;
-      this.originalText += other.originalText;
+      this.str += other.str;
+      this.originalStr += other.originalStr;
 
       if (canFuseRanges(this.lastRange, other.firstRange)) {
          const lastRange = this.ranges.pop();

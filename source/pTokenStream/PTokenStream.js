@@ -84,7 +84,7 @@ class PTokenStream extends stream.Readable {
                deliverParse(null);
                return;
             }
-            switch (sToken.text) {
+            switch (sToken.str) {
                case '<':
                   this._markupParse(deliverParse);
                   break;
@@ -99,9 +99,9 @@ class PTokenStream extends stream.Readable {
                      this._parseClose(deliverParse);
                      this.waitingForInternalClose = false;
                   } else {
-                     charData.parse(this._sTokenSource, (result) => {
-                        if (result && result.text) {
-                           deliverParse(result);
+                     charData.parse(this._sTokenSource, (charPToken) => {
+                        if (charPToken && charPToken.text) {
+                           deliverParse(charPToken);
                         } else {
                            this._sTokenSource.extract('match', ']]>', (sToken) => {
                               deliverParse({
@@ -131,7 +131,7 @@ class PTokenStream extends stream.Readable {
 
    _markupParse(deliverParse) {
       this._sTokenSource.extract('markup', (markupStartSToken) => {
-         switch (markupStartSToken.text) {
+         switch (markupStartSToken.str) {
             case '<':
                elementStart.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
@@ -140,7 +140,7 @@ class PTokenStream extends stream.Readable {
                break;
             case '<?':
                instruction.parse(this._sTokenSource, markupStartSToken, (pToken) => {
-                  const target = pToken.target ? pToken.target.text : '';
+                  const target = pToken.target ? pToken.target.str : '';
 
                   if (target.toLocaleUpperCase() === 'XML') {
                      xmlDeclaration.parse(this._sTokenSource, pToken, deliverParse);
@@ -159,7 +159,7 @@ class PTokenStream extends stream.Readable {
                      return;
                   }
 
-                  switch (pToken.declType.text.toLocaleUpperCase()) {
+                  switch (pToken.declType.str.toLocaleUpperCase()) {
                      case 'DOCTYPE':
                         docTypeStart.parse(this._sTokenSource, pToken, (docTypeStart) => {
                            if (docTypeStart.startInternalSubset) {
@@ -191,7 +191,7 @@ class PTokenStream extends stream.Readable {
                      return;
                   }
 
-                  switch (pToken.envelopeType.text.toLocaleUpperCase()) {
+                  switch (pToken.envelopeType.str.toLocaleUpperCase()) {
                      case 'CDATA':
                         cdata.parse(this._sTokenSource, pToken, deliverParse);
                         break;

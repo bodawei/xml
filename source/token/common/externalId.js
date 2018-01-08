@@ -57,7 +57,7 @@ function parse(source, terminators, deliverPTokenPart) {
       }
    }, () => {
       source.extract('peekWord', allTerminators, (sToken) => {
-         const capitalType = sToken && sToken.text.toLocaleUpperCase();
+         const capitalType = sToken && sToken.str.toLocaleUpperCase();
 
          if (!sToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
             deliverPTokenPart();
@@ -99,7 +99,7 @@ function parsePublic(source, pTokenPart, allTerminators, deliverPTokenPart) {
 function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
    usp.checkForPERef(source, 'system', pTokenPart, deliverPTokenPart, () => {
       source.extract('peekWord', allTerminators, (nData) => {
-         if (nData && nData.text.toLocaleUpperCase() === 'NDATA') {
+         if (nData && nData.str.toLocaleUpperCase() === 'NDATA') {
             deliverPTokenPart(pTokenPart);
             return;
          }
@@ -170,9 +170,9 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
          if (!pTokenPart.public || !pTokenPart.public.value) {
             return;
          }
-         const match = PUBID_CHARS.exec(pTokenPart.public.value[0].text);
-         ec.check(!match || match[0] !== pTokenPart.public.value[0].text, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ pTokenPart.public.value[0].text[match[0].length] ]);
+         const match = PUBID_CHARS.exec(pTokenPart.public.value[0].str);
+         ec.check(!match || match[0] !== pTokenPart.public.value[0].str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+                  [ pTokenPart.public.value[0].str[match[0].length] ]);
       });
    }
 
@@ -197,9 +197,9 @@ function makeEntityLocation(pTokenPart) {
    }
 
    const value = (pTokenPart.system && pTokenPart.system.value) ?
-      pTokenPart.system.value[0].text.text : undefined;
+      pTokenPart.system.value[0].text.str : undefined;
    const publicValue = (pTokenPart.public && pTokenPart.public.value) ?
-      pTokenPart.public.value[0].text.text : undefined;
+      pTokenPart.public.value[0].text.str : undefined;
 
    return new EntityLocation(value, publicValue);
 }

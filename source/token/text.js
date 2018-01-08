@@ -57,7 +57,7 @@ function parse(source, terminators, deliverPToken) {
 }
 
 function makeXToken(pToken) {
-   return new Text(pToken.text.text, pToken);
+   return new Text(pToken.text.str, pToken);
 }
 
 const text = {

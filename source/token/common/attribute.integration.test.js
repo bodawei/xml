@@ -168,7 +168,7 @@ describe('attribute (integration)', () => {
          attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
             const results = attribute.getSTokens(parsing);
 
-            expect(results[3].text).toEqual('value');
+            expect(results[3].str).toEqual('value');
             done();
          });
       });

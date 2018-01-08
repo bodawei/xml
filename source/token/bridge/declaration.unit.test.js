@@ -120,7 +120,7 @@ describe('declaration (unit)', () => {
       });
 
       it('reports an error if the type is not capitalized', () => {
-         declarationPToken.declType.text = 'docType';
+         declarationPToken.declType.str = 'docType';
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector);
 
@@ -132,7 +132,7 @@ describe('declaration (unit)', () => {
       });
 
       it('reports an error if the type is not a valid type', () => {
-         declarationPToken.declType.text = 'BOGUSTYPE';
+         declarationPToken.declType.str = 'BOGUSTYPE';
 
          declaration.checkWellFormed(declarationPToken, mockErrorCollector);
 

@@ -47,18 +47,13 @@ describe('usp (integration)', () => {
          source.endText();
 
          usp.parse(source, {}, (pieces) => {
-            expect(pieces).toEqual([ {
-               type: 'space',
-               space: makeSToken(' '),
-            }, {
+            expect(pieces).toEqual([
+               usp.spaceFromSToken(makeSToken(' ')), {
                type: 'literal',
                openQuote: makeSToken('"'),
                value: [ new text.PToken({ text: makeSToken('double') }) ],
                closeQuote: makeSToken('"'),
-            }, {
-               type: 'word',
-               word: makeSToken('whatever'),
-            }, {
+            }, usp.wordFromSToken(makeSToken('whatever')), {
                type: 'literal',
                openQuote: makeSToken('\''),
                value: [ new text.PToken({ text: makeSToken('single') }) ],

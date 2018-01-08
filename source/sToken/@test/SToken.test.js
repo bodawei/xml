@@ -13,8 +13,8 @@ describe('SToken', () => {
          const sToken = new SToken('one', 'two', new Range());
 
          expect(sToken).toEqualProps({
-            text: 'one',
-            originalText: 'two',
+            str: 'one',
+            originalStr: 'two',
             ranges: [ new Range() ],
          });
       });
@@ -23,8 +23,8 @@ describe('SToken', () => {
          const sToken = new SToken('one', 'two');
 
          expect(sToken).toEqualProps({
-            text: 'one',
-            originalText: 'two',
+            str: 'one',
+            originalStr: 'two',
             ranges: [],
          });
       });
@@ -33,8 +33,8 @@ describe('SToken', () => {
          const sToken = new SToken('one', 'two', [ new Range(), new Range() ]);
 
          expect(sToken).toEqualProps({
-            text: 'one',
-            originalText: 'two',
+            str: 'one',
+            originalStr: 'two',
             ranges: [ new Range(), new Range() ],
          });
       });
@@ -47,8 +47,8 @@ describe('SToken', () => {
          const sToken = SToken.fromString('one');
 
          expect(sToken).toEqualProps({
-            text: 'one',
-            originalText: 'one',
+            str: 'one',
+            originalStr: 'one',
             ranges: [],
          });
       });
@@ -108,8 +108,8 @@ describe('SToken', () => {
          sToken1.merge(sToken2);
 
          expect(sToken1).toEqualProps({
-            text: ' \ntwo',
-            originalText: ' \r\ntwo',
+            str: ' \ntwo',
+            originalStr: ' \r\ntwo',
             ranges: [],
          });
       });
@@ -130,8 +130,8 @@ describe('SToken', () => {
          sToken1.merge(sToken2);
 
          expect(sToken1).toEqualProps({
-            text: ' \ntwo',
-            originalText: ' \r\ntwo',
+            str: ' \ntwo',
+            originalStr: ' \r\ntwo',
             ranges: [ new Range(undefined, 1, 2, 3) ],
          });
       });
@@ -143,8 +143,8 @@ describe('SToken', () => {
          sToken1.merge(sToken2);
 
          expect(sToken1).toEqualProps({
-            text: ' \ntwo',
-            originalText: ' \r\ntwo',
+            str: ' \ntwo',
+            originalStr: ' \r\ntwo',
             ranges: [ new Range(undefined, 1, 2, 3) ],
          });
       });

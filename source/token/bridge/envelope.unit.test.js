@@ -103,7 +103,7 @@ describe('envelope (unit)', () => {
       });
 
       it('reports an error if the type is not capitalized', () => {
-         envelopePToken.envelopeType.text = 'cdata';
+         envelopePToken.envelopeType.str = 'cdata';
 
          envelope.checkWellFormed(envelopePToken, true, mockErrorCollector, emd);
 
@@ -115,7 +115,7 @@ describe('envelope (unit)', () => {
       });
 
       it('reports an error if the type is not a known type', () => {
-         envelopePToken.envelopeType.text = 'BOGUSTYPE';
+         envelopePToken.envelopeType.str = 'BOGUSTYPE';
 
          envelope.checkWellFormed(envelopePToken, true, mockErrorCollector, emd);
 

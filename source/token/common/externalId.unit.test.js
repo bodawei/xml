@@ -376,7 +376,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if the PUBLIC value has illegal characters', () => {
-         pTokenPart.public.value[0].text = 'bad&chars';
+         pTokenPart.public.value[0].str = 'bad&chars';
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
          // invoke the callback function
@@ -416,7 +416,7 @@ describe('externalId (unit)', () => {
          literal.checkWellFormed.and.callFake((_1, _2, _3, _4, callback) => {
             return callback ? callback() : undefined;
          });
-         pTokenPart.public.value[0].text = '{}{}{}{}';
+         pTokenPart.public.value[0].str = '{}{}{}{}';
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
@@ -428,7 +428,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if type is neither PUBLIC or SYSTEM', () => {
-         pTokenPart.idType.text = 'Bogus';
+         pTokenPart.idType.str = 'Bogus';
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
@@ -440,7 +440,7 @@ describe('externalId (unit)', () => {
       });
 
       it('reports an error if type is the wrong case', () => {
-         pTokenPart.idType.text = 'public';
+         pTokenPart.idType.str = 'public';
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 

@@ -130,7 +130,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             break;
          case elementStart.PTYPE:
          case elementStart.EMPTY_TYPE:
-            const nameText = pToken.name ? pToken.name.text : '';
+            const nameText = pToken.name ? pToken.name.str : '';
             if (pToken.type === elementStart.PTYPE) {
                this._elementNameStack.push(nameText);
             }
@@ -146,7 +146,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             elementStart.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
          case elementEnd.PTYPE:
-            const endNameText = pToken.name ? pToken.name.text : '';
+            const endNameText = pToken.name ? pToken.name.str : '';
             const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
 
             if (lastElement === endNameText) {

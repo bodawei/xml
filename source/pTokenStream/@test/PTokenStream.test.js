@@ -130,7 +130,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('DOCTYPE');
+         expect(docTypeStart.parse.calls.argsFor(0)[1].declType.str).toEqual('DOCTYPE');
          expect(docTypeStart.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -143,7 +143,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(docTypeStart.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(docTypeStart.parse.calls.argsFor(0)[1].declType.text).toEqual('docType');
+         expect(docTypeStart.parse.calls.argsFor(0)[1].declType.str).toEqual('docType');
          expect(docTypeStart.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -167,7 +167,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(entityDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(entityDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('ENTITY');
+         expect(entityDeclaration.parse.calls.argsFor(0)[1].declType.str).toEqual('ENTITY');
          expect(entityDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -204,7 +204,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(notationDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(notationDeclaration.parse.calls.argsFor(0)[1].declType.text).toEqual('NOTATION');
+         expect(notationDeclaration.parse.calls.argsFor(0)[1].declType.str).toEqual('NOTATION');
          expect(notationDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -217,7 +217,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(instruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(instruction.parse.calls.argsFor(0)[1].text).toEqual('<?');
+         expect(instruction.parse.calls.argsFor(0)[1].str).toEqual('<?');
          expect(instruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -230,7 +230,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(processingInstruction.parse.calls.argsFor(0)[1].target.text).toEqual('something');
+         expect(processingInstruction.parse.calls.argsFor(0)[1].target.str).toEqual('something');
          expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -267,7 +267,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(declaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(declaration.parse.calls.argsFor(0)[1].text).toEqual('<!');
+         expect(declaration.parse.calls.argsFor(0)[1].str).toEqual('<!');
          expect(declaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -291,7 +291,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(envelope.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(envelope.parse.calls.argsFor(0)[1].text).toEqual('<![');
+         expect(envelope.parse.calls.argsFor(0)[1].str).toEqual('<![');
          expect(envelope.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -315,7 +315,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(cdata.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(cdata.parse.calls.argsFor(0)[1].envelopeType.text).toEqual('CDATA');
+         expect(cdata.parse.calls.argsFor(0)[1].envelopeType.str).toEqual('CDATA');
          expect(cdata.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -328,7 +328,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(xmlDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(xmlDeclaration.parse.calls.argsFor(0)[1].target.text).toEqual('xml');
+         expect(xmlDeclaration.parse.calls.argsFor(0)[1].target.str).toEqual('xml');
          expect(xmlDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -340,7 +340,7 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, (pTokens) => {
          // pTokens 0-2 are metadata, xmldecl, and "one" element open
-         expect(pTokens[3].text.text).toEqual(']');
+         expect(pTokens[3].text.str).toEqual(']');
          done();
       });
    });

@@ -125,7 +125,7 @@ function parse(source, declarationPToken, deliverPToken) {
          return;
       }
 
-      if (sToken.text === '%') {
+      if (sToken.str === '%') {
          source.extractToObject('char', pToken, 'parameter');
          source.extractToObject('space', pToken, 'postParameterSpace');
       }
@@ -149,7 +149,7 @@ function parse(source, declarationPToken, deliverPToken) {
 
                source.extractToObject('space', pToken, 'postExternalIdSpace');
                source.extract('peekWord', [ '>' ], (sToken) => {
-                  if (sToken && sToken.text.toLocaleUpperCase() === 'NDATA') {
+                  if (sToken && sToken.str.toLocaleUpperCase() === 'NDATA') {
                      source.extractToObject('word', [ '>' ], pToken, 'nData');
                      source.extractToObject('space', pToken, 'postNDataSpace');
                      source.extractToObject('word', [ '>' ], pToken, 'nDataName');
@@ -207,8 +207,8 @@ function checkWellFormed(pToken, ec, entityMetaData) {
 
       if (pToken.nData) {
          ec.setPos(pToken.nData);
-         ec.check(pToken.nData.text !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
-            [ enNameText, pToken.nData.text ]);
+         ec.check(pToken.nData.str !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
+            [ enNameText, pToken.nData.str ]);
          ec.setPos(pToken.nDataName);
          ec.check(!pToken.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
          misc.checkWellFormedText(pToken.nDataName, ec, entityMetaData);

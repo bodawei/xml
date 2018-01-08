@@ -57,11 +57,11 @@ function checkName(nameSToken, ec, entityMetaData, errorCode) {
       (entityMetaData.isVersion1dot0 && entityMetaData.revision === 5);
    const regEx = use11Names ? WHOLENAME_REGEX11 : WHOLENAME_REGEX10;
 
-   if (!nameSToken || regEx.exec(nameSToken.text)) {
+   if (!nameSToken || regEx.exec(nameSToken.str)) {
       return;
    }
 
-   ec.report(errorCode, [ nameSToken.text ], nameSToken);
+   ec.report(errorCode, [ nameSToken.str ], nameSToken);
 }
 
 /**********************************************************************\
@@ -76,10 +76,10 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, v1R6Warning
    }
    const isV1R6 = entityMd.isVersion1dot0 && entityMd.revision === 6;
 
-   if (isV1R6 && nameSToken.text.substring(0, 4) === 'xml-') {
-      ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.text ]);
-   } else if (!isV1R6 && nameSToken.text.substring(0, 3).toLocaleLowerCase() === 'xml') {
-      ec.reportError(otherWarning, XmlWarning, [ nameSToken.text ]);
+   if (isV1R6 && nameSToken.str.substring(0, 4) === 'xml-') {
+      ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);
+   } else if (!isV1R6 && nameSToken.str.substring(0, 3).toLocaleLowerCase() === 'xml') {
+      ec.reportError(otherWarning, XmlWarning, [ nameSToken.str ]);
    }
 }
 
@@ -98,12 +98,12 @@ function checkWellFormedText(sToken, ec, entityMd) {
    const badRegEx = entityMd.isVersion1dot1 ? BAD_CHARS_11 : BAD_CHARS_10;
 
    badRegEx.lastIndex = 0;
-   let found = badRegEx.test(sToken.text);
+   let found = badRegEx.test(sToken.str);
 
    if (found) {
       while (found) {
          badIndices.push(sToken.ranges[0].startIndex - 1 + badRegEx.lastIndex);
-         found = badRegEx.test(sToken.text);
+         found = badRegEx.test(sToken.str);
       }
 
       ec.report(WFEID.CHARDATA_INVALID_CHAR, [ badIndices.join(', ') ]);
@@ -130,12 +130,12 @@ function checkWellFormedText(sToken, ec, entityMd) {
    }
 
    discouragedRegEx.lastIndex = 0;
-   let foundDiscouraged = discouragedRegEx.test(sToken.text);
+   let foundDiscouraged = discouragedRegEx.test(sToken.str);
 
    if (foundDiscouraged) {
       while (foundDiscouraged) {
          discouragedIndices.push(sToken.ranges[0].startIndex - 1 + discouragedRegEx.lastIndex);
-         foundDiscouraged = discouragedRegEx.test(sToken.text);
+         foundDiscouraged = discouragedRegEx.test(sToken.str);
       }
 
       ec.reportError(XWID.CHARDATA_DISCOURAGED_CHAR, XmlWarning, [ discouragedIndices.join(', ') ]);
@@ -143,7 +143,7 @@ function checkWellFormedText(sToken, ec, entityMd) {
 }
 
 function textOrBlank(sToken) {
-   return sToken ? sToken.text : '';
+   return sToken ? sToken.str : '';
 }
 
 const misc = {

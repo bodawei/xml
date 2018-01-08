@@ -156,14 +156,15 @@ describe('NodeStream (unit)', () => {
 
             nodeStream.write(declToken);
 
+            const uspWord = new xToken.text.PToken({
+               text: new SToken('theValue', 'theValue', new Range(new EntityLocation(), 0, 0, 0, 8, 0, 8)),
+            });
+            uspWord.subType = 'word';
             gatherResults(nodeStream, (result) => {
                expect(result.pToken.externalId.incomplete).toEqual([ {
                   type: 'pestart',
                   item: peref,
-               }, {
-                  type: 'word',
-                  word: new SToken('theValue', 'theValue', new Range(new EntityLocation(), 0, 0, 0, 8, 0, 8)),
-               }, {
+               }, uspWord, {
                   type: 'peend',
                   item: peref,
                } ]);
@@ -205,6 +206,10 @@ describe('NodeStream (unit)', () => {
                },
             };
             const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
+            const uspWord = new xToken.text.PToken({
+               text: new SToken('testValue', 'testValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9)),
+            });
+            uspWord.subType = 'word';
 
             nodeStream.write(declToken);
 
@@ -215,10 +220,7 @@ describe('NodeStream (unit)', () => {
                }, {
                   type: 'pestart',
                   item: childPeref,
-               }, {
-                  type: 'word',
-                  word: new SToken('testValue', 'testValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9)),
-               }, {
+               }, uspWord, {
                   type: 'peend',
                   item: childPeref,
                }, {

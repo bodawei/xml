@@ -126,7 +126,7 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.value[0].text.text).toEqual('one');
+            expect(xToken.value[0].text.str).toEqual('one');
             done();
          });
       });
@@ -146,7 +146,7 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.pToken.externalId.system.value[0].text.text).toEqual('sys.xml');
+            expect(xToken.pToken.externalId.system.value[0].text.str).toEqual('sys.xml');
             done();
          });
       });
@@ -156,7 +156,7 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.pToken.value[0].text.text).toEqual('dukkha');
+            expect(xToken.pToken.value[0].text.str).toEqual('dukkha');
             done();
          });
       });

@@ -34,8 +34,8 @@ import SToken from './SToken.js';
      process() so this can determine whether to keep feeding it
      segments or call finish()
    * finish() must return a data structure containing:
-       text : The final text extracted
-       originalText: The text extracted, before newline normalization
+       str : The final text extracted
+       originalStr: The text extracted, before newline normalization
        segments: An array of information about each segment that this
           had been passed.  Each entry must have:
              chars: The number of characters consumed from this segment
@@ -273,9 +273,9 @@ class STokenSource {
       return ranges;
    }
 
-   _reportResults(extractorContext, text, originalText, ranges) {
+   _reportResults(extractorContext, str, originalStr, ranges) {
       if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
-         extractorContext.callback(new SToken(text, originalText, ranges));
+         extractorContext.callback(new SToken(str, originalStr, ranges));
       } else {
          extractorContext.callback();
       }

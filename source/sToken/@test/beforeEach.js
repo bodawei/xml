@@ -3,29 +3,29 @@
 
 function toEqualSTokenText() {
    return {
-      compare: (actualSToken, expectedText) => {
+      compare: (actualSToken, expectedStr) => {
          let pass = true;
          let message = '';
 
          if (!actualSToken) {
-            throw new Error(`SToken with text "${expectedText}" is undefined, but should not be.`);
+            throw new Error(`SToken with text "${expectedStr}" is undefined, but should not be.`);
          } else {
-            const expected = toSTokenTextObj(expectedText);
+            const expected = toSTokenTextObj(expectedStr);
 
-            if (actualSToken.text !== expected.text) {
+            if (actualSToken.str !== expected.str) {
                pass = false;
                message = 'SToken text values do not match.\n';
-               message += `\tActual:   ${actualSToken.text}\n`;
-               message += `\tExpected: ${expected.text}\n`;
-            } else if (actualSToken.originalText !== expected.originalText) {
+               message += `\tActual:   ${actualSToken.str}\n`;
+               message += `\tExpected: ${expected.str}\n`;
+            } else if (actualSToken.originalStr !== expected.originalStr) {
                pass = false;
                message = 'SToken original text values do not match.\n';
-               message += `\tActual:   ${actualSToken.originalText}\n`;
-               message += `\tExpected: ${expected.originalText}\n`;
+               message += `\tActual:   ${actualSToken.originalStr}\n`;
+               message += `\tExpected: ${expected.originalStr}\n`;
             } else {
                pass = true;
                message = 'Expected text values in SToken not to match. ' +
-                  `("${actualSToken.text}" and "${actualSToken.originalText}").\n`;
+                  `("${actualSToken.str}" and "${actualSToken.originalStr}").\n`;
             }
          }
 
@@ -58,8 +58,8 @@ function toEqualSTokenTexts() {
 
          const maxSearch = Math.min(actualArray.length, expected.length);
          for (let index = 0; index < maxSearch; index++) {
-            if (actualArray[index].text !== expected[index].text ||
-               actualArray[index].originalText !== expected[index].originalText) {
+            if (actualArray[index].str !== expected[index].str ||
+               actualArray[index].originalStr !== expected[index].originalStr) {
                mismatchIndex = index;
                break;
             }
@@ -91,21 +91,21 @@ function toEqualSTokenTexts() {
 
 function displaySTokenTexts(objects) {
    return objects.map((obj) => {
-      if (obj.text !== obj.originalText) {
-         return `"${obj.text}"/"${obj.originalText}"`;
+      if (obj.str !== obj.originalStr) {
+         return `"${obj.str}"/"${obj.originalStr}"`;
       } else {
-         return `"${obj.text}"`;
+         return `"${obj.str}"`;
       }
    }).join(', ');
 }
 
-function toSTokenTextObj(expectedText) {
-   let expected = expectedText;
+function toSTokenTextObj(expectedStr) {
+   let expected = expectedStr;
 
-   if (typeof expectedText === 'string') {
+   if (typeof expectedStr === 'string') {
       expected = {
-         text: expectedText,
-         originalText: expectedText,
+         str: expectedStr,
+         originalStr: expectedStr,
       };
    }
 

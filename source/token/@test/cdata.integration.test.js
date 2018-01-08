@@ -69,7 +69,7 @@ describe('cdata (integration)', () => {
       });
 
       it('reports an error a bad character is in the text (checks envelope.checkWellFormed())', (done) => {
-         envelopePToken.envelopeType.text = 'CD\u0000ATA';
+         envelopePToken.envelopeType.str = 'CD\u0000ATA';
          source.addText('goodStuff]]>');
          source.endText();
 
