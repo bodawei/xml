@@ -18,6 +18,7 @@ const regexMemo = {};
 
 class AllExtractor extends Extractor {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(version, terminators = []) {
       super(version);
 

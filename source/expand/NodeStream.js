@@ -14,7 +14,7 @@ import {
    entityStart,
    notationDeclaration,
    text,
-   usp,
+   unassigned,
 } from '../token';
 
 import EntityManager from './EntityManager.js';
@@ -86,8 +86,9 @@ class NodeStream extends Transform {
             return;
          }
       } else if (xToken instanceof notationDeclaration.XToken) {
-         if (xToken.pToken && xToken.pToken.externalId && xToken.pToken.externalId.incomplete) {
-            this._processIncomplete(xToken, xToken.pToken.externalId, () => {
+         if (xToken.pToken && xToken.pToken.externalId && xToken.pToken.externalId.unassigned) {
+            this._expandUnassigned(xToken.pToken.externalId.unassigned.slice(0), (expandedUnassigned) => {
+               xToken.pToken.externalId.unassigned = expandedUnassigned;
                this.push(xToken);
                callback();
             });
@@ -123,20 +124,20 @@ class NodeStream extends Transform {
       for (let index = 0; index < entityDeclaration.value.length; index++) {
          const item = entityDeclaration.value[index];
 
-         if (item.type === entityReference.PARAM_PTYPE) {
-            const itemName = item.name ? item.name.str : '';
+         if (item.type === entityReference.PARAM_PTYPE && item.name) {
+            const itemName = item.name.str;
             const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
             if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
                newValue.push(item);
             } else {
-               newValue.push(new entityStart.ParamXToken(itemName)); // should a PToken like thing
+               newValue.push(new entityStart.ParamPToken({ refPToken: item }));
 
                for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
                   newValue.push(entityToken.value[tokenIndex]);
                }
 
-               newValue.push(new entityEnd.ParamXToken(itemName));
+               newValue.push(new entityEnd.ParamPToken({ refPToken: item }));
             }
          } else {
             newValue.push(item);
@@ -147,76 +148,79 @@ class NodeStream extends Transform {
       done();
    }
 
-   _processIncomplete(xToken, incompleteParent, done) {
-      this._processNext(incompleteParent, 0, (expandedIncomplete) => {
-         incompleteParent.incomplete = expandedIncomplete;
-         done();
-      });
-   }
+   _expandUnassigned(unassigned, done) {
+      const expanded = [];
 
-   _processNext(incompleteParent, index, done) {
-      if (index >= incompleteParent.incomplete.length) {
-         done([]);
-         return;
+      let nextValue = unassigned.shift();
+      while (nextValue) {
+         if (nextValue.type === entityReference.PARAM_PTYPE && nextValue.name && nextValue.name.str) {
+            break;
+         }
+
+         expanded.push(nextValue);
+         nextValue = unassigned.shift();
       }
 
-      const item = incompleteParent.incomplete[index];
-
-      this._expandPERef(item, (replacement) => {
-         this._processNext(incompleteParent, index + 1, (result) => {
-            done(replacement.concat(result));
+      if (nextValue) {
+         this._expandPERef(nextValue, (expandedPeRef) => {
+            this._expandUnassigned(unassigned, (rest) => {
+               done(expanded.concat(expandedPeRef, rest));
+            });
          });
-      });
+      } else {
+         done(expanded);
+      }
    }
 
    _expandPERef(peRef, deliverExpanded) {
-      if (peRef.type !== entityReference.PARAM_PTYPE) {
+      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.str);
+
+      if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
          return;
       }
 
-      const results = [];
-      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.str || '');
+      this._parseValues(entityToken.value.slice(0), (values) => {
+         const allValues = [ new entityStart.ParamPToken({ refPToken: peRef }) ]
+            .concat(values, [ new entityEnd.ParamPToken({ refPToken: peRef }) ]);
 
-      if (!entityToken || !entityToken.value) {
-         results.push(peRef);
-         deliverExpanded(results);
-      } else {
-         results.push({
-            type: 'pestart',
-            item: peRef,
-         });
-
-         this._insertEntityPiece(entityToken, 0, peRef, results, deliverExpanded);
-      }
+         deliverExpanded(allValues);
+      });
    }
 
-   _insertEntityPiece(entityToken, index, peRef, results, deliverResults) {
-      if (entityToken.value.length === index) {
-         results.push({
-            type: 'peend',
-            item: peRef,
-         });
-         deliverResults(results);
+   _parseValues(values, deliverValues) {
+      let nextValue = values.shift();
+      const newValues = [];
+
+      while (nextValue && nextValue.type !== text.PTYPE) {
+         newValues.push(nextValue);
+         nextValue = values.shift();
+      }
+
+      if (!nextValue) {
+         deliverValues(newValues);
          return;
       }
 
-      const tokenItem = entityToken.value[index];
+      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      source.addText(nextValue.text.originalStr, nextValue.text.ranges[0]); // there will only ever be one
+      source.endText();
 
-      if (tokenItem.type === text.PTYPE) {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText(tokenItem.text.originalStr); // add the range
-         source.endText();
-         usp.parse(source, {}, (parsed) => {
-            results = results.concat(parsed);
-            this._insertEntityPiece(entityToken, index + 1, peRef, results, deliverResults);
-         });
-      } else {
-         this._expandPERef(tokenItem, (result) => {
-            results = results.concat(result);
-            this._insertEntityPiece(entityToken, index + 1, peRef, results, deliverResults);
-         });
-      }
+      // eslint-disable-next-line func-style
+      const handler = (item) => {
+         if (item) {
+            newValues.push(item);
+            setTimeout(() => unassigned.parseNextValue(source, handler), 0);  // force async
+            return;
+         }
+         setTimeout(() => {
+            this._parseValues(values, (trailingValues) => {
+               deliverValues(newValues.concat(trailingValues));
+            });
+         }, 0);
+      };
+
+      unassigned.parseNextValue(source, handler);
    }
 }
 

@@ -1,16 +1,16 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { XmlWarning } from '../error';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
-import { WellFormedError } from '../error';
+import { EntityMetaData } from '../../basic';
+import { XmlWarning } from '../../error';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { WellFormedError } from '../../error';
 
-import * as declaration from './bridge/declaration.js';
-import * as notationDeclaration from './notationDeclaration.js';
-import externalId from './common/externalId.js';
-import misc from './common/misc.js';
+import * as declaration from '../bridge/declaration.js';
+import * as notationDeclaration from '../notationDeclaration.js';
+import externalId from '../common/externalId.js';
+import misc from '../common/misc.js';
 
 describe('notationdeDlaration (unit)', () => {
    let notationPToken;

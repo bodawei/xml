@@ -1,17 +1,18 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
+import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
+import entityReference from '../entityReference.js';
 import text from '../text.js';
+import unassigned from '../unassigned.js';
 
 import externalId from './externalId.js';
-import entityReference from '../entityReference.js';
 import literal from './literal.js';
-import * as usp from './usp.js';
 
 describe('externalId (unit)', () => {
 
@@ -23,21 +24,21 @@ describe('externalId (unit)', () => {
       beforeEach(() => {
          expectedSToken = makeSTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(literal, 'parse');
-         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         spyOn(literal, 'parse').and.callFake((_1, _2, callback) => { callback(false); });
+         spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, _2, _3, cb) => cb);
+         spyOn(unassigned, 'checkForPERef').and.callFake((_1, cb) => {
+            cb();
+         })
       });
 
       it('returns simple values', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('"'), 'peekChar' ],
             // literal
             [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
             [ undefined, 'peekWord' ],
          ]);
          externalId.parse(mockSource, [], callback);
@@ -55,11 +56,9 @@ describe('externalId (unit)', () => {
 
       it('only finds a SystemLiteral if that is all that is offered', () => {
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('S'), 'peekChar' ],
             [ MockSTokenSource.PEEK('SYSTEM'), 'peekWord', [ '"', '\'' ] ],
             [ 'SYSTEM', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('"'), 'peekChar' ],
             // literal
             [ undefined, 'peekWord' ],
          ]);
@@ -76,7 +75,7 @@ describe('externalId (unit)', () => {
 
       it('returns nothing if it gets nothing back on first call', () => {
          mockSource = new MockSTokenSource([
-            [ undefined, 'peekChar' ],
+            [ undefined, 'peekWord' ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -87,7 +86,6 @@ describe('externalId (unit)', () => {
 
       it('returns nothing if the first word is not SYSTEM or PUBLIC', () => {
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('B'), 'peekChar' ],
             [ MockSTokenSource.PEEK('BOGUS!'), 'peekWord', [ '"', '\'' ] ],
          ]);
 
@@ -100,14 +98,11 @@ describe('externalId (unit)', () => {
       it('stops if it finds an NDATA after finding the PublicId', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
             // literal
-            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
             [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('n'), 'peekChar' ],
             [ 'NDATA', 'peekWord', [ '"', '\'' ] ],
          ]);
 
@@ -126,14 +121,11 @@ describe('externalId (unit)', () => {
       it('does not mind if public or ndata are the wrong case', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('p'), 'peekChar' ],
             [ MockSTokenSource.PEEK('pUbLiC'), 'peekWord', [ '"', '\'' ] ],
             [ 'pUbLiC', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
             // literal
-            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
             [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('n'), 'peekChar' ],
             [ 'nData', 'peekWord', [ '"', '\'' ] ],
          ]);
 
@@ -152,12 +144,10 @@ describe('externalId (unit)', () => {
       it('stops if it does not find an open quote', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
             // literal
-            [ 'x', 'peekChar' ],
          ]);
 
          externalId.parse(mockSource, [], callback);
@@ -171,16 +161,21 @@ describe('externalId (unit)', () => {
       });
 
       it('does not mind if, illegally, no space between PUBLIC and PublicLiteral', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         let didPublic = false;
+         literal.parse.and.callFake((_1, _2, callback) => {
+            if (!didPublic) {
+               didPublic = true;
+               callback(true);
+            } else {
+               callback(false);
+            }
+         });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
             [ undefined, 'space' ],
             // literal
-            [ MockSTokenSource.PEEK(' '), 'peekChar' ],
             [ ' ', 'space' ],
-            [ undefined, 'peekChar' ],
             [ undefined, 'peekWord' ],  // check for ndata
             // literal
          ]);
@@ -200,14 +195,12 @@ describe('externalId (unit)', () => {
       it('does not mind if, illegally, no space between public and system literals', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
          mockSource = new MockSTokenSource([
-            [ MockSTokenSource.PEEK('P'), 'peekChar' ],
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
             [ ' ', 'space' ],
             // literal
-            [ undefined, 'peekChar' ],
             [ undefined, 'space' ],
-            [ undefined, 'peekWord' ],  // check for ndata
+            [ '"foo"', 'peekWord' ],  // check for ndata
             // literal
          ]);
 
@@ -218,6 +211,9 @@ describe('externalId (unit)', () => {
             type: 'EXTERNAL_ID',
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),
+            public: {},
+            postPublicSpace: undefined,
+            system: {},
          } ] ]);
       });
 
@@ -225,34 +221,30 @@ describe('externalId (unit)', () => {
 
       describe('parameter entity reference', () => {
 
-         beforeEach(() => {
-            spyOn(usp, 'checkForPERef');
-         });
-
-         it('stops immediately if it encounters a PERef', () => {
-            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef) => {
-               pToken.leftOff = type;
-               foundPeRef(pToken);
-            });
-            mockSource = new MockSTokenSource([
-            ]);
+         it('sets up to let unassigned handle checking for a PE Reference', () => {
+            const checkCallbackSpy = jasmine.createSpy();
+            unassigned.makeCheckCallback.and.returnValue(checkCallbackSpy);
+            mockSource = new MockSTokenSource([]);
 
             externalId.parse(mockSource, [], callback);
             mockSource.respondInAsyncTime();
 
-            expect(callback.calls.allArgs()).toEqual([ [ {
-               type: 'EXTERNAL_ID',
-               leftOff: 'idType',
-            } ] ]);
+            expect(unassigned.makeCheckCallback.calls.argsFor(0)[0]).toEqual({
+               type: externalId.PTYPE,
+            });
+            expect(unassigned.makeCheckCallback.calls.argsFor(0)[1]).toEqual('idType');
+            expect(unassigned.makeCheckCallback.calls.argsFor(0)[2]).toEqual(callback);
+            expect(unassigned.makeCheckCallback.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+            expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
 
-         it('recognizes a PERef after the idType', () => {
-            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef, otherwise) => {
+         it('sets up unassigned to check for PERef for the public value', () => {
+            const checkCallbackSpy = jasmine.createSpy();
+            unassigned.makeCheckCallback.and.callFake((_1, type, deliver, otherwise) => {
                if (type === 'idType') {
-                  otherwise();
+                  return () => otherwise();
                } else {
-                  pToken.leftOff = type;
-                  foundPeRef(pToken);
+                  return checkCallbackSpy;
                }
             });
             mockSource = new MockSTokenSource([
@@ -264,21 +256,24 @@ describe('externalId (unit)', () => {
             externalId.parse(mockSource, [], callback);
             mockSource.respondInAsyncTime();
 
-            expect(callback.calls.allArgs()).toEqual([ [ {
+            expect(unassigned.makeCheckCallback.calls.argsFor(1)[0]).toEqual({
                type: 'EXTERNAL_ID',
                idType: expectedSToken('PUBLIC'),
                postIdTypeSpace: undefined,
-               leftOff: 'public',
-            } ] ]);
+            });
+            expect(unassigned.makeCheckCallback.calls.argsFor(1)[1]).toEqual('public');
+            expect(unassigned.makeCheckCallback.calls.argsFor(1)[2]).toEqual(callback);
+            expect(unassigned.makeCheckCallback.calls.argsFor(1)[3]).toBeInstanceOf(Function);
+            expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
 
-         it('recognizes a PERef after the public', () => {
-            usp.checkForPERef.and.callFake((_1, type, pToken, foundPeRef, otherwise) => {
+         it('sets up unassigned to check for PERef for the system value', () => {
+            const checkCallbackSpy = jasmine.createSpy();
+            unassigned.makeCheckCallback.and.callFake((_1, type, deliver, otherwise) => {
                if (type === 'idType' || type === 'public') {
-                  otherwise();
+                  return () => otherwise();
                } else {
-                  pToken.leftOff = type;
-                  foundPeRef(pToken);
+                  return checkCallbackSpy;
                }
             });
             literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
@@ -292,36 +287,108 @@ describe('externalId (unit)', () => {
             externalId.parse(mockSource, [], callback);
             mockSource.respondInAsyncTime();
 
-            expect(callback.calls.allArgs()).toEqual([ [ {
+            expect(unassigned.makeCheckCallback.calls.argsFor(2)[0]).toEqual({
                type: 'EXTERNAL_ID',
                idType: expectedSToken('PUBLIC'),
                postIdTypeSpace: undefined,
                public: {},
                postPublicSpace: expectedSToken(' '),
-               leftOff: 'system',
-            } ] ]);
+            });
+            expect(unassigned.makeCheckCallback.calls.argsFor(2)[1]).toEqual('system');
+            expect(unassigned.makeCheckCallback.calls.argsFor(2)[2]).toEqual(callback);
+            expect(unassigned.makeCheckCallback.calls.argsFor(2)[3]).toBeInstanceOf(Function);
+            expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
          });
 
       });
 
    });
 
-   describe('completeParse()', () => {
+   describe('assignUnassigned()', () => {
 
-      it('does nothing if there is no incomplete array', () => {
+      beforeEach(() => {
+         spyOn(unassigned, 'assignToProps');
+      });
+
+      it('does nothing if there is no unassigned array', () => {
          const pToken = {};
 
-         expect(() => externalId.completeParse(pToken)).not.toThrow();
+         expect(() => externalId.assignUnassigned(pToken)).not.toThrow();
+      });
+
+      it('deletes the unassigned array if it comes in empty', () => {
+         const externalIdToken = {
+            unassigned: [],
+         };
+
+         externalId.assignUnassigned(externalIdToken);
+
+         expect(externalIdToken.unassigned).toBeUndefined();
       });
 
       it('does nothing if there is still an unexpanded parameter entity reference', () => {
-         const pToken = {
-            incomplete: [
+         const externalIdToken = {
+            unassigned: [
                new entityReference.ParamPToken(),
             ],
          };
 
-         expect(() => externalId.completeParse(pToken)).not.toThrow();
+         externalId.assignUnassigned(externalIdToken);
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      it('calls assignToProps()', () => {
+         const externalIdToken = {
+            nextPropName: 'postIdTypeSpace',
+            unassigned: [
+               unassigned.wordFromSToken(SToken.fromString('hi')),
+            ],
+         };
+
+         externalId.assignUnassigned(externalIdToken);
+
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(
+            externalIdToken.unassigned,
+            externalIdToken,
+            'postIdTypeSpace', [
+               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'postIdTypeSpace', type: 'space' },
+               { name: 'public', type: 'literal' },
+               { name: 'postPublicSpace', type: 'space' },
+               { name: 'system', type: 'literal' },
+            ]);
+      });
+
+      it('removes the unassigned array if it is empty', () => {
+         const externalIdToken = {
+            nextPropName: 'postIdTypeSpace',
+            unassigned: [
+               new text.PToken({ text: SToken.fromString('hi') }),
+            ],
+         };
+         unassigned.assignToProps.and.callFake((unArray) => {
+            unArray.forEach(() => unArray.shift());
+         });
+
+         externalId.assignUnassigned(externalIdToken);
+
+         expect(externalIdToken.unassigned).toBeUndefined();
+      });
+
+      it('moves unused unassigned to .extra', () => {
+         const externalIdToken = {
+            nextPropName: 'idType',
+            unassigned: [
+               unassigned.wordFromSToken(SToken.fromString('hi')),
+            ],
+         };
+
+         externalId.assignUnassigned(externalIdToken);
+
+         expect(externalIdToken.extra).toEqual([
+            unassigned.wordFromSToken(SToken.fromString('hi')),
+         ]);
       });
 
    });
@@ -389,8 +456,9 @@ describe('externalId (unit)', () => {
          });
       });
 
-      it('reports no errors the pToken is passed in with incomplete data', () => {
-         pTokenPart.incomplete = [];
+      it('reports no errors the pToken is passed in with unassigned values', () => {
+         pTokenPart.idType = new SToken('bad'),
+         pTokenPart.unassigned = [];
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
@@ -496,14 +564,49 @@ describe('externalId (unit)', () => {
          }).not.toThrow();
       });
 
+      it('reports an error if there are extra unassigned values', () => {
+         const startSToken = SToken.fromString('one');
+         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+         pTokenPart.extra = [
+            unassigned.wordFromSToken(startSToken),
+            unassigned.spaceFromSToken(SToken.fromString(' ')), {
+               type: 'literal',
+               openQuote: SToken.fromString('"'),
+               closeQuote: SToken.fromString('"'),
+            }, new entityReference.ParamPToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('fred'),
+               close: SToken.fromString(';'),
+            }),
+         ];
+
+         externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_EXTRA_TEXT,
+            params: [ 'one ""&fred;' ],
+            position: startSToken,
+         });
+      });
+
+      it('reports no errors if extra is empty', () => {
+         const startSToken = SToken.fromString('one');
+         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+         pTokenPart.extra = [];
+
+         externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
    });
 
    describe('makeEntityLocation()', () => {
 
-      it('returns nothing if the pToken part has an incomplete', () => {
+      it('returns nothing if the pToken part has an unassigned', () => {
          const expectedSToken = makeSTokenMaker();
          const pTokenPart = {
-            incomplete: [],
+            unassigned: [],
             type: 'EXTERNAL_ID',
             idType: expectedSToken('PUBLIC'),
             postIdTypeSpace: expectedSToken(' '),

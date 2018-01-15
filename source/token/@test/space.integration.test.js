@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../basic';
-import { defaultExtractors } from '../extractor';
-import { SToken, STokenSource } from '../sToken';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { defaultExtractors } from '../../extractor';
+import { SToken, STokenSource } from '../../sToken';
 
-import * as space from './space.js';
+import * as space from '../space.js';
 
 describe('space (integration)', () => {
 

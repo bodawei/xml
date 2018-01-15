@@ -18,7 +18,7 @@ prepro[BUILD_DIR + '*.ts'] = [ 'karma-typescript' ];
 
 const config = {
    basePath: './',
-   reportSlowerThan: 200,
+   reportSlowerThan: 1000,
    browsers: [ 'Chrome' ],
    captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
    autoWatch: false,

@@ -16,6 +16,7 @@ import MatchExtractor from './MatchExtractor.js';
 
 class MultiMatchExtractor extends Extractor {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(context, candidates) {
       super(context);
 

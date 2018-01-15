@@ -1,13 +1,13 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
 import entityReference from '../entityReference.js';
+import unassigned from '../unassigned.js';
 
 import literal from './literal.js';
 import { textOrBlank } from './misc.js';
-import * as usp from './usp.js';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -43,64 +43,62 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
    deliverPTokenPart: Callback to deliver the PToken compatible version
 \**********************************************************************/
 
-function parse(source, terminators, deliverPTokenPart) {
+function parse(source, terminators, deliverExtId) {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
-   const pTokenPart = {
+   const extIdPToken = {
       type: EXTERNAL_ID,
    };
 
-   usp.checkForPERef(source, 'idType', pTokenPart, (result) => {
-      if (result.leftOff) {
-         deliverPTokenPart(result);
-      } else {
-         deliverPTokenPart();
-      }
-   }, () => {
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'idType', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (sToken) => {
          const capitalType = sToken && sToken.str.toLocaleUpperCase();
 
          if (!sToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
-            deliverPTokenPart();
+            deliverExtId();
             return;
          }
 
-         source.extractToObject('word', allTerminators, pTokenPart, 'idType');
-         source.extractToObject('space', pTokenPart, 'postIdTypeSpace');
+         source.extractToObject('word', allTerminators, extIdPToken, 'idType');
+         source.extractToObject('space', extIdPToken, 'postIdTypeSpace');
 
          if (capitalType === 'PUBLIC') {
-            parsePublic(source, pTokenPart, allTerminators, deliverPTokenPart);
+            parsePublic(source, extIdPToken, allTerminators, deliverExtId);
          } else {
-            parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart);
+            parseSystem(source, allTerminators, extIdPToken, deliverExtId);
          }
       });
    });
+
+   unassigned.checkForPERef(source, callback);
 }
 
-function parsePublic(source, pTokenPart, allTerminators, deliverPTokenPart) {
-   usp.checkForPERef(source, 'public', pTokenPart, deliverPTokenPart, () => {
+function parsePublic(source, extIdPToken, allTerminators, deliverExtId) {
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'public', deliverExtId, () => {
       const temp = {};
 
       literal.parse(source, {
          pToken: temp,
       }, (gotQuoted) => {
          if (!gotQuoted) {
-            deliverPTokenPart(pTokenPart);
+            deliverExtId(extIdPToken);
             return;
          }
 
-         pTokenPart.public = temp;
-         source.extractToObject('space', pTokenPart, 'postPublicSpace');
+         extIdPToken.public = temp;
+         source.extractToObject('space', extIdPToken, 'postPublicSpace');
 
-         parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart);
+         parseSystem(source, allTerminators, extIdPToken, deliverExtId);
       });
    });
+
+   unassigned.checkForPERef(source, callback);
 }
 
-function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
-   usp.checkForPERef(source, 'system', pTokenPart, deliverPTokenPart, () => {
+function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'system', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (nData) => {
          if (nData && nData.str.toLocaleUpperCase() === 'NDATA') {
-            deliverPTokenPart(pTokenPart);
+            deliverExtId(extIdPToken);
             return;
          }
 
@@ -109,36 +107,46 @@ function parseSystem(source, allTerminators, pTokenPart, deliverPTokenPart) {
             pToken: temp,
          }, (gotLiteral) => {
             if (gotLiteral) {
-               pTokenPart.system = temp;
+               extIdPToken.system = temp;
             }
 
-            deliverPTokenPart(pTokenPart);
+            deliverExtId(extIdPToken);
          });
       });
    });
+
+   unassigned.checkForPERef(source, callback);
 }
 
-function completeParse(externalId) {
-   const incomplete = externalId.incomplete || [];
-   if (incomplete.length === 0) {
-      delete externalId.incomplete;
-   }
+function assignUnassigned(externalId) {
+   const unValues = externalId.unassigned || [];
 
-   const unexpandedRef = incomplete.filter((item) => (item.type === entityReference.PTOKEN));
-   if (unexpandedRef.length === 0) {
+   if (unValues.length === 0) {
+      delete externalId.unassigned;
+      delete externalId.nextPropName;
       return;
    }
 
-   usp.fillInProperties(externalId, externalId.leftOff || 'idType', externalId.incomplete, [
-      { id: 'idType', type: 'word' },
-      { id: 'postIdTypeSpace', type: 'space', required: true },
-      { id: 'public', type: 'literal' },
-      { id: 'postPublicSpace', type: 'space', required: true },
-      { id: 'system', type: 'literal' },
+   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+
+   if (unexpandedRef.length !== 0) {
+      return;
+   }
+
+   unassigned.assignToProps(externalId.unassigned, externalId, externalId.nextPropName, [
+      { name: 'idType', type: 'word', allowed: [ 'public', 'system' ] },
+      { name: 'postIdTypeSpace', type: 'space' },
+      { name: 'public', type: 'literal' },
+      { name: 'postPublicSpace', type: 'space' },
+      { name: 'system', type: 'literal' },
    ]);
 
-   if (incomplete === 0) {
-      delete externalId.incomplete;
+   delete externalId.nextPropName;
+
+   if (unValues.length === 0) {
+      delete externalId.unassigned;
+   } else {
+      externalId.extra = externalId.unassigned;
    }
 }
 
@@ -152,7 +160,7 @@ function completeParse(externalId) {
 \**********************************************************************/
 
 function checkWellFormed(pTokenPart, ec, entityMetaData) {
-   if (!pTokenPart || pTokenPart.incomplete) {
+   if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
 
@@ -176,13 +184,26 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
       });
    }
 
-   if (capitalType === 'SYSTEM' || (pTokenPart.system && (pTokenPart.system.openQuote || pTokenPart.system.value))) {
+   if (capitalType === 'SYSTEM' || pTokenPart.system) {
       if (pTokenPart.public && pTokenPart.public.value) {
          ec.setPos(pTokenPart.postPublicSpace);
          ec.check(!pTokenPart.postPublicSpace, WFEID.EXTERNALID_SYSTEM_NO_LEADING_SPACE);
       }
 
       literal.checkWellFormed(pTokenPart.system, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
+   }
+
+   if (pTokenPart.extra && pTokenPart.extra.length > 0) {
+      // convert the unassigned values into a set of STokens
+      const sTokens = unassigned.getSTokens(pTokenPart.extra);
+      ec.setPos(sTokens[0]);
+      const firstToken = sTokens[0].clone();
+      sTokens.shift();
+      const unifiedSToken = sTokens.reduce((accumulation, sToken) => {
+         accumulation.merge(sToken);
+         return accumulation;
+      }, firstToken);
+      ec.report(WFEID.EXTERNALID_EXTRA_TEXT, [ unifiedSToken.originalStr ]);
    }
 }
 
@@ -192,7 +213,7 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
 \**********************************************************************/
 
 function makeEntityLocation(pTokenPart) {
-   if (!pTokenPart || pTokenPart.incomplete) {
+   if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
 
@@ -223,7 +244,7 @@ function getSTokens(pTokenPart) {
 const externalId = {
    PTYPE: EXTERNAL_ID,
    parse,
-   completeParse,
+   assignUnassigned,
    getSTokens,
    checkWellFormed,
    makeEntityLocation,

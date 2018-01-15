@@ -134,9 +134,7 @@ class EntityManager {
       const source = new STokenSource(defaultExtractors, new EntityMetaData());
 
       for (let index = 0; index < token.value.length; index++) {
-         if (token.value[index].text) {
-            source.addText(token.value[index].text.str);
-         }
+         source.addText(token.value[index].text.str);
       }
       source.endText();
 
@@ -144,7 +142,7 @@ class EntityManager {
    }
 
    _internalGetToken(name, isParameter) {
-      if (!name) {
+      if (name === undefined || name === null) {
          throw new Error('Must call with the name of an entity.');
       }
 

@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
+import { EntityMetaData } from '../../basic';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
-import * as space from './space.js';
+import * as space from '../space.js';
 
 describe('space (unit)', () => {
    let spacePToken;

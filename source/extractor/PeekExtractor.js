@@ -14,6 +14,7 @@ import Extractor from './Extractor.js';
 
 class PeekExtractor extends Extractor {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(version, subExtractor) {
       super(version);
 

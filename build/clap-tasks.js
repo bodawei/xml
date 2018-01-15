@@ -134,7 +134,7 @@ const test = {
    _karmaLive: `karma start ${BUILD_DIR}/karma-live.js --browsers ChromeHeadless`,
 
    // NOTE!  This does not yet run with typescript at all.
-   _nodeTest: `nyc --require="babel-register" --report-dir="${NODE_COVERAGE_DIR}" jasmine --config=build/jasmine.json`,
+   _nodeTest: `nyc --require="babel-register" --require="babel-polyfill" --report-dir="${NODE_COVERAGE_DIR}" jasmine --config=build/jasmine.json`,
 };
 
 const publicInterface = {

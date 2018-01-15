@@ -1,13 +1,13 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Offset } from '../basic';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
-import { WellFormedError } from '../error';
+import { EntityMetaData, Offset } from '../../basic';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { WellFormedError } from '../../error';
 
-import * as comment from './comment.js';
-import misc from './common/misc.js';
+import * as comment from '../comment.js';
+import misc from '../common/misc.js';
 
 describe('comment (unit)', () => {
    let commentPToken;

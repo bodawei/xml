@@ -2,14 +2,14 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityMetaData } from '../../basic';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { WellFormedError, XmlWarning } from '../../error';
 
-import attribute from './common/attribute.js';
-import misc from './common/misc.js';
-import * as elementStart from './elementStart.js';
+import attribute from '../common/attribute.js';
+import misc from '../common/misc.js';
+import * as elementStart from '../elementStart.js';
 
 describe('elementStart (unit)', () => {
    let elementStartPToken;

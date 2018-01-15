@@ -18,6 +18,7 @@ import Extractor from './Extractor.js';
 
 class MatchExtractor extends Extractor {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(version, candidate) {
       super(version);
 

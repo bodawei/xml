@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import * as base from './base.js';
 
@@ -22,9 +22,27 @@ class EntityStart extends base.XToken {
 class ParameterEntityStart extends EntityStart {
 }
 
-export {
-   ENTITY_START as PTYPE,
-   EntityStart as XToken,
-   PARAMETERENTITY_START as PARAM_PTYPE,
-   ParameterEntityStart as ParamXToken,
+class EntityStartPToken extends base.PToken {
+   constructor(props) {
+      super(ENTITY_START, props);
+      this.refPToken = props.refPToken;
+   }
+}
+
+class ParameterEntityStartPToken extends EntityStartPToken {
+   constructor(props) {
+      super(props);
+      this.type = PARAMETERENTITY_START;
+   }
+}
+
+const entityStart = {
+   PTYPE: ENTITY_START,
+   PToken: EntityStartPToken,
+   XToken: EntityStart,
+   PARAM_PTYPE: PARAMETERENTITY_START,
+   ParamPToken: ParameterEntityStartPToken,
+   ParamXToken: ParameterEntityStart,
 };
+
+export default entityStart;

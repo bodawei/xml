@@ -109,9 +109,9 @@ describe('NodeStream (integration)', () => {
       node.on('end', () => {
          const valueArray = results[4].value;
          expect(valueArray[0].text.str).toEqual('one');
-         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamXToken('peOne'));
+         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
          expect(valueArray[2].text.str).toEqual('two');
-         expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamXToken('peOne'));
+         expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
          done();
       });
       pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
@@ -131,13 +131,13 @@ describe('NodeStream (integration)', () => {
       node.on('end', () => {
          const valueArray = results[5].value;
          expect(valueArray[0].text.str).toEqual('[');
-         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamXToken('peOne'));
+         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
          expect(valueArray[2].text.str).toEqual('(');
-         expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamXToken('peTwo'));
+         expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
          expect(valueArray[4].text.str).toEqual('inner');
-         expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamXToken('peTwo'));
+         expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[3].refPToken }));
          expect(valueArray[6].text.str).toEqual(')');
-         expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamXToken('peOne'));
+         expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
          expect(valueArray[8].text.str).toEqual(']');
          done();
       });

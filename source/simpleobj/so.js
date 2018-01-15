@@ -24,6 +24,7 @@ class Node {
 
 class SimpleObj extends stream.Transform {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
       super({
          objectMode: true,

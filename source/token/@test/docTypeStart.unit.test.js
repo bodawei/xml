@@ -2,15 +2,15 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
-import { WellFormedError } from '../error';
+import { EntityMetaData } from '../../basic';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { WellFormedError } from '../../error';
 
-import * as declaration from './bridge/declaration.js';
-import * as docTypeStart from './docTypeStart.js';
-import externalId from './common/externalId.js';
-import misc from './common/misc.js';
+import * as declaration from '../bridge/declaration.js';
+import * as docTypeStart from '../docTypeStart.js';
+import externalId from '../common/externalId.js';
+import misc from '../common/misc.js';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken;

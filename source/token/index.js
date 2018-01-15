@@ -10,18 +10,17 @@ import * as comment from './comment.js';
 import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
-import * as entityEnd from './entityEnd.js';
+import entityEnd from './entityEnd.js';
 import entityReference from './entityReference.js';
-import * as entityStart from './entityStart.js';
+import entityStart from './entityStart.js';
 import * as elementStart from './elementStart.js';
 import * as elementEnd from './elementEnd.js';
 import * as space from './space.js';
 import text from './text.js';
 import * as notationDeclaration from './notationDeclaration.js';
 import * as processingInstruction from './processingInstruction.js';
+import unassigned from './unassigned.js';
 import * as xmlDeclaration from './xmlDeclaration.js';
-
-import * as usp from './common/usp.js';
 
 module.exports = {
    declaration,
@@ -45,5 +44,5 @@ module.exports = {
    text,
    xmlDeclaration,
 
-   usp,
+   unassigned,
 };

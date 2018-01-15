@@ -1,15 +1,15 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 /* eslint-env jasmine */
 
-import * as entityEnd from './entityEnd.js';
+import entityStart from '../entityStart.js';
 
-describe('entityEnd (unit)', () => {
+describe('entityStart (unit)', () => {
 
    describe('Token', () => {
 
       it('is constructed with the specified name', () => {
-         const token = new entityEnd.XToken('foo');
+         const token = new entityStart.XToken('foo');
 
          expect(token.name).toEqual('foo');
          expect(token.pToken).toEqual([]);
@@ -20,7 +20,7 @@ describe('entityEnd (unit)', () => {
    describe('ParamXToken', () => {
 
       it('is constructed with the specified name', () => {
-         const token = new entityEnd.ParamXToken('foo');
+         const token = new entityStart.ParamXToken('foo');
 
          expect(token.name).toEqual('foo');
          expect(token.pToken).toEqual([]);

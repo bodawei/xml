@@ -41,6 +41,14 @@ class SToken {
       }
    }
 
+   clone() {
+      const clonedRanges = [];
+      for (let index = 0; index < this.ranges.length; index++) {
+         clonedRanges.push(this.ranges[index].clone());
+      }
+      return new SToken(this.str, this.originalStr, clonedRanges);
+   }
+
    get firstRange() {
       return this.ranges.length > 0 ? this.ranges[0] : undefined;
    }

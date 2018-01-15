@@ -66,6 +66,7 @@
       "xclap-cli": "^0.1.3"
    },
    "dependencies": {
+      "babel-polyfill": "^6.26.0",
       "karma-typescript-preprocessor": "^0.3.1"
    }
 }

@@ -55,6 +55,22 @@ describe('SToken', () => {
 
    });
 
+   describe('.clone()', () => {
+
+      it('makes a copy of the current token', () => {
+         const sToken1 = new SToken(' \n', ' \r\n', new Range(undefined, 1, 2, 3));
+
+         const clone = sToken1.clone();
+
+         expect(clone).not.toBe(sToken1);
+
+         sToken1.ranges[0].startIndex = 1000;
+
+         expect(clone).toEqual(new SToken(' \n', ' \r\n', new Range(undefined, 1, 2, 3)));
+      });
+
+   });
+
    describe('.firstRange', () => {
 
       it('is undefined if there is no first range', () => {

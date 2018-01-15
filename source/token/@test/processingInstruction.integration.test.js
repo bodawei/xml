@@ -1,13 +1,13 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError } from '../error';
-import { defaultExtractors } from '../extractor';
-import { STokenSource } from '../sToken';
-import { makeSTokenMaker } from '../sToken/@test/helper';
+import { EntityMetaData } from '../../basic';
+import { ErrorCollector, WellFormedError } from '../../error';
+import { defaultExtractors } from '../../extractor';
+import { STokenSource } from '../../sToken';
+import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as processingInstruction from './processingInstruction.js';
+import * as processingInstruction from '../processingInstruction.js';
 
 describe('processingInstruction (integration)', () => {
    let piPToken;

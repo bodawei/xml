@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { MockErrorCollector } from '../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../sToken/@test/helper';
-import { WellFormedError } from '../error';
+import { MockErrorCollector } from '../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { WellFormedError } from '../../error';
 
-import entityReference from './entityReference.js';
+import entityReference from '../entityReference.js';
 
 describe('entityReference (unit)', () => {
    let generalEntityPToken;

@@ -17,6 +17,7 @@ const DEC_REGEX = /^([0-9]+);(.*)$/;
 \**********************************************************************/
 class CommentFixer extends stream.Transform {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
       super({
          objectMode: true,

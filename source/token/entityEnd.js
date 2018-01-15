@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import * as base from './base.js';
 
@@ -22,9 +22,27 @@ class EntityEnd extends base.XToken {
 class ParameterEntityEnd extends EntityEnd {
 }
 
-export {
-   ENTITY_END as PTYPE,
-   EntityEnd as XToken,
-   PARAMETERENTITY_END as PARAM_PTYPE,
-   ParameterEntityEnd as ParamXToken,
+class EntityEndPToken extends base.PToken {
+   constructor(props) {
+      super(ENTITY_END, props);
+      this.refPToken = props.refPToken;
+   }
+}
+
+class ParameterEntityEndPToken extends EntityEndPToken {
+   constructor(props) {
+      super(props);
+      this.type = PARAMETERENTITY_END;
+   }
+}
+
+const entityEnd = {
+   PTYPE: ENTITY_END,
+   PARAM_PTYPE: PARAMETERENTITY_END,
+   PToken: EntityEndPToken,
+   XToken: EntityEnd,
+   ParamPToken: ParameterEntityEndPToken,
+   ParamXToken: ParameterEntityEnd,
 };
+
+export default entityEnd;

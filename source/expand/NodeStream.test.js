@@ -103,26 +103,36 @@ describe('NodeStream (unit)', () => {
 
          it('passes a reference with no referent straight through', () => {
             const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined, []);
-            const refToken = new xToken.entityReference.ParamXToken('test', []);
+            const refToken = new xToken.entityReference.ParamPToken({ name: SToken.fromString('test') });
             declToken.value.push(refToken);
 
             nodeStream.write(declToken);
 
-            const actualDecl = nodeStream.read();
-            expect(actualDecl.value[0]).toEqual(new xToken.entityReference.ParamXToken('test', []));
+            gatherResults(nodeStream, (result) => {
+               expect(result.value[0]).toEqual(refToken);
+            });
+         });
+
+         it('does not expand an entity reference that has no name', () => {
+            const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined, []);
+            const refToken = new xToken.entityReference.ParamPToken({ name: undefined });
+            declToken.value.push(refToken);
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, (result) => {
+               expect(result.value[0]).toEqual(refToken);
+            });
          });
 
       });
 
-      describe('incomplete processing', () => {
+      describe('unassigned processing', () => {
 
-         it('does nothing if the incomplete has no PERefs', (done) => {
+         it('does nothing if the unassigned has no PERefs', (done) => {
             const pToken = {
                externalId: {
-                  incomplete: [ {
-                     type: 'space',
-                     item: new SToken(' ', ' '),
-                  } ],
+                  unassigned: [ xToken.unassigned.spaceFromSToken(SToken.fromString(' ')) ],
                },
             };
             const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
@@ -130,103 +140,148 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(declToken);
 
             gatherResults(nodeStream, (result) => {
-               expect(result.pToken.externalId.incomplete).toEqual(pToken.externalId.incomplete);
+               expect(result.pToken.externalId.unassigned)
+                  .toEqual([ xToken.unassigned.spaceFromSToken(SToken.fromString(' ')) ]);
                done();
             });
          });
 
-         it('replaces a peref with a pestart, word and peend item in incomplete', (done) => {
+         it('does not replace a peref with a pestart if it is not in the entity manager', (done) => {
             const peref = new xToken.entityReference.ParamPToken({
-               open: new SToken('%', '%'),
-               name: new SToken('testRef', 'testRef'),
-               close: new SToken(';', ';'),
+               open: SToken.fromString('%'),
+               name: SToken.fromString('testRef'),
+               close: SToken.fromString(';'),
+            });
+            const pToken = {
+               externalId: {
+                  unassigned: [ peref ],
+               },
+            };
+            const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, (result) => {
+               expect(result.pToken.externalId.unassigned).toEqual([ peref ]);
+               done();
+            });
+         });
+
+         it('does not replace a peref if it has no name', (done) => {
+            const peref = new xToken.entityReference.ParamPToken({
+               open: SToken.fromString('%'),
+               name: undefined,
+               close: SToken.fromString(';'),
+            });
+            const pToken = {
+               externalId: {
+                  unassigned: [ peref ],
+               },
+            };
+            const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, (result) => {
+               expect(result.pToken.externalId.unassigned).toEqual([ peref ]);
+               done();
+            });
+         });
+
+         it('does not replace a peref if it has an empty name', (done) => {
+            const peref = new xToken.entityReference.ParamPToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString(''),
+               close: SToken.fromString(';'),
+            });
+            const pToken = {
+               externalId: {
+                  unassigned: [ peref ],
+               },
+            };
+            const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, (result) => {
+               expect(result.pToken.externalId.unassigned).toEqual([ peref ]);
+               done();
+            });
+         });
+
+         it('replaces a peref with a pestart, word and peend item in unassigned', (done) => {
+            const peref = new xToken.entityReference.ParamPToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('testRef'),
+               close: SToken.fromString(';'),
             });
             const declarationPToken = new xToken.entityDeclaration.ParamPToken({
-               name: new SToken('testRef', 'testRef'),
-               value: [ new xToken.text.PToken({ text: new SToken('theValue', 'theValue') }) ],
+               name: SToken.fromString('testRef'),
+               value: [ new xToken.text.PToken({ text: SToken.fromString('theValue') }) ],
             });
             const entityToken = xToken.entityDeclaration.pTokenToXToken(declarationPToken);
             spyOn(entityManager, 'getParameterEntityToken').and.returnValue(entityToken);
             const pToken = {
                externalId: {
-                  incomplete: [ peref ],
+                  unassigned: [ peref ],
                },
             };
             const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
+            // parsing introduces a range!
+            const unassignedWord = xToken.unassigned.wordFromSToken(
+               new SToken('theValue', 'theValue', new Range(new EntityLocation(), 0, 0, 0, 8, 0, 8)));
 
             nodeStream.write(declToken);
 
-            const uspWord = new xToken.text.PToken({
-               text: new SToken('theValue', 'theValue', new Range(new EntityLocation(), 0, 0, 0, 8, 0, 8)),
-            });
-            uspWord.subType = 'word';
             gatherResults(nodeStream, (result) => {
-               expect(result.pToken.externalId.incomplete).toEqual([ {
-                  type: 'pestart',
-                  item: peref,
-               }, uspWord, {
-                  type: 'peend',
-                  item: peref,
-               } ]);
+               expect(result.pToken.externalId.unassigned).toEqual([
+                  new xToken.entityStart.ParamPToken({ refPToken: peref }),
+                  unassignedWord,
+                  new xToken.entityEnd.ParamPToken({ refPToken: peref }) ]);
                done();
             });
          });
 
          it('replaces a peref that references another peref', (done) => {
             const parentPeref = new xToken.entityReference.ParamPToken({
-               open: new SToken('%', '%'),
-               name: new SToken('parentRef', 'parentRef'),
-               close: new SToken(';', ';'),
+               open: SToken.fromString('%'),
+               name: SToken.fromString('parentDecl'),
+               close: SToken.fromString(';'),
             });
             const childPeref = new xToken.entityReference.ParamPToken({
-               open: new SToken('%', '%'),
-               name: new SToken('testRef', 'testRef'),
-               close: new SToken(';', ';'),
+               open: SToken.fromString('%'),
+               name: SToken.fromString('childDecl'),
+               close: SToken.fromString(';'),
             });
+            const unassignedWord = xToken.unassigned.wordFromSToken(
+               new SToken('theValue', 'theValue', new Range(new EntityLocation(), 0, 0, 0, 8, 0, 8)));
             const declarationPToken1 = new xToken.entityDeclaration.ParamPToken({
-               name: new SToken('parentRef', 'parentRef'),
-               value: [ childPeref ],
-            });
-            const declarationPToken2 = new xToken.entityDeclaration.ParamPToken({
-               name: new SToken('testRef', 'testRef'),
-               value: [ new xToken.text.PToken({ text: new SToken('testValue', 'testValue') }) ],
+               name: SToken.fromString('parentDecl'),
+               value: [
+                  new xToken.entityStart.ParamPToken({ refPToken: childPeref }),
+                  unassignedWord,
+                  new xToken.entityEnd.ParamPToken({ refPToken: childPeref }),
+               ],
             });
             const entityToken1 = xToken.entityDeclaration.pTokenToXToken(declarationPToken1);
-            const entityToken2 = xToken.entityDeclaration.pTokenToXToken(declarationPToken2);
-            spyOn(entityManager, 'getParameterEntityToken').and.callFake((param) => {
-               if (param === 'parentRef') {
-                  return entityToken1;
-               } else {
-                  return entityToken2;
-               }
-            });
+            spyOn(entityManager, 'getParameterEntityToken').and.returnValue(entityToken1);
             const pToken = {
                externalId: {
-                  incomplete: [ parentPeref ],
+                  unassigned: [ parentPeref ],
                },
             };
             const declToken = new xToken.notationDeclaration.XToken('test', undefined, pToken);
-            const uspWord = new xToken.text.PToken({
-               text: new SToken('testValue', 'testValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9)),
-            });
-            uspWord.subType = 'word';
 
             nodeStream.write(declToken);
 
             gatherResults(nodeStream, (result) => {
-               expect(result.pToken.externalId.incomplete).toEqual([ {
-                  type: 'pestart',
-                  item: parentPeref,
-               }, {
-                  type: 'pestart',
-                  item: childPeref,
-               }, uspWord, {
-                  type: 'peend',
-                  item: childPeref,
-               }, {
-                  type: 'peend',
-                  item: parentPeref,
-               } ]);
+               expect(result.pToken.externalId.unassigned).toEqual([
+                  new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
+                  new xToken.entityStart.ParamPToken({ refPToken: childPeref }),
+                  unassignedWord,
+                  new xToken.entityEnd.ParamPToken({ refPToken: childPeref }),
+                  new xToken.entityEnd.ParamPToken({ refPToken: parentPeref }),
+               ]);
 
                done();
             });
