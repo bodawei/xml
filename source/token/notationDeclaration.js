@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { WellFormedError, XmlWarning } from '../error';
 
@@ -6,6 +6,8 @@ import * as declaration from './bridge/declaration.js';
 import externalId from './common/externalId.js';
 import misc from './common/misc.js';
 import * as base from './base.js';
+import entityReference from './entityReference.js';
+import unassigned from './unassigned.js';
 
 const NOTATIONDECL = 'NOTATIONDECL';
 const WARN = XmlWarning.ID;
@@ -64,18 +66,77 @@ class NotationDeclarationPToken extends declaration.PToken {
 function parse(source, declarationPToken, deliverPToken) {
    const pToken = new NotationDeclarationPToken(declarationPToken);
 
-   source.extractToObject('word', [ '>' ], pToken, 'name');
-   source.extractToObject('space', pToken, 'postNameSpace');
+   const callback = unassigned.makeCheckCallback(pToken, 'name', (thePToken) => {
+      getClose(source, thePToken, undefined, deliverPToken);
+   }, () => {
+      source.extractToObject('word', [ '>' ], pToken, 'name');
+      source.extractToObject('space', pToken, 'postNameSpace');
 
-   externalId.parse(source, [ '>' ], (externalId) => {
-      pToken.externalId = externalId;
-      source.extractToObject('space', pToken, 'postExternalIdSpace');
+      externalId.parse(source, [ '>' ], (externalId) => {
+         pToken.externalId = externalId;
+         if (externalId && !externalId.unassigned) {
+            source.extractToObject('space', pToken, 'postExternalIdSpace');
+         }
 
-      source.extract('match', '>', (sToken) => {
-         pToken.close = sToken;
-         deliverPToken(pToken);
+         getClose(source, pToken, externalId, deliverPToken);
       });
    });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function getClose(source, pToken, externalId, deliverPToken) {
+   source.extract('match', '>', (sToken) => {
+      pToken.close = sToken;
+      if (externalId) {
+         pToken.unassigned = externalId.unassigned;
+      }
+
+      deliverPToken(pToken);
+   });
+}
+
+/**********************************************************************\
+ Recover from finding a parameter param entity ref in the declaration
+\**********************************************************************/
+
+function assignUnassigned(notationPToken) {
+   const unValues = notationPToken.unassigned || [];
+
+   if (unValues.length === 0) {
+      delete notationPToken.unassigned;
+      delete notationPToken.nextPropName;
+      return;
+   }
+
+   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+
+   if (unexpandedRef.length !== 0) {
+      return;
+   }
+
+   if (notationPToken.nextPropName === 'name') {
+      unassigned.assignToProps(notationPToken.unassigned, notationPToken, notationPToken.nextPropName, [
+         { name: 'postDeclTypeSpace', type: 'space' },
+         { name: 'name', type: 'word' },
+         { name: 'postNameSpace', type: 'space' },
+      ]);
+   }
+
+   notationPToken.externalId = notationPToken.externalId || {
+      unassigned: notationPToken.unassigned,
+   };
+   externalId.assignUnassigned(notationPToken.externalId);
+
+   if (unValues.length !== 0) {
+      notationPToken.extra = notationPToken.unassigned;
+   }
+
+   delete notationPToken.externalId.nextPropName;
+   delete notationPToken.externalId.unassigned;
+   delete notationPToken.externalId.extra;
+   delete notationPToken.nextPropName;
+   delete notationPToken.unassigned;
 }
 
 /**********************************************************************\
@@ -120,6 +181,7 @@ export {
    NotationDeclaration as XToken,
    NotationDeclarationPToken as PToken,
    parse,
+   assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
 };

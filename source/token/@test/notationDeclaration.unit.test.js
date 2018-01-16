@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
@@ -11,6 +11,8 @@ import * as declaration from '../bridge/declaration.js';
 import * as notationDeclaration from '../notationDeclaration.js';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';
+import entityReference from '../entityReference.js';
+import unassigned from '../unassigned.js';
 
 describe('notationdeDlaration (unit)', () => {
    let notationPToken;
@@ -63,12 +65,20 @@ describe('notationdeDlaration (unit)', () => {
 
    describe('parse()', () => {
       let callback;
+      let nonPeRefCallback;
 
       beforeEach(() => {
+         nonPeRefCallback = undefined;
          callback = jasmine.createSpy('callbackSpy');
          spyOn(externalId, 'parse');
          externalId.parse.and.callFake((source, terminators, cb) => {
             cb({ externalId: true });
+         });
+         spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, name, cb1, cb2) => {
+            nonPeRefCallback = cb2;
+         });
+         spyOn(unassigned, 'checkForPERef').and.callFake(() => {
+            nonPeRefCallback();
          });
       });
 
@@ -108,6 +118,156 @@ describe('notationdeDlaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(notationPToken);
+      });
+
+      it('adopts the unassigned value from the externalId', () => {
+         // delete the things that our mocking of declaration will not return
+         const mockSource = new MockSTokenSource([
+            'notationName',
+            ' ',
+            // Skipping externalId parsing here
+            ' ',
+            '>',
+         ]);
+         externalId.parse.and.callFake((source, terminators, cb) => {
+            cb({ unassigned: [ 7734 ] });
+         });
+
+         notationDeclaration.parse(mockSource, {
+            type: notationPToken.type,
+         }, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ 7734 ]);
+      });
+   
+      it('sets up to let unassigned handle checking for a PE Reference', () => {
+         const checkCallbackSpy = jasmine.createSpy();
+         unassigned.makeCheckCallback.and.returnValue(checkCallbackSpy);
+         unassigned.checkForPERef.and.callFake(() => {});
+         const mockSource = new MockSTokenSource([]);
+
+         notationDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(unassigned.makeCheckCallback.calls.argsFor(0)[0].type).toEqual(notationDeclaration.PTYPE);
+         expect(unassigned.makeCheckCallback.calls.argsFor(0)[1]).toEqual('name');
+         expect(unassigned.makeCheckCallback.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(unassigned.makeCheckCallback.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
+      });
+
+   });
+
+   describe('assignUnassigned()', () => {
+
+      beforeEach(() => {
+         spyOn(unassigned, 'assignToProps');
+         spyOn(externalId, 'assignUnassigned');
+      });
+
+      it('does not call assignToProps() if there is no unassigned', () => {
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      it('deletes the unassigned property if it is empty', () => {
+         notationPToken.unassigned = [];
+         notationPToken.nextPropName = 'name';
+         
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(notationPToken.unassigned).toBeUndefined();
+         expect(notationPToken.nextPropName).toBeUndefined();
+      });
+
+      it('does not call assignToProps() if there is still an unexpanded param ref', () => {
+         notationPToken.unassigned = [ {
+            type: entityReference.PARAM_PTYPE,
+         } ];
+         
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      it('calls unassigned.assignToProps() if the nextPropName is "name"', () => {
+         notationPToken = new notationDeclaration.PToken({
+            unassigned: [ 'foo' ],
+            nextPropName: 'name',
+         });
+         
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(
+            [ 'foo' ],
+            notationPToken,
+            'name', [
+               { name: 'postDeclTypeSpace', type: 'space' },
+               { name: 'name', type: 'word' },
+               { name: 'postNameSpace', type: 'space' },
+            ]);
+      });
+
+      // Transpilation is somhow producing a slightly different spy
+      // for externalId.assignUnassigned, or something. so we can't validate these
+      // it('calls externalId.assignUnassigned() with the toplevel unassigned value', () => {
+      //    notationPToken = new notationDeclaration.PToken({
+      //       unassigned: [ 'foo' ],
+      //       nextPropName: 'name',
+      //    });
+         
+      //    notationDeclaration.assignUnassigned(notationPToken);
+
+      //    expect(externalId.assignUnassigned).toHaveBeenCalledWith({
+      //       unassigned: [ 'foo' ],
+      //    });
+      // });
+
+      // fit('calls externalId.assignUnassigned() its own unassigned value, if present', () => {
+      //    notationPToken = new notationDeclaration.PToken({
+      //       unassigned: [ 'foo' ],
+      //       externalId: {
+      //          unassigned: [ 'different' ],
+      //          nextPropName: 'idType',
+      //       },
+      //    });
+         
+      //    notationDeclaration.assignUnassigned(notationPToken);
+
+      //    expect(externalId.assignUnassigned).toHaveBeenCalledWith({
+      //       unassigned: [ 'different' ],
+      //       nextPropName: 'idType',
+      //    });
+      // });
+      
+      it('adds an "extra" property if the unassigned values are not consumed', () => {
+         notationPToken = new notationDeclaration.PToken({
+            unassigned: [ 'foo' ],
+         });
+         
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(notationPToken.extra).toEqual([ 'foo' ]);
+      });
+
+      it('removes all unassigned and nextPropName values', () => {
+         notationPToken = new notationDeclaration.PToken({
+            unassigned: [ 'foo' ],
+            nextPropName: 'name',
+            externalId: {
+               unassigned: [ 'different' ],
+               nextPropName: 'idType',
+            },
+         });
+         
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(notationPToken).toEqual(new notationDeclaration.PToken({
+            extra: [ 'foo' ],
+            externalId: {},
+         }));
       });
 
    });

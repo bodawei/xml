@@ -176,10 +176,11 @@ class STokenSource {
    }
 
    _resumeOperation() {
-      if (this._resuming === true) {
-         return;
-      }
-      this._resuming = true;
+      // Turn these back on if we turn off the setTimeout(), below.
+      // if (this._resuming === true) {
+      //    return;
+      // }
+      // this._resuming = true;
 
       while ((this._segments.length !== 0 || this._allTextAdded) && this._extractors.length > 0) {
          const extContext = this._extractors[0];
@@ -222,7 +223,7 @@ class STokenSource {
          }, 0);
          break;
       }
-      this._resuming = false;
+      // this._resuming = false;
    }
 
    _restorePartiallyAndUnusedSegments(segInfos) {

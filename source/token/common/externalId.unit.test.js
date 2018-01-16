@@ -341,15 +341,13 @@ describe('externalId (unit)', () => {
       it('calls assignToProps()', () => {
          const externalIdToken = {
             nextPropName: 'postIdTypeSpace',
-            unassigned: [
-               unassigned.wordFromSToken(SToken.fromString('hi')),
-            ],
+            unassigned: [ 'hi' ],
          };
 
          externalId.assignUnassigned(externalIdToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            externalIdToken.unassigned,
+            [ 'hi' ],
             externalIdToken,
             'postIdTypeSpace', [
                { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },

@@ -1,14 +1,18 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as notationDeclaration from '../notationDeclaration.js';
+import entityEnd from '../entityEnd.js';
+import entityReference from '../entityReference.js';
+import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
+import * as notationDeclaration from '../notationDeclaration.js';
+import unassigned from '../unassigned.js';
 
 describe('notationdeDlaration (integration)', () => {
    let declarationPToken;
@@ -33,6 +37,106 @@ describe('notationdeDlaration (integration)', () => {
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
             expect(parsing.externalId.type).toEqual(externalId.PTYPE);
+            done();
+         });
+      });
+
+      it('parses a PERef (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('%foo;>');
+         source.endText();
+
+         notationDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
+            expect(result).toEqual(new notationDeclaration.PToken({
+               unassigned: [ new entityReference.ParamPToken({
+                  open:  makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name:  makeSToken('foo'),
+                  postNameSpace: undefined,
+                  close:  makeSToken(';'),
+               }) ],
+               nextPropName: 'name',
+               close: makeSToken1('>'),
+            }));
+            done();
+         });
+      });
+
+      it('copes with a PERef in the externalId (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('notationName %foo;>');
+         source.endText();
+         const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13, 13, 0, 13);
+         const unassignedValue = [ new entityReference.ParamPToken({
+            open:  makeSToken1('%'),
+            postOpenSpace: undefined,
+            name:  makeSToken1('foo'),
+            postNameSpace: undefined,
+            close:  makeSToken1(';'),
+         }) ];
+
+         notationDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            expect(result).toEqual(new notationDeclaration.PToken({
+               name: makeSToken('notationName'),
+               postNameSpace: makeSToken(' '),
+               unassigned: unassignedValue,
+               externalId: {
+                  type: 'EXTERNAL_ID',
+                  unassigned: unassignedValue,
+                  nextPropName: 'idType',
+               },
+               close: makeSToken1('>'),
+            }));
+            done();
+         });
+      });
+
+   });
+
+   describe('assignUnassigned()', () => {
+
+      it('fills in the missing properties, including the preceeding declaration space', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('%foo;>');
+         source.endText();
+
+         notationDeclaration.parse(source, {}, (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}),
+               unassigned.wordFromSToken(SToken.fromString('notationName')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
+                  type: 'literal',
+                  openQuote: SToken.fromString('"'),
+                  value: [ SToken.fromString('foo') ],
+                  closeQuote: SToken.fromString('"'),
+               },
+               new entityEnd.ParamPToken({}),
+            ];
+
+            notationDeclaration.assignUnassigned(pToken);
+
+            const makeSToken = makeSTokenMaker();
+            const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
+            expect(pToken).toEqual(new notationDeclaration.PToken({
+               postDeclTypeSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               name: SToken.fromString('notationName'),
+               postNameSpace: SToken.fromString(' '),
+               externalId: {
+                  idType: SToken.fromString('PUBLIC'),
+                  public: {
+                     openQuote: SToken.fromString('"'),
+                     value: [ SToken.fromString('foo') ],
+                     closeQuote: SToken.fromString('"'),
+                  },
+                  postPublicSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               },
+               close: makeSToken2('>'),
+            }));
             done();
          });
       });

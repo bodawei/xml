@@ -143,11 +143,10 @@ function assignUnassigned(externalId) {
 
    delete externalId.nextPropName;
 
-   if (unValues.length === 0) {
-      delete externalId.unassigned;
-   } else {
+   if (unValues.length !== 0) {
       externalId.extra = externalId.unassigned;
    }
+   delete externalId.unassigned;
 }
 
 /**********************************************************************\
