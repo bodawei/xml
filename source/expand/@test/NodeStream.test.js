@@ -1,12 +1,12 @@
 /* Copyright ® 2016 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../basic';
-import { SToken } from '../sToken';
-import * as xToken from '../token';
+import { EntityLocation, Range } from '../../basic';
+import { SToken } from '../../sToken';
+import * as xToken from '../../token';
 
-import NodeStream from './NodeStream.js';
-import EntityManager from './EntityManager.js';
+import NodeStream from '../NodeStream.js';
+import EntityManager from '../EntityManager.js';
 
 describe('NodeStream (unit)', () => {
 

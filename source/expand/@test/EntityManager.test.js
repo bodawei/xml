@@ -1,14 +1,14 @@
 /* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation } from '../basic';
-import { SToken } from '../sToken';
+import { EntityLocation } from '../../basic';
+import { SToken } from '../../sToken';
 import {
    entityDeclaration,
    text,
-} from '../token';
+} from '../../token';
 
-import EntityManager from './EntityManager.js';
+import EntityManager from '../EntityManager.js';
 
 describe('EntityManager (unit)', () => {
    let manager;

@@ -210,37 +210,47 @@ describe('notationdeDlaration (unit)', () => {
             ]);
       });
 
-      // Transpilation is somhow producing a slightly different spy
-      // for externalId.assignUnassigned, or something. so we can't validate these
-      // it('calls externalId.assignUnassigned() with the toplevel unassigned value', () => {
-      //    notationPToken = new notationDeclaration.PToken({
-      //       unassigned: [ 'foo' ],
-      //       nextPropName: 'name',
-      //    });
+      it('calls externalId.assignUnassigned() with the toplevel unassigned value', () => {
+         notationPToken = new notationDeclaration.PToken({
+            unassigned: [ 'foo' ],
+            nextPropName: 'name',
+         });
+         let testName;
+         externalId.assignUnassigned.and.callFake((external, container, propName) => {
+            expect(external).toEqual({
+               unassigned: [ 'foo' ],
+            });
+            expect(container).toEqual(notationPToken);
+            testName = propName;
+         });
          
-      //    notationDeclaration.assignUnassigned(notationPToken);
+         notationDeclaration.assignUnassigned(notationPToken);
 
-      //    expect(externalId.assignUnassigned).toHaveBeenCalledWith({
-      //       unassigned: [ 'foo' ],
-      //    });
-      // });
+         expect(testName).toEqual('postNameSpace');
+      });
 
-      // fit('calls externalId.assignUnassigned() its own unassigned value, if present', () => {
-      //    notationPToken = new notationDeclaration.PToken({
-      //       unassigned: [ 'foo' ],
-      //       externalId: {
-      //          unassigned: [ 'different' ],
-      //          nextPropName: 'idType',
-      //       },
-      //    });
-         
-      //    notationDeclaration.assignUnassigned(notationPToken);
+      it('calls externalId.assignUnassigned() its own unassigned value, if present', () => {
+         notationPToken = new notationDeclaration.PToken({
+            unassigned: [ 'foo' ],
+            externalId: {
+               unassigned: [ 'different' ],
+               nextPropName: 'idType',
+            },
+         });
+         let testName;
+         externalId.assignUnassigned.and.callFake((external, container, propName) => {
+            expect(external).toEqual({
+               unassigned: [ 'different' ],
+               nextPropName: 'idType',
+            });
+            expect(container).toEqual(notationPToken);
+            testName = propName;
+         });
 
-      //    expect(externalId.assignUnassigned).toHaveBeenCalledWith({
-      //       unassigned: [ 'different' ],
-      //       nextPropName: 'idType',
-      //    });
-      // });
+         notationDeclaration.assignUnassigned(notationPToken);
+
+         expect(testName).toEqual('postNameSpace');
+      });
       
       it('adds an "extra" property if the unassigned values are not consumed', () => {
          notationPToken = new notationDeclaration.PToken({

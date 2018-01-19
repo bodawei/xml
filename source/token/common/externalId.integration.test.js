@@ -148,31 +148,70 @@ describe('externalId (integration)', () => {
          });
       });
 
-      it('parses a PERef (check unsasigned calls)', (done) => {
-         source.addText('PUBLIC "pub.xml"%foo;>');
+      it('adds a space to the previous prop name (check unsasigned calls)', (done) => {
+         const container = {
+            prevProp: new SToken('\t', '\t', [
+               new Range(new EntityLocation(), 10, 0, 10, 11, 0, 11)
+            ]),
+         };
+         const expectedString = new SToken('\t ', '\t ', [
+            new Range(new EntityLocation(), 10, 0, 10, 11, 0, 11),
+            RANGE,
+         ]);
+         source.addText('%foo;>');
+         source.endText();
 
-         externalId.parse(source, [], (result) => {
-            const makeSToken = makeSTokenMaker();
-            expect(result).toEqual({
-               type: 'EXTERNAL_ID',
-               idType: makeSToken('PUBLIC'),
-               postIdTypeSpace: makeSToken(' '),
-               public: {
-                  openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('pub.xml') }) ],
-                  closeQuote: makeSToken('"'),
-               },
-               postPublicSpace: undefined,
-               unassigned: [ new entityReference.ParamPToken({
-                  type: 'foo',
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
-               nextPropName: 'system',
+         externalId.parse(source, [], (extIdPToken) => {
+            // expand/replace the publicVal reference
+            expect(extIdPToken.unassigned[0].type).toEqual(entityReference.PARAM_PTYPE);
+            extIdPToken.unassigned.shift();
+            extIdPToken.unassigned.unshift({
+               type: entityEnd.PARAM_PTYPE
             });
+            extIdPToken.unassigned.unshift({
+               type: 'text',
+               subType: 'word',
+               text: SToken.fromString('public'),
+            });
+            extIdPToken.unassigned.unshift({
+               type: entityStart.PARAM_PTYPE
+            });
+
+            externalId.assignUnassigned(extIdPToken, container, 'prevProp');
+
+            expect(container.prevProp).toEqual(expectedString);
+            expect(extIdPToken.idType.str).toEqual('public');
+            done();
+         });
+      });
+
+      it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
+         const container = {};
+         const expectedString = new SToken(' ', ' ', [ RANGE ]);
+         source.addText('%foo;>');
+         source.endText();
+
+         externalId.parse(source, [], (extIdPToken) => {
+            // expand/replace the publicVal reference
+            expect(extIdPToken.unassigned[0].type).toEqual(entityReference.PARAM_PTYPE);
+            extIdPToken.unassigned.shift();
+            extIdPToken.unassigned.unshift({
+               type: entityEnd.PARAM_PTYPE
+            });
+            extIdPToken.unassigned.unshift({
+               type: 'text',
+               subType: 'word',
+               text: SToken.fromString('public'),
+            });
+            extIdPToken.unassigned.unshift({
+               type: entityStart.PARAM_PTYPE
+            });
+
+            externalId.assignUnassigned(extIdPToken, container, 'prevProp');
+
+            expect(container.prevProp).toEqual(expectedString);
+            expect(extIdPToken.__bogusWorkaround).toBeUndefined();
+            expect(extIdPToken.idType.str).toEqual('public');
             done();
          });
       });

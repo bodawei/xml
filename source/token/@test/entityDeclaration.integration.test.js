@@ -1,13 +1,16 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration.js';
+import entityEnd from '../entityEnd.js';
+import entityStart from '../entityStart.js';
+import unassigned from '../unassigned.js';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken;
@@ -27,14 +30,103 @@ describe('entityDeclaration (integration)', () => {
 
    describe('parse()', () => {
 
-      it('parses an enty declaration with a PEReference', (done) => {
-         const makeSToken = makeSTokenMaker();
+      it('parses an enty declaration with a PEReference in the value', (done) => {
          source.addText('aName "frog%foo;">');
          source.endText();
 
-         entityDeclaration.parse(source, makeSToken('<'), (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
             expect(pToken.type).toEqual(entityDeclaration.PTYPE);
             expect(pToken.value[1].type).toEqual('PARAMETERENTITYREF');
+            done();
+         });
+      });
+
+      it('parses an entity declaration after the name', (done) => {
+         source.addText('aName %foo;>');
+         source.endText();
+
+         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+            expect(pToken.postNameSpace.str).toEqual(' ');
+            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.close.str).toEqual('>');
+            done();
+         });
+      });
+
+      it('parses an enty declaration in the body of the declaration even when maformed', (done) => {
+         source.addText('% foo ;>');
+         source.endText();
+
+         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+            expect(pToken.parameter).toBeUndefined();
+            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.close.str).toEqual('>');
+            done();
+         });
+      });
+
+      it('parses no enty declaration if there is not one', (done) => {
+         source.addText('%foo "value">');
+         source.endText();
+
+         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+            expect(pToken.parameter.str).toEqual('%');
+            expect(pToken.unassigned).toBeUndefined();
+            expect(pToken.close.str).toEqual('>');
+            done();
+         });
+      });
+
+      it('parses an enty declaration in an externalID', (done) => {
+         source.addText('aName SYSTEM %foo;>');
+         source.endText();
+
+         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+            expect(pToken.externalId.idType.str).toEqual('SYSTEM');
+            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.unassigned).toBe(pToken.externalId.unassigned);
+            expect(pToken.close.str).toEqual('>');
+            done();
+         });
+      });
+
+   });
+
+   describe('assignUnassigned()', () => {
+
+      it('fills in the missing properties, including the preceeding declaration space', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('%foo;>');
+         source.endText();
+
+         entityDeclaration.parse(source, {}, (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}),
+               unassigned.wordFromSToken(SToken.fromString('entityName')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')), {
+                  type: 'literal',
+                  openQuote: SToken.fromString('"'),
+                  value: [ SToken.fromString('foo') ],
+                  closeQuote: SToken.fromString('"'),
+               },
+               new entityEnd.ParamPToken({}),
+            ];
+
+            entityDeclaration.assignUnassigned(pToken);
+
+            const makeSToken = makeSTokenMaker();
+            const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
+            expect(pToken).toEqual(new entityDeclaration.PToken({
+               postDeclTypeSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               name: SToken.fromString('entityName'),
+               postNameSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: [ SToken.fromString('foo') ],
+               closeQuote: SToken.fromString('"'),
+               postEntityValueSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               close: makeSToken2('>'),
+            }));
             done();
          });
       });

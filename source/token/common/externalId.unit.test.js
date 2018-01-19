@@ -358,6 +358,86 @@ describe('externalId (unit)', () => {
             ]);
       });
 
+      it('calls assignToProps() with the previous space property name, if provided', () => {
+         const externalIdToken = {
+            nextPropName: 'postIdTypeSpace',
+            unassigned: [ 'hi' ],
+         };
+
+         externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
+
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(
+            [ 'hi' ],
+            externalIdToken,
+            'postIdTypeSpace', [
+               { name: '__bogusWorkaround', type: 'space' },
+               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'postIdTypeSpace', type: 'space' },
+               { name: 'public', type: 'literal' },
+               { name: 'postPublicSpace', type: 'space' },
+               { name: 'system', type: 'literal' },
+            ]);
+      });
+
+      it('forces idType to be the start value if none provided', () => {
+         const externalIdToken = {
+            unassigned: [ 'hi' ],
+         };
+
+         externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
+
+         expect(unassigned.assignToProps).toHaveBeenCalledWith(
+            [ 'hi' ],
+            externalIdToken,
+            'idType', [
+               { name: '__bogusWorkaround', type: 'space' },
+               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'postIdTypeSpace', type: 'space' },
+               { name: 'public', type: 'literal' },
+               { name: 'postPublicSpace', type: 'space' },
+               { name: 'system', type: 'literal' },
+            ]);
+      });
+
+      it('moves the previous property to the container', () => {
+         unassigned.assignToProps.and.callFake((_1, pToken) => {
+            pToken.__bogusWorkaround = SToken.fromString('bogus');
+            pToken.unassigned = [];
+         });
+         const container = {};
+         const externalIdToken = {
+            nextPropName: 'postIdTypeSpace',
+            unassigned: [ 'hi' ],
+         };
+
+         externalId.assignUnassigned(externalIdToken, container, 'testPropName');
+
+         expect(externalIdToken.__bogusWorkaround).toBeUndefined();
+         expect(container).toEqual({
+            testPropName: SToken.fromString('bogus'),
+         });
+      });
+
+      it('merges a space with the previous property', () => {
+         unassigned.assignToProps.and.callFake((_1, pToken) => {
+            pToken.__bogusWorkaround = SToken.fromString('b');
+            pToken.unassigned = [];
+         });
+         const container = {
+            testPropName: SToken.fromString('a'),
+         };
+         const externalIdToken = {
+            nextPropName: 'postIdTypeSpace',
+            unassigned: [ 'hi' ],
+         };
+
+         externalId.assignUnassigned(externalIdToken, container, 'testPropName');
+
+         expect(container).toEqual({
+            testPropName: SToken.fromString('ab'),
+         });
+      });
+
       it('removes the unassigned array if it is empty', () => {
          const externalIdToken = {
             nextPropName: 'postIdTypeSpace',

@@ -118,8 +118,15 @@ function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
    unassigned.checkForPERef(source, callback);
 }
 
-function assignUnassigned(externalId) {
+function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
    const unValues = externalId.unassigned || [];
+   const descriptors = [
+      { name: 'idType', type: 'word', allowed: [ 'public', 'system' ] },
+      { name: 'postIdTypeSpace', type: 'space' },
+      { name: 'public', type: 'literal' },
+      { name: 'postPublicSpace', type: 'space' },
+      { name: 'system', type: 'literal' },
+   ];
 
    if (unValues.length === 0) {
       delete externalId.unassigned;
@@ -133,19 +140,27 @@ function assignUnassigned(externalId) {
       return;
    }
 
-   unassigned.assignToProps(externalId.unassigned, externalId, externalId.nextPropName, [
-      { name: 'idType', type: 'word', allowed: [ 'public', 'system' ] },
-      { name: 'postIdTypeSpace', type: 'space' },
-      { name: 'public', type: 'literal' },
-      { name: 'postPublicSpace', type: 'space' },
-      { name: 'system', type: 'literal' },
-   ]);
+   if (prevContainer && prevSpacePropName) {
+      descriptors.unshift({ name: '__bogusWorkaround', type: 'space' });
+   }
 
-   delete externalId.nextPropName;
+   const nextPropName = externalId.nextPropName || 'idType';
+   unassigned.assignToProps(externalId.unassigned, externalId, nextPropName, descriptors);
+
+   if (externalId.__bogusWorkaround) {
+      if (prevContainer[prevSpacePropName]) {
+         prevContainer[prevSpacePropName].merge(externalId.__bogusWorkaround);
+      } else {
+         prevContainer[prevSpacePropName] = externalId.__bogusWorkaround;
+      }
+   }
 
    if (unValues.length !== 0) {
       externalId.extra = externalId.unassigned;
    }
+
+   delete externalId.__bogusWorkaround;
+   delete externalId.nextPropName;
    delete externalId.unassigned;
 }
 

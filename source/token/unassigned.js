@@ -132,9 +132,7 @@ function checkForPERef(source, deliverResult) {
          return;
       }
 
-      extractAllValues(source, (values) => {
-         deliverResult(values);
-      });
+      extractAllValues(source, deliverResult);
    });
 }
 

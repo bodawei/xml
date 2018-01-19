@@ -3,6 +3,8 @@
 import { WellFormedError, XmlWarning } from '../error';
 
 import * as base from './base.js';
+import entityReference from './entityReference.js';
+import unassigned from './unassigned.js';
 import * as declaration from './bridge/declaration.js';
 import misc from './common/misc.js';
 import externalId from './common/externalId.js';
@@ -130,53 +132,227 @@ function parse(source, declarationPToken, deliverPToken) {
          source.extractToObject('space', pToken, 'postParameterSpace');
       }
 
-      source.extractToObject('word', [ '>', '"', '\'' ], pToken, 'name');
-      source.extractToObject('space', pToken, 'postNameSpace');
+      parseWordOrPERef(source, pToken, () => {
+         parseClose(source, pToken, deliverPToken);
+      });
+   });
+}
 
+function parseWordOrPERef(source, pToken, done) {
+   const callback = unassigned.makeCheckCallback(pToken, 'name', done, () => {
+      // Consider "<!ENTITY % name". By strict syntax, tht can only be
+      // a Parameter entity declaration.  However, because we want to allow
+      // inappropriate spaces in non-strict mode, and if we actually have this:
+      // "<!ENTITY % name ;" then we would consider that as an entity declaration
+      // with a malformed PERef, and not an overall malformed ENTITY declaration.
+      // The code here seeks to cope with this case.
+
+      source.extractToObject('word', [ '>', '"', '\'', ';' ], pToken, 'name');
+      source.extractToObject('space', pToken, 'postNameSpace');
+      source.extract('match', ';', (semiColon) => {
+         if (pToken.parameter && semiColon) {
+            // @@@ CLEANUP because code copied and pasted
+            const values = [];
+
+            unassigned.parseNextValue(source, (value) => {
+               handleValue(source, pToken, value, semiColon, values, done);
+            });
+         } else {
+            parseEntityValue(source, pToken, done);
+         }
+      });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function handleValue(source, pToken, value, semiColon, values, done) {
+   if (!value) {
+      const entityRef = new entityReference.ParamPToken({
+         open: pToken.parameter,
+         postOpenSpace: pToken.postParameterSpace,
+         name: pToken.name,
+         postNameSpace: pToken.postNameSpace,
+         close: semiColon,
+      });
+      pToken.unassigned = values;
+      pToken.nextPropName = 'parameter';
+      pToken.unassigned.unshift(entityRef);
+      delete pToken.parameter;
+      delete pToken.postParameterSpace;
+      delete pToken.name;
+      delete pToken.postNameSpace;
+      done();
+      return;
+   }
+
+   values.push(value);
+   // call via the public interface (helps with jasmine spy'ing)
+   unassigned.parseNextValue(source, (value) => {
+      handleValue(source, pToken, value, semiColon, values, done);
+   });
+}
+
+function parseEntityValue(source, pToken, done) {
+   const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
       literal.parse(source, {
          pToken,
          peRef: true,
       }, (gotQuoted) => {
          if (gotQuoted) {
-            parseClose(source, pToken, 'postEntityValueSpace', deliverPToken);
-         } else {
-            externalId.parse(source, [ '>' ], (externalId) => {
-               pToken.externalId = externalId;
-               if (!externalId) {
-                  parseClose(source, pToken, undefined, deliverPToken);
-                  return;
-               }
-
-               source.extractToObject('space', pToken, 'postExternalIdSpace');
-               source.extract('peekWord', [ '>' ], (sToken) => {
-                  if (sToken && sToken.str.toLocaleUpperCase() === 'NDATA') {
-                     source.extractToObject('word', [ '>' ], pToken, 'nData');
-                     source.extractToObject('space', pToken, 'postNDataSpace');
-                     source.extractToObject('word', [ '>' ], pToken, 'nDataName');
-                     parseClose(source, pToken, 'postNDataNameSpace', deliverPToken);
-                  } else {
-                     parseClose(source, pToken, undefined, deliverPToken);
-                  }
-               });
+            source.extract('space', (sToken) => {
+               pToken.postEntityValueSpace = sToken;
+               done();
             });
+            return;
+         }
+
+         parseExternalId(source, pToken, done);
+      });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseExternalId(source, pToken, done) {
+   const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
+      externalId.parse(source, [ '>' ], (externalId) => {
+         pToken.externalId = externalId;
+         pToken.unassigned = externalId && externalId.unassigned;
+
+         if (!externalId || externalId.unassigned) {
+            done();
+            return;
+         }
+
+         source.extractToObject('space', pToken, 'postExternalIdSpace');
+         parseNData(source, pToken, done);
+      });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseNData(source, pToken, done) {
+   const callback = unassigned.makeCheckCallback(pToken, 'nData', done, () => {
+      source.extract('peekWord', [ '>' ], (sToken) => {
+         if (sToken && sToken.str.toLocaleUpperCase() === 'NDATA') {
+            source.extractToObject('word', [ '>' ], pToken, 'nData');
+            source.extract('space', (sToken) => {
+               pToken.postNDataSpace = sToken;
+               parseNDataName(source, pToken, done);
+            });
+         } else {
+            done();
          }
       });
    });
+
+   unassigned.checkForPERef(source, callback);
 }
 
-function parseClose(source, pToken, propName, deliverPToken) {
-   if (propName) {
-      source.extractToObject('space', pToken, propName);
-   }
-   source.extract('match', '>', (sToken) => {
-      pToken.close = sToken;
-
-      if (pToken.parameter) {
-         deliverPToken(new ParameterEntityDeclarationPToken(pToken));
-      } else {
-         deliverPToken(pToken);
-      }
+function parseNDataName(source, pToken, done) {
+   const callback = unassigned.makeCheckCallback(pToken, 'nDataName', done, () => {
+      source.extractToObject('word', [ '>' ], pToken, 'nDataName');
+      source.extract('space', (sToken) => {
+         pToken.postNDataNameSpace = sToken;
+         done();
+      });
    });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseClose(source, pToken, deliverPToken) {
+   source.extract('match', '>', (sToken) => {
+      const deliveredPToken = !pToken.parameter ? pToken : new ParameterEntityDeclarationPToken(pToken);
+
+      deliveredPToken.close = sToken;
+      deliverPToken(deliveredPToken);
+   });
+}
+
+/**********************************************************************\
+ assignUnassigned()
+\**********************************************************************/
+
+function assignUnassigned(pToken) {
+   const unValues = pToken.unassigned || [];
+
+   if (unValues.length === 0) {
+      delete pToken.unassigned;
+      delete pToken.nextPropName;
+      return;
+   }
+
+   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+
+   if (unexpandedRef.length !== 0) {
+      return;
+   }
+
+   const prolog = [
+      { name: 'postDeclTypeSpace', type: 'space' },
+      { name: 'parameter', type: 'word', allowed: '%' },
+      { name: 'postParameterSpace', type: 'space' },
+      { name: 'name', type: 'word' },
+      { name: 'postNameSpace', type: 'space' },
+   ];
+   const epilog = [
+      { name: 'postExternalIdSpace', type: 'space' },
+      { name: 'nData', type: 'word' },
+      { name: 'postNDataSpace', type: 'space' },
+      { name: 'nDataName', type: 'word' },
+      { name: 'postNDataNameSpace', type: 'space' },
+   ];
+
+   // Help guide where to fill in the unassigned values
+   const inProlog = prolog.filter((item) => item.name === pToken.nextPropName).length > 0;
+   const inExternalId = !!(pToken.externalId && pToken.externalId.unassigned);
+   const isEntityValueOrExternalId = pToken.nextPropName === 'entityValueOrId';
+   const inEpilog = epilog.filter((item) => item.name === pToken.nextPropName).length > 0;
+   let doEpilog = inEpilog.length > 0;
+
+   if (inExternalId) {
+      externalId.assignUnassigned(pToken.externalId, pToken, 'postNameSpace');
+      doEpilog = true;
+   } else {
+      if (inProlog) {
+         unassigned.assignToProps(pToken.unassigned, pToken, pToken.nextPropName, prolog);
+      }
+
+      if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned[0]) {
+         if (pToken.unassigned[0].type === 'literal') {
+            unassigned.assignToProps(pToken.unassigned, pToken, 'EntityValue', [
+               { name: 'EntityValue', type: 'literal', flatten: true },
+               { name: 'postEntityValueSpace', type: 'space' },
+            ]);
+         } else {
+            pToken.externalId = {
+               unassigned: pToken.unassigned,
+            };
+            externalId.assignUnassigned(pToken.externalId, pToken, 'postNameSpace');
+            doEpilog = true;
+         }
+      }
+   }
+
+   if (doEpilog) {
+      unassigned.assignToProps(pToken.unassigned, pToken, 'postExternalIdSpace', epilog);
+   }
+
+   if (unValues.length !== 0) {
+      pToken.extra = pToken.unassigned;
+   }
+
+   if (pToken.externalId) {
+      delete pToken.externalId.nextPropName;
+      delete pToken.externalId.unassigned;
+      delete pToken.externalId.extra;
+   }
+
+   delete pToken.nextPropName;
+   delete pToken.unassigned;
 }
 
 /**********************************************************************\
@@ -250,6 +426,7 @@ export {
    EntityDeclaration as XToken,
    ParameterEntityDeclaration as ParamXToken,
    parse,
+   assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
 };

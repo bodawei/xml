@@ -8,6 +8,8 @@ import { WellFormedError, XmlWarning } from '../../error';
 
 import * as declaration from '../bridge/declaration.js';
 import * as entityDeclaration from '../entityDeclaration.js';
+import entityReference from '../entityReference.js'
+import unassigned from '../unassigned.js';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';
 import literal from '../common/literal.js';
@@ -82,21 +84,31 @@ describe('entityDeclaration (unit)', () => {
 
    describe('parse()', () => {
       let callback;
+      let checkForPERefCallback;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parse');
-         externalId.parse.and.callFake((source, terminators, cb) => {
+
+         spyOn(externalId, 'parse').and.callFake((source, terminators, cb) => {
             cb({ externalId: true });
          });
+
          spyOn(literal, 'parse');
+
+         spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, _2, _3, other) => {
+            checkForPERefCallback = other;
+         });
+
+         spyOn(unassigned, 'checkForPERef').and.callFake(() => checkForPERefCallback());
       });
 
       it('calls literal.parse()', () => {
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('a'),
-            'anEntity',
-            ' ',
+            [ 'anEntity', 'word', [ '>', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'match' ],
+            [ '>', 'match', '>' ],
          ]);
          delete entityDeclarationPToken.postExternalIdSpace;
          delete entityDeclarationPToken.close;
@@ -115,12 +127,13 @@ describe('entityDeclaration (unit)', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
-            'entityName',
-            ' ',
-            MockSTokenSource.PEEK('S'),
-            ' ',
-            undefined,
-            '>',
+            [ 'entityName', 'word', [ '>', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'match', ';' ],
+            // externalId or literal would have been here
+            [ ' ', 'space' ],
+            [ undefined, 'peekWord' [ '>' ] ],
+            [ '>', 'match', '>' ],
          ]);
          entityDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
@@ -134,10 +147,10 @@ describe('entityDeclaration (unit)', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
-            [ 'anEntity', 'word', [ '>' ] ],
+            [ 'anEntity', 'word', [ '>', '"', '\'' ] ],
             [ ' ', 'space' ],
-            // Skipping literal parsing here
-            // Skipping externalId parsing here
+            [ undefined, 'match', ';' ],
+            // externalId or literal would have been here
             [ ' ', 'space' ],
             [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
@@ -166,10 +179,10 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
             [ ' ', 'space' ],
-            [ 'anEntity', 'word', [ '>' ] ],
+            [ 'anEntity', 'word', [ '>' ] ], // @@ CLEANUP why does the param match?
             [ ' ', 'space' ],
-            // Skipping literal parsing here
-            // Skipping externalId parsing here
+            [ undefined, 'match', ';' ],
+            // externalId or literal would have been here
             [ undefined, 'space' ],
             [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
@@ -187,12 +200,14 @@ describe('entityDeclaration (unit)', () => {
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
             '%',
-            undefined,
+            [ undefined, 'space' ],
             'entityName',
-            ' ',
-            undefined,
-            undefined,
-            '>',
+            [ ' ', 'space' ],
+            [ undefined, 'match', ';' ],
+            // externalId or literal would have been here
+            [ undefined, 'space' ],
+            [ undefined, 'peekWord', [ '>' ] ],
+            [ '>', 'match', '>' ],
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
@@ -211,12 +226,13 @@ describe('entityDeclaration (unit)', () => {
          externalId.parse.and.callFake((_1, _2, callback) => { callback(undefined); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
-            '%',
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
+            [ '%', 'char' ],
+            [ undefined, 'space' ],
+            [ undefined, 'word', [ '>' ] ], // @@ CLEANUP why does the param match?
+            [ undefined, 'space' ],
+            [ undefined, 'match', ';' ],
+            // externalId or literal would have been here
+            [ undefined, 'match', '>' ],
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
@@ -238,6 +254,7 @@ describe('entityDeclaration (unit)', () => {
             'entityName',
             undefined,
             undefined,
+            undefined,
             '>',
          ]);
 
@@ -256,6 +273,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
+            [ undefined, 'match', ';' ],
             ' ',
             '>',
          ]);
@@ -300,6 +318,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
+            [ undefined, 'match', ';' ],
             ' ',
             undefined, // peekWord
             '>',
@@ -324,7 +343,8 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
-               // externalId
+            [ undefined, 'match', ';' ],
+            // externalId
             ' ',
             MockSTokenSource.PEEK('NDATA'),
             'NDATA',
@@ -354,6 +374,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
+            [ undefined, 'match', ';' ],
                // externalId
             ' ',
             MockSTokenSource.PEEK('ndaTa'),
@@ -379,6 +400,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
+            [ undefined, 'match', ';' ],
                // externalId
             ' ',
             MockSTokenSource.PEEK('ndaTa'),
@@ -408,14 +430,15 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('e'),
             'entityName',
             ' ',
+            [ undefined, 'match', ';' ],
                // externalId
             ' ',
             MockSTokenSource.PEEK('NDATA'),
             'NDATA',
             undefined,
-            undefined,
-            undefined,
-            undefined,
+            [ undefined, 'word', [ '>' ] ],
+            [ undefined, 'space' ],
+            [ undefined, 'match' ],
          ]);
 
          entityDeclaration.parse(mockSource, {}, callback);
@@ -432,22 +455,475 @@ describe('entityDeclaration (unit)', () => {
          });
       });
 
-      describe('terminators', () => {
+      describe('parameter entity reference', () => {
 
-         it('passes quotes and > as terminators for getting the name', () => {
+         it('returns an unassigned value when finding a PE Ref at the starting position', () => {
+            let count = 0;
+            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+               checkForPERefCallback = other;
+            });
+            spyOn(unassigned, 'parseNextValue').and.callFake((source, handler) => {
+               if (count === 0) {
+                  count ++;
+                  handler({ one: 1 });
+               } else {
+                  handler();
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               MockSTokenSource.PEEK('%'),
+               '%',
+               ' ',
+               'entityName',
+               ' ',
+               [ ';', 'match', ';' ],
+               '>',
+            ]);
+   
+            entityDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            const makeSToken = makeSTokenMaker();
+            expect(pToken.unassigned).toEqual([
+               new entityReference.ParamPToken({
+                  open: makeSToken('%'),
+                  postOpenSpace: makeSToken(' '),
+                  name: makeSToken('entityName'),
+                  postNameSpace: makeSToken(' '),
+                  close: makeSToken(';'),
+               }), {
+                  one: 1
+               },
+            ])
+         });
+
+         it('returns an unassigned value when finding a PE Ref at the EntityValue position', () => {
+            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+               checkForPERefCallback = other;
+
+               if (prop === 'entityValueOrId') {
+                  checkForPERefCallback = () => {
+                     pToken.unassigned = [ { name: prop } ],
+                     foundRef(pToken);
+                  };
+               }
+            });
             const mockSource = new MockSTokenSource([
                MockSTokenSource.PEEK('e'),
-               [ 'entityName', 'word', [ '>' ] ],
+               'entityName',
                ' ',
-               undefined,
+               [ undefined, 'match', ';' ],
+               '>',
+            ]);
+   
+            entityDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            expect(pToken.unassigned).toEqual([ { name: 'entityValueOrId' } ])
+         });
+
+         it('returns an unassigned value when finding a PE Ref in external ID', () => {
+            literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+            externalId.parse.and.callFake((source, terminators, cb) => {
+               cb({
+                  externalId: true,
+                  unassigned: [ { type: 'literal' } ],
+                  nextPropName: 'system',
+               });
+            });
+   
+            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+               checkForPERefCallback = other;
+            });
+            const mockSource = new MockSTokenSource([
+               MockSTokenSource.PEEK('e'),
+               'entityName',
+               ' ',
+               [ undefined, 'match', ';' ],
+               '>',
+            ]);
+   
+            entityDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            expect(pToken.externalId.unassigned).toEqual([ { type: 'literal' } ])
+            expect(pToken.unassigned).toBe(pToken.externalId.unassigned)
+         });
+
+         it('returns an unassigned value with a PE Ref in the NDATA name position', () => {
+            literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+               checkForPERefCallback = other;
+
+               if (prop === 'nDataName') {
+                  checkForPERefCallback = () => {
+                     pToken.unassigned = [ { name: prop } ],
+                     foundRef(pToken);
+                  };
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               MockSTokenSource.PEEK('e'),
+               'entityName',
+               ' ',
+               [ undefined, 'match', ';' ],
+               // externalId
+               ' ',
+               MockSTokenSource.PEEK('NDATA'),
+               'NDATA',
                undefined,
                '>',
             ]);
-
+   
             entityDeclaration.parse(mockSource, {}, callback);
             mockSource.respondInAsyncTime();
+   
+            expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nDataName' } ])
+         });
+   
+         it('returns an unassigned value with a PE Ref in the NDATA position', () => {
+            literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+               checkForPERefCallback = other;
 
-            expect(mockSource.extractToObject.calls.argsFor(0)[1]).toEqual([ '>', '"', '\'' ]);
+               if (prop === 'nData') {
+                  checkForPERefCallback = () => {
+                     pToken.unassigned = [ { name: prop } ],
+                     foundRef(pToken);
+                  };
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               MockSTokenSource.PEEK('e'),
+               'entityName',
+               ' ',
+               [ undefined, 'match', ';' ],
+               // externalId
+               ' ',
+               '>',
+            ]);
+   
+            entityDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nData' } ])
+         });
+   
+      });
+
+   });
+
+   describe('assignUnassigned()', () => {
+
+      beforeEach(() => {
+         spyOn(unassigned, 'assignToProps');
+         spyOn(externalId, 'assignUnassigned');
+      });
+
+      it('does not call assignToProps() if there is no unassigned', () => {
+         entityDeclaration.assignUnassigned({});
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      it('deletes the unassigned property if it is empty', () => {
+         const declPToken = {
+            unassigned: [],
+            nextPropName: 'name',
+         };
+         
+         entityDeclaration.assignUnassigned(declPToken);
+
+         expect(entityDeclaration.unassigned).toBeUndefined();
+         expect(entityDeclaration.nextPropName).toBeUndefined();
+      });
+
+      it('does not call assignToProps() if there is still an unexpanded param ref', () => {
+         const declPToken = {
+            unassigned: [ {
+               type: entityReference.PARAM_PTYPE,
+            } ],
+         };
+         
+         entityDeclaration.assignUnassigned(declPToken);
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      describe('unassigned in prolog', () => {
+
+         it('calls unassigned.assignToProps() when the match is in the prolog', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'name', [
+                  { name: 'postDeclTypeSpace', type: 'space' },
+                  { name: 'parameter', type: 'word', allowed: '%' },
+                  { name: 'postParameterSpace', type: 'space' },
+                  { name: 'name', type: 'word' },
+                  { name: 'postNameSpace', type: 'space' },
+               ]);
+         });
+
+         it('calls externalId.assignUnassigned() if externalId in PERef', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            let propName;
+            externalId.assignUnassigned.and.callFake((externalId, pToken, name) => {
+               // check externalId now, before it is modified
+               expect(externalId).toEqual({
+                  unassigned: unassignedValue
+               });
+               expect(pToken).toEqual(declPToken);
+               propName = name;
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(propName).toEqual('postNameSpace'); // make sure we've evaluated above
+         });
+
+         it('calls unassigned.assignToProps() with the epilog', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'postExternalIdSpace', [
+                  { name: 'postExternalIdSpace', type: 'space' },
+                  { name: 'nData', type: 'word' },
+                  { name: 'postNDataSpace', type: 'space' },
+                  { name: 'nDataName', type: 'word' },
+                  { name: 'postNDataNameSpace', type: 'space' },
+               ]);
+         });
+
+         it('moves any unused unassigned values into an .extra property', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken.extra).toEqual(unassignedValue);
+         });
+
+      });
+
+      describe('unassigned is the ExternalId or the EntityValue', () => {
+
+         it('does not unassigned.assignToProps() with the prolog', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).not.toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'name', [
+                  { name: 'postDeclTypeSpace', type: 'space' },
+                  { name: 'parameter', type: 'word', allowed: '%' },
+                  { name: 'postParameterSpace', type: 'space' },
+                  { name: 'name', type: 'word' },
+                  { name: 'postNameSpace', type: 'space' },
+               ]);
+         });
+
+         it('calls externalId.assignUnassigned() if externalId IS the peref', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            let propName;
+            externalId.assignUnassigned.and.callFake((externalId, pToken, name) => {
+               // check externalId now, before it is modified
+               expect(externalId).toEqual({
+                  unassigned: unassignedValue
+               });
+               expect(pToken).toEqual(declPToken);
+               propName = name;
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(propName).toEqual('postNameSpace'); // make sure we've evaluated above
+         });
+
+         it('calls unassigned.assignToProps() with the epilog if we found an externalId', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'postExternalIdSpace', [
+                  { name: 'postExternalIdSpace', type: 'space' },
+                  { name: 'nData', type: 'word' },
+                  { name: 'postNDataSpace', type: 'space' },
+                  { name: 'nDataName', type: 'word' },
+                  { name: 'postNDataNameSpace', type: 'space' },
+               ]);
+         });
+   
+         it('calls unassigned.assignToProps() if EntityValue IS the peref', () => {
+            const unassignedValue = [ {
+               type: 'literal',
+            } ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'EntityValue', [
+                  { name: 'EntityValue', type: 'literal', flatten: true },
+                  { name: 'postEntityValueSpace', type: 'space' },
+               ]);
+         });
+
+         it('does not unassigned.assignToProps() with the epilog if we found an EntityValue', () => {
+            const unassignedValue = [ {
+               type: 'literal',
+            } ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).not.toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'postExternalIdSpace', [
+                  { name: 'postExternalIdSpace', type: 'space' },
+                  { name: 'nData', type: 'word' },
+                  { name: 'postNDataSpace', type: 'space' },
+                  { name: 'nDataName', type: 'word' },
+                  { name: 'postNDataNameSpace', type: 'space' },
+               ]);
+         });
+   
+      });
+
+      describe('unassigned inside externalId', () => {
+
+         it('calls externalId.assignUnassigned() if externalId has an unassigned value', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               externalId: {
+                  unassigned: unassignedValue,
+                  nextPropName: 'name',
+               },
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(externalId.assignUnassigned).toHaveBeenCalledWith(
+               declPToken.externalId, declPToken, 'postNameSpace');
+         });
+   
+         it('calls unassigned.assignToProps() if externalId has an unassigned value', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               externalId: {
+                  unassigned: unassignedValue,
+                  nextPropName: 'name',
+               },
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'postExternalIdSpace', [
+                  { name: 'postExternalIdSpace', type: 'space' },
+                  { name: 'nData', type: 'word' },
+                  { name: 'postNDataSpace', type: 'space' },
+                  { name: 'nDataName', type: 'word' },
+                  { name: 'postNDataNameSpace', type: 'space' },
+               ]);
+         });
+   
+         it('removes any unassigned values in the externalId', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               externalId: {
+                  unassigned: unassignedValue,
+                  nextPropName: 'name',
+               },
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken.externalId.unassigned).toBeUndefined();
+            expect(declPToken.externalId.extra).toBeUndefined();
+            expect(declPToken.externalId.nextPropName).toBeUndefined();
+         });
+
+      });
+
+      describe('unassigned inside epilog', () => {
+
+         it('does not call externalId.assignUnassigned()', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'nData',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(externalId.assignUnassigned).not.toHaveBeenCalled();
+         });
+   
+         it('calls unassigned.assignToProps() only with the epilog values', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               externalId: {
+                  unassigned: unassignedValue,
+                  nextPropName: 'nData',
+               },
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps.calls.count()).toEqual(1);
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'postExternalIdSpace', [
+                  { name: 'postExternalIdSpace', type: 'space' },
+                  { name: 'nData', type: 'word' },
+                  { name: 'postNDataSpace', type: 'space' },
+                  { name: 'nDataName', type: 'word' },
+                  { name: 'postNDataNameSpace', type: 'space' },
+               ]);
          });
 
       });

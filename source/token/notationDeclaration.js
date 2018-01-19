@@ -126,7 +126,7 @@ function assignUnassigned(notationPToken) {
    notationPToken.externalId = notationPToken.externalId || {
       unassigned: notationPToken.unassigned,
    };
-   externalId.assignUnassigned(notationPToken.externalId);
+   externalId.assignUnassigned(notationPToken.externalId, notationPToken, 'postNameSpace');
 
    if (unValues.length !== 0) {
       notationPToken.extra = notationPToken.unassigned;

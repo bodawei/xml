@@ -1,12 +1,12 @@
 /* Copyright ® 2017 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { PTokenStream } from '../pTokenStream';
-import { PToXTokenStream } from '../xTokenStream';
-import * as tokenNs from '../token';
+import { PTokenStream } from '../../pTokenStream';
+import { PToXTokenStream } from '../../xTokenStream';
+import * as tokenNs from '../../token';
 
-import EntityManager from './EntityManager.js';
-import NodeStream from './NodeStream.js';
+import EntityManager from '../EntityManager.js';
+import NodeStream from '../NodeStream.js';
 
 describe('NodeStream (integration)', () => {
 
