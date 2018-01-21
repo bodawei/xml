@@ -1,7 +1,9 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
+import { WellFormedError } from '../../error';
+import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
@@ -9,12 +11,10 @@ import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text.js';
-
 import literal from '../common/literal.js';
 import unassigned from '../unassigned.js';
 
-const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
-const RANGE = new Range(new EntityLocation(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
+import helper from './helper.js';
 
 describe('unassigned (unit)', () => {
 
@@ -196,6 +196,56 @@ describe('unassigned (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith(pToken);
+      });
+
+   });
+
+   describe('parseAllValues()', () => {
+      let mockSource;
+      let deliverySpy;
+      let makeSToken;
+
+      beforeEach(() => {
+         deliverySpy = jasmine.createSpy('callbackSpy');
+         spyOn(literal, 'parse');
+         spyOn(entityReference, 'paramParse');
+
+         makeSToken = makeSTokenMaker();
+      });
+
+      it('delivers all multiple values', () => {
+         literal.parse.and.callFake((_1, container, foundOne) => {
+            container.pToken.isLiteral = true;
+            foundOne(true);
+         });
+         entityReference.paramParse.and.callFake((_1, deliver) => {
+            deliver({ isPeref: true });
+         });
+         mockSource = new MockSTokenSource([
+            [ '   ', 'space' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('x'), 'peekChar' ],
+            [ 'xyzzy', 'word', [ '>', '"', '\'', '%' ] ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('"'), 'peekChar' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('%'), 'peekChar' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('>'), 'peekChar' ],
+         ]);
+
+         unassigned.parseAllValues(mockSource, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith([
+            unassigned.spaceFromSToken(makeSToken('   ')),
+            unassigned.wordFromSToken(makeSToken('xyzzy')), {
+               type: 'literal',
+               isLiteral: true,
+            }, {
+               isPeref: true
+            },
+         ]);
       });
 
    });
@@ -472,7 +522,7 @@ describe('unassigned (unit)', () => {
 
             expect(pToken).toEqual({
                one: word1.text,
-               two: new SToken(' ', ' ', [ RANGE ]),
+               two: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                three: word2.text,
             });
          });
@@ -525,7 +575,7 @@ describe('unassigned (unit)', () => {
 
             expect(pToken).toEqual({
                one: word1.text,
-               four: new SToken(' ', ' ', [ RANGE ]),
+               four: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
             });
          });
 
@@ -581,7 +631,12 @@ describe('unassigned (unit)', () => {
 
             expect(pToken).toEqual({
                one: word.text,
-               two: new SToken('     ', '     ', [ RANGE, RANGE, RANGE, RANGE ]),
+               two: new SToken('     ', '     ', [
+                  helper.makeInsertedRange(),
+                  helper.makeInsertedRange(),
+                  helper.makeInsertedRange(),
+                  helper.makeInsertedRange()
+               ]),
             });
          });
 
@@ -657,7 +712,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: new SToken('\t ', '\t ', [ RANGE ]),
+               one: new SToken('\t ', '\t ', [ helper.makeInsertedRange() ]),
                two: word.text,
             });
          });
@@ -838,6 +893,38 @@ describe('unassigned (unit)', () => {
          ]);
       });
 
+
+   });
+
+   describe('checkExtra()', () => {
+
+      it('adds an error with the text of all the tokens in the provided array', () => {
+         const mockErrorCollector = new MockErrorCollector();
+         const startSToken = SToken.fromString('one');
+         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+         const extra = [
+            unassigned.wordFromSToken(startSToken),
+            unassigned.spaceFromSToken(SToken.fromString(' ')),
+            {
+               type: 'literal',
+               openQuote: SToken.fromString('"'),
+               closeQuote: SToken.fromString('"'),
+            },
+            new entityReference.ParamPToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('fred'),
+               close: SToken.fromString(';'),
+            }), 
+         ];
+
+         unassigned.checkExtra(extra, mockErrorCollector, WellFormedError.ID.EXTERNALID_EXTRA_TEXT);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.EXTERNALID_EXTRA_TEXT,
+            params: [ 'one ""%fred;' ],
+            position: startSToken,
+         });
+      });
 
    });
 

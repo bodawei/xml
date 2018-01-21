@@ -1,9 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData, Range } from '../../basic';
 import { XmlWarning } from '../../error';
 import { MockErrorCollector } from '../../error/@test/helper';
+import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
@@ -310,6 +311,21 @@ describe('notationdeDlaration (unit)', () => {
             .toHaveBeenCalledWith(notationPToken.externalId, mockErrorCollector, emd);
       });
 
+      it('reports no errors if the notationPToken is undefined', () => {
+         notationDeclaration.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no errors if there are unassigned values', () => {
+         delete notationPToken.name;
+         notationPToken.unassigned = [];
+
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
       it('reports an error if there is no name', () => {
          delete notationPToken.name;
 
@@ -378,6 +394,20 @@ describe('notationdeDlaration (unit)', () => {
             position: undefined,
             lastPosition: notationPToken.postExternalIdSpace,
          });
+      });
+
+      it('calls unassigned.checkExtra() with extras', () => {
+         spyOn(unassigned, 'checkExtra');
+         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         notationPToken.extra = [
+            unassigned.wordFromSToken(startSToken),
+         ];
+
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+
+         expect(unassigned.checkExtra).toHaveBeenCalledWith(notationPToken.extra,
+            mockErrorCollector,
+            WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
       });
 
    });

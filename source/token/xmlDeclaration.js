@@ -33,6 +33,7 @@ class XmlDeclaration extends base.XToken {
 
 class XmlDeclarationPToken extends instruction.PToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(XMLDECL, props);
    }
 

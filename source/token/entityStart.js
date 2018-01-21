@@ -31,6 +31,7 @@ class EntityStartPToken extends base.PToken {
 
 class ParameterEntityStartPToken extends EntityStartPToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(props);
       this.type = PARAMETERENTITY_START;
    }

@@ -1,8 +1,9 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData, Range } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
+import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 
@@ -105,7 +106,7 @@ describe('entityDeclaration (unit)', () => {
       it('calls literal.parse()', () => {
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('a'),
-            [ 'anEntity', 'word', [ '>', '"', '\'' ] ],
+            [ 'anEntity', 'word', [ '>', '"', '\'', ';' ] ],
             [ ' ', 'space' ],
             [ undefined, 'match' ],
             [ '>', 'match', '>' ],
@@ -127,7 +128,7 @@ describe('entityDeclaration (unit)', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
-            [ 'entityName', 'word', [ '>', '"', '\'' ] ],
+            [ 'entityName', 'word', [ '>', '"', '\'', ';' ] ],
             [ ' ', 'space' ],
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
@@ -147,7 +148,7 @@ describe('entityDeclaration (unit)', () => {
          literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
-            [ 'anEntity', 'word', [ '>', '"', '\'' ] ],
+            [ 'anEntity', 'word', [ '>', '"', '\'', ';' ] ],
             [ ' ', 'space' ],
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
@@ -179,7 +180,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
             [ ' ', 'space' ],
-            [ 'anEntity', 'word', [ '>' ] ], // @@ CLEANUP why does the param match?
+            [ 'anEntity', 'word', ['>', '"', '\'', ';'] ],
             [ ' ', 'space' ],
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
@@ -228,7 +229,7 @@ describe('entityDeclaration (unit)', () => {
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
             [ undefined, 'space' ],
-            [ undefined, 'word', [ '>' ] ], // @@ CLEANUP why does the param match?
+            [ undefined, 'word', ['>', '"', '\'', ';'] ],
             [ undefined, 'space' ],
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
@@ -802,6 +803,7 @@ describe('entityDeclaration (unit)', () => {
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'EntityValue', [
+                  { name: 'postNameSpace', type: 'space' },
                   { name: 'EntityValue', type: 'literal', flatten: true },
                   { name: 'postEntityValueSpace', type: 'space' },
                ]);
@@ -958,6 +960,21 @@ describe('entityDeclaration (unit)', () => {
          spyOn(literal, 'checkWellFormed');
       });
 
+      it('reports no errors if the entity declaration PToken is undefined', () => {
+         entityDeclaration.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no errors if there are unassigned values', () => {
+         delete pToken.name;
+         pToken.unassigned = [];
+
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
       it('asks the declaration module to look for problems in the declaration part', () => {
          const emd = new EntityMetaData();
 
@@ -1106,6 +1123,20 @@ describe('entityDeclaration (unit)', () => {
             position: undefined,
             lastPosition: pToken.postNameSpace,
          });
+      });
+
+      it('calls unassigned.checkExtra() with extras', () => {
+         spyOn(unassigned, 'checkExtra');
+         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         pToken.extra = [
+            unassigned.wordFromSToken(startSToken),
+         ];
+
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, new EntityMetaData());
+
+         expect(unassigned.checkExtra).toHaveBeenCalledWith(pToken.extra,
+            mockErrorCollector,
+            WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
       });
 
    });

@@ -26,6 +26,7 @@ class Cdata extends base.XToken {
 
 class CdataPToken extends envelope.PToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(CDATA, props);
    }
 

@@ -123,9 +123,6 @@ function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
    const descriptors = [
       { name: 'idType', type: 'word', allowed: [ 'public', 'system' ] },
       { name: 'postIdTypeSpace', type: 'space' },
-      { name: 'public', type: 'literal' },
-      { name: 'postPublicSpace', type: 'space' },
-      { name: 'system', type: 'literal' },
    ];
 
    if (unValues.length === 0) {
@@ -153,6 +150,25 @@ function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
       } else {
          prevContainer[prevSpacePropName] = externalId.__bogusWorkaround;
       }
+   }
+
+   const idType = externalId.idType && externalId.idType.str.toLocaleUpperCase();
+
+   switch (idType) {
+      case 'SYSTEM':
+         unassigned.assignToProps(externalId.unassigned, externalId, 'system', [
+            { name: 'postIdTypeSpace', type: 'space' },
+            { name: 'system', type: 'literal' },
+         ]);
+         break;
+      case 'PUBLIC':
+         unassigned.assignToProps(externalId.unassigned, externalId, 'public', [
+            { name: 'postIdTypeSpace', type: 'space' },
+            { name: 'public', type: 'literal' },
+            { name: 'postPublicSpace', type: 'space' },
+            { name: 'system', type: 'literal' },
+         ]);
+         break;
    }
 
    if (unValues.length !== 0) {
@@ -207,18 +223,7 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
       literal.checkWellFormed(pTokenPart.system, ec, entityMetaData, WFEID.NOUN_EXTERNALID_SYSTEM);
    }
 
-   if (pTokenPart.extra && pTokenPart.extra.length > 0) {
-      // convert the unassigned values into a set of STokens
-      const sTokens = unassigned.getSTokens(pTokenPart.extra);
-      ec.setPos(sTokens[0]);
-      const firstToken = sTokens[0].clone();
-      sTokens.shift();
-      const unifiedSToken = sTokens.reduce((accumulation, sToken) => {
-         accumulation.merge(sToken);
-         return accumulation;
-      }, firstToken);
-      ec.report(WFEID.EXTERNALID_EXTRA_TEXT, [ unifiedSToken.originalStr ]);
-   }
+   unassigned.checkExtra(pTokenPart.extra, ec, WFEID.EXTERNALID_EXTRA_TEXT);
 }
 
 /**********************************************************************\

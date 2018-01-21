@@ -35,9 +35,9 @@ const JS_FILE_GLOB = [
 let BROWSERS;
 // Figure out what browsers we should be able to run on the current platform.
 if (/darwin/.test(process.platform)) {
-   BROWSERS = [ 'Chrome', 'Firefox', 'Opera', 'PhantomJS', 'Safari', 'Vivaldi' ];
+   BROWSERS = [ 'Chrome', 'Firefox', 'Opera', 'Safari', 'Vivaldi' ];
 } else if (/^win/.test(process.platform)) {
-   BROWSERS = [ 'Brave', 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'PhantomJS', 'Vivaldi' ];
+   BROWSERS = [ 'Brave', 'Chrome', 'Edge', 'Firefox', 'IE', 'Opera', 'Vivaldi' ];
 } else {
    console.error('Unknown or unsupported platform. Please add support for it with a pull request.');
 }

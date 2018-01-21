@@ -1,9 +1,11 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { WellFormedError, XmlWarning } from '../error';
 
 import * as base from './base.js';
+import entityEnd from './entityEnd.js';
 import entityReference from './entityReference.js';
+import entityStart from './entityStart.js';
 import unassigned from './unassigned.js';
 import * as declaration from './bridge/declaration.js';
 import misc from './common/misc.js';
@@ -36,6 +38,7 @@ class EntityDeclaration extends base.XToken {
 
 class ParameterEntityDeclaration extends EntityDeclaration {
    constructor(name, value, externalLoc, notationDataName, pToken) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(name, value, externalLoc, notationDataName, pToken);
       this.isParameter = true;
    }
@@ -43,6 +46,7 @@ class ParameterEntityDeclaration extends EntityDeclaration {
 
 class EntityDeclarationPToken extends declaration.PToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ENTITYDECL, props);
    }
 
@@ -149,13 +153,24 @@ function parseWordOrPERef(source, pToken, done) {
 
       source.extractToObject('word', [ '>', '"', '\'', ';' ], pToken, 'name');
       source.extractToObject('space', pToken, 'postNameSpace');
-      source.extract('match', ';', (semiColon) => {
-         if (pToken.parameter && semiColon) {
-            // @@@ CLEANUP because code copied and pasted
-            const values = [];
-
-            unassigned.parseNextValue(source, (value) => {
-               handleValue(source, pToken, value, semiColon, values, done);
+      source.extract('match', ';', (semicolon) => {
+         if (pToken.parameter && semicolon) {
+            unassigned.parseAllValues(source, (values) => {
+               const entityRef = new entityReference.ParamPToken({
+                  open: pToken.parameter,
+                  postOpenSpace: pToken.postParameterSpace,
+                  name: pToken.name,
+                  postNameSpace: pToken.postNameSpace,
+                  close: semicolon,
+               });
+               pToken.unassigned = values;
+               pToken.nextPropName = 'parameter';
+               pToken.unassigned.unshift(entityRef);
+               delete pToken.parameter;
+               delete pToken.postParameterSpace;
+               delete pToken.name;
+               delete pToken.postNameSpace;
+               done();
             });
          } else {
             parseEntityValue(source, pToken, done);
@@ -164,33 +179,6 @@ function parseWordOrPERef(source, pToken, done) {
    });
 
    unassigned.checkForPERef(source, callback);
-}
-
-function handleValue(source, pToken, value, semiColon, values, done) {
-   if (!value) {
-      const entityRef = new entityReference.ParamPToken({
-         open: pToken.parameter,
-         postOpenSpace: pToken.postParameterSpace,
-         name: pToken.name,
-         postNameSpace: pToken.postNameSpace,
-         close: semiColon,
-      });
-      pToken.unassigned = values;
-      pToken.nextPropName = 'parameter';
-      pToken.unassigned.unshift(entityRef);
-      delete pToken.parameter;
-      delete pToken.postParameterSpace;
-      delete pToken.name;
-      delete pToken.postNameSpace;
-      done();
-      return;
-   }
-
-   values.push(value);
-   // call via the public interface (helps with jasmine spy'ing)
-   unassigned.parseNextValue(source, (value) => {
-      handleValue(source, pToken, value, semiColon, values, done);
-   });
 }
 
 function parseEntityValue(source, pToken, done) {
@@ -322,8 +310,19 @@ function assignUnassigned(pToken) {
       }
 
       if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned[0]) {
-         if (pToken.unassigned[0].type === 'literal') {
+         const nextThing = pToken.unassigned.find((value) => {
+            if ((value.type === 'text' && value.subType === 'space') ||
+               value.type === entityStart.PARAM_PTYPE ||
+               value.type === entityEnd.PARAM_PTYPE) {
+               return;
+            }
+
+            return value;
+         });
+
+         if (nextThing.type === 'literal') {
             unassigned.assignToProps(pToken.unassigned, pToken, 'EntityValue', [
+               { name: 'postNameSpace', type: 'space' },
                { name: 'EntityValue', type: 'literal', flatten: true },
                { name: 'postEntityValueSpace', type: 'space' },
             ]);
@@ -360,6 +359,10 @@ function assignUnassigned(pToken) {
 \**********************************************************************/
 
 function checkWellFormed(pToken, ec, entityMetaData) {
+   if (!pToken || pToken.unassigned) {
+      return;
+   }
+
    const enNameText = misc.textOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
@@ -398,15 +401,16 @@ function checkWellFormed(pToken, ec, entityMetaData) {
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.ENTITYDECL_NO_CLOSE, [ enNameText ]);
+
+   unassigned.checkExtra(pToken.extra, ec, WFEID.ENTITYDECL_EXTRA_TEXT);
 }
 
 /**********************************************************************\
  pTokenToXToken() makes either a general or parmaeter entity token based
  on the PToken value.
 
- It is worth mentioning that the EntityValue is an array of STokens
- and PTokens. They are not XTokenized, as every consumer will need
- to do some kind of additional parsing of these.
+ NOTE: The EntityValue is an array of PTokens. They are not XTokenized,
+ as every consumer will need to further process them.
 \**********************************************************************/
 
 function pTokenToXToken(pToken) {

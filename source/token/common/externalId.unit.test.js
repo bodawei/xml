@@ -352,9 +352,6 @@ describe('externalId (unit)', () => {
             'postIdTypeSpace', [
                { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
                { name: 'postIdTypeSpace', type: 'space' },
-               { name: 'public', type: 'literal' },
-               { name: 'postPublicSpace', type: 'space' },
-               { name: 'system', type: 'literal' },
             ]);
       });
 
@@ -373,9 +370,6 @@ describe('externalId (unit)', () => {
                { name: '__bogusWorkaround', type: 'space' },
                { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
                { name: 'postIdTypeSpace', type: 'space' },
-               { name: 'public', type: 'literal' },
-               { name: 'postPublicSpace', type: 'space' },
-               { name: 'system', type: 'literal' },
             ]);
       });
 
@@ -393,9 +387,6 @@ describe('externalId (unit)', () => {
                { name: '__bogusWorkaround', type: 'space' },
                { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
                { name: 'postIdTypeSpace', type: 'space' },
-               { name: 'public', type: 'literal' },
-               { name: 'postPublicSpace', type: 'space' },
-               { name: 'system', type: 'literal' },
             ]);
       });
 
@@ -468,6 +459,94 @@ describe('externalId (unit)', () => {
             unassigned.wordFromSToken(SToken.fromString('hi')),
          ]);
       });
+
+      it('passes the necessary parameters to unassigned.assignToProps() when type is system', () => {
+         const sysVal = {
+            type: 'literal',
+            openQuote: SToken.fromString('"'),
+         };
+         const externalIdToken = {
+            unassigned: [
+               unassigned.wordFromSToken(SToken.fromString('sYsTeM')), sysVal
+            ],
+         };
+         unassigned.assignToProps.and.callFake((values, pToken, name) => {
+            if (name === 'idType') {
+               pToken.idType = values[0].text;
+               values.shift();
+            }
+         });
+
+         externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
+
+         expect(unassigned.assignToProps.calls.argsFor(1)).toEqual([
+            [ sysVal ], externalIdToken, 'system', [
+               { name: 'postIdTypeSpace', type: 'space' }, // test
+               { name: 'system', type: 'literal' },
+            ] ]);
+      });
+
+      it('passes the necessary parameters to unassigned.assignToProps() when type is PUBLIC', () => {
+         const sysVal = {
+            type: 'literal',
+            openQuote: SToken.fromString('"'),
+         };
+         const pubVal = {
+            type: 'literal',
+            openQuote: SToken.fromString('\''),
+         };
+         const externalIdToken = {
+            unassigned: [
+               unassigned.wordFromSToken(SToken.fromString('puBlic')), pubVal, sysVal
+            ],
+         };
+         unassigned.assignToProps.and.callFake((values, pToken, name) => {
+            if (name === 'idType') {
+               pToken.idType = values[0].text;
+               values.shift();
+            }
+         });
+
+         externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
+
+         expect(unassigned.assignToProps.calls.argsFor(1)).toEqual([
+            [ pubVal, sysVal ], externalIdToken, 'public', [
+               { name: 'postIdTypeSpace', type: 'space' },
+               { name: 'public', type: 'literal' },
+               { name: 'postPublicSpace', type: 'space' },
+               { name: 'system', type: 'literal' },
+            ] ]);
+      });
+
+      it('ignores a trailing literal if this is of type system', () => {
+         const externalIdToken = {
+            unassigned: [
+               unassigned.wordFromSToken(SToken.fromString('sYsTeM')), {
+                  type: 'literal',
+                  openQuote: SToken.fromString('"'),
+               }, {
+                  type: 'literal',
+                  openQuote: SToken.fromString('\''),
+               },
+            ],
+         };
+         unassigned.assignToProps.and.callFake((values, pToken, name, descriptors) => {
+            if (name === 'idType') {
+               pToken.idType = values[0].text;
+               values.shift();
+            } else {
+               pToken.system = values.shift();
+            }
+         });
+
+         externalId.assignUnassigned(externalIdToken, {}, 'testPropName');
+
+         expect(externalIdToken.extra).toEqual([ {
+            type: 'literal',
+            openQuote: SToken.fromString('\''),
+         } ]);
+      });
+
 
    });
 
@@ -642,29 +721,18 @@ describe('externalId (unit)', () => {
          }).not.toThrow();
       });
 
-      it('reports an error if there are extra unassigned values', () => {
-         const startSToken = SToken.fromString('one');
-         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+      it('calls unassigned.checkExtra() with extras', () => {
+         spyOn(unassigned, 'checkExtra');
+         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
          pTokenPart.extra = [
             unassigned.wordFromSToken(startSToken),
-            unassigned.spaceFromSToken(SToken.fromString(' ')), {
-               type: 'literal',
-               openQuote: SToken.fromString('"'),
-               closeQuote: SToken.fromString('"'),
-            }, new entityReference.ParamPToken({
-               open: SToken.fromString('&'),
-               name: SToken.fromString('fred'),
-               close: SToken.fromString(';'),
-            }),
          ];
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());
 
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.EXTERNALID_EXTRA_TEXT,
-            params: [ 'one ""&fred;' ],
-            position: startSToken,
-         });
+         expect(unassigned.checkExtra).toHaveBeenCalledWith(pTokenPart.extra,
+            mockErrorCollector,
+            WellFormedError.ID.EXTERNALID_EXTRA_TEXT);
       });
 
       it('reports no errors if extra is empty', () => {

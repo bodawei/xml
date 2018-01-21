@@ -24,7 +24,7 @@ module.exports = function karmaConfig(config) {
       basePath: './',
       logLevel: config.LOG_ERROR, // also: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
       reportSlowerThan: 200,
-      browsers: [ 'PhantomJS' ],
+      browsers: [ 'HeadlessChrome' ],
       captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
       autoWatch: false,
       singleRun: true,

@@ -31,6 +31,7 @@ class NotationDeclaration extends base.XToken {
 
 class NotationDeclarationPToken extends declaration.PToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(NOTATIONDECL, props);
    }
 
@@ -144,6 +145,10 @@ function assignUnassigned(notationPToken) {
 \**********************************************************************/
 
 function checkWellFormed(pToken, ec, entityMetaData) {
+   if (!pToken || pToken.unassigned) {
+      return;
+   }
+
    const nameText = misc.textOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
@@ -165,6 +170,8 @@ function checkWellFormed(pToken, ec, entityMetaData) {
    ec.setPos(pToken.postExternalIdSpace);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.NOTATIONDECL_NO_CLOSE, [ nameText ]);
+
+   unassigned.checkExtra(pToken.extra, ec, WFEID.NOTATIONDECL_EXTRA_TEXT);
 }
 
 /**********************************************************************\

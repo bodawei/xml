@@ -7,14 +7,14 @@ import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
+import helper from '../@test/helper.js';
 import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text.js';
-import externalId from './externalId.js';
+import unassigned from '../unassigned.js';
 
-const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
-const RANGE = new Range(new EntityLocation(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
+import externalId from './externalId.js';
 
 describe('externalId (integration)', () => {
 
@@ -92,7 +92,7 @@ describe('externalId (integration)', () => {
          source = new STokenSource(defaultExtractors, emd);
       });
 
-      it('parses the public and system value (check unassigned.assignToProps())', (done) => {
+      it('assigns the public and system value (check unassigned.assignToProps())', (done) => {
          source.addText('PUBLIC\t%publicVal;\t"sys.xml">');
          source.endText();
 
@@ -123,10 +123,10 @@ describe('externalId (integration)', () => {
             const postPublicSpace = makeSToken2('\t');
             postIdTypeSpace.str += ' ';
             postIdTypeSpace.originalStr += ' ';
-            postIdTypeSpace.ranges.push(RANGE.clone());
+            postIdTypeSpace.ranges.push(helper.makeInsertedRange());
             postPublicSpace.str = ' ' + postPublicSpace.str;
             postPublicSpace.originalStr = ' ' + postPublicSpace.originalStr;
-            postPublicSpace.ranges.unshift(RANGE.clone());
+            postPublicSpace.ranges.unshift(helper.makeInsertedRange());
 
             expect(extIdPToken).toEqual({
                type: 'EXTERNAL_ID',
@@ -156,7 +156,7 @@ describe('externalId (integration)', () => {
          };
          const expectedString = new SToken('\t ', '\t ', [
             new Range(new EntityLocation(), 10, 0, 10, 11, 0, 11),
-            RANGE,
+            helper.makeInsertedRange(),
          ]);
          source.addText('%foo;>');
          source.endText();
@@ -187,7 +187,7 @@ describe('externalId (integration)', () => {
 
       it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
          const container = {};
-         const expectedString = new SToken(' ', ' ', [ RANGE ]);
+         const expectedString = new SToken(' ', ' ', [ helper.makeInsertedRange() ]);
          source.addText('%foo;>');
          source.endText();
 
@@ -236,6 +236,35 @@ describe('externalId (integration)', () => {
             externalId.checkWellFormed(result, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
+            done();
+         });
+      });
+
+      it('calls unassigned.checkExtra() to report on extra values', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('%wtf; "other">');
+         source.endText();
+
+         externalId.parse(source, [], (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned.shift(); // get rid of the peref
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}), 
+               unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range())), 
+               unassigned.spaceFromSToken(new SToken(' ', ' ', new Range())), {
+                  type: 'literal',
+                  openQuote: new SToken('"', '"', new Range()),
+                  value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
+                  closeQuote: new SToken('"', '"', new Range()),
+               },
+               new entityEnd.ParamPToken({}),
+            ].concat(pToken.unassigned);
+            externalId.assignUnassigned(pToken, {}, 'prevSpace');
+            const ec = new ErrorCollector(undefined, WellFormedError);
+
+            externalId.checkWellFormed(pToken, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_EXTRA_TEXT);
             done();
          });
       });

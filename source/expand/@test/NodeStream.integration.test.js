@@ -97,56 +97,114 @@ describe('NodeStream (integration)', () => {
       pTokenStream.endText();
    });
 
-   it('expands an parameter entity values in an EntityValue', (done) => {
-      const results = [];
-      const manager = new EntityManager();
-      const pTokenStream = new PTokenStream();
-      const xTokenStream = new PToXTokenStream();
-      const node = new NodeStream(manager);
-      pTokenStream.pipe(xTokenStream).pipe(node);
+   describe('entity declaration processing', () => {
 
-      node.on('data', (token) => results.push(token));
-      node.on('end', () => {
-         const valueArray = results[4].value;
-         expect(valueArray[0].text.str).toEqual('one');
-         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
-         expect(valueArray[2].text.str).toEqual('two');
-         expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
-         done();
+      it('expands an parameter entity values in an EntityValue', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+   
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const valueArray = results[4].value;
+            expect(valueArray[0].text.str).toEqual('one');
+            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            expect(valueArray[2].text.str).toEqual('two');
+            expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            done();
+         });
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
+            '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>');
+         pTokenStream.endText();
       });
-      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
-         '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>');
-      pTokenStream.endText();
+  
+      it('expands an parameter entity inside a parameter entity inside the EntityValue', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+   
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const valueArray = results[5].value;
+            expect(valueArray[0].text.str).toEqual('[');
+            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            expect(valueArray[2].text.str).toEqual('(');
+            expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
+            expect(valueArray[4].text.str).toEqual('inner');
+            expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[3].refPToken }));
+            expect(valueArray[6].text.str).toEqual(')');
+            expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            expect(valueArray[8].text.str).toEqual(']');
+            done();
+         });
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % peTwo "inner">' +
+            '<!ENTITY % peOne "(%peTwo;)">' +
+            '<!ENTITY child "[%peOne;]">' +
+         ']>');
+         pTokenStream.endText();
+      });
+  
+      it('expands an parameter entity that makes up the entity declaration body', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const entityDecl = results[6];
+            const values = entityDecl.value;
+
+            expect(entityDecl.name).toEqual('child');
+            expect(values[0].text.str).toEqual('[(inner)]');
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % peTwo "inner">' +
+            '<!ENTITY % peOne "(%peTwo;)">' +
+            '<!ENTITY % body \'child "[%peOne;]"\'>' +
+            '<!ENTITY %body;>' +
+         ']>');
+         pTokenStream.endText();
+      });
+  
    });
 
-   it('expands an parameter entity inside a parameter entity', (done) => {
-      const results = [];
-      const manager = new EntityManager();
-      const pTokenStream = new PTokenStream();
-      const xTokenStream = new PToXTokenStream();
-      const node = new NodeStream(manager);
-      pTokenStream.pipe(xTokenStream).pipe(node);
+   describe('notation declaration processing', () => {
 
-      node.on('data', (token) => results.push(token));
-      node.on('end', () => {
-         const valueArray = results[5].value;
-         expect(valueArray[0].text.str).toEqual('[');
-         expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
-         expect(valueArray[2].text.str).toEqual('(');
-         expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
-         expect(valueArray[4].text.str).toEqual('inner');
-         expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[3].refPToken }));
-         expect(valueArray[6].text.str).toEqual(')');
-         expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
-         expect(valueArray[8].text.str).toEqual(']');
-         done();
+      it('expands an parameter entity that makes up the notation declaration body', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const notationDecl = results[5];
+
+            expect(notationDecl.name).toEqual('foo');
+            expect(notationDecl.externalId.publicId).toEqual('http://somewhere.com');
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % url "http://somewhere.com">' +
+            '<!ENTITY % middle \'PUBLIC "%url;"\'>' +
+            '<!NOTATION foo %middle;>' +
+         ']>');
+         pTokenStream.endText();
       });
-      pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
-         '<!ENTITY % peTwo "inner">' +
-         '<!ENTITY % peOne "(%peTwo;)">' +
-         '<!ENTITY child "[%peOne;]">' +
-      ']>');
-      pTokenStream.endText();
+
    });
 
 });

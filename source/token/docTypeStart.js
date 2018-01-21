@@ -41,6 +41,7 @@ class DocTypeStart extends base.XToken {
 
 class DocTypeStartPToken extends declaration.PToken {
    constructor(props) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(DOCTYPE_START, props);
    }
 

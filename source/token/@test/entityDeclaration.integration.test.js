@@ -10,7 +10,10 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as entityDeclaration from '../entityDeclaration.js';
 import entityEnd from '../entityEnd.js';
 import entityStart from '../entityStart.js';
+import text from '../text.js';
 import unassigned from '../unassigned.js';
+
+import helper from './helper.js';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken;
@@ -118,13 +121,13 @@ describe('entityDeclaration (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(pToken).toEqual(new entityDeclaration.PToken({
-               postDeclTypeSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                name: SToken.fromString('entityName'),
                postNameSpace: SToken.fromString(' '),
                openQuote: SToken.fromString('"'),
                value: [ SToken.fromString('foo') ],
                closeQuote: SToken.fromString('"'),
-               postEntityValueSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               postEntityValueSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                close: makeSToken2('>'),
             }));
             done();
@@ -205,6 +208,33 @@ describe('entityDeclaration (integration)', () => {
             entityDeclaration.checkWellFormed(result, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      });
+
+      it('calls unassigned.checkExtra() to report on extra values', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('entityName %bar; "other">');
+         source.endText();
+
+         entityDeclaration.parse(source, declarationPToken, (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned.shift(); // get rid of the peref
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}), {
+                  type: 'literal',
+                  openQuote: new SToken('"', '"', new Range()),
+                  value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
+                  closeQuote: new SToken('"', '"', new Range()),
+               },
+               new entityEnd.ParamPToken({}),
+            ].concat(pToken.unassigned);
+            entityDeclaration.assignUnassigned(pToken);
+            const ec = new ErrorCollector(undefined, WellFormedError);
+
+            entityDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
             done();
          });
       });

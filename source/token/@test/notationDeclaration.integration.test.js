@@ -12,7 +12,10 @@ import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import * as notationDeclaration from '../notationDeclaration.js';
+import text from '../text.js';
 import unassigned from '../unassigned.js';
+
+import helper from './helper.js';
 
 describe('notationdeDlaration (integration)', () => {
    let declarationPToken;
@@ -123,7 +126,7 @@ describe('notationdeDlaration (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(pToken).toEqual(new notationDeclaration.PToken({
-               postDeclTypeSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+               postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                name: SToken.fromString('notationName'),
                postNameSpace: SToken.fromString(' '),
                externalId: {
@@ -133,7 +136,7 @@ describe('notationdeDlaration (integration)', () => {
                      value: [ SToken.fromString('foo') ],
                      closeQuote: SToken.fromString('"'),
                   },
-                  postPublicSpace: new SToken(' ', ' ', [ new Range(new EntityLocation('https://www.w3.org/TR/xml/#as-PE'), 0, 0, 0, 1, 0, 1) ]),
+                  postPublicSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                },
                close: makeSToken2('>'),
             }));
@@ -201,6 +204,34 @@ describe('notationdeDlaration (integration)', () => {
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
+            done();
+         });
+      });
+
+      it('calls unassigned.checkExtra() to report on extra values', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('name SYSTEM %bar; "other">');
+         source.endText();
+
+         notationDeclaration.parse(source, declarationPToken, (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned.shift(); // get rid of the peref
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}), {
+                  type: 'literal',
+                  openQuote: new SToken('"', '"', new Range()),
+                  value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
+                  closeQuote: new SToken('"', '"', new Range()),
+               },
+               new entityEnd.ParamPToken({}),
+            ].concat(pToken.unassigned);
+            pToken.externalId.unassigned = pToken.unassigned;
+            notationDeclaration.assignUnassigned(pToken);
+            const ec = new ErrorCollector(undefined, WellFormedError);
+
+            notationDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
             done();
          });
       });

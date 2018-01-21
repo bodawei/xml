@@ -48,20 +48,8 @@ class NodeStream extends Transform {
 
    _transform(xToken, encoding, callback) {
       if (xToken instanceof entityDeclaration.XToken) {
-         const func = (xToken instanceof entityDeclaration.ParamXToken) ?
-            this._entityManager.addParameterEntityFromInternalSubset :
-            this._entityManager.addEntityFromInternalSubset;
-
-         if (xToken.value && xToken.value.length > 0) {
-            this._populateEntityValue(xToken, () => {
-               func.call(this._entityManager, xToken);
-               this.push(xToken);
-               callback();
-            });
-            return;
-         } else {
-            func.call(this._entityManager, xToken);
-         }
+         this._processEntityDeclaration(xToken, callback);
+         return;
       } else if (xToken instanceof entityReference.XToken) {
          const isPeRef = (xToken instanceof entityReference.ParamXToken);
          const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
@@ -86,14 +74,8 @@ class NodeStream extends Transform {
             return;
          }
       } else if (xToken instanceof notationDeclaration.XToken) {
-         if (xToken.pToken && xToken.pToken.externalId && xToken.pToken.externalId.unassigned) {
-            this._expandUnassigned(xToken.pToken.externalId.unassigned.slice(0), (expandedUnassigned) => {
-               xToken.pToken.externalId.unassigned = expandedUnassigned;
-               this.push(xToken);
-               callback();
-            });
-            return;
-         }
+         this._processNotationDeclaration(xToken, callback);
+         return;
       }
 
       this.push(xToken);
@@ -118,110 +100,159 @@ class NodeStream extends Transform {
       temp();
    }
 
-   _populateEntityValue(entityDeclaration, done) {
-      const newValue = [];
+   /**********************************************************************\
+    Expand PERefs
+   \**********************************************************************/
 
-      for (let index = 0; index < entityDeclaration.value.length; index++) {
-         const item = entityDeclaration.value[index];
-
-         if (item.type === entityReference.PARAM_PTYPE && item.name) {
-            const itemName = item.name.str;
-            const entityToken = this._entityManager.getParameterEntityToken(itemName);
-
-            if (!entityToken || !entityToken.value || !entityToken.value.length === 0) {
-               newValue.push(item);
-            } else {
-               newValue.push(new entityStart.ParamPToken({ refPToken: item }));
-
-               for (let tokenIndex = 0; tokenIndex < entityToken.value.length; tokenIndex++) {
-                  newValue.push(entityToken.value[tokenIndex]);
-               }
-
-               newValue.push(new entityEnd.ParamPToken({ refPToken: item }));
-            }
-         } else {
-            newValue.push(item);
-         }
-      }
-
-      entityDeclaration.value = newValue;
-      done();
-   }
-
-   _expandUnassigned(unassigned, done) {
-      const expanded = [];
-
-      let nextValue = unassigned.shift();
-      while (nextValue) {
-         if (nextValue.type === entityReference.PARAM_PTYPE && nextValue.name && nextValue.name.str) {
-            break;
-         }
-
-         expanded.push(nextValue);
-         nextValue = unassigned.shift();
-      }
-
-      if (nextValue) {
-         this._expandPERef(nextValue, (expandedPeRef) => {
-            this._expandUnassigned(unassigned, (rest) => {
-               done(expanded.concat(expandedPeRef, rest));
-            });
-         });
-      } else {
-         done(expanded);
-      }
-   }
-
-   _expandPERef(peRef, deliverExpanded) {
-      const entityToken = this._entityManager.getParameterEntityToken(peRef.name.str);
+   // Given a PERef PToken, return an array Text, EntityStart,
+   // EntityEnd and PERef (for unexpandable oens) PTokens.
+   // Most consumers will then do further processing of the Text bits
+   _expandPERefFully(peRef, deliverExpanded) {
+      const itemName = peRef.name && peRef.name.str || '';
+      const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
+      } else {
+         const expanded = [
+            new entityStart.ParamPToken({ refPToken: peRef }),
+         ].concat(entityToken.value, new entityEnd.ParamPToken({ refPToken: peRef }));
+
+         deliverExpanded(expanded);
+      }
+   }
+
+   _expandThroughNextPERef(mixedArray, deliverExpanded) {
+      if (!mixedArray) {
+         deliverExpanded([]);
          return;
       }
 
-      this._parseValues(entityToken.value.slice(0), (values) => {
-         const allValues = [ new entityStart.ParamPToken({ refPToken: peRef }) ]
-            .concat(values, [ new entityEnd.ParamPToken({ refPToken: peRef }) ]);
+      const expanded = [];
 
-         deliverExpanded(allValues);
+      while (mixedArray.length > 0) {
+         const item = mixedArray.shift();
+
+         if (item.type === entityReference.PARAM_PTYPE) {
+            this._expandPERefFully(item, (expandedItem) => {
+               deliverExpanded(expanded, expandedItem);
+            });
+            return;
+         } else {
+            expanded.push(item);
+         }
+      }
+
+      deliverExpanded(expanded);
+   }
+
+   /**********************************************************************\
+    Expand PERefs in unassigned arrays
+   \**********************************************************************/
+
+   _expandPERefsInUnassignedValue(unassignedValues, deliverExpanded) {
+      this._expandThroughNextPERef(unassignedValues, (before, expandedPERef) => {
+         if (!expandedPERef) {
+            deliverExpanded(before);
+            return;
+         }
+
+         const start = expandedPERef.shift();
+         const end = expandedPERef.pop() || []; // if this was an unexpandable peref
+
+         this._parsePERefTexts(expandedPERef, (values) => {
+            deliverExpanded(before.concat(start, values, end));
+         });
       });
    }
 
-   _parseValues(values, deliverValues) {
-      let nextValue = values.shift();
-      const newValues = [];
-
-      while (nextValue && nextValue.type !== text.PTYPE) {
-         newValues.push(nextValue);
-         nextValue = values.shift();
-      }
-
-      if (!nextValue) {
-         deliverValues(newValues);
-         return;
-      }
-
+   _parsePERefTexts(peRefContents, deliverValues) {
       const source = new STokenSource(defaultExtractors, new EntityMetaData());
-      source.addText(nextValue.text.originalStr, nextValue.text.ranges[0]); // there will only ever be one
+
+      for (let index = 0; index < peRefContents.length; index++) {
+         const item = peRefContents[index];
+
+         if (item.type === text.PTYPE) {
+            source.addText(item.text.originalStr, item.text.ranges[0]); // there will only ever be one
+         }
+      }
       source.endText();
 
-      // eslint-disable-next-line func-style
-      const handler = (item) => {
-         if (item) {
-            newValues.push(item);
-            setTimeout(() => unassigned.parseNextValue(source, handler), 0);  // force async
+      // setTimeout() candidate
+      unassigned.parseAllValues(source, deliverValues);
+   }
+
+   /**********************************************************************\
+    Notation Declaration processing
+   \**********************************************************************/
+
+   _processNotationDeclaration(ndToken, callback) {
+      if (ndToken.pToken && ndToken.pToken.unassigned) {
+         this._expandPERefsInUnassignedValue(ndToken.pToken.unassigned, (expandedUnassigned) => {
+            ndToken.pToken.unassigned = expandedUnassigned;
+            if (ndToken.pToken.externalId) {
+               ndToken.pToken.externalId.unassigned = expandedUnassigned;
+            }
+
+            notationDeclaration.assignUnassigned(ndToken.pToken);
+
+            const newNDToken = notationDeclaration.pTokenToXToken(ndToken.pToken);
+            this.push(newNDToken);
+            callback();
+         });
+      } else {
+         this.push(ndToken);
+         callback();
+      }
+   }
+
+   /**********************************************************************\
+    EntityDeclaration processing
+   \**********************************************************************/
+
+   _processEntityDeclaration(edToken, callback) {
+      if (edToken.pToken && edToken.pToken.unassigned) {
+         this._expandPERefsInUnassignedValue(edToken.pToken.unassigned, (parsed) => {
+            edToken.pToken.unassigned = parsed;
+            entityDeclaration.assignUnassigned(edToken.pToken);
+            const newXToken = entityDeclaration.pTokenToXToken(edToken.pToken);
+            this._expandPeRefsInEntityValue(newXToken.value, (newValue) => {
+               newXToken.value = newValue;
+               this._addEntityDeclaration(newXToken, callback);
+            });
+         });
+      } else {
+         this._expandPeRefsInEntityValue(edToken.value, (newValue) => {
+            edToken.value = newValue;
+            this._addEntityDeclaration(edToken, callback);
+         });
+      }
+   }
+
+   _expandPeRefsInEntityValue(entityValue, deliverExpanded) {
+      this._expandThroughNextPERef(entityValue, (before, expandedPERef) => {
+         if (!expandedPERef) {
+            deliverExpanded(before);
             return;
          }
-         setTimeout(() => {
-            this._parseValues(values, (trailingValues) => {
-               deliverValues(newValues.concat(trailingValues));
-            });
-         }, 0);
-      };
 
-      unassigned.parseNextValue(source, handler);
+         this._expandPeRefsInEntityValue(entityValue, (rest) => {
+            deliverExpanded(before.concat(expandedPERef, rest));
+         });
+      });
    }
+
+   _addEntityDeclaration(edToken, callback) {
+      if (edToken instanceof entityDeclaration.ParamXToken) {
+         this._entityManager.addParameterEntityFromInternalSubset(edToken);
+      } else {
+         this._entityManager.addEntityFromInternalSubset(edToken);
+      }
+
+      this.push(edToken);
+      callback();
+   }
+
 }
 
 export default NodeStream;

@@ -149,10 +149,22 @@ describe('SToken test utils', () => {
          ]);
 
          expect(() => {
-            mock.extract('word', [ '<' ], () => {});
+            mock.extract('word', [ '<', 'x' ], () => {});
             mock.respondInAsyncTime();
          }).toThrowError('Parameters passed to STokenSource did not match expectation. ' +
-            'Expected "!" but got "undefined".');
+            'Expected "!" but got "x".');
+      });
+
+      it('throws an error if input param array is longer than the defined', () => {
+         const mock = new MockSTokenSource([
+            [ 'one', 'word', [ '<' ] ],
+         ]);
+
+         expect(() => {
+            mock.extract('word', [ '<', '!' ], () => {});
+            mock.respondInAsyncTime();
+         }).toThrowError('Parameters passed to STokenSource did not match expectation. ' +
+            'Expected "[\'<\']" but got "[\'<\', \'!\']".');
       });
 
       it('extractToObject() extracts the next value to the specified object', () => {

@@ -386,14 +386,33 @@ function getSTokens(unassignedArray) {
    return tokens;
 }
 
+function checkExtra(values, ec, errorCode) {
+   if (values && values.length > 0) {
+      // convert the unassigned values into a set of STokens
+      const sTokens = getSTokens(values);
+      const firstToken = sTokens[0].clone();
+      const originalFirst = sTokens.shift();
+
+      ec.setPos(originalFirst);
+      const unifiedSToken = sTokens.reduce((accumulation, sToken) => {
+         accumulation.merge(sToken);
+         return accumulation;
+      }, firstToken);
+
+      ec.report(errorCode, [ unifiedSToken.originalStr ]);
+   }
+}
+
 const unassigned = {
    checkForPERef,
    parseNextValue,
+   parseAllValues: extractAllValues,
    assignToProps,
    wordFromSToken,
    spaceFromSToken,
    makeCheckCallback,
    getSTokens,
+   checkExtra,
 };
 
 export default unassigned;

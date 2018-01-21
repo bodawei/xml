@@ -65,7 +65,7 @@ describe('docTypeStart (unit)', () => {
 
       it('parses a full element start', () => {
          const mockSource = new MockSTokenSource([
-            [ 'rootElement', 'word', [ '[' ] ],
+            [ 'rootElement', 'word', [ '[', '>' ] ],
             [ ' ', 'space' ],
             [ ' ', 'space' ],
             [ '[', 'match', '[' ],

@@ -205,6 +205,12 @@ class MockSTokenSource {
 
       if (expected.param) {
          if (Array.isArray(expected.param)) {
+            if (expected.param.length !== actualCall.params.length) {
+               throw new Error('Parameters passed to STokenSource did not match expectation. ' +
+               `Expected "['${expected.param.join('\', \'')}']" but got ` +
+               `"['${actualCall.params.join('\', \'')}']".`);
+            }
+
             for (let paramIndex = 0; paramIndex < expected.param.length; paramIndex++) {
                if (expected.param[paramIndex] !== actualCall.params[paramIndex]) {
                   throw new Error('Parameters passed to STokenSource did not match expectation. ' +
