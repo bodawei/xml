@@ -335,6 +335,12 @@ describe('literal (unit)', () => {
          expect(result).toEqual(undefined);
       });
 
+      it('copes with no pToken at all', () => {
+         const result = literal.makeTokenCompatible();
+
+         expect(result).toEqual(undefined);
+      });
+
    });
 
    describe('makeOneTokenCompatible()', () => {
@@ -384,11 +390,14 @@ describe('literal (unit)', () => {
 
       it('adds STokens from any entity references', () => {
          const expectedSToken = makeSTokenMaker();
+         const entityReferencePToken = new entityReference.PToken({
+            name: expectedSToken('theName')
+         });
          const pToken = {
             openQuote: expectedSToken('"'),
             value: [
                new text.PToken({ text: expectedSToken('blah') }),
-               new entityReference.XToken('foo', [ { stoken: true } ]),
+               new entityReference.XToken('foo', entityReferencePToken),
             ],
             closeQuote: expectedSToken('"'),
          };
@@ -397,7 +406,7 @@ describe('literal (unit)', () => {
          expect(results).toEqual([
             pToken.openQuote,
             pToken.value[0].text,
-            { stoken: true },
+            entityReferencePToken.name,
             pToken.closeQuote,
          ]);
       });

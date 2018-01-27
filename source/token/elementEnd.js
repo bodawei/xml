@@ -16,6 +16,7 @@ const ELEMENT_END = 'ELEMENT_END';
 
 class ElementEnd extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, pToken) {
       super(pToken);
 
@@ -25,6 +26,7 @@ class ElementEnd extends base.XToken {
 }
 
 class ElementEndPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(ELEMENT_END, props);
    }

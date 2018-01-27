@@ -809,6 +809,28 @@ describe('entityDeclaration (unit)', () => {
                ]);
          });
 
+         it('calls unassigned.assignToProps() if EntityValue IS the peref, and preceeded by space', () => {
+            const unassignedValue = [ {
+               type: 'text',
+               subType: 'space',
+            }, {
+               type: 'literal',
+            } ];
+            const declPToken = new entityDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'entityValueOrId',
+            });
+            
+            entityDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'EntityValue', [
+                  { name: 'postNameSpace', type: 'space' },
+                  { name: 'EntityValue', type: 'literal', flatten: true },
+                  { name: 'postEntityValueSpace', type: 'space' },
+               ]);
+         });
+
          it('does not unassigned.assignToProps() with the epilog if we found an EntityValue', () => {
             const unassignedValue = [ {
                type: 'literal',

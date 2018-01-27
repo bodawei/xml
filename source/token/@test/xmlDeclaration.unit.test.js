@@ -224,6 +224,21 @@ describe('xmlDeclaration (unit)', () => {
                });
             });
 
+            it('reports no error about encoding position if this is not a document kind', () => {
+               emd = new EntityMetaData(EntityMetaData.KIND.EXTERNAL);
+               checkName(makeToken('version'), 0, mockErrorCollector, emd);
+               checkName(makeToken('standalone'), 1, mockErrorCollector, emd);
+               const encodingSToken = makeToken('encoding');
+
+               checkName(encodingSToken, 2, mockErrorCollector, emd);
+
+               expect(mockErrorCollector).not.toReportError({
+                  id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
+                  params: undefined,
+                  position: undefined,
+               });
+            });
+
             it('reports an error if a standalone is in the wrong order', () => {
                checkName(makeToken('standalone'), 0, mockErrorCollector, emd);
 
@@ -315,6 +330,18 @@ describe('xmlDeclaration (unit)', () => {
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
                   params: [ 'yes', 'Yes' ],
+                  lastPosition: undefined,
+               });
+            });
+
+            it('reports an error if the standalone has no value', () => {
+               const mockErrorCollector = new MockErrorCollector();
+
+               checkValue(makeToken('standalone'), [ ], mockErrorCollector, emd);
+
+               expect(mockErrorCollector).toReportError({
+                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
+                  params: [ '' ],
                   lastPosition: undefined,
                });
             });

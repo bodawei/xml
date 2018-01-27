@@ -18,6 +18,7 @@ class UnknownEnvelope extends base.XToken {
 }
 
 class EnvelopePToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(type, props) {
       super(type || UNKNOWNENVELOPE, props);
    }

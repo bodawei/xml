@@ -164,7 +164,7 @@ function makeOneTokenCompatible(pToken) {
 }
 
 function getSTokens(pToken) {
-   const results = [];
+   let results = [];
 
    if (!pToken) {
       return results;
@@ -177,11 +177,7 @@ function getSTokens(pToken) {
    for (let index = 0; index < pieces.length; index++) {
       const item = pieces[index];
       if (!item.text) {
-         if (item.pToken) {
-            item.pToken.forEach(sToken => {
-               results.push(sToken);
-            });
-         }
+         results = results.concat(item.pToken.getSTokenArray());
       } else {
          results.push(item.text);
       }

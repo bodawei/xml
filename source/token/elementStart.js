@@ -18,6 +18,7 @@ const ELEMENT_EMPTY = 'ELEMENT_EMPTY';
 
 class ElementStart extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, attributes, pToken) {
       super(pToken);
 
@@ -29,6 +30,7 @@ class ElementStart extends base.XToken {
 
 class ElementEmpty extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, attributes, pToken) {
       super(pToken);
 
@@ -39,11 +41,13 @@ class ElementEmpty extends base.XToken {
 }
 
 class ElementStartPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(ELEMENT_START, props);
    }
 
    getSTokenArray() {
+      /* istanbul ignore next */ // Istanbul is confused by node transpilation
       const results = super.getSTokenArray();
       const sTokens = attribute.getSTokens(this.attributes);
 
@@ -59,11 +63,13 @@ class ElementStartPToken extends base.PToken {
 }
 
 class ElementEmptyPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(ELEMENT_EMPTY, props);
    }
 
    getSTokenArray() {
+      /* istanbul ignore next */ // Istanbul is confused by node transpilation
       const results = super.getSTokenArray();
       const sTokens = attribute.getSTokens(this.attributes);
 

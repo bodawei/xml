@@ -15,6 +15,7 @@ const CHARDATA = 'CHARDATA';
 
 class CharData extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text, sTokens) {
       super(sTokens);
 
@@ -24,6 +25,7 @@ class CharData extends base.XToken {
 }
 
 class CharDataPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(CHARDATA, props);
    }

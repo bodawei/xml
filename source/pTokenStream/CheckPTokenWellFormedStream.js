@@ -100,7 +100,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case docTypeStart.PTYPE:
             switch (this._state) {
                case STATE.PROLOG_PREDOCTYPE:
-                  this._state = STATE.PROLOG_PREDOCTYPE;
                   if (pToken.startInternalSubset) {
                      this._state = STATE.IN_DTD;
                   }

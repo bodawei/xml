@@ -14,6 +14,7 @@ const SPACE = 'SPACE';
 
 class Space extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text, pToken) {
       super(pToken);
 
@@ -23,11 +24,13 @@ class Space extends base.XToken {
 }
 
 class SpacePToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(SPACE, props);
    }
 
    getSTokenArray() {
+      /* istanbul ignore next */ // Istanbul is confused by node transpilation
       const results = super.getSTokenArray();
 
       results.pushSTokens(this.text);

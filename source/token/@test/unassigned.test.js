@@ -377,6 +377,37 @@ describe('unassigned (unit)', () => {
          });
       });
 
+      it('allows for an SToken having no text when the value is "allowed"', () => {
+         const pToken = {};
+         const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
+         const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
+         const word2 = unassigned.wordFromSToken(SToken.fromString('BAR'));
+         delete word2.text;
+         const unVals = [ word1, space, word2 ];
+         const descriptors = [ {
+            name: 'one',
+            type: 'word',
+         }, {
+            name: 'two',
+            type: 'space',
+         }, {
+            name: 'three',
+            type: 'word',
+            allowed: [ 'one', 'bar' ],
+         }, {
+            name: 'four',
+            type: 'word',
+         } ];
+
+         unassigned.assignToProps(unVals, pToken, undefined, descriptors);
+
+         expect(pToken).toEqual({
+            one: word1.text,
+            two: space.text,
+            four: undefined,
+         });
+      });
+
       it('skips descriptor if there is no matching unassigned item', () => {
          const pToken = {};
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));

@@ -18,6 +18,7 @@ const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
 
 class ProcessingInstruction extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(target, instruction, sTokens) {
       super(sTokens);
 
@@ -28,11 +29,13 @@ class ProcessingInstruction extends base.XToken {
 }
 
 class ProcessingInstructionPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(PROCESSING_INSTRUCTION, props);
    }
 
    getSTokenArray() {
+      /* istanbul ignore next */ // Istanbul is confused by node transpilation
       const results = super.getSTokenArray();
 
       results.pushSTokens(this.instruction,

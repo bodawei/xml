@@ -70,7 +70,7 @@ function parse(source, openSToken, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec) {
+function checkWellFormed(pToken, ec, entityMetaData) {
    ec.setPos(pToken.open);
 
    ec.setPos(pToken.postOpenSpace);

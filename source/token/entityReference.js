@@ -18,8 +18,8 @@ const WFEID = WellFormedError.ID;
 
 class EntityReference extends base.XToken {
 
-   constructor(name, sTokens) {
-      super(sTokens);
+   constructor(name, pToken) {
+      super(pToken);
 
       this.name = name;
    }

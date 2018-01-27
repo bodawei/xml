@@ -18,6 +18,7 @@ class DocTypeEnd extends base.XToken {
 }
 
 class DocTypeEndPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(props) {
       super(DOCTYPE_END, props);
    }

@@ -258,6 +258,22 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
          });
 
+         it('leaves state in PREDOCTYPE if not starting internal subset', () => {
+            checker._state = 'PROLOG_PREDOCTYPE';
+            pToken.startInternalSubset = false;
+            checker.write(pToken);
+
+            expect(checker._state).toEqual('PROLOG_PREDOCTYPE');
+         });
+
+         it('changes state to IN_DTD if in PREDOCTYPE and starting internal subset', () => {
+            checker._state = 'PROLOG_PREDOCTYPE';
+            pToken.startInternalSubset = true;
+            checker.write(pToken);
+
+            expect(checker._state).toEqual('IN_DTD');
+         });
+
       });
 
    });
@@ -590,6 +606,14 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
          });
 
+         it('reports no error if IN_DTD', () => {
+            checker._state = 'IN_DTD';
+            spyOn(checker, 'push');
+            checker.write(pToken);
+
+            expect(checker.push.calls.argsFor(0)[0]).toEqual(pToken);
+         });
+
       });
 
    });
@@ -670,6 +694,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       });
 
       it('calls space.checkWellFormed() when encountering a space parsing', () => {
+         checker._state = 'IN_CONTENT';
          checker.write(pToken);
 
          const args = space.checkWellFormed.calls.argsFor(0);

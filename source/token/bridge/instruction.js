@@ -17,6 +17,7 @@ const INSTRUCTION = 'INSTRUCTION';
 
 class InstructionToken extends base.XToken {
 
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(target, pToken) {
       super(pToken);
 
@@ -26,6 +27,7 @@ class InstructionToken extends base.XToken {
 }
 
 class InstructionPToken extends base.PToken {
+   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(type, props) {
       super(type || INSTRUCTION, props);
    }

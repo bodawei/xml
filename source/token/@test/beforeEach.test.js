@@ -1,5 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
+/* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
 import { toContainPTokenProps } from './beforeEach.js';
 
