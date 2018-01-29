@@ -9,6 +9,7 @@ import {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -73,6 +74,19 @@ describe('PTokenStream (unit)', () => {
          });
       });
 
+   });
+
+   it('calls attListDeclaration.parse()', (done) => {
+      spyOn(attListDeclaration, 'parse').and.callThrough();
+      pTokenStream.addText('<!ATTLIST something bar CDATA #REQUIRED>');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(attListDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(attListDeclaration.parse.calls.argsFor(0)[1].declType.str).toEqual('ATTLIST');
+         expect(attListDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         done();
+      });
    });
 
    it('calls charData.parse()', (done) => {

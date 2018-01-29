@@ -47,6 +47,15 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when the ATTLIST has a bad name', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!DOCTYPE [<!ATTLIST $badName>]>',
+         new WellFormedError('ATTLISTDECL_ELEMENT_NAME_INVALID',
+            [ '$badName' ],
+            new Offset(new EntityLocation(), 42, 0, 42),
+            new Offset(new EntityLocation(), 32, 0, 32),
+         ), done);
+   });
+
    it('reports an error when the charData has an invalid char', (done) => {
       expectInputToProduce('<?xml version="1.0"?><one>bad\u0000data</one>',
          new WellFormedError('CHARDATA_INVALID_CHAR',

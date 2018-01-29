@@ -7,6 +7,7 @@ import {
    declaration,
    envelope,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -70,6 +71,12 @@ describe('PToXTokenStream (integration)', () => {
    it('tokenizes an UNKNOWN envelope', (done) => {
       expectInputToProduce('<![BOGUS[', [
          new envelope.XToken([]),
+      ], done);
+   });
+
+   it('tokenizes an ATTLIST declaration', (done) => {
+      expectInputToProduce('<!ATTLIST elementName >', [
+         new attListDeclaration.XToken('elementName', new attListDeclaration.PToken()),
       ], done);
    });
 

@@ -6,6 +6,7 @@ import {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -55,6 +56,16 @@ describe('PToXTokenStream (unit)', () => {
       tokenStream.read();
 
       expect(instruction.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   });
+
+   it('calls attListDeclaration.pTokenToXToken()', () => {
+      spyOn(attListDeclaration, 'pTokenToXToken');
+      const pToken = { type: attListDeclaration.PTYPE };
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(attListDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls cdata.pTokenToXToken()', () => {

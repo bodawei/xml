@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -10,6 +10,7 @@ import {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -68,6 +69,14 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             break;
          case EntityMetaData.PTYPE:
             this._metaData = pToken;
+            break;
+
+         case attListDeclaration.PTYPE:
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ATTLISTDECL_INVALID_CONTEXT);
+            }
+
+            attListDeclaration.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
          case cdata.PTYPE:
             if (this._state !== STATE.IN_CONTENT) {

@@ -530,6 +530,39 @@ describe('NodeStream (unit)', () => {
 
       });
 
+      describe('attlist declaration processing', () => {
+
+         it('processes through the unassigned values', (done) => {
+            const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('elName')) ];
+            const pToken = {
+               unassigned: unassignedVals,
+            };
+            const declToken = new xToken.attListDeclaration.pTokenToXToken(pToken);
+            spyOn(xToken.attListDeclaration, 'assignUnassigned').and.callFake((pToken) => {
+               expect(pToken.unassigned).toEqual([
+                  xToken.unassigned.wordFromSToken(SToken.fromString('elName')),
+               ]);
+            });
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, done);
+         });
+
+         it('passes a complete ATTLIST token through', () => {
+            const pToken = {};
+            const declToken = new xToken.attListDeclaration.pTokenToXToken(pToken);
+            spyOn(nodeStream, 'push');
+
+            nodeStream.write(declToken);
+
+            expect(nodeStream.push).toHaveBeenCalledWith(declToken);
+         });
+
+         // Other testing is implicitly covered in entity declaration testing
+
+      });
+
    });
 
 });

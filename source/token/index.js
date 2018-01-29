@@ -4,6 +4,7 @@ import * as declaration from './bridge/declaration.js';
 import * as envelope from './bridge/envelope.js';
 import * as instruction from './bridge/instruction.js';
 
+import attListDeclaration from './attListDeclaration';
 import * as cdata from './cdata.js';
 import * as charData from './charData.js';
 import * as comment from './comment.js';
@@ -27,6 +28,7 @@ module.exports = {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,

@@ -207,4 +207,31 @@ describe('NodeStream (integration)', () => {
 
    });
 
+
+   describe('attlist declaration processing', () => {
+
+      it('expands an parameter entity that makes up the attlist declaration body', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const attListDecl = results[4];
+
+            expect(attListDecl.elementName).toEqual('foo');
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % middle "foo">' +
+            '<!ATTLIST %middle;>' +
+         ']>');
+         pTokenStream.endText();
+      });
+
+   });
+
 });

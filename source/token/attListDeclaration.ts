@@ -1,47 +1,26 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
+import { EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError } from '../error';
+import { SToken, STokenSource } from '../sToken';
+import entityReference from './entityReference.js';
 import unassigned from './unassigned.js';
 
 import * as declaration from './bridge/declaration.js';
 import misc from './common/misc.js';
 
-const ATTLISTDECL_PTOKENTYPE = 'ATTLISTDECL_PTOKENTYPE';
+const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
+const ATTLIST_XTOKEN_TYPE = 'ATTLIST_XTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
 
-type SToken = {
-
-};
-
-type EntityMetaData = {
-
-};
-type ErrorCollector = {
-   setPos(item:SToken);
-   check(condition:any, code: string);
-};
-
-type UnassignedValue = {
-   type: 'literal'|'word';
-   [name: string]: any;
-}
-
-type STokenSource = {
-   extract(type: string, deliverResult: (sToken: SToken) => void),
-   extract(type: string, params: any, deliverResult: (sToken: SToken) => void),
-   extractToObject(type: string, obj: Object, propName: string),
-   extractToObject(type: string, params: any, obj: Object, propName: string),
-};
-
-type DeclPToken = {
-
-};
-
-type DeliverPToken = (pToken:Object) => void;
+type DeliverPToken = (pToken:AttListPToken) => void;
 
 class AttListPToken {
+   readonly type: string;
+
    constructor(basePToken?: DeclPToken|AttListPToken) {
       Object.assign(this, basePToken);
+      this.type = ATTLISTDECL_PTOKEN_TYPE;
    }
 
    elementName?: SToken;
@@ -99,6 +78,41 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
 }
 
 /**********************************************************************\
+ Recover from finding a parameter param entity ref in the declaration
+\**********************************************************************/
+
+function assignUnassigned(atLiPToken) {
+   const unValues = atLiPToken.unassigned || [];
+
+   if (unValues.length === 0) {
+      delete atLiPToken.unassigned;
+      delete atLiPToken.nextPropName;
+      return;
+   }
+
+   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+
+   if (unexpandedRef.length !== 0) {
+      return;
+   }
+
+   if (atLiPToken.nextPropName === 'elementName') {
+      unassigned.assignToProps(atLiPToken.unassigned, atLiPToken, atLiPToken.nextPropName, [
+         { name: 'postDeclTypeSpace', type: 'space' },
+         { name: 'elementName', type: 'word' },
+         { name: 'postElementNameSpace', type: 'space' },
+      ]);
+   }
+
+   if (unValues.length !== 0) {
+      atLiPToken.extra = atLiPToken.unassigned;
+   }
+
+   delete atLiPToken.nextPropName;
+   delete atLiPToken.unassigned;
+}
+
+/**********************************************************************\
  checkWellFormed()
 \**********************************************************************/
 
@@ -116,11 +130,42 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
    misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 }
 
+/**********************************************************************\
+ XToken
+\**********************************************************************/
+
+class AttListXToken {
+      readonly type: string;
+      public elementName: string;
+      public pToken: AttListPToken;
+
+      constructor(elementName: string, pToken?: AttListPToken) {
+         this.type = ATTLIST_XTOKEN_TYPE;
+         this.elementName = elementName;
+         this.pToken = pToken;
+      }
+}
+
+function pTokenToXToken(pToken: AttListPToken): AttListXToken {
+   const name = pToken.elementName ? pToken.elementName.str : '';
+
+   return new AttListXToken(name, pToken);
+}
+
+/**********************************************************************\
+ Public Interface
+\**********************************************************************/
+
 const attListDecl = {
-   PTYPE: ATTLISTDECL_PTOKENTYPE,
+   PTYPE: ATTLISTDECL_PTOKEN_TYPE,
    PToken: AttListPToken,
+   XTYPE: ATTLIST_XTOKEN_TYPE,
+   XToken: AttListXToken,
+
    parse,
+   assignUnassigned,
    checkWellFormed,
+   pTokenToXToken,
 };
 
 export default attListDecl;

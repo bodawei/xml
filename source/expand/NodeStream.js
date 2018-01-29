@@ -8,6 +8,7 @@ import { PTokenStream } from '../pTokenStream';
 import { STokenSource } from '../sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
+   attListDeclaration,
    entityDeclaration,
    entityEnd,
    entityReference,
@@ -75,6 +76,9 @@ class NodeStream extends Transform {
          }
       } else if (xToken instanceof notationDeclaration.XToken) {
          this._processNotationDeclaration(xToken, callback);
+         return;
+      } else if (xToken instanceof attListDeclaration.XToken) {
+         this._processAttListDeclaration(xToken, callback);
          return;
       }
 
@@ -202,6 +206,27 @@ class NodeStream extends Transform {
          });
       } else {
          this.push(ndToken);
+         callback();
+      }
+   }
+
+   /**********************************************************************\
+    AttList Declaration processing
+   \**********************************************************************/
+
+   _processAttListDeclaration(alToken, callback) {
+      if (alToken.pToken && alToken.pToken.unassigned) {
+         this._expandPERefsInUnassignedValue(alToken.pToken.unassigned, (expandedUnassigned) => {
+            alToken.pToken.unassigned = expandedUnassigned;
+
+            attListDeclaration.assignUnassigned(alToken.pToken);
+
+            const newALToken = attListDeclaration.pTokenToXToken(alToken.pToken);
+            this.push(newALToken);
+            callback();
+         });
+      } else {
+         this.push(alToken);
          callback();
       }
    }

@@ -57,6 +57,10 @@ describe('PTokenStream (integration)', () => {
 
    });
 
+   it('parses an ATTLIST', (done) => {
+      expectInputToProduceTypes('<!ATTLIST myEntity >', 'ATTLISTDECL_PTOKEN_TYPE', done);
+   });
+
    it('parses character data up to a <', (done) => {
       expectInputToProduceTypes('blah<elementName>', 'CHARDATA', done);
    });
@@ -82,7 +86,7 @@ describe('PTokenStream (integration)', () => {
       expectInputToProduceTypes('</elementName\t>', 'ELEMENT_END', done);
    });
 
-   it('parsees an ENTITY', (done) => {
+   it('parses an ENTITY', (done) => {
       expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', 'ENTITYDECL', done);
    });
 

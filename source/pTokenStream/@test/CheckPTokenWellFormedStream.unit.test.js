@@ -1,15 +1,17 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Offset } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 
+import { SToken } from '../../sToken';
 import { makeSToken } from '../../sToken/@test/helper';
 import {
    declaration,
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -65,6 +67,41 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          expect(args[1]).toEqual(true);
          expect(args[2]).toBeInstanceOf(ErrorCollector);
          expect(args[3]).toEqual(metaData);
+      });
+
+   });
+
+   describe('attListDeclaration', () => {
+      let pToken;
+
+      beforeEach(() => {
+         spyOn(attListDeclaration, 'checkWellFormed');
+         pToken = {
+            type: attListDeclaration.PTYPE,
+            open: makeSToken('<!'),
+         };
+      });
+
+      it('calls attListDeclaration.checkWellFormed() when encountering a PToken', () => {
+         checker.write(metaData);
+         checker.write(pToken);
+
+         const args = attListDeclaration.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(pToken);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not IN_DTD', () => {
+            checker._state = 'IN_CONTENT';
+            spyOn(checker, 'push');
+            checker.write(pToken);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_INVALID_CONTEXT);
+         });
+
       });
 
    });

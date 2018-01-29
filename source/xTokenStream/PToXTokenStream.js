@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 import { EntityMetaData } from '../basic';
@@ -8,6 +8,7 @@ import {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -46,6 +47,9 @@ class PToXTokenStream extends stream.Transform {
             break;
          case instruction.PTYPE:
             this.push(instruction.pTokenToXToken(pToken));
+            break;
+         case attListDeclaration.PTYPE:
+            this.push(attListDeclaration.pTokenToXToken(pToken));
             break;
          case cdata.PTYPE:
             this.push(cdata.pTokenToXToken(pToken));

@@ -5,6 +5,7 @@ import stream from 'readable-stream';
 import { ValidityError } from '../error';
 
 import {
+   attListDeclaration,
    docTypeStart,
    elementStart,
    notationDeclaration,
@@ -32,6 +33,8 @@ class CheckXTokenValidStream extends stream.Transform {
          } else {
             this._notations[xToken.name] = xToken;
          }
+      } else if (xToken instanceof attListDeclaration.XToken) {
+         this._validateAttListDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
          this._docType = xToken;
          this._holding = true;
@@ -68,6 +71,19 @@ class CheckXTokenValidStream extends stream.Transform {
          token = this._queued.shift();
       }
       done();
+   }
+
+   _validateAttListDecl(alDecl) {
+      if (this._attrDefsByElementName[alDecl.elementName]) {
+         // should include location of previous
+         const err = new XMLWarning(XmlWarning.ID.ATTLIST_REPEATED_ROOT_ELEMENT_TYPE, [ xToken.elementName ],
+            alDecl.pToken.elementName, alDecl.pToken.open);
+         this._queued.push(err);
+      }
+
+      this._attrDefsByElementName[alDecl.elementName] = alDecl;
+
+      this._queued.push(alDecl);
    }
 
 }

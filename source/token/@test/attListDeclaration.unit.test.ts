@@ -25,6 +25,28 @@ describe('attListDeclaration (unit)', () => {
       });
    });
 
+   describe('AttListXToken()', () => {
+
+      it('is defined', () => {
+         expect(attListDeclaration.XToken).toBeInstanceOf(Function);
+      });
+
+      it('constructs an instance', () => {
+         const xToken = new attListDeclaration.XToken('foo', new attListDeclaration.PToken());
+
+         expect(xToken.elementName).toEqual('foo');
+      });
+
+   });
+
+   describe('XTYPE', () => {
+
+      it('is defined', () => {
+         expect(attListDeclaration.XTYPE).toEqual('ATTLIST_XTOKEN_TYPE');
+      });
+
+   });
+
    describe('parse()', () => {
       let callback;
       let checkForPERefCallback;
@@ -95,6 +117,65 @@ describe('attListDeclaration (unit)', () => {
 
    });
 
+   describe('assignUnassigned()', () => {
+
+      beforeEach(() => {
+         spyOn(unassigned, 'assignToProps');
+      });
+
+      it('does not call assignToProps() if there is no unassigned', () => {
+         attListDeclaration.assignUnassigned({});
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      it('deletes the unassigned property if it is empty', () => {
+         const declPToken = {
+            unassigned: [],
+            nextPropName: 'elementName',
+         };
+         
+         attListDeclaration.assignUnassigned(declPToken);
+
+         expect(attListDeclaration.unassigned).toBeUndefined();
+         expect(attListDeclaration.nextPropName).toBeUndefined();
+      });
+
+      it('does not call assignToProps() if there is still an unexpanded param ref', () => {
+         const declPToken = {
+            unassigned: [ {
+               type: entityReference.PARAM_PTYPE,
+            } ],
+         };
+         
+         attListDeclaration.assignUnassigned(declPToken);
+
+         expect(unassigned.assignToProps).not.toHaveBeenCalled();
+      });
+
+      describe('unassigned in elementName', () => {
+
+         it('calls unassigned.assignToProps() when the match is in the el name', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'elementName',
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
+               declPToken, 'elementName', [
+                  { name: 'postDeclTypeSpace', type: 'space' },
+                  { name: 'elementName', type: 'word' },
+                  { name: 'postElementNameSpace', type: 'space' },
+               ]);
+         });
+   
+      });
+
+   });
+
    describe('checkWellFormed()', () => {
       let mockErrorCollector;
       let emd;
@@ -146,6 +227,31 @@ describe('attListDeclaration (unit)', () => {
 
          expect(misc.checkName).toHaveBeenCalledWith(aldPToken.elementName,
             mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+      });
+
+   });
+
+   describe('pTokenToXToken()', () => {
+
+      it('creates an XToken', () => {
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: aldPToken.elementName.str,
+            pToken: aldPToken,
+         });
+      });
+
+      it('creates an XToken with a blank name when pToken has no name', () => {
+         delete aldPToken.elementName;
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: '',
+            pToken: aldPToken,
+         });
       });
 
    });

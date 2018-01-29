@@ -150,7 +150,7 @@ const publicInterface = {
       '_setup',
       '_deriveLocale',
       '_eslint',
-      '_nodeTest',
+//      '_nodeTest',
       '_karmaPrecommit', // Arguably should be running the dist/ code
       // '_buildPackage',
       // '_buildES5Files',

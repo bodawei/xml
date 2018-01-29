@@ -10,6 +10,7 @@ import {
    envelope,
    instruction,
 
+   attListDeclaration,
    cdata,
    charData,
    comment,
@@ -171,6 +172,9 @@ class PTokenStream extends stream.Readable {
                               });
                            }
                         });
+                        break;
+                     case 'ATTLIST':
+                        attListDeclaration.parse(this._sTokenSource, pToken, deliverParse);
                         break;
                      case 'ENTITY':
                         entityDeclaration.parse(this._sTokenSource, pToken, deliverParse);
