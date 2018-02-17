@@ -21,6 +21,10 @@ describe('attListDeclaration (unit)', () => {
       aldPToken = new attListDeclaration.PToken({
          elementName: makeSToken('elementName'),
          postElementNameSpace: makeSToken(' '),
+         attDefs: [ {
+            name: makeSToken('att1'),
+            postNameSpace: makeSToken(' '),
+         } ],
          close: makeSToken('>'),
       });
    });
@@ -32,9 +36,12 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('constructs an instance', () => {
-         const xToken = new attListDeclaration.XToken('foo', new attListDeclaration.PToken());
+         const xToken = new attListDeclaration.XToken('foo', [{
+            name: 'attName',
+         }], new attListDeclaration.PToken());
 
          expect(xToken.elementName).toEqual('foo');
+         expect(xToken.attDefs[0].name).toEqual('attName');
       });
 
    });
@@ -64,11 +71,15 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('does a parse of a basic attribute list declaration', () => {
+         const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
          ]);
+         aldPToken.attDefs = [];
+         aldPToken.close = makeSToken('>');
 
          attListDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
@@ -78,6 +89,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('returns nothing if at EOF. That is: <!ATTLIST', () => {
          const mockSource = new MockSTokenSource([
+            undefined,
             undefined,
             undefined,
             undefined,
@@ -91,6 +103,54 @@ describe('attListDeclaration (unit)', () => {
             postElementNameSpace: undefined,
             close: undefined,
          }) ] ]);
+      });
+
+      it('parses an attribute list with a single named attribute', () => {
+         const makeSToken = makeSTokenMaker(undefined, 17, 0, 17);
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         aldPToken.close = makeSToken('>');
+
+         attListDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('parses an attribute list with a multiple named attributes', () => {
+         const makeSToken = makeSTokenMaker(undefined, 17, 0, 17);
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att2', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att3', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         aldPToken.attDefs.push({
+            name: makeSToken('att2'),
+            postNameSpace: makeSToken(' '),
+         });
+         aldPToken.attDefs.push({
+            name: makeSToken('att3'),
+            postNameSpace: makeSToken(' '),
+         });
+         aldPToken.close = makeSToken('>');
+
+         attListDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
       });
 
       describe('parameter entity reference', () => {
@@ -109,6 +169,34 @@ describe('attListDeclaration (unit)', () => {
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual(new attListDeclaration.PToken({
+               close: makeSToken('>'),
+            }));
+         });
+
+         it('returns an unassigned value when finding a PE Ref instead of an attr name', () => {
+            let calls = 0;
+            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+               calls ++;
+               if (calls > 1) {
+                  foundRef();
+               } else {
+                  other();
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               [ 'elName', 'word', [ '>', '%' ] ],
+               [ ' ', 'space' ],
+               [ '>', 'match', '>' ],
+            ]);
+   
+            attListDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            const makeSToken = makeSTokenMaker();
+            expect(pToken).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
                close: makeSToken('>'),
             }));
          });
@@ -137,8 +225,8 @@ describe('attListDeclaration (unit)', () => {
          
          attListDeclaration.assignUnassigned(declPToken);
 
-         expect(attListDeclaration.unassigned).toBeUndefined();
-         expect(attListDeclaration.nextPropName).toBeUndefined();
+         expect(declPToken.unassigned).toBeUndefined();
+         expect(declPToken.nextPropName).toBeUndefined();
       });
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
@@ -186,6 +274,7 @@ describe('attListDeclaration (unit)', () => {
 
          spyOn(declaration, 'checkWellFormed');
          spyOn(misc, 'checkName');
+         spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
       it('reports no errors if no pToken provided', () => {
@@ -229,6 +318,21 @@ describe('attListDeclaration (unit)', () => {
             mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
       });
 
+      it('calls misc.checkName() to report on attribute name validity', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
+            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
+      });
+
+      it('calls misc.checkName() to report on attribute name validity', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
+            mockErrorCollector, emd, XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
+            XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+      });
+
    });
 
    describe('pTokenToXToken()', () => {
@@ -250,6 +354,24 @@ describe('attListDeclaration (unit)', () => {
          expect(xToken).toEqualProps({
             type: attListDeclaration.XTYPE,
             elementName: '',
+            pToken: aldPToken,
+         });
+      });
+
+      it('creates an XToken with the provided attributes', () => {
+         aldPToken.attDefs.push({
+            name: SToken.fromString('attr2'),
+         });
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: 'elementName',
+            attDefs: [{
+               name: 'att1',
+            }, {
+               name: 'attr2',
+            }],
             pToken: aldPToken,
          });
       });

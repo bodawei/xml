@@ -1,8 +1,8 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
-import { ValidityError } from '../error';
+import { ValidityError, XmlWarning } from '../error';
 
 import {
    attListDeclaration,
@@ -76,7 +76,7 @@ class CheckXTokenValidStream extends stream.Transform {
    _validateAttListDecl(alDecl) {
       if (this._attrDefsByElementName[alDecl.elementName]) {
          // should include location of previous
-         const err = new XMLWarning(XmlWarning.ID.ATTLIST_REPEATED_ROOT_ELEMENT_TYPE, [ xToken.elementName ],
+         const err = new XmlWarning(XmlWarning.ID.ATTLIST_REPEATED_ROOT_ELEMENT_TYPE, [ alDecl.elementName ],
             alDecl.pToken.elementName, alDecl.pToken.open);
          this._queued.push(err);
       }

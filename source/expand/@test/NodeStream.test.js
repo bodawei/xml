@@ -535,6 +535,7 @@ describe('NodeStream (unit)', () => {
          it('processes through the unassigned values', (done) => {
             const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('elName')) ];
             const pToken = {
+               attDefs: [],
                unassigned: unassignedVals,
             };
             const declToken = new xToken.attListDeclaration.pTokenToXToken(pToken);
@@ -550,7 +551,9 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes a complete ATTLIST token through', () => {
-            const pToken = {};
+            const pToken = {
+               attDefs: [],
+            };
             const declToken = new xToken.attListDeclaration.pTokenToXToken(pToken);
             spyOn(nodeStream, 'push');
 

@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError } from '../error';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { SToken, STokenSource } from '../sToken';
 import entityReference from './entityReference.js';
 import unassigned from './unassigned.js';
@@ -12,21 +12,30 @@ import misc from './common/misc.js';
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
 const ATTLIST_XTOKEN_TYPE = 'ATTLIST_XTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
+const WARN = XmlWarning.ID;
 
 type DeliverPToken = (pToken:AttListPToken) => void;
 
+type DeclPToken = {};
+type UnassignedValue = object;
+
+class AttDefPToken {
+   public name: SToken;
+}
+
 class AttListPToken {
-   readonly type: string;
+   public readonly type: string;
+   public elementName?: SToken;
+   public postElementNameSpace?: SToken;
+   public attDefs: Array<AttDefPToken> = [];
+   public close?: SToken;
+   public unassigned?: Array<UnassignedValue>;
+   public nextPropName?: string;
 
    constructor(basePToken?: DeclPToken|AttListPToken) {
       Object.assign(this, basePToken);
       this.type = ATTLISTDECL_PTOKEN_TYPE;
    }
-
-   elementName?: SToken;
-   postElementNameSpace?: SToken;
-   close?: SToken;
-   unassigned?: Array<UnassignedValue>;
 }
 
 /**********************************************************************\
@@ -64,7 +73,30 @@ function parseElementName(source: STokenSource, pToken: AttListPToken, done: Fun
    const callback = unassigned.makeCheckCallback(pToken, 'elementName', done, () => {
       source.extractToObject('word', [ '>', '%' ], pToken, 'elementName');
       source.extractToObject('space', pToken, 'postElementNameSpace');
-      done();
+
+      parseAttDef(source, pToken, done);
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseAttDef(source: STokenSource, pToken: AttListPToken, done: Function) {
+   const callback = unassigned.makeCheckCallback(pToken, 'attDef', done, () => {
+      source.extract('word', [ '>', '%' ], (attrName: SToken|void) => {
+         if (!attrName) {
+            done();
+            return;
+         }
+
+         const attDef = {
+            name: attrName,
+         };
+         pToken.attDefs.push(attDef);
+
+         source.extractToObject('space', attDef, 'postNameSpace');
+
+         parseAttDef(source, pToken, done);
+      });
    });
 
    unassigned.checkForPERef(source, callback);
@@ -128,28 +160,53 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
    ec.setPos(pToken.elementName);
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
    misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+
+   for (let index = 0; index < pToken.attDefs.length; index++) {
+      const attDef = pToken.attDefs[index];
+
+      ec.setPos(attDef.name);
+      misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);         
+      misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData,
+         WARN.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
+         WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+      }
 }
 
 /**********************************************************************\
  XToken
 \**********************************************************************/
 
+type XAttr = {
+   name: string,
+};
+
 class AttListXToken {
       readonly type: string;
       public elementName: string;
+      public attDefs: Array<XAttr>;
       public pToken: AttListPToken;
 
-      constructor(elementName: string, pToken?: AttListPToken) {
+      constructor(elementName: string, attDefs: Array<XAttr>, pToken?: AttListPToken) {
          this.type = ATTLIST_XTOKEN_TYPE;
          this.elementName = elementName;
+         this.attDefs = attDefs;
          this.pToken = pToken;
       }
 }
 
 function pTokenToXToken(pToken: AttListPToken): AttListXToken {
    const name = pToken.elementName ? pToken.elementName.str : '';
+   const attrs: Array<XAttr> = [];
 
-   return new AttListXToken(name, pToken);
+   for (let index = 0; index < pToken.attDefs.length; index++) {
+      const attDef = pToken.attDefs[index];
+
+      attrs.push({
+         name: attDef.name.str,
+      });
+   }
+
+   return new AttListXToken(name, attrs, pToken);
 }
 
 /**********************************************************************\

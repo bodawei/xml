@@ -30,7 +30,7 @@ describe('attListDeclaration (integration)', () => {
 
    describe('parse()', () => {
 
-      it('parses a PERef (check unsasigned calls)', (done) => {
+      it('parses a PERef in the intial position (check unsasigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('%foo;>');
          source.endText();
@@ -53,6 +53,34 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
+      it('parses a PERef in the attribute definition (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one %foo;>');
+         source.endText();
+
+         attListDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 16, 0, 16);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+               }],
+               unassigned: [ new entityReference.ParamPToken({
+                  open:  makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name:  makeSToken('foo'),
+                  postNameSpace: undefined,
+                  close:  makeSToken(';'),
+               }) ],
+               nextPropName: 'attDef',
+               close: makeSToken1('>'),
+            }));
+            done();
+         });
+      });
    });
 
    describe('assignUnassigned()', () => {
@@ -105,7 +133,6 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-
       it('calls misc.checkName() to report on invalid names', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('$foo>');
@@ -116,6 +143,34 @@ describe('attListDeclaration (integration)', () => {
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+            done();
+         });
+      });
+
+      it('calls misc.checkName() to report on invalid attribute names', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName $foo>');
+         source.endText();
+         attListDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(undefined, WellFormedError);
+
+            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
+            done();
+         });
+      });
+
+      it('calls misc.checkWellFormedNameRecommendation() to report on invalid attribute names', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName xml-foo>');
+         source.endText();
+         attListDeclaration.parse(source, declarationPToken, (result) => {
+            const ec = new ErrorCollector(undefined, WellFormedError);
+
+            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
             done();
          });
       });
@@ -133,7 +188,7 @@ describe('attListDeclaration (integration)', () => {
             const token = attListDeclaration.pTokenToXToken(parsing);
 
             token.pToken = new attListDeclaration.PToken();
-            expect(token).toEqual(new attListDeclaration.XToken('foo', token.pToken));
+            expect(token).toEqual(new attListDeclaration.XToken('foo', [], token.pToken));
             done();
          });
       });

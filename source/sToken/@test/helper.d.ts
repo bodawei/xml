@@ -1,7 +1,8 @@
-import { SToken } from '../index';
+import { SToken, STokenSource } from '../index';
 
-declare class MockSTokenSource {
-   new(expectedValues: any, index?: number, row?: number, column?: number): MockSTokenSource;
+declare class MockSTokenSource extends STokenSource {
+   constructor(expectedValues: any, index?: number, row?: number, column?: number);
+   respondInAsyncTime(): void;
 }
 
 //declare function sTokenMaker(str: string): SToken;

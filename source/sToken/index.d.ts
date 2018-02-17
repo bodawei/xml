@@ -1,14 +1,17 @@
 import { EntityMetaData, Range } from '../basic';
 
 declare class  SToken {
-   new(str: string, originalStr: string, range?: Array<Range>): SToken;
+   static fromString(str: string): SToken;
+   constructor(str: string, originalStr: string, range?: Array<Range>);
    str?: string;
    oritinalStr: string;
    ranges: Array<any>;
 }
 
 declare class STokenSource {
-   new(extractorMap: any, info?: EntityMetaData): STokenSource;
+   constructor(extractorMap: any, info?: EntityMetaData);
+   addText(text: string): void;
+   endText(): void;
    extract(type: string, deliverResult: (sToken: SToken) => void);
    extract(type: string, params: any, deliverResult: (sToken: SToken) => void);
    extractToObject(type: string, obj: Object, propName: string);
