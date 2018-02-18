@@ -75,8 +75,12 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ATTLIST declaration', (done) => {
-      expectInputToProduce('<!ATTLIST elementName >', [
-         new attListDeclaration.XToken('elementName', [], new attListDeclaration.PToken()),
+      expectInputToProduce('<!ATTLIST elementName atOne atTwo>', [
+         new attListDeclaration.XToken('elementName', [{
+            name: 'atOne',
+         }, {
+            name: 'atTwo',
+         }], new attListDeclaration.PToken()),
       ], done);
    });
 

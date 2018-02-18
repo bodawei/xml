@@ -23,6 +23,7 @@ class CheckXTokenValidStream extends stream.Transform {
       this._docType = undefined;
       this._holding = false;
       this._notations = {};
+      this._attrDefsByElementName = {};
    }
 
    _transform(xToken, _, done) {
@@ -76,14 +77,12 @@ class CheckXTokenValidStream extends stream.Transform {
    _validateAttListDecl(alDecl) {
       if (this._attrDefsByElementName[alDecl.elementName]) {
          // should include location of previous
-         const err = new XmlWarning(XmlWarning.ID.ATTLIST_REPEATED_ROOT_ELEMENT_TYPE, [ alDecl.elementName ],
+         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ alDecl.elementName ],
             alDecl.pToken.elementName, alDecl.pToken.open);
          this._queued.push(err);
       }
 
       this._attrDefsByElementName[alDecl.elementName] = alDecl;
-
-      this._queued.push(alDecl);
    }
 
 }

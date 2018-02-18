@@ -81,7 +81,7 @@ function parseElementName(source: STokenSource, pToken: AttListPToken, done: Fun
 }
 
 function parseAttDef(source: STokenSource, pToken: AttListPToken, done: Function) {
-   const callback = unassigned.makeCheckCallback(pToken, 'attDef', done, () => {
+   const callback = unassigned.makeCheckCallback(pToken, 'name', done, () => {
       source.extract('word', [ '>', '%' ], (attrName: SToken|void) => {
          if (!attrName) {
             done();
@@ -113,12 +113,12 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(atLiPToken) {
-   const unValues = atLiPToken.unassigned || [];
+function assignUnassigned(attLiPToken) {
+   const unValues = attLiPToken.unassigned || [];
 
    if (unValues.length === 0) {
-      delete atLiPToken.unassigned;
-      delete atLiPToken.nextPropName;
+      delete attLiPToken.unassigned;
+      delete attLiPToken.nextPropName;
       return;
    }
 
@@ -128,20 +128,65 @@ function assignUnassigned(atLiPToken) {
       return;
    }
 
-   if (atLiPToken.nextPropName === 'elementName') {
-      unassigned.assignToProps(atLiPToken.unassigned, atLiPToken, atLiPToken.nextPropName, [
+   if (attLiPToken.nextPropName === 'elementName') {
+      unassigned.assignToProps(attLiPToken.unassigned, attLiPToken, attLiPToken.nextPropName, [
          { name: 'postDeclTypeSpace', type: 'space' },
          { name: 'elementName', type: 'word' },
          { name: 'postElementNameSpace', type: 'space' },
       ]);
+      attLiPToken.nextPropName = 'name';
    }
+
+   let lastLength = 0;
+
+   while (lastLength !== unValues.length && unValues.length !== 0) {
+      lastLength = unValues.length;
+      let descriptors = [
+         { name: 'name', type: 'word' },
+         { name: 'postNameSpace', type: 'space' },
+      ];
+
+      if (attLiPToken.nextPropName === 'name') {
+         attLiPToken.attDefs.push({});
+         descriptors.unshift({ name: 'xtra', type: 'space' }); // dont forget to test the absence of this when non-names come in
+      }
+
+      const nextDef = attLiPToken.attDefs[attLiPToken.attDefs.length -1];
+      unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, descriptors);
+
+      attLiPToken.nextPropName = 'name';
+   }
+
+   adjustSpaces(attLiPToken);
 
    if (unValues.length !== 0) {
-      atLiPToken.extra = atLiPToken.unassigned;
+      attLiPToken.extra = attLiPToken.unassigned;
    }
 
-   delete atLiPToken.nextPropName;
-   delete atLiPToken.unassigned;
+   delete attLiPToken.nextPropName;
+   delete attLiPToken.unassigned;
+}
+
+function adjustSpaces(attLiPToken) {
+   let prevDef = attLiPToken.attDefs[0] || {};
+
+   if (prevDef.xtra) {
+      attLiPToken.postElementNameSpace = attLiPToken.postElementNameSpace ? 
+         attLiPToken.postElementNameSpace.merge(prevDef.xtra) : prevDef.xtra;
+      delete prevDef.xtra;
+   }
+
+   for (let index = 1; index < attLiPToken.attDefs.length; index++) {
+      const current = attLiPToken.attDefs[index];
+
+      if (current.xtra) {
+         prevDef.postNameSpace = prevDef.postNameSpace ?
+            prevDef.postNameSpace.merge(current.xtra) :
+            current.xtra;
+
+         delete current.xtra;
+      }
+   }
 }
 
 /**********************************************************************\
@@ -161,6 +206,7 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
    misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 
+   const attNames = {};
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
 
@@ -169,7 +215,13 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
       misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData,
          WARN.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
          WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+
+      if (attNames[attDef.name.str]) {
+         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, XmlWarning, [ attDef.name.str ]);
       }
+
+      attNames[attDef.name.str] = attDef;
+   }
 }
 
 /**********************************************************************\

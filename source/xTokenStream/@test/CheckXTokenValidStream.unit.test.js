@@ -1,8 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { ValidityError } from '../../error';
+import { ValidityError, XmlWarning } from '../../error';
 import {
+   attListDeclaration,
    docTypeStart,
    elementStart,
    notationDeclaration,
@@ -79,6 +80,18 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(nOne);
          expect(validator.read()).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ]));
          expect(validator.read()).toEqual(nTwo);
+      });
+
+      it('adds an error if the ATTLIST name shows up more than once', () => {
+         const aOne = new attListDeclaration.XToken('one', [], {});
+         const aTwo = new attListDeclaration.XToken('one', [], {});
+
+         validator.write(aOne);
+         validator.write(aTwo);
+
+         expect(validator.read()).toEqual(aOne);
+         expect(validator.read()).toEqual(new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]));
+         expect(validator.read()).toEqual(aTwo);
       });
 
    });

@@ -206,9 +206,10 @@ describe('attListDeclaration (unit)', () => {
    });
 
    describe('assignUnassigned()', () => {
+      let assignToPropsSpy;
 
       beforeEach(() => {
-         spyOn(unassigned, 'assignToProps');
+         assignToPropsSpy = spyOn(unassigned, 'assignToProps');
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -262,6 +263,128 @@ describe('attListDeclaration (unit)', () => {
    
       });
 
+      describe('unassigned in attribute name', () => {
+
+         it('calls unassigned.assignToProps() with "xtra" if missing is name', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'name', [
+                  { name: 'xtra', type: 'space' },
+                  { name: 'name', type: 'word' },
+                  { name: 'postNameSpace', type: 'space' },
+               ]);
+         });
+   
+         it('adds attribute entries for each attribute', () => {
+            const unassignedValue = [ 'attName1', 'attName2' ];
+            assignToPropsSpy.and.callFake((unassigned) => {
+               unassigned.pop();
+            })
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+            const expected = new attListDeclaration.PToken({
+               attDefs: [ {}, {} ],
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(expected);
+         });
+
+         it('adds a space before the first attribute to the postElementNameSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               postElementNameSpace: SToken.fromString('\t'),
+               attDefs: [ {} ],
+            }));
+         });
+
+         it('appends a space before the first attribute to the postElementNameSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               postElementNameSpace: SToken.fromString(' '),
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               postElementNameSpace: SToken.fromString(' \t'),
+               attDefs: [ {} ],
+            }));
+         });
+
+         it('adds a space to the previous attribute', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  postNameSpace: SToken.fromString('\t'),
+               }, {} ],
+            }));
+         });
+
+         it('merges a space into the previous attribute', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  postNameSpace: SToken.fromString(' ')
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  postNameSpace: SToken.fromString(' \t'),
+               }, {} ],
+            }));
+         });
+
+      });
+
    });
 
    describe('checkWellFormed()', () => {
@@ -308,6 +431,23 @@ describe('attListDeclaration (unit)', () => {
             params: undefined,
             position: undefined,
             lastPosition: undefined,   // space after ATTLIST was mocked out
+         });
+      });
+
+      it('reports a warning if the same attribute name is listed multiple times', () => {
+         aldPToken.attDefs.push({
+            name: SToken.fromString('two'),
+         });
+         aldPToken.attDefs.push({
+            name: new SToken('att1', 'att1', new Range(undefined, 10, 0, 10, 15, 0, 15)),
+         });
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportWarning({
+            id: XmlWarning.ID.ATTLISTDECL_ATTR_NAME_DUPLICATE,
+            params: [ 'att1' ],
+            position: aldPToken.attDefs[2].name,
          });
       });
 

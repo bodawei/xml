@@ -2,9 +2,9 @@ import { EntityMetaData, Range } from '../basic';
 
 declare class  SToken {
    static fromString(str: string): SToken;
-   constructor(str: string, originalStr: string, range?: Array<Range>);
+   constructor(str: string, originalStr: string, range?: Range | Array<Range>);
    str?: string;
-   oritinalStr: string;
+   originalStr: string;
    ranges: Array<any>;
 }
 

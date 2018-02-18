@@ -8,5 +8,6 @@ interface ErrorProps {
 declare namespace jasmine {
    interface Matchers<T> {
       toReportError(errorProps: ErrorProps): void;
+      toReportWarning(errorProps: ErrorProps): void;
    }
 }

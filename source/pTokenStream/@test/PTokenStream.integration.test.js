@@ -58,7 +58,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses an ATTLIST', (done) => {
-      expectInputToProduceTypes('<!ATTLIST myEntity >', 'ATTLISTDECL_PTOKEN_TYPE', done);
+      expectInputToProduceTypes('<!ATTLIST myEntity atOne CDATA #REQUIRED>', 'ATTLISTDECL_PTOKEN_TYPE', done);
    });
 
    it('parses character data up to a <', (done) => {

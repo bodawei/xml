@@ -7,7 +7,7 @@ declare class EntityLocation {
 }
 
 declare class Range {
-   new(location?: EntityLocation, index?: number, row?: number, column?: number, endIndex?: number, endRow?: number, endColumn?: number): Range;
+   constructor(location?: EntityLocation, index?: number, row?: number, column?: number, endIndex?: number, endRow?: number, endColumn?: number);
    location: EntityLocation;
    startIndex: number;
    startRow: number;
