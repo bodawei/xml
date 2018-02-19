@@ -240,7 +240,7 @@ function assignValues(propertyDescriptors, pToken, cursor) {
                let canAssign = true;
                if (descriptor.allowed) {
                   const valueText = nextValue.text ? nextValue.text.str : '';
-                  canAssign = descriptor.allowed.indexOf(valueText.toLocaleLowerCase()) !== -1;
+                  canAssign = descriptor.allowed.test(valueText.toLocaleLowerCase());
                }
 
                if (canAssign) {

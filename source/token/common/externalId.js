@@ -121,7 +121,7 @@ function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
 function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
    const unValues = externalId.unassigned || [];
    const descriptors = [
-      { name: 'idType', type: 'word', allowed: [ 'public', 'system' ] },
+      { name: 'idType', type: 'word', allowed: /public|system/i },
       { name: 'postIdTypeSpace', type: 'space' },
    ];
 

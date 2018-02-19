@@ -53,20 +53,22 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('parses a PERef in the attribute definition (check unsasigned calls)', (done) => {
+      it('parses a PERef in the attribute name definition (check unsasigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('elName one %foo;>');
+         source.addText('elName one CDATA %foo;>');
          source.endText();
 
          attListDeclaration.parse(source, {}, (result) => {
             const makeSToken = makeSTokenMaker();
-            const makeSToken1 = makeSTokenMaker(undefined, 16, 0, 16);
+            const makeSToken1 = makeSTokenMaker(undefined, 22, 0, 22);
             expect(result).toEqual(new attListDeclaration.PToken({
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                attDefs: [{
                   name: makeSToken('one'),
                   postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
                }],
                unassigned: [ new entityReference.ParamPToken({
                   open:  makeSToken('%'),
@@ -115,7 +117,7 @@ describe('attListDeclaration (integration)', () => {
 
       it('fills in the missing attributes', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('elName at1 %foo;>');
+         source.addText('elName at1 CDATA %foo;>');
          source.endText();
 
          attListDeclaration.parse(source, {}, (pToken) => {
@@ -124,32 +126,88 @@ describe('attListDeclaration (integration)', () => {
                new entityStart.ParamPToken({}),
                unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('ENTITIES')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
                new entityEnd.ParamPToken({}),
             ];
 
             attListDeclaration.assignUnassigned(pToken);
 
             const makeSToken = makeSTokenMaker();
-            const makeSToken2 = makeSTokenMaker(undefined, 16, 0, 16);
+            const makeSToken2 = makeSTokenMaker(undefined, 22, 0, 22);
             const expected = {
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
                attDefs: [{
                   name: makeSToken('at1'),
                   postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
                }, {
                   name: SToken.fromString('at2'),
+                  postNameSpace: SToken.fromString(' '),
+                  type: SToken.fromString('ENTITIES'),
+                  postTypeSpace: SToken.fromString(' '),
+               }],
+               close: makeSToken2('>'),
+            };
+            expected.attDefs[0].postTypeSpace.str += ' ';
+            expected.attDefs[0].postTypeSpace.originalStr += ' ';
+            expected.attDefs[0].postTypeSpace.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[1].postTypeSpace.str += ' ';
+            expected.attDefs[1].postTypeSpace.originalStr += ' ';
+            expected.attDefs[1].postTypeSpace.ranges.push(helper.makeInsertedRange());
+            expect(pToken).toEqual(new attListDeclaration.PToken(expected));
+            done();
+         });
+      });
+
+      it('does not assign a # value to a missing type value', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName at1 CDATA %foo;>');
+         source.endText();
+
+         attListDeclaration.parse(source, {}, (pToken) => {
+            // "expand" what should be there.
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}),
+               unassigned.wordFromSToken(SToken.fromString('at2')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('#ENTITIES')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               new entityEnd.ParamPToken({}),
+            ];
+            const makeSToken = makeSTokenMaker();
+            const makeSToken2 = makeSTokenMaker(undefined, 22, 0, 22);
+            const rawExpected = {
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('at1'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+               }, {
+                  name: SToken.fromString('at2'),
+                  postNameSpace: SToken.fromString(' '),
+               }, {
+                  name: SToken.fromString('#ENTITIES'),
                   postNameSpace: SToken.fromString(' '),
                }],
                close: makeSToken2('>'),
             };
-            expected.attDefs[0].postNameSpace.str += ' ';
-            expected.attDefs[0].postNameSpace.originalStr += ' ';
-            expected.attDefs[0].postNameSpace.ranges.push(helper.makeInsertedRange());
-            expected.attDefs[1].postNameSpace.str += ' ';
-            expected.attDefs[1].postNameSpace.originalStr += ' ';
-            expected.attDefs[1].postNameSpace.ranges.push(helper.makeInsertedRange());
-            expect(pToken).toEqual(new attListDeclaration.PToken(expected));
+            // work around some kind of ts issue
+            const expected = new attListDeclaration.PToken(rawExpected);
+            expected.attDefs[2].postNameSpace.str += ' ';
+            expected.attDefs[2].postNameSpace.originalStr += ' ';
+            expected.attDefs[2].postNameSpace.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[0].postTypeSpace.str += ' ';
+            expected.attDefs[0].postTypeSpace.originalStr += ' ';
+            expected.attDefs[0].postTypeSpace.ranges.push(helper.makeInsertedRange());
+
+            attListDeclaration.assignUnassigned(pToken);
+
+            expect(pToken).toEqual(expected);
             done();
          });
       });

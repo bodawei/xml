@@ -350,7 +350,7 @@ describe('externalId (unit)', () => {
             [ 'hi' ],
             externalIdToken,
             'postIdTypeSpace', [
-               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'idType', type: 'word', allowed: /public|system/i  },
                { name: 'postIdTypeSpace', type: 'space' },
             ]);
       });
@@ -368,7 +368,7 @@ describe('externalId (unit)', () => {
             externalIdToken,
             'postIdTypeSpace', [
                { name: '__bogusWorkaround', type: 'space' },
-               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'idType', type: 'word', allowed: /public|system/i  },
                { name: 'postIdTypeSpace', type: 'space' },
             ]);
       });
@@ -385,7 +385,7 @@ describe('externalId (unit)', () => {
             externalIdToken,
             'idType', [
                { name: '__bogusWorkaround', type: 'space' },
-               { name: 'idType', type: 'word', allowed: [ 'public', 'system' ]  },
+               { name: 'idType', type: 'word', allowed: /public|system/i  },
                { name: 'postIdTypeSpace', type: 'space' },
             ]);
       });

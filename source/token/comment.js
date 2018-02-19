@@ -15,8 +15,8 @@ const WFEID = WellFormedError.ID;
 
 class Comment extends base.XToken {
 
-   constructor(text, sTokens) {
-      super(sTokens);
+   constructor(text, pToken) {
+      super(pToken);
 
       this.text = text;
    }

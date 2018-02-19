@@ -332,7 +332,7 @@ describe('unassigned (unit)', () => {
          }, {
             name: 'three',
             type: 'word',
-            allowed: [ 'one' ],
+            allowed: /one/,
          }, {
             name: 'four',
             type: 'word',
@@ -362,7 +362,7 @@ describe('unassigned (unit)', () => {
          }, {
             name: 'three',
             type: 'word',
-            allowed: [ 'one', 'bar' ],
+            allowed: /one|bar/,
          }, {
             name: 'four',
             type: 'word',
@@ -393,7 +393,7 @@ describe('unassigned (unit)', () => {
          }, {
             name: 'three',
             type: 'word',
-            allowed: [ 'one', 'bar' ],
+            allowed: /one|bar/,
          }, {
             name: 'four',
             type: 'word',

@@ -13,6 +13,7 @@ const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
 const ATTLIST_XTOKEN_TYPE = 'ATTLIST_XTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
+const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 
 type DeliverPToken = (pToken:AttListPToken) => void;
 
@@ -21,6 +22,9 @@ type UnassignedValue = object;
 
 class AttDefPToken {
    public name: SToken;
+   public postNameSpace?: SToken;
+   public type?: SToken;
+   public postTypeSpace?: SToken;
 }
 
 class AttListPToken {
@@ -74,13 +78,13 @@ function parseElementName(source: STokenSource, pToken: AttListPToken, done: Fun
       source.extractToObject('word', [ '>', '%' ], pToken, 'elementName');
       source.extractToObject('space', pToken, 'postElementNameSpace');
 
-      parseAttDef(source, pToken, done);
+      parseAttName(source, pToken, done);
    });
 
    unassigned.checkForPERef(source, callback);
 }
 
-function parseAttDef(source: STokenSource, pToken: AttListPToken, done: Function) {
+function parseAttName(source: STokenSource, pToken: AttListPToken, done: Function) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', done, () => {
       source.extract('word', [ '>', '%' ], (attrName: SToken|void) => {
          if (!attrName) {
@@ -95,7 +99,24 @@ function parseAttDef(source: STokenSource, pToken: AttListPToken, done: Function
 
          source.extractToObject('space', attDef, 'postNameSpace');
 
-         parseAttDef(source, pToken, done);
+         parseAttType(source, pToken, attDef, () => {
+            parseAttName(source, pToken, done);
+         });
+      });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+   const callback = unassigned.makeCheckCallback(pToken, 'type', done, () => {
+      source.extract('word', [ '>', '%', '(', '#', '"', '\'' ], (attType: SToken|void) => {
+         if (attType) {
+            attDef.type = attType;
+            source.extractToObject('space', attDef, 'postTypeSpace');
+         }
+
+         done();
       });
    });
 
@@ -144,11 +165,13 @@ function assignUnassigned(attLiPToken) {
       let descriptors = [
          { name: 'name', type: 'word' },
          { name: 'postNameSpace', type: 'space' },
+         { name: 'type', type: 'word', allowed: /^[^#].*/i },
+         { name: 'postTypeSpace', type: 'space' },
       ];
 
       if (attLiPToken.nextPropName === 'name') {
          attLiPToken.attDefs.push({});
-         descriptors.unshift({ name: 'xtra', type: 'space' }); // dont forget to test the absence of this when non-names come in
+         descriptors.unshift({ name: 'xtra', type: 'space' });
       }
 
       const nextDef = attLiPToken.attDefs[attLiPToken.attDefs.length -1];
@@ -180,9 +203,16 @@ function adjustSpaces(attLiPToken) {
       const current = attLiPToken.attDefs[index];
 
       if (current.xtra) {
-         prevDef.postNameSpace = prevDef.postNameSpace ?
-            prevDef.postNameSpace.merge(current.xtra) :
-            current.xtra;
+         // need better definition here.
+         if (prevDef.type) {
+            prevDef.postTypeSpace = prevDef.postTypeSpace ?
+               prevDef.postTypeSpace.merge(current.xtra) :
+               current.xtra;
+         } else {
+            prevDef.postNameSpace = prevDef.postNameSpace ?
+               prevDef.postNameSpace.merge(current.xtra) :
+               current.xtra;
+         }
 
          delete current.xtra;
       }
@@ -200,15 +230,24 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
-   const enNameText = misc.textOrBlank(pToken.elementName);
+   const elNameText = misc.textOrBlank(pToken.elementName);
 
    ec.setPos(pToken.elementName);
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
    misc.checkName(pToken.elementName, ec, entityMetaData, WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
 
+   ec.setPos(pToken.postElementNameSpace);
+   ec.check(!pToken.postElementNameSpace, WFEID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE);
+
+   if (pToken.attDefs.length < 1) {
+      ec.setPos(undefined);
+      ec.report(WFEID.ATTLISTDECL_NO_ATTRIBUTES, [ elNameText ]);
+   }
+
    const attNames = {};
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
+      const attName = misc.textOrBlank(attDef.name);
 
       ec.setPos(attDef.name);
       misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);         
@@ -216,11 +255,28 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
          WARN.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
          WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
 
-      if (attNames[attDef.name.str]) {
-         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, XmlWarning, [ attDef.name.str ]);
+      if (attNames[attName]) {
+         ec.reportError(WARN.ATTLISTDECL_ATTR_NAME_DUPLICATE, XmlWarning, [ attName ]);
       }
 
-      attNames[attDef.name.str] = attDef;
+      attNames[attName] = attDef;
+
+      ec.setPos(attDef.postNameSpace);
+      ec.check(!attDef.postNameSpace, WFEID.ATTLISTDECL_ATTR_NAME_NO_SPACE, [ attName, elNameText ]);
+
+      ec.setPos(attDef.type);
+      const attType = misc.textOrBlank(attDef.type);
+      const upperAttType = attType.toLocaleUpperCase();
+      const knownType = ATTR_TYPES.indexOf(upperAttType) !== -1;
+      ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ attName, elNameText, attType ]);
+
+      if (knownType) {
+         ec.check(attType !== upperAttType, WFEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ attName, elNameText, attType ]);
+      }
+
+      ec.setPos(attDef.postTypeSpace);
+      ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
+
    }
 }
 
@@ -230,6 +286,7 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
 
 type XAttr = {
    name: string,
+   type: string,
 };
 
 class AttListXToken {
@@ -255,6 +312,7 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
 
       attrs.push({
          name: attDef.name.str,
+         type: attDef.type ? attDef.type.str : '',
       });
    }
 

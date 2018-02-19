@@ -24,6 +24,8 @@ describe('attListDeclaration (unit)', () => {
          attDefs: [ {
             name: makeSToken('att1'),
             postNameSpace: makeSToken(' '),
+            type: makeSToken('CDATA'),
+            postTypeSpace: makeSToken(' '),
          } ],
          close: makeSToken('>'),
       });
@@ -38,6 +40,7 @@ describe('attListDeclaration (unit)', () => {
       it('constructs an instance', () => {
          const xToken = new attListDeclaration.XToken('foo', [{
             name: 'attName',
+            type: '',
          }], new attListDeclaration.PToken());
 
          expect(xToken.elementName).toEqual('foo');
@@ -105,16 +108,18 @@ describe('attListDeclaration (unit)', () => {
          }) ] ]);
       });
 
-      it('parses an attribute list with a single named attribute', () => {
-         const makeSToken = makeSTokenMaker(undefined, 17, 0, 17);
+      it('parses an attribute list with a single attribute', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'att1', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
          ]);
+         const makeSToken = makeSTokenMaker(undefined, 23, 0, 23);
          aldPToken.close = makeSToken('>');
 
          attListDeclaration.parse(mockSource, {}, callback);
@@ -124,15 +129,21 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a multiple named attributes', () => {
-         const makeSToken = makeSTokenMaker(undefined, 17, 0, 17);
+         const makeSToken = makeSTokenMaker(undefined, 23, 0, 23);
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'att1', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
             [ 'att2', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
+            [ 'ID', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
             [ 'att3', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'IDREF', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
@@ -140,10 +151,14 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs.push({
             name: makeSToken('att2'),
             postNameSpace: makeSToken(' '),
+            type: makeSToken('ID'),
+            postTypeSpace: makeSToken(' '),
          });
          aldPToken.attDefs.push({
             name: makeSToken('att3'),
             postNameSpace: makeSToken(' '),
+            type: makeSToken('IDREF'),
+            postTypeSpace: makeSToken(' '),
          });
          aldPToken.close = makeSToken('>');
 
@@ -197,6 +212,40 @@ describe('attListDeclaration (unit)', () => {
             expect(pToken).toEqual(new attListDeclaration.PToken({
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
+               close: makeSToken('>'),
+            }));
+         });
+
+         it('returns an unassigned value when finding a PE Ref instead of an attr type', () => {
+            let calls = 0;
+            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+               calls ++;
+               if (calls > 2) {
+                  foundRef();
+               } else {
+                  other();
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               [ 'elName', 'word', [ '>', '%' ] ],
+               [ ' ', 'space' ],
+               [ 'attName', 'word', [ '>', '%' ] ],
+               [ ' ', 'space' ],
+               [ '>', 'match', '>' ],
+            ]);
+   
+            attListDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            const makeSToken = makeSTokenMaker();
+            expect(pToken).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('attName'),
+                  postNameSpace: makeSToken(' '),
+               }],
                close: makeSToken('>'),
             }));
          });
@@ -275,10 +324,12 @@ describe('attListDeclaration (unit)', () => {
             attListDeclaration.assignUnassigned(declPToken);
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'name', [
-                  { name: 'xtra', type: 'space' },
-                  { name: 'name', type: 'word' },
-                  { name: 'postNameSpace', type: 'space' },
-               ]);
+               { name: 'xtra', type: 'space' },
+               { name: 'name', type: 'word' },
+               { name: 'postNameSpace', type: 'space' },
+               { name: 'type', type: 'word', allowed: /^[^#].*/i },
+               { name: 'postTypeSpace', type: 'space' },
+            ]);
          });
    
          it('adds attribute entries for each attribute', () => {
@@ -338,7 +389,7 @@ describe('attListDeclaration (unit)', () => {
             }));
          });
 
-         it('adds a space to the previous attribute', () => {
+         it('adds a space to the previous postNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
             assignToPropsSpy.and.callFake((unassigned, pToken) => {
                unassigned.pop();
@@ -360,7 +411,7 @@ describe('attListDeclaration (unit)', () => {
             }));
          });
 
-         it('merges a space into the previous attribute', () => {
+         it('merges a space into the previous postNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
             assignToPropsSpy.and.callFake((unassigned, pToken) => {
                unassigned.pop();
@@ -381,6 +432,77 @@ describe('attListDeclaration (unit)', () => {
                   postNameSpace: SToken.fromString(' \t'),
                }, {} ],
             }));
+         });
+
+         it('adds a space to the previous postTypeSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  type: SToken.fromString('lala'),
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  type: SToken.fromString('lala'),
+                  postTypeSpace: SToken.fromString('\t'),
+               }, {} ],
+            }));
+         });
+
+         it('merges a space into the previous postTypeSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  type: SToken.fromString('lala'),
+                  postTypeSpace: SToken.fromString(' ')
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  type: SToken.fromString('lala'),
+                  postTypeSpace: SToken.fromString(' \t'),
+               }, {} ],
+            }));
+         });
+
+      });
+
+      describe('unassigned in attribute type', () => {
+
+         it('calls unassigned.assignToProps() with no "xtra" if missing is type', () => {
+            const unassignedValue = [ 'placeholder unassigned' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'type',
+               attDefs: [ {} ],
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'type', [
+               { name: 'name', type: 'word' },
+               { name: 'postNameSpace', type: 'space' },
+               { name: 'type', type: 'word', allowed: /^[^#].*/i },
+               { name: 'postTypeSpace', type: 'space' },
+            ]);
          });
 
       });
@@ -421,7 +543,7 @@ describe('attListDeclaration (unit)', () => {
          expect(declaration.checkWellFormed).toHaveBeenCalledWith(aldPToken, mockErrorCollector, emd);
       });
 
-      it('reports an error if there is no name', () => {
+      it('reports an error if there is no element name', () => {
          delete aldPToken.elementName;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
@@ -432,6 +554,54 @@ describe('attListDeclaration (unit)', () => {
             position: undefined,
             lastPosition: undefined,   // space after ATTLIST was mocked out
          });
+      });
+
+      it('reports an error if there is no space after the element name', () => {
+         delete aldPToken.postElementNameSpace;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE,
+            params: undefined,
+            position: undefined,
+            lastPosition: aldPToken.elementName,
+         });
+      });
+
+      it('reports an error if there are no attribute definitions', () => {
+         aldPToken.attDefs = [];
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_NO_ATTRIBUTES,
+            params: [ aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.postElementNameSpace,
+         });
+      });
+
+      it('calls misc.checkName() to report on name validity', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(aldPToken.elementName,
+            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+      });
+
+      it('calls misc.checkName() to report on attribute name validity', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
+            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
+      });
+
+      it('calls misc.checkWellFormedNameRecommendation() to report on attribute name conformance', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
+            mockErrorCollector, emd, XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
+            XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
       });
 
       it('reports a warning if the same attribute name is listed multiple times', () => {
@@ -451,26 +621,126 @@ describe('attListDeclaration (unit)', () => {
          });
       });
 
-      it('calls misc.checkName() to report on name validity', () => {
+      it('reports an error if there is no space after the attribute name', () => {
+         delete aldPToken.attDefs[0].postNameSpace;
+
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(misc.checkName).toHaveBeenCalledWith(aldPToken.elementName,
-            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NAME_NO_SPACE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].name,
+         });
       });
 
-      it('calls misc.checkName() to report on attribute name validity', () => {
+      it('reports an error if an unknown type is provided', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('bogus');
+
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(misc.checkName).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
-            mockErrorCollector, emd, WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, 'bogus' ],
+            position: aldPToken.attDefs[0].type,
+         });
       });
 
-      it('calls misc.checkName() to report on attribute name validity', () => {
+      it('reports no error if the type is CDATA', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('CDATA');
+
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
-            mockErrorCollector, emd, XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
-            XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is ID', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('ID');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is IDREF', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('IDREF');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is IDREFS', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('IDREFS');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is ENTITY', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('ENTITY');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is ENTITIES', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('ENTITIES');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is NMTOKEN', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NMTOKEN');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is NMTOKENS', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NMTOKENS');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is NOTATION', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports an error if an the type is miscased', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('cdata');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, 'cdata' ],
+            position: aldPToken.attDefs[0].type,
+         });
+      });
+
+      it('reports an error if there is no space after the attribute type', () => {
+         delete aldPToken.attDefs[0].postTypeSpace;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_NO_SPACE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].type,
+         });
       });
 
    });
@@ -501,6 +771,7 @@ describe('attListDeclaration (unit)', () => {
       it('creates an XToken with the provided attributes', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
+            type: SToken.fromString('bogus'),
          });
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 
@@ -509,8 +780,30 @@ describe('attListDeclaration (unit)', () => {
             elementName: 'elementName',
             attDefs: [{
                name: 'att1',
+               type: 'CDATA',
             }, {
                name: 'attr2',
+               type: 'bogus',
+            }],
+            pToken: aldPToken,
+         });
+      });
+
+      it('replaces a missing type value with a space', () => {
+         aldPToken.attDefs.push({
+            name: SToken.fromString('attr2'),
+         });
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: 'elementName',
+            attDefs: [{
+               name: 'att1',
+               type: 'CDATA',
+            }, {
+               name: 'attr2',
+               type: '',
             }],
             pToken: aldPToken,
          });

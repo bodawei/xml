@@ -668,7 +668,7 @@ describe('entityDeclaration (unit)', () => {
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'name', [
                   { name: 'postDeclTypeSpace', type: 'space' },
-                  { name: 'parameter', type: 'word', allowed: '%' },
+                  { name: 'parameter', type: 'word', allowed: /%/ },
                   { name: 'postParameterSpace', type: 'space' },
                   { name: 'name', type: 'word' },
                   { name: 'postNameSpace', type: 'space' },
@@ -743,7 +743,7 @@ describe('entityDeclaration (unit)', () => {
             expect(unassigned.assignToProps).not.toHaveBeenCalledWith(unassignedValue,
                declPToken, 'name', [
                   { name: 'postDeclTypeSpace', type: 'space' },
-                  { name: 'parameter', type: 'word', allowed: '%' },
+                  { name: 'parameter', type: 'word', allowed: /%/ },
                   { name: 'postParameterSpace', type: 'space' },
                   { name: 'name', type: 'word' },
                   { name: 'postNameSpace', type: 'space' },

@@ -281,7 +281,7 @@ function assignUnassigned(pToken) {
 
    const prolog = [
       { name: 'postDeclTypeSpace', type: 'space' },
-      { name: 'parameter', type: 'word', allowed: '%' },
+      { name: 'parameter', type: 'word', allowed: /%/ },
       { name: 'postParameterSpace', type: 'space' },
       { name: 'name', type: 'word' },
       { name: 'postNameSpace', type: 'space' },
