@@ -35,48 +35,82 @@ describe('FixingStream (unit)', () => {
       });
    });
 
-   it('capitalizes a type if it is not capitalized', (done) => {
-      const before = new tokenNs.attListDeclaration.XToken('elName', [{
-         name: 'one',
-         type: 'id'
-      }], {});
+   describe('ATTLIST', () => {
 
-      fs.write(before);
-      fs.end();
-
-      gatherTokens(fs, (tokens) => {
-         expect(tokens[0].attDefs[0].type).toEqual('ID');
-         done();
+      it('capitalizes a type if it is not capitalized', (done) => {
+         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+            name: 'one',
+            type: 'id'
+         }], {});
+   
+         fs.write(before);
+         fs.end();
+   
+         gatherTokens(fs, (tokens) => {
+            expect(tokens[0].attDefs[0].type).toEqual('ID');
+            done();
+         });
       });
-   });
-
-   it('replaces an unknown type with CDATA', (done) => {
-      const before = new tokenNs.attListDeclaration.XToken('elName', [{
-         name: 'one',
-         type: 'BOGUS'
-      }], {});
-
-      fs.write(before);
-      fs.end();
-
-      gatherTokens(fs, (tokens) => {
-         expect(tokens[0].attDefs[0].type).toEqual('CDATA');
-         done();
+   
+      it('replaces an unknown type with CDATA', (done) => {
+         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+            name: 'one',
+            type: 'BOGUS'
+         }], {});
+   
+         fs.write(before);
+         fs.end();
+   
+         gatherTokens(fs, (tokens) => {
+            expect(tokens[0].attDefs[0].type).toEqual('CDATA');
+            done();
+         });
       });
-   });
-
-   it('replaces a missing type with CDATA', (done) => {
-      const before = new tokenNs.attListDeclaration.XToken('elName', [{
-         name: 'one',
-      }], {});
-
-      fs.write(before);
-      fs.end();
-
-      gatherTokens(fs, (tokens) => {
-         expect(tokens[0].attDefs[0].type).toEqual('CDATA');
-         done();
+   
+      it('replaces a missing type with CDATA', (done) => {
+         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+            name: 'one',
+         }], {});
+   
+         fs.write(before);
+         fs.end();
+   
+         gatherTokens(fs, (tokens) => {
+            expect(tokens[0].attDefs[0].type).toEqual('CDATA');
+            done();
+         });
       });
+
+      it('capitalizes a default type if it is not capitalized', (done) => {
+         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+            name: 'one',
+            defaultType: '#required'
+         }], {});
+   
+         fs.write(before);
+         fs.end();
+   
+         gatherTokens(fs, (tokens) => {
+            expect(tokens[0].attDefs[0].defaultType).toEqual('#REQUIRED');
+            done();
+         });
+      });
+   
+      it('replaces an unknown type with #IMPLIED', (done) => {
+         const before = new tokenNs.attListDeclaration.XToken('elName', [{
+            name: 'one',
+            defaultType: 'BOGUS'
+         }], {});
+   
+         fs.write(before);
+         fs.end();
+   
+         gatherTokens(fs, (tokens) => {
+            expect(tokens[0].attDefs[0].defaultType).toEqual('#IMPLIED');
+            done();
+         });
+      });
+
    });
 
 });

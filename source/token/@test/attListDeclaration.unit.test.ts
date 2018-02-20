@@ -26,6 +26,8 @@ describe('attListDeclaration (unit)', () => {
             postNameSpace: makeSToken(' '),
             type: makeSToken('CDATA'),
             postTypeSpace: makeSToken(' '),
+            defaultType: makeSToken('#REQUIRED'),
+            postDefaultTypeSpace: makeSToken(' '),
          } ],
          close: makeSToken('>'),
       });
@@ -40,11 +42,14 @@ describe('attListDeclaration (unit)', () => {
       it('constructs an instance', () => {
          const xToken = new attListDeclaration.XToken('foo', [{
             name: 'attName',
-            type: '',
+            type: 'CDATA',
+            defaultType: '#REQUIRED',
          }], new attListDeclaration.PToken());
 
          expect(xToken.elementName).toEqual('foo');
          expect(xToken.attDefs[0].name).toEqual('attName');
+         expect(xToken.attDefs[0].type).toEqual('CDATA');
+         expect(xToken.attDefs[0].defaultType).toEqual('#REQUIRED');
       });
 
    });
@@ -116,10 +121,47 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
+            MockSTokenSource.PEEK('#'),
+            [ '#REQUIRED', 'word', [ '>', '%', '"', '\'' ] ],
+            [ ' ', 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
          ]);
+         const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
+         aldPToken.close = makeSToken('>');
+
+         attListDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('skips parsing a default type if there is no # character', () => {
          const makeSToken = makeSTokenMaker(undefined, 23, 0, 23);
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('a'),
+            [ 'att2', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'ID', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('>'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         delete aldPToken.attDefs[0].defaultType;
+         delete aldPToken.attDefs[0].postDefaultTypeSpace;
+         aldPToken.attDefs.push({
+            name: makeSToken('att2'),
+            postNameSpace: makeSToken(' '),
+            type: makeSToken('ID'),
+            postTypeSpace: makeSToken(' '),
+         });
          aldPToken.close = makeSToken('>');
 
          attListDeclaration.parse(mockSource, {}, callback);
@@ -129,7 +171,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a multiple named attributes', () => {
-         const makeSToken = makeSTokenMaker(undefined, 23, 0, 23);
+         const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
@@ -137,13 +179,20 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
+            MockSTokenSource.PEEK('#'),
+            [ '#REQUIRED', 'word', [ '>', '%', '"', '\'' ] ],
+            [ ' ', 'space' ],
             [ 'att2', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'ID', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
+            MockSTokenSource.PEEK('a'),
             [ 'att3', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
             [ 'IDREF', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('#'),
+            [ '#IMPLICIT', 'word', [ '>', '%', '"', '\'' ] ],
             [ ' ', 'space' ],
             [ undefined, 'word', [ '>', '%' ] ],
             [ '>', 'match', '>' ],
@@ -159,6 +208,8 @@ describe('attListDeclaration (unit)', () => {
             postNameSpace: makeSToken(' '),
             type: makeSToken('IDREF'),
             postTypeSpace: makeSToken(' '),
+            defaultType: makeSToken('#IMPLICIT'),
+            postDefaultTypeSpace: makeSToken(' '),
          });
          aldPToken.close = makeSToken('>');
 
@@ -249,6 +300,44 @@ describe('attListDeclaration (unit)', () => {
                close: makeSToken('>'),
             }));
          });
+
+         it('returns an unassigned value when finding a PE Ref instead of an default type', () => {
+            let calls = 0;
+            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+               calls ++;
+               if (calls > 3) {
+                  foundRef();
+               } else {
+                  other();
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               'elName',
+               ' ',
+               'attName',
+               ' ',
+               'CDATA',
+               ' ',
+               [ '>', 'match', '>' ],
+            ]);
+   
+            attListDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            const makeSToken = makeSTokenMaker();
+            expect(pToken).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('attName'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+               }],
+               close: makeSToken('>'),
+            }));
+         });
    
       });
 
@@ -329,6 +418,8 @@ describe('attListDeclaration (unit)', () => {
                { name: 'postNameSpace', type: 'space' },
                { name: 'type', type: 'word', allowed: /^[^#].*/i },
                { name: 'postTypeSpace', type: 'space' },
+               { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
+               { name: 'postDefaultTypeSpace', type: 'space' },
             ]);
          });
    
@@ -483,6 +574,55 @@ describe('attListDeclaration (unit)', () => {
             }));
          });
 
+         it('adds a space to the previous postDefaultTypeSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  defaultType: SToken.fromString('lala'),
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  defaultType: SToken.fromString('lala'),
+                  postDefaultTypeSpace: SToken.fromString('\t'),
+               }, {} ],
+            }));
+         });
+
+         it('merges a space into the previous postDefaultTypeSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  defaultType: SToken.fromString('lala'),
+                  postDefaultTypeSpace: SToken.fromString(' ')
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  defaultType: SToken.fromString('lala'),
+                  postDefaultTypeSpace: SToken.fromString(' \t'),
+               }, {} ],
+            }));
+         });
+
       });
 
       describe('unassigned in attribute type', () => {
@@ -502,6 +642,8 @@ describe('attListDeclaration (unit)', () => {
                { name: 'postNameSpace', type: 'space' },
                { name: 'type', type: 'word', allowed: /^[^#].*/i },
                { name: 'postTypeSpace', type: 'space' },
+               { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
+               { name: 'postDefaultTypeSpace', type: 'space' },
             ]);
          });
 
@@ -743,6 +885,69 @@ describe('attListDeclaration (unit)', () => {
          });
       });
 
+      it('reports an error if an unknown defaultType is provided', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#IMPLICIT');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, '#IMPLICIT' ],
+            position: aldPToken.attDefs[0].defaultType,
+         });
+      });
+
+      it('reports no error if the type is #REQUIRED', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#REQUIRED');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is #IMPLIED', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#IMPLIED');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports no error if the type is #FIXED', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
+         aldPToken.attDefs[0].postDefaultTypeSpace = SToken.fromString(' ');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports an error if an the default type is miscased', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#required');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, '#required' ],
+            position: aldPToken.attDefs[0].defaultType,
+         });
+      });
+
+      it('reports an error if there is no space after a fixed type', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
+         delete aldPToken.attDefs[0].postDefaultTypeSpace;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_SPACE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].defaultType,
+         });
+      });
+   
    });
 
    describe('pTokenToXToken()', () => {
@@ -772,6 +977,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
             type: SToken.fromString('bogus'),
+            defaultType: SToken.fromString('#REQUIRED'),
          });
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 
@@ -781,15 +987,17 @@ describe('attListDeclaration (unit)', () => {
             attDefs: [{
                name: 'att1',
                type: 'CDATA',
+               defaultType: '#REQUIRED',
             }, {
                name: 'attr2',
                type: 'bogus',
+               defaultType: '#REQUIRED',
             }],
             pToken: aldPToken,
          });
       });
 
-      it('replaces a missing type value with a space', () => {
+      it('replaces a missing type and defaultType value with a space', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
          });
@@ -801,9 +1009,11 @@ describe('attListDeclaration (unit)', () => {
             attDefs: [{
                name: 'att1',
                type: 'CDATA',
+               defaultType: '#REQUIRED',
             }, {
                name: 'attr2',
                type: '',
+               defaultType: '',
             }],
             pToken: aldPToken,
          });

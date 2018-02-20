@@ -14,9 +14,9 @@ const ATTLIST_XTOKEN_TYPE = 'ATTLIST_XTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
+const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
 type DeliverPToken = (pToken:AttListPToken) => void;
-
 type DeclPToken = {};
 type UnassignedValue = object;
 
@@ -25,6 +25,8 @@ class AttDefPToken {
    public postNameSpace?: SToken;
    public type?: SToken;
    public postTypeSpace?: SToken;
+   public defaultType?: SToken;
+   public postDefaultTypeSpace?: SToken;
 }
 
 class AttListPToken {
@@ -63,6 +65,10 @@ class AttListPToken {
    [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
    [60] DefaultDecl    ::= '#REQUIRED' | '#IMPLIED'
                            | (('#FIXED' S)? AttValue)
+
+   Note: Codi tries to stick closely to the syntax names, but she has
+   "subdivided" DefaultDecl into defaultType (all the # values) and
+   attValue.
 \**********************************************************************/
 
 function parse(source: STokenSource, declarationPToken: DeclPToken, deliverPToken: DeliverPToken): void {
@@ -116,6 +122,21 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
             source.extractToObject('space', attDef, 'postTypeSpace');
          }
 
+         parseDefaultType(source, pToken, attDef, done);
+      });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+   const callback = unassigned.makeCheckCallback(pToken, 'defaultType', done, () => {
+      source.extract('peekChar', (charToken: SToken|void) => {
+         if (charToken && charToken.str === '#') {
+            source.extractToObject('word', [ '>', '%', '"', '\'' ], attDef, 'defaultType');
+            source.extractToObject('space', attDef, 'postDefaultTypeSpace');
+         }
+
          done();
       });
    });
@@ -167,6 +188,8 @@ function assignUnassigned(attLiPToken) {
          { name: 'postNameSpace', type: 'space' },
          { name: 'type', type: 'word', allowed: /^[^#].*/i },
          { name: 'postTypeSpace', type: 'space' },
+         { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
+         { name: 'postDefaultTypeSpace', type: 'space' },
       ];
 
       if (attLiPToken.nextPropName === 'name') {
@@ -204,7 +227,11 @@ function adjustSpaces(attLiPToken) {
 
       if (current.xtra) {
          // need better definition here.
-         if (prevDef.type) {
+         if (prevDef.defaultType) {
+            prevDef.postDefaultTypeSpace = prevDef.postDefaultTypeSpace ?
+               prevDef.postDefaultTypeSpace.merge(current.xtra) :
+               current.xtra;
+         } else if (prevDef.type) {
             prevDef.postTypeSpace = prevDef.postTypeSpace ?
                prevDef.postTypeSpace.merge(current.xtra) :
                current.xtra;
@@ -277,6 +304,24 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
       ec.setPos(attDef.postTypeSpace);
       ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
 
+      // No default type is not an error
+      if (attDef.defaultType) {
+         ec.setPos(attDef.defaultType);
+         const defType = misc.textOrBlank(attDef.defaultType);
+         const upperDefType = defType.toLocaleUpperCase();
+         const knownDefType = DEF_TYPES.indexOf(upperDefType) !== -1;
+
+         ec.check(!knownDefType, WFEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attName, elNameText, defType ]);
+
+         if (knownDefType) {
+            ec.check(defType !== upperDefType, WFEID.ATTLISTDECL_ATTR_DEFAULT_INVALID, [ attName, elNameText, defType ]);
+         }
+
+         ec.setPos(attDef.postDefaultTypeSpace);
+         if (upperDefType === '#FIXED') {
+            ec.check(!attDef.postDefaultTypeSpace, WFEID.ATTLISTDECL_ATTR_FIXED_NO_SPACE, [ attName, elNameText ]);
+         }
+      }
    }
 }
 
@@ -285,14 +330,16 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
 \**********************************************************************/
 
 type XAttr = {
-   name: string,
-   type: string,
+   name: string;
+   type: string;
+   defaultType: string;
 };
 
 class AttListXToken {
       readonly type: string;
-      public elementName: string;
+      public elementName?: string;
       public attDefs: Array<XAttr>;
+      public defaultType?: string;
       public pToken: AttListPToken;
 
       constructor(elementName: string, attDefs: Array<XAttr>, pToken?: AttListPToken) {
@@ -312,7 +359,8 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
 
       attrs.push({
          name: attDef.name.str,
-         type: attDef.type ? attDef.type.str : '',
+         type: misc.textOrBlank(attDef.type),
+         defaultType: misc.textOrBlank(attDef.defaultType)
       });
    }
 

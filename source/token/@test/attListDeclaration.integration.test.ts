@@ -30,6 +30,36 @@ describe('attListDeclaration (integration)', () => {
 
    describe('parse()', () => {
 
+      it('parses an ATTLIST with a couple attributes', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one CDATA two IDREFS #IMPLICIT>');
+         source.endText();
+
+         attListDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+               }, {
+                  name: makeSToken('two'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('IDREFS'),
+                  postTypeSpace: makeSToken(' '),
+                  defaultType: makeSToken('#IMPLICIT'),
+                  postDefaultTypeSpace: undefined,
+               }],
+               close: makeSToken('>'),
+            }));
+            done();
+         });
+      });
+
       it('parses a PERef in the intial position (check unsasigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('%foo;>');
@@ -55,12 +85,12 @@ describe('attListDeclaration (integration)', () => {
 
       it('parses a PERef in the attribute name definition (check unsasigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('elName one CDATA %foo;>');
+         source.addText('elName one CDATA #IMPLICIT %foo;>');
          source.endText();
 
          attListDeclaration.parse(source, {}, (result) => {
             const makeSToken = makeSTokenMaker();
-            const makeSToken1 = makeSTokenMaker(undefined, 22, 0, 22);
+            const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
             expect(result).toEqual(new attListDeclaration.PToken({
                elementName: makeSToken('elName'),
                postElementNameSpace: makeSToken(' '),
@@ -69,6 +99,8 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
+                  defaultType: makeSToken('#IMPLICIT'),
+                  postDefaultTypeSpace: makeSToken(' '),
                }],
                unassigned: [ new entityReference.ParamPToken({
                   open:  makeSToken('%'),
@@ -83,6 +115,81 @@ describe('attListDeclaration (integration)', () => {
             done();
          });
       });
+
+      it('parses a PERef in the attribute type location (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one CDATA #IMPLICIT two%foo;>');
+         source.endText();
+
+         attListDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 35, 0, 35);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  defaultType: makeSToken('#IMPLICIT'),
+                  postDefaultTypeSpace: makeSToken(' '),
+               }, {
+                  name: makeSToken('two'),
+                  postNameSpace: undefined,
+               }],
+               unassigned: [ new entityReference.ParamPToken({
+                  open:  makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name:  makeSToken('foo'),
+                  postNameSpace: undefined,
+                  close:  makeSToken(';'),
+               }) ],
+               nextPropName: 'type',
+               close: makeSToken1('>'),
+            }));
+            done();
+         });
+      });
+
+      it('parses a PERef in the attribute default type location (check unsasigned calls)', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one CDATA #IMPLICIT two ID %foo;>');
+         source.endText();
+
+         attListDeclaration.parse(source, {}, (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 39, 0, 39);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  defaultType: makeSToken('#IMPLICIT'),
+                  postDefaultTypeSpace: makeSToken(' '),
+               }, {
+                  name: makeSToken('two'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('ID'),
+                  postTypeSpace: makeSToken(' '),
+               }],
+               unassigned: [ new entityReference.ParamPToken({
+                  open:  makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name:  makeSToken('foo'),
+                  postNameSpace: undefined,
+                  close:  makeSToken(';'),
+               }) ],
+               nextPropName: 'defaultType',
+               close: makeSToken1('>'),
+            }));
+            done();
+         });
+      });
+
    });
 
    describe('assignUnassigned()', () => {
@@ -190,20 +297,19 @@ describe('attListDeclaration (integration)', () => {
                }, {
                   name: SToken.fromString('at2'),
                   postNameSpace: SToken.fromString(' '),
-               }, {
-                  name: SToken.fromString('#ENTITIES'),
-                  postNameSpace: SToken.fromString(' '),
+                  defaultType: SToken.fromString('#ENTITIES'),
+                  postDefaultTypeSpace: SToken.fromString(' '),
                }],
                close: makeSToken2('>'),
             };
             // work around some kind of ts issue
             const expected = new attListDeclaration.PToken(rawExpected);
-            expected.attDefs[2].postNameSpace.str += ' ';
-            expected.attDefs[2].postNameSpace.originalStr += ' ';
-            expected.attDefs[2].postNameSpace.ranges.push(helper.makeInsertedRange());
             expected.attDefs[0].postTypeSpace.str += ' ';
             expected.attDefs[0].postTypeSpace.originalStr += ' ';
             expected.attDefs[0].postTypeSpace.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[1].postDefaultTypeSpace.str += ' ';
+            expected.attDefs[1].postDefaultTypeSpace.originalStr += ' ';
+            expected.attDefs[1].postDefaultTypeSpace.ranges.push(helper.makeInsertedRange());
 
             attListDeclaration.assignUnassigned(pToken);
 

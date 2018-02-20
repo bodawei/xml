@@ -1,6 +1,7 @@
 import { SToken, STokenSource } from '../index';
 
 declare class MockSTokenSource extends STokenSource {
+   static PEEK: (peekValue: string) => any;
    constructor(expectedValues: any, index?: number, row?: number, column?: number);
    respondInAsyncTime(): void;
 }
