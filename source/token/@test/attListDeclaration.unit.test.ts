@@ -10,7 +10,9 @@ import { WellFormedError, XmlWarning } from '../../error';
 import * as declaration from '../bridge/declaration.js';
 import attListDeclaration from '../attListDeclaration.js';
 import entityReference from '../entityReference.js'
+import text from '../text.js';
 import unassigned from '../unassigned.js';
+import literal from '../common/literal.js';
 import misc from '../common/misc.js';
 
 describe('attListDeclaration (unit)', () => {
@@ -66,6 +68,7 @@ describe('attListDeclaration (unit)', () => {
       let callback;
       let checkForPERefCallback;
       let makeCheckCallbackSpy;
+      let literalParseSpy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -76,6 +79,7 @@ describe('attListDeclaration (unit)', () => {
          });
 
          spyOn(unassigned, 'checkForPERef').and.callFake(() => checkForPERefCallback());
+         literalParseSpy = spyOn(literal, 'parse').and.callFake((source, options, done) => done());
       });
 
       it('does a parse of a basic attribute list declaration', () => {
@@ -219,6 +223,62 @@ describe('attListDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps(aldPToken);
       });
 
+      it('parses an attribute list with a literal even with #REQUIRED', () => {
+         literalParseSpy.and.callFake((source, options, done) => {
+            options.pToken.value = [ 'dummyValue' ];
+            done();
+         });
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('#'),
+            [ '#REQUIRED', 'word', [ '>', '%', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
+         aldPToken.close = makeSToken('>');
+         aldPToken.attDefs[0].value = [ 'dummyValue' ];
+
+         attListDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('parses an attribute list with a literal with no defaultType at all', () => {
+         literalParseSpy.and.callFake((source, options, done) => {
+            options.pToken.value = [ 'dummyValue' ];
+            done();
+         });
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'CDATA', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ '>', 'match', '>' ],
+         ]);
+         const makeSToken = makeSTokenMaker(undefined, 23, 0, 23);
+         aldPToken.close = makeSToken('>');
+         delete aldPToken.attDefs[0].defaultType;
+         delete aldPToken.attDefs[0].postDefaultTypeSpace;
+         aldPToken.attDefs[0].value = [ 'dummyValue' ];
+
+         attListDeclaration.parse(mockSource, {}, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
       describe('parameter entity reference', () => {
 
          it('returns an unassigned value when finding a PE Ref at the start', () => {
@@ -338,6 +398,49 @@ describe('attListDeclaration (unit)', () => {
                close: makeSToken('>'),
             }));
          });
+
+         it('returns an unassigned value when finding a PE Ref instead of an attValue', () => {
+            let calls = 0;
+            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+               calls ++;
+               if (calls > 4) {
+                  foundRef();
+               } else {
+                  other();
+               }
+            });
+            const mockSource = new MockSTokenSource([
+               'elName',
+               ' ',
+               'attName',
+               ' ',
+               'CDATA',
+               ' ',
+               MockSTokenSource.PEEK('#'),
+               [ '#FIXED', 'word', [ '>', '%', '"', '\'' ] ],
+               ' ',
+               [ '>', 'match', '>' ],
+            ]);
+   
+            attListDeclaration.parse(mockSource, {}, callback);
+            mockSource.respondInAsyncTime();
+   
+            const pToken = callback.calls.argsFor(0)[0];
+            const makeSToken = makeSTokenMaker();
+            expect(pToken).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('attName'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('CDATA'),
+                  postTypeSpace: makeSToken(' '),
+                  defaultType: makeSToken('#FIXED'),
+                  postDefaultTypeSpace: makeSToken(' '),
+               }],
+               close: makeSToken('>'),
+            }));
+         });
    
       });
 
@@ -420,6 +523,8 @@ describe('attListDeclaration (unit)', () => {
                { name: 'postTypeSpace', type: 'space' },
                { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
                { name: 'postDefaultTypeSpace', type: 'space' },
+               { name: 'value', type: 'literal' },
+               { name: 'postValueSpace', type: 'space' },
             ]);
          });
    
@@ -623,6 +728,55 @@ describe('attListDeclaration (unit)', () => {
             }));
          });
 
+         it('adds a space to the previous postValueSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  value: {},
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  value: {},
+                  postValueSpace: SToken.fromString('\t'),
+               }, {} ],
+            }));
+         });
+
+         it('merges a space into the previous postValueSpace', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+               unassigned.pop();
+               pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  value: {},
+                  postValueSpace: SToken.fromString(' ')
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  value: {},
+                  postValueSpace: SToken.fromString(' \t'),
+               }, {} ],
+            }));
+         });
+
       });
 
       describe('unassigned in attribute type', () => {
@@ -644,6 +798,8 @@ describe('attListDeclaration (unit)', () => {
                { name: 'postTypeSpace', type: 'space' },
                { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
                { name: 'postDefaultTypeSpace', type: 'space' },
+               { name: 'value', type: 'literal' },
+               { name: 'postValueSpace', type: 'space' },
             ]);
          });
 
@@ -660,6 +816,7 @@ describe('attListDeclaration (unit)', () => {
          emd = new EntityMetaData();
 
          spyOn(declaration, 'checkWellFormed');
+         spyOn(literal, 'checkWellFormed');
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
@@ -916,6 +1073,7 @@ describe('attListDeclaration (unit)', () => {
       it('reports no error if the type is #FIXED', () => {
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
          aldPToken.attDefs[0].postDefaultTypeSpace = SToken.fromString(' ');
+         aldPToken.attDefs[0].openQuote = SToken.fromString('"');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
@@ -948,6 +1106,65 @@ describe('attListDeclaration (unit)', () => {
          });
       });
    
+      it('reports an error if there is no value and no defaultType', () => {
+         delete aldPToken.attDefs[0].defaultType;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_VALUE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].postTypeSpace,
+         });
+      });
+   
+      it('reports an error if there is no value after a #FIXED', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].postDefaultTypeSpace,
+         });
+      });
+   
+      it('calls literal.checkWellFormed() with the attribute data', () => {
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(literal.checkWellFormed)
+            .toHaveBeenCalledWith(aldPToken.attDefs[0], mockErrorCollector, emd, WellFormedError.ID.NOUN_ATTRIBUTE);
+      });
+   
+      it('reports an error if there is a value after a #REQUIRED', () => {
+         aldPToken.attDefs[0].defaultType = SToken.fromString('#REQUIRED');
+         aldPToken.attDefs[0].openQuote = SToken.fromString('"');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_EXTRA_VALUE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            position: aldPToken.attDefs[0].openQuote,
+         });
+      });
+   
+      it('reports an error if there is no close', () => {
+         delete aldPToken.close;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_NO_CLOSE,
+            params: [ aldPToken.elementName.str ],
+            position: undefined,
+            lastPosition: aldPToken.attDefs[0].postDefaultTypeSpace,
+         });
+      });
+   
    });
 
    describe('pTokenToXToken()', () => {
@@ -977,7 +1194,10 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
             type: SToken.fromString('bogus'),
-            defaultType: SToken.fromString('#REQUIRED'),
+            defaultType: SToken.fromString('#FIXED'),
+            openQuote: SToken.fromString('"'),
+            value: [ new text.PToken({ text: SToken.fromString('x') }) ],
+            closeQuote: SToken.fromString('"'),
          });
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 
@@ -991,7 +1211,8 @@ describe('attListDeclaration (unit)', () => {
             }, {
                name: 'attr2',
                type: 'bogus',
-               defaultType: '#REQUIRED',
+               defaultType: '#FIXED',
+               value: [ text.makeXToken(new text.PToken({ text: SToken.fromString('x') })) ],
             }],
             pToken: aldPToken,
          });

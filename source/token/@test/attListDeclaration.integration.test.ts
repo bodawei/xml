@@ -109,7 +109,7 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: undefined,
                   close:  makeSToken(';'),
                }) ],
-               nextPropName: 'name',
+               nextPropName: 'attValue',
                close: makeSToken1('>'),
             }));
             done();

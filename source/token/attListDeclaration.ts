@@ -7,6 +7,7 @@ import entityReference from './entityReference.js';
 import unassigned from './unassigned.js';
 
 import * as declaration from './bridge/declaration.js';
+import literal from './common/literal.js';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -27,6 +28,10 @@ class AttDefPToken {
    public postTypeSpace?: SToken;
    public defaultType?: SToken;
    public postDefaultTypeSpace?: SToken;
+   public openQuote?: SToken;
+   public value?: Array<any>;
+   public closeQuote?: SToken;
+   public postAttValueSpace?: SToken;
 }
 
 class AttListPToken {
@@ -137,8 +142,19 @@ function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: A
             source.extractToObject('space', attDef, 'postDefaultTypeSpace');
          }
 
-         done();
+         parseAttValue(source, pToken, attDef, done);
       });
+   });
+
+   unassigned.checkForPERef(source, callback);
+}
+
+function parseAttValue(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+   const callback = unassigned.makeCheckCallback(pToken, 'attValue', done, () => {
+      literal.parse(source, {
+         pToken: attDef,
+         geRef: true,
+      }, done);
    });
 
    unassigned.checkForPERef(source, callback);
@@ -190,6 +206,8 @@ function assignUnassigned(attLiPToken) {
          { name: 'postTypeSpace', type: 'space' },
          { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
          { name: 'postDefaultTypeSpace', type: 'space' },
+         { name: 'value', type: 'literal' },
+         { name: 'postValueSpace', type: 'space' },
       ];
 
       if (attLiPToken.nextPropName === 'name') {
@@ -227,7 +245,11 @@ function adjustSpaces(attLiPToken) {
 
       if (current.xtra) {
          // need better definition here.
-         if (prevDef.defaultType) {
+         if (prevDef.value) {
+            prevDef.postValueSpace = prevDef.postValueSpace ?
+               prevDef.postValueSpace.merge(current.xtra) :
+               current.xtra;
+         } else if (prevDef.defaultType) {
             prevDef.postDefaultTypeSpace = prevDef.postDefaultTypeSpace ?
                prevDef.postDefaultTypeSpace.merge(current.xtra) :
                current.xtra;
@@ -305,10 +327,11 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
       ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
 
       // No default type is not an error
+      const defType = misc.textOrBlank(attDef.defaultType);
+      const upperDefType = defType.toLocaleUpperCase();
+
       if (attDef.defaultType) {
          ec.setPos(attDef.defaultType);
-         const defType = misc.textOrBlank(attDef.defaultType);
-         const upperDefType = defType.toLocaleUpperCase();
          const knownDefType = DEF_TYPES.indexOf(upperDefType) !== -1;
 
          ec.check(!knownDefType, WFEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [ attName, elNameText, defType ]);
@@ -322,6 +345,21 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
             ec.check(!attDef.postDefaultTypeSpace, WFEID.ATTLISTDECL_ATTR_FIXED_NO_SPACE, [ attName, elNameText ]);
          }
       }
+
+      ec.setPos(attDef.openQuote);
+
+      if (upperDefType === '' || upperDefType === '#FIXED') {
+         ec.check(!attDef.openQuote, upperDefType === ''
+            ? WFEID.ATTLISTDECL_ATTR_NO_VALUE
+            : WFEID.ATTLISTDECL_ATTR_FIXED_NO_VALUE, [ attName, elNameText ]);
+      } else {
+         ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [ attName, elNameText ]);
+      }
+
+      literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
+
+      ec.setPos(pToken.close);
+      ec.check(!pToken.close, WFEID.ATTLISTDECL_NO_CLOSE, [ elNameText ]);
    }
 }
 
@@ -333,6 +371,7 @@ type XAttr = {
    name: string;
    type: string;
    defaultType: string;
+   value?: Array<any>;
 };
 
 class AttListXToken {
@@ -356,12 +395,17 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
 
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
-
-      attrs.push({
+      const xTokenAttrDef: XAttr = {
          name: attDef.name.str,
          type: misc.textOrBlank(attDef.type),
-         defaultType: misc.textOrBlank(attDef.defaultType)
-      });
+         defaultType: misc.textOrBlank(attDef.defaultType),
+      };
+
+      if (attDef.value) {
+         xTokenAttrDef.value = literal.makeTokenCompatible(attDef);
+      }
+
+      attrs.push(xTokenAttrDef);
    }
 
    return new AttListXToken(name, attrs, pToken);
