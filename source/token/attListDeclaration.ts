@@ -318,6 +318,7 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
       const upperAttType = attType.toLocaleUpperCase();
       const knownType = ATTR_TYPES.indexOf(upperAttType) !== -1;
       ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ attName, elNameText, attType ]);
+      // @@@ don't forget to check the space after NOTATION
 
       if (knownType) {
          ec.check(attType !== upperAttType, WFEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ attName, elNameText, attType ]);
