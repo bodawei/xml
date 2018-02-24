@@ -20,12 +20,12 @@ describe('nameList (integration)', () => {
          names: [ {
             name: makeSToken('one'),
             postNameSpace: makeSToken(' '),
-            or: makeSToken('|'),
+            delimiter: makeSToken('|'),
             postOrSpace: makeSToken(' '),
          }, {
             name: makeSToken('two'),
             postNameSpace: undefined,
-            or: undefined,
+            delimiter: undefined,
             postOrSpace: undefined,
          }],
          close: makeSToken(')'),
@@ -39,7 +39,7 @@ describe('nameList (integration)', () => {
          source.addText('( one | two)');
          source.endText();
 
-         nameList.parse(source, (result) => {
+         nameList.parse(source, {}, (result) => {
             expect(result).toEqual(nlPToken);
             done();
          });
@@ -50,7 +50,7 @@ describe('nameList (integration)', () => {
          source.addText('( one | %fred;');
          source.endText();
 
-         nameList.parse(source, (result) => {
+         nameList.parse(source, {}, (result) => {
             nlPToken.names.pop();
             nlPToken.close = undefined;
 

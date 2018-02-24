@@ -12,10 +12,15 @@ const WARN = XmlWarning.ID;
 
 type DeliverPToken = (pToken?: NameListPToken) => void;
 
+type CWFNameListOptions = {
+   nameType?: 'NAME' | 'NMTOKEN',
+   listType?: 'CHOICE' | 'SEQUENCE'
+};
+
 type NamePToken = {
    name?: SToken;
    postNameSpace?: SToken;
-   or?: SToken;
+   delimiter?: SToken;
    postOrSpace?: SToken;
 };
 
@@ -46,10 +51,15 @@ class NameListPToken {
    [58] NotationType   ::= 'NOTATION' S
                            '(' S? Name (S? '|' S? Name)* S? ')'
    [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
-
+   [47] children       ::= (choice | seq) ('?' | '*' | '+')?
+   [48] cp             ::= (Name | choice | seq) ('?' | '*' | '+')?
+   [49] choice         ::= '(' S? cp ( S? '|' S? cp )+ S? ')'
+   [50] seq            ::= '(' S? cp ( S? ',' S? cp )* S? ')'
+   [51] Mixed          ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
+                           | '(' S? '#PCDATA' S? ')'
 \**********************************************************************/
 
-function parse(source: STokenSource, deliverPToken: DeliverPToken): void {
+function parse(source: STokenSource, options: CWFNameListOptions, deliverPToken: DeliverPToken): void {
    source.extract('match', '(', (charSToken: SToken) => {
       const namePToken = new NameListPToken();
       if (!charSToken) {
@@ -60,7 +70,7 @@ function parse(source: STokenSource, deliverPToken: DeliverPToken): void {
       namePToken.open = charSToken;
       source.extractToObject('space', namePToken, 'postOpenSpace');
 
-      extractNames(source, namePToken, (pToken: NameListPToken) => {
+      extractNames(source, namePToken, options, (pToken: NameListPToken) => {
          source.extract('match', ')', (charSToken: SToken) => {
             pToken.close = charSToken;
 
@@ -70,17 +80,40 @@ function parse(source: STokenSource, deliverPToken: DeliverPToken): void {
    });
 }
 
-function extractNames(source: STokenSource, pToken: NameListPToken, deliverPToken: DeliverPToken): void {
+function extractNames(source: STokenSource, pToken: NameListPToken, options: CWFNameListOptions, deliverPToken: DeliverPToken): void {
    const entry: NamePToken = {};
+   let delimType = options.listType;
+   let wordDelims = [ ')', '%', '>'];
+   let delimMatch;
 
-   source.extractToObject('word', [ '|', ')', '%', '>'], entry, 'name');
+   switch (delimType) {
+      case 'CHOICE':
+         wordDelims.unshift('|');
+         delimMatch = [ '|' ];
+         break;
+      case 'SEQUENCE':
+         wordDelims.unshift(',');
+         delimMatch = [ ',' ];
+         break;
+      default:
+         wordDelims.unshift(',');
+         wordDelims.unshift('|');
+         delimMatch = [ '|', ',' ];
+         break;
+   }
+
+   source.extractToObject('word', wordDelims, entry, 'name');
    source.extractToObject('space', entry, 'postNameSpace');
-   source.extractToObject('match', '|', entry, 'or');
+   source.extractToObject('multi', delimMatch, entry, 'delimiter');
    source.extractToObject('space', entry, 'postOrSpace');
 
    source.extract('peekChar', (charSToken: SToken) => {
-      if (entry.name || entry.or) {
+      if (entry.name || entry.delimiter) {
          pToken.names.push(entry);
+      }
+
+      if (entry.delimiter && !delimType) {
+         delimType = (entry.delimiter.str === ',') ? 'SEQUENCE' :  'CHOICE';
       }
 
       if (!charSToken || charSToken.str === '>' || charSToken.str === ')' || charSToken.str === '%') {
@@ -88,7 +121,9 @@ function extractNames(source: STokenSource, pToken: NameListPToken, deliverPToke
          return;
       }
 
-      extractNames(source, pToken, deliverPToken);
+      extractNames(source, pToken, {
+         listType: delimType,
+      }, deliverPToken);
    });
 }
 
@@ -103,10 +138,12 @@ function assignUnassigned(attLiPToken) {
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, type: string) {
+function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
+   type: string, options: CWFNameListOptions = {}) {
    if (!pToken) {
       return;
    }
+   let delimType = options.listType;
 
    ec.setPos(pToken.open);
    ec.setPos(pToken.postOpenSpace);
@@ -122,15 +159,31 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 
       ec.setPos(entry.name);
       ec.check(!entry.name, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
-      misc.checkName(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+      if (options.nameType === 'NMTOKEN') {
+         misc.checkNmToken(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+      } else {
+         misc.checkName(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+      }
 
       ec.setPos(entry.postNameSpace);
-      ec.setPos(entry.or);
+      ec.setPos(entry.delimiter);
+
+      if (entry.delimiter) {
+         if (!delimType) {
+            delimType = entry.delimiter.str === ',' ? 'SEQUENCE' : 'CHOICE';
+         }
+
+         if (delimType === 'SEQUENCE' && entry.delimiter.str !== ',') {
+            ec.report(WFEID.NAMELIST_BAD_SEQUENCE, [ index.toString(), type, entry.delimiter.str]);
+         } else if (entry.delimiter.str !== '|') {
+            ec.report(WFEID.NAMELIST_BAD_CHOICE, [ index.toString(), type, entry.delimiter.str]);
+         }
+      }
 
       if (!isLast) {
-         ec.check(!entry.or, WFEID.NAMELIST_NO_OR, [ index.toString(), type ]);
+         ec.check(!entry.delimiter, WFEID.NAMELIST_NO_DELIM, [ index.toString(), type ]);
       } else {
-         ec.check(entry.or, WFEID.NAMELIST_EXTRA_OR, [ index.toString(), type ]);
+         ec.check(entry.delimiter, WFEID.NAMELIST_EXTRA_DELIM, [ index.toString(), type ]);
       }
 
       ec.setPos(entry.postOrSpace);
@@ -146,13 +199,21 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 
 type XNames = {
    names: Array<string>;
+   listType: 'CHOICE' | 'SEQUENCE',
 };
 
-function makeXTokenCompatible(pToken: NameListPToken): XNames {
+function makeXTokenCompatible(pToken: NameListPToken, options: CWFNameListOptions = {}): XNames {
    const names = [];
+   let listType = options.listType;
 
    for (let index = 0; index < pToken.names.length; index++) {
       const name = pToken.names[index].name;
+      const type = pToken.names[index].delimiter;
+
+      if (!listType && type) {
+         listType = (type.str === ',') ? 'SEQUENCE' : 'CHOICE';
+      }
+
       if (!name) {
          continue;
       }
@@ -162,6 +223,7 @@ function makeXTokenCompatible(pToken: NameListPToken): XNames {
 
    return {
       names,
+      listType: listType || 'CHOICE',
    };
 }
 
@@ -172,6 +234,7 @@ function makeXTokenCompatible(pToken: NameListPToken): XNames {
 const attListDecl = {
    PTYPE: NAMELIST_PTOKEN_TYPE,
    PToken: NameListPToken,
+   NameListPToken,
 
    parse,
    assignUnassigned,

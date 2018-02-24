@@ -148,6 +148,7 @@ function textOrBlank(sToken) {
 
 const misc = {
    checkName,
+   checkNmToken: checkName,
    checkWellFormedNameRecommendation,
    checkWellFormedText,
    textOrBlank,
@@ -155,6 +156,7 @@ const misc = {
 
 export {
    checkName,
+   checkName as checkNmToken,
    checkWellFormedNameRecommendation,
    checkWellFormedText,
    textOrBlank,
