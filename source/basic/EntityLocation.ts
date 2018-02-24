@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 // http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative
 const RELATIVE_REGEX = new RegExp('^([a-z0-9]+:)?//', 'i');
@@ -20,6 +20,10 @@ function getDirOf(path) {
 \**********************************************************************/
 
 class EntityLocation {
+   public systemId: string;
+   public publicId: string | void;
+   public resolvedSystemId: string;
+   private _parent: EntityLocation;
 
    /**********************************************************************\
     Constructs an instance with the specified system and public
@@ -30,8 +34,8 @@ class EntityLocation {
     publicId: The pubidLiteral
    \**********************************************************************/
 
-   constructor(systemId, publicId) {
-      this.systemId = systemId || '';
+   constructor(systemId: string = '', publicId?: string) {
+      this.systemId = systemId;
       this.publicId = publicId;
    }
 
@@ -63,7 +67,7 @@ class EntityLocation {
       return this.resolvedSystemId || this.systemId;
    }
 
-   equals(other) {
+   equals(other: EntityLocation) {
       if (!other) {
          return false;
       }

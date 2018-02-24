@@ -17,12 +17,25 @@ const LAST_1DOT1_REVISION = 2;
  so we need to be able to cope with that in parsing.
 \**********************************************************************/
 
-class EntityMetaData {
+type XmlVersion = 1.0 | 1.1;
+type XmlRevision = 1 | 2 | 3 | 4 | 5 | 6;
 
-   constructor(entityKind, xmlVersion, xmlRevision, location) {
-      this.type = EntityMetaData.PTYPE;
+class EntityMetaData {
+   public static PTYPE: string = 'ENTITY_META_DATA';
+   public static KIND = {
+      DOCUMENT: 'DOCUMENT',
+      EXTERNAL: 'EXTERNAL',
+      EXTERNALSUBSET: 'EXTERNALSUBSET',
+   };
+   public location: EntityLocation;
+   private _type: string;
+   private _version: XmlVersion;
+   private _revision: XmlRevision;
+
+   constructor(entityKind?: string, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
+      this._type = EntityMetaData.PTYPE;
       this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
-      this.version = xmlVersion || 1.0;
+      this.version = xmlVersion;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
    }
@@ -31,7 +44,7 @@ class EntityMetaData {
     type: When setting the type, make sure it is a legal value.
    \**********************************************************************/
 
-   _setKind(newValue) {
+   _setKind(newValue: string) {
       if (EntityMetaData.KIND[newValue]) {
          this._type = newValue;
       } else {
@@ -39,7 +52,7 @@ class EntityMetaData {
       }
    }
 
-   get kind() {
+   get kind(): string {
       return this._type;
    }
 
@@ -47,15 +60,15 @@ class EntityMetaData {
     Shortcuts for getting the type
    \**********************************************************************/
 
-   get isDocumentKind() {
+   get isDocumentKind(): boolean {
       return this.kind === EntityMetaData.KIND.DOCUMENT;
    }
 
-   get isExternalKind() {
+   get isExternalKind(): boolean {
       return this.kind === EntityMetaData.KIND.EXTERNAL;
    }
 
-   get isExternalSubsetKind() {
+   get isExternalSubsetKind(): boolean {
       return this.kind === EntityMetaData.KIND.EXTERNALSUBSET;
    }
 
@@ -67,7 +80,7 @@ class EntityMetaData {
     changing.
    \**********************************************************************/
 
-   set version(newValue) {
+   set version(newValue: XmlVersion) {
       if (newValue === this._version) {
          return;
       }
@@ -83,7 +96,7 @@ class EntityMetaData {
       }
    }
 
-   get version() {
+   get version(): XmlVersion {
       return this._version;
    }
 
@@ -91,11 +104,11 @@ class EntityMetaData {
     Shortcuts for checking the version
    \**********************************************************************/
 
-   get isVersion1dot0() {
+   get isVersion1dot0(): boolean {
       return this.version === 1.0;
    }
 
-   get isVersion1dot1() {
+   get isVersion1dot1(): boolean {
       return this.version === 1.1;
    }
 
@@ -104,7 +117,7 @@ class EntityMetaData {
     version. So, if you need to change both, change version first.
    \**********************************************************************/
 
-   _setRevision(newValue) {
+   _setRevision(newValue: XmlRevision) {
       if ((this.version === 1.0 && newValue > 0 && newValue <= LAST_1DOT0_REVISION) ||
          (this.version === 1.1 && newValue > 0 && newValue <= LAST_1DOT1_REVISION)) {
          this._revision = newValue;
@@ -114,18 +127,10 @@ class EntityMetaData {
       }
    }
 
-   get revision() {
+   get revision(): XmlRevision {
       return this._revision;
    }
 
 }
-
-EntityMetaData.KIND = {
-   DOCUMENT: 'DOCUMENT',
-   EXTERNAL: 'EXTERNAL',
-   EXTERNALSUBSET: 'EXTERNALSUBSET',
-};
-
-EntityMetaData.PTYPE = 'ENTITY_META_DATA';
 
 export default EntityMetaData;

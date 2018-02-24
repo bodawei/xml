@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 /**********************************************************************\
  StringBundle is a simple wrapper around a set of localized strings.
@@ -20,17 +20,29 @@
  base locale.
 \**********************************************************************/
 
-class StringBundle {
+type Locale = {
+   [key: string]: string;
+}
 
-   constructor(strings) {
-      if (!(strings instanceof Object)) {
+type LocaleMap = {
+   [localeName: string]: Locale;
+}
+
+class StringBundle {
+   public preferredLocale: string;
+   private _locales: {
+      [localeName: string]: Locale;
+   };
+
+   constructor(locales: LocaleMap) {
+      if (!(locales instanceof Object)) {
          throw new Error('Must pass an object containing locales and messages.');
       }
-      if (!strings.base || !(strings.base instanceof Object)) {
+      if (!locales.base || !(locales.base instanceof Object)) {
          throw new Error('Strings must at least have a locale called "base", with an object value.');
       }
 
-      this._strings = strings;
+      this._locales = locales;
       this.preferredLocale = 'en-US';
    }
 
@@ -51,20 +63,20 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   lookup(key, locales) {
+   lookup(key: string, localeNames: string|Array<string>) {
       if (typeof key !== 'string') {
          throw new Error('Must pass a string key to look up.');
       }
 
-      let locale;
+      let locale: Locale;
 
-      if (locales) {
-         if (!Array.isArray(locales)) {
-            locales = [ locales ];
+      if (localeNames) {
+         if (!Array.isArray(localeNames)) {
+            localeNames = [ localeNames ];
          }
 
-         for (let index = 0; index < locales.length; index++) {
-            locale = this._strings[locales[index]];
+         for (let index = 0; index < localeNames.length; index++) {
+            locale = this._locales[localeNames[index]];
             if (locale) {
                const value = locale[key];
 
@@ -75,13 +87,13 @@ class StringBundle {
          }
       }
 
-      locale = this._strings[this.preferredLocale];
+      locale = this._locales[this.preferredLocale];
 
       if (locale && locale[key]) {
          return locale[key];
       }
 
-      return this._strings.base[key];
+      return this._locales.base[key];
    }
 
    /**********************************************************************\
@@ -107,24 +119,28 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   substitute(key, params, locales) {
-      let message = this.lookup(key, locales);
+   substitute(key: string, params: string|Array<string>, localNames: string|Array<string>) {
+      let message = this.lookup(key, localNames);
 
       if (!params || !message) {
          return message ? unescapeBraces(message) : undefined;
       }
 
+      let paramsArray: Array<string>;
+
       if (!Array.isArray(params)) {
-         params = [ params ];
+         paramsArray = [ params ];
+      } else {
+         paramsArray = params;
       }
 
       for (let index = 0; index < params.length; index++) {
          // jsperf says this is faster than just doing the two replaces
          if (message.indexOf('{' + index + ':key}') !== -1) {
-            const substitute = this.lookup(params[index], locales);
+            const substitute = this.lookup(paramsArray[index], localNames);
             message = message.replace('{' + index + ':key}', substitute);
          } else {
-            message = message.replace('{' + index + '}', params[index]);
+            message = message.replace('{' + index + '}', paramsArray[index]);
          }
       }
 
@@ -144,16 +160,16 @@ class StringBundle {
     None
    \**********************************************************************/
 
-   addLocale(localeName, localeStrings) {
+   addLocale(localeName: string, locale: Locale) {
       if (typeof localeName !== 'string') {
          throw new Error('Must pass in the name of a locale.');
       }
-      const type = typeof localeStrings; // do this separately to help code coverage!
+      const type = typeof locale; // do this separately to help code coverage!
       if (type !== 'object') {
          throw new Error('Must pass an object of key/strings.');
       }
 
-      this._strings[localeName] = localeStrings;
+      this._locales[localeName] = locale;
    }
 
    /**********************************************************************\
@@ -166,13 +182,13 @@ class StringBundle {
     The strings for that locale
    \**********************************************************************/
 
-   removeLocale(localeName) {
+   removeLocale(localeName: string) {
       if (typeof localeName !== 'string') {
          throw new Error('Must pass in the name of a locale.');
       }
 
-      const temp = this._strings[localeName];
-      delete this._strings[localeName];
+      const temp = this._locales[localeName];
+      delete this._locales[localeName];
 
       return temp;
    }

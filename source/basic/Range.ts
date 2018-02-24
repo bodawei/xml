@@ -1,5 +1,6 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import EntityLocation from './EntityLocation';
 import Offset from './Offset.js';
 
 /**********************************************************************\
@@ -18,16 +19,19 @@ import Offset from './Offset.js';
 \**********************************************************************/
 
 class Range {
-   // public location: EntityLocation;
-   // public startIndex: number;
-   // public startRow: number;
-   // public startColumn: number;
-   // public endIndex: number;
-   // public endRow: number;
-   // public endColumn: number;
+   public location: EntityLocation;
+   public startIndex: number;
+   public startRow: number;
+   public startColumn: number;
+   public endIndex: number;
+   public endRow: number;
+   public endColumn: number;
 
-   constructor(location, index, row, column, endIndex, endRow, endColumn) {
-      if (location instanceof Offset) {
+   constructor(location: EntityLocation,
+      index: number = 0, row: number = 0, column: number = 0,
+      endIndex: number = 0, endRow: number = 0, endColumn: number = 0) {
+
+         if (location instanceof Offset) {
          this.location = location.location;
          this.startIndex = location.index;
          this.startRow = location.row;
@@ -64,7 +68,7 @@ class Range {
       return new Offset(this.location, this.endIndex, this.endRow, this.endColumn);
    }
 
-   equals(other) {
+   equals(other: Range) {
       let locationsEqual = false;
 
       if (!this.location && !other.location) {
