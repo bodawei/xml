@@ -128,13 +128,14 @@ class StringBundle {
 
       let paramsArray: Array<string>;
 
+
       if (!Array.isArray(params)) {
          paramsArray = [ params ];
       } else {
          paramsArray = params;
       }
 
-      for (let index = 0; index < params.length; index++) {
+      for (let index = 0; index < paramsArray.length; index++) {
          // jsperf says this is faster than just doing the two replaces
          if (message.indexOf('{' + index + ':key}') !== -1) {
             const substitute = this.lookup(paramsArray[index], localNames);

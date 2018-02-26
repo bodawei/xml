@@ -21,14 +21,17 @@ describe('nameList (integration)', () => {
             name: makeSToken('one'),
             postNameSpace: makeSToken(' '),
             delimiter: makeSToken('|'),
-            postOrSpace: makeSToken(' '),
+            postDelimiterSpace: makeSToken(' '),
          }, {
             name: makeSToken('two'),
             postNameSpace: undefined,
             delimiter: undefined,
-            postOrSpace: undefined,
+            postDelimiterSpace: undefined,
          }],
          close: makeSToken(')'),
+         postCloseSpace: undefined,
+         repeat: makeSToken('*'),
+         postRepeatSpace: makeSToken(' '),
       });
    });
 
@@ -36,10 +39,10 @@ describe('nameList (integration)', () => {
 
       it('parses name list', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one | two)');
+         source.addText('( one | two)* ');
          source.endText();
 
-         nameList.parse(source, {}, (result) => {
+         nameList.parse(source, 'ANY', (result) => {
             expect(result).toEqual(nlPToken);
             done();
          });
@@ -50,11 +53,27 @@ describe('nameList (integration)', () => {
          source.addText('( one | %fred;');
          source.endText();
 
-         nameList.parse(source, {}, (result) => {
+         nameList.parse(source, 'ANY', (result) => {
             nlPToken.names.pop();
             nlPToken.close = undefined;
+            nlPToken.postCloseSpace = undefined;
+            nlPToken.repeat = undefined;
+            nlPToken.postRepeatSpace = undefined;
 
             expect(result).toEqual(nlPToken);
+            done();
+         });
+      });
+
+      it('parses a nested name list with various delimiters', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('( one | ( ( two | three)+ , four)? | five)');
+         source.endText();
+
+         nameList.parse(source, 'ANY', (result) => {
+            expect(result.names[1].list.names[0].list.repeat.str).toEqual('+');
+            expect(result.names[1].list.repeat.str).toEqual('?');
+            expect(result.names[1].list.names[0].list.names[0].name.str).toEqual('two');
             done();
          });
       });

@@ -207,7 +207,6 @@ describe('NodeStream (integration)', () => {
 
    });
 
-
    describe('attlist declaration processing', () => {
 
       it('expands an parameter entity that makes up the attlist declaration body', (done) => {

@@ -31,6 +31,12 @@ describe('EntityMetaData', () => {
          expect(pk.location).toEqual(loc);
       });
 
+      it('sets the type', () => {
+         const pk = new EntityMetaData('DOCUMENT', 1.0, 4);
+
+         expect(pk.type).toEqual('ENTITY_META_DATA');
+      });
+
       it('throws an error if the version and revision do not match', () => {
          expect(() => {
             new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.1, 5);

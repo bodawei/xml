@@ -65,6 +65,19 @@ function toBeInstanceOf() {
    };
 }
 
+console.json = function json() {
+   const args = arguments;
+
+   if (arguments.length === 1) {
+      console.debug(JSON.stringify(arguments[0], undefined, 4));
+   } else {
+      for (let index = 0; index < arguments.length; index++) {
+         console.debug(`@ INDEX ${index}: ${JSON.stringify(arguments[index], undefined, 4)}`);
+      }
+   }
+}
+
+
 beforeEach(() => {
    jasmine.addMatchers({
       toEqualProps,

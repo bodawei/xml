@@ -28,12 +28,13 @@ class EntityMetaData {
       EXTERNALSUBSET: 'EXTERNALSUBSET',
    };
    public location: EntityLocation;
-   private _type: string;
+   public type: string;
+   private _kind: string;
    private _version: XmlVersion;
    private _revision: XmlRevision;
 
    constructor(entityKind?: string, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
-      this._type = EntityMetaData.PTYPE;
+      this.type = EntityMetaData.PTYPE;
       this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
       this.version = xmlVersion;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
@@ -46,14 +47,14 @@ class EntityMetaData {
 
    _setKind(newValue: string) {
       if (EntityMetaData.KIND[newValue]) {
-         this._type = newValue;
+         this._kind = newValue;
       } else {
          throw new Error('Unknown type passed to EntityMetaData.type.  Got "' + newValue + '".');
       }
    }
 
    get kind(): string {
-      return this._type;
+      return this._kind;
    }
 
    /**********************************************************************\
