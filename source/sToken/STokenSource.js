@@ -176,11 +176,14 @@ class STokenSource {
    }
 
    _resumeOperation() {
-      // Turn these back on if we turn off the setTimeout(), below.
-      // if (this._resuming === true) {
-      //    return;
-      // }
-      // this._resuming = true;
+      // There are two alternate ways of running this routine.  A is faster, but allows some callers to get "synchronous" returns. B is much slower, but forces asynchronous returns.
+      // A
+      if (this._resuming === true) {
+         return;
+      }
+      this._resuming = true;
+      // B
+      //
 
       while ((this._segments.length !== 0 || this._allTextAdded) && this._extractors.length > 0) {
          const extContext = this._extractors[0];
@@ -211,19 +214,23 @@ class STokenSource {
             this._lastOffset = ranges[ranges.length - 1].getEndOffset();
          }
 
+         // A
+         this._reportResults(extContext, results.text, results.original, ranges);
          /*
+          * B:
           * Ultimately, we probably do not want to doing a setTimeout here, as
           * there's no reason callers should not be able to deal with what turns
           * out to be a synchronous return of values.  However, it is better for
           * development purposes, at least, to do this to make sure the layers of
           * our system are not dependent on the sometimes synchronous behavior.
           */
-         setTimeout(() => {
-            this._reportResults(extContext, results.text, results.original, ranges);
-         }, 0);
-         break;
+         // setTimeout(() => {
+         // this._reportResults(extContext, results.text, results.original, ranges);
+         // }, 0);
+         // break;
       }
-      // this._resuming = false;
+      // A
+      this._resuming = false;
    }
 
    _restorePartiallyAndUnusedSegments(segInfos) {
