@@ -408,7 +408,7 @@ describe('nameList (unit)', () => {
          emd = new EntityMetaData();
 
          spyOn(misc, 'checkName');
-         spyOn(misc, 'checkNmToken');
+         spyOn(misc, 'checkNMToken');
       });
 
       it('reports no errors if no pToken provided', () => {
@@ -455,7 +455,7 @@ describe('nameList (unit)', () => {
             nameType: 'NMTOKEN',
          });
 
-         expect(misc.checkNmToken).toHaveBeenCalledWith(nlPToken.names[0].name,
+         expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].name,
             mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
       });
 

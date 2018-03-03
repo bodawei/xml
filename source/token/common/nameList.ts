@@ -199,7 +199,7 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
       ec.setPos(entry.name);
       ec.check(!entry.name, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
       if (options.nameType === 'NMTOKEN') {
-         misc.checkNmToken(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+         misc.checkNMToken(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
       } else {
          misc.checkName(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
       }

@@ -176,7 +176,9 @@ class STokenSource {
    }
 
    _resumeOperation() {
-      // There are two alternate ways of running this routine.  A is faster, but allows some callers to get "synchronous" returns. B is much slower, but forces asynchronous returns.
+      // There are two alternate ways of running this routine.
+      // - A is faster, but allows some callers to get "synchronous" returns.
+      // - B is much slower, but forces asynchronous returns.
       // A
       if (this._resuming === true) {
          return;
