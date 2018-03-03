@@ -19,12 +19,16 @@ describe('nameList (integration)', () => {
          postOpenSpace: makeSToken(' '),
          names: [ {
             name: makeSToken('one'),
-            postNameSpace: makeSToken(' '),
+            postNameSpace: undefined,
+            repeat: makeSToken('+'),
+            postRepeatSpace: makeSToken(' '),
             delimiter: makeSToken('|'),
             postDelimiterSpace: makeSToken(' '),
          }, {
             name: makeSToken('two'),
             postNameSpace: undefined,
+            repeat: undefined,
+            postRepeatSpace: undefined,
             delimiter: undefined,
             postDelimiterSpace: undefined,
          }],
@@ -39,7 +43,7 @@ describe('nameList (integration)', () => {
 
       it('parses name list', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one | two)* ');
+         source.addText('( one+ | two)* ');
          source.endText();
 
          nameList.parse(source, 'ANY', (result) => {
@@ -50,7 +54,7 @@ describe('nameList (integration)', () => {
 
       it('parses name list with a PE Ref in it', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one | %fred;');
+         source.addText('( one+ | %fred;');
          source.endText();
 
          nameList.parse(source, 'ANY', (result) => {
@@ -67,7 +71,7 @@ describe('nameList (integration)', () => {
 
       it('parses a nested name list with various delimiters', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('( one | ( ( two | three)+ , four)? | five)');
+         source.addText('( one+ | ( ( two | three)+ , four)? | five)');
          source.endText();
 
          nameList.parse(source, 'ANY', (result) => {

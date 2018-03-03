@@ -101,7 +101,7 @@ function extractNames(source: STokenSource, pToken: NameListPToken, listType: Li
       }
 
       const entry: NamePToken = {};
-      let wordDelims = [ ')', '%', '>'];
+      let wordDelims = [ ')', '%', '>', '?', '*', '+' ];
    
       switch (delimterType) {
          case 'CHOICE':
@@ -124,18 +124,18 @@ function extractNames(source: STokenSource, pToken: NameListPToken, listType: Li
          if (charSToken.str === '(') {
             parse(source, 'ANY', (listPToken: NameListPToken) => {
                entry.list = listPToken;
-               getDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
+               getRepeatAndDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
             });
             return;
          }
       };
 
       source.extractToObject('word', wordDelims, entry, 'name');
-      getDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
+      getRepeatAndDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
    });
 }
 
-function getDelimiter(source: STokenSource, pToken: NameListPToken,  entry: NamePToken, listType: ListType, delimiterType: DelimiterType, deliverPToken: DeliverPToken): void {
+function getRepeatAndDelimiter(source: STokenSource, pToken: NameListPToken,  entry: NamePToken, listType: ListType, delimiterType: DelimiterType, deliverPToken: DeliverPToken): void {
    let delimMatch;
 
    switch (delimiterType) {
@@ -151,6 +151,8 @@ function getDelimiter(source: STokenSource, pToken: NameListPToken,  entry: Name
    }
 
    source.extractToObject('space', entry, 'postNameSpace');
+   source.extractToObject('multi', [ '?', '*', '+' ], entry, 'repeat');
+   source.extractToObject('space', entry, 'postRepeatSpace');
    source.extractToObject('multi', delimMatch, entry, 'delimiter');
    source.extract('space', (space: SToken) => {
       entry.postDelimiterSpace = space;

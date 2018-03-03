@@ -61,6 +61,21 @@ describe('PTokenStream (unit)', () => {
 
    });
 
+   describe('unusual read() situation', () => {
+
+      it('ignores a second _read() if one is already in progress', () => {
+         spyOn(pTokenStream, '_parseGeneral');
+         pTokenStream.addText(']');
+         pTokenStream.endText();
+
+         pTokenStream._read();
+         pTokenStream._read();
+
+         expect(pTokenStream._parseGeneral.calls.count()).toEqual(1);
+      });
+
+   });
+
    describe('weird parse situation', () => {
 
       it('does not try to parse a close if encountering a "]" but no start was found', (done) => {

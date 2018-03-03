@@ -5,6 +5,32 @@
 const toEqualPropsMatcher = require('./beforeEach.jasmine.js').toEqualProps;
 const toBeInstanceOfMatcher = require('./beforeEach.jasmine.js').toBeInstanceOf;
 
+describe('console.json()', () => {
+
+   beforeEach(() => {
+      spyOn(console, 'debug');
+   });
+
+   it('calls console.debug() for one argument', () => {
+      const expected = '{\n    "a": 1\n}';
+
+      console.json({ a: 1 });
+
+      expect(console.debug).toHaveBeenCalledWith(expected);
+   });
+   
+   it('calls console.debug() repeatedly for multiple argument', () => {
+      const expected = '{\n    "a": 1\n}';
+
+      console.json({ a: 1 }, true, 3);
+
+      expect(console.debug).toHaveBeenCalledWith(`ARG 0: ${expected}`);
+      expect(console.debug).toHaveBeenCalledWith('ARG 1: true');
+      expect(console.debug).toHaveBeenCalledWith('ARG 2: 3');
+   });
+   
+});
+
 describe('toEqualProps()', () => {
 
    describe('jasmine use', () => {
