@@ -364,7 +364,7 @@ describe('notationdeDlaration (unit)', () => {
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector);
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NOTATIONDECL_NO_SPACE_AFTER_NAME,
+            id: WellFormedError.ID.NOTATIONDECL_NAME_NO_SPACE,
             params: [ 'notationName' ],
             position: undefined,
             lastPosition: notationPToken.name,

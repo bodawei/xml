@@ -161,7 +161,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
       WARN.NOTATIONDECL_NAME_XML_RESERVED);
 
    ec.setPos(pToken.postNameSpace);
-   ec.check(!pToken.postNameSpace, WFEID.NOTATIONDECL_NO_SPACE_AFTER_NAME, [ nameText ]);
+   ec.check(!pToken.postNameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [ nameText ]);
 
    ec.setPos(undefined);
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
