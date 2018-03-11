@@ -18,17 +18,21 @@ describe('nameList (integration)', () => {
          open: makeSToken('('),
          postOpenSpace: makeSToken(' '),
          names: [ {
-            name: makeSToken('one'),
-            postNameSpace: undefined,
-            repeat: makeSToken('+'),
-            postRepeatSpace: makeSToken(' '),
+            particle: {
+               name: makeSToken('one'),
+               postNameSpace: undefined,
+               repeat: makeSToken('+'),
+               postRepeatSpace: makeSToken(' '),
+            },
             delimiter: makeSToken('|'),
             postDelimiterSpace: makeSToken(' '),
          }, {
-            name: makeSToken('two'),
-            postNameSpace: undefined,
-            repeat: undefined,
-            postRepeatSpace: undefined,
+            particle: {
+               name: makeSToken('two'),
+               postNameSpace: undefined,
+               repeat: undefined,
+               postRepeatSpace: undefined,
+            },
             delimiter: undefined,
             postDelimiterSpace: undefined,
          }],
@@ -75,9 +79,12 @@ describe('nameList (integration)', () => {
          source.endText();
 
          nameList.parse(source, 'ANY', (result) => {
-            expect(result.names[1].list.names[0].list.repeat.str).toEqual('+');
-            expect(result.names[1].list.repeat.str).toEqual('?');
-            expect(result.names[1].list.names[0].list.names[0].name.str).toEqual('two');
+            const listSubOne = <any>result.names[1].particle;
+            const listSubOneSubZero = listSubOne.names[0].particle;
+            const listSubOneSubZeroSubZero = listSubOneSubZero.names[0].particle;
+            expect(listSubOne.repeat.str).toEqual('?');
+            expect(listSubOneSubZero.repeat.str).toEqual('+');
+            expect(listSubOneSubZeroSubZero.name.str).toEqual('two');
             done();
          });
       });

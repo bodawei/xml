@@ -22,19 +22,24 @@ type CWFNameListOptions = {
    nested?: boolean;
 };
 
-type NamePToken = {
-   name?: SToken;
-   list?: NameListPToken;
-   postNameSpace?: SToken;
+type ContentParticlePToken = {
+   particle?: NamePToken | NameListPToken;
    delimiter?: SToken;
    postDelimiterSpace?: SToken;
 };
+
+type NamePToken = {
+   name?: SToken;
+   postNameSpace?: SToken;
+   repeat?: SToken;
+   postRepeatSpace?: SToken;
+}
 
 class NameListPToken {
    public readonly type: string;
    public open: SToken;
    public postOpenSpace?: SToken;
-   public names: Array<NamePToken>;
+   public names: Array<ContentParticlePToken>;
    public close?: SToken;
    public postCloseSpace?: SToken;
    public repeat?: SToken;
@@ -44,6 +49,12 @@ class NameListPToken {
       this.names = [];
       Object.assign(this, basePToken);
       this.type = NAMELIST_PTOKEN_TYPE;
+   }
+}
+
+function isNamePToken(value: any): value is NamePToken {
+   if (value && (value.name || value.postNameSpace)) {
+      return true;
    }
 }
 
@@ -80,7 +91,7 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
       source.extractToObject('space', namePToken, 'postOpenSpace');
 
       const delimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : 'ANY';
-      extractNames(source, namePToken, listType, delimiterType, (pToken: NameListPToken) => {
+      parseNames(source, namePToken, delimiterType, (pToken: NameListPToken) => {
          source.extractToObject('match', ')', pToken, 'close');
          source.extractToObject('space', pToken, 'postCloseSpace');
          source.extractToObject('multi', [ '?', '*', '+' ], pToken, 'repeat');
@@ -93,15 +104,15 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
    });
 }
 
-function extractNames(source: STokenSource, pToken: NameListPToken, listType: ListType, delimterType: DelimiterType, deliverPToken: DeliverPToken): void {
+function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: DelimiterType, deliverPToken: DeliverPToken): void {
    source.extract('peekChar', (charSToken: SToken) => {
       if (!charSToken || charSToken.str === '>' || charSToken.str === ')' || charSToken.str === '%') {
          deliverPToken(pToken);
          return;
       }
 
-      const entry: NamePToken = {};
-      let wordDelims = [ ')', '%', '>', '?', '*', '+' ];
+      const particle: ContentParticlePToken = {};
+      let wordDelims = [ ')', '%', '>', '?', '*', '+', '(' ];
    
       switch (delimterType) {
          case 'CHOICE':
@@ -116,26 +127,33 @@ function extractNames(source: STokenSource, pToken: NameListPToken, listType: Li
             break;
       }
    
-      pToken.names.push(entry);
+      pToken.names.push(particle);
 
-      if (listType === 'ANY') {
-         wordDelims.push('(');
-
-         if (charSToken.str === '(') {
-            parse(source, 'ANY', (listPToken: NameListPToken) => {
-               entry.list = listPToken;
-               getRepeatAndDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
-            });
-            return;
-         }
-      };
-
-      source.extractToObject('word', wordDelims, entry, 'name');
-      getRepeatAndDelimiter(source, pToken, entry, listType, delimterType, deliverPToken);
+      if (charSToken.str === '(') {
+         parse(source, 'ANY', (listPToken: NameListPToken) => {
+            particle.particle = listPToken;
+            parseDelimiter(source, pToken, particle, delimterType, deliverPToken);
+         });
+      } else {
+         parseName(source, wordDelims, (name: NamePToken) => {
+            particle.particle = name;
+            parseDelimiter(source, pToken, particle, delimterType, deliverPToken);
+         });
+      }
    });
 }
 
-function getRepeatAndDelimiter(source: STokenSource, pToken: NameListPToken,  entry: NamePToken, listType: ListType, delimiterType: DelimiterType, deliverPToken: DeliverPToken): void {
+function parseName(source: STokenSource, wordDelims: Array<string>, deliverName: Function) {
+   let namePToken: NamePToken = {};
+
+   source.extractToObject('word', wordDelims, namePToken, 'name');
+   source.extractToObject('space', namePToken, 'postNameSpace');
+   source.extractToObject('multi', [ '?', '*', '+' ], namePToken, 'repeat');
+   source.extractToObject('space', namePToken, 'postRepeatSpace');
+   deliverName(namePToken);
+}
+
+function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle: ContentParticlePToken, delimiterType: DelimiterType, deliverPToken: DeliverPToken): void {
    let delimMatch;
 
    switch (delimiterType) {
@@ -150,20 +168,17 @@ function getRepeatAndDelimiter(source: STokenSource, pToken: NameListPToken,  en
          break;
    }
 
-   source.extractToObject('space', entry, 'postNameSpace');
-   source.extractToObject('multi', [ '?', '*', '+' ], entry, 'repeat');
-   source.extractToObject('space', entry, 'postRepeatSpace');
-   source.extractToObject('multi', delimMatch, entry, 'delimiter');
+   source.extractToObject('multi', delimMatch, particle, 'delimiter');
    source.extract('space', (space: SToken) => {
-      entry.postDelimiterSpace = space;
+      particle.postDelimiterSpace = space;
 
       let newDelimiterType: DelimiterType = delimiterType;
 
-      if (entry.delimiter && delimiterType === 'ANY') {
-         newDelimiterType = (entry.delimiter.str === ',') ? 'SEQUENCE' :  'CHOICE';
+      if (particle.delimiter && delimiterType === 'ANY') {
+         newDelimiterType = (particle.delimiter.str === ',') ? 'SEQUENCE' :  'CHOICE';
       }
 
-      extractNames(source, pToken, listType, newDelimiterType, deliverPToken);
+      parseNames(source, pToken, newDelimiterType, deliverPToken);
    });
 
 }
@@ -198,15 +213,20 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
       const isLast = index === pToken.names.length - 1;
       const entry = pToken.names[index];
 
-      ec.setPos(entry.name);
-      ec.check(!entry.name, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
-      if (options.nameType === 'NMTOKEN') {
-         misc.checkNMToken(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
-      } else {
-         misc.checkName(entry.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
-      }
+      if (isNamePToken(entry.particle)) {
+         ec.setPos(entry.particle.name);
+         if (options.nameType === 'NMTOKEN') {
+            misc.checkNMToken(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+         } else {
+            misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+         }
 
-      ec.setPos(entry.postNameSpace);
+         ec.setPos(entry.particle.postNameSpace);
+      } else {
+         ec.setPos(undefined);
+         ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
+      }         
+
       ec.setPos(entry.delimiter);
 
       if (entry.delimiter) {
@@ -238,33 +258,63 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
  XToken
 \**********************************************************************/
 
-type XNames = {
-   names: Array<string>;
-   listType: 'CHOICE' | 'SEQUENCE',
+type DefinitiveListType = 'CHOICE' | 'SEQUENCE';
+type RepeatType = 'ONE' | 'ZEROPLUS' | 'ONEPLUS' | 'ZEROONE';
+
+type XName = {
+   name: string;
+   repeat: RepeatType;
+}
+
+type XNameList = {
+   names: Array<XName | XNameList>;
+   listType: DefinitiveListType,
+   repeat: RepeatType;
 };
 
-function makeXTokenCompatible(pToken: NameListPToken, options: CWFNameListOptions = {}): XNames {
+const REPEAT_LOOKUP_TABLE = {
+   '*': 'ZEROPLUS',
+   '+': 'ONEPLUS',
+   '?': 'ZEROONE',
+}
+
+function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
    const names = [];
-   let listType = options.listType;
+   let listType: DefinitiveListType;
+   let repetition: RepeatType;
+   
+   if (lType === 'ENUMERATION' || lType === 'NOTATION') {
+      listType = 'CHOICE';
+   }
 
    for (let index = 0; index < pToken.names.length; index++) {
-      const name = pToken.names[index].name;
-      const type = pToken.names[index].delimiter;
+      const particle = pToken.names[index].particle;
+      const delimiter = pToken.names[index].delimiter;
 
-      if (!listType && type) {
-         listType = (type.str === ',') ? 'SEQUENCE' : 'CHOICE';
+      if (!listType && delimiter) {
+         listType = (delimiter.str === ',') ? 'SEQUENCE' : 'CHOICE';
       }
 
-      if (!name) {
+      if (!particle) {
          continue;
       }
 
-      names.push(name.str);
+      if (particle instanceof NameListPToken) {
+         names.push(makeXTokenCompatible(particle));
+      } else if (particle.name) {
+         const name: XName = {
+            name: particle.name.str,
+            repeat: REPEAT_LOOKUP_TABLE[misc.textOrBlank(particle.repeat)] || 'ONE',
+         };
+
+         names.push(name);
+      }
    }
 
    return {
       names,
       listType: listType || 'CHOICE',
+      repeat: REPEAT_LOOKUP_TABLE[pToken.repeat && pToken.repeat.str] || 'ONE',
    };
 }
 

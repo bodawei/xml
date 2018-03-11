@@ -19,21 +19,28 @@ describe('nameList (unit)', () => {
          open: makeSToken('('),
          postOpenSpace: makeSToken(' '),
          names: [ {
-            name: makeSToken('one'),
-            postNameSpace: makeSToken(' '),
-            repeat: makeSToken('*'),
-            postRepeatSpace: makeSToken(' '),
+            particle: {
+               name: makeSToken('one'),
+               postNameSpace: makeSToken(' '),
+               repeat: makeSToken('*'),
+               postRepeatSpace: makeSToken(' '),
+            },
             delimiter: makeSToken('|'),
             postDelimiterSpace: makeSToken(' '),
          } , {
-            name: makeSToken('two'),
-            repeat: undefined,
-            postRepeatSpace: undefined,
-            postNameSpace: undefined,
+            particle: {
+               name:  makeSToken('two'),
+               repeat: undefined,
+               postRepeatSpace: undefined,
+               postNameSpace: undefined,
+            },
             delimiter: undefined,
             postDelimiterSpace: undefined,
          }],
          close: makeSToken(')'),
+         postCloseSpace: undefined,
+         repeat: undefined,
+         postRepeatSpace: undefined,
       });
    });
 
@@ -49,14 +56,14 @@ describe('nameList (unit)', () => {
             [ '(', 'match', '(' ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('o'),
-            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ ' ', 'space' ],
             [ '*', 'multi', [ '?', '*', '+' ] ],
             [ ' ', 'space' ],
             [ '|', 'multi', [ '|' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('t'),
-            [ 'two', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'two', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ undefined, 'space' ],
             [ undefined, 'multi', [ '?', '*', '+' ] ],
             [ undefined, 'space' ],
@@ -212,14 +219,14 @@ describe('nameList (unit)', () => {
             [ '(', 'match', '(' ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('o'),
-            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ ' ', 'space' ],
             [ '*', 'multi', [ '?', '*', '+' ] ],
             [ ' ', 'space' ],
             [ '|', 'multi', [ '|' ] ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('|'),
-            [ undefined, 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ undefined, 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ undefined, 'space' ],
             [ undefined, 'multi', [ '?', '*', '+' ] ],
             [ undefined, 'space' ],
@@ -232,17 +239,21 @@ describe('nameList (unit)', () => {
             [ undefined, 'space' ],
          ]);
 
-         const makeSToken = makeSTokenMaker(undefined, 20, 0, 20);
-         nlPToken.names[1].name = undefined;
-         nlPToken.names[1].postNameSpace = undefined;
-         nlPToken.names[1].or = makeSToken('|');
+         const makeSToken = makeSTokenMaker(undefined, 10, 0, 10);
+         nlPToken.names[1].particle = {
+            name: undefined,
+            postNameSpace: undefined,
+            repeat: undefined,
+            postRepeatSpace: undefined,
+         };
+         nlPToken.names[1].delimiter = makeSToken('|');
          nlPToken.names[1].postDelimiterSpace = undefined;
          nlPToken.close = makeSToken(')');
 
          nameList.parse(mockSource, 'ENUMERATION', callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainPTokenProps(makeSToken);
+         expect(callback).toContainPTokenProps(nlPToken);
       });
 
       it('parses a name list with two names and no "|"s', () => {
@@ -250,14 +261,14 @@ describe('nameList (unit)', () => {
             [ '(', 'match', '(' ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('o'),
-            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ ' ', 'space' ],
             [ '*', 'multi', [ '?', '*', '+' ] ],
             [ ' ', 'space' ],
             [ undefined, 'multi' ],
             [ undefined, 'space' ],
             MockSTokenSource.PEEK('t'),
-            [ 'two', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'two', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ undefined, 'space' ],
             [ undefined, 'multi', [ '?', '*', '+' ] ],
             [ undefined, 'space' ],
@@ -273,8 +284,12 @@ describe('nameList (unit)', () => {
          const makeSToken = makeSTokenMaker(undefined, 8, 0, 8);
          nlPToken.names[0].delimiter = undefined;
          nlPToken.names[0].postDelimiterSpace = undefined;
-         nlPToken.names[1].name = makeSToken('two');
-         nlPToken.names[1].postNameSpace = undefined;
+         nlPToken.names[1].particle = {
+            name: makeSToken('two'),
+            postNameSpace: undefined,
+            repeat: undefined,
+            postRepeatSpace: undefined,
+         };
          nlPToken.names[1].delimiter = undefined;
          nlPToken.names[1].postDelimiterSpace = undefined;
          nlPToken.close = makeSToken(')');
@@ -312,7 +327,7 @@ describe('nameList (unit)', () => {
             [ '(', 'match', '(' ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('o'),
-            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ ' ', 'space' ],
             [ '*', 'multi', [ '?', '*', '+' ] ],
             [ ' ', 'space' ],
@@ -357,7 +372,7 @@ describe('nameList (unit)', () => {
             [ '(', 'match', '(' ],
             [ ' ', 'space' ],
             MockSTokenSource.PEEK('o'),
-            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+' ] ],
+            [ 'one', 'word', [ '|', ')', '%', '>', '?', '*', '+', '(' ] ],
             [ ' ', 'space' ],
             [ '*', 'multi', [ '?', '*', '+' ] ],
             [ ' ', 'space' ],
@@ -413,9 +428,6 @@ describe('nameList (unit)', () => {
                   undefined,
                   undefined,
                   undefined,
-               [ ' ', 'space' ],
-               [ undefined, 'multi', [ '?', '*', '+' ] ],
-               [ undefined, 'space' ],
                [ ',', 'multi', [ ',' ] ],
                [ ' ', 'space' ],
                MockSTokenSource.PEEK('f'),
@@ -437,7 +449,7 @@ describe('nameList (unit)', () => {
    
             const result = callback.calls.argsFor(0)[0];
             expect(result.names.length).toEqual(3);
-            expect(result.names[1].list.names.length).toEqual(2);
+            expect(result.names[1].particle.names.length).toEqual(2);
          });
    
    
@@ -477,7 +489,7 @@ describe('nameList (unit)', () => {
       });
 
       it('reports an error if a name in an entry is not present', () => {
-         nlPToken.names[1].name = undefined;
+         nlPToken.names[1].particle = undefined;
 
          nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
 
@@ -492,7 +504,7 @@ describe('nameList (unit)', () => {
       it('checks if the name is valid', () => {
          nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
 
-         expect(misc.checkName).toHaveBeenCalledWith(nlPToken.names[0].name,
+         expect(misc.checkName).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
             mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
       });
 
@@ -501,7 +513,7 @@ describe('nameList (unit)', () => {
             nameType: 'NMTOKEN',
          });
 
-         expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].name,
+         expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
             mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
       });
 
@@ -563,7 +575,7 @@ describe('nameList (unit)', () => {
             id: WellFormedError.ID.NAMELIST_NO_DELIM,
             params: [ '0', 'xxx' ],
             position: undefined,
-            lastPosition: nlPToken.names[0].postNameSpace,
+            lastPosition: nlPToken.names[0].particle.postNameSpace,
          });
       });
 
@@ -587,7 +599,7 @@ describe('nameList (unit)', () => {
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NAMELIST_NO_CLOSE,
             params: [ 'xxx' ],
-            lastPosition: nlPToken.names[1].name,
+            lastPosition: nlPToken.names[1].particle.name,
          });
       });
    
@@ -599,63 +611,288 @@ describe('nameList (unit)', () => {
          const xNames = nameList.makeXTokenCompatible(nlPToken);
 
          expect(xNames).toEqual({
-            names: [ 'one', 'two' ],
+            names: [ {
+               name: 'one',
+               repeat: 'ZEROPLUS',
+            }, {
+               name: 'two',
+               repeat: 'ONE',
+            } ],
             listType: 'CHOICE',
+            repeat: 'ONE',
          });
       });
 
-      it('returns an empty choice type if no names', () => {
+      it('returns a result if no entries', () => {
          nlPToken.names = [];
          const xNames = nameList.makeXTokenCompatible(nlPToken);
 
          expect(xNames).toEqual({
             names: [ ],
             listType: 'CHOICE',
+            repeat: 'ONE',
          });
       });
 
-      it('silently ignored entries without names', () => {
-         nlPToken.names[1].name = undefined;
+      it('silently ignores entries without names', () => {
+         nlPToken.names[1].particle = undefined;
 
          const xNames = nameList.makeXTokenCompatible(nlPToken);
 
          expect(xNames).toEqual({
-            names: [ 'one' ],
+            names: [ {
+               name: 'one',
+               repeat: 'ZEROPLUS',
+            } ],
             listType: 'CHOICE',
+            repeat: 'ONE',
          });
       });
 
-      it('silently ignored entries without delimiters', () => {
+      it('silently ignores the absence of delimiters', () => {
          nlPToken.names[1].delimiter = undefined;
 
          const xNames = nameList.makeXTokenCompatible(nlPToken);
 
          expect(xNames).toEqual({
-            names: [ 'one', 'two' ],
+            names: [ {
+               name: 'one',
+               repeat: 'ZEROPLUS',
+            }, {
+               name: 'two',
+               repeat: 'ONE',
+            } ],
             listType: 'CHOICE',
+            repeat: 'ONE',
          });
       });
 
-      it('sets a SEQUENCE list type using the first delimiter', () => {
-         nlPToken.names[0].delimiter = SToken.fromString(',');
+      describe ('listType', () => {
 
-         const xNames = nameList.makeXTokenCompatible(nlPToken);
+         it('sets a SEQUENCE list type using the first delimiter', () => {
+            nlPToken.names[0].delimiter = SToken.fromString(',');
 
-         expect(xNames).toEqual({
-            names: [ 'one', 'two' ],
-            listType: 'SEQUENCE',
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'SEQUENCE',
+               repeat: 'ONE',
+            });
          });
+
+         it('sets a CHOICE list type using the first delimiter', () => {
+            nlPToken.names[0].delimiter = SToken.fromString('|');
+
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONE',
+            });
+         });
+
+         it('allows ENUMERATION type to force a list type', () => {
+            const xNames = nameList.makeXTokenCompatible(nlPToken, 'ENUMERATION');
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONE',
+            });
+         });
+
+         it('allows NOTATION type to force a list type', () => {
+            const xNames = nameList.makeXTokenCompatible(nlPToken, 'NOTATION');
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONE',
+            });
+         });
+
       });
 
-      it('allows options to force a list type', () => {
-         const xNames = nameList.makeXTokenCompatible(nlPToken, {
-            listType: 'SEQUENCE',
+      describe ('repeat', () => {
+
+         it('sets a repeat type of "ONE" if nothing specified on input', () => {
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONE',
+            });
          });
 
-         expect(xNames).toEqual({
-            names: [ 'one', 'two' ],
-            listType: 'SEQUENCE',
+         it('sets a repeat type of "ONE" if a junk repeat is found', () => {
+            nlPToken.repeat = SToken.fromString('x');
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONE',
+            });
          });
+
+         it('sets a repeat type of "ZEROPLUS" if "*" repeat is found', () => {
+            nlPToken.repeat = SToken.fromString('*');
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ZEROPLUS',
+            });
+         });
+
+         it('sets a repeat type of "ONEPLUS" if "+" repeat is found', () => {
+            nlPToken.repeat = SToken.fromString('+');
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ONEPLUS',
+            });
+         });
+
+         it('sets a repeat type of "ZEROONE" if "?" repeat is found', () => {
+            nlPToken.repeat = SToken.fromString('?');
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ZEROPLUS',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               } ],
+                  listType: 'CHOICE',
+               repeat: 'ZEROONE',
+            });
+         });
+
+      });
+
+      describe ('sublists', () => {
+
+         it('converts embedded lists to embedded names', () => {
+            const innerInnerList = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('three'),
+                  },
+                  delimiter: SToken.fromString(','),
+               } , {
+                  particle: {
+                     name: SToken.fromString('four'),
+                     repeat: SToken.fromString('?'),
+                  },
+               }],
+               close: SToken.fromString(')'),
+               repeat: SToken.fromString('+'),
+            });
+            const innerList = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('one'),
+                     repeat: SToken.fromString('*'),
+                  },
+                  delimiter: SToken.fromString('|'),
+               } , {
+                  particle: innerInnerList,
+               }],
+               close: SToken.fromString(')'),
+            });
+      
+            nlPToken.names[0].particle = innerList;
+
+            const xNames = nameList.makeXTokenCompatible(nlPToken);
+
+            expect(xNames).toEqual({
+               names: [ {
+                  names: [ {
+                     name: 'one',
+                     repeat: 'ZEROPLUS',
+                   }, {
+                     names: [ {
+                       name: 'three',
+                       repeat: 'ONE',
+                     }, {
+                       name: 'four',
+                       repeat: 'ZEROONE',
+                     } ],
+                     listType: 'SEQUENCE',
+                     repeat: 'ONEPLUS',
+                  } ],
+                  listType: 'CHOICE',
+                  repeat: 'ONE',
+               }, {
+                 name: 'two',
+                 repeat: 'ONE',
+               } ],
+               listType: 'CHOICE',
+               repeat: 'ONE',
+            });
+         });
+
       });
 
    });

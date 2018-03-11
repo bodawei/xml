@@ -33,6 +33,7 @@ function toContainPTokenProps(util, customEqualityTesters) {
             if (actualProps.hasOwnProperty(propName) &&
                !util.equals(actualProps[propName], expectedProps[propName], customEqualityTesters)) {
                pass = false;
+               // note JSON.stringify() loses properties that have undefined values
                message += `${propName}'s value did not match.\n` +
                   `   Actual:   ${JSON.stringify(actualProps[propName])}\n` +
                   `   Expected: ${JSON.stringify(expectedProps[propName])}\n`;
