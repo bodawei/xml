@@ -469,124 +469,330 @@ describe('nameList (unit)', () => {
          spyOn(misc, 'checkNMToken');
       });
 
-      it('reports no errors if no pToken provided', () => {
-         nameList.checkWellFormed(undefined, mockErrorCollector, emd, 'xxx');
+      describe('universal', () => {
 
-         expect(mockErrorCollector.errors.length).toEqual(0);
-      });
+         it('reports an error if no "(" present', () => {
+            nlPToken.open = undefined;
 
-      it('reports an error if no names are present', () => {
-         nlPToken.names = [];
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
 
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NO_OPEN,
+               params: undefined,
+               position: undefined,
+               lastPosition: undefined,
+            });
+         });
 
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_NO_NAMES,
-            params: [ 'xxx' ],
-            position: undefined,
-            lastPosition: nlPToken.postOpenSpace,
+         it('reports no errors if no pToken provided', () => {
+            nameList.checkWellFormed(undefined, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector.errors.length).toEqual(0);
+         });
+
+         it('reports an error if no names are present', () => {
+            nlPToken.names = [];
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NO_NAMES,
+               params: [ 'xxx' ],
+               position: undefined,
+               lastPosition: nlPToken.postOpenSpace,
+            });
+         });
+
+         it('reports an error if a name in an entry is not present', () => {
+            nlPToken.names[1].particle = undefined;
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NO_NAME,
+               params: [ '1', 'xxx' ],
+               position: undefined,
+               lastPosition: nlPToken.names[0].postDelimiterSpace,
+            });
+         });
+
+         it('reports an error if a delimiter in an entry is not present', () => {
+            nlPToken.names[0].delimiter = undefined;
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NO_DELIM,
+               params: [ '0', 'xxx' ],
+               position: undefined,
+               lastPosition: nlPToken.names[0].particle.postRepeatSpace
+               ,
+            });
+         });
+
+         it('reports an error if a delimiter is present in the last entry', () => {
+            nlPToken.names[1].delimiter = SToken.fromString('|');
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_EXTRA_DELIM,
+               params: [ '1', 'xxx' ],
+               position: nlPToken.names[1].delimiter,
+            });
+         });
+
+         it('reports an error if the close is missing', () => {
+            nlPToken.close = undefined;
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NO_CLOSE,
+               params: [ 'xxx' ],
+               lastPosition: nlPToken.names[1].particle.name,
+            });
          });
       });
 
-      it('reports an error if a name in an entry is not present', () => {
-         nlPToken.names[1].particle = undefined;
+      describe('non-mixed children', () => {
 
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_NO_NAME,
-            params: [ '1', 'xxx' ],
-            position: undefined,
-            lastPosition: nlPToken.names[0].postDelimiterSpace,
-         });
-      });
-
-      it('checks if the name is valid', () => {
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(misc.checkName).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
-            mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
-      });
-
-      it('checks if the nmtoken is valid', () => {
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
-
-         expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
-            mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
-      });
-
-      it('reports an error if a "," is found but "|" is expected', () => {
-         nlPToken.names[0].delimiter = SToken.fromString(',');
-
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
-            params: [ '0', 'xxx', ',' ],
-            position: nlPToken.names[0].delimiter,
-         });
-      });
-
-      it('reports an error if the second separator does not match the first "|"', () => {
-         nlPToken.names[1].delimiter = SToken.fromString(',');
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
-            params: [ '1', 'xxx', ',' ],
-            position: nlPToken.names[1].delimiter,
-         });
-      });
-
-      it('reports an error if the second separator does not match the first ","', () => {
-         nlPToken.names[0].delimiter = SToken.fromString(',');
-         nlPToken.names[1].delimiter = SToken.fromString('|');
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_BAD_SEQUENCE,
-            params: [ '1', 'xxx', '|' ],
-            position: nlPToken.names[1].delimiter,
-         });
-      });
-
-      it('reports an error if a "|" in an entry is not present', () => {
-         nlPToken.names[0].delimiter = undefined;
-
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_NO_DELIM,
-            params: [ '0', 'xxx' ],
-            position: undefined,
-            lastPosition: nlPToken.names[0].particle.postNameSpace,
-         });
-      });
-
-      it('reports an error if a "|" is present in the last entry', () => {
-         nlPToken.names[1].delimiter = SToken.fromString('|');
-
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_EXTRA_DELIM,
-            params: [ '1', 'xxx' ],
-            position: nlPToken.names[1].delimiter,
-         });
-      });
-
-      it('reports an error if the close is missing', () => {
-         nlPToken.close = undefined;
-
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_NO_CLOSE,
-            params: [ 'xxx' ],
-            lastPosition: nlPToken.names[1].particle.name,
-         });
-      });
+         it('checks if the name is valid', () => {
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
    
+            expect(misc.checkName).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
+               mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
+         });
+   
+         it('reports an error if the second separator does not match the first "|"', () => {
+            nlPToken.names[1].delimiter = SToken.fromString(',');
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
+               params: [ '1', 'xxx', ',' ],
+               position: nlPToken.names[1].delimiter,
+            });
+         });
+   
+         it('reports an error if the second separator does not match the first ","', () => {
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+            nlPToken.names[1].delimiter = SToken.fromString('|');
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_BAD_SEQUENCE,
+               params: [ '1', 'xxx', '|' ],
+               position: nlPToken.names[1].delimiter,
+            });
+         });
+   
+         it('reports an error if there is an extra space between the name and the repeat marker', () => {
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NAME_EXTRA_SPACE,
+               params: [ '0' ],
+               position: nlPToken.names[0].particle.postNameSpace,
+            });
+         });
+      
+         it('reports an error if there is an extra space between the close and the repeat marker', () => {
+            nlPToken.postCloseSpace = SToken.fromString(' ');
+            nlPToken.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_CLOSE_EXTRA_SPACE,
+               params: undefined,
+               position: nlPToken.postCloseSpace,
+            });
+         });
+      
+         it('reports an error if a sublist has an error', () => {
+            const subSubList = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('four'),
+                  },
+               } ],
+               close: SToken.fromString(')'),
+               postCloseSpace: SToken.fromString(' '),
+               repeat: SToken.fromString('*'),
+               postRepeatSpace: undefined,
+            });
+
+            nlPToken.names[0].particle = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('three'),
+                  },
+                  delimiter: SToken.fromString('|'),
+               }, {
+                  particle: subSubList,
+               } ],
+               close: SToken.fromString(')'),
+               postCloseSpace: undefined,
+               repeat: undefined,
+               postRepeatSpace: undefined,
+            });
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_CLOSE_EXTRA_SPACE,
+               params: undefined,
+               position: nlPToken.names[0].particle.names[1].particle.postCloseSpace,
+            });
+         });
+
+      });
+
+      describe('notation', () => {
+
+         it('reports an error if a "," is found but this is a NOTATION', () => {
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
+               params: [ '0', 'xxx', ',' ],
+               position: nlPToken.names[0].delimiter,
+            });
+         });
+
+         it('checks if the name is valid', () => {
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
+   
+            expect(misc.checkName).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
+               mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
+         });
+   
+         it('reports an error if a Notation contains a sublist', () => {
+            nlPToken.names[1].particle = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('one'),
+                  },
+                  delimiter: SToken.fromString('|'),
+               }],
+               close: SToken.fromString(')'),
+               postCloseSpace: undefined,
+               repeat: undefined,
+               postRepeatSpace: undefined,
+            });
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_INVALID_SUBPARTICLE,
+               params: [ '1', 'xxx' ],
+               position: nlPToken.names[1].particle.open,
+            });
+         });
+
+         it('reports an error if there is a repeat indicator after a name', () => {
+            nlPToken.names[0].particle.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NAME_EXTRA_REPEAT,
+               params: [ '0', 'xxx', '*' ],
+               position: nlPToken.names[0].particle.repeat,
+            });
+         });
+
+         it('reports an error if there is a repeat indicator on a Notation', () => {
+            nlPToken.repeat = SToken.fromString('?');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_EXTRA_REPEAT,
+               params: [ '?', 'xxx' ],
+               position: nlPToken.repeat,
+            });
+         });
+
+      });
+
+      describe('enumeration', () => {
+
+         it('assumes a choice type if this is an Enumeration', () => {
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
+               params: [ '0', 'xxx', ',' ],
+               position: nlPToken.names[0].delimiter,
+            });
+         });
+
+         it('checks if the nmtoken is valid', () => {
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
+   
+            expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
+               mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
+         });
+   
+         it('reports an error if an Enumeration contains a sublist', () => {
+            nlPToken.names[1].particle = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('one'),
+                  },
+                  delimiter: SToken.fromString('|'),
+               }],
+               close: SToken.fromString(')'),
+               postCloseSpace: undefined,
+               repeat: undefined,
+               postRepeatSpace: undefined,
+            })
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_INVALID_SUBPARTICLE,
+               params: [ '1', 'xxx' ],
+               position: nlPToken.names[1].particle.open,
+            });
+         });
+
+         it('reports an error if there is a repeat indicator after a nmtoken', () => {
+            nlPToken.names[0].particle.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_NAME_EXTRA_REPEAT,
+               params: [ '0', 'xxx', '*' ],
+               position: nlPToken.names[0].particle.repeat,
+            });
+         });
+
+         it('reports an error if there is a repeat indicator on an Enumeration', () => {
+            nlPToken.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_EXTRA_REPEAT,
+               params: [ '*', 'xxx' ],
+               position: nlPToken.repeat,
+            });
+         });
+
+      });
+
       describe('mixed', () => {
 
          it('reports an error if #PCDATA is the wrong case', () => {
@@ -639,6 +845,19 @@ describe('nameList (unit)', () => {
             });
          });
 
+         it('reports an error if there is a repeat indicator after a name', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            nlPToken.names[1].particle.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_MIXED_NAME_EXTRA_REPEAT,
+               params: [ '1', '*' ],
+               position: nlPToken.names[1].particle.repeat,
+            });
+         });
+
          it('reports an error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
             nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
             nlPToken.names.pop(); // remove the second
@@ -677,6 +896,19 @@ describe('nameList (unit)', () => {
                lastPosition: nlPToken.close,
             });
          });
+
+         it('reports no errors if the list ends with a * properly', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            delete nlPToken.names[0].particle.postNameSpace;
+            delete nlPToken.names[0].particle.repeat;
+
+            nlPToken.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector.errors.length).toEqual(0);
+         });
+
       });
 
    });
@@ -711,7 +943,7 @@ describe('nameList (unit)', () => {
       });
 
       it('silently ignores entries without names', () => {
-         nlPToken.names[1].particle = undefined;
+         nlPToken.names[1].particle.name = undefined;
 
          const xNames = nameList.makeXTokenCompatible(nlPToken);
 

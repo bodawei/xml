@@ -199,11 +199,13 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 }
 
 function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
-   type: string, listType: ListType, isTop: true) {
+   type: string, listType: ListType, isTop: boolean) {
       let delimType: DelimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : undefined;
       const particleType: NameType = listType === 'ENUMERATION' ? 'NMTOKEN' : 'NAME';
 
    ec.setPos(pToken.open);
+   ec.check(!pToken.open, WFEID.NAMELIST_NO_OPEN);
+
    ec.setPos(pToken.postOpenSpace);
 
    if (pToken.names.length <= 0) {
@@ -232,15 +234,34 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
          }
 
          ec.setPos(entry.particle.postNameSpace);
-      } else {
-         if (listType === 'MIXED' && entry.particle.open) {
-            ec.setPos(entry.particle.open);
-            ec.report(WFEID.NAMELIST_MIXED_INVALID_SUBPARTICLE, [ index.toString() ]);
-         }
+         if (entry.particle.repeat) {
+            ec.check(entry.particle.postNameSpace, WFEID.NAMELIST_NAME_EXTRA_SPACE, [ index.toString() ]);
 
-         ec.setPos(undefined);
-         ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
-      }         
+            ec.setPos(entry.particle.repeat);
+
+            if (listType === 'MIXED') {
+               ec.report(WFEID.NAMELIST_MIXED_NAME_EXTRA_REPEAT, [ index.toString(), entry.particle.repeat.str ]);
+            } else if (listType !== 'ANY') {
+               ec.report(WFEID.NAMELIST_NAME_EXTRA_REPEAT, [ index.toString(), type, entry.particle.repeat.str ]);
+            }
+            ec.setPos(entry.particle.postRepeatSpace);
+         }
+      } else {
+         if (entry.particle && entry.particle.open) {
+            ec.setPos(entry.particle.open);
+
+            if (listType === 'MIXED') {
+               ec.report(WFEID.NAMELIST_MIXED_INVALID_SUBPARTICLE, [ index.toString() ]);
+            } else if (listType === 'ENUMERATION' || listType === 'NOTATION') {
+               ec.report(WFEID.NAMELIST_INVALID_SUBPARTICLE, [ index.toString(), type ]);
+            }
+
+            checkListWellFormed(entry.particle, ec, entityMetaData, type, listType, false);
+         } else {
+            ec.setPos(undefined);
+            ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
+         }
+      }
 
       ec.setPos(entry.delimiter);
 
@@ -267,20 +288,25 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.NAMELIST_NO_CLOSE, [ type ]);
+   ec.setPos(pToken.postCloseSpace);
 
-   // report if a space after close before repeat
+   if (pToken.repeat) {
+      ec.check(pToken.postCloseSpace, WFEID.NAMELIST_CLOSE_EXTRA_SPACE);
+   }
 
    ec.setPos(pToken.repeat);
+   const repeatStr = misc.textOrBlank(pToken.repeat);
    if (listType === 'MIXED') {
-      const repeatStr = misc.textOrBlank(pToken.repeat);
-
       // 0 length is an "error", but we'll never know that because we identify MIXED by the first item
       if (pToken.names.length === 1) {
          ec.check(repeatStr !== '', WFEID.NAMELIST_MIXED_EXTRA_REPEAT, [ repeatStr ]);
       } else if (pToken.names.length > 1 && repeatStr !== '*') {
          ec.report(WFEID.NAMELIST_MIXED_INVALID_REPEAT, [ repeatStr ]);
       }
+   } else if (listType === 'ENUMERATION' || listType === 'NOTATION') {
+      ec.check(repeatStr !== '', WFEID.NAMELIST_EXTRA_REPEAT, [ repeatStr, 'xxx' ]);
    }
+   ec.setPos(pToken.postRepeatSpace);
 }
 
 /**********************************************************************\

@@ -91,4 +91,5 @@ describe('nameList (integration)', () => {
 
    });
 
+   // checkwellformed should report on #PCDATA as a bad name if not in position 0
 });
