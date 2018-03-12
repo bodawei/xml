@@ -9,18 +9,13 @@ import misc from './misc.js';
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
+const PCDATA = '#PCDATA';
 
 type DeliverPToken = (pToken?: NameListPToken) => void;
 
-type ListType = 'ENUMERATION' | 'NOTATION' | 'ANY';
+type NameType = 'NMTOKEN' | 'NAME';
+type ListType = 'ENUMERATION' | 'NOTATION' | 'ANY' | 'MIXED';
 type DelimiterType = 'ANY' | 'CHOICE' | 'SEQUENCE';
-
-// Too many permutations here.  some are redundatn
-type CWFNameListOptions = {
-   nameType?: 'NAME' | 'NMTOKEN';
-   listType?: 'CHOICE' | 'SEQUENCE';
-   nested?: boolean;
-};
 
 type ContentParticlePToken = {
    particle?: NamePToken | NameListPToken;
@@ -195,11 +190,18 @@ function assignUnassigned(attLiPToken) {
 \**********************************************************************/
 
 function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
-   type: string, options: CWFNameListOptions = {}) {
+   type: string, listType?: ListType) {
    if (!pToken) {
       return;
    }
-   let delimType = options.listType;
+
+   checkListWellFormed(pToken, ec, entityMetaData, type, listType || 'ANY', true);
+}
+
+function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
+   type: string, listType: ListType, isTop: true) {
+      let delimType: DelimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : undefined;
+      const particleType: NameType = listType === 'ENUMERATION' ? 'NMTOKEN' : 'NAME';
 
    ec.setPos(pToken.open);
    ec.setPos(pToken.postOpenSpace);
@@ -215,14 +217,27 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 
       if (isNamePToken(entry.particle)) {
          ec.setPos(entry.particle.name);
-         if (options.nameType === 'NMTOKEN') {
-            misc.checkNMToken(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+         const ucName = entry.particle.name.str.toUpperCase();
+
+         if (index === 0 && listType === 'ANY' && ucName === PCDATA) {
+            ec.check(ucName !== entry.particle.name.str, WFEID.NAMELIST_PCDATA_INVALID_CASE, [ entry.particle.name.str ]);
+            listType = 'MIXED';
+            delimType = 'CHOICE';
          } else {
-            misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+            if (particleType === 'NMTOKEN') {
+               misc.checkNMToken(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+            } else {
+               misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
+            }
          }
 
          ec.setPos(entry.particle.postNameSpace);
       } else {
+         if (listType === 'MIXED' && entry.particle.open) {
+            ec.setPos(entry.particle.open);
+            ec.report(WFEID.NAMELIST_MIXED_INVALID_SUBPARTICLE, [ index.toString() ]);
+         }
+
          ec.setPos(undefined);
          ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
       }         
@@ -252,6 +267,20 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.NAMELIST_NO_CLOSE, [ type ]);
+
+   // report if a space after close before repeat
+
+   ec.setPos(pToken.repeat);
+   if (listType === 'MIXED') {
+      const repeatStr = misc.textOrBlank(pToken.repeat);
+
+      // 0 length is an "error", but we'll never know that because we identify MIXED by the first item
+      if (pToken.names.length === 1) {
+         ec.check(repeatStr !== '', WFEID.NAMELIST_MIXED_EXTRA_REPEAT, [ repeatStr ]);
+      } else if (pToken.names.length > 1 && repeatStr !== '*') {
+         ec.report(WFEID.NAMELIST_MIXED_INVALID_REPEAT, [ repeatStr ]);
+      }
+   }
 }
 
 /**********************************************************************\

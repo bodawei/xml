@@ -509,9 +509,7 @@ describe('nameList (unit)', () => {
       });
 
       it('checks if the nmtoken is valid', () => {
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', {
-            nameType: 'NMTOKEN',
-         });
+         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
 
          expect(misc.checkNMToken).toHaveBeenCalledWith(nlPToken.names[0].particle.name,
             mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
@@ -520,25 +518,11 @@ describe('nameList (unit)', () => {
       it('reports an error if a "," is found but "|" is expected', () => {
          nlPToken.names[0].delimiter = SToken.fromString(',');
 
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', {
-            listType: 'CHOICE',
-         });
+         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
             params: [ '0', 'xxx', ',' ],
-            position: nlPToken.names[0].delimiter,
-         });
-      });
-
-      it('reports an error if a "|" is found but "," is expected', () => {
-         nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', {
-            listType: 'SEQUENCE',
-         });
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.NAMELIST_BAD_SEQUENCE,
-            params: [ '0', 'xxx', '|' ],
             position: nlPToken.names[0].delimiter,
          });
       });
@@ -603,6 +587,98 @@ describe('nameList (unit)', () => {
          });
       });
    
+      describe('mixed', () => {
+
+         it('reports an error if #PCDATA is the wrong case', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#pcData');;
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_PCDATA_INVALID_CASE,
+               params: [ '#pcData' ],
+               position: nlPToken.names[0].particle.name,
+            });
+         });
+
+         it('assumes a choice type if it finds #PCDATA', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            nlPToken.names[0].delimiter = SToken.fromString(',');
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_BAD_CHOICE,
+               params: [ '0', 'xxx', ',' ],
+               position: nlPToken.names[0].delimiter,
+            });
+         });
+
+         it('reports an error if a Mixed contains a sublist', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            nlPToken.names[1].particle = new nameList.PToken({
+               open: SToken.fromString('('),
+               names: [ {
+                  particle: {
+                     name: SToken.fromString('one'),
+                  },
+                  delimiter: SToken.fromString('|'),
+               }],
+               close: SToken.fromString(')'),
+               postCloseSpace: undefined,
+               repeat: undefined,
+               postRepeatSpace: undefined,
+            })
+
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_MIXED_INVALID_SUBPARTICLE,
+               params: [ '1' ],
+               position: nlPToken.names[1].particle.open,
+            });
+         });
+
+         it('reports an error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            nlPToken.names.pop(); // remove the second
+            nlPToken.repeat = SToken.fromString('*');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_MIXED_EXTRA_REPEAT,
+               params: [ '*' ],
+               position: nlPToken.repeat,
+            });
+         });
+
+         it('reports an error if there is any non-* repeat indicator on a #PCDATA list of > 1 item', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+            nlPToken.repeat = SToken.fromString('+');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_MIXED_INVALID_REPEAT,
+               params: [ '+' ],
+               position: nlPToken.repeat,
+            });
+         });
+
+         it('reports an error if there is any blank repeat indicator on a #PCDATA list of > 1 item', () => {
+            nlPToken.names[0].particle.name = SToken.fromString('#PCDATA');
+   
+            nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.NAMELIST_MIXED_INVALID_REPEAT,
+               params: [ '' ],
+               lastPosition: nlPToken.close,
+            });
+         });
+      });
+
    });
 
    describe('makeXTokenCompatible()', () => {
