@@ -1,8 +1,11 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { SToken, STokenSource } from '../../sToken';
+import { EntityMetaData } from '../../basic/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { SToken, STokenSource } from '../../sToken/index';
+
+import entityReference from '../entityReference.js';
+import unassigned from '../unassigned.js';
 
 import misc from './misc.js';
 
@@ -182,8 +185,76 @@ function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle:
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(attLiPToken) {
+function assignUnassigned(nameListPToken: NameListPToken, unValues) {
+
+   if (unValues.length === 0) {
+      return;
+   }
+
+   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+
+   if (unexpandedRef.length !== 0) {
+      return;
+   }
+
+   assignList(nameListPToken, unValues);
 }
+
+function assignList(nameList, unValues) {
+   let propName;
+   const openDescriptors = [
+      { name: 'open', type: 'word', allowed: /\(/ },
+      { name: 'postOpenSpace', type: 'space' },
+   ];
+   const closeDescriptors = [
+      { name: 'close', type: 'word', allowed: /\)/ },
+      { name: 'postCloseSpace', type: 'space' },
+      { name: 'repeat', type: 'word', allowed: /[\*\+\?]/ },
+      { name: 'postRepeatSpace', type: 'space' },
+   ];
+
+   unassigned.assignToProps(unValues, nameList, 'open', openDescriptors);
+
+   assignNames(nameList.names, unValues);
+
+   unassigned.assignToProps(unValues, nameList, 'close', closeDescriptors);
+}
+
+function assignNames(names, unValues) {
+   let cp: ContentParticlePToken;
+   let particle: NameListPToken|NamePToken;
+   let nextUnValue = unValues[0];
+
+   while (nextUnValue) {
+      if (nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
+         return;
+      }
+
+      if (nextUnValue.text.str === '(') {
+         particle = new NameListPToken();
+         assignList(particle, unValues);
+      } else {
+         particle = {};
+         unassigned.assignToProps(unValues, particle, 'name', [
+            { name: 'name', type: 'word', allowed: /[^\)\|\,\*\+\?]/ },
+            { name: 'postNameSpace', type: 'space' },
+            { name: 'repeat', type: 'word', allowed: /[\*\+\?]/ },
+            { name: 'postRepeatSpace', type: 'space' },
+         ]);
+      }
+      cp = { particle };
+      unassigned.assignToProps(unValues, cp, 'delimiter', [
+         { name: 'delimiter', type: 'word', allowed: /[\|\,]/ },
+         { name: 'postDelimiterSpace', type: 'space' },
+      ]);
+      names.push(cp);
+
+      nextUnValue = unValues[0];
+   }
+}
+
+// We may want to completely prevent any sublists in the ENUMERATION etc. in both parse and unassigned
+   // checkwellformed should report on #PCDATA as a bad name if not in position 0
 
 /**********************************************************************\
  checkWellFormed()
@@ -389,3 +460,8 @@ const nameList = {
 };
 
 export default nameList;
+export {
+   ContentParticlePToken,
+   NamePToken,
+   NameListPToken,
+};

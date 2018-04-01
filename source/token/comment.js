@@ -3,7 +3,7 @@
 import { WellFormedError } from '../error';
 
 import misc from './common/misc.js';
-import * as base from './base.js';
+import base from './base';
 
 const COMMENT = 'COMMENT';
 const WFEID = WellFormedError.ID;

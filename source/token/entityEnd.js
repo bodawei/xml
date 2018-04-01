@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import * as base from './base.js';
+import base from './base';
 
 /**********************************************************************\
  Defines a simple token that tracks the end of an entity expansion.

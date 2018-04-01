@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import * as base from './base.js';
+import base from './base';
 
 /**********************************************************************\
  The text namespace provides the Text XToken type.  This is used

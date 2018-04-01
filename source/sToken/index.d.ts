@@ -1,4 +1,4 @@
-import { EntityMetaData, Range } from '../basic';
+import { EntityMetaData, Range } from '../basic/index';
 
 declare class  SToken {
    static fromString(str: string): SToken;

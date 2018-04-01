@@ -1,14 +1,14 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic';
-import { XmlWarning } from '../../error';
+import { EntityMetaData, Range } from '../../basic/index';
+import { XmlWarning } from '../../error/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken';
+import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError } from '../../error';
+import { WellFormedError } from '../../error/index';
 
-import * as declaration from '../bridge/declaration.js';
+import declaration from '../bridge/declaration';
 import elementDeclaration from '../elementDeclaration.js';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';

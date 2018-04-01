@@ -1,14 +1,14 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic';
+import { EntityMetaData, Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken';
+import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError, XmlWarning } from '../../error';
+import { WellFormedError, XmlWarning } from '../../error/index';
 
-import * as declaration from '../bridge/declaration.js';
 import attListDeclaration from '../attListDeclaration.js';
+import declaration from '../bridge/declaration';
 import entityReference from '../entityReference.js'
 import text from '../text.js';
 import unassigned from '../unassigned.js';
@@ -93,7 +93,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.attDefs = [];
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -107,7 +107,7 @@ describe('attListDeclaration (unit)', () => {
             undefined,
          ]);
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ new attListDeclaration.PToken({
@@ -134,7 +134,7 @@ describe('attListDeclaration (unit)', () => {
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -168,7 +168,7 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -217,7 +217,7 @@ describe('attListDeclaration (unit)', () => {
          });
          aldPToken.close = makeSToken('>');
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -245,7 +245,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.close = makeSToken('>');
          aldPToken.attDefs[0].value = [ 'dummyValue' ];
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -273,7 +273,7 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
          aldPToken.attDefs[0].value = [ 'dummyValue' ];
 
-         attListDeclaration.parse(mockSource, {}, callback);
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(aldPToken);
@@ -289,7 +289,7 @@ describe('attListDeclaration (unit)', () => {
                '>',
             ]);
    
-            attListDeclaration.parse(mockSource, {}, callback);
+            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -315,7 +315,7 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
    
-            attListDeclaration.parse(mockSource, {}, callback);
+            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -345,7 +345,7 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
    
-            attListDeclaration.parse(mockSource, {}, callback);
+            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -381,7 +381,7 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
    
-            attListDeclaration.parse(mockSource, {}, callback);
+            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -422,7 +422,7 @@ describe('attListDeclaration (unit)', () => {
                [ '>', 'match', '>' ],
             ]);
    
-            attListDeclaration.parse(mockSource, {}, callback);
+            attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];

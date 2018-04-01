@@ -1,14 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { SToken, STokenSource } from '../../sToken';
+import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { defaultExtractors } from '../../extractor/index';
+import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper.js';
 import attListDeclaration from '../attListDeclaration';
+import declaration from '../bridge/declaration';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
@@ -35,7 +36,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName one CDATA two IDREFS #IMPLICIT>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (result) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
             expect(result).toEqual(new attListDeclaration.PToken({
@@ -65,7 +66,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (result) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new attListDeclaration.PToken({
@@ -88,7 +89,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName one CDATA #IMPLICIT %foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (result) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
             expect(result).toEqual(new attListDeclaration.PToken({
@@ -121,7 +122,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName one CDATA #IMPLICIT two%foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (result) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 35, 0, 35);
             expect(result).toEqual(new attListDeclaration.PToken({
@@ -157,7 +158,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName one CDATA #IMPLICIT two ID %foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (result) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 39, 0, 39);
             expect(result).toEqual(new attListDeclaration.PToken({
@@ -199,7 +200,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (pToken) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),
@@ -227,7 +228,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName at1 CDATA %foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (pToken) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),
@@ -274,7 +275,7 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName at1 CDATA %foo;>');
          source.endText();
 
-         attListDeclaration.parse(source, {}, (pToken) => {
+         attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),

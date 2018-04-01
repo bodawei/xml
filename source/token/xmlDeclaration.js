@@ -5,7 +5,7 @@ import { WellFormedError } from '../error';
 import { textOrBlank } from './common/misc.js';
 import * as instruction from './bridge/instruction.js';
 import attribute from './common/attribute.js';
-import * as base from './base.js';
+import base from './base';
 
 /**********************************************************************\
  The xmlDeclaration namespace contains the usual routines for parsing,

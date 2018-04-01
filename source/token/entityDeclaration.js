@@ -2,12 +2,12 @@
 
 import { WellFormedError, XmlWarning } from '../error';
 
-import * as base from './base.js';
+import base from './base';
 import entityEnd from './entityEnd.js';
 import entityReference from './entityReference.js';
 import entityStart from './entityStart.js';
 import unassigned from './unassigned.js';
-import * as declaration from './bridge/declaration.js';
+import declaration from './bridge/declaration';
 import misc from './common/misc.js';
 import externalId from './common/externalId.js';
 import literal from './common/literal.js';
@@ -155,7 +155,7 @@ function parseWordOrPERef(source, pToken, done) {
       source.extractToObject('space', pToken, 'postNameSpace');
       source.extract('match', ';', (semicolon) => {
          if (pToken.parameter && semicolon) {
-            unassigned.parseAllValues(source, (values) => {
+            unassigned.parseAllValues(source, false, (values) => {
                const entityRef = new entityReference.ParamPToken({
                   open: pToken.parameter,
                   postOpenSpace: pToken.postParameterSpace,

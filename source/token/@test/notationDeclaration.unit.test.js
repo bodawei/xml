@@ -8,7 +8,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
-import * as declaration from '../bridge/declaration.js';
+import declaration from '../bridge/declaration';
 import * as notationDeclaration from '../notationDeclaration.js';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';

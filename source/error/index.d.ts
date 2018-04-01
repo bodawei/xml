@@ -1,4 +1,4 @@
-import { SToken } from '../sToken';
+import { SToken } from '../sToken/index';
 
 declare class ErrorCollector {
    constructor(foo: any, errorType: Function);

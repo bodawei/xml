@@ -74,7 +74,7 @@ describe('unassigned (integration)', () => {
          source.addText('%peref; "double"whatever\'single\'%peref;>');
          source.endText();
 
-         unassigned.parseNextValue(source, (value) => {
+         unassigned.parseNextValue(source, false, (value) => {
             expect(value).toEqual(new entityReference.ParamPToken({
                open: makeSToken('%'),
                postOpenSpace: undefined,

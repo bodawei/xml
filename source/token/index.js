@@ -1,6 +1,6 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import * as declaration from './bridge/declaration.js';
+import declaration from './bridge/declaration';
 import * as envelope from './bridge/envelope.js';
 import * as instruction from './bridge/instruction.js';
 

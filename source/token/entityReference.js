@@ -2,7 +2,7 @@
 
 import { WellFormedError } from '../error';
 
-import * as base from './base.js';
+import base from './base';
 import {
    textOrBlank,
  } from './common/misc.js';

@@ -1,13 +1,14 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 
-import * as declaration from './bridge/declaration.js';
-import nameList from './common/nameList.js';
+import declaration from './bridge/declaration';
+import nameList, { NameListPToken } from './common/nameList.js';
 import misc from './common/misc.js';
-import * as base from './base.js';
+import base from './base';
 import unassigned from './unassigned.js';
-import { SToken, STokenSource } from '../sToken';
+import { SToken, STokenSource } from '../sToken/index';
 
 const ELEMENTDECL = 'ELEMENTDECL';
 const WARN = XmlWarning.ID;
@@ -30,12 +31,14 @@ class ElementDeclaration extends base.XToken {
 }
 
 class ElementDeclarationPToken extends declaration.PToken {
-   public name: SToken;
-   public postNameSpace: SToken;
-   public contentSpec: SToken;
-   public postContentSpecSpace: SToken;
-   public children: nameList.PToken;
-   public close: SToken;
+   public name?: SToken;
+   public postNameSpace?: SToken;
+   public contentSpec?: SToken;
+   public postContentSpecSpace?: SToken;
+   public children?: NameListPToken;
+   public close?: SToken;
+   public unassigned?: Array<any>;
+   public extra?: Array<any>;
 
    constructor(props) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
@@ -105,7 +108,7 @@ function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken
             return;
          }
 
-         nameList.parse(source, 'ANY', (nameList: nameList.PToken) => {
+         nameList.parse(source, 'ANY', (nameList: NameListPToken) => {
             pToken.children = nameList;
             // @@@ NEED TO DEAL WITH A PEREF HERE. Should nameList handle that? Or should externalId NOT handle that?
             deliverPToken(pToken);
@@ -145,7 +148,7 @@ function assignUnassigned(notationPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: ElementDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken || pToken.unassigned) {
       return;
    }

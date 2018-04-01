@@ -1,11 +1,13 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../../error';
+import { EntityMetaData } from '../../basic';
+import { ErrorCollector, WellFormedError } from '../../error';
+import { SToken, STokenSource } from '../../stoken';
 
 import {
    textOrBlank,
 } from '../common/misc.js';
-import * as base from '../base.js';
+import base, { STokenArray } from '../base';
 
 /**********************************************************************\
  The declaration namespace contains a "bridge" parser which will
@@ -21,12 +23,17 @@ class UnknownDeclaration extends base.XToken {
 }
 
 class DeclarationPToken extends base.PToken {
-   constructor(type, props) {
+   public open?: SToken;
+   public postOpenSpace?: SToken;
+   public declType?: SToken;
+   public postDeclTypeSpace?: SToken;
+   
+   constructor(type?: string, props?: Object) {
       super(type || UNKNOWNDECL, props);
    }
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
+   getSTokenArray(): STokenArray {
+      const results: STokenArray = super.getSTokenArray();
 
       results.pushSTokens(this.open,
          this.postOpenSpace,
@@ -52,7 +59,7 @@ class DeclarationPToken extends base.PToken {
    declaration ::= '<!' name S
 \**********************************************************************/
 
-function parse(source, openSToken, deliverPToken) {
+function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: DeclarationPToken) => void) {
    const results = new DeclarationPToken();
    results.open = openSToken;
 
@@ -70,8 +77,9 @@ function parse(source, openSToken, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.open);
+
 
    ec.setPos(pToken.postOpenSpace);
    ec.check(pToken.postOpenSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
@@ -95,15 +103,18 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: DeclarationPToken): UnknownDeclaration {
    return new UnknownDeclaration(pToken);
 }
 
-export {
-   UNKNOWNDECL as PTYPE,
-   UnknownDeclaration as XToken,
-   DeclarationPToken as PToken,
+const declaration = {
+   PTYPE: UNKNOWNDECL,
+   XToken: UnknownDeclaration,
+   PToken: DeclarationPToken,
    parse,
    checkWellFormed,
    pTokenToXToken,
 };
+
+export default declaration;
+export { DeclarationPToken };

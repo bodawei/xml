@@ -183,7 +183,7 @@ class NodeStream extends Transform {
       source.endText();
 
       // setTimeout() candidate
-      unassigned.parseAllValues(source, deliverValues);
+      unassigned.parseAllValues(source, false, deliverValues);
    }
 
    /**********************************************************************\

@@ -1,4 +1,6 @@
-declare class MockErrorCollector {
+import ErrorCollector from '../ErrorCollector.js';
+
+declare class MockErrorCollector extends ErrorCollector {
    constructor();
    errors: Array<object>;
    setPos(sToken:any);

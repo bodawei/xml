@@ -7,7 +7,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 
-import * as declaration from '../bridge/declaration.js';
+import declaration from '../bridge/declaration';
 import * as entityDeclaration from '../entityDeclaration.js';
 import entityReference from '../entityReference.js'
 import unassigned from '../unassigned.js';
@@ -463,7 +463,7 @@ describe('entityDeclaration (unit)', () => {
             unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
                checkForPERefCallback = other;
             });
-            spyOn(unassigned, 'parseNextValue').and.callFake((source, handler) => {
+            spyOn(unassigned, 'parseNextValue').and.callFake((_1, _2, handler) => {
                if (count === 0) {
                   count ++;
                   handler({ one: 1 });

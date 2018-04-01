@@ -59,7 +59,7 @@ describe('unassigned (unit)', () => {
          mockSource = new MockSTokenSource([
             [ '%', 'peekChar' ],
          ]);
-         unassigned.parseNextValue.and.callFake((_1, deliver) => {
+         unassigned.parseNextValue.and.callFake((_1, _2, deliver) => {
             if (callCount === 3) {
                deliver();
             } else {
@@ -99,7 +99,7 @@ describe('unassigned (unit)', () => {
             [ undefined, 'peekChar' ],
          ]);
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith();
@@ -111,7 +111,7 @@ describe('unassigned (unit)', () => {
          ]);
          const pToken = unassigned.spaceFromSToken(makeSToken('   '));
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith(pToken);
@@ -123,7 +123,7 @@ describe('unassigned (unit)', () => {
             [ MockSTokenSource.PEEK('>'), 'peekChar' ],
          ]);
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith();
@@ -139,7 +139,7 @@ describe('unassigned (unit)', () => {
             [ MockSTokenSource.PEEK('"'), 'peekChar' ],
          ]);
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
@@ -158,7 +158,7 @@ describe('unassigned (unit)', () => {
             [ MockSTokenSource.PEEK('\''), 'peekChar' ],
          ]);
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
@@ -176,7 +176,7 @@ describe('unassigned (unit)', () => {
             [ MockSTokenSource.PEEK('%'), 'peekChar' ],
          ]);
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
@@ -192,7 +192,63 @@ describe('unassigned (unit)', () => {
          ]);
          const pToken = unassigned.wordFromSToken(makeSToken('xyzzy'));
 
-         unassigned.parseNextValue(mockSource, deliverySpy);
+         unassigned.parseNextValue(mockSource, false, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith(pToken);
+      });
+
+      it('delivers a "(" as a word if nameListChars is true', () => {
+         mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('('), 'peekChar' ],
+            [ '(', 'match', '(' ],
+         ]);
+         const pToken = unassigned.wordFromSToken(makeSToken('('));
+
+         unassigned.parseNextValue(mockSource, true, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith(pToken);
+      });
+
+      it('delivers a "," as a word if nameListChars is true', () => {
+         mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK(','), 'peekChar' ],
+            [ ',', 'match', ',' ],
+         ]);
+         const pToken = unassigned.wordFromSToken(makeSToken(','));
+
+         unassigned.parseNextValue(mockSource, true, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith(pToken);
+      });
+
+      it('delivers a "|" as a word if nameListChars is true', () => {
+         mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('|'), 'peekChar' ],
+            [ '|', 'match', '|' ],
+         ]);
+         const pToken = unassigned.wordFromSToken(makeSToken('|'));
+
+         unassigned.parseNextValue(mockSource, true, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith(pToken);
+      });
+
+      it('delivers a ")" as a word if nameListChars is true', () => {
+         mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK(')'), 'peekChar' ],
+            [ ')', 'match', ')' ],
+         ]);
+         const pToken = unassigned.wordFromSToken(makeSToken(')'));
+
+         unassigned.parseNextValue(mockSource, true, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith(pToken);
@@ -234,7 +290,7 @@ describe('unassigned (unit)', () => {
             [ MockSTokenSource.PEEK('>'), 'peekChar' ],
          ]);
 
-         unassigned.parseAllValues(mockSource, deliverySpy);
+         unassigned.parseAllValues(mockSource, false, deliverySpy);
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith([
@@ -245,6 +301,43 @@ describe('unassigned (unit)', () => {
             }, {
                isPeref: true
             },
+         ]);
+      });
+
+      it('parses nameList separators when asked to', () => {
+         mockSource = new MockSTokenSource([
+            [ '   ', 'space' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('('), 'peekChar' ],
+            [ '(', 'match', '(' ],
+            [ ' ', 'space' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK('|'), 'peekChar' ],
+            [ '|', 'match', '|' ],
+            [ ' ', 'space' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK(','), 'peekChar' ],
+            [ ',', 'match', ',' ],
+            [ ' ', 'space' ],
+            [ undefined, 'space' ],
+            [ MockSTokenSource.PEEK(')'), 'peekChar' ],
+            [ ')', 'match', ')' ],
+            [ undefined, 'space' ],
+            [ undefined, 'peekChar' ],
+         ]);
+
+         unassigned.parseAllValues(mockSource, true, deliverySpy);
+         mockSource.respondInAsyncTime();
+
+         expect(deliverySpy).toHaveBeenCalledWith([
+            unassigned.spaceFromSToken(makeSToken('   ')),
+            unassigned.wordFromSToken(makeSToken('(')),
+            unassigned.spaceFromSToken(makeSToken(' ')),
+            unassigned.wordFromSToken(makeSToken('|')),
+            unassigned.spaceFromSToken(makeSToken(' ')),
+            unassigned.wordFromSToken(makeSToken(',')),
+            unassigned.spaceFromSToken(makeSToken(' ')),
+            unassigned.wordFromSToken(makeSToken(')')),
          ]);
       });
 

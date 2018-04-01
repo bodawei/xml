@@ -2,7 +2,7 @@
 
 import { WellFormedError } from '../error';
 
-import * as base from './base.js';
+import base from './base';
 
 /**********************************************************************\
  docTypeEnd is the portion of a DOCTYPE declaration that comes after

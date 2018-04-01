@@ -4,7 +4,7 @@ import { WellFormedError } from '../error';
 
 import misc from './common/misc.js';
 import * as envelope from './bridge/envelope.js';
-import * as base from './base.js';
+import base from './base';
 
 const CDATA = 'CDATA';
 const WFEID = WellFormedError.ID;

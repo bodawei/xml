@@ -4,7 +4,7 @@ import {
    textOrBlank,
 } from './common/misc.js';
 import misc from './common/misc.js';
-import * as base from './base.js';
+import base from './base';
 
 const CHARDATA = 'CHARDATA';
 

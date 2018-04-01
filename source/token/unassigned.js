@@ -10,6 +10,8 @@ import text from './text.js';
 import literal from './common/literal.js';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
+const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];
+const IS_NAMELIST_CHARS = /[()|,+*?]/;
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 
 const TYPE = {
@@ -74,7 +76,7 @@ const TYPE = {
  the callback.
 \**********************************************************************/
 
-function parseNextValue(source, deliverValue) {
+function parseNextValue(source, includeNameListChars, deliverValue) {
    source.extract('space', (sToken) => {
       if (sToken) {
          const pToken = spaceFromSToken(sToken);
@@ -88,12 +90,20 @@ function parseNextValue(source, deliverValue) {
             return;
          }
 
-         extractValue(source, sToken.str, deliverValue);
+         extractValue(source, sToken.str, includeNameListChars, deliverValue);
       });
    });
 }
 
-function extractValue(source, peekedChar, deliverValue) {
+function extractValue(source, peekedChar, includeNameListChars, deliverValue) {
+   if (includeNameListChars && IS_NAMELIST_CHARS.test(peekedChar)) {
+      source.extract('match', peekedChar, (sToken) => {
+         const pToken = wordFromSToken(sToken);
+         deliverValue(pToken);
+      });
+      return;
+   }
+
    switch (peekedChar) {
       case '>':
          deliverValue(); // no more values!
@@ -110,7 +120,9 @@ function extractValue(source, peekedChar, deliverValue) {
          });
          break;
       default:
-         source.extract('word', TERMINATORS, (sToken) => {
+         const terminators = includeNameListChars ? TERMINATORS_FOR_NAMELIST : TERMINATORS;
+
+         source.extract('word', terminators, (sToken) => {
             const pToken = wordFromSToken(sToken);
             deliverValue(pToken);
          });
@@ -132,11 +144,11 @@ function checkForPERef(source, deliverResult) {
          return;
       }
 
-      extractAllValues(source, deliverResult);
+      parseAllValues(source, false, deliverResult);
    });
 }
 
-function extractAllValues(source, deliverValues) {
+function parseAllValues(source, includeNameListChars, deliverValues) {
    const values = [];
 
    function handleValue(value) {
@@ -147,10 +159,10 @@ function extractAllValues(source, deliverValues) {
 
       values.push(value);
       // call via the public interface (helps with jasmine spy'ing)
-      unassigned.parseNextValue(source, handleValue);
+      unassigned.parseNextValue(source, includeNameListChars, handleValue);
    }
 
-   unassigned.parseNextValue(source, handleValue);
+   unassigned.parseNextValue(source, includeNameListChars, handleValue);
 }
 
 /**********************************************************************\
@@ -406,7 +418,7 @@ function checkExtra(values, ec, errorCode) {
 const unassigned = {
    checkForPERef,
    parseNextValue,
-   parseAllValues: extractAllValues,
+   parseAllValues,
    assignToProps,
    wordFromSToken,
    spaceFromSToken,

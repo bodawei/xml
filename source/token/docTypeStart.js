@@ -3,9 +3,9 @@
 import { WellFormedError } from '../error';
 
 import externalId from './common/externalId.js';
-import * as declaration from './bridge/declaration.js';
+import declaration from './bridge/declaration';
 import misc from './common/misc.js';
-import * as base from './base.js';
+import base from './base';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';

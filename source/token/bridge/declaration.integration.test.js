@@ -6,7 +6,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as declaration from './declaration.js';
+import declaration from './declaration';
 
 describe('declaration (integration)', () => {
    let declarationPToken;

@@ -451,7 +451,7 @@ describe('NodeStream (unit)', () => {
                   return thirdDeclXToken;
                }
             });
-            spyOn(xToken.unassigned, 'parseAllValues').and.callFake((source, callback) => {
+            spyOn(xToken.unassigned, 'parseAllValues').and.callFake((source, _2, callback) => {
                callback([
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {

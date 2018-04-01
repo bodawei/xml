@@ -1,12 +1,12 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
-import { SToken, STokenSource } from '../sToken';
+import { EntityMetaData } from '../basic/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
+import { SToken, STokenSource } from '../sToken/index';
 import entityReference from './entityReference.js';
 import unassigned from './unassigned.js';
 
-import * as declaration from './bridge/declaration.js';
+import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal from './common/literal.js';
 import misc from './common/misc.js';
 
@@ -18,7 +18,6 @@ const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NM
 const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
 type DeliverPToken = (pToken:AttListPToken) => void;
-type DeclPToken = {};
 type UnassignedValue = object;
 
 class AttDefPToken {
@@ -34,18 +33,18 @@ class AttDefPToken {
    public postAttValueSpace?: SToken;
 }
 
-class AttListPToken {
+class AttListPToken extends DeclarationPToken {
    public readonly type: string;
    public elementName?: SToken;
    public postElementNameSpace?: SToken;
-   public attDefs: Array<AttDefPToken> = [];
+   public attDefs: Array<AttDefPToken>;
    public close?: SToken;
    public unassigned?: Array<UnassignedValue>;
    public nextPropName?: string;
 
-   constructor(basePToken?: DeclPToken|AttListPToken) {
-      Object.assign(this, basePToken);
-      this.type = ATTLISTDECL_PTOKEN_TYPE;
+   constructor(basePToken?: DeclarationPToken|AttListPToken|Object) {
+      super(ATTLISTDECL_PTOKEN_TYPE, basePToken);
+      this.attDefs = this.attDefs || [];
    }
 }
 
@@ -76,7 +75,7 @@ class AttListPToken {
    attValue.
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken: DeclPToken, deliverPToken: DeliverPToken): void {
+function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: DeliverPToken): void {
    const pToken = new AttListPToken(declarationPToken);
 
    parseElementName(source, pToken, () => {
