@@ -9,15 +9,15 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error/index';
 
 import declaration from '../bridge/declaration';
-import elementDeclaration from '../elementDeclaration.js';
+import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';
 import entityReference from '../entityReference.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 describe('elementDeclaration (unit)', () => {
-   let elementPToken;
-   let makeSToken;
+   let elementPToken: ElementDeclarationPToken;
+   let makeSToken: (foo:string) => SToken;
 
    beforeEach(() => {
       makeSToken = makeSTokenMaker();

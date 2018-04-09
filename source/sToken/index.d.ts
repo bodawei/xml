@@ -6,16 +6,18 @@ declare class  SToken {
    str?: string;
    originalStr: string;
    ranges: Array<any>;
+   merge(other:SToken): SToken;
+   clone(): SToken;
 }
 
 declare class STokenSource {
    constructor(extractorMap: any, info?: EntityMetaData);
    addText(text: string): void;
    endText(): void;
-   extract(type: string, deliverResult: (sToken: SToken) => void);
-   extract(type: string, params: any, deliverResult: (sToken: SToken) => void);
-   extractToObject(type: string, obj: Object, propName: string);
-   extractToObject(type: string, params: any, obj: Object, propName: string);
+   extract(type: string, deliverResult: (sToken: SToken) => void): void;
+   extract(type: string, params: any, deliverResult: (sToken: SToken) => void): void;
+   extractToObject(type: string, obj: Object, propName: string): void;
+   extractToObject(type: string, params: any, obj: Object, propName: string): void;
 }
 
 export {

@@ -7,16 +7,16 @@ import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error/index';
 
-import attListDeclaration from '../attListDeclaration.js';
+import attListDeclaration, { AttListPToken } from '../attListDeclaration.js';
 import declaration from '../bridge/declaration';
 import entityReference from '../entityReference.js'
 import text from '../text.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 import literal from '../common/literal.js';
 import misc from '../common/misc.js';
 
 describe('attListDeclaration (unit)', () => {
-   let aldPToken;
+   let aldPToken: AttListPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -65,10 +65,10 @@ describe('attListDeclaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
       let checkForPERefCallback;
-      let makeCheckCallbackSpy;
-      let literalParseSpy;
+      let makeCheckCallbackSpy: jasmine.Spy;
+      let literalParseSpy: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -447,7 +447,7 @@ describe('attListDeclaration (unit)', () => {
    });
 
    describe('assignUnassigned()', () => {
-      let assignToPropsSpy;
+      let assignToPropsSpy: jasmine.Spy;
 
       beforeEach(() => {
          assignToPropsSpy = spyOn(unassigned, 'assignToProps');
@@ -808,8 +808,8 @@ describe('attListDeclaration (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let emd;
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();

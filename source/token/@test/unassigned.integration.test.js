@@ -8,7 +8,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import entityReference from '../entityReference.js';
 import text from '../text.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 describe('unassigned (integration)', () => {
    let emd;

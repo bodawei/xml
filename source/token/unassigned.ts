@@ -1,12 +1,14 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, Range } from '../basic';
-import { SToken } from '../sToken';
+import { ErrorCollector } from '../error';
+import { SToken, STokenSource } from '../sToken';
 
 import entityEnd from './entityEnd.js';
 import entityReference from './entityReference.js';
 import entityStart from './entityStart.js';
-import text from './text.js';
+import text from './text';
+import { TextPToken } from './text';
 import literal from './common/literal.js';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
@@ -19,6 +21,56 @@ const TYPE = {
    WORD: 'word',
    LITERAL : 'literal',
 };
+
+interface SubtypedTextPToken extends TextPToken {
+   subType: string;
+};
+
+interface EntityReferencePToken {
+   type: string;
+   getSTokenArray(): Array<SToken>;
+}
+
+interface LiteralPToken {
+   type: string;
+   openQuote?: SToken;
+   value?: SToken;
+   closeQuote?: SToken;
+}
+
+type UnassignedValue = SubtypedTextPToken | EntityReferencePToken | LiteralPToken;
+type UnassignedArray = Array<UnassignedValue>;
+
+type DeliverUnassigned = (value?: UnassignedValue) => void;
+type DeliverUnassignedArray = (values?: UnassignedArray) => void;
+
+interface UnassignedPToken {
+   type: string;
+   nextPropName?: string;
+   extra?: UnassignedArray;
+   unassigned?: UnassignedArray;
+}
+
+interface Descriptor {
+   name: string;
+   type: string;
+   allowed?: RegExp;
+   flatten?: boolean
+};
+
+type DescriptorArray = Array<Descriptor>;
+
+function isTypedText(value: any): value is SubtypedTextPToken {
+   if (value && value.subType) {
+      return true;
+   }
+}
+
+function isLiteral(value: any): value is LiteralPToken {
+   if (value && value.type === TYPE.LITERAL) {
+      return true;
+   }
+}
 
 /**********************************************************************\
  The "unassigned" module contains several routines involved in
@@ -76,8 +128,8 @@ const TYPE = {
  the callback.
 \**********************************************************************/
 
-function parseNextValue(source, includeNameListChars, deliverValue) {
-   source.extract('space', (sToken) => {
+function parseNextValue(source: STokenSource, includeNameListChars: boolean, deliverValue: DeliverUnassigned) {
+   source.extract('space', (sToken: SToken) => {
       if (sToken) {
          const pToken = spaceFromSToken(sToken);
          deliverValue(pToken);
@@ -95,7 +147,7 @@ function parseNextValue(source, includeNameListChars, deliverValue) {
    });
 }
 
-function extractValue(source, peekedChar, includeNameListChars, deliverValue) {
+function extractValue(source: STokenSource, peekedChar: string, includeNameListChars: Boolean, deliverValue: DeliverUnassigned) {
    if (includeNameListChars && IS_NAMELIST_CHARS.test(peekedChar)) {
       source.extract('match', peekedChar, (sToken) => {
          const pToken = wordFromSToken(sToken);
@@ -114,7 +166,7 @@ function extractValue(source, peekedChar, includeNameListChars, deliverValue) {
          break;
       case '"':
       case '\'':
-         const container = { type: TYPE.LITERAL };
+         const container: LiteralPToken = { type: TYPE.LITERAL };
          literal.parse(source, { pToken: container }, () => {
             deliverValue(container);
          });
@@ -137,7 +189,7 @@ function extractValue(source, peekedChar, includeNameListChars, deliverValue) {
  back.
 \**********************************************************************/
 
-function checkForPERef(source, deliverResult) {
+function checkForPERef(source: STokenSource, deliverResult: DeliverUnassignedArray) {
    source.extract('peekChar', (sToken) => {
       if (!sToken || sToken.str !== '%') {
          deliverResult();
@@ -148,10 +200,10 @@ function checkForPERef(source, deliverResult) {
    });
 }
 
-function parseAllValues(source, includeNameListChars, deliverValues) {
-   const values = [];
+function parseAllValues(source: STokenSource, includeNameListChars: boolean, deliverValues: DeliverUnassignedArray) {
+   const values: UnassignedArray = [];
 
-   function handleValue(value) {
+   function handleValue(value: UnassignedValue) {
       if (!value) {
          deliverValues(values);
          return;
@@ -183,7 +235,7 @@ function parseAllValues(source, includeNameListChars, deliverValues) {
  may not skip over a value in the unassignedValues array.
 \**********************************************************************/
 
-function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
+function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPToken, leftOff: string, propertyDescriptors: DescriptorArray) {
    const valueCursor = new UnassignedValueCursor(unassignedValues);
    const allDescriptors = propertyDescriptors.slice(0);
    const startPropName = leftOff || propertyDescriptors[0].name;
@@ -193,7 +245,7 @@ function assignToProps(unassignedValues, pToken, leftOff, propertyDescriptors) {
    assignValues(descriptors, pToken, valueCursor);
 }
 
-function findDescriptorsToUse(propertyDescriptors, pToken, leftOff, cursor) {
+function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken, leftOff: string, cursor: UnassignedValueCursor) {
    let nextValue = cursor.getNext();
    let prev;
 
@@ -212,17 +264,20 @@ function findDescriptorsToUse(propertyDescriptors, pToken, leftOff, cursor) {
           * the space after foo. Our bias is to reproduce the parsing we
           * would have done if the PERef wasn't there.
           */
-         if (descriptor.type !== TYPE.SPACE && nextValue.subType === TYPE.SPACE) {
-            const prevWasSpace = prev && prev.type === TYPE.SPACE;
+         if (isTypedText(nextValue)) {
+            if (descriptor.type !== TYPE.SPACE && nextValue.subType === TYPE.SPACE) {
+               const prevWasSpace = prev && prev.type === TYPE.SPACE;
+               const genericPToken: any = pToken;
 
-            if (prevWasSpace) {
-               if (pToken[prev.name]) {
-                  pToken[prev.name].merge(nextValue.text);
-               } else {
-                  pToken[prev.name] = nextValue.text;
+               if (prevWasSpace) {
+                  if (genericPToken[prev.name]) {
+                     genericPToken[prev.name].merge(nextValue.text);
+                  } else {
+                     genericPToken[prev.name] = nextValue.text;
+                  }
+
+                  nextValue = cursor.getNext();
                }
-
-               nextValue = cursor.getNext();
             }
          }
 
@@ -237,16 +292,17 @@ function findDescriptorsToUse(propertyDescriptors, pToken, leftOff, cursor) {
    return propertyDescriptors;
 }
 
-function assignValues(propertyDescriptors, pToken, cursor) {
+function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken, cursor: UnassignedValueCursor) {
    for (let index = 0; index < propertyDescriptors.length; index++) {
       const nextValue = cursor.getNext();
       const descriptor = propertyDescriptors[index];
+      const genericPToken: any = pToken;
 
       if (!nextValue) {
          return;
       }
 
-      if (descriptor.type === nextValue.subType) {
+      if (isTypedText(nextValue) && descriptor.type === nextValue.subType) {
          switch (nextValue.subType) {
             case TYPE.WORD:
                let canAssign = true;
@@ -256,23 +312,23 @@ function assignValues(propertyDescriptors, pToken, cursor) {
                }
 
                if (canAssign) {
-                  pToken[descriptor.name] = nextValue.text;
+                  genericPToken[descriptor.name] = nextValue.text;
                } else {
                   cursor.ungetValue(nextValue);
                }
                break;
             case TYPE.SPACE:
-               pToken[descriptor.name] = nextValue.text;
+               genericPToken[descriptor.name] = nextValue.text;
                break;
          }
       } else if (descriptor.type === nextValue.type) {
-         if (nextValue.type === TYPE.LITERAL && descriptor.flatten) {
-            pToken.openQuote = nextValue.openQuote;
-            pToken.value = nextValue.value;
-            pToken.closeQuote = nextValue.closeQuote;
+         if (isLiteral(nextValue) && descriptor.flatten) {
+            genericPToken.openQuote = nextValue.openQuote;
+            genericPToken.value = nextValue.value;
+            genericPToken.closeQuote = nextValue.closeQuote;
          } else {
-            pToken[descriptor.name] = nextValue;
-            delete pToken[descriptor.name].type;
+            genericPToken[descriptor.name] = nextValue;
+            delete genericPToken[descriptor.name].type;
          }
       } else {
          cursor.ungetValue(nextValue);
@@ -294,18 +350,19 @@ function assignValues(propertyDescriptors, pToken, cursor) {
  *    into a single text PToken.
  */
 class UnassignedValueCursor {
+   private values: Array<UnassignedValue>;
 
-   constructor(unassignedValues) {
-      this._values = unassignedValues;
+   constructor(unassignedValues: Array<UnassignedValue>) {
+      this.values = unassignedValues;
    }
 
-   getNext() {
-      if (this._values.length <= 0) {
+   getNext(): UnassignedValue {
+      if (this.values.length <= 0) {
          return;
       }
 
       const candidatePToken = this._peekValue();
-      this._values.shift();
+      this.values.shift();
 
       /*
        * If two+ spaces are side-by-side, merge the two. This can happen
@@ -315,12 +372,12 @@ class UnassignedValueCursor {
        * text must be prefixed and suffixed by a space, that turns this into
        * "   x   ".
        */
-      if (candidatePToken.subType === TYPE.SPACE) {
+      if (isTypedText(candidatePToken) && candidatePToken.subType === TYPE.SPACE) {
          let nextValue = this._peekValue();
 
-         while (nextValue && nextValue.subType === TYPE.SPACE) {
+         while (nextValue && isTypedText(nextValue) && nextValue.subType === TYPE.SPACE) {
             candidatePToken.text.merge(nextValue.text);
-            this._values.shift();
+            this.values.shift();
             nextValue = this._peekValue();
          }
       }
@@ -328,14 +385,14 @@ class UnassignedValueCursor {
       return candidatePToken;
    }
 
-   ungetValue(value) {
+   ungetValue(value: UnassignedValue) {
       if (value) {
-         this._values.unshift(value);
+         this.values.unshift(value);
       }
    }
 
-   _peekValue() {
-      const pToken = this._values[0];
+   _peekValue(): UnassignedValue {
+      const pToken = this.values[0];
       if (!pToken || (pToken.type !== entityStart.PARAM_PTYPE &&
          pToken.type !== entityEnd.PARAM_PTYPE)) {
          return pToken;
@@ -352,20 +409,26 @@ class UnassignedValueCursor {
  Utility routines for some common operations
 \**********************************************************************/
 
-function wordFromSToken(sToken) {
-   const pToken = new text.PToken({ text: sToken });
+function wordFromSToken(sToken: SToken): SubtypedTextPToken {
+   // Fighting with TypeScript
+   const buildIt: any = text.PToken;
+   const pToken = new buildIt({ text: sToken }) as SubtypedTextPToken
+
    pToken.subType = TYPE.WORD;
    return pToken;
 }
 
-function spaceFromSToken(sToken) {
-   const pToken = new text.PToken({ text: sToken });
+function spaceFromSToken(sToken: SToken) {
+   // Fighting with TypeScript
+   const buildIt: any = text.PToken;
+   const pToken = new buildIt({ text: sToken }) as SubtypedTextPToken
+
    pToken.subType = TYPE.SPACE;
    return pToken;
 }
 
-function makeCheckCallback(pToken, propName, foundUnassigned, otherwise) {
-   return (unassignedValues) => {
+function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: ({}) => void, otherwise: () => void) {
+   return (unassignedValues: Array<UnassignedValue>) => {
       if (unassignedValues) {
          pToken.nextPropName = propName;
          pToken.unassigned = unassignedValues;
@@ -377,28 +440,25 @@ function makeCheckCallback(pToken, propName, foundUnassigned, otherwise) {
    };
 }
 
-function getSTokens(unassignedArray) {
-   let tokens = [];
+function getSTokens(unassignedArray: UnassignedArray) {
+   let tokens: Array<SToken> = [];
 
    for (let index = 0; index < unassignedArray.length; index++) {
       const value = unassignedArray[index];
-      switch (value.type) {
-         case text.PTYPE:
-            tokens.push(value.text);
-            break;
-         case TYPE.LITERAL:
-            tokens = tokens.concat(literal.getSTokens(value));
-            break;
-         case entityReference.PARAM_PTYPE:
-            tokens = tokens.concat(value.getSTokenArray());
-            break;
+
+      if (isTypedText(value)) {
+         tokens.push(value.text);
+      } else if (isLiteral(value)) {
+         tokens = tokens.concat(literal.getSTokens(value));
+      } else if (value.type == 'PARAMETERENTITYREF') {
+         tokens = tokens.concat(value.getSTokenArray());
       }
    }
 
    return tokens;
 }
 
-function checkExtra(values, ec, errorCode) {
+function checkExtra(values: UnassignedArray, ec: ErrorCollector, errorCode: string) {
    if (values && values.length > 0) {
       // convert the unassigned values into a set of STokens
       const sTokens = getSTokens(values);
@@ -428,3 +488,9 @@ const unassigned = {
 };
 
 export default unassigned;
+
+export {
+   UnassignedArray,
+   DescriptorArray,
+   Descriptor,
+};

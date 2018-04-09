@@ -13,7 +13,7 @@ import declaration from '../bridge/declaration';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 describe('attListDeclaration (integration)', () => {
    let declarationPToken;

@@ -12,7 +12,7 @@ import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 import externalId from './externalId.js';
 

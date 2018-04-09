@@ -3,16 +3,18 @@
 import { EntityMetaData } from '../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 
-import declaration from './bridge/declaration';
+import declaration, { DeclarationPToken } from './bridge/declaration';
 import nameList, { NameListPToken } from './common/nameList.js';
 import misc from './common/misc.js';
 import base from './base';
-import unassigned from './unassigned.js';
+import unassigned from './unassigned';
 import { SToken, STokenSource } from '../sToken/index';
 
 const ELEMENTDECL = 'ELEMENTDECL';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
+
+type DeliverCB = (ptoken: ElementDeclarationPToken) => void;
 
 /**********************************************************************\
  The elementDeclaration namespace contains the usual tools for processing
@@ -39,8 +41,9 @@ class ElementDeclarationPToken extends declaration.PToken {
    public close?: SToken;
    public unassigned?: Array<any>;
    public extra?: Array<any>;
+   public nextPropName?: string;
 
-   constructor(props) {
+   constructor(props: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ELEMENTDECL, props);
    }
@@ -74,7 +77,7 @@ class ElementDeclarationPToken extends declaration.PToken {
    Note that Mixed and children are handled by nameList
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken, deliverPToken) {
+function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: DeliverCB) {
    const pToken = new ElementDeclarationPToken(declarationPToken);
 
    parseName(source, pToken, (resultToken: ElementDeclarationPToken) => {
@@ -83,7 +86,7 @@ function parse(source: STokenSource, declarationPToken, deliverPToken) {
 
 }
 
-function parseName(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken) {
+function parseName(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken: DeliverCB) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', deliverPToken, () => {
       source.extractToObject('word', [ '>', '(' ], pToken, 'name');
       source.extractToObject('space', pToken, 'postNameSpace');
@@ -93,7 +96,7 @@ function parseName(source: STokenSource, pToken: ElementDeclarationPToken, deliv
    unassigned.checkForPERef(source, callback);
 }
 
-function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken) {
+function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken: DeliverCB) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', deliverPToken, () => {
       source.extract('peekChar', (charSToken) => {
          if (!charSToken) {
@@ -119,7 +122,7 @@ function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken
    unassigned.checkForPERef(source, callback);
 }
 
-function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken) {
+function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken: DeliverCB) {
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
 
@@ -131,7 +134,7 @@ function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deli
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(notationPToken) {
+function assignUnassigned(notationPToken: ElementDeclarationPToken) {
    const unValues = notationPToken.unassigned || [];
 
    if (unValues.length === 0) {
@@ -201,3 +204,4 @@ const elementDeclaration = {
 };
 
 export default elementDeclaration;
+export { ElementDeclarationPToken };

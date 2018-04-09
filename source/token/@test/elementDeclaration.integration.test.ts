@@ -13,7 +13,7 @@ import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import elementDeclaration from '../elementDeclaration.js';
 import text from '../text.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 import helper from './helper.js';
 

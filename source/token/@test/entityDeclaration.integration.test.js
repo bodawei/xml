@@ -11,7 +11,7 @@ import * as entityDeclaration from '../entityDeclaration.js';
 import entityEnd from '../entityEnd.js';
 import entityStart from '../entityStart.js';
 import text from '../text.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 import helper from './helper.js';
 

@@ -20,7 +20,7 @@ import * as space from './space.js';
 import text from './text.js';
 import * as notationDeclaration from './notationDeclaration.js';
 import * as processingInstruction from './processingInstruction.js';
-import unassigned from './unassigned.js';
+import unassigned from './unassigned';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
 module.exports = {

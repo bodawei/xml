@@ -197,7 +197,7 @@ class StringBundle {
 
 const BRACES = /\{([{}])\}/g;
 
-function unescapeBraces(message) {
+function unescapeBraces(message: string) {
    // interestingly, this is usually much faster than 2 replaces.
    return message.replace(BRACES, '$1');
 }

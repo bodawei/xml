@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
 import { SToken, STokenSource } from '../../sToken/index';
 
 import entityReference from '../entityReference.js';
-import unassigned from '../unassigned.js';
+import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
 import misc from './misc.js';
 
@@ -185,13 +185,13 @@ function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle:
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(nameListPToken: NameListPToken, unValues) {
+function assignUnassigned(nameListPToken: NameListPToken, unValues: UnassignedArray) {
 
    if (unValues.length === 0) {
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+   const unexpandedRef = unValues.filter((item: any) => (item.type === entityReference.PARAM_PTYPE));
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -200,30 +200,48 @@ function assignUnassigned(nameListPToken: NameListPToken, unValues) {
    assignList(nameListPToken, unValues);
 }
 
-function assignList(nameList, unValues) {
-   let propName;
-   const openDescriptors = [
-      { name: 'open', type: 'word', allowed: /\(/ },
-      { name: 'postOpenSpace', type: 'space' },
-   ];
-   const closeDescriptors = [
-      { name: 'close', type: 'word', allowed: /\)/ },
-      { name: 'postCloseSpace', type: 'space' },
-      { name: 'repeat', type: 'word', allowed: /[\*\+\?]/ },
-      { name: 'postRepeatSpace', type: 'space' },
-   ];
+function assignList(nameList: NameListPToken, unValues: UnassignedArray) {
+   assignListOpen(nameList, unValues);
 
-   unassigned.assignToProps(unValues, nameList, 'open', openDescriptors);
+   if (!nameList.repeat &&
+      !nameList.close &&
+      !nameList.postRepeatSpace &&
+      !nameList.postCloseSpace) {
+      assignNames(nameList.names, unValues);
+   }
 
-   assignNames(nameList.names, unValues);
-
-   unassigned.assignToProps(unValues, nameList, 'close', closeDescriptors);
+   assignListClose(nameList, unValues);
 }
 
-function assignNames(names, unValues) {
+function assignListOpen(nameList: NameListPToken, unValues: UnassignedArray) {
+   let needOpen = nameList.names.length === 0;
+   let openProp = 'postOpenSpace';
+   const openDescriptors: DescriptorArray = [
+      { name: 'postOpenSpace', type: 'space' },
+   ];
+
+   if (!nameList.open) {
+      openDescriptors.unshift({ name: 'open', type: 'word', allowed: /\(/ });
+      openProp = 'open';
+      needOpen = true;
+   }
+
+   if (needOpen) {
+      unassigned.assignToProps(unValues, nameList, openProp, openDescriptors);
+   }
+}
+
+// We may want to completely prevent any sublists in the ENUMERATION etc. in both parse and unassigned
+   // checkwellformed should report on #PCDATA as a bad name if not in position 0
+// @@ Myust consume space.  And will we inadvertantly consume stuff from the delimiter wrongly?
+function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedArray) {
    let cp: ContentParticlePToken;
    let particle: NameListPToken|NamePToken;
    let nextUnValue = unValues[0];
+
+   if (names.length > 0) {
+      assignIncompleteName(names[names.length -1], unValues);
+   }
 
    while (nextUnValue) {
       if (nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
@@ -231,8 +249,9 @@ function assignNames(names, unValues) {
       }
 
       if (nextUnValue.text.str === '(') {
-         particle = new NameListPToken();
-         assignList(particle, unValues);
+         const nlPToken = new NameListPToken();
+         particle = nlPToken;
+         assignList(nlPToken, unValues);
       } else {
          particle = {};
          unassigned.assignToProps(unValues, particle, 'name', [
@@ -253,8 +272,66 @@ function assignNames(names, unValues) {
    }
 }
 
-// We may want to completely prevent any sublists in the ENUMERATION etc. in both parse and unassigned
-   // checkwellformed should report on #PCDATA as a bad name if not in position 0
+function assignIncompleteName(cp: ContentParticlePToken, unValues: Array<any>) {
+   if (cp.delimiter || cp.postDelimiterSpace) {
+      unassigned.assignToProps(unValues, cp, 'postDelimiterSpace', [
+         { name: 'postDelimiterSpace', type: 'space' },
+      ]);
+      return;
+   } else if (cp.particle instanceof NameListPToken) {
+      assignList(cp.particle, unValues);
+   } else {
+      let startProp = 'postRepeatSpace';
+      const descriptors: DescriptorArray = [
+         { name: 'postRepeatSpace', type: 'space' },
+      ];
+
+      if (!cp.particle) {
+         cp.particle = {};
+      }
+
+      if (!cp.particle.repeat) {
+         descriptors.unshift({ name: 'repeat', type: 'word', allowed: /[\*\+\?]/ });
+         descriptors.unshift({ name: 'postNameSpace', type: 'space' });
+         startProp = 'repeat';
+      }
+
+      if (!cp.particle.name) {
+         descriptors.unshift({ name: 'name', type: 'word', allowed: /[^\)\|\,\*\+\?]/ });
+         startProp = 'name';
+      }
+
+      unassigned.assignToProps(unValues, cp.particle, startProp, descriptors);
+   }
+
+   unassigned.assignToProps(unValues, cp, 'delimiter', [
+      { name: 'delimiter', type: 'word', allowed: /[\|\,]/ },
+      { name: 'postDelimiterSpace', type: 'space' },
+   ]);
+}
+
+function assignListClose(nameList: NameListPToken, unValues: Array<any>) {
+   let needClose = false;
+   let closeProp = 'postRepeatSpace';
+   const closeDescriptors: DescriptorArray = [
+      { name: 'postRepeatSpace', type: 'space' },
+   ];
+
+   if (!nameList.repeat) {
+      closeDescriptors.unshift({ name: 'repeat', type: 'word', allowed: /[\*\+\?]/ });
+      closeDescriptors.unshift({ name: 'postCloseSpace', type: 'space' });
+      closeProp = 'repeat';
+      needClose = true;
+   }
+
+   if (!nameList.close) {
+      closeDescriptors.unshift({ name: 'close', type: 'word', allowed: /\)/ });
+      closeProp = 'close';
+      needClose = true;
+   }
+
+   unassigned.assignToProps(unValues, nameList, closeProp, closeDescriptors);
+}
 
 /**********************************************************************\
  checkWellFormed()

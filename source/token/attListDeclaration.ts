@@ -4,7 +4,7 @@ import { EntityMetaData } from '../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 import entityReference from './entityReference.js';
-import unassigned from './unassigned.js';
+import unassigned from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal from './common/literal.js';
@@ -170,7 +170,7 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(attLiPToken) {
+function assignUnassigned(attLiPToken: AttListPToken) {
    const unValues = attLiPToken.unassigned || [];
 
    if (unValues.length === 0) {
@@ -428,3 +428,4 @@ const attListDecl = {
 };
 
 export default attListDecl;
+export { AttListPToken };

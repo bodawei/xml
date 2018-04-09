@@ -13,7 +13,7 @@ import * as notationDeclaration from '../notationDeclaration.js';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';
 import entityReference from '../entityReference.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 describe('notationdeDlaration (unit)', () => {
    let notationPToken;

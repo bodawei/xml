@@ -7,14 +7,14 @@ import { defaultExtractors } from '../../extractor/index';
 import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 import nameList, {
    ContentParticlePToken,
    NameListPToken,
 } from '../common/nameList.js';
 
 describe('nameList (integration)', () => {
-   let nlPToken;
+   let nlPToken: NameListPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();

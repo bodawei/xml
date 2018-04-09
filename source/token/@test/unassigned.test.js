@@ -12,7 +12,7 @@ import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text.js';
 import literal from '../common/literal.js';
-import unassigned from '../unassigned.js';
+import unassigned from '../unassigned';
 
 import helper from './helper.js';
 
