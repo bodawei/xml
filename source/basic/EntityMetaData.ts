@@ -20,22 +20,23 @@ const LAST_1DOT1_REVISION = 2;
 type XmlVersion = 1.0 | 1.1;
 type XmlRevision = 1 | 2 | 3 | 4 | 5 | 6;
 
+enum EntityKind {
+   DOCUMENT = 'DOCUMENT',
+   EXTERNAL = 'EXTERNAL',
+   EXTERNALSUBSET = 'EXTERNALSUBSET',
+}
+
 class EntityMetaData {
    public static PTYPE: string = 'ENTITY_META_DATA';
-   public static KIND = {
-      DOCUMENT: 'DOCUMENT',
-      EXTERNAL: 'EXTERNAL',
-      EXTERNALSUBSET: 'EXTERNALSUBSET',
-   };
    public location: EntityLocation;
    public type: string;
    private _kind: string;
    private _version: XmlVersion;
    private _revision: XmlRevision;
 
-   constructor(entityKind?: string, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
+   constructor(entityKind?: EntityKind, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
       this.type = EntityMetaData.PTYPE;
-      this._setKind(entityKind || EntityMetaData.KIND.DOCUMENT);
+      this._setKind(entityKind || EntityKind.DOCUMENT);
       this.version = xmlVersion;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
@@ -45,12 +46,8 @@ class EntityMetaData {
     type: When setting the type, make sure it is a legal value.
    \**********************************************************************/
 
-   _setKind(newValue: string) {
-      if (EntityMetaData.KIND[newValue]) {
-         this._kind = newValue;
-      } else {
-         throw new Error('Unknown type passed to EntityMetaData.type.  Got "' + newValue + '".');
-      }
+   _setKind(newValue: EntityKind) {
+      this._kind = newValue;
    }
 
    get kind(): string {
@@ -62,15 +59,15 @@ class EntityMetaData {
    \**********************************************************************/
 
    get isDocumentKind(): boolean {
-      return this.kind === EntityMetaData.KIND.DOCUMENT;
+      return this.kind === EntityKind.DOCUMENT;
    }
 
    get isExternalKind(): boolean {
-      return this.kind === EntityMetaData.KIND.EXTERNAL;
+      return this.kind === EntityKind.EXTERNAL;
    }
 
    get isExternalSubsetKind(): boolean {
-      return this.kind === EntityMetaData.KIND.EXTERNALSUBSET;
+      return this.kind === EntityKind.EXTERNALSUBSET;
    }
 
    /**********************************************************************\
@@ -135,3 +132,4 @@ class EntityMetaData {
 }
 
 export default EntityMetaData;
+export { EntityKind };

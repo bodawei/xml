@@ -4,7 +4,7 @@
 const RELATIVE_REGEX = new RegExp('^([a-z0-9]+:)?//', 'i');
 const PROTOCOL_RELATIVE_REGEX = /^\/\//;
 
-function getDirOf(path) {
+function getDirOf(path: string) {
    if (path[path.length - 1] !== '/') {
       path = path.replace(/\/[^\/]*$/, '/');
    }
@@ -51,7 +51,7 @@ class EntityLocation {
     sourceLocation: The EntityLocation of the referencing entity.
    \**********************************************************************/
 
-   resolve(sourceLocation) {
+   resolve(sourceLocation: EntityLocation) {
       this._parent = sourceLocation;
 
       if (this._systemIsRelative()) {

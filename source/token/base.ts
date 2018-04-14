@@ -7,12 +7,11 @@ import { SToken } from '../stoken';
  by all the token namespaces.
 \**********************************************************************/
 
-interface STokenArray {
-   [index:number]: SToken,
-   pushSTokens(...STokens):void;
+declare class STokenArray extends Array<SToken> {
+   public pushSTokens(...STokens: Array<SToken>):void;
 };
 
-function pushIfNotVoid(...items) {
+function pushIfNotVoid(...items: Array<SToken|void>) {
    for (let index = 0; index < items.length; index++) {
       if (items[index] !== undefined && items[index] !== null) {
          this.push(items[index]);
@@ -34,9 +33,10 @@ class BaseXToken {
 }
 
 class BaseParsedToken {
+   [name: string]: any;
    public type: string;
 
-   constructor(type: string, props?: Object) {
+   constructor(type: string, props?: { [name: string]: any }) {
       if (props) {
          for (const propName in props) {
             if (props.hasOwnProperty(propName)) {
@@ -49,7 +49,7 @@ class BaseParsedToken {
    }
 
    getSTokenArray(): STokenArray {
-      const results: any = [];
+      const results: STokenArray = [] as STokenArray;
       results.pushSTokens = pushIfNotVoid.bind(results);
       Object.defineProperty(results, 'pushSTokens', {
          enumerable: false,

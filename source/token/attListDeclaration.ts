@@ -4,7 +4,7 @@ import { EntityMetaData } from '../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 import entityReference from './entityReference.js';
-import unassigned from './unassigned';
+import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal from './common/literal.js';
@@ -17,8 +17,7 @@ const WARN = XmlWarning.ID;
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
-type DeliverPToken = (pToken:AttListPToken) => void;
-type UnassignedValue = object;
+type DeliverPToken = (pToken?:AttListPToken) => void;
 
 class AttDefPToken {
    public name: SToken;
@@ -29,8 +28,10 @@ class AttDefPToken {
    public postDefaultTypeSpace?: SToken;
    public openQuote?: SToken;
    public value?: Array<any>;
+   public postValueSpace?: SToken;
    public closeQuote?: SToken;
    public postAttValueSpace?: SToken;
+   public xtra?: SToken;
 }
 
 class AttListPToken extends DeclarationPToken {
@@ -39,10 +40,12 @@ class AttListPToken extends DeclarationPToken {
    public postElementNameSpace?: SToken;
    public attDefs: Array<AttDefPToken>;
    public close?: SToken;
-   public unassigned?: Array<UnassignedValue>;
+   public unassigned?: UnassignedArray;
+   public extra?: UnassignedArray;
    public nextPropName?: string;
 
    constructor(basePToken?: DeclarationPToken|AttListPToken|Object) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ATTLISTDECL_PTOKEN_TYPE, basePToken);
       this.attDefs = this.attDefs || [];
    }
@@ -83,7 +86,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
    });
 }
 
-function parseElementName(source: STokenSource, pToken: AttListPToken, done: Function) {
+function parseElementName(source: STokenSource, pToken: AttListPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'elementName', done, () => {
       source.extractToObject('word', [ '>', '%' ], pToken, 'elementName');
       source.extractToObject('space', pToken, 'postElementNameSpace');
@@ -94,7 +97,7 @@ function parseElementName(source: STokenSource, pToken: AttListPToken, done: Fun
    unassigned.checkForPERef(source, callback);
 }
 
-function parseAttName(source: STokenSource, pToken: AttListPToken, done: Function) {
+function parseAttName(source: STokenSource, pToken: AttListPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', done, () => {
       source.extract('word', [ '>', '%' ], (attrName: SToken|void) => {
          if (!attrName) {
@@ -118,7 +121,7 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Functio
    unassigned.checkForPERef(source, callback);
 }
 
-function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'type', done, () => {
       source.extract('word', [ '>', '%', '(', '#', '"', '\'' ], (attType: SToken|void) => {
          if (attType) {
@@ -133,7 +136,7 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
    unassigned.checkForPERef(source, callback);
 }
 
-function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'defaultType', done, () => {
       source.extract('peekChar', (charToken: SToken|void) => {
          if (charToken && charToken.str === '#') {
@@ -148,7 +151,7 @@ function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: A
    unassigned.checkForPERef(source, callback);
 }
 
-function parseAttValue(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: Function) {
+function parseAttValue(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'attValue', done, () => {
       literal.parse(source, {
          pToken: attDef,
@@ -210,7 +213,8 @@ function assignUnassigned(attLiPToken: AttListPToken) {
       ];
 
       if (attLiPToken.nextPropName === 'name') {
-         attLiPToken.attDefs.push({});
+         // Working around TypeScript. this is wrong in some way.
+         attLiPToken.attDefs.push({} as AttDefPToken);
          descriptors.unshift({ name: 'xtra', type: 'space' });
       }
 
@@ -230,8 +234,12 @@ function assignUnassigned(attLiPToken: AttListPToken) {
    delete attLiPToken.unassigned;
 }
 
-function adjustSpaces(attLiPToken) {
-   let prevDef = attLiPToken.attDefs[0] || {};
+function adjustSpaces(attLiPToken: AttListPToken) {
+   let prevDef: AttDefPToken = attLiPToken.attDefs[0];
+
+   if (!prevDef) {
+      return;
+   }
 
    if (prevDef.xtra) {
       attLiPToken.postElementNameSpace = attLiPToken.postElementNameSpace ? 
@@ -292,7 +300,9 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
       ec.report(WFEID.ATTLISTDECL_NO_ATTRIBUTES, [ elNameText ]);
    }
 
-   const attNames = {};
+   const attNames: {
+      [name: string]: AttDefPToken,
+   } = {};
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
       const attName = misc.textOrBlank(attDef.name);
@@ -428,4 +438,7 @@ const attListDecl = {
 };
 
 export default attListDecl;
-export { AttListPToken };
+export {
+   AttListPToken,
+   AttDefPToken,
+};

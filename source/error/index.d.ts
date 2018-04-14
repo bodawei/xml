@@ -2,9 +2,9 @@ import { SToken } from '../sToken/index';
 
 declare class ErrorCollector {
    constructor(foo: any, errorType: Function);
-   setPos(item:SToken | void);
-   report(code: string, params?: Array<string>);
-   check(condition:any, code: string, params?: Array<string>);
+   setPos(item:SToken | void): void;
+   report(code: string, params?: Array<string>): void;
+   check(condition:any, code: string, params?: Array<string>): void;
    reportError(id: string, constr: Function, params: Array<string>): void;
    getErrors(): Array<any>;
 }

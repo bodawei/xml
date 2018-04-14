@@ -4,6 +4,7 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
 import { SToken, STokenSource } from '../../sToken/index';
 
+import base, { STokenArray } from '../base';
 import entityReference from '../entityReference.js';
 import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
@@ -33,8 +34,7 @@ type NamePToken = {
    postRepeatSpace?: SToken;
 }
 
-class NameListPToken {
-   public readonly type: string;
+class NameListPToken extends base.PToken {
    public open: SToken;
    public postOpenSpace?: SToken;
    public names: Array<ContentParticlePToken>;
@@ -43,10 +43,46 @@ class NameListPToken {
    public repeat?: SToken;
    public postRepeatSpace?: SToken;
 
-   constructor(basePToken?: NameListPToken | object) {
-      this.names = [];
-      Object.assign(this, basePToken);
-      this.type = NAMELIST_PTOKEN_TYPE;
+   constructor(props?: NameListPToken|Object) {
+      super(NAMELIST_PTOKEN_TYPE, props);
+      this.names = this.names || [];
+   }
+
+   getSTokenArray() {
+      const results = super.getSTokenArray();
+
+      results.pushSTokens(
+         this.open,
+         this.postOpenSpace,
+      );
+
+      for (let index = 0; index < this.names.length; index++) {
+         let cp = this.names[index];
+
+         if (cp.particle instanceof NameListPToken) {
+            results.pushSTokens(...cp.particle.getSTokenArray());
+         } else {
+            results.pushSTokens(
+               cp.particle.name,
+               cp.particle.postNameSpace,
+               cp.particle.repeat,
+               cp.particle.postRepeatSpace,
+            );
+         }
+         results.pushSTokens(
+            cp.delimiter,
+            cp.postDelimiterSpace,
+         );
+      }
+
+      results.pushSTokens(
+         this.close,
+         this.postCloseSpace,
+         this.repeat,
+         this.postRepeatSpace,
+      );
+
+      return results;
    }
 }
 
@@ -244,7 +280,7 @@ function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedAr
    }
 
    while (nextUnValue) {
-      if (nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
+      if (!unassigned.isTypedText(nextUnValue) || nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
          return;
       }
 
@@ -475,11 +511,17 @@ type XNameList = {
    repeat: RepeatType;
 };
 
-const REPEAT_LOOKUP_TABLE = {
+const REPEAT_LOOKUP_TABLE: { [key: string]: RepeatType } = {
    '*': 'ZEROPLUS',
    '+': 'ONEPLUS',
    '?': 'ZEROONE',
 }
+
+// enum REPEAT_LOOKUP_TABLE {
+//    '*' = 'ZEROPLUS',
+//    '+' = 'ONEPLUS',
+//    '?' = 'ZEROONE',
+// }
 
 function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
    const names = [];
@@ -505,6 +547,7 @@ function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameLi
       if (particle instanceof NameListPToken) {
          names.push(makeXTokenCompatible(particle));
       } else if (particle.name) {
+
          const name: XName = {
             name: particle.name.str,
             repeat: REPEAT_LOOKUP_TABLE[misc.textOrBlank(particle.repeat)] || 'ONE',
@@ -514,10 +557,11 @@ function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameLi
       }
    }
 
+   const index = pToken.repeat && pToken.repeat.str;
    return {
       names,
       listType: listType || 'CHOICE',
-      repeat: REPEAT_LOOKUP_TABLE[pToken.repeat && pToken.repeat.str] || 'ONE',
+      repeat: REPEAT_LOOKUP_TABLE[index] || 'ONE',
    };
 }
 
@@ -534,6 +578,8 @@ const nameList = {
    assignUnassigned,
    checkWellFormed,
    makeXTokenCompatible,
+
+   isNamePToken,
 };
 
 export default nameList;
@@ -541,4 +587,5 @@ export {
    ContentParticlePToken,
    NamePToken,
    NameListPToken,
+   XNameList,
 };

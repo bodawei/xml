@@ -7,13 +7,19 @@ import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error/index';
 
-import attListDeclaration, { AttListPToken } from '../attListDeclaration.js';
+import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration.js';
 import declaration from '../bridge/declaration';
 import entityReference from '../entityReference.js'
-import text from '../text.js';
-import unassigned from '../unassigned';
+import text from '../text';
+import unassigned, { UnassignedArray } from '../unassigned';
 import literal from '../common/literal.js';
 import misc from '../common/misc.js';
+
+type LiteralOptions = {
+   pToken: {
+      value: Array<any>,
+   },
+};
 
 describe('attListDeclaration (unit)', () => {
    let aldPToken: AttListPToken;
@@ -66,7 +72,7 @@ describe('attListDeclaration (unit)', () => {
 
    describe('parse()', () => {
       let callback: jasmine.Spy;
-      let checkForPERefCallback;
+      let checkForPERefCallback: (values?:UnassignedArray) => void;
       let makeCheckCallbackSpy: jasmine.Spy;
       let literalParseSpy: jasmine.Spy;
 
@@ -74,12 +80,12 @@ describe('attListDeclaration (unit)', () => {
          callback = jasmine.createSpy('callbackSpy');
 
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback'); // TS
-         makeCheckCallbackSpy.and.callFake((_1, _2, _3, other) => {
+         makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x: UnassignedArray) => void) => {
             checkForPERefCallback = other;
          });
 
          spyOn(unassigned, 'checkForPERef').and.callFake(() => checkForPERefCallback());
-         literalParseSpy = spyOn(literal, 'parse').and.callFake((source, options, done) => done());
+         literalParseSpy = spyOn(literal, 'parse').and.callFake((_1: any, _2: any, done: () => void) => done());
       });
 
       it('does a parse of a basic attribute list declaration', () => {
@@ -224,7 +230,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a literal even with #REQUIRED', () => {
-         literalParseSpy.and.callFake((source, options, done) => {
+         literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
             options.pToken.value = [ 'dummyValue' ];
             done();
          });
@@ -252,7 +258,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a literal with no defaultType at all', () => {
-         literalParseSpy.and.callFake((source, options, done) => {
+         literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
             options.pToken.value = [ 'dummyValue' ];
             done();
          });
@@ -282,7 +288,7 @@ describe('attListDeclaration (unit)', () => {
       describe('parameter entity reference', () => {
 
          it('returns an unassigned value when finding a PE Ref at the start', () => {
-            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+            makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: any) => {
                foundRef();
             });
             const mockSource = new MockSTokenSource([
@@ -301,7 +307,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref instead of an attr name', () => {
             let calls = 0;
-            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+            makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
                if (calls > 1) {
                   foundRef();
@@ -329,7 +335,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref instead of an attr type', () => {
             let calls = 0;
-            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+            makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
                if (calls > 2) {
                   foundRef();
@@ -363,7 +369,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref instead of an default type', () => {
             let calls = 0;
-            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+            makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
                if (calls > 3) {
                   foundRef();
@@ -401,7 +407,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref instead of an attValue', () => {
             let calls = 0;
-            makeCheckCallbackSpy.and.callFake((pToken, prop, foundRef, other) => {
+            makeCheckCallbackSpy.and.callFake((_1: any, _2: any, foundRef: () => void, other: () => void) => {
                calls ++;
                if (calls > 4) {
                   foundRef();
@@ -454,31 +460,31 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
-         attListDeclaration.assignUnassigned({});
+         attListDeclaration.assignUnassigned(new attListDeclaration.PToken({}));
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });
 
       it('deletes the unassigned property if it is empty', () => {
-         const declPToken = {
+         const alPToken = new attListDeclaration.PToken({
             unassigned: [],
             nextPropName: 'elementName',
-         };
+         });
          
-         attListDeclaration.assignUnassigned(declPToken);
+         attListDeclaration.assignUnassigned(alPToken);
 
-         expect(declPToken.unassigned).toBeUndefined();
-         expect(declPToken.nextPropName).toBeUndefined();
+         expect(alPToken.unassigned).toBeUndefined();
+         expect(alPToken.nextPropName).toBeUndefined();
       });
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
-         const declPToken = {
+         const alPToken = new attListDeclaration.PToken({
             unassigned: [ {
                type: entityReference.PARAM_PTYPE,
             } ],
-         };
+         });
          
-         attListDeclaration.assignUnassigned(declPToken);
+         attListDeclaration.assignUnassigned(alPToken);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });
@@ -530,7 +536,7 @@ describe('attListDeclaration (unit)', () => {
    
          it('adds attribute entries for each attribute', () => {
             const unassignedValue = [ 'attName1', 'attName2' ];
-            assignToPropsSpy.and.callFake((unassigned) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray) => {
                unassigned.pop();
             })
             const declPToken = new attListDeclaration.PToken({
@@ -548,7 +554,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('adds a space before the first attribute to the postElementNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -567,7 +573,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('appends a space before the first attribute to the postElementNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -587,7 +593,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('adds a space to the previous postNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -609,7 +615,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('merges a space into the previous postNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -632,7 +638,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('adds a space to the previous postTypeSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -656,7 +662,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('merges a space into the previous postTypeSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -681,7 +687,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('adds a space to the previous postDefaultTypeSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -705,7 +711,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('merges a space into the previous postDefaultTypeSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -730,7 +736,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('adds a space to the previous postValueSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -754,7 +760,7 @@ describe('attListDeclaration (unit)', () => {
 
          it('merges a space into the previous postValueSpace', () => {
             const unassignedValue = [ 'attName1' ];
-            assignToPropsSpy.and.callFake((unassigned, pToken) => {
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
                unassigned.pop();
                pToken.xtra = SToken.fromString('\t');
             })
@@ -1191,6 +1197,7 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('creates an XToken with the provided attributes', () => {
+         const textValue = new text.PToken();
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
             type: SToken.fromString('bogus'),

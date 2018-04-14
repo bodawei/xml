@@ -8,7 +8,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as docTypeStart from '../docTypeStart.js';
-import text from '../text.js';
+import text from '../text';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken;

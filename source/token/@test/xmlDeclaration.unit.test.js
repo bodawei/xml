@@ -1,7 +1,7 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData, EntityKind } from '../../basic';
 import { WellFormedError } from '../../error';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
@@ -143,7 +143,7 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       it('reports an error if there are no parameters in the text declaration', () => {
-         const emd = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
+         const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
          xmlDeclPToken.params = [];
 
          xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
@@ -156,7 +156,7 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       it('reports an error if there is no encoding in the text declaration', () => {
-         const emd = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
+         const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
 
          xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
 
@@ -225,7 +225,7 @@ describe('xmlDeclaration (unit)', () => {
             });
 
             it('reports no error about encoding position if this is not a document kind', () => {
-               emd = new EntityMetaData(EntityMetaData.KIND.EXTERNAL);
+               emd = new EntityMetaData(EntityKind.EXTERNAL);
                checkName(makeToken('version'), 0, mockErrorCollector, emd);
                checkName(makeToken('standalone'), 1, mockErrorCollector, emd);
                const encodingSToken = makeToken('encoding');
@@ -250,7 +250,7 @@ describe('xmlDeclaration (unit)', () => {
             });
 
             it('reports an error if standalone specified on a non-doc entity', () => {
-               const localEmd = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
+               const localEmd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
                checkName(makeToken('version'), 0, mockErrorCollector, localEmd);
 
                checkName(makeToken('standalone'), 1, mockErrorCollector, localEmd);

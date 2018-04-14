@@ -235,7 +235,7 @@ function parseAllValues(source: STokenSource, includeNameListChars: boolean, del
  may not skip over a value in the unassignedValues array.
 \**********************************************************************/
 
-function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPToken, leftOff: string, propertyDescriptors: DescriptorArray) {
+function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPToken|{}, leftOff: string, propertyDescriptors: DescriptorArray) {
    const valueCursor = new UnassignedValueCursor(unassignedValues);
    const allDescriptors = propertyDescriptors.slice(0);
    const startPropName = leftOff || propertyDescriptors[0].name;
@@ -245,7 +245,7 @@ function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPTok
    assignValues(descriptors, pToken, valueCursor);
 }
 
-function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken, leftOff: string, cursor: UnassignedValueCursor) {
+function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken|{}, leftOff: string, cursor: UnassignedValueCursor) {
    let nextValue = cursor.getNext();
    let prev;
 
@@ -292,7 +292,7 @@ function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: Unas
    return propertyDescriptors;
 }
 
-function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken, cursor: UnassignedValueCursor) {
+function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken|{}, cursor: UnassignedValueCursor) {
    for (let index = 0; index < propertyDescriptors.length; index++) {
       const nextValue = cursor.getNext();
       const descriptor = propertyDescriptors[index];
@@ -427,8 +427,8 @@ function spaceFromSToken(sToken: SToken) {
    return pToken;
 }
 
-function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: ({}) => void, otherwise: () => void) {
-   return (unassignedValues: Array<UnassignedValue>) => {
+function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: ({}) => void, otherwise: () => void): (values: UnassignedArray) => void {
+   return (unassignedValues: UnassignedArray) => {
       if (unassignedValues) {
          pToken.nextPropName = propName;
          pToken.unassigned = unassignedValues;
@@ -485,6 +485,7 @@ const unassigned = {
    makeCheckCallback,
    getSTokens,
    checkExtra,
+   isTypedText,
 };
 
 export default unassigned;

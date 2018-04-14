@@ -8,7 +8,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as elementStart from '../elementStart.js';
-import text from '../text.js';
+import text from '../text';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken;

@@ -3,10 +3,10 @@ import ErrorCollector from '../ErrorCollector.js';
 declare class MockErrorCollector extends ErrorCollector {
    constructor();
    errors: Array<object>;
-   setPos(sToken:any);
-   report(id: string, params: any, position?: any);
-   check(condition: any, id: string, params: any);
-   reportError(id: string, context: any, params: any);
+   setPos(sToken:any): void;
+   report(id: string, params: any, position?: any): void;
+   check(condition: any, id: string, params: any): void;
+   reportError(id: string, context: any, params: any): void;
 }
 
 export {

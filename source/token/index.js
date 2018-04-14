@@ -17,7 +17,7 @@ import entityStart from './entityStart.js';
 import * as elementStart from './elementStart.js';
 import * as elementEnd from './elementEnd.js';
 import * as space from './space.js';
-import text from './text.js';
+import text from './text';
 import * as notationDeclaration from './notationDeclaration.js';
 import * as processingInstruction from './processingInstruction.js';
 import unassigned from './unassigned';

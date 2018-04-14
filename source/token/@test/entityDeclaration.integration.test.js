@@ -10,7 +10,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as entityDeclaration from '../entityDeclaration.js';
 import entityEnd from '../entityEnd.js';
 import entityStart from '../entityStart.js';
-import text from '../text.js';
+import text from '../text';
 import unassigned from '../unassigned';
 
 import helper from './helper.js';

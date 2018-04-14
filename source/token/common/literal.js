@@ -4,7 +4,7 @@ import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken';
 
 import entityReference from '../entityReference.js';
-import text from '../text.js';
+import text from '../text';
 import misc from './misc.js';
 
 const WFEID = WellFormedError.ID;

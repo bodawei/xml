@@ -8,7 +8,7 @@ import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper.js';
-import attListDeclaration from '../attListDeclaration';
+import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
@@ -16,17 +16,17 @@ import entityStart from '../entityStart';
 import unassigned from '../unassigned';
 
 describe('attListDeclaration (integration)', () => {
-   let declarationPToken;
-   let expectedSToken;
+   let declarationPToken: AttListPToken;
+   let expectedSToken: (value: string) => SToken;
 
    beforeEach(() => {
       expectedSToken = makeSTokenMaker();
-      declarationPToken = {
+      declarationPToken = new attListDeclaration.PToken({
          open: expectedSToken('<!'),
          postOpenSpace: undefined,
          declType: expectedSToken('ATTLIST'),
          postDeclTypeSpace: expectedSToken(' '),
-      };
+      });
    });
 
    describe('parse()', () => {

@@ -10,7 +10,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
-import text from '../text.js';
+import text from '../text';
 import literal from '../common/literal.js';
 import unassigned from '../unassigned';
 

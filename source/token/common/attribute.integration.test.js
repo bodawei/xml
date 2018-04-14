@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import text from '../text.js';
+import text from '../text';
 
 import attribute from './attribute.js';
 

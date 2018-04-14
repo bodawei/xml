@@ -7,28 +7,29 @@ import { defaultExtractors } from '../../extractor/index';
 import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
+import declaration, { DeclarationPToken } from '../bridge/declaration';
 import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import elementDeclaration from '../elementDeclaration.js';
-import text from '../text.js';
+import text from '../text';
 import unassigned from '../unassigned';
 
 import helper from './helper.js';
 
 describe('elementDeclaration (integration)', () => {
-   let declarationPToken;
-   let expectedSToken;
+   let declarationPToken: DeclarationPToken;
+   let expectedSToken: (str: string) => SToken;
 
    beforeEach(() => {
       expectedSToken = makeSTokenMaker();
-      declarationPToken = {
+      declarationPToken = new declaration.PToken(undefined, {
          open: expectedSToken('<!'),
          postOpenSpace: undefined,
          declType: expectedSToken('ELEMENT'),
          postDeclTypeSpace: expectedSToken(' '),
-      };
+      });
    });
 
    describe('parse()', () => {
@@ -38,7 +39,7 @@ describe('elementDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         elementDeclaration.parse(source, {}, (result) => {
+         elementDeclaration.parse(source, new declaration.PToken(), (result) => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new elementDeclaration.PToken({
@@ -132,37 +133,6 @@ describe('elementDeclaration (integration)', () => {
       //       notationDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
 
       //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
-      //       done();
-      //    });
-      // });
-
-   });
-
-   describe('pTokenToXToken()', () => {
-
-      // it('includes an entityLocation', (done) => {
-      //    const source = new STokenSource(defaultExtractors, new EntityMetaData());
-      //    source.addText('foo SYSTEM "sys.dtd">');
-      //    source.endText();
-
-      //    elementDeclaration.parse(source, declarationPToken, (parsing) => {
-      //       const token = notationDeclaration.pTokenToXToken(parsing);
-
-      //       token.pToken = [];
-      //       expect(token).toEqual(new notationDeclaration.XToken('foo', new EntityLocation('sys.dtd'), []));
-      //       done();
-      //    });
-      // });
-
-      // it('includes the STokens for the externalId and declaration', (done) => {
-      //    const source = new STokenSource(defaultExtractors, new EntityMetaData());
-      //    source.addText('foo SYSTEM "sys.dtd">');
-      //    source.endText();
-
-      //    notationDeclaration.parse(source, declarationPToken, (parsing) => {
-      //       const token = notationDeclaration.pTokenToXToken(parsing);
-
-      //       expect(token.pToken.open).toEqual(declarationPToken.open);
       //       done();
       //    });
       // });

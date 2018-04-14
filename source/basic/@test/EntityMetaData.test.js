@@ -1,7 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import EntityMetaData from '../EntityMetaData.js';
+import EntityMetaData, { EntityKind } from '../EntityMetaData.js';
 import EntityLocation from '../EntityLocation.js';
 
 describe('EntityMetaData', () => {
@@ -37,12 +37,6 @@ describe('EntityMetaData', () => {
          expect(pk.type).toEqual('ENTITY_META_DATA');
       });
 
-      it('throws an error if the version and revision do not match', () => {
-         expect(() => {
-            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.1, 5);
-         }).toThrowError('Version and revision do not match. Got "1.1" and "5".');
-      });
-
    });
 
    describe('kind', () => {
@@ -50,25 +44,19 @@ describe('EntityMetaData', () => {
       it('defaults to document kind', () => {
          const pk = new EntityMetaData();
 
-         expect(pk.kind).toEqual(EntityMetaData.KIND.DOCUMENT);
+         expect(pk.kind).toEqual(EntityKind.DOCUMENT);
       });
 
       it('sets the version to EXTERNAL', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.EXTERNAL);
+         const pk = new EntityMetaData(EntityKind.EXTERNAL);
 
-         expect(pk.kind).toEqual(EntityMetaData.KIND.EXTERNAL);
+         expect(pk.kind).toEqual(EntityKind.EXTERNAL);
       });
 
       it('sets the version to EXTERNALSUBSET', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
+         const pk = new EntityMetaData(EntityKind.EXTERNALSUBSET);
 
-         expect(pk.kind).toEqual(EntityMetaData.KIND.EXTERNALSUBSET);
-      });
-
-      it('throws an exception when a bad type is passed in', () => {
-         expect(() => {
-            new EntityMetaData('document');
-         }).toThrowError('Unknown type passed to EntityMetaData.type.  Got "document".');
+         expect(pk.kind).toEqual(EntityKind.EXTERNALSUBSET);
       });
 
    });
@@ -76,7 +64,7 @@ describe('EntityMetaData', () => {
    describe('isDocumentKind', () => {
 
       it('sets the type', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT);
 
          expect(pk.isDocumentKind).toEqual(true);
       });
@@ -86,7 +74,7 @@ describe('EntityMetaData', () => {
    describe('isExternalKind', () => {
 
       it('sets the type', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.EXTERNAL);
+         const pk = new EntityMetaData(EntityKind.EXTERNAL);
 
          expect(pk.isExternalKind).toEqual(true);
       });
@@ -96,7 +84,7 @@ describe('EntityMetaData', () => {
    describe('isExternalSubsetKind', () => {
 
       it('sets the kind', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.EXTERNALSUBSET);
+         const pk = new EntityMetaData(EntityKind.EXTERNALSUBSET);
 
          expect(pk.isExternalSubsetKind).toEqual(true);
       });
@@ -186,32 +174,32 @@ describe('EntityMetaData', () => {
       });
 
       it('sets the specified revision', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 4);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
 
          expect(pk.revision).toEqual(4);
       });
 
       it('allows a revision of 6 for 1.0', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 6);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 6);
 
          expect(pk.revision).toEqual(6);
       });
 
       it('sets a revision to 1', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 1);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1);
 
          expect(pk.revision).toEqual(1);
       });
 
       it('can change the revision to 1 when 1.1 is set', () => {
-         const pk = new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.1, 1);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 1);
 
          expect(pk.revision).toEqual(1);
       });
 
       it('throws an exception when a bad revision is passed in', () => {
          expect(() => {
-            new EntityMetaData(EntityMetaData.KIND.DOCUMENT, 1.0, 7);
+            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 7);
          }).toThrowError('Version and revision do not match. Got "1" and "7".');
       });
 

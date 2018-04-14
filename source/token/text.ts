@@ -1,6 +1,9 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import base from './base';
+import { SToken, STokenSource } from '../sToken/';
+
+type DeliverPToken = (token: TextPToken) => void;
 
 /**********************************************************************\
  The text namespace provides the Text XToken type.  This is used
@@ -14,8 +17,9 @@ import base from './base';
 const TEXT = 'TEXT';
 
 class Text extends base.XToken {
+   public text: string;
 
-   constructor(text, pToken) {
+   constructor(text: string, pToken: TextPToken) {
       super(pToken);
 
       this.text = text;
@@ -24,7 +28,9 @@ class Text extends base.XToken {
 }
 
 class TextPToken extends base.PToken {
-   constructor(props) {
+   public text: SToken;
+
+   constructor(props?: Object) {
       super(TEXT, props);
    }
 
@@ -47,7 +53,7 @@ class TextPToken extends base.PToken {
  deliverPToken: Callback to deliver the PToken
 \**********************************************************************/
 
-function parse(source, terminators, deliverPToken) {
+function parse(source: STokenSource, terminators: Array<string>, deliverPToken: DeliverPToken) {
    const pToken = new TextPToken();
 
    source.extract('all', terminators, (sToken) => {
@@ -56,7 +62,7 @@ function parse(source, terminators, deliverPToken) {
    });
 }
 
-function makeXToken(pToken) {
+function makeXToken(pToken: TextPToken) {
    return new Text(pToken.text.str, pToken);
 }
 
@@ -69,3 +75,4 @@ const text = {
 };
 
 export default text;
+export { TextPToken };
