@@ -12,6 +12,7 @@ import {
    comment,
    elementEnd,
    elementStart,
+   elementDeclaration,
    entityReference,
    notationDeclaration,
    processingInstruction,
@@ -126,6 +127,16 @@ describe('PToXTokenStream (unit)', () => {
       tokenStream.read();
 
       expect(elementEnd.pTokenToXToken).toHaveBeenCalledWith(pToken);
+   });
+
+   it('calls elementDeclaration.pTokenToXToken()', () => {
+      spyOn(elementDeclaration, 'pTokenToXToken');
+      const pToken = { type: elementDeclaration.PTYPE };
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls entityReference.pTokenToXToken() with a parameter entity reference', () => {

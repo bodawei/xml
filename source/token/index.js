@@ -12,6 +12,7 @@ import * as docTypeStart from './docTypeStart.js';
 import * as docTypeEnd from './docTypeEnd.js';
 import * as entityDeclaration from './entityDeclaration.js';
 import entityEnd from './entityEnd.js';
+import elementDeclaration from './elementDeclaration';
 import entityReference from './entityReference.js';
 import entityStart from './entityStart.js';
 import * as elementStart from './elementStart.js';
@@ -36,6 +37,7 @@ module.exports = {
    docTypeEnd,
    elementStart,
    elementEnd,
+   elementDeclaration,
    entityDeclaration,
    entityEnd,
    entityReference,

@@ -292,6 +292,12 @@ function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: Unas
    return propertyDescriptors;
 }
 
+/*
+ * In general, this assumes if it is placing a property, that property is assumed to
+ * be empty.  We don't verify.  An exception to this is spaces, since we frequently
+ * want to be sure to consume a leading space in case that's what is on the unassigned
+ * array.
+ */
 function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPToken|{}, cursor: UnassignedValueCursor) {
    for (let index = 0; index < propertyDescriptors.length; index++) {
       const nextValue = cursor.getNext();
@@ -318,7 +324,11 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
                }
                break;
             case TYPE.SPACE:
-               genericPToken[descriptor.name] = nextValue.text;
+               if (genericPToken[descriptor.name]) {
+                  genericPToken[descriptor.name].merge(nextValue.text);
+               } else {
+                  genericPToken[descriptor.name] = nextValue.text;
+               }
                break;
          }
       } else if (descriptor.type === nextValue.type) {

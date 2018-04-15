@@ -90,6 +90,10 @@ describe('PTokenStream (integration)', () => {
       expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', 'ENTITYDECL', done);
    });
 
+   it('parses an ELEMENT', (done) => {
+      expectInputToProduceTypes('<!ELEMENT myEntity EMPTY>', 'ELEMENTDECL', done);
+   });
+
    it('parse entity reference', (done) => {
       expectInputToProduceTypes('&foo;', 'ENTITYREF', done);
    });

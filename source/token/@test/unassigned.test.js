@@ -727,6 +727,25 @@ describe('unassigned (unit)', () => {
             });
          });
 
+         it('merges a leading space into the next available space, if it matches the left off property', () => {
+            const pToken = {
+               two: SToken.fromString(' '),
+            };
+            const space = unassigned.spaceFromSToken(SToken.fromString(' '));
+            const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
+            const unVals = [ space, word ];
+            const descriptors = [ {
+               name: 'two',
+               type: 'space',
+            } ];
+
+            unassigned.assignToProps(unVals, pToken, 'two', descriptors);
+
+            expect(pToken).toEqual({
+               two: SToken.fromString(' ').merge(space.text),
+            });
+         });
+
          it('merges the combination of several introduced spaces into one space', () => {
             const pToken = {};
             const space = unassigned.spaceFromSToken(SToken.fromString(' '));

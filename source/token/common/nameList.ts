@@ -271,13 +271,13 @@ function assignListOpen(nameList: NameListPToken, unValues: UnassignedArray) {
    // checkwellformed should report on #PCDATA as a bad name if not in position 0
 // @@ Myust consume space.  And will we inadvertantly consume stuff from the delimiter wrongly?
 function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedArray) {
-   let cp: ContentParticlePToken;
-   let particle: NameListPToken|NamePToken;
-   let nextUnValue = unValues[0];
-
    if (names.length > 0) {
       assignIncompleteName(names[names.length -1], unValues);
    }
+
+   let cp: ContentParticlePToken;
+   let particle: NameListPToken|NamePToken;
+   let nextUnValue = unValues[0];
 
    while (nextUnValue) {
       if (!unassigned.isTypedText(nextUnValue) || nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
@@ -315,6 +315,7 @@ function assignIncompleteName(cp: ContentParticlePToken, unValues: Array<any>) {
       ]);
       return;
    } else if (cp.particle instanceof NameListPToken) {
+      // If end up with an empty-ish namelistptoken, you'll lose a space.
       assignList(cp.particle, unValues);
    } else {
       let startProp = 'postRepeatSpace';
@@ -516,12 +517,6 @@ const REPEAT_LOOKUP_TABLE: { [key: string]: RepeatType } = {
    '+': 'ONEPLUS',
    '?': 'ZEROONE',
 }
-
-// enum REPEAT_LOOKUP_TABLE {
-//    '*' = 'ZEROPLUS',
-//    '+' = 'ONEPLUS',
-//    '?' = 'ZEROONE',
-// }
 
 function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
    const names = [];

@@ -18,6 +18,7 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
+   elementDeclaration,
    entityDeclaration,
    entityReference,
    notationDeclaration,
@@ -170,6 +171,13 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
 
             elementEnd.checkWellFormed(pToken, errorCollector, this._metaData);
+            break;
+         case elementDeclaration.PTYPE:
+            if (this._state !== STATE.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.ELEMENTDECL_INVALID_CONTEXT);
+            }
+
+            elementDeclaration.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
          case entityDeclaration.PTYPE:
             if (this._state !== STATE.IN_DTD) {

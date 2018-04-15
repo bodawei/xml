@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -18,6 +18,7 @@ import {
    docTypeEnd,
    elementStart,
    elementEnd,
+   elementDeclaration,
    entityDeclaration,
    entityReference,
    notationDeclaration,
@@ -175,6 +176,9 @@ class PTokenStream extends stream.Readable {
                         break;
                      case 'ATTLIST':
                         attListDeclaration.parse(this._sTokenSource, pToken, deliverParse);
+                        break;
+                     case 'ELEMENT':
+                        elementDeclaration.parse(this._sTokenSource, pToken, deliverParse);
                         break;
                      case 'ENTITY':
                         entityDeclaration.parse(this._sTokenSource, pToken, deliverParse);

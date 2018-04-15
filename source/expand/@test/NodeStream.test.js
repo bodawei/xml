@@ -10,7 +10,7 @@ import EntityManager from '../EntityManager.js';
 
 describe('NodeStream (unit)', () => {
 
-   function gatherResults(stream, expect) {
+function gatherResults(stream, expect) {
       stream.on('data', (item) => {
          expect(item);
       });
@@ -105,6 +105,42 @@ describe('NodeStream (unit)', () => {
             gatherResults(nodeStream, (result) => {
                expect(result.value[0]).toEqual(refToken);
             });
+         });
+
+      });
+
+      describe('element declaration processing', () => {
+
+         it('passes the element declaration through if there are no unassigned', (done) => {
+            const pToken = {
+               name: SToken.fromString('test'),
+            };
+            const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, (token) => {
+               expect(token).toEqual(declToken);
+               done();
+            });
+         });
+
+         it('processes through the unassigned values', (done) => {
+            const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('ANY')) ];
+            const pToken = {
+               name: SToken.fromString('test'),
+               unassigned: unassignedVals,
+            };
+            const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+            spyOn(xToken.elementDeclaration, 'assignUnassigned').and.callFake((pToken) => {
+               expect(pToken.unassigned).toEqual([
+                  xToken.unassigned.wordFromSToken(SToken.fromString('ANY')),
+               ]);
+            });
+
+            nodeStream.write(declToken);
+
+            gatherResults(nodeStream, done);
          });
 
       });
@@ -487,7 +523,7 @@ describe('NodeStream (unit)', () => {
       describe('notation declaration processing', () => {
 
          it('processes through the unassigned values', (done) => {
-            const unassignedVals = [ xToken.unassigned.spaceFromSToken(SToken.fromString('public')) ];
+            const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('public')) ];
             const pToken = {
                name: SToken.fromString('test'),
                unassigned: unassignedVals,
@@ -499,7 +535,7 @@ describe('NodeStream (unit)', () => {
             const declToken = new xToken.notationDeclaration.pTokenToXToken(pToken);
             spyOn(xToken.notationDeclaration, 'assignUnassigned').and.callFake((pToken) => {
                expect(pToken.unassigned).toEqual([
-                  xToken.unassigned.spaceFromSToken(SToken.fromString('public')),
+                  xToken.unassigned.wordFromSToken(SToken.fromString('public')),
                ]);
             });
 

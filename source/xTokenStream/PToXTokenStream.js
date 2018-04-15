@@ -16,6 +16,7 @@ import {
    docTypeEnd,
    elementEnd,
    elementStart,
+   elementDeclaration,
    entityDeclaration,
    entityReference,
    notationDeclaration,
@@ -72,6 +73,9 @@ class PToXTokenStream extends stream.Transform {
          case elementStart.PTYPE:
          case elementStart.EMPTY_TYPE:
             this.push(elementStart.pTokenToXToken(pToken));
+            break;
+         case elementDeclaration.PTYPE:
+            this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
          case entityDeclaration.PTYPE:
             this.push(entityDeclaration.pTokenToXToken(pToken));

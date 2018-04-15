@@ -1,0 +1,128 @@
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 80, 0, 80);
+            const makeSToken1b = makeSTokenMaker(undefined, 83, 0, 83);
+            const makeSToken2 = makeSTokenMaker();
+
+            const cpOne: ContentParticlePToken = {
+               particle: {
+                  name: makeSToken2('one'),
+                  repeat: makeSToken2('*'),
+                  postRepeatSpace: makeSToken2(' '),
+               },
+               delimiter: makeSToken2('|'),
+               postDelimiterSpace: makeSToken2(' '),
+            };
+            const cpTwo: ContentParticlePToken = {
+               particle: {
+                  name: makeSToken2('two'),
+                  postNameSpace: makeSToken2(' '),
+                  repeat: makeSToken2('+'),
+               },
+               delimiter: makeSToken2('|'),
+            };
+            const cpThree: ContentParticlePToken = {
+               particle: new nameList.PToken({
+                  open: makeSToken2('('),
+               }),
+            };
+            const cpThreeParticle: NameListPToken = cpThree.particle as NameListPToken;
+            cpThreeParticle.names.push({
+               particle: {
+                  name: makeSToken2('threeA'),
+               },
+               delimiter: makeSToken2(','),
+            });
+            cpThreeParticle.names.push({
+               particle: {
+                  name: makeSToken2('threeB'),
+                  repeat: makeSToken2('+'),
+               },
+            });
+            cpThreeParticle.close = makeSToken2(')');
+            cpThreeParticle.repeat = makeSToken2('+');
+            cpThreeParticle.postRepeatSpace = makeSToken2(' ');
+            cpThree.delimiter = makeSToken2('|');
+            const cpFour: ContentParticlePToken = {
+               particle: new nameList.PToken({
+                  open: makeSToken2('('),
+                  postOpenSpace: makeSToken2(' '),
+               }),
+            };
+
+            const cpFourParticle: NameListPToken = cpFour.particle as NameListPToken;
+            cpFourParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourA'),
+               },
+               delimiter: makeSToken2(','),
+            });
+            const cpFourB: ContentParticlePToken = {
+               particle: new nameList.PToken({
+                  open: makeSToken2('('),
+                  postOpenSpace: makeSToken2(' '),
+               }),
+            };
+            const cpFourBParticle: NameListPToken = cpFourB.particle as NameListPToken;
+            cpFourBParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourB1'),
+                  postOpenSpace: makeSToken2(' '),
+               },
+               delimiter: makeSToken2('|'),
+               postDelimiterSpace: makeSToken2(' '),
+            });
+            cpFourBParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourB2'),
+               },
+            });
+            cpFourBParticle.close = makeSToken2(')');
+            cpFourBParticle.repeat = makeSToken2('*');
+            cpFourB.delimiter = makeSToken2(',');
+            cpFourB.postDelimiterSpace = makeSToken2(' ');
+            cpFourParticle.names.push(cpFourB);
+            cpFourParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourC'),
+               },
+               delimiter: makeSToken2(','),
+            });
+            cpFourBParticle.close = makeSToken2(')');
+            cpFourBParticle.repeat = makeSToken2('*');
+
+            cpFourParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourC'),
+               },
+            });
+            cpFourParticle.close = makeSToken2(')');
+
+            cpFourParticle.names.push({
+               particle: {
+                  name: makeSToken2('fourC'),
+               },
+            });
+            cpFourParticle.close = makeSToken2(')');
+
+            const expected = new elementDeclaration.PToken({
+               name: makeSToken('AnElement'),
+               postNameSpace: makeSToken(' '),
+               children: (function() {
+                  return new nameList.PToken({
+                     open: makeSToken('('),
+                     postOpenSpace: makeSToken(' '),
+                     names: [
+                        cpOne,
+                        cpTwo,
+                        cpThree,
+                        cpFour,
+                     ],
+                     close: makeSToken1(')'),
+                     postCloseSpace: undefined,
+                     repeat: makeSToken1('?'),
+                     postRepeatSpace: makeSToken1(' '),
+                  })
+               })(),
+               close: makeSToken1b('>'),
+            });
+            console.log(JSON.stringify(result, undefined, 3));

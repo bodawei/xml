@@ -9,6 +9,7 @@ import { STokenSource } from '../sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
    attListDeclaration,
+   elementDeclaration,
    entityDeclaration,
    entityEnd,
    entityReference,
@@ -74,6 +75,9 @@ class NodeStream extends Transform {
 
             return;
          }
+      } else if (xToken instanceof elementDeclaration.XToken) {
+         this._processElementDeclaration(xToken, callback);
+         return;
       } else if (xToken instanceof notationDeclaration.XToken) {
          this._processNotationDeclaration(xToken, callback);
          return;
@@ -108,9 +112,49 @@ class NodeStream extends Transform {
     Expand PERefs
    \**********************************************************************/
 
-   // Given a PERef PToken, return an array Text, EntityStart,
-   // EntityEnd and PERef (for unexpandable oens) PTokens.
-   // Most consumers will then do further processing of the Text bits
+   /*
+    * Given an unassigned array, pull leading items off until we
+    * find an entity reference, and then expand that, and pass
+    * the leading items and the expanded value back to the caller.
+    */
+   _expandThroughNextPERef(unassignedArray, deliverExpanded) {
+      if (!unassignedArray) {
+         deliverExpanded([]);
+         return;
+      }
+
+      const expanded = [];
+
+      while (unassignedArray.length > 0) {
+         const item = unassignedArray.shift();
+
+         if (item.type === entityReference.PARAM_PTYPE) {
+            this._expandPERefFully(item, (expandedItem) => {
+               deliverExpanded(expanded, expandedItem);
+            });
+            return;
+         } else {
+            expanded.push(item);
+         }
+      }
+
+      deliverExpanded(expanded);
+   }
+
+   /*
+    * Convert a PE reference PToken into an array of an
+    * entity start, the entity value, and an entity end, or
+    * an array containing the PE reference PToken (if it cant be expanded).
+    *
+    * The entity value consists of text PTokens, as well as other
+    * entity start and end's that represent previous PE References that
+    * were expanded when the entity was stored.
+    *
+    * Most callers will do further processing on the entity value.
+    *
+    * CRUCIALLY, right now this assumes the entity value is delivered
+    * synchronously, which is not true i nthe long term.
+    */
    _expandPERefFully(peRef, deliverExpanded) {
       const itemName = peRef.name && peRef.name.str || '';
       const entityToken = this._entityManager.getParameterEntityToken(itemName);
@@ -126,51 +170,43 @@ class NodeStream extends Transform {
       }
    }
 
-   _expandThroughNextPERef(mixedArray, deliverExpanded) {
-      if (!mixedArray) {
-         deliverExpanded([]);
-         return;
-      }
-
-      const expanded = [];
-
-      while (mixedArray.length > 0) {
-         const item = mixedArray.shift();
-
-         if (item.type === entityReference.PARAM_PTYPE) {
-            this._expandPERefFully(item, (expandedItem) => {
-               deliverExpanded(expanded, expandedItem);
-            });
-            return;
-         } else {
-            expanded.push(item);
-         }
-      }
-
-      deliverExpanded(expanded);
-   }
-
    /**********************************************************************\
     Expand PERefs in unassigned arrays
    \**********************************************************************/
 
-   _expandPERefsInUnassignedValue(unassignedValues, deliverExpanded) {
-      this._expandThroughNextPERef(unassignedValues, (before, expandedPERef) => {
+   /*
+    * Given an unassigned array, replace any PE reference PTokens with
+    * their values, and deliver the expanded unassigned array to the caller.
+    */
+   _expandPERefsInUnassignedValue(pToken, includeNameListChars, done) {
+      const unassignedArray = pToken.unassigned;
+      if (!unassignedArray) {
+         done();
+         return;
+      }
+
+      this._expandThroughNextPERef(unassignedArray, (leadingUnassignedValues, expandedPERef) => {
          if (!expandedPERef) {
-            deliverExpanded(before);
+            pToken.unassigned = leadingUnassignedValues;
+            done();
             return;
          }
 
          const start = expandedPERef.shift();
          const end = expandedPERef.pop() || []; // if this was an unexpandable peref
 
-         this._parsePERefTexts(expandedPERef, (values) => {
-            deliverExpanded(before.concat(start, values, end));
+         this._parsePERefTexts(expandedPERef, includeNameListChars, (values) => {
+            pToken.unassigned = leadingUnassignedValues.concat(start, values, end, pToken.unassigned);
+            done();
          });
       });
    }
 
-   _parsePERefTexts(peRefContents, deliverValues) {
+   /*
+    * Break down the text values in the pereferences into normal
+    * unassigned values.
+    */
+   _parsePERefTexts(peRefContents, includeNameListChars, deliverValues) {
       const source = new STokenSource(defaultExtractors, new EntityMetaData());
 
       for (let index = 0; index < peRefContents.length; index++) {
@@ -183,52 +219,39 @@ class NodeStream extends Transform {
       source.endText();
 
       // setTimeout() candidate
-      unassigned.parseAllValues(source, false, deliverValues);
-   }
-
-   /**********************************************************************\
-    Notation Declaration processing
-   \**********************************************************************/
-
-   _processNotationDeclaration(ndToken, callback) {
-      if (ndToken.pToken && ndToken.pToken.unassigned) {
-         this._expandPERefsInUnassignedValue(ndToken.pToken.unassigned, (expandedUnassigned) => {
-            ndToken.pToken.unassigned = expandedUnassigned;
-            if (ndToken.pToken.externalId) {
-               ndToken.pToken.externalId.unassigned = expandedUnassigned;
-            }
-
-            notationDeclaration.assignUnassigned(ndToken.pToken);
-
-            const newNDToken = notationDeclaration.pTokenToXToken(ndToken.pToken);
-            this.push(newNDToken);
-            callback();
-         });
-      } else {
-         this.push(ndToken);
-         callback();
-      }
+      unassigned.parseAllValues(source, includeNameListChars, deliverValues);
    }
 
    /**********************************************************************\
     AttList Declaration processing
    \**********************************************************************/
 
-   _processAttListDeclaration(alToken, callback) {
-      if (alToken.pToken && alToken.pToken.unassigned) {
-         this._expandPERefsInUnassignedValue(alToken.pToken.unassigned, (expandedUnassigned) => {
-            alToken.pToken.unassigned = expandedUnassigned;
-
+   _processAttListDeclaration(alToken, done) {
+      this._expandPERefsInUnassignedValue(alToken.pToken, true, () => {
+         if (alToken.pToken.unassigned) {
             attListDeclaration.assignUnassigned(alToken.pToken);
+            alToken = attListDeclaration.pTokenToXToken(alToken.pToken);
+         }
 
-            const newALToken = attListDeclaration.pTokenToXToken(alToken.pToken);
-            this.push(newALToken);
-            callback();
-         });
-      } else {
          this.push(alToken);
-         callback();
-      }
+         done();
+      });
+   }
+
+   /**********************************************************************\
+    Element Declaration processing
+   \**********************************************************************/
+
+   _processElementDeclaration(edXToken, done) {
+      this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
+         if (edXToken.pToken.unassigned) {
+            elementDeclaration.assignUnassigned(edXToken.pToken);
+            edXToken = elementDeclaration.pTokenToXToken(edXToken.pToken);
+         }
+
+         this.push(edXToken);
+         done();
+      });
    }
 
    /**********************************************************************\
@@ -236,22 +259,17 @@ class NodeStream extends Transform {
    \**********************************************************************/
 
    _processEntityDeclaration(edToken, callback) {
-      if (edToken.pToken && edToken.pToken.unassigned) {
-         this._expandPERefsInUnassignedValue(edToken.pToken.unassigned, (parsed) => {
-            edToken.pToken.unassigned = parsed;
+      this._expandPERefsInUnassignedValue(edToken.pToken, false, () => {
+         if (edToken.pToken.unassigned) {
             entityDeclaration.assignUnassigned(edToken.pToken);
-            const newXToken = entityDeclaration.pTokenToXToken(edToken.pToken);
-            this._expandPeRefsInEntityValue(newXToken.value, (newValue) => {
-               newXToken.value = newValue;
-               this._addEntityDeclaration(newXToken, callback);
-            });
-         });
-      } else {
+            edToken = entityDeclaration.pTokenToXToken(edToken.pToken);
+         }
+
          this._expandPeRefsInEntityValue(edToken.value, (newValue) => {
             edToken.value = newValue;
             this._addEntityDeclaration(edToken, callback);
          });
-      }
+      });
    }
 
    _expandPeRefsInEntityValue(entityValue, deliverExpanded) {
@@ -276,6 +294,24 @@ class NodeStream extends Transform {
 
       this.push(edToken);
       callback();
+   }
+
+   /**********************************************************************\
+    Notation Declaration processing
+   \**********************************************************************/
+
+   _processNotationDeclaration(ndToken, callback) {
+      this._expandPERefsInUnassignedValue(ndToken.pToken, false, () => {
+         if (ndToken.pToken.unassigned) {
+            if (ndToken.pToken.externalId) {
+               ndToken.pToken.externalId.unassigned = ndToken.pToken.unassigned;
+            }
+            notationDeclaration.assignUnassigned(ndToken.pToken);
+            ndToken = notationDeclaration.pTokenToXToken(ndToken.pToken);
+         }
+         this.push(ndToken);
+         callback();
+      });
    }
 
 }

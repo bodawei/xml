@@ -22,7 +22,7 @@ const WFEID = WellFormedError.ID;
  If true is returned, then this modifies the options.pToken value.
  It does so by adding these properties to it:
    openQuote: SToken
-   value: Array<SToken|entityReference.PToken|entityReference.ParamPToken>
+   value: Array<text.PToken|entityReference.PToken|entityReference.ParamPToken>
    closeQuote: SToken|void
 \**********************************************************************/
 

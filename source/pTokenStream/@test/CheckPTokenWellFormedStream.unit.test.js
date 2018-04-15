@@ -19,6 +19,7 @@ import {
    docTypeStart,
    elementEnd,
    elementStart,
+   elementDeclaration,
    entityDeclaration,
    entityReference,
    notationDeclaration,
@@ -556,6 +557,42 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
                expect(checker.push.calls.count()).toEqual(1);  // for the pToken itself
             });
 
+         });
+
+      });
+
+   });
+
+   describe('element declaration', () => {
+
+      it('calls elementDeclaration.checkWellFormed() when encountering an ELEMENT declaration parsing', () => {
+         spyOn(elementDeclaration, 'checkWellFormed');
+         const pToken = {
+            type: elementDeclaration.PTYPE,
+            open: makeSToken('<'),
+         };
+         checker.write(metaData);
+         checker.write(pToken);
+   
+         const args = elementDeclaration.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(pToken);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not IN_DTD', () => {
+            const pToken = {
+               type: elementDeclaration.PTYPE,
+               open: makeSToken('<'),
+            };
+            checker._state = 'IN_CONTENT';
+            spyOn(checker, 'push');
+
+            checker.write(pToken);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENTDECL_INVALID_CONTEXT);
          });
 
       });

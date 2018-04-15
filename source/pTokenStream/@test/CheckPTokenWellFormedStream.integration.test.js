@@ -119,6 +119,15 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when an ELEMENT declaration has the wrong syntax', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ELEMENT elDec BOGUS>]>',
+         new WellFormedError('ELEMENTDECL_SPEC_UNKNOWN',
+            [ 'elDec', 'BOGUS' ],
+            new Offset(new EntityLocation(), 52, 0, 52),
+            new Offset(new EntityLocation(), 36, 0, 36)
+         ), done);
+   });
+
    it('reports an error when an ENTITY declaration has the wrong syntax', (done) => {
       expectInputToProduce('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY %entityName "frog">]>',
          new WellFormedError('ENTITYDECL_PERCENT_NO_TRAILING_SPACE',

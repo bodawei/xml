@@ -13,6 +13,7 @@ import {
    comment,
    docTypeStart,
    docTypeEnd,
+   elementDeclaration,
    entityDeclaration,
    elementEnd,
    elementStart,
@@ -122,6 +123,22 @@ describe('PToXTokenStream (integration)', () => {
    it('tokenizes an element end', (done) => {
       expectInputToProduce('</elementName>', [
          new elementEnd.XToken('elementName', []),
+      ], done);
+   });
+
+   it('tokenizes an ELEMENT declaration', (done) => {
+      expectInputToProduce('<!ELEMENT myElement (one,two+)*>', [
+         new elementDeclaration.XToken('myElement', 'CHILDREN', {
+            names: [{
+               name: 'one',
+               repeat: 'ONE',
+            }, {
+               name: 'two',
+               repeat: 'ONEPLUS',
+            }],
+            listType: 'SEQUENCE',
+            repeat: 'ZEROPLUS',
+          }, {}),
       ], done);
    });
 

@@ -16,6 +16,7 @@ import {
    docTypeStart,
    elementEnd,
    elementStart,
+   elementDeclaration,
    entityDeclaration,
    entityReference,
    notationDeclaration,
@@ -185,6 +186,19 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(elementEnd.parse).toHaveBeenCalled();
+         done();
+      });
+   });
+
+   it('calls elementDeclaration.parse()', (done) => {
+      spyOn(elementDeclaration, 'parse').and.callThrough();
+      pTokenStream.addText('<!ELEMENT something (one+)>');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(elementDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(elementDeclaration.parse.calls.argsFor(0)[1].declType.str).toEqual('ELEMENT');
+         expect(elementDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });

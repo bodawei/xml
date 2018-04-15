@@ -97,6 +97,72 @@ describe('NodeStream (integration)', () => {
       pTokenStream.endText();
    });
 
+   describe('attlist declaration processing', () => {
+
+      it('expands an parameter entity that makes up the attlist declaration body', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const attListDecl = results[4];
+
+            expect(attListDecl.elementName).toEqual('foo');
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % middle "foo">' +
+            '<!ATTLIST %middle;>' +
+         ']>');
+         pTokenStream.endText();
+      });
+
+   });
+
+   describe('element declaration processing', () => {
+
+      it('expands an parameter entity embedded in the content spec', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const elementDecl = results[4];
+
+            expect(elementDecl.name).toEqual('one');
+            expect(elementDecl.children).toEqual({
+               names: [ {
+                  name: 'one',
+                  repeat: 'ONE',
+               }, {
+                  name: 'two',
+                  repeat: 'ONE',
+               }, {
+                  name: 'three',
+                  repeat: 'ONE',
+               } ],
+               listType: 'CHOICE',
+               repeat: 'ONE'
+            });
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % middle "two">' +
+            '<!ELEMENT one ( one | %middle; | three)>' +
+         ']>');
+         pTokenStream.endText();
+      });
+
+   });
+
    describe('entity declaration processing', () => {
 
       it('expands an parameter entity values in an EntityValue', (done) => {
@@ -151,7 +217,7 @@ describe('NodeStream (integration)', () => {
          pTokenStream.endText();
       });
   
-      it('expands an parameter entity that makes up the entity declaration body', (done) => {
+      it('expands a parameter entity that makes up the entity declaration body', (done) => {
          const results = [];
          const manager = new EntityManager();
          const pTokenStream = new PTokenStream();
@@ -162,7 +228,7 @@ describe('NodeStream (integration)', () => {
          node.on('end', () => {
             const entityDecl = results[6];
             const values = entityDecl.value;
-
+            
             expect(entityDecl.name).toEqual('child');
             expect(values[0].text.str).toEqual('[(inner)]');
             done();
@@ -201,32 +267,6 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % url "http://somewhere.com">' +
             '<!ENTITY % middle \'PUBLIC "%url;"\'>' +
             '<!NOTATION foo %middle;>' +
-         ']>');
-         pTokenStream.endText();
-      });
-
-   });
-
-   describe('attlist declaration processing', () => {
-
-      it('expands an parameter entity that makes up the attlist declaration body', (done) => {
-         const results = [];
-         const manager = new EntityManager();
-         const pTokenStream = new PTokenStream();
-         const xTokenStream = new PToXTokenStream();
-         const node = new NodeStream(manager);
-         pTokenStream.pipe(xTokenStream).pipe(node);
-         node.on('data', (token) => results.push(token));
-         node.on('end', () => {
-            const attListDecl = results[4];
-
-            expect(attListDecl.elementName).toEqual('foo');
-            done();
-         });
-
-         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ENTITY % middle "foo">' +
-            '<!ATTLIST %middle;>' +
          ']>');
          pTokenStream.endText();
       });
