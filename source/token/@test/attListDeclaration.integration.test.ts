@@ -369,7 +369,7 @@ describe('attListDeclaration (integration)', () => {
 
       it('calls misc.checkWellFormedNameRecommendation() to report on invalid attribute names', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('elName xml-foo>');
+         source.addText('elName xml:foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(undefined, WellFormedError);

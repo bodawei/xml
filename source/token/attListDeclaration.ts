@@ -309,8 +309,8 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
 
       ec.setPos(attDef.name);
       misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);         
-      misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData,
-         WARN.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
+      misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData, true,
+         WARN.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
          WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
 
       if (attNames[attName]) {

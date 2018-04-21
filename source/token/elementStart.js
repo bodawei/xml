@@ -144,8 +144,8 @@ function checkWellFormed(pToken, ec, entityMetaData) {
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
    misc.checkName(pToken.name, ec, entityMetaData, WFEID.ELEMENT_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData,
-      WARN.ELEMENT_NAME_XMLDASH_RESERVED,
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, true,
+      WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
       WARN.ELEMENT_NAME_XML_RESERVED);
 
    ec.setPos(pToken.postNameSpace);

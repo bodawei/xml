@@ -1,6 +1,6 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../../error';
+import { WellFormedError, XmlWarning,  } from '../../error';
 
 import misc from './misc.js';
 import literal from './literal.js';
@@ -12,6 +12,7 @@ import literal from './literal.js';
 \**********************************************************************/
 
 const WFEID = WellFormedError.ID;
+const WARN = XmlWarning.ID;
 
 /**********************************************************************\
  parse() extracts the pieces of an attribute.
@@ -98,6 +99,9 @@ function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type,
 
       if (type === WFEID.NOUN_ATTRIBUTE) {
          ec.check(attrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
+         misc.checkWellFormedNameRecommendation(attr.name, ec, entityMetaData, true,
+            WARN.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+            WARN.ATTRIBUTE_NAME_XML_RESERVED);
          attrNames[nameText] = true;
       }
 

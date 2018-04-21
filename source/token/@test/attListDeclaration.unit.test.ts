@@ -905,7 +905,7 @@ describe('attListDeclaration (unit)', () => {
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(aldPToken.attDefs[0].name,
-            mockErrorCollector, emd, XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, emd, true, XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
       });
 

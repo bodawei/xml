@@ -4,7 +4,7 @@
 import { EntityMetaData } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError } from '../../error';
+import { WellFormedError, XmlWarning } from '../../error';
 
 import attribute from './attribute.js';
 import misc from './misc.js';
@@ -182,6 +182,7 @@ describe('attribute (unit)', () => {
          mockErrorCollector = new MockErrorCollector();
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(literal, 'checkWellFormed');
       });
 
@@ -228,6 +229,16 @@ describe('attribute (unit)', () => {
             params: [ 'another' ],
             lastPosition: attributesPChunk[0].postEqualSpace,
          });
+      });
+
+      it('calls the checkWellFormedNameRecommendation() function', () => {
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE, () => {});
+
+         expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
+            attributesPChunk[0].name, mockErrorCollector, emd, true,
+            XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
+            XmlWarning.ID.ATTRIBUTE_NAME_XML_RESERVED);
       });
 
       it('calls the checkName function, if provided', () => {

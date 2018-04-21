@@ -95,15 +95,20 @@ function checkNMToken(nameTokenSToken, ec, entityMetaData, errorCode) {
  version.
 \**********************************************************************/
 
-function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, v1R6Warning, otherWarning) {
+function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, elementOrAttr, v1R6Warning, otherWarning) {
    if (!nameSToken) {
       return;
    }
    const isV1R6 = entityMd.isVersion1dot0 && entityMd.revision === 6;
 
-   if (isV1R6 && nameSToken.str.substring(0, 4) === 'xml-') {
-      ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);
-   } else if (!isV1R6 && nameSToken.str.substring(0, 3).toLocaleLowerCase() === 'xml') {
+   if (isV1R6) {
+      const isProblematic = (elementOrAttr && nameSToken.str.substring(0, 4) === 'xml:') ||
+         (!elementOrAttr && nameSToken.str.substring(0, 4) === 'xml-');
+
+      if (isProblematic) {
+         ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);
+      }
+   } else if (nameSToken.str.substring(0, 3).toLocaleLowerCase() === 'xml') {
       ec.reportError(otherWarning, XmlWarning, [ nameSToken.str ]);
    }
 }

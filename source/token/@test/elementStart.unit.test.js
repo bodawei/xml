@@ -199,7 +199,7 @@ describe('elementStart (unit)', () => {
          elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementStartPToken.name,
-            mockErrorCollector, emd, XmlWarning.ID.ELEMENT_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, emd, true, XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
       });
 

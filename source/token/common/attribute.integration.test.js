@@ -1,8 +1,8 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
-import { ErrorCollector, WellFormedError } from '../../error';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -104,7 +104,7 @@ describe('attribute (integration)', () => {
          const makeSToken = makeSTokenMaker();
          preSpace = makeSToken(' ');
          ec = new ErrorCollector(undefined, WellFormedError);
-      });
+      });`
 
       it('asks misc.checkName() to complain if the name is bad', (done) => {
          source.addText('na\u0000me="value">');
@@ -114,6 +114,19 @@ describe('attribute (integration)', () => {
             attribute.checkWellFormed(parsing, ec, emd, preSpace);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
+            done();
+         });
+      });
+
+      it('asks misc.checkWellFormedNameRecommendation() to complain if the name is bad', (done) => {
+         const metaData = new EntityMetaData(undefined, 1.0, 6, undefined);
+         source.addText('xml:foo="value">');
+         source.endText();
+
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
+            attribute.checkWellFormed(parsing, ec, metaData, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+            expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED);
             done();
          });
       });

@@ -26,38 +26,50 @@ describe('misc', () => {
       });
 
       it('adds no errors if a name is not passed in', () => {
-         misc.checkWellFormedNameRecommendation(undefined, errorCollectorSpy, entityMetaData, WARN1, WARN2);
+         misc.checkWellFormedNameRecommendation(undefined, errorCollectorSpy, entityMetaData, false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if the name does not start with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
-      it('reports no error if the version is 1.0/6, and it starts with "xml"', () => {
+      it('reports no error if the version is 1.0/6, and the name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
-      it('report an error if the version is 1.0/6, and it starts with "xml-"', () => {
+      it('report an error if the version is 1.0/6, and the non-attr/element name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml-Foo' ]);
       });
 
-      it('report an error if the version is 1.0/5, and it starts with "xml"', () => {
+      it('report an error if the version is 1.0/6, and the element or attr name starts with "xml:"', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), true, WARN1, WARN2);
+         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
+      });
+
+      it('report an error if the version is 1.0/5, and the name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
-         new EntityMetaData(EntityKind.DOCUMENT, 1, 5), WARN1, WARN2);
+         new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
       });
 
-      it('report an error if the version is 1.1/5, and it starts with "xml-"', () => {
+      it('report an error if the version is 1.1/5, and the name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
+      });
+
+      it('report an error if the version is 1.1/5, and the element/attr name starts with "xml:"', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
+         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
       });
 
    });

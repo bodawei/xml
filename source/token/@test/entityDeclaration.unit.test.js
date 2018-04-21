@@ -1051,7 +1051,7 @@ describe('entityDeclaration (unit)', () => {
          entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(pToken.name,
-            mockErrorCollector, emd, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, emd, false, XmlWarning.ID.ENTITYDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
       });
 

@@ -84,7 +84,7 @@ function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
    misc.checkWellFormedText(pToken.target, ec, entityMetaData);
 
    if (!xmlOk) {
-      misc.checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData,
+      misc.checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, false,
          WARN.PI_TARGET_XMLDASH_RESERVED, WARN.PI_TARGET_XML_RESERVED);
    }
 

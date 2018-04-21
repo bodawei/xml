@@ -104,7 +104,7 @@ describe('instruction (unit)', () => {
          instruction.checkWellFormed(instructionPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation)
-            .toHaveBeenCalledWith(instructionPToken.target, mockErrorCollector, emd,
+            .toHaveBeenCalledWith(instructionPToken.target, mockErrorCollector, emd, false,
                XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
       });
 
