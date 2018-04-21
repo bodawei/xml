@@ -6,6 +6,8 @@ import {
    attListDeclaration,
    docTypeStart,
    elementStart,
+   elementEnd,
+   elementDeclaration,
    notationDeclaration,
    xmlDeclaration,
 } from '../../token';
@@ -18,6 +20,17 @@ describe('CheckXTokenValidStream (unit)', () => {
    beforeEach(() => {
       validator = new CheckXTokenValidStream();
    });
+
+   function gatherTokens(stream, cb) {
+      const tokens = [];
+
+      stream.on('data', (item) => {
+         tokens.push(item);
+      });
+      stream.on('end', () => {
+         cb(tokens);
+      });
+   }
 
    describe('_transform', () => {
 
@@ -92,6 +105,58 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(aOne);
          expect(validator.read()).toEqual(new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]));
          expect(validator.read()).toEqual(aTwo);
+      });
+
+      describe('element content', () => {
+
+         it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elStart = new elementStart.XToken('one', [], {});
+
+            validator.write(elementDecl);
+            validator.write(elStart);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.INTEROP_USE_EMPTY, [ 'one' ]));
+               done();
+            });
+         });
+
+         it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elStart = new elementStart.XToken('one', [], {});
+            const elTwo = new elementStart.XToken('one', [], {});
+
+            validator.write(elementDecl);
+            validator.write(elStart);
+            validator.write(elTwo);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
+
+               expect(tokens[3]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elStart = new elementStart.XToken('one', [], {});
+            const elTwo = new elementEnd.XToken('one', {});
+
+            validator.write(elementDecl);
+            validator.write(elStart);
+            validator.write(elTwo);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(4);
+               done();
+            });
+         });
+
       });
 
    });

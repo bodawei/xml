@@ -5,9 +5,11 @@ import stream from 'readable-stream';
 import { ValidityError, XmlWarning } from '../error';
 
 import {
+   elementDeclaration,
    attListDeclaration,
    docTypeStart,
    elementStart,
+   elementEnd,
    notationDeclaration,
 } from '../token';
 
@@ -24,9 +26,21 @@ class CheckXTokenValidStream extends stream.Transform {
       this._holding = false;
       this._notations = {};
       this._attrDefsByElementName = {};
+      this._elementDeclarations = {};
+      this._contentStack = [];
+      this._currentContext = undefined;
    }
 
    _transform(xToken, _, done) {
+      if (this._currentContext && this._currentContext.contentSpecType === 'EMPTY') {
+         if (!(xToken instanceof elementEnd.XToken)) {
+            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this._currentContext.name ],
+               xToken.pToken.open, xToken.pToken.open);
+
+            this._queued.push(error);
+         }
+      }
+
       if (xToken instanceof notationDeclaration.XToken) {
          if (this._notations[xToken.name]) {
             this._queued.push(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ xToken.name ],
@@ -36,16 +50,33 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (xToken instanceof attListDeclaration.XToken) {
          this._validateAttListDecl(xToken);
+      } else if (xToken instanceof elementDeclaration.XToken) {
+         this._elementDeclarations[xToken.name] = xToken;
       } else if (xToken instanceof docTypeStart.XToken) {
          this._docType = xToken;
          this._holding = true;
-      } else if (!this._seenRoot && xToken instanceof elementStart.XToken) {
-         if (xToken.name !== this._docType.name) {
+      } else if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
+         // if (!this._seenRoot) {
+         if (this._docType && xToken.name !== this._docType.name) {
             this._queued.unshift(
                new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this._docType.name, xToken.name ],
                   this._docType.pToken.open, this._docType.pToken.open));
          }
          this._holding = false;
+         // }
+
+         this._currentContext = this._elementDeclarations[xToken.name];
+         this._contentStack.push(this._currentContext);
+
+         if (this._currentContext && this._currentContext.contentSpecType === 'EMPTY'
+            && xToken instanceof elementStart.XToken) {
+            const warning = new XmlWarning(XmlWarning.ID.INTEROP_USE_EMPTY, [ xToken.name ],
+               xToken.pToken.open, xToken.pToken.open);
+            this._queued.push(warning);
+         }
+      } else if (xToken instanceof elementEnd.XToken) {
+         this._contentStack.pop();
+         this._currentContext = this._contentStack[this._contentStack.length - 1];
       }
 
       if (this._holding) {
