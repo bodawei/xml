@@ -583,4 +583,5 @@ export {
    NamePToken,
    NameListPToken,
    XNameList,
+   XName,
 };

@@ -283,4 +283,4 @@ const elementDeclaration = {
 };
 
 export default elementDeclaration;
-export { ElementDeclarationPToken };
+export { ElementDeclarationPToken, ElementDeclaration };

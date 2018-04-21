@@ -104,7 +104,7 @@ describe('attribute (integration)', () => {
          const makeSToken = makeSTokenMaker();
          preSpace = makeSToken(' ');
          ec = new ErrorCollector(undefined, WellFormedError);
-      });`
+      });
 
       it('asks misc.checkName() to complain if the name is bad', (done) => {
          source.addText('na\u0000me="value">');
