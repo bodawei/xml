@@ -4,11 +4,13 @@
 import { ValidityError, XmlWarning } from '../../error';
 import {
    attListDeclaration,
+   comment,
    docTypeStart,
    elementStart,
    elementEnd,
    elementDeclaration,
    notationDeclaration,
+   processingInstruction,
    xmlDeclaration,
 } from '../../token';
 
@@ -155,6 +157,143 @@ describe('CheckXTokenValidStream (unit)', () => {
                expect(tokens.length).toEqual(4);
                done();
             });
+         });
+
+         describe('mixed content', () => {
+
+            it('reports an error if any element start appears in a PCDATA-only element', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const child = new elementStart.XToken('sub', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(child);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
+
+                  expect(tokens[2]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports no error if all the provided elements match expectsions', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'one',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'two',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const elEnd = new elementEnd.XToken('one', [], {});
+               const child = new elementStart.XToken('two', [], {});
+               const childEnd = new elementEnd.XToken('two', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(elEnd);
+               validator.write(child);
+               validator.write(childEnd);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens.length).toEqual(5);
+                  done();
+               });
+            });
+
+            it('reports an error if one child element does not match any of the defined ones', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'one',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'two',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const elEnd = new elementEnd.XToken('one', [], {});
+               const child = new elementStart.XToken('two', [], {});
+               const childEnd = new elementEnd.XToken('two', [], {});
+               const thirdStart = new elementStart.XToken('three', [], {});
+               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
+
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(elStart);
+               validator.write(elEnd);
+               validator.write(child);
+               validator.write(childEnd);
+               validator.write(thirdStart);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[6]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports an error if there is a comment found in mixed content in an old version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const commentToken = new comment.XToken('stuff', {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'comment' ]);
+
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(commentToken);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports an error if there is a processing instruction found in mixed content in an old version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const pi = new processingInstruction.XToken('stuff', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'processing instruction' ]);
+
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(pi);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2]).toEqual(expected);
+                  done();
+               });
+            });
+
          });
 
       });

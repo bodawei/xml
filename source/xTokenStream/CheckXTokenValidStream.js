@@ -5,13 +5,26 @@ import stream from 'readable-stream';
 import { ValidityError, XmlWarning } from '../error';
 
 import {
+   comment,
    elementDeclaration,
    attListDeclaration,
    docTypeStart,
    elementStart,
    elementEnd,
    notationDeclaration,
+   processingInstruction,
 } from '../token';
+
+function setupContextCheck(xToken) {
+   xToken.matcherType = 'MIXED';
+   xToken.matcher = {};
+
+   xToken.children.names.forEach((item) => {
+      if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
+         xToken.matcher[item.name] = true;
+      }
+   });
+}
 
 class CheckXTokenValidStream extends stream.Transform {
 
@@ -32,10 +45,27 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    _transform(xToken, _, done) {
-      if (this._currentContext && this._currentContext.contentSpecType === 'EMPTY') {
+      const context = this._currentContext || {};
+
+      if (context.contentSpecType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
             const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this._currentContext.name ],
                xToken.pToken.open, xToken.pToken.open);
+
+            this._queued.push(error);
+         }
+      } else if (context.matcherType === 'MIXED') {
+         if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
+            if (!context.matcher[xToken.name]) {
+               const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
+                  [ context.name, xToken.name ], xToken.pToken.open, xToken.pToken.open);
+
+               this._queued.push(error);
+            }
+         } else if (xToken instanceof comment.XToken || xToken instanceof processingInstruction.XToken) {
+            const commentOrPi = xToken instanceof comment.XToken ? 'comment' : 'processing instruction';
+            const error = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI,
+               [ context.name, commentOrPi ], xToken.pToken.open, xToken.pToken.open);
 
             this._queued.push(error);
          }
@@ -52,6 +82,10 @@ class CheckXTokenValidStream extends stream.Transform {
          this._validateAttListDecl(xToken);
       } else if (xToken instanceof elementDeclaration.XToken) {
          this._elementDeclarations[xToken.name] = xToken;
+         if (xToken.children && xToken.children.names.length > 0
+            && xToken.children.names[0].name.toLocaleUpperCase() === '#PCDATA') {
+            setupContextCheck(xToken);
+         }
       } else if (xToken instanceof docTypeStart.XToken) {
          this._docType = xToken;
          this._holding = true;
