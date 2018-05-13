@@ -211,7 +211,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                gatherTokens(validator, (tokens) => {
-                  expect(tokens.length).toEqual(5);
+                  expect(tokens.length).toEqual(7);
                   done();
                });
             });
@@ -246,7 +246,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                gatherTokens(validator, (tokens) => {
-                  expect(tokens[6]).toEqual(expected);
+                  expect(tokens[8]).toEqual(expected);
                   done();
                });
             });
@@ -506,7 +506,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports an error if there is more than one ELEMENT declaration for the same element type', (done) => {
-            const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined, { open: SToken.fromString('<') });
+            const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
             const elDecl2 = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
 
             validator.write(elDecl1);
@@ -518,6 +518,81 @@ describe('CheckXTokenValidStream (unit)', () => {
                   [ 'one' ], elDecl1.pToken.open, elDecl1.pToken.open);
 
                expect(tokens[1]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports no warning all children have been declared', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('foo', 'EMPTY', undefined, {});
+            const elDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+               names: [{
+                  name: '#pcdata',
+                  repeat: 'ONE',
+               }, {
+                  name: 'foo',
+                  repeat: 'ONE',
+               }],
+               listType: 'CHOICE',
+               repeat: 'ZEROPLUS',
+            }, {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(2);
+               done();
+            });
+         });
+
+         it('reports a warning if a Mixed content spec has an undeclared child type', (done) => {
+            const elDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+               names: [{
+                  name: '#pcdata',
+                  repeat: 'ONE',
+               }, {
+                  name: 'foo',
+                  repeat: 'ONE',
+               }],
+               listType: 'CHOICE',
+               repeat: 'ZEROPLUS',
+            }, {});
+
+            validator.write(elDecl);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+                  [ 'one', 'foo' ], elDecl.pToken.open, elDecl.pToken.open);
+
+               expect(tokens[0]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports a warning if a children content spec has an undeclared child type', (done) => {
+            const elDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+               names: [{
+                  names: [{
+                     name: 'badChild',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ZEROPLUS',
+               }],
+               listType: 'CHOICE',
+               repeat: 'ZEROPLUS',
+            }, {});
+
+            validator.write(elDecl);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+                  [ 'one', 'badChild' ], elDecl.pToken.open, elDecl.pToken.open);
+
+               expect(tokens[0]).toEqual(expected);
                done();
             });
          });

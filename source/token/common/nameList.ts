@@ -518,6 +518,12 @@ const REPEAT_LOOKUP_TABLE: { [key: string]: RepeatType } = {
    '?': 'ZEROONE',
 }
 
+function isXName(value: any): value is XName {
+   if (value && value.name) {
+      return true;
+   }
+}
+
 function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
    const names = [];
    let listType: DefinitiveListType;
@@ -575,6 +581,7 @@ const nameList = {
    makeXTokenCompatible,
 
    isNamePToken,
+   isXName,
 };
 
 export default nameList;
@@ -584,4 +591,5 @@ export {
    NameListPToken,
    XNameList,
    XName,
+   isXName,
 };

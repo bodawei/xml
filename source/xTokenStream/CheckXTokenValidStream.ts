@@ -15,7 +15,7 @@ import {
    processingInstruction,
 } from '../token';
 import { AttListXToken, XAttr } from '../token/attListDeclaration';
-import { ElementDeclaration } from '../token/elementDeclaration';
+import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 
 type XToken = {
    name: string,
@@ -180,6 +180,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
       const openSToken = elDecl.pToken.open;
+      let isMixed = false;
 
       // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
       //    An element type must not be declared more than once.
@@ -191,9 +192,28 @@ class CheckXTokenValidStream extends stream.Transform {
          return;
       }
 
+      // §3.2: At user option, an XML processor may issue a warning when a declaration mentions an
+      //    element type for which no declaration is provided, but this is not an error.
+      const childNamesMap = getNamesFromList(elDecl.children);
+      const childNames = Object.keys(childNamesMap);
+      for (let index = 0; index < childNames.length; index++) {
+         const childName = childNames[index];
+
+         if (childName.toLocaleUpperCase() === '#PCDATA') {
+            isMixed = true;
+            continue;
+         }
+
+         if (!this.elementDeclarations[childName]) {
+            const err = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED, [ elDecl.name, childNames[index] ],
+               openSToken, openSToken);
+            this.queued.push(err);
+         }
+      }
+
+
       this.elementDeclarations[elDecl.name] = elDecl;
-      if (elDecl.children && elDecl.children.names.length > 0
-         && elDecl.children.names[0].name.toLocaleUpperCase() === '#PCDATA') {
+      if (elDecl.children && elDecl.children.names.length > 0 && isMixed) {
          setupContextCheck(elDecl);
       }
    }
@@ -241,5 +261,27 @@ class CheckXTokenValidStream extends stream.Transform {
       }
    }
 }
+
+type NamesMap = { [elName: string]: true };
+
+function getNamesFromList(children: XNameList): NamesMap {
+   if (!children) {
+      return {};
+   }
+
+   let childNames: NamesMap = {};
+   for (let index = 0; index < children.names.length; index++) {
+      const child = children.names[index];
+
+      if (isXName(child)) {
+         childNames[child.name] = true;
+      } else {
+         childNames = Object.assign(childNames, getNamesFromList(child)) as NamesMap;
+      }
+   }
+
+   return childNames;
+};
+
 
 export default CheckXTokenValidStream;

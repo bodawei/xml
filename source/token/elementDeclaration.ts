@@ -4,7 +4,7 @@ import { EntityMetaData } from '../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
-import nameList, { NameListPToken, XNameList } from './common/nameList';
+import nameList, { NameListPToken, XNameList, isXName } from './common/nameList';
 import misc from './common/misc.js';
 import base from './base';
 import entityReference from './entityReference';
@@ -282,5 +282,11 @@ const elementDeclaration = {
    pTokenToXToken,
 };
 
+let isNamePToken = nameList.isNamePToken;
 export default elementDeclaration;
-export { ElementDeclarationPToken, ElementDeclaration };
+export {
+   ElementDeclarationPToken,
+   ElementDeclaration,
+   XNameList,
+   isXName,
+};
