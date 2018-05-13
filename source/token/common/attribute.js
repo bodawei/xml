@@ -81,7 +81,7 @@ function addAttribute(source, attrs, options, name, deliverPToken) {
 \**********************************************************************/
 
 function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type, checkName, checkValue) {
-   const attrNames = {};
+   const seenAttrNames = {};
 
    for (let index = 0; index < pAttributes.length; index++) {
       const attr = pAttributes[index];
@@ -98,11 +98,13 @@ function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type,
       ec.setPos(attr.name);
 
       if (type === WFEID.NOUN_ATTRIBUTE) {
-         ec.check(attrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
+         // Well-formedness constraint: §3.1: Unique Att Spec
+         //    An attribute name must not appear more than once in the same start-tag or empty-element tag.
+         ec.check(seenAttrNames[nameText], WFEID.ATTRIBUTE_DUPLICATE_NAME, [ nameText ]);
          misc.checkWellFormedNameRecommendation(attr.name, ec, entityMetaData, true,
             WARN.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
             WARN.ATTRIBUTE_NAME_XML_RESERVED);
-         attrNames[nameText] = true;
+         seenAttrNames[nameText] = true;
       }
 
       misc.checkName(attr.name, ec, entityMetaData, WFEID.ATTRIBUTE_INVALID_NAME);

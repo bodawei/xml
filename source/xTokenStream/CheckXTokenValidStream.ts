@@ -15,6 +15,7 @@ import {
    processingInstruction,
 } from '../token';
 import { AttListXToken, XAttr } from '../token/attListDeclaration';
+import { ElementDeclaration } from '../token/elementDeclaration';
 
 type XToken = {
    name: string,
@@ -51,9 +52,9 @@ class CheckXTokenValidStream extends stream.Transform {
    private holding: boolean;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
-   private elementDeclarations: { [name: string]: XToken };
-   private contentStack: Array<XToken>;
-   private currentContext: XToken;
+   private elementDeclarations: { [name: string]: ElementDeclaration };
+   private contentStack: Array<ElementDeclaration>;
+   private currentContext: ElementDeclaration;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -72,16 +73,16 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
-      const context = this.currentContext || {};
+      const context = this.currentContext;
 
-      if (context.contentSpecType === 'EMPTY') {
+      if (context && context.contentSpecType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
             const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this.currentContext.name ],
                xToken.pToken.open, xToken.pToken.open);
 
             this.queued.push(error);
          }
-      } else if (context.matcherType === 'MIXED') {
+      } else if (context && context.matcherType === 'MIXED') {
          if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
             if (!context.matcher[xToken.name]) {
                const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
@@ -108,11 +109,7 @@ class CheckXTokenValidStream extends stream.Transform {
       } else if (xToken instanceof attListDeclaration.XToken) {
          this._validateAttListDecl(xToken);
       } else if (xToken instanceof elementDeclaration.XToken) {
-         this.elementDeclarations[xToken.name] = xToken;
-         if (xToken.children && xToken.children.names.length > 0
-            && xToken.children.names[0].name.toLocaleUpperCase() === '#PCDATA') {
-            setupContextCheck(xToken);
-         }
+         this.validateElementDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
          this.docType = xToken;
          this.holding = true;
@@ -128,13 +125,6 @@ class CheckXTokenValidStream extends stream.Transform {
 
          this.currentContext = this.elementDeclarations[xToken.name];
          this.contentStack.push(this.currentContext);
-
-         if (this.currentContext && this.currentContext.contentSpecType === 'EMPTY'
-            && xToken instanceof elementStart.XToken) {
-            const warning = new XmlWarning(XmlWarning.ID.INTEROP_USE_EMPTY, [ xToken.name ],
-               xToken.pToken.open, xToken.pToken.open);
-            this.queued.push(warning);
-         }
 
          this._checkelementStart(xToken);
       } else if (xToken instanceof elementEnd.XToken) {
@@ -188,26 +178,66 @@ class CheckXTokenValidStream extends stream.Transform {
       this.attrDefsByElementName[attrList.elementName] = processedAttrDefs;
    }
 
-   _checkelementStart(xToken: XToken) {
-      const elemAttrsDef = this.attrDefsByElementName[xToken.name];
-      const attributes = xToken.attributes || [];
+   private validateElementDecl(elDecl: ElementDeclaration): void {
+      const openSToken = elDecl.pToken.open;
 
-      if (!elemAttrsDef) { // This must be required somewhere...
+      // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
+      //    An element type must not be declared more than once.
+      if (this.elementDeclarations[elDecl.name]) {
+         const err = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+            [ elDecl.name ], openSToken, openSToken);
+         this.queued.push(err);
+
          return;
       }
 
-      // Validity Constraint: §3.1: Validity constraint: Attribute Value Type
-      //    The attribute must have been declared; the value must be of
-      //    the type declared for it.
-      for (let index = 0; index < attributes.length; index++) {
-         const attrName = attributes[index].name || '';
-         const pToken = xToken.pToken;
+      this.elementDeclarations[elDecl.name] = elDecl;
+      if (elDecl.children && elDecl.children.names.length > 0
+         && elDecl.children.names[0].name.toLocaleUpperCase() === '#PCDATA') {
+         setupContextCheck(elDecl);
+      }
+   }
 
-         if (!elemAttrsDef.attributes[attrName]) {
-            const err = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-               [ xToken.name, attrName ], pToken.open, pToken.open);
-            this.queued.push(err);
+   _checkelementStart(xToken: XToken) {
+      const elemAttrsDef = this.attrDefsByElementName[xToken.name];
+      const elementDecl = this.elementDeclarations[xToken.name];
+      const attributes = xToken.attributes || [];
+
+      if (elemAttrsDef) { // This must be required somewhere...
+         // Validity Constraint: §3.1: Validity constraint: Attribute Value Type
+         //    The attribute must have been declared; the value must be of
+         //    the type declared for it.
+         for (let index = 0; index < attributes.length; index++) {
+            const attrName = attributes[index].name || '';
+            const pToken = xToken.pToken;
+
+            if (!elemAttrsDef.attributes[attrName]) {
+               const err = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+                  [ xToken.name, attrName ], pToken.open, pToken.open);
+               this.queued.push(err);
+            }
          }
+      }
+
+      if (!elementDecl) {
+         return;
+      }
+
+      // Interoperability: §3.1: For interoperability, the empty-element tag should be
+      //    used, and should only be used, for elements which are declared EMPTY.
+      const tokenIsEmptyType = xToken instanceof elementStart.EmptyToken;
+      const declarationIsEmpty = elementDecl.contentSpecType === 'EMPTY';
+      let warningId;
+
+      if (tokenIsEmptyType && !declarationIsEmpty) {
+         warningId = XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL;
+      } else if (!tokenIsEmptyType && declarationIsEmpty) {
+         warningId = XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL;
+      }
+
+      if (warningId) {
+         const warning = new XmlWarning(warningId, [ xToken.name ], xToken.pToken.open, xToken.pToken.open);
+         this.queued.push(warning);
       }
    }
 }

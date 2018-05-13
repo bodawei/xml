@@ -112,20 +112,6 @@ describe('CheckXTokenValidStream (unit)', () => {
 
       describe('element content', () => {
 
-         it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
-            const elStart = new elementStart.XToken('one', [], {});
-
-            validator.write(elementDecl);
-            validator.write(elStart);
-            validator.end();
-
-            gatherTokens(validator, (tokens) => {
-               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.INTEROP_USE_EMPTY, [ 'one' ]));
-               done();
-            });
-         });
-
          it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
             const elStart = new elementStart.XToken('one', [], {});
@@ -146,12 +132,26 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
-            const elStart = new elementStart.XToken('one', [], {});
-            const elTwo = new elementEnd.XToken('one', {});
+            const elStart = new elementStart.EmptyToken('one', [], {});
 
             validator.write(elementDecl);
             validator.write(elStart);
-            validator.write(elTwo);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(2);
+               done();
+            });
+         });
+
+         it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elStart = new elementStart.XToken('one', [], {});
+            const elEnd = new elementEnd.XToken('one', {});
+
+            validator.write(elementDecl);
+            validator.write(elStart);
+            validator.write(elEnd);
             validator.end();
 
             gatherTokens(validator, (tokens) => {
@@ -409,17 +409,32 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
          });
    
+         it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            const emptyTag = new elementStart.EmptyToken('one', [], {});
+
+            validator.write(elementDecl);
+            validator.write(emptyTag);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, [ 'one' ]));
+               done();
+            });
+         });
+
       });
-   
+
       describe('EmptyElement tokens', () => {
          let attlist;
+         let element;
 
          beforeEach(() => {
             attlist = new attListDeclaration.XToken('one', [{
                name: 'first',
                type: 'CDATA',
                defaultType: 'yoiks',
-            }]);
+            }], {});
          });
 
          it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', () => {
@@ -437,6 +452,72 @@ describe('CheckXTokenValidStream (unit)', () => {
                   startToken.pToken.open, startToken.pToken.open);
 
                expect(tokens[2]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', () => {
+            element = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            const startToken = new elementStart.EmptyToken('one', [], { open: new SToken('foo', 'foo') });
+
+            validator.write(element);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new XmlWArning(XmlWarning.ID.EMPTYTAG_NON_EMPTY_DECL,
+                  [ 'one' ],
+                  startToken.pToken.open, startToken.pToken.open);
+
+               expect(tokens[2]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elStart = new elementStart.XToken('one', [], {});
+
+            validator.write(elementDecl);
+            validator.write(elStart);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL, [ 'one' ]));
+               done();
+            });
+         });
+
+      });
+
+      describe('ELEMENT', () => {
+
+         it('reports no errors if multiple ELEMENT declarations are provided', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+            const elDecl2 = new elementDeclaration.XToken('two', 'EMPTY', undefined, {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl2);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(2);
+               done();
+            });
+         });
+
+         it('reports an error if there is more than one ELEMENT declaration for the same element type', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined, { open: SToken.fromString('<') });
+            const elDecl2 = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl2);
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+                  [ 'one' ], elDecl1.pToken.open, elDecl1.pToken.open);
+
+               expect(tokens[1]).toEqual(expected);
                done();
             });
          });
