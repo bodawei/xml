@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { ValidityError, XmlWarning } from '../../error';
@@ -17,6 +17,67 @@ import {
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 
+
+function toHaveError(util) {
+   return {
+      compare: (actual, expected) => {
+         let Constructor = expected instanceof XmlWarning ? XmlWarning : ValidityError;
+         let pass = false;
+         let message;
+
+         actual.forEach((token) => {
+            if (token instanceof Constructor) {
+               pass = pass || util.equals(token, expected);
+            }
+         });
+
+         if (pass) {
+            message = `Expected not to find "${expected}".`;
+         } else {
+            message = `Expected to find "${expected}".`;
+         }
+
+         return {
+            pass: pass,
+            message: message,
+         };
+      },
+   };
+}
+
+function toBeErrorFree() {
+   return {
+      compare: (actual, expected) => {
+         let error;
+         let message;
+
+         actual.forEach((token) => {
+            if (token instanceof XmlWarning || token instanceof ValidityError) {
+               error = token;
+            }
+         });
+
+         if (!error) {
+            message = `Expected to find one or more XmlErrors.`;
+         } else {
+            message = `Expected to find no XmlErrors, but found ${error.message}.`;
+         }
+
+         return {
+            pass: !error,
+            message: message,
+         };
+      },
+   };
+}
+
+beforeEach(() => {
+   jasmine.addMatchers({
+      toHaveError,
+      toBeErrorFree,
+   });
+});
+
 describe('CheckXTokenValidStream (unit)', () => {
    let validator;
 
@@ -32,6 +93,20 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
       stream.on('end', () => {
          cb(tokens);
+      });
+   }
+
+   function expectStream(validator, expected, done) {
+      gatherTokens(validator, (tokens) => {
+         expect(tokens).toHaveError(expected);
+         done();
+      });
+   }
+
+   function expectNoErrors(validator, done) {
+      gatherTokens(validator, (tokens) => {
+         expect(tokens).toBeErrorFree();
+         done();
       });
    }
 
@@ -98,18 +173,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(nTwo);
       });
 
-      it('adds an error if the ATTLIST name shows up more than once', () => {
-         const aOne = new attListDeclaration.XToken('one', [], {});
-         const aTwo = new attListDeclaration.XToken('one', [], {});
-
-         validator.write(aOne);
-         validator.write(aTwo);
-
-         expect(validator.read()).toEqual(aOne);
-         expect(validator.read()).toEqual(new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]));
-         expect(validator.read()).toEqual(aTwo);
-      });
-
       describe('element content', () => {
 
          it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
@@ -122,12 +185,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elTwo);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
-
-               expect(tokens[3]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
+            expectStream(validator, expected, done);
          });
 
          it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
@@ -177,12 +236,8 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(child);
                validator.end();
    
-               gatherTokens(validator, (tokens) => {
-                  const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
-
-                  expect(tokens[2]).toEqual(expected);
-                  done();
-               });
+               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
+               expectStream(validator, expected, done);
             });
 
             it('reports no error if all the provided elements match expectsions', (done) => {
@@ -234,7 +289,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                const child = new elementStart.XToken('two', [], {});
                const childEnd = new elementEnd.XToken('two', [], {});
                const thirdStart = new elementStart.XToken('three', [], {});
-               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
 
                validator.write(elementDecl);
                validator.write(elStart);
@@ -245,10 +299,8 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(thirdStart);
                validator.end();
    
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[8]).toEqual(expected);
-                  done();
-               });
+               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
+               expectStream(validator, expected, done);
             });
 
             it('reports an error if there is a comment found in mixed content in an old version', (done) => {
@@ -260,17 +312,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                }, {});
                const commentToken = new comment.XToken('stuff', {});
                const elStart = new elementStart.XToken('one', [], {});
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'comment' ]);
 
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(commentToken);
                validator.end();
    
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2]).toEqual(expected);
-                  done();
-               });
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'comment' ]);
+               expectStream(validator, expected, done);
             });
 
             it('reports an error if there is a processing instruction found in mixed content in an old version', (done) => {
@@ -282,17 +331,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                }, {});
                const pi = new processingInstruction.XToken('stuff', undefined, {});
                const elStart = new elementStart.XToken('one', [], {});
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'processing instruction' ]);
 
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(pi);
                validator.end();
    
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens[2]).toEqual(expected);
-                  done();
-               });
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'processing instruction' ]);
+               expectStream(validator, expected, done);
             });
 
          });
@@ -304,109 +350,97 @@ describe('CheckXTokenValidStream (unit)', () => {
    describe('write()', () => {
 
       describe('ElementStart tokens', () => {
-         let attlist;
+         let attListDecl;
 
          beforeEach(() => {
-            attlist = new attListDeclaration.XToken('one', [{
+            attListDecl = new attListDeclaration.XToken('one', [{
                name: 'first',
                type: 'CDATA',
                defaultType: 'yoiks',
-            }]);
+            }], {});
          });
 
-         it('reports no error if the attribute is in the ATTLIST', () => {
+         it('reports no error if the attribute is in the ATTLIST', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
             const startToken = new elementStart.XToken('one', [{
                name: 'first',
                value: []
             }], { open: new SToken('foo', 'foo')});
 
-            validator.write(attlist);
+            validator.write(elementDecl);
+            validator.write(attListDecl);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(2);
-               done();
-            });
+            expectNoErrors(validator, done);
          });
 
-         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', () => {
+         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', (done) => {
             const startToken = new elementStart.XToken('one', [{
                name: 'notPresent',
                value: []
             }], { open: new SToken('foo', 'foo')});
 
-            validator.write(attlist);
+            validator.write(attListDecl);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ 'one', 'notPresent' ],
-                  startToken.pToken.open, startToken.pToken.open);
-
-               expect(tokens[2]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+               [ 'one', 'notPresent' ], startToken.pToken.open, startToken.pToken.open);
+            expectStream(validator, expected, done);
          });
 
-         it('allows for the start token to have no attributes', () => {
+         it('allows for the start token to have no attributes', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
             const startToken = new elementStart.XToken('one', undefined, { open: new SToken('foo', 'foo')});
 
-            validator.write(attlist);
+            validator.write(elementDecl);
+            validator.write(attListDecl);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(2);
-               done();
-            });
+            expectNoErrors(validator, done);
          });
 
-         it('allows for there not being an ATTLIST', () => {
+         it('allows for there not being an ATTLIST', (done) => {
             const startToken = new elementStart.XToken('one', [{
                name: 'notPresent',
                value: []
             }], { open: new SToken('foo', 'foo')});
 
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(1);
-               done();
-            });
+            expectNoErrors(validator, done);
          });
 
-         it('allows for the attribute not having a name', () => {
+         it('allows for the attribute not having a name', (done) => {
             const startToken = new elementStart.XToken('one', [{
                value: []
             }], { open: new SToken('foo', 'foo')});
 
-            validator.write(attlist);
+            validator.write(attListDecl);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ 'one', '' ]);
-
-               expect(tokens[2]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+               [ 'one', '' ]);
+            expectStream(validator, expected, done);
          });
 
-         it('allows for an empty pToken', () => {
+         it('allows for an empty pToken', (done) => {
             const startToken = new elementStart.XToken('one', [{
                name: 'notPresent',
                value: []
             }], {});
 
-            validator.write(attlist);
+            validator.write(attListDecl);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ 'one', 'notPresent' ]);
-
-               expect(tokens[2]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+               [ 'one', 'notPresent' ]);
+            expectStream(validator, expected, done);
          });
    
          it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
@@ -417,10 +451,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(emptyTag);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, [ 'one' ]));
-               done();
-            });
+            const expected = new XmlWarning(XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL, [ 'one' ]);
+            expectStream(validator, expected, done);
          });
 
       });
@@ -437,7 +469,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             }], {});
          });
 
-         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', () => {
+         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', (done) => {
             const startToken = new elementStart.EmptyToken('one', [{
                name: 'notPresent',
                value: []
@@ -445,32 +477,24 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             validator.write(attlist);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ 'one', 'notPresent' ],
-                  startToken.pToken.open, startToken.pToken.open);
-
-               expect(tokens[2]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+               [ 'one', 'notPresent' ], startToken.pToken.open, startToken.pToken.open);
+            expectStream(validator, expected, done);
          });
 
-         it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', () => {
+         it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', (done) => {
             element = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
             const startToken = new elementStart.EmptyToken('one', [], { open: new SToken('foo', 'foo') });
 
             validator.write(element);
             validator.write(startToken);
+            validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new XmlWArning(XmlWarning.ID.EMPTYTAG_NON_EMPTY_DECL,
-                  [ 'one' ],
-                  startToken.pToken.open, startToken.pToken.open);
-
-               expect(tokens[2]).toEqual(expected);
-               done();
-            });
+            const expected = new XmlWarning(XmlWarning.ID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
+               [ 'one' ], startToken.pToken.open, startToken.pToken.open);
+            expectStream(validator, expected, done);
          });
 
          it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
@@ -481,10 +505,46 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elStart);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens[1]).toEqual(new XmlWarning(XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL, [ 'one' ]));
-               done();
-            });
+            const expected = new XmlWarning(XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL, [ 'one' ]);
+            expectStream(validator, expected, done);
+         });
+
+      });
+
+      describe('ATTLIST', () => {
+
+         it('adds an error if the ATTLIST name shows up more than once', (done) => {
+            const aOne = new attListDeclaration.XToken('one', [], {});
+            const aTwo = new attListDeclaration.XToken('one', [], {});
+   
+            validator.write(aOne);
+            validator.write(aTwo);
+            validator.end();
+
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]);
+            expectStream(validator, expected, done);
+         });
+   
+         it('reports no warnings if the related ELEMENT declaration is already present', (done) => {
+            const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+            const attDecl = new attListDeclaration.XToken('elementType', [], {});
+
+            validator.write(elDecl);
+            validator.write(attDecl);
+            validator.end();
+
+            expectNoErrors(validator, done);
+         });
+
+         it('reports a warning if the related ELEMENT declaration is not present', (done) => {
+            const attListDecl = new attListDeclaration.XToken('elementType', [], {});
+
+            validator.write(attListDecl);
+            validator.end();
+
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL,
+               [ 'elementType', ], attListDecl.pToken.open, attListDecl.pToken.open);
+            expectStream(validator, expected, done);
          });
 
       });
@@ -499,10 +559,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl2);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(2);
-               done();
-            });
+            expectNoErrors(validator, done);
          });
 
          it('reports an error if there is more than one ELEMENT declaration for the same element type', (done) => {
@@ -513,13 +570,9 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl2);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
-                  [ 'one' ], elDecl1.pToken.open, elDecl1.pToken.open);
-
-               expect(tokens[1]).toEqual(expected);
-               done();
-            });
+            const expected = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
+               [ 'one' ], elDecl1.pToken.open, elDecl1.pToken.open);
+            expectStream(validator, expected, done);
          });
 
          it('reports no warning all children have been declared', (done) => {
@@ -540,10 +593,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(2);
-               done();
-            });
+            expectNoErrors(validator, done);
          });
 
          it('reports a warning if a Mixed content spec has an undeclared child type', (done) => {
@@ -562,13 +612,9 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
-                  [ 'one', 'foo' ], elDecl.pToken.open, elDecl.pToken.open);
-
-               expect(tokens[0]).toEqual(expected);
-               done();
-            });
+            const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+               [ 'one', 'foo' ], elDecl.pToken.open, elDecl.pToken.open);
+            expectStream(validator, expected, done);
          });
 
          it('reports a warning if a children content spec has an undeclared child type', (done) => {
@@ -588,13 +634,9 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl);
             validator.end();
 
-            gatherTokens(validator, (tokens) => {
-               const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
-                  [ 'one', 'badChild' ], elDecl.pToken.open, elDecl.pToken.open);
-
-               expect(tokens[0]).toEqual(expected);
-               done();
-            });
+            const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+               [ 'one', 'badChild' ], elDecl.pToken.open, elDecl.pToken.open);
+            expectStream(validator, expected, done);
          });
 
       });

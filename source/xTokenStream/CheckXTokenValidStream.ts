@@ -107,7 +107,7 @@ class CheckXTokenValidStream extends stream.Transform {
             this.notations[xToken.name] = xToken;
          }
       } else if (xToken instanceof attListDeclaration.XToken) {
-         this._validateAttListDecl(xToken);
+         this.validateAttListDecl(xToken);
       } else if (xToken instanceof elementDeclaration.XToken) {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
@@ -158,24 +158,36 @@ class CheckXTokenValidStream extends stream.Transform {
       done();
    }
 
-   _validateAttListDecl(attrList: AttListXToken) {
-      if (this.attrDefsByElementName[attrList.elementName]) {
+   private validateAttListDecl(attListDecl: AttListXToken) {
+      const openSToken = attListDecl.pToken.open;
+
+      if (this.attrDefsByElementName[attListDecl.elementName]) {
          // should include location of previous
-         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ attrList.elementName ],
-            attrList.pToken.elementName, attrList.pToken.open);
+         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ attListDecl.elementName ],
+            openSToken, openSToken);
+         this.queued.push(err);
+      }
+
+      // §3.3: At user option, an XML processor may issue a warning if attributes are declared for
+      //    an element type not itself declared, but this is not an error.
+      // Note: This takes the position that if the element wasn't declared before this, it is a warning.
+      // Conceivably this should wait until the end of the DTD and then make this assessment.
+      if (!this.elementDeclarations[attListDecl.elementName]) {
+         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL,
+            [ attListDecl.elementName ], openSToken, openSToken);
          this.queued.push(err);
       }
 
       const processedAttrDefs: AttrDefinitions = {
-         token: attrList,
+         token: attListDecl,
          attributes: {},
       };
 
-      for (let index = 0; index < attrList.attDefs.length; index++) {
-         processedAttrDefs.attributes[attrList.attDefs[index].name] = attrList.attDefs[index];
+      for (let index = 0; index < attListDecl.attDefs.length; index++) {
+         processedAttrDefs.attributes[attListDecl.attDefs[index].name] = attListDecl.attDefs[index];
       }
 
-      this.attrDefsByElementName[attrList.elementName] = processedAttrDefs;
+      this.attrDefsByElementName[attListDecl.elementName] = processedAttrDefs;
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
@@ -210,7 +222,6 @@ class CheckXTokenValidStream extends stream.Transform {
             this.queued.push(err);
          }
       }
-
 
       this.elementDeclarations[elDecl.name] = elDecl;
       if (elDecl.children && elDecl.children.names.length > 0 && isMixed) {
