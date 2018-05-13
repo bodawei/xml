@@ -441,4 +441,6 @@ export default attListDecl;
 export {
    AttListPToken,
    AttDefPToken,
+   AttListXToken,
+   XAttr,
 };

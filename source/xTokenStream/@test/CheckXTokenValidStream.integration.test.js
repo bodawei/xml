@@ -5,7 +5,7 @@ import { EntityLocation, Offset } from '../../basic';
 import { ValidityError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 
-import CheckXTokenValidStream from '../CheckXTokenValidStream.js';
+import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';
 
 describe('CheckXTokenValidStream (integration)', () => {

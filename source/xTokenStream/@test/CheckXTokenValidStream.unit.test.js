@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { ValidityError, XmlWarning } from '../../error';
+import { SToken } from '../../sToken';
 import {
    attListDeclaration,
    comment,
@@ -14,7 +15,7 @@ import {
    xmlDeclaration,
 } from '../../token';
 
-import CheckXTokenValidStream from '../CheckXTokenValidStream.js';
+import CheckXTokenValidStream from '../CheckXTokenValidStream';
 
 describe('CheckXTokenValidStream (unit)', () => {
    let validator;
@@ -294,6 +295,150 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
+         });
+
+      });
+   
+   });
+
+   describe('write()', () => {
+
+      describe('ElementStart tokens', () => {
+         let attlist;
+
+         beforeEach(() => {
+            attlist = new attListDeclaration.XToken('one', [{
+               name: 'first',
+               type: 'CDATA',
+               defaultType: 'yoiks',
+            }]);
+         });
+
+         it('reports no error if the attribute is in the ATTLIST', () => {
+            const startToken = new elementStart.XToken('one', [{
+               name: 'first',
+               value: []
+            }], { open: new SToken('foo', 'foo')});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(2);
+               done();
+            });
+         });
+
+         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', () => {
+            const startToken = new elementStart.XToken('one', [{
+               name: 'notPresent',
+               value: []
+            }], { open: new SToken('foo', 'foo')});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+                  [ 'one', 'notPresent' ],
+                  startToken.pToken.open, startToken.pToken.open);
+
+               expect(tokens[2]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('allows for the start token to have no attributes', () => {
+            const startToken = new elementStart.XToken('one', undefined, { open: new SToken('foo', 'foo')});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(2);
+               done();
+            });
+         });
+
+         it('allows for there not being an ATTLIST', () => {
+            const startToken = new elementStart.XToken('one', [{
+               name: 'notPresent',
+               value: []
+            }], { open: new SToken('foo', 'foo')});
+
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               expect(tokens.length).toEqual(1);
+               done();
+            });
+         });
+
+         it('allows for the attribute not having a name', () => {
+            const startToken = new elementStart.XToken('one', [{
+               value: []
+            }], { open: new SToken('foo', 'foo')});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+                  [ 'one', '' ]);
+
+               expect(tokens[2]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('allows for an empty pToken', () => {
+            const startToken = new elementStart.XToken('one', [{
+               name: 'notPresent',
+               value: []
+            }], {});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+                  [ 'one', 'notPresent' ]);
+
+               expect(tokens[2]).toEqual(expected);
+               done();
+            });
+         });
+   
+      });
+   
+      describe('EmptyElement tokens', () => {
+         let attlist;
+
+         beforeEach(() => {
+            attlist = new attListDeclaration.XToken('one', [{
+               name: 'first',
+               type: 'CDATA',
+               defaultType: 'yoiks',
+            }]);
+         });
+
+         it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', () => {
+            const startToken = new elementStart.EmptyToken('one', [{
+               name: 'notPresent',
+               value: []
+            }], { open: new SToken('foo', 'foo')});
+
+            validator.write(attlist);
+            validator.write(startToken);
+
+            gatherTokens(validator, (tokens) => {
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
+                  [ 'one', 'notPresent' ],
+                  startToken.pToken.open, startToken.pToken.open);
+
+               expect(tokens[2]).toEqual(expected);
+               done();
+            });
          });
 
       });

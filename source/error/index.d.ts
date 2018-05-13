@@ -11,6 +11,7 @@ declare class ErrorCollector {
 
 declare class XmlWarning {
    static ID: IDToStringMapping;
+   constructor(id: string, params: Array<string>, place?: any, contextOffset?: any);
 }
 
 type IDToStringMapping = {
@@ -22,8 +23,14 @@ declare class WellFormedError {
    constructor();
 }
 
+declare class ValidityError {
+   static ID: IDToStringMapping;
+   constructor(id: string, params: Array<string>, place?: any, contextOffset?: any);
+}
+
 export {
    ErrorCollector,
    XmlWarning,
-   WellFormedError
+   WellFormedError,
+   ValidityError,
 };
