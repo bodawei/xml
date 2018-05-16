@@ -380,7 +380,7 @@ function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaDa
 type XAttr = {
    name: string;
    type: string;
-   defaultType: string;
+   defaultType?: string;
    value?: Array<any>;
 };
 

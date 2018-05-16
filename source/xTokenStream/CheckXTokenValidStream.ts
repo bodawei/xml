@@ -35,13 +35,20 @@ type AttrDefinitions = {
    },
 }
 
-function setupContextCheck(xToken: XToken) {
-   xToken.matcherType = 'MIXED';
-   xToken.matcher = {};
+type ElementDeclInfo = {
+   token: ElementDeclaration,
+   matcherType: 'EMPTY' | 'MIXED' | 'CHILDREN' | 'EMPTY',
+   matcher: {
+      [key: string]: any
+   },
+}
 
-   xToken.children.names.forEach((item) => {
-      if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
-         xToken.matcher[item.name] = true;
+function setupContextCheck(context: ElementDeclInfo) {
+   context.token.children.names.forEach((item) => {
+      if (isXName(item)) {
+         if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
+            context.matcher[item.name] = true;
+         }
       }
    });
 }
@@ -52,9 +59,9 @@ class CheckXTokenValidStream extends stream.Transform {
    private holding: boolean;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
-   private elementDeclarations: { [name: string]: ElementDeclaration };
-   private contentStack: Array<ElementDeclaration>;
-   private currentContext: ElementDeclaration;
+   private elementDeclarations: { [name: string]: ElementDeclInfo };
+   private contentStack: Array<ElementDeclInfo>;
+   private currentContext: ElementDeclInfo;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -72,12 +79,16 @@ class CheckXTokenValidStream extends stream.Transform {
       this.currentContext = undefined;
    }
 
+   push(...args: Array<any>) {
+      super.push.apply(this, args);
+   }
+
    _transform(xToken: XToken, _: string, done: StreamCallback) {
       const context = this.currentContext;
 
-      if (context && context.contentSpecType === 'EMPTY') {
+      if (context && context.matcherType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
-            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this.currentContext.name ],
+            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this.currentContext.token.name ],
                xToken.pToken.open, xToken.pToken.open);
 
             this.queued.push(error);
@@ -86,14 +97,14 @@ class CheckXTokenValidStream extends stream.Transform {
          if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
             if (!context.matcher[xToken.name]) {
                const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                  [ context.name, xToken.name ], xToken.pToken.open, xToken.pToken.open);
+                  [ context.token.name, xToken.name ], xToken.pToken.open, xToken.pToken.open);
 
                this.queued.push(error);
             }
          } else if (xToken instanceof comment.XToken || xToken instanceof processingInstruction.XToken) {
             const commentOrPi = xToken instanceof comment.XToken ? 'comment' : 'processing instruction';
             const error = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI,
-               [ context.name, commentOrPi ], xToken.pToken.open, xToken.pToken.open);
+               [ context.token.name, commentOrPi ], xToken.pToken.open, xToken.pToken.open);
 
             this.queued.push(error);
          }
@@ -223,9 +234,14 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       }
 
-      this.elementDeclarations[elDecl.name] = elDecl;
+      this.elementDeclarations[elDecl.name] = {
+         token: elDecl,
+         matcherType: elDecl.contentSpecType === 'EMPTY' ? 'EMPTY' : 'CHILDREN',
+         matcher: {},
+      };
       if (elDecl.children && elDecl.children.names.length > 0 && isMixed) {
-         setupContextCheck(elDecl);
+         this.elementDeclarations[elDecl.name].matcherType = 'MIXED',
+         setupContextCheck(this.elementDeclarations[elDecl.name]);
       }
    }
 
@@ -257,7 +273,7 @@ class CheckXTokenValidStream extends stream.Transform {
       // Interoperability: §3.1: For interoperability, the empty-element tag should be
       //    used, and should only be used, for elements which are declared EMPTY.
       const tokenIsEmptyType = xToken instanceof elementStart.EmptyToken;
-      const declarationIsEmpty = elementDecl.contentSpecType === 'EMPTY';
+      const declarationIsEmpty = elementDecl.matcherType === 'EMPTY';
       let warningId;
 
       if (tokenIsEmptyType && !declarationIsEmpty) {

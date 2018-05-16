@@ -1,9 +1,11 @@
 /* Copyright ® 2018 by David John Burrowes. All rights reserved. */
 
+// <reference types="node"/>
+
 import stream from 'readable-stream';
 
 import tokenNs from '../token';
-import { ElementDeclaration } from '../token/elementDeclaration';
+import { ElementDeclaration, isXName } from '../token/elementDeclaration';
 import nameList, { XName, XNameList } from '../token/common/nameList';
 
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
@@ -28,6 +30,22 @@ class FixingStream extends stream.Transform {
       super({
          objectMode: true,
       });
+   }
+
+   on(...args: Array<any>) {
+      super.on.apply(this, args);
+   }
+
+   write(...args: Array<any>) {
+      super.write.apply(this, args);
+   }
+
+   end() {
+      super.end.apply(this);
+   }
+
+   push(...args: Array<any>) {
+      super.push.apply(this, args);
    }
 
    _transform(token: any, encoding: string, callback: () => {}) {
@@ -81,7 +99,7 @@ function adjustAttListDeclaration(token: any) {
  */
 const ALLOWED_CONTENT_SPEC_TYPES = [ 'ANY', 'EMPTY', 'CHILDREN' ];
 
-function adjustElementDeclaration(token: tokenNs.elementDeclaration.XToken) {
+function adjustElementDeclaration(token: ElementDeclaration) {
    const contentSpecType = token.contentSpecType || '';
    const capContentSpecType = contentSpecType.toLocaleUpperCase();
 
@@ -109,7 +127,7 @@ function putPCDataFirst(list: XNameList, topList: boolean): boolean {
    for (let index = list.names.length - 1; index >= 0; index--) {
       const item = list.names[index];
 
-      if (item.name) {
+      if (isXName(item)) {
          if (item.name.toLocaleUpperCase() === '#PCDATA') {
             seenPCData = true;
             list.names.splice(index, 1);
@@ -132,7 +150,8 @@ function putPCDataFirst(list: XNameList, topList: boolean): boolean {
 type SimpleMap = {[name:string]:boolean};
 
 function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
-   const isMixed = list.names.length > 0 && list.names[0].name === '#PCDATA';
+   const listItem = list.names[0];
+   const isMixed = list.names.length > 0 && isXName(listItem) && listItem.name === '#PCDATA';
 
    if (topList && !isMixed) {
       return;
@@ -141,7 +160,7 @@ function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
    for (let index = list.names.length - 1; index >= 0; index--) {
       const item = list.names[index];
 
-      if (!item.name) {
+      if (!isXName(item)) {
          const newChildren = flattenMixed(item, false);
          list.names.splice(index, 1, ...newChildren);
       }
@@ -149,12 +168,12 @@ function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
 
    if (topList) {
       const seenNames: SimpleMap = {};
-      const newNames = [];
+      const newNames: Array<XName> = [];
 
       for (let index = 0; index <  list.names.length; index++) {
          const item = list.names[index];
 
-         if (!seenNames[item.name]) {
+         if (isXName(item) && !seenNames[item.name]) {
             seenNames[item.name] = true;
             newNames.push(item);
             item.repeat = 'ONE';
@@ -166,7 +185,7 @@ function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
       list.repeat = list.names.length === 1 ? 'ONE' : 'ZEROPLUS';
    }
 
-   return list.names;
+   return list.names as Array<XName>;
 }
 
 export default FixingStream;

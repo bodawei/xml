@@ -24,7 +24,7 @@ import * as processingInstruction from './processingInstruction.js';
 import unassigned from './unassigned';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
-module.exports = {
+const token = {
    declaration,
    envelope,
    instruction,
@@ -50,3 +50,32 @@ module.exports = {
 
    unassigned,
 };
+
+export {
+   declaration,
+   envelope,
+   instruction,
+
+   attListDeclaration,
+   cdata,
+   charData,
+   comment,
+   docTypeStart,
+   docTypeEnd,
+   elementStart,
+   elementEnd,
+   elementDeclaration,
+   entityDeclaration,
+   entityEnd,
+   entityReference,
+   entityStart,
+   notationDeclaration,
+   processingInstruction,
+   space,
+   text,
+   xmlDeclaration,
+
+   unassigned,
+};
+
+export default token;
