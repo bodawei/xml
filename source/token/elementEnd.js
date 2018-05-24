@@ -8,6 +8,7 @@ import base from './base';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 const ELEMENT_END = 'ELEMENT_END';
+const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
@@ -18,7 +19,7 @@ class ElementEnd extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, pToken) {
-      super(pToken);
+      super(ELEMENT_END_XTOKEN, pToken);
 
       this.name = name;
    }
@@ -105,6 +106,7 @@ function pTokenToXToken(pToken) {
 
 export {
    ELEMENT_END as PTYPE,
+   ELEMENT_END_XTOKEN as XTYPE,
    ElementEnd as XToken,
    ElementEndPToken as PToken,
    parse,

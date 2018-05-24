@@ -12,9 +12,13 @@ import base from '../base';
 \**********************************************************************/
 
 const UNKNOWNENVELOPE = 'UNKNOWNENVELOPE';
+const UNKNOWNENVELOPE_XTOKEN = 'UNKNOWNENVELOPE_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 class UnknownEnvelope extends base.XToken {
+   constructor() {
+      super(UNKNOWNENVELOPE_XTOKEN, {});
+   }
 }
 
 class EnvelopePToken extends base.PToken {
@@ -116,6 +120,7 @@ function pTokenToXToken(pToken) {
 
 export {
    UNKNOWNENVELOPE as PTYPE,
+   UNKNOWNENVELOPE_XTOKEN as XTYPE,
    UnknownEnvelope as XToken,
    EnvelopePToken as PToken,
    parse,

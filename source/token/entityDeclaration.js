@@ -19,13 +19,14 @@ import literal from './common/literal.js';
 \**********************************************************************/
 
 const ENTITYDECL = 'ENTITYDECL';
+const ENTITYDECL_XTOKEN = 'ENTITYDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 
 class EntityDeclaration extends base.XToken {
 
    constructor(name, value, externalLoc, notationDataName, pToken) {
-      super(pToken);
+      super(ENTITYDECL_XTOKEN, pToken);
 
       this.name = name;
       this.value = value;
@@ -425,6 +426,7 @@ function pTokenToXToken(pToken) {
 
 export {
    ENTITYDECL as PTYPE,
+   ENTITYDECL_XTOKEN as XTYPE,
    EntityDeclarationPToken as PToken,
    ParameterEntityDeclarationPToken as ParamPToken,
    EntityDeclaration as XToken,

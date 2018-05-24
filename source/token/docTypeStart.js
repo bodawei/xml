@@ -9,6 +9,7 @@ import base from './base';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
+const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
 /**********************************************************************\
  The docTypeStart namespace contains the Token class, parser, validator
@@ -30,7 +31,7 @@ const DOCTYPE_START = 'DOCTYPE_START';
 class DocTypeStart extends base.XToken {
 
    constructor(name, externalLocation, hasInternalSubset, sTokens) {
-      super(sTokens);
+      super(DOCTYPE_START_XTOKEN, sTokens);
 
       this.name = name;
       this.externalLoc = externalLocation;
@@ -121,6 +122,7 @@ function pTokenToXToken(pToken) {
 
 export {
    DOCTYPE_START as PTYPE,
+   DOCTYPE_START_XTOKEN as XTYPE,
    DocTypeStart as XToken,
    DocTypeStartPToken as PToken,
    parse,

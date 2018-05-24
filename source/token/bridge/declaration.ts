@@ -17,9 +17,13 @@ import base, { STokenArray } from '../base';
 \**********************************************************************/
 
 const UNKNOWNDECL = 'UNKNOWNDECL';
+const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 class UnknownDeclaration extends base.XToken {
+   constructor() {
+      super(UNKNOWNDECL_XTOKEN, {});
+   }
 }
 
 class DeclarationPToken extends base.PToken {

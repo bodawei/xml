@@ -7,6 +7,7 @@ import * as envelope from './bridge/envelope.js';
 import base from './base';
 
 const CDATA = 'CDATA';
+const CDATA_XTOKEN = 'CDATA_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 /**********************************************************************\
@@ -17,7 +18,7 @@ const WFEID = WellFormedError.ID;
 class Cdata extends base.XToken {
 
    constructor(text, sTokens) {
-      super(sTokens);
+      super(CDATA_XTOKEN, sTokens);
 
       this.text = text;
    }
@@ -87,6 +88,7 @@ function pTokenToXToken(pToken) {
 
 export {
    CDATA as PTYPE,
+   CDATA_XTOKEN as XTYPE,
    Cdata as XToken,
    CdataPToken as PToken,
    parse,

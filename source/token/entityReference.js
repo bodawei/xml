@@ -13,13 +13,15 @@ import {
 \**********************************************************************/
 
 const ENTITYREF = 'ENTITYREF';
+const ENTITYREF_XTOKEN = 'ENTITYREF_XTOKEN';
 const PARAMETERENTITYREF = 'PARAMETERENTITYREF';
+const PEREF_XTOKEN = 'PEREF_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 class EntityReference extends base.XToken {
 
    constructor(name, pToken) {
-      super(pToken);
+      super(ENTITYREF_XTOKEN, pToken);
 
       this.name = name;
    }
@@ -27,6 +29,11 @@ class EntityReference extends base.XToken {
 }
 
 class ParameterEntityReference extends EntityReference {
+   constructor(name, pToken) {
+      super(name, pToken);
+
+      this.type = PEREF_XTOKEN;
+   }
 }
 
 class EntityReferencePToken extends base.PToken {
@@ -154,6 +161,8 @@ function pTokenToXToken(pToken) {
 const entityReference = {
    PTYPE: ENTITYREF,
    PARAM_PTYPE: PARAMETERENTITYREF,
+   XTYPE: ENTITYREF_XTOKEN,
+   PEREF_XTYPE: PEREF_XTOKEN,
    PToken: EntityReferencePToken,
    ParamPToken: ParameterEntityReferencePToken,
    XToken: EntityReference,

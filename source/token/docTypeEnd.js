@@ -13,8 +13,12 @@ import base from './base';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_END = 'DOCTYPE_END';
+const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
 class DocTypeEnd extends base.XToken {
+   constructor() {
+      super(DOCTYPE_END_XTOKEN, {});
+   }
 }
 
 class DocTypeEndPToken extends base.PToken {
@@ -90,6 +94,7 @@ function pTokenToXToken(pToken) {
 
 export {
    DOCTYPE_END as PTYPE,
+   DOCTYPE_END_XTOKEN as XTYPE,
    DocTypeEnd as XToken,
    DocTypeEndPToken as PToken,
    parse,

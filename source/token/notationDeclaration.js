@@ -10,6 +10,7 @@ import entityReference from './entityReference.js';
 import unassigned from './unassigned';
 
 const NOTATIONDECL = 'NOTATIONDECL';
+const NOTATIONDECL_XTOKEN = 'NOTATIONDECL_XTOKEN';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
 
@@ -21,7 +22,7 @@ const WFEID = WellFormedError.ID;
 class NotationDeclaration extends base.XToken {
 
    constructor(name, externalId, pToken) {
-      super(pToken);
+      super(NOTATIONDECL_XTOKEN, pToken);
 
       this.name = name;
       this.externalId = externalId;
@@ -185,6 +186,7 @@ function pTokenToXToken(pToken) {
 
 export {
    NOTATIONDECL as PTYPE,
+   NOTATIONDECL_XTOKEN as XTYPE,
    NotationDeclaration as XToken,
    NotationDeclarationPToken as PToken,
    parse,

@@ -6,6 +6,7 @@ import {
 import base from './base';
 
 const SPACE = 'SPACE';
+const SPACE_XTOKEN = 'SPACE_XTOKEN';
 
 /**********************************************************************\
  The comment namespace contains the usual tools for processing XML
@@ -16,7 +17,7 @@ class Space extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text, pToken) {
-      super(pToken);
+      super(SPACE_XTOKEN, pToken);
 
       this.text = text;
    }
@@ -79,6 +80,7 @@ function pTokenToXToken(pToken) {
 
 export {
    SPACE as PTYPE,
+   SPACE_XTOKEN as XTYPE,
    Space as XToken,
    SpacePToken as PToken,
    parse,

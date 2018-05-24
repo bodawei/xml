@@ -14,6 +14,7 @@ import base from './base';
 
 const WFEID = WellFormedError.ID;
 const XMLDECL = 'XMLDECL';
+const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 const XMLDECL_NAME_TERMINATORS = [ '?>' ];
 const XMLDECL_PARAMS = {
    version: 'version',
@@ -25,7 +26,7 @@ const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 class XmlDeclaration extends base.XToken {
 
    constructor(params, sTokens) {
-      super(sTokens);
+      super(XMLDECL_XTOKEN, sTokens);
       this.params = params;
    }
 
@@ -192,6 +193,7 @@ function pTokenToXToken(pToken) {
 
 export {
    XMLDECL as PTYPE,
+   XMLDECL_XTOKEN as XTYPE,
    XmlDeclarationPToken as PToken,
    XmlDeclaration as XToken,
    parse,

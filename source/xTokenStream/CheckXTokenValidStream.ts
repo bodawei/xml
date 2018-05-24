@@ -57,9 +57,7 @@ function setupContextCheck(context: ElementDeclInfo) {
 }
 
 class CheckXTokenValidStream extends stream.Transform {
-   private queued: Array<ValidityError | XmlWarning>;
    private docType: XToken | void;
-   private holding: boolean;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
    private elementDeclarations: { [name: string]: ElementDeclInfo };
@@ -72,9 +70,7 @@ class CheckXTokenValidStream extends stream.Transform {
          objectMode: true,
       });
 
-      this.queued = [];
       this.docType = undefined;
-      this.holding = false;
       this.notations = {};
       this.attrDefsByElementName = {};
       this.elementDeclarations = {};
@@ -92,32 +88,32 @@ class CheckXTokenValidStream extends stream.Transform {
 
       if (context && context.matcherType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
-            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ context.token.name ],
-               pToken, pToken);
+            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
+               [ context.token.name ], pToken);
 
-            this.queued.push(error);
+            this.push(error);
          }
       } else if (context && context.matcherType === 'MIXED') {
          if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
             if (!context.matcher[xToken.name]) {
                const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                  [ context.token.name, xToken.name ], pToken, pToken);
+                  [ context.token.name, xToken.name ], pToken);
 
-               this.queued.push(error);
+               this.push(error);
             }
          } else if (xToken instanceof comment.XToken || xToken instanceof processingInstruction.XToken) {
             const commentOrPi = xToken instanceof comment.XToken ? 'comment' : 'processing instruction';
             const error = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI,
-               [ context.token.name, commentOrPi ], pToken, pToken);
+               [ context.token.name, commentOrPi ], pToken);
 
-            this.queued.push(error);
+            this.push(error);
          }
       }
 
       if (xToken instanceof notationDeclaration.XToken) {
          if (this.notations[xToken.name]) {
-            this.queued.push(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ xToken.name ],
-               pToken, pToken));
+            this.push(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE,
+               [ xToken.name ], pToken));
          } else {
             this.notations[xToken.name] = xToken;
          }
@@ -127,15 +123,13 @@ class CheckXTokenValidStream extends stream.Transform {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
          this.docType = xToken;
-         this.holding = true;
       } else if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
          // if (!this._seenRoot) {
          if (this.docType && xToken.name !== this.docType.name) {
-            this.queued.unshift(
+            this.push(
                new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
-                  this.docType.pToken.open, this.docType.pToken.open));
+                  this.docType.pToken.open));
          }
-         this.holding = false;
          // }
 
          this.currentContext = this.elementDeclarations[xToken.name];
@@ -147,29 +141,8 @@ class CheckXTokenValidStream extends stream.Transform {
          this.currentContext = this.contentStack[this.contentStack.length - 1];
       }
 
-      if (this.holding) {
-         this.queued.push(xToken);
-      } else {
-         let token = this.queued.shift();
+      this.push(xToken);
 
-         while (token) {
-            this.push(token);
-            token = this.queued.shift();
-         }
-
-         this.push(xToken);
-      }
-
-      done();
-   }
-
-   _flush(done: StreamCallback) {
-      let token = this.queued.shift();
-
-      while (token) {
-         this.push(token);
-         token = this.queued.shift();
-      }
       done();
    }
 
@@ -181,7 +154,7 @@ class CheckXTokenValidStream extends stream.Transform {
          // should include location of previous
          const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ elName ],
             openSToken, openSToken);
-         this.queued.push(err);
+         this.push(err);
       }
 
       // §3.3: At user option, an XML processor may issue a warning if attributes are declared for
@@ -191,7 +164,7 @@ class CheckXTokenValidStream extends stream.Transform {
       if (!this.elementDeclarations[elName]) {
          const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL,
             [ elName ], openSToken, openSToken);
-         this.queued.push(err);
+         this.push(err);
       }
 
       const processedAttrDefs: AttrDefinitions = {
@@ -214,8 +187,8 @@ class CheckXTokenValidStream extends stream.Transform {
       //    An element type must not be declared more than once.
       if (this.elementDeclarations[elDecl.name]) {
          const err = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
-            [ elDecl.name ], openSToken, openSToken);
-         this.queued.push(err);
+            [ elDecl.name ], openSToken);
+         this.push(err);
 
          return;
       }
@@ -233,9 +206,9 @@ class CheckXTokenValidStream extends stream.Transform {
          }
 
          if (!this.elementDeclarations[childName]) {
-            const err = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED, [ elDecl.name, childNames[index] ],
-               openSToken, openSToken);
-            this.queued.push(err);
+            const err = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+               [ elDecl.name, childNames[index] ], openSToken);
+            this.push(err);
          }
       }
 
@@ -265,8 +238,8 @@ class CheckXTokenValidStream extends stream.Transform {
 
             if (!elemAttrsDef.attributes[attrName]) {
                const err = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ xToken.name, attrName ], pToken.open, pToken.open);
-               this.queued.push(err);
+                  [ xToken.name, attrName ], pToken.open);
+               this.push(err);
             }
          }
       }
@@ -289,7 +262,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
       if (warningId) {
          const warning = new XmlWarning(warningId, [ xToken.name ], xToken.pToken.open, xToken.pToken.open);
-         this.queued.push(warning);
+         this.push(warning);
       }
    }
 }

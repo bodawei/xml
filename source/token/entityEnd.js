@@ -7,12 +7,14 @@ import base from './base';
 \**********************************************************************/
 
 const ENTITY_END = 'ENTITY_END';
+const ENTITY_END_XTOKEN = 'ENTITY_END_XTOKEN';
 const PARAMETERENTITY_END = 'PARAMETERENTITY_END';
+const PE_END_XTOKEN = 'PE_END_XTOKEN';
 
 class EntityEnd extends base.XToken {
 
    constructor(name) {
-      super([]);
+      super(ENTITY_END_XTOKEN, []);
 
       this.name = name;
    }
@@ -20,6 +22,11 @@ class EntityEnd extends base.XToken {
 }
 
 class ParameterEntityEnd extends EntityEnd {
+   constructor(name) {
+      super(name, []);
+
+      this.type = PE_END_XTOKEN;
+   }
 }
 
 class EntityEndPToken extends base.PToken {
@@ -39,7 +46,9 @@ class ParameterEntityEndPToken extends EntityEndPToken {
 
 const entityEnd = {
    PTYPE: ENTITY_END,
+   XTYPE: ENTITY_END_XTOKEN,
    PARAM_PTYPE: PARAMETERENTITY_END,
+   PARAM_XTYPE: PE_END_XTOKEN,
    PToken: EntityEndPToken,
    XToken: EntityEnd,
    ParamPToken: ParameterEntityEndPToken,

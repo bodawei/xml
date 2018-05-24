@@ -23,8 +23,8 @@ describe('CheckXTokenValidStream (integration)', () => {
       const results = [];
       validator.on('data', result => results.push(result));
       validator.on('end', () => {
-         expect(results[2]).toEqual(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ 'one', 'two' ],
-            new Offset(new EntityLocation(), 23, 0, 23), new Offset(new EntityLocation(), 21, 0, 21)));
+         expect(results[4]).toEqual(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ 'one', 'two' ],
+            new Offset(new EntityLocation(), 23, 0, 23)));
          done();
       });
 
@@ -37,7 +37,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       validator.on('data', result => results.push(result));
       validator.on('end', () => {
          expect(results[4]).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ],
-            new Offset(new EntityLocation(), 70, 0, 70), new Offset(new EntityLocation(), 68, 0, 68)));
+            new Offset(new EntityLocation(), 70, 0, 70)));
          done();
       });
 

@@ -6,6 +6,7 @@ import misc from './common/misc.js';
 import base from './base';
 
 const COMMENT = 'COMMENT';
+const COMMENT_XTOKEN = 'COMMENT_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 /**********************************************************************\
@@ -16,7 +17,7 @@ const WFEID = WellFormedError.ID;
 class Comment extends base.XToken {
 
    constructor(text, pToken) {
-      super(pToken);
+      super(COMMENT_XTOKEN, pToken);
 
       this.text = text;
    }
@@ -139,6 +140,7 @@ function pTokenToXToken(pToken) {
 
 export {
    COMMENT as PTYPE,
+   COMMENT_XTOKEN as XTYPE,
    Comment as XToken,
    CommentPToken as PToken,
    parse,

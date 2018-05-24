@@ -15,12 +15,13 @@ import base from './base';
 
 const WFEID = WellFormedError.ID;
 const PROCESSING_INSTRUCTION = 'PROCESSING_INSTRUCTION';
+const PI_XTOKEN = 'PI_XTOKEN';
 
 class ProcessingInstruction extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(target, instruction, sTokens) {
-      super(sTokens);
+      super(PI_XTOKEN, sTokens);
 
       this.target = target;
       this.instruction = instruction;
@@ -93,6 +94,7 @@ function pTokenToXToken(pToken) {
 
 export {
    PROCESSING_INSTRUCTION as PTYPE,
+   PI_XTOKEN as XTYPE,
    ProcessingInstructionPToken as PToken,
    ProcessingInstruction as XToken,
    parse,

@@ -122,13 +122,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(xmlDecl);
       });
 
-      it('stops passing through when encountering a docTypeStart', () => {
-         const dtStart = new docTypeStart.XToken('foo', undefined, false, []);
-         validator.write(dtStart);
-
-         expect(validator.read()).toEqual(null);
-      });
-
       it('resumes passing through when encountering an elementStart after docTypeStart', () => {
          const dtStart = new docTypeStart.XToken('foo', undefined, false, []);
          const elStart = new elementStart.XToken('foo', undefined, []);
@@ -156,9 +149,9 @@ describe('CheckXTokenValidStream (unit)', () => {
          validator.write(dtStart);
          validator.write(elStart);
 
+         expect(validator.read()).toEqual(dtStart);
          expect(validator.read()).toEqual(new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE,
             [ 'docTypeName', 'elementName' ]));
-         expect(validator.read()).toEqual(dtStart);
       });
 
       it('adds an error if the NOTATION name shows up more than once', () => {

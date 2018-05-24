@@ -12,6 +12,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 import { SToken, STokenSource } from '../sToken/index';
 
 const ELEMENTDECL = 'ELEMENTDECL';
+const ELEMENTDECL_XTOKEN = 'ELEMENTDECL_XTOKEN';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
 const ALLOWED_CONTENT_SPEC = [ 'EMPTY', 'ANY' ];
@@ -31,7 +32,7 @@ class ElementDeclaration extends base.XToken {
    public children: XNameList | void;
 
    constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken) {
-      super(pToken);
+      super(ELEMENTDECL_XTOKEN, pToken);
 
       this.name = name;
       this.contentSpecType = contentSpecType;
@@ -274,6 +275,7 @@ function pTokenToXToken(pToken: ElementDeclarationPToken) {
 
 const elementDeclaration = {
    PTYPE: ELEMENTDECL,
+   XTYPE: ELEMENTDECL_XTOKEN,
    XToken: ElementDeclaration,
    PToken: ElementDeclarationPToken,
    parse,

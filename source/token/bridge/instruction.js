@@ -14,12 +14,13 @@ import base from '../base';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
 const INSTRUCTION = 'INSTRUCTION';
+const INSTRUCTION_XTOKEN = 'INSTRUCTION_XTOKEN';
 
 class InstructionToken extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(target, pToken) {
-      super(pToken);
+      super(INSTRUCTION_XTOKEN, pToken);
 
       this.target = target;
    }
@@ -102,6 +103,7 @@ function pTokenToXToken(pToken) {
 
 export {
    INSTRUCTION as PTYPE,
+   INSTRUCTION_XTOKEN as XTYPE,
    InstructionPToken as PToken,
    InstructionToken as XToken,
    parse,

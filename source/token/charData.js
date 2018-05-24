@@ -7,6 +7,7 @@ import misc from './common/misc.js';
 import base from './base';
 
 const CHARDATA = 'CHARDATA';
+const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
 
 /**********************************************************************\
  The charData namespace contains the usual tools for processing
@@ -17,7 +18,7 @@ class CharData extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text, sTokens) {
-      super(sTokens);
+      super(CHARDATA_XTOKEN, sTokens);
 
       this.text = text;
    }
@@ -87,6 +88,7 @@ function pTokenToXToken(pToken) {
 
 export {
    CHARDATA as PTYPE,
+   CHARDATA_XTOKEN as XTYPE,
    CharData as XToken,
    CharDataPToken as PToken,
    parse,

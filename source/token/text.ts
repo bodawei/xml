@@ -15,12 +15,13 @@ type DeliverPToken = (token: TextPToken) => void;
 \**********************************************************************/
 
 const TEXT = 'TEXT';
+const TEXT_XTOKEN = 'TEXT_XTOKEN';
 
 class Text extends base.XToken {
    public text: string;
 
    constructor(text: string, pToken: TextPToken) {
-      super(pToken);
+      super(TEXT_XTOKEN, pToken);
 
       this.text = text;
    }
@@ -68,6 +69,7 @@ function makeXToken(pToken: TextPToken) {
 
 const text = {
    PTYPE: TEXT,
+   XTYPE: TEXT_XTOKEN,
    PToken: TextPToken,
    XToken: Text,
    parse,

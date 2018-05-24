@@ -10,6 +10,8 @@ const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 const ELEMENT_START = 'ELEMENT_START';
 const ELEMENT_EMPTY = 'ELEMENT_EMPTY';
+const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
+const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
@@ -20,7 +22,7 @@ class ElementStart extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, attributes, pToken) {
-      super(pToken);
+      super(ELEMENT_START_XTOKEN, pToken);
 
       this.name = name;
       this.attributes = attributes;
@@ -32,7 +34,7 @@ class ElementEmpty extends base.XToken {
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name, attributes, pToken) {
-      super(pToken);
+      super(ELEMENT_EMPTY_XTOKEN, pToken);
 
       this.name = name;
       this.attributes = attributes;
@@ -170,9 +172,11 @@ function pTokenToXToken(pToken) {
 
 export {
    ELEMENT_START as PTYPE,
+   ELEMENT_START_XTOKEN as XTYPE,
    ElementStart as XToken,
    ElementStartPToken as PToken,
    ELEMENT_EMPTY as EMPTY_TYPE,
+   ELEMENT_EMPTY_XTOKEN as EMPTY_XTYPE,
    ElementEmpty as EmptyToken,
    ElementEmptyPToken as EmptyPToken,
    parse,

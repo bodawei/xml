@@ -7,12 +7,14 @@ import base from './base';
 \**********************************************************************/
 
 const ENTITY_START = 'ENTITY_START';
+const ENTITY_START_XTOKEN = 'ENTITY_START_XTOKEN';
 const PARAMETERENTITY_START = 'PARAMETERENTITY_START';
+const PENTITY_XTOKEN = 'PENTITY_XTOKEN';
 
 class EntityStart extends base.XToken {
 
    constructor(name) {
-      super([]);
+      super(ENTITY_START_XTOKEN, []);
 
       this.name = name;
    }
@@ -20,6 +22,12 @@ class EntityStart extends base.XToken {
 }
 
 class ParameterEntityStart extends EntityStart {
+
+   constructor(name) {
+      super(name);
+      this.type = PENTITY_XTOKEN;
+   }
+
 }
 
 class EntityStartPToken extends base.PToken {
@@ -39,6 +47,8 @@ class ParameterEntityStartPToken extends EntityStartPToken {
 
 const entityStart = {
    PTYPE: ENTITY_START,
+   XTYPE: ENTITY_START_XTOKEN,
+   PE_XTYPE: PENTITY_XTOKEN,
    PToken: EntityStartPToken,
    XToken: EntityStart,
    PARAM_PTYPE: PARAMETERENTITY_START,
