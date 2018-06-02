@@ -28,10 +28,14 @@ class Text extends base.XToken {
 
 }
 
-class TextPToken extends base.PToken {
-   public text: SToken;
+type PTokenProps = {
+   text: SToken,
+};
 
-   constructor(props?: Object) {
+class TextPToken extends base.PToken {
+   public text?: SToken;
+
+   constructor(props?: PTokenProps) {
       super(TEXT, props);
    }
 
@@ -64,7 +68,7 @@ function parse(source: STokenSource, terminators: Array<string>, deliverPToken: 
 }
 
 function makeXToken(pToken: TextPToken) {
-   return new Text(pToken.text.str, pToken);
+   return new Text(pToken.text ? pToken.text.str : '', pToken);
 }
 
 const text = {

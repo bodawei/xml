@@ -12,7 +12,7 @@ describe('console.json()', () => {
    });
 
    it('calls console.debug() for one argument', () => {
-      const expected = '{\n    "a": 1\n}';
+      const expected = '{\n   "a": 1\n}';
 
       console.json({ a: 1 });
 
@@ -20,7 +20,7 @@ describe('console.json()', () => {
    });
    
    it('calls console.debug() repeatedly for multiple argument', () => {
-      const expected = '{\n    "a": 1\n}';
+      const expected = '{\n   "a": 1\n}';
 
       console.json({ a: 1 }, true, 3);
 

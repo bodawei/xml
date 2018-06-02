@@ -71,6 +71,13 @@ describe('text (unit)', () => {
          expect(token).toEqual(new text.XToken('foo', textPToken));
       });
 
+      it('converts a PToken with no text into an XToken with a ""', () => {
+         delete textPToken.text;
+         const token = text.makeXToken(textPToken);
+
+         expect(token).toEqual(new text.XToken('', textPToken));
+      });
+
    });
 
 });

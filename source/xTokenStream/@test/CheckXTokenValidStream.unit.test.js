@@ -517,6 +517,30 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]);
             expectStream(validator, expected, done);
          });
+
+         it('doe snot blow up if the ATTLIST has no pToken', (done) => {
+            const aOne = new attListDeclaration.XToken('one', []);
+            const aTwo = new attListDeclaration.XToken('one', []);
+   
+            validator.write(aOne);
+            validator.write(aTwo);
+            validator.end();
+
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ 'one' ]);
+            expectStream(validator, expected, done);
+         });
+
+         it('doe snot blow up if the ATTLIST has no element name', (done) => {
+            const aOne = new attListDeclaration.XToken(undefined, []);
+            const aTwo = new attListDeclaration.XToken(undefined, []);
+   
+            validator.write(aOne);
+            validator.write(aTwo);
+            validator.end();
+
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ '' ]);
+            expectStream(validator, expected, done);
+         });
    
          it('reports no warnings if the related ELEMENT declaration is already present', (done) => {
             const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
@@ -547,6 +571,17 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('reports no errors if multiple ELEMENT declarations are provided', (done) => {
             const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
             const elDecl2 = new elementDeclaration.XToken('two', 'EMPTY', undefined, {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl2);
+            validator.end();
+
+            expectNoErrors(validator, done);
+         });
+
+         it('reports no errors if the element has no pToken', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'EMPTY', undefined);
+            const elDecl2 = new elementDeclaration.XToken('two', 'EMPTY', undefined);
 
             validator.write(elDecl1);
             validator.write(elDecl2);

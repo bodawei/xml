@@ -56,6 +56,12 @@ describe('Offset', () => {
          expect(offset1.equals(offset2)).toEqual(true);
       });
 
+      it('reports false when a nothing is passed', () => {
+         const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
+
+         expect(offset1.equals(undefined)).toEqual(false);
+      });
+
       it('reports false when ranges do not match', () => {
          const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
          const offset2 = new Offset(new EntityLocation('s', 'p'), 1, 999, 3);

@@ -51,7 +51,7 @@ describe('elementDeclaration (unit)', () => {
                elementPToken.contentSpec,
                elementPToken.postContentSpecSpace,
                elementPToken.close,
-            ];
+            ] as Array<SToken>;
 
             const result = elementPToken.getSTokenArray();
 
@@ -80,7 +80,7 @@ describe('elementDeclaration (unit)', () => {
       let nonPeRefCallback: Function;
 
       beforeEach(() => {
-         nonPeRefCallback = undefined;
+         nonPeRefCallback = () => {};
 
          callback = jasmine.createSpy('callbackSpy');
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback');
@@ -398,7 +398,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         unassignedAssignSpy.and.callFake(() => elementPToken.unassigned.pop());
+         unassignedAssignSpy.and.callFake(() => elementPToken.unassigned!.pop());
          
          elementDeclaration.assignUnassigned(elementPToken);
 
@@ -441,7 +441,7 @@ describe('elementDeclaration (unit)', () => {
          expect(declaration.checkWellFormed).toHaveBeenCalledWith(elementPToken, mockErrorCollector, emd);
       });
 
-      it('reports no errors if the notationPToken is undefined', () => {
+      it('reports no errors if the PToken is undefined', () => {
          elementDeclaration.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.errors.length).toEqual(0);
@@ -508,32 +508,32 @@ describe('elementDeclaration (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NO_SPEC,
-            params: [ elementPToken.name.str ],
+            params: [ elementPToken.name!.str ],
             position: undefined,
             lastPosition: elementPToken.postNameSpace,
          });
       });
 
       it('reports an error if the content spec was an invalid value', () => {
-         elementPToken.contentSpec.str = 'XYZ';
+         elementPToken.contentSpec!.str = 'XYZ';
 
          elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_SPEC_UNKNOWN,
-            params: [ elementPToken.name.str, 'XYZ' ],
+            params: [ elementPToken.name!.str, 'XYZ' ],
             position: elementPToken.contentSpec,
          });
       });
 
       it('reports an error if the content spec was cased wrong', () => {
-         elementPToken.contentSpec.str = 'any';
+         elementPToken.contentSpec!.str = 'any';
 
          elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_SPEC_INVALID_CASE,
-            params: [ elementPToken.name.str, 'ANY', 'any' ],
+            params: [ elementPToken.name!.str, 'ANY', 'any' ],
             position: elementPToken.contentSpec,
          });
       });
@@ -545,7 +545,7 @@ describe('elementDeclaration (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENTDECL_NO_CLOSE,
-            params: [ elementPToken.name.str ],
+            params: [ elementPToken.name!.str ],
             position: undefined,
             lastPosition: elementPToken.postContentSpecSpace,
          });

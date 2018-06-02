@@ -17,21 +17,21 @@ const WARN = XmlWarning.ID;
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
-type DeliverPToken = (pToken:AttListPToken) => void;
+type DeliverPToken = (pToken?: any) => void;
 
-class AttDefPToken {
-   public name: SToken;
-   public postNameSpace?: SToken;
-   public type?: SToken;
-   public postTypeSpace?: SToken;
-   public defaultType?: SToken;
-   public postDefaultTypeSpace?: SToken;
-   public openQuote?: SToken;
-   public value?: Array<any>;
-   public postValueSpace?: SToken;
-   public closeQuote?: SToken;
-   public postAttValueSpace?: SToken;
-   public xtra?: SToken;
+type AttDefPToken = {
+   name: SToken;
+   postNameSpace?: SToken;
+   type?: SToken;
+   postTypeSpace?: SToken;
+   defaultType?: SToken;
+   postDefaultTypeSpace?: SToken;
+   openQuote?: SToken;
+   value?: Array<any>;
+   postValueSpace?: SToken;
+   closeQuote?: SToken;
+   postAttValueSpace?: SToken;
+   xtra?: SToken;
 }
 
 class AttListPToken extends DeclarationPToken {
@@ -47,7 +47,10 @@ class AttListPToken extends DeclarationPToken {
    constructor(basePToken?: DeclarationPToken|AttListPToken|Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ATTLISTDECL_PTOKEN_TYPE, basePToken);
-      if (!this.attDefs) {
+
+      if (basePToken && 'attDefs' in basePToken) {
+         this.attDefs = basePToken.attDefs;
+      } else {
          this.attDefs = [];
       }
    }
@@ -176,14 +179,13 @@ function parseClose(source: STokenSource, pToken: AttListPToken, deliverPToken: 
 \**********************************************************************/
 
 function assignUnassigned(attLiPToken: AttListPToken) {
-   const unValues = attLiPToken.unassigned || [];
-
-   if (unValues.length === 0) {
+   if (!attLiPToken.unassigned || attLiPToken.unassigned.length === 0) {
       delete attLiPToken.unassigned;
       delete attLiPToken.nextPropName;
       return;
    }
 
+   const unValues = attLiPToken.unassigned;
    const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
 
    if (unexpandedRef.length !== 0) {
@@ -391,7 +393,7 @@ class AttListXToken {
       public elementName?: string;
       public attDefs: Array<XAttr>;
       public defaultType?: string;
-      public pToken: AttListPToken;
+      public pToken?: AttListPToken;
 
       constructor(elementName: string, attDefs: Array<XAttr>, pToken?: AttListPToken) {
          this.type = ATTLIST_XTOKEN_TYPE;

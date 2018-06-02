@@ -8,6 +8,11 @@ import base, { STokenArray } from '../base';
 import entityReference from '../entityReference.js';
 import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
+import { textOrBlank } from './/misc.js';
+import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';
+import nameListToGraph from './nameListToGraph';
+import collapseAutoTrans from './collapseAutoTrans';
+import pruneNameListGraph from './pruneNameListGraph';
 import misc from './misc.js';
 
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
@@ -16,6 +21,7 @@ const WARN = XmlWarning.ID;
 const PCDATA = '#PCDATA';
 
 type DeliverPToken = (pToken?: NameListPToken) => void;
+type InnerDeliverPToken = (pToken: NameListPToken) => void;
 
 type NameType = 'NMTOKEN' | 'NAME';
 type ListType = 'ENUMERATION' | 'NOTATION' | 'ANY' | 'MIXED';
@@ -35,7 +41,7 @@ type NamePToken = {
 }
 
 class NameListPToken extends base.PToken {
-   public open: SToken;
+   public open?: SToken;
    public postOpenSpace?: SToken;
    public names: Array<ContentParticlePToken>;
    public close?: SToken;
@@ -45,7 +51,7 @@ class NameListPToken extends base.PToken {
 
    constructor(props?: NameListPToken|Object) {
       super(NAMELIST_PTOKEN_TYPE, props);
-      this.names = this.names || [];
+      this.names = (props && 'names' in props) ? props.names : [];
    }
 
    getSTokenArray() {
@@ -63,12 +69,13 @@ class NameListPToken extends base.PToken {
             results.pushSTokens(...cp.particle.getSTokenArray());
          } else {
             results.pushSTokens(
-               cp.particle.name,
-               cp.particle.postNameSpace,
-               cp.particle.repeat,
-               cp.particle.postRepeatSpace,
+               cp.particle!.name,
+               cp.particle!.postNameSpace,
+               cp.particle!.repeat,
+               cp.particle!.postRepeatSpace,
             );
          }
+
          results.pushSTokens(
             cp.delimiter,
             cp.postDelimiterSpace,
@@ -136,7 +143,7 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
    });
 }
 
-function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: DelimiterType, deliverPToken: DeliverPToken): void {
+function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: DelimiterType, deliverPToken: InnerDeliverPToken): void {
    source.extract('peekChar', (charSToken: SToken) => {
       if (!charSToken || charSToken.str === '>' || charSToken.str === ')' || charSToken.str === '%') {
          deliverPToken(pToken);
@@ -162,7 +169,7 @@ function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: 
       pToken.names.push(particle);
 
       if (charSToken.str === '(') {
-         parse(source, 'ANY', (listPToken: NameListPToken) => {
+         parse(source, 'ANY', (listPToken?: NameListPToken) => {
             particle.particle = listPToken;
             parseDelimiter(source, pToken, particle, delimterType, deliverPToken);
          });
@@ -185,7 +192,7 @@ function parseName(source: STokenSource, wordDelims: Array<string>, deliverName:
    deliverName(namePToken);
 }
 
-function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle: ContentParticlePToken, delimiterType: DelimiterType, deliverPToken: DeliverPToken): void {
+function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle: ContentParticlePToken, delimiterType: DelimiterType, deliverPToken: InnerDeliverPToken): void {
    let delimMatch;
 
    switch (delimiterType) {
@@ -277,11 +284,11 @@ function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedAr
    let nextUnValue = unValues[0];
 
    while (nextUnValue) {
-      if (!unassigned.isTypedText(nextUnValue) || nextUnValue.subType !== 'word' || nextUnValue.text.str === ')') {
+      if (!unassigned.isTypedText(nextUnValue) || nextUnValue.subType !== 'word' || nextUnValue.text && nextUnValue.text.str === ')') {
          return;
       }
 
-      if (nextUnValue.text.str === '(') {
+      if (nextUnValue.text && nextUnValue.text.str === '(') {
          const nlPToken = new NameListPToken();
          particle = nlPToken;
          assignList(nlPToken, unValues);
@@ -371,7 +378,7 @@ function assignListClose(nameList: NameListPToken, unValues: Array<any>) {
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
+function checkWellFormed(pToken: NameListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData,
    type: string, listType?: ListType) {
    if (!pToken) {
       return;
@@ -382,8 +389,8 @@ function checkWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaD
 
 function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
    type: string, listType: ListType, isTop: boolean) {
-      let delimType: DelimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : undefined;
-      const particleType: NameType = listType === 'ENUMERATION' ? 'NMTOKEN' : 'NAME';
+   let delimType: DelimiterType | void = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : undefined;
+   const particleType: NameType = listType === 'ENUMERATION' ? 'NMTOKEN' : 'NAME';
 
    ec.setPos(pToken.open);
    ec.check(!pToken.open, WFEID.NAMELIST_NO_OPEN);
@@ -401,10 +408,11 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
       if (isNamePToken(entry.particle)) {
          ec.setPos(entry.particle.name);
-         const ucName = entry.particle.name.str.toUpperCase();
+         const namePTokenName = textOrBlank(entry.particle.name);
+         const ucName = namePTokenName.toUpperCase();
 
          if (index === 0 && listType === 'ANY' && ucName === PCDATA) {
-            ec.check(ucName !== entry.particle.name.str, WFEID.NAMELIST_PCDATA_INVALID_CASE, [ entry.particle.name.str ]);
+            ec.check(ucName !== namePTokenName, WFEID.NAMELIST_PCDATA_INVALID_CASE, [ namePTokenName ]);
             listType = 'MIXED';
             delimType = 'CHOICE';
          } else {
@@ -516,14 +524,12 @@ const REPEAT_LOOKUP_TABLE: { [key: string]: RepeatType } = {
 }
 
 function isXName(value: any): value is XName {
-   if (value && value.name) {
-      return true;
-   }
+   return value && value.name;
 }
 
 function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
    const names = [];
-   let listType: DefinitiveListType;
+   let listType: DefinitiveListType | void;
    let repetition: RepeatType;
    
    if (lType === 'ENUMERATION' || lType === 'NOTATION') {
@@ -555,7 +561,7 @@ function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameLi
       }
    }
 
-   const index = pToken.repeat && pToken.repeat.str;
+   const index = pToken.repeat ? pToken.repeat.str : '';
    return {
       names,
       listType: listType || 'CHOICE',
@@ -567,6 +573,14 @@ function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameLi
  Public Interface
 \**********************************************************************/
 
+// function processContentExpression(children: XNameList): Graph {
+//    const graph = nameListToGraph(children);
+//    collapseAutoTrans(graph);
+//    pruneNameListGraph(graph);
+
+//    return graph;
+// }
+
 const nameList = {
    PTYPE: NAMELIST_PTOKEN_TYPE,
    PToken: NameListPToken,
@@ -576,6 +590,8 @@ const nameList = {
    assignUnassigned,
    checkWellFormed,
    makeXTokenCompatible,
+
+   // processContentExpression,
 
    isNamePToken,
    isXName,

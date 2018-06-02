@@ -11,6 +11,7 @@ import unassigned from '../unassigned';
 import nameList, {
    ContentParticlePToken,
    NameListPToken,
+   NamePToken,
 } from '../common/nameList.js';
 
 describe('nameList (integration)', () => {
@@ -83,12 +84,12 @@ describe('nameList (integration)', () => {
          source.endText();
 
          nameList.parse(source, 'ANY', (result) => {
-            const listSubOne = <any>result.names[1].particle;
-            const listSubOneSubZero = listSubOne.names[0].particle;
-            const listSubOneSubZeroSubZero = listSubOneSubZero.names[0].particle;
-            expect(listSubOne.repeat.str).toEqual('?');
-            expect(listSubOneSubZero.repeat.str).toEqual('+');
-            expect(listSubOneSubZeroSubZero.name.str).toEqual('two');
+            const listSubOne = result!.names[1].particle as NameListPToken;
+            const listSubOneSubZero = listSubOne!.names[0].particle as NameListPToken;
+            const listSubOneSubZeroSubZero = listSubOneSubZero.names[0].particle as NamePToken;
+            expect(listSubOne!.repeat!.str).toEqual('?');
+            expect(listSubOneSubZero.repeat!.str).toEqual('+');
+            expect(listSubOneSubZeroSubZero.name!.str).toEqual('two');
             done();
          });
       });
@@ -148,8 +149,8 @@ describe('nameList (integration)', () => {
             secondAParticle.names.push(secondAOne);
             secondAParticle.names.push(secondATwo);
             secondAParticle.close = makeSToken(')');
-            secondA.particle.repeat = makeSToken('+');
-            secondA.particle.postRepeatSpace = makeSToken(' ');
+            secondA.particle!.repeat = makeSToken('+');
+            secondA.particle!.postRepeatSpace = makeSToken(' ');
             secondA.delimiter = makeSToken(',');
             secondA.postDelimiterSpace = makeSToken(' ');
             const secondB: ContentParticlePToken = {
@@ -160,8 +161,8 @@ describe('nameList (integration)', () => {
             secondParticle.names.push(secondA);
             secondParticle.names.push(secondB);
             secondParticle.close = makeSToken(')');
-            second.particle.repeat = makeSToken('?');
-            second.particle.postRepeatSpace = makeSToken(' ');
+            second.particle!.repeat = makeSToken('?');
+            second.particle!.postRepeatSpace = makeSToken(' ');
             second.delimiter = makeSToken('|');
             second.postDelimiterSpace = makeSToken(' ');
             expected.names.push(second);
@@ -173,7 +174,7 @@ describe('nameList (integration)', () => {
             expected.names.push(third);
             expected.close = makeSToken(')');
 
-            nameList.assignUnassigned(listToken, unassignedValues);
+            nameList.assignUnassigned(listToken, unassignedValues!);
 
             expect(listToken).toEqual(expected);
             done();

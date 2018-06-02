@@ -231,7 +231,7 @@ function parseAllValues(source: STokenSource, includeNameListChars: boolean, del
  may not skip over a value in the unassignedValues array.
 \**********************************************************************/
 
-function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPToken|{}, leftOff: string, propertyDescriptors: DescriptorArray) {
+function assignToProps(unassignedValues: UnassignedArray, pToken: UnassignedPToken|{}, leftOff: string | void, propertyDescriptors: DescriptorArray) {
    const valueCursor = new UnassignedValueCursor(unassignedValues);
    const allDescriptors = propertyDescriptors.slice(0);
    const startPropName = leftOff || propertyDescriptors[0].name;
@@ -383,7 +383,7 @@ class UnassignedValueCursor {
          let nextValue = this._peekValue();
 
          while (nextValue && isTypedText(nextValue) && nextValue.subType === TYPE.SPACE) {
-            candidatePToken.text.merge(nextValue.text);
+            candidatePToken!.text!.merge(nextValue.text!); // ick
             this.values.shift();
             nextValue = this._peekValue();
          }
@@ -434,8 +434,8 @@ function spaceFromSToken(sToken: SToken) {
    return pToken;
 }
 
-function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: ({}) => void, otherwise: () => void): (values: UnassignedArray) => void {
-   return (unassignedValues: UnassignedArray) => {
+function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: (pToken: any) => void, otherwise: () => void): DeliverUnassignedArray {
+   return (unassignedValues?: UnassignedArray) => {
       if (unassignedValues) {
          pToken.nextPropName = propName;
          pToken.unassigned = unassignedValues;
@@ -454,7 +454,9 @@ function getSTokens(unassignedArray: UnassignedArray) {
       const value = unassignedArray[index];
 
       if (isTypedText(value)) {
-         tokens.push(value.text);
+         if (value.text) {
+            tokens.push(value.text);
+         }
       } else if (isLiteral(value)) {
          tokens = tokens.concat(literal.getSTokens(value));
       } else if (value.type == 'PARAMETERENTITYREF') {

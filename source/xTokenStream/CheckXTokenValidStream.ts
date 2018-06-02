@@ -16,6 +16,8 @@ import {
 } from '../token';
 import { AttListXToken, XAttr } from '../token/attListDeclaration';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
+import nameList, { XName } from '../token/common/nameList';
+import { Graph } from '../token/common/nameListGraphTypes';
 
 type XToken = {
    name: string,
@@ -37,23 +39,36 @@ type AttrDefinitions = {
 
 type ElementDeclInfo = {
    token: ElementDeclaration,
-   matcherType: 'EMPTY' | 'MIXED' | 'CHILDREN' | 'EMPTY',
-   matcher: {
+   matcherType: 'EMPTY' | 'MIXED' | 'CHILDREN' | 'ANY',
+   mixedMatcher: {
       [key: string]: any
+   },
+   childrenMatcher?: {
+      currentStateId: number,
+      graph: Graph,
    },
 }
 
 function setupContextCheck(context: ElementDeclInfo) {
-   if (!context.token.children) {
-      return;
+   // if (!context.token.children) {
+   //    return;
+   // }
+
+   if (context.matcherType === 'MIXED' && context.token.children) {
+      const names: Array<XName> = context.token.children.names as Array<XName>;
+      names.forEach((item: XName) => {
+         // if (isXName(item)) {
+            if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
+               context.mixedMatcher[item.name] = true;
+            }
+         // }
+      });
    }
-   context.token.children.names.forEach((item) => {
-      if (isXName(item)) {
-         if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
-            context.matcher[item.name] = true;
-         }
-      }
-   });
+
+   // context.childrenMatcher = {
+   //    currentStateId: 0,
+   //    graph: nameList.processContentExpression(context.token.children)
+   // }
 }
 
 class CheckXTokenValidStream extends stream.Transform {
@@ -95,7 +110,7 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (context && context.matcherType === 'MIXED') {
          if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
-            if (!context.matcher[xToken.name]) {
+            if (!context.mixedMatcher[xToken.name]) {
                const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
                   [ context.token.name, xToken.name ], pToken);
 
@@ -108,6 +123,21 @@ class CheckXTokenValidStream extends stream.Transform {
 
             this.push(error);
          }
+      // } else if (context && context.matcherType === 'CHILDREN') {
+      //    if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
+      //       const matcher = context.childrenMatcher;
+      //       const currentState = matcher.graph.states[matcher.currentStateId];
+      //       const destState = currentState.trans[xToken.name];
+
+      //       if (!destState) {
+      //          const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
+      //             [ context.token.name, xToken.name ], pToken);
+
+      //          this.push(error);
+      //       } else {
+      //          matcher.currentStateId = destState.stateId;
+      //       }
+      //    }
       }
 
       if (xToken instanceof notationDeclaration.XToken) {
@@ -147,7 +177,7 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    private validateAttListDecl(attListDecl: AttListXToken) {
-      const openSToken = attListDecl.pToken.open;
+      const openSToken = attListDecl.pToken ? attListDecl.pToken.open : undefined;
       const elName = attListDecl.elementName || '';
 
       if (this.attrDefsByElementName[elName]) {
@@ -180,7 +210,7 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
-      const openSToken = elDecl.pToken ? elDecl.pToken.open : undefined;
+      const openSToken = elDecl.pToken.open;
       let isMixed = false;
 
       // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
@@ -212,13 +242,19 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       }
 
+      const matcherType = elDecl.contentSpecType === 'EMPTY' || elDecl.contentSpecType === 'ANY'
+         ? elDecl.contentSpecType : 'CHILDREN';
+
       this.elementDeclarations[elDecl.name] = {
          token: elDecl,
-         matcherType: elDecl.contentSpecType === 'EMPTY' ? 'EMPTY' : 'CHILDREN',
-         matcher: {},
+         matcherType,
+         mixedMatcher: {},
       };
-      if (elDecl.children && elDecl.children.names.length > 0 && isMixed) {
-         this.elementDeclarations[elDecl.name].matcherType = 'MIXED',
+      if (elDecl.children && elDecl.children.names.length > 0) {
+         if (isMixed) {
+            this.elementDeclarations[elDecl.name].matcherType = 'MIXED';
+         }
+
          setupContextCheck(this.elementDeclarations[elDecl.name]);
       }
    }

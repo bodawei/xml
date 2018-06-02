@@ -201,6 +201,10 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
+            if (!pToken) {
+               throw new Error('Unexpected undefined PToken.');
+            }
+
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),
@@ -229,6 +233,10 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
+            if (!pToken) {
+               throw new Error('Unexpected undefined PToken.');
+            }
+
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),
@@ -276,6 +284,10 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
+            if (!pToken) {
+               throw new Error('Unexpected undefined PToken.');
+            }
+
             // "expand" what should be there.
             pToken.unassigned = [
                new entityStart.ParamPToken({}),
@@ -305,12 +317,12 @@ describe('attListDeclaration (integration)', () => {
             };
             // work around some kind of ts issue
             const expected = new attListDeclaration.PToken(rawExpected);
-            expected.attDefs[0].postTypeSpace.str += ' ';
-            expected.attDefs[0].postTypeSpace.originalStr += ' ';
-            expected.attDefs[0].postTypeSpace.ranges.push(helper.makeInsertedRange());
-            expected.attDefs[1].postDefaultTypeSpace.str += ' ';
-            expected.attDefs[1].postDefaultTypeSpace.originalStr += ' ';
-            expected.attDefs[1].postDefaultTypeSpace.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[0].postTypeSpace!.str += ' ';
+            expected.attDefs[0].postTypeSpace!.originalStr += ' ';
+            expected.attDefs[0].postTypeSpace!.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[1].postDefaultTypeSpace!.str += ' ';
+            expected.attDefs[1].postDefaultTypeSpace!.originalStr += ' ';
+            expected.attDefs[1].postDefaultTypeSpace!.ranges.push(helper.makeInsertedRange());
 
             attListDeclaration.assignUnassigned(pToken);
 
@@ -390,8 +402,12 @@ describe('attListDeclaration (integration)', () => {
          source.addText('foo>');
          source.endText();
 
-         attListDeclaration.parse(source, declarationPToken, (parsing) => {
-            const token = attListDeclaration.pTokenToXToken(parsing);
+         attListDeclaration.parse(source, declarationPToken, (pToken) => {
+            if (!pToken) {
+               throw new Error('Unexpected undefined PToken.');
+            }
+
+            const token = attListDeclaration.pTokenToXToken(pToken);
 
             token.pToken = new attListDeclaration.PToken();
             expect(token).toEqual(new attListDeclaration.XToken('foo', [], token.pToken));

@@ -1,7 +1,5 @@
 /* Copyright ® 2018 by David John Burrowes. All rights reserved. */
 
-// <reference types="node"/>
-
 import stream from 'readable-stream';
 
 import tokenNs from '../token';
@@ -30,22 +28,6 @@ class FixingStream extends stream.Transform {
       super({
          objectMode: true,
       });
-   }
-
-   on(...args: Array<any>) {
-      super.on.apply(this, args);
-   }
-
-   write(...args: Array<any>) {
-      super.write.apply(this, args);
-   }
-
-   end() {
-      super.end.apply(this);
-   }
-
-   push(...args: Array<any>) {
-      super.push.apply(this, args);
    }
 
    _transform(token: any, encoding: string, callback: () => {}) {

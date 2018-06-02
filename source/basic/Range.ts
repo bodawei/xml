@@ -19,7 +19,7 @@ import Offset from './Offset.js';
 \**********************************************************************/
 
 class Range {
-   public location?: EntityLocation;
+   public location: EntityLocation | void;
    public startIndex: number;
    public startRow: number;
    public startColumn: number;

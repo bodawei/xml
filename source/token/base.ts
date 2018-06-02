@@ -11,17 +11,18 @@ declare class STokenArray extends Array<SToken> {
    public pushSTokens(...STokens: Array<SToken|void>):void;
 };
 
-function pushIfNotVoid(...items: Array<SToken|void>) {
+function pushIfNotVoid(this: STokenArray, ...items: Array<SToken|void>) {
    for (let index = 0; index < items.length; index++) {
-      if (items[index] !== undefined && items[index] !== null) {
-         this.push(items[index]);
+      const item = items[index]
+      if (item) {
+         this.push(item);
       }
    }
 }
 
 class BaseXToken {
    public readonly type: string;
-   public pToken?: BaseParsedToken;
+   public pToken: BaseParsedToken;
 
    constructor(type: string, pToken: BaseParsedToken) {
       // if (typeof type !== 'string') {
@@ -56,13 +57,13 @@ class BaseParsedToken {
    }
 
    getSTokenArray(): STokenArray {
-      const results: STokenArray = [] as STokenArray;
+      const results: any = [];
       results.pushSTokens = pushIfNotVoid.bind(results);
       Object.defineProperty(results, 'pushSTokens', {
          enumerable: false,
       });
 
-      return <STokenArray> results;
+      return results as STokenArray;
    }
 }
 

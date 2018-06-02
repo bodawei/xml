@@ -4,6 +4,7 @@
 
 import { EntityMetaData } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
+import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
@@ -35,6 +36,7 @@ describe('docTypeStart (unit)', () => {
             const pToken = new docTypeStart.PToken(docTypeStartPToken);
 
             expect(pToken.getSTokenArray()).toEqual([
+               SToken.fromString(''),
                docTypeStartPToken.name,
                docTypeStartPToken.postNameSpace,
                docTypeStartPToken.postExternalIdSpace,

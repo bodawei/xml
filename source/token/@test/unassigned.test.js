@@ -900,6 +900,35 @@ describe('unassigned (unit)', () => {
          expect(unVals.length).toEqual(2);
       });
 
+      it('copes with tokens missing actual text', () => {
+         const pToken = {};
+         const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
+         const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
+         const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
+         delete space.text;
+         delete word1.text;
+         delete word2.text;
+         const unVals = [ word1, space, word2 ];
+         const descriptors = [ {
+            name: 'one',
+            type: 'word',
+         }, {
+            name: 'two',
+            type: 'space',
+         }, {
+            name: 'three',
+            type: 'word',
+         } ];
+
+         unassigned.assignToProps(unVals, pToken, 'one', descriptors);
+
+         expect(pToken).toEqual({
+            one: undefined,
+            two: undefined,
+            three: undefined,
+         });
+      });
+
    });
 
    describe('spaceFromSToken()', () => {
@@ -993,6 +1022,16 @@ describe('unassigned (unit)', () => {
          expect(result).toEqual([
             SToken.fromString('foo'),
          ]);
+      });
+
+      it('skips a word with no actual text in it (type workaround)', () => {
+         const badWord = unassigned.wordFromSToken(SToken.fromString('foo'));
+         delete badWord.text;
+         const result = unassigned.getSTokens([
+            badWord,
+         ]);
+
+         expect(result).toEqual([]);
       });
 
       it('returns STokens for a space', () => {

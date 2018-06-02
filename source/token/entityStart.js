@@ -24,6 +24,7 @@ class EntityStart extends base.XToken {
 class ParameterEntityStart extends EntityStart {
 
    constructor(name) {
+      /* istanbul ignore next */
       super(name);
       this.type = PENTITY_XTOKEN;
    }

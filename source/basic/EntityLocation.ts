@@ -75,7 +75,7 @@ class EntityLocation {
    }
 
    _getSystemProtocol() {
-      const matchResults = RELATIVE_REGEX.exec(this.systemId);
+      const matchResults = RELATIVE_REGEX.exec(this.systemId)!;
       return matchResults[1];
    }
 

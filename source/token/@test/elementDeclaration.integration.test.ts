@@ -154,6 +154,11 @@ describe('elementDeclaration (integration)', () => {
 
 const PARSE_TEST_EXPECTED = {
    type: 'ELEMENTDECL',
+   open: {
+      str: '',
+      originalStr: '',
+      ranges: []
+   },
    name: {
       str: 'AnElement',
       originalStr: 'AnElement',

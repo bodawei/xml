@@ -2,7 +2,7 @@
 
 import { EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
-import { SToken, STokenSource } from '../../stoken';
+import { SToken, STokenSource } from '../../sToken';
 
 import {
    textOrBlank,
@@ -21,19 +21,25 @@ const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 class UnknownDeclaration extends base.XToken {
-   constructor() {
-      super(UNKNOWNDECL_XTOKEN, {});
+   constructor(pToken: DeclarationPToken) {
+      super(UNKNOWNDECL_XTOKEN, pToken);
    }
 }
 
 class DeclarationPToken extends base.PToken {
-   public open?: SToken;
+   public open: SToken;
    public postOpenSpace?: SToken;
    public declType?: SToken;
    public postDeclTypeSpace?: SToken;
    
-   constructor(type?: string, props?: Object) {
+   constructor(type?: string, props?: any) {
       super(type || UNKNOWNDECL, props);
+
+      if (props && 'open' in props) {
+         this.open = props.open;
+      } else {
+         this.open = SToken.fromString('');
+      }
    }
 
    getSTokenArray(): STokenArray {
@@ -113,6 +119,7 @@ function pTokenToXToken(pToken: DeclarationPToken): UnknownDeclaration {
 
 const declaration = {
    PTYPE: UNKNOWNDECL,
+   XTYPE: UNKNOWNDECL_XTOKEN,
    XToken: UnknownDeclaration,
    PToken: DeclarationPToken,
    parse,

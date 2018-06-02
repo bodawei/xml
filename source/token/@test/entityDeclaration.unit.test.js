@@ -49,6 +49,7 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns all the STokens', () => {
             expect(entityDeclarationPToken.getSTokenArray()).toEqual([
+               SToken.fromString(''),
                entityDeclarationPToken.name,
                entityDeclarationPToken.postNameSpace,
                entityDeclarationPToken.postExternalIdSpace,

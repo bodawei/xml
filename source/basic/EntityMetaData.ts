@@ -31,12 +31,12 @@ class EntityMetaData {
    public location: EntityLocation;
    public type: string;
    private _kind: string;
-   private _version: XmlVersion;
-   private _revision: XmlRevision;
+   private _version: XmlVersion = 1.0;
+   private _revision: XmlRevision = 5;
 
    constructor(entityKind?: EntityKind, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
       this.type = EntityMetaData.PTYPE;
-      this._setKind(entityKind || EntityKind.DOCUMENT);
+      this._kind = entityKind || EntityKind.DOCUMENT;
       this.version = xmlVersion;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
       this.location = location || new EntityLocation();
@@ -45,10 +45,6 @@ class EntityMetaData {
    /**********************************************************************\
     type: When setting the type, make sure it is a legal value.
    \**********************************************************************/
-
-   _setKind(newValue: EntityKind) {
-      this._kind = newValue;
-   }
 
    get kind(): string {
       return this._kind;

@@ -218,8 +218,8 @@ describe('nameList (unit)', () => {
             [ undefined, 'multi', [ '?', '*', '+' ] ],
             [ undefined, 'space' ],
          ]);
-         nlPToken.names[0].delimiter.str = ',';
-         nlPToken.names[0].delimiter.originalStr = ',';
+         nlPToken.names[0].delimiter!.str = ',';
+         nlPToken.names[0].delimiter!.originalStr = ',';
 
          nameList.parse(mockSource, 'ANY', callback);
          mockSource.respondInAsyncTime();
@@ -282,8 +282,8 @@ describe('nameList (unit)', () => {
             [ undefined, 'multi', [ '?', '*', '+' ] ],
             [ undefined, 'space' ],
          ]);
-         nlPToken.names[0].delimiter.str = ',';
-         nlPToken.names[0].delimiter.originalStr = ',';
+         nlPToken.names[0].delimiter!.str = ',';
+         nlPToken.names[0].delimiter!.originalStr = ',';
 
          nameList.parse(mockSource, 'ANY', callback);
          mockSource.respondInAsyncTime();
@@ -980,7 +980,7 @@ describe('nameList (unit)', () => {
                id: WellFormedError.ID.NAMELIST_NO_DELIM,
                params: [ '0', 'xxx' ],
                position: undefined,
-               lastPosition: nlPToken.names[0].particle.postRepeatSpace
+               lastPosition: nlPToken.names[0].particle!.postRepeatSpace
                ,
             });
          });
@@ -1099,12 +1099,12 @@ describe('nameList (unit)', () => {
             const particle = nlPToken.names[0].particle;
             let expectedNameList: NameListPToken;
             if (!nameList.isNamePToken(particle)) {
-               expectedNameList = particle;
+               expectedNameList = particle!;
             };
-            const subParticle = expectedNameList.names[1].particle;
+            const subParticle = expectedNameList!.names[1].particle;
             let expectedSubParticleList: NameListPToken;
             if (!nameList.isNamePToken(subParticle)) {
-               expectedSubParticleList = subParticle;
+               expectedSubParticleList = subParticle!;
             };
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
@@ -1112,7 +1112,7 @@ describe('nameList (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_CLOSE_EXTRA_SPACE,
                params: undefined,
-               position: expectedSubParticleList.postCloseSpace,
+               position: expectedSubParticleList!.postCloseSpace,
             });
          });
 
@@ -1158,7 +1158,7 @@ describe('nameList (unit)', () => {
             const particle = nlPToken.names[1].particle;
             let expectedNameList: NameListPToken;
             if (!nameList.isNamePToken(particle)) {
-               expectedNameList = particle;
+               expectedNameList = particle!;
             };
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
@@ -1166,19 +1166,19 @@ describe('nameList (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_INVALID_SUBPARTICLE,
                params: [ '1', 'xxx' ],
-               position: expectedNameList.open,
+               position: expectedNameList!.open,
             });
          });
 
          it('reports an error if there is a repeat indicator after a name', () => {
-            nlPToken.names[0].particle.repeat = SToken.fromString('*');
+            nlPToken.names[0].particle!.repeat = SToken.fromString('*');
    
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
    
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NAME_EXTRA_REPEAT,
                params: [ '0', 'xxx', '*' ],
-               position: nlPToken.names[0].particle.repeat,
+               position: nlPToken.names[0].particle!.repeat,
             });
          });
 
@@ -1235,7 +1235,7 @@ describe('nameList (unit)', () => {
             const particle = nlPToken.names[1].particle;
             let expectedNameList: NameListPToken;
             if (!nameList.isNamePToken(particle)) {
-               expectedNameList = particle;
+               expectedNameList = particle!;
             };
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
@@ -1243,19 +1243,19 @@ describe('nameList (unit)', () => {
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_INVALID_SUBPARTICLE,
                params: [ '1', 'xxx' ],
-               position: expectedNameList.open,
+               position: expectedNameList!.open,
             });
          });
 
          it('reports an error if there is a repeat indicator after a nmtoken', () => {
-            nlPToken.names[0].particle.repeat = SToken.fromString('*');
+            nlPToken.names[0].particle!.repeat = SToken.fromString('*');
    
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
    
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NAME_EXTRA_REPEAT,
                params: [ '0', 'xxx', '*' ],
-               position: nlPToken.names[0].particle.repeat,
+               position: nlPToken.names[0].particle!.repeat,
             });
          });
 
@@ -1332,14 +1332,14 @@ describe('nameList (unit)', () => {
          it('reports an error if there is a repeat indicator after a name', () => {
             const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
-            nlPToken.names[1].particle.repeat = SToken.fromString('*');
+            nlPToken.names[1].particle!.repeat = SToken.fromString('*');
    
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
    
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_MIXED_NAME_EXTRA_REPEAT,
                params: [ '1', '*' ],
-               position: nlPToken.names[1].particle.repeat,
+               position: nlPToken.names[1].particle!.repeat,
             });
          });
 
@@ -1359,7 +1359,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if there is any non-* repeat indicator on a #PCDATA list of > 1 item', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = nlPToken.names[0].particle as NamePToken;
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.repeat = SToken.fromString('+');
    
@@ -1389,7 +1389,7 @@ describe('nameList (unit)', () => {
             const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             delete namePToken.postNameSpace;
-            delete nlPToken.names[0].particle.repeat;
+            delete nlPToken.names[0].particle!.repeat;
 
             nlPToken.repeat = SToken.fromString('*');
    

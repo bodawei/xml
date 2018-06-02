@@ -31,7 +31,7 @@ class ElementDeclaration extends base.XToken {
    public contentSpecType: string; // if not malformed, would only be ContentSpecType
    public children: XNameList | void;
 
-   constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken) {
+   constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken = {} as ElementDeclarationPToken) {
       super(ELEMENTDECL_XTOKEN, pToken);
 
       this.name = name;
@@ -129,7 +129,7 @@ function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken
             return;
          }
 
-         nameList.parse(source, 'ANY', (nameList: NameListPToken) => {
+         nameList.parse(source, 'ANY', (nameList?: NameListPToken) => {
             pToken.children = nameList;
             source.extract('peekChar', (nextChar) => {
                if (nextChar && nextChar.str === '%') {
@@ -189,8 +189,8 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
    if (edPToken.nextPropName === 'contentSpec') {
       const nextValue: Object = unValues.length > 0 ? unValues[0] : {};
 
-      if (unassigned.isTypedText(nextValue) && nextValue.text.str === '(') {
-         nameList.assignUnassigned(edPToken.children, edPToken.unassigned);
+      if (unassigned.isTypedText(nextValue) && nextValue.text && nextValue.text.str === '(') {
+         nameList.assignUnassigned(edPToken.children!, unValues);
       } else {
          unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [
             { name: 'contentSpec', type: 'word' },
@@ -198,7 +198,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
          ]);
       }
    } else {
-      nameList.assignUnassigned(edPToken.children, edPToken.unassigned);
+      nameList.assignUnassigned(edPToken.children!, unValues);
    }
 
    if (unValues.length !== 0) {
@@ -213,7 +213,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: ElementDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken || pToken.unassigned) {
       return;
    }

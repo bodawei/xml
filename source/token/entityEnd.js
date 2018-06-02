@@ -23,6 +23,7 @@ class EntityEnd extends base.XToken {
 
 class ParameterEntityEnd extends EntityEnd {
    constructor(name) {
+      /* istanbul ignore next */
       super(name, []);
 
       this.type = PE_END_XTOKEN;

@@ -1,12 +1,10 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { convertList } from '../childrenAutomata.js';
-import { XNameList, XName } from '../../token/common/nameList'
+import { XNameList } from '../common/nameList'
+import nameListToGraph from '../common/nameListToGraph.js';
 
-describe('childrenAutomata (unit)', () => {
-
-   describe('listToAutomata()', () => {
+describe('nameListToGraph()', () => {
 
       describe('toplevel list', () => {
 
@@ -20,26 +18,27 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -55,26 +54,27 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ZEROONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [1],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -90,26 +90,27 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ZEROPLUS',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [1],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [0],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -125,26 +126,27 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONEPLUS',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [0],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -164,26 +166,27 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -202,30 +205,31 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [1],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        second: [{
-                           ref: '2',
+                        },
+                        second: {
+                           ref: '/2',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                }
             });
@@ -244,39 +248,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [1],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        second: [{
-                           ref: '2',
+                        },
+                        second: {
+                           ref: '/2',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                }
@@ -296,39 +301,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [], // no auto transition to end
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        second: [{
-                           ref: '2',
+                        },
+                        second: {
+                           ref: '/2',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                }
@@ -348,49 +354,50 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [1], // this has one entry, rather than several
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }],
-                        second: [{
-                           ref: '2',
+                        },
+                        second: {
+                           ref: '/2',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [1],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                }
@@ -414,35 +421,36 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                }
@@ -462,35 +470,36 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                }
@@ -510,35 +519,36 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 0
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                }
@@ -558,55 +568,56 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
 
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
 
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 3,
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 4,
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 3,
-                        }]
+                        }
                      }
                   },
                   4: {
                      id: 4,
                      autoTrans: [1],
                      trans: {
-                        second: [{
-                           ref: '2',
+                        second: {
+                           ref: '/2',
                            stateId: 4,
-                        }]
+                        }
                      }
                   },
                }
@@ -637,39 +648,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        },
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -701,39 +713,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        },
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [3],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -765,39 +778,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [3],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -829,39 +843,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -897,45 +912,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -967,45 +983,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [4],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1037,45 +1054,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [4],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1107,45 +1125,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1181,39 +1200,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -1245,39 +1265,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [3],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -1309,39 +1330,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [3],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -1373,39 +1395,40 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [2],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 1
-                        }],
-                        last: [{
-                           ref: '3',
+                        },
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        },
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 3
-                        }]
+                        }
                      }
                   },
                   3: {
@@ -1444,45 +1467,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 5
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1494,10 +1518,10 @@ describe('childrenAutomata (unit)', () => {
                      id: 5,
                      autoTrans: [],
                      trans: {
-                        second: [{
-                           ref: '2,2',
+                        second: {
+                           ref: '/2/2',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                }
@@ -1524,45 +1548,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [4],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1594,45 +1619,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [4],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1664,45 +1690,46 @@ describe('childrenAutomata (unit)', () => {
                repeat: 'ONE',
             };
    
-            const result = convertList(srcList);
+            const result = nameListToGraph(srcList);
    
             expect(result).toEqual({
-               start: 0,
-               end: 1,
+               startId: 0,
+               endId: 1,
                states: {
                   0: {
                      id: 0,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '1',
+                        first: {
+                           ref: '/1',
                            stateId: 2
-                        }]
+                        }
                      }
                   },
                   1: {
                      id: 1,
                      autoTrans: [],
-                     trans: {}
+                     trans: {},
+                     done: true,
                   },
                   2: {
                      id: 2,
                      autoTrans: [],
                      trans: {
-                        first: [{
-                           ref: '2,1',
+                        first: {
+                           ref: '/2/1',
                            stateId: 4,
-                        }]
+                        }
                      }
                   },
                   3: {
                      id: 3,
                      autoTrans: [],
                      trans: {
-                        last: [{
-                           ref: '3',
+                        last: {
+                           ref: '/3',
                            stateId: 1
-                        }]
+                        }
                      }
                   },
                   4: {
@@ -1716,6 +1743,4 @@ describe('childrenAutomata (unit)', () => {
 
       });
          
-   });
-
 });

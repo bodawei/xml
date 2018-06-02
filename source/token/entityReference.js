@@ -30,6 +30,7 @@ class EntityReference extends base.XToken {
 
 class ParameterEntityReference extends EntityReference {
    constructor(name, pToken) {
+      /* istanbul ignore next */
       super(name, pToken);
 
       this.type = PEREF_XTOKEN;
