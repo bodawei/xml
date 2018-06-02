@@ -9,7 +9,7 @@ import { SToken } from '../../sToken';
 
 import attribute from './attribute.js';
 import misc from './misc.js';
-import literal from './literal.js';
+import literal from './literal';
 
 describe('attribute (unit)', () => {
    let attributesPChunk;

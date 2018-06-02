@@ -6,7 +6,7 @@ import { WellFormedError } from '../../error';
 import entityReference from '../entityReference.js';
 import unassigned from '../unassigned';
 
-import literal from './literal.js';
+import literal from './literal';
 import { textOrBlank } from './misc.js';
 
 /**********************************************************************\

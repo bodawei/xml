@@ -47,6 +47,7 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
+                  value: [],
                }, {
                   name: makeSToken('two'),
                   postNameSpace: makeSToken(' '),
@@ -54,6 +55,7 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: undefined,
+                  value: [],
                }],
                close: makeSToken('>'),
             }));
@@ -102,6 +104,7 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: makeSToken(' '),
+                  value: [],
                }],
                unassigned: [ new entityReference.ParamPToken({
                   open:  makeSToken('%'),
@@ -135,9 +138,11 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: makeSToken(' '),
+                  value: [],
                }, {
                   name: makeSToken('two'),
                   postNameSpace: undefined,
+                  value: [],
                }],
                unassigned: [ new entityReference.ParamPToken({
                   open:  makeSToken('%'),
@@ -171,11 +176,13 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: makeSToken(' '),
+                  value: [],
                }, {
                   name: makeSToken('two'),
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('ID'),
                   postTypeSpace: makeSToken(' '),
+                  value: [],
                }],
                unassigned: [ new entityReference.ParamPToken({
                   open:  makeSToken('%'),
@@ -259,6 +266,7 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
+                  value: [],
                }, {
                   name: SToken.fromString('at2'),
                   postNameSpace: SToken.fromString(' '),
@@ -307,6 +315,7 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
+                  value: [],
                }, {
                   name: SToken.fromString('at2'),
                   postNameSpace: SToken.fromString(' '),

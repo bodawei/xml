@@ -12,7 +12,7 @@ import declaration from '../bridge/declaration';
 import entityReference from '../entityReference.js'
 import text from '../text';
 import unassigned, { UnassignedArray } from '../unassigned';
-import literal from '../common/literal.js';
+import literal from '../common/literal';
 import misc from '../common/misc.js';
 
 type LiteralOptions = {
@@ -36,6 +36,7 @@ describe('attListDeclaration (unit)', () => {
             postTypeSpace: makeSToken(' '),
             defaultType: makeSToken('#REQUIRED'),
             postDefaultTypeSpace: makeSToken(' '),
+            value: [],
          } ],
          close: makeSToken('>'),
       });
@@ -171,6 +172,7 @@ describe('attListDeclaration (unit)', () => {
             postNameSpace: makeSToken(' '),
             type: makeSToken('ID'),
             postTypeSpace: makeSToken(' '),
+            value: [],
          });
          aldPToken.close = makeSToken('>');
 
@@ -212,6 +214,7 @@ describe('attListDeclaration (unit)', () => {
             postNameSpace: makeSToken(' '),
             type: makeSToken('ID'),
             postTypeSpace: makeSToken(' '),
+            value: [],
          });
          aldPToken.attDefs.push({
             name: makeSToken('att3'),
@@ -220,6 +223,7 @@ describe('attListDeclaration (unit)', () => {
             postTypeSpace: makeSToken(' '),
             defaultType: makeSToken('#IMPLICIT'),
             postDefaultTypeSpace: makeSToken(' '),
+            value: [],
          });
          aldPToken.close = makeSToken('>');
 
@@ -362,6 +366,7 @@ describe('attListDeclaration (unit)', () => {
                attDefs: [{
                   name: makeSToken('attName'),
                   postNameSpace: makeSToken(' '),
+                  value: []
                }],
                close: makeSToken('>'),
             }));
@@ -400,6 +405,7 @@ describe('attListDeclaration (unit)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('CDATA'),
                   postTypeSpace: makeSToken(' '),
+                  value: [],
                }],
                close: makeSToken('>'),
             }));
@@ -443,6 +449,7 @@ describe('attListDeclaration (unit)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#FIXED'),
                   postDefaultTypeSpace: makeSToken(' '),
+                  value: [],
                }],
                close: makeSToken('>'),
             }));
@@ -913,9 +920,11 @@ describe('attListDeclaration (unit)', () => {
       it('reports a warning if the same attribute name is listed multiple times', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('two'),
+            value: [],
          });
          aldPToken.attDefs.push({
             name: new SToken('att1', 'att1', new Range(undefined, 10, 0, 10, 15, 0, 15)),
+            value: [],
          });
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
@@ -1241,6 +1250,7 @@ describe('attListDeclaration (unit)', () => {
       it('replaces a missing type and defaultType value with a space', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
+            value: [],
          });
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 

@@ -10,7 +10,7 @@ import unassigned from './unassigned';
 import declaration from './bridge/declaration';
 import misc from './common/misc.js';
 import externalId from './common/externalId.js';
-import literal from './common/literal.js';
+import literal from './common/literal';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for

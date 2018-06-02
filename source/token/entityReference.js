@@ -18,7 +18,7 @@ const PARAMETERENTITYREF = 'PARAMETERENTITYREF';
 const PEREF_XTOKEN = 'PEREF_XTOKEN';
 const WFEID = WellFormedError.ID;
 
-class EntityReference extends base.XToken {
+class EntityReferenceXToken extends base.XToken {
 
    constructor(name, pToken) {
       super(ENTITYREF_XTOKEN, pToken);
@@ -28,7 +28,7 @@ class EntityReference extends base.XToken {
 
 }
 
-class ParameterEntityReference extends EntityReference {
+class ParameterEntityReferenceXToken extends EntityReferenceXToken {
    constructor(name, pToken) {
       /* istanbul ignore next */
       super(name, pToken);
@@ -150,10 +150,10 @@ function checkWellFormed(pToken, ec) {
 \**********************************************************************/
 
 function pTokenToXToken(pToken) {
-   let refClass = EntityReference;
+   let refClass = EntityReferenceXToken;
 
    if (pToken.open && pToken.open.str === '%') {
-      refClass = ParameterEntityReference;
+      refClass = ParameterEntityReferenceXToken;
    }
 
    return new refClass(textOrBlank(pToken.name), pToken);
@@ -166,8 +166,8 @@ const entityReference = {
    PEREF_XTYPE: PEREF_XTOKEN,
    PToken: EntityReferencePToken,
    ParamPToken: ParameterEntityReferencePToken,
-   XToken: EntityReference,
-   ParamXToken: ParameterEntityReference,
+   XToken: EntityReferenceXToken,
+   ParamXToken: ParameterEntityReferenceXToken,
    parse,
    paramParse,
    checkWellFormed,
@@ -175,3 +175,6 @@ const entityReference = {
 };
 
 export default entityReference;
+export {
+   EntityReferenceXToken,
+};

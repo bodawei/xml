@@ -11,7 +11,7 @@ import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text';
-import literal from '../common/literal.js';
+import literal from '../common/literal';
 import unassigned from '../unassigned';
 
 import helper from './helper.js';

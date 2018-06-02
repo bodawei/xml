@@ -13,7 +13,7 @@ import entityReference from '../entityReference.js'
 import unassigned from '../unassigned';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';
-import literal from '../common/literal.js';
+import literal from '../common/literal';
 
 describe('entityDeclaration (unit)', () => {
    let entityDeclarationPToken;

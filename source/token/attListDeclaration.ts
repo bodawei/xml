@@ -7,7 +7,7 @@ import entityReference from './entityReference.js';
 import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
-import literal from './common/literal.js';
+import literal, { LiteralValueXToken } from './common/literal';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -27,7 +27,7 @@ type AttDefPToken = {
    defaultType?: SToken;
    postDefaultTypeSpace?: SToken;
    openQuote?: SToken;
-   value?: Array<any>;
+   value: Array<any>;
    postValueSpace?: SToken;
    closeQuote?: SToken;
    postAttValueSpace?: SToken;
@@ -112,6 +112,7 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Deliver
 
          const attDef = {
             name: attrName,
+            value: []
          };
          pToken.attDefs.push(attDef);
 
@@ -385,7 +386,7 @@ type XAttr = {
    name: string;
    type: string;
    defaultType?: string;
-   value?: Array<any>;
+   value?: LiteralValueXToken;
 };
 
 class AttListXToken {
@@ -415,8 +416,9 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
          defaultType: misc.textOrBlank(attDef.defaultType),
       };
 
-      if (attDef.value) {
-         xTokenAttrDef.value = literal.makeTokenCompatible(attDef);
+      const result = literal.makeTokenCompatible(attDef)
+      if (result) {
+         xTokenAttrDef.value = result;
       }
 
       attrs.push(xTokenAttrDef);

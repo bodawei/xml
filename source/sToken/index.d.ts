@@ -8,6 +8,7 @@ declare class  SToken {
    ranges: Array<any>;
    merge(other:SToken): SToken;
    clone(): SToken;
+   firstRange: Range;
 }
 
 declare class STokenSource {

@@ -9,7 +9,7 @@ import entityReference from './entityReference.js';
 import entityStart from './entityStart.js';
 import text from './text';
 import { TextPToken } from './text';
-import literal from './common/literal.js';
+import literal, { LiteralPToken, LiteralValuePToken } from './common/literal';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];
@@ -23,6 +23,8 @@ const TYPE = {
 };
 
 interface SubtypedTextPToken extends TextPToken {
+   type: 'TEXT',
+   text?: SToken,
    subType: string;
 };
 
@@ -31,14 +33,15 @@ interface EntityReferencePToken {
    getSTokenArray(): Array<SToken>;
 }
 
-interface LiteralPToken {
-   type: string;
-   openQuote?: SToken;
-   value?: SToken;
-   closeQuote?: SToken;
+interface TypedLiteralPToken {
+   type: string,
+   openQuote?: SToken,
+   value: LiteralValuePToken,
+   closeQuote?: SToken,
+   [other: string]: any,
 }
 
-type UnassignedValue = SubtypedTextPToken | EntityReferencePToken | LiteralPToken;
+type UnassignedValue = SubtypedTextPToken | EntityReferencePToken | TypedLiteralPToken;
 type UnassignedArray = Array<UnassignedValue>;
 
 type DeliverUnassigned = (value?: UnassignedValue) => void;
@@ -162,9 +165,12 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          break;
       case '"':
       case '\'':
-         const container: LiteralPToken = { type: TYPE.LITERAL };
+         const container = { };
          literal.parse(source, { pToken: container }, () => {
-            deliverValue(container);
+            const litPToken: TypedLiteralPToken = container as TypedLiteralPToken;
+            litPToken.type = TYPE.LITERAL;
+
+            deliverValue(litPToken);
          });
          break;
       default:

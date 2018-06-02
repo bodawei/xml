@@ -558,10 +558,10 @@ describe('nameList (unit)', () => {
       it('calls assignToProps() with the opening of the list open descriptors', () => {
          const pToken: NameListPToken = new nameList.NameListPToken();
 
-         nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+         nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ { type: 'foo' }  ],
+            [ { type: 'foo', value: [] }  ],
             pToken,
             'open', [
                { name: 'open', type: 'word', allowed: /\(/ },
@@ -572,10 +572,10 @@ describe('nameList (unit)', () => {
       it('calls assignToProps() with the closing of the list open descriptors', () => {
          const pToken: NameListPToken = new nameList.NameListPToken();
 
-         nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+         nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
-            [ { type: 'foo' }  ],
+            [ { type: 'foo', value: [] }  ],
             pToken,
             'close', [
                { name: 'close', type: 'word', allowed: /\)/ },
@@ -594,10 +594,10 @@ describe('nameList (unit)', () => {
          });
 
          nameList.assignUnassigned(pToken, [ {
-            type: 'text',
+            type: 'TEXT',
             text: { str: 'x' },
             subType: 'word',
-         } ]);
+         } as any ]); // typeHack
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
             [ ],
@@ -622,7 +622,7 @@ describe('nameList (unit)', () => {
             type: 'text',
             subType: 'word',
             text: SToken.fromString('x'),
-         } ]);
+         } as any ]); // typeHack
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
             [ ], // the value in the jasmine store is modified
@@ -650,7 +650,7 @@ describe('nameList (unit)', () => {
             type: 'text',
             text: { str: '(' },
             subType: 'word',
-         } ]);
+         } ] as any[]); // typeHack
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
             [ ],
@@ -665,7 +665,11 @@ describe('nameList (unit)', () => {
       it('abandons looking for names if the end of the list is found', () => {
          const pToken: NameListPToken = new nameList.NameListPToken();
 
-         nameList.assignUnassigned(pToken, [ { type: 'text', text: { str: ')' }, subType: 'word' } ]);
+         nameList.assignUnassigned(pToken, [ {
+            type: 'text',
+            text: { str: ')' },
+            subType: 'word'
+         } as any ]); // typeHack
 
          expect(assignSpy.calls.count()).toEqual(2);
       });
@@ -675,11 +679,11 @@ describe('nameList (unit)', () => {
          it('calls assignToProps() with full opening parameters if "(" was NOT found', () => {
             const pToken: NameListPToken = new nameList.NameListPToken();
 
-            nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(2);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' }  ],
+               [ { type: 'foo', value: [] }  ],
                pToken,
                'open', [
                   { name: 'open', type: 'word', allowed: /\(/ },
@@ -692,11 +696,11 @@ describe('nameList (unit)', () => {
 
             pToken.open = SToken.fromString('(');
    
-            nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(2);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' }  ],
+               [ { type: 'foo', value: [] }  ],
                pToken,
                'postOpenSpace', [
                   { name: 'postOpenSpace', type: 'space' },
@@ -709,11 +713,11 @@ describe('nameList (unit)', () => {
             pToken.open = SToken.fromString('(');
             pToken.names.push({});
    
-            nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(3);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' }  ],
+               [ { type: 'foo', value: [] }  ],
                pToken,
                'close', [
                   { name: 'close', type: 'word', allowed: /\)/ },
@@ -730,11 +734,11 @@ describe('nameList (unit)', () => {
             pToken.names.push({});
             pToken.close = SToken.fromString(')');
    
-            nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(1);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' }  ],
+               [ { type: 'foo', value: [] }  ],
                pToken,
                'repeat', [
                   { name: 'postCloseSpace', type: 'space' },
@@ -751,11 +755,11 @@ describe('nameList (unit)', () => {
             pToken.close = SToken.fromString(')');
             pToken.repeat = SToken.fromString('*');
    
-            nameList.assignUnassigned(pToken, [ { type: 'foo' }  ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] }  ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(1);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' }  ],
+               [ { type: 'foo', value: [] }  ],
                pToken,
                'postRepeatSpace', [
                   { name: 'postRepeatSpace', type: 'space' },
@@ -770,11 +774,11 @@ describe('nameList (unit)', () => {
                delimiter: SToken.fromString('|'),
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'foo' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'foo', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(2);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'foo' } ],
+               [ { type: 'foo', value: [] } ],
                {
                   delimiter: SToken.fromString('|'),
                },
@@ -791,18 +795,24 @@ describe('nameList (unit)', () => {
                particle: new nameList.NameListPToken(),
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(4);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: [],
+               } ],
                new nameList.NameListPToken(),
                'open', [
                   { name: 'open', type: 'word', allowed: /\(/ },
                   { name: 'postOpenSpace', type: 'space' },
                ]);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: [],
+               } ],
                {
                   particle: new nameList.NameListPToken(),
                },
@@ -823,11 +833,14 @@ describe('nameList (unit)', () => {
                },
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(3);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: []
+               } ],
                {
                   particle: {
                      name: SToken.fromString('name'),
@@ -851,11 +864,14 @@ describe('nameList (unit)', () => {
                },
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledTimes(3);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: []
+               } ],
                {
                   name: SToken.fromString('name'),
                   repeat: SToken.fromString('repeat'),
@@ -872,10 +888,13 @@ describe('nameList (unit)', () => {
             pToken.names.push({
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: [],
+               } ],
                {},
                'name', [
                   { name: 'name', type: 'word', allowed: /[^\)\|\,\*\+\?]/ },
@@ -895,10 +914,13 @@ describe('nameList (unit)', () => {
                },
             });
    
-            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin' } ]);
+            nameList.assignUnassigned(pToken, [ { type: 'unassignedStandin', value: [] } ]);
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(
-               [ { type: 'unassignedStandin' } ],
+               [ {
+                  type: 'unassignedStandin',
+                  value: []
+               } ],
                {
                   name: SToken.fromString('name'),
                },

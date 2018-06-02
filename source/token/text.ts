@@ -17,7 +17,7 @@ type DeliverPToken = (token: TextPToken) => void;
 const TEXT = 'TEXT';
 const TEXT_XTOKEN = 'TEXT_XTOKEN';
 
-class Text extends base.XToken {
+class TextXToken extends base.XToken {
    public text: string;
 
    constructor(text: string, pToken: TextPToken) {
@@ -68,17 +68,17 @@ function parse(source: STokenSource, terminators: Array<string>, deliverPToken: 
 }
 
 function makeXToken(pToken: TextPToken) {
-   return new Text(pToken.text ? pToken.text.str : '', pToken);
+   return new TextXToken(pToken.text ? pToken.text.str : '', pToken);
 }
 
 const text = {
    PTYPE: TEXT,
    XTYPE: TEXT_XTOKEN,
    PToken: TextPToken,
-   XToken: Text,
+   XToken: TextXToken,
    parse,
    makeXToken,
 };
 
 export default text;
-export { TextPToken };
+export { TextPToken, TextXToken };

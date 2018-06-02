@@ -1,0 +1,279 @@
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* eslint-env jasmine */
+
+import { EntityMetaData } from '../../../basic';
+import { WellFormedError } from '../../../error';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from '../../../sToken';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+
+import entityReference from '../../entityReference.js';
+import text from '../../text';
+
+import misc from '../misc.js';
+import literalValue, { LiteralValuePToken } from '../literalValue.js';
+
+// <typeHack>
+   type EntityReferencePToken = { type: string };
+// </typeHack>
+
+describe('literalValue (unit)', () => {
+
+   describe('parse()', () => {
+      let mockSource: MockSTokenSource;
+      let value: LiteralValuePToken;
+      let callback: (result: LiteralValuePToken) => void;
+      let expectedSToken: (value: string) => SToken;
+
+      beforeEach(() => {
+         expectedSToken = makeSTokenMaker();
+         callback = (result: LiteralValuePToken) => value = result;
+      });
+
+      it('does a basic parse', () => {
+         const container = {};
+         mockSource = new MockSTokenSource([
+            'blah',
+            MockSTokenSource.PEEK('"'),
+         ]);
+
+         literalValue.parse(mockSource, [ '"' ], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(value).toEqual([ new text.PToken({ text: expectedSToken('blah') }) ]);
+      });
+
+      it('returns an empty array result if there is an EOF', () => {
+         mockSource = new MockSTokenSource([
+            undefined,
+            undefined,
+         ]);
+
+         literalValue.parse(mockSource, [ '"' ], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(value).toEqual([ ]);
+      });
+
+      it('returns a partial result if there is an EOF after first chunk of text', () => {
+         mockSource = new MockSTokenSource([
+            'some text',
+            undefined,
+         ]);
+
+         literalValue.parse(mockSource, [ '"' ], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(value).toEqual([ new text.PToken({ text: expectedSToken('some text') }) ]);
+      });
+
+      it('returns an empty array result if there is no text before the close quote', () => {
+         mockSource = new MockSTokenSource([
+            undefined,
+            MockSTokenSource.PEEK('"'),
+         ]);
+
+         literalValue.parse(mockSource, [ '"' ], callback);
+         mockSource.respondInAsyncTime();
+
+         expect(value).toEqual([ ]);
+      });
+
+      describe('entity references', () => {
+         let generalParseSpy: jasmine.Spy;
+         let paramParseSpy: jasmine.Spy;
+
+         beforeEach(() => {
+            generalParseSpy= spyOn(entityReference, 'parse');
+            paramParseSpy = spyOn(entityReference, 'paramParse');
+         });
+
+         it('calls out to entityReference.parse when encountering a % and asked to parse peRefs', () => {
+            mockSource = new MockSTokenSource([
+               undefined,
+               MockSTokenSource.PEEK('%'),
+            ]);
+
+            literalValue.parse(mockSource, [ '"', '%' ], callback);
+            mockSource.respondInAsyncTime();
+   
+            expect(paramParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(paramParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+         });
+
+         it('calls out to entityReference.parse when encountering a & and asked to parse geRefs', () => {
+            mockSource = new MockSTokenSource([
+               undefined,
+               MockSTokenSource.PEEK('&'),
+            ]);
+
+            literalValue.parse(mockSource, [ '"', '&' ], callback);
+            mockSource.respondInAsyncTime();
+   
+            expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(generalParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+         });
+
+
+         it('handles a combination of text, pe and ge refs', () => {
+            generalParseSpy.and.callFake((_1: any, callback: (entityRef: any) => void) => {
+               callback({});
+            });
+            paramParseSpy.and.callFake((_1: any, callback: (entityRef: any) => void) => {
+               callback({});
+            });
+            mockSource = new MockSTokenSource([
+               'one',
+               MockSTokenSource.PEEK('&'),
+               'two',
+               MockSTokenSource.PEEK('%'),
+               'three',
+               MockSTokenSource.PEEK('%'),
+               'four',
+               MockSTokenSource.PEEK('"'),
+            ]);
+
+            literalValue.parse(mockSource, [ '"', '&', '%' ], callback);
+            mockSource.respondInAsyncTime();
+
+            const makeSToken = makeSTokenMaker();
+            expect(value).toEqual([
+               new text.PToken({ text: makeSToken('one') }),
+               {} as EntityReferencePToken,
+               new text.PToken({ text: makeSToken('two') }),
+               {} as EntityReferencePToken,
+               new text.PToken({ text: makeSToken('three') }),
+               {} as EntityReferencePToken,
+               new text.PToken({ text: makeSToken('four') }),
+            ]);
+         });
+
+      });
+
+   });
+
+   describe('checkWellFormed()', () => {
+      let miscCheckWellFormedSpy: jasmine.Spy;
+      let refCheckWellFormedSpy: jasmine.Spy;
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
+      let valuePToken: LiteralValuePToken;
+
+      beforeEach(() => {
+         mockErrorCollector = new MockErrorCollector();
+         emd = new EntityMetaData();
+
+         valuePToken = [ new text.PToken({ text: SToken.fromString('xxx') }) ];
+
+         miscCheckWellFormedSpy = spyOn(misc, 'checkWellFormedText');
+         refCheckWellFormedSpy = spyOn(entityReference, 'checkWellFormed');
+      });
+
+      it('calls misc.checkWellFormedText() to check the value', () => {
+         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+
+         expect(miscCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
+         expect(miscCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
+         expect(miscCheckWellFormedSpy.calls.argsFor(0)[2]).toEqual(emd);
+      });
+
+      it('sets the position before calling misc.checkWellFormed', () => {
+         const spy: jasmine.Spy = mockErrorCollector.setPos as jasmine.Spy;
+         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+
+         expect(spy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
+      });
+
+      it('calls entityReference.checkWellFormed if an entity reference PToken is found', () => {
+         valuePToken.push({
+            type: entityReference.PTYPE,
+         });
+
+         literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
+
+         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual({
+            type: entityReference.PTYPE,
+         });
+         expect(refCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
+      });
+
+   });
+
+   describe('makeTokenXCompatible()', () => {
+
+      it('returns a Text token from the PToken result', () => {
+         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }) ];
+         const result = literalValue.makeXTokenCompatible(pToken);
+
+         expect(result).toEqual([ new text.XToken('blah', pToken[0]) ]);
+      });
+
+      it('copes with the text PToken not having a text value', () => {
+         const pToken = [ new text.PToken() ];
+         const result = literalValue.makeXTokenCompatible(pToken);
+
+         expect(result).toEqual([ ]);
+      });
+
+      it('calls entityReference.makeToken for each reference in the pToken value', () => {
+         const refSpy = spyOn(entityReference, 'pTokenToXToken');
+         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }), {
+               type: entityReference.PTYPE,
+            }, {
+               type: entityReference.PARAM_PTYPE,
+            } ];
+         literalValue.makeXTokenCompatible(pToken);
+
+         expect(refSpy.calls.count()).toEqual(2);
+         expect(refSpy.calls.argsFor(0)[0]).toEqual(pToken[1]);
+         expect(refSpy.calls.argsFor(1)[0]).toEqual(pToken[2]);
+      });
+
+      it('copes with no values at all', () => {
+         const result = literalValue.makeXTokenCompatible([]);
+
+         expect(result).toEqual([]);
+      });
+
+   });
+
+   describe('getSTokens()', () => {
+
+      it('does a basic population', () => {
+         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }) ];
+         const results = literalValue.getSTokens(pToken);
+
+         expect(results).toEqual([ SToken.fromString('blah') ]);
+      });
+
+      it('adds STokens from any entity references', () => {
+         const pToken = [
+            new text.PToken({ text: SToken.fromString('blah') }),
+            new entityReference.PToken({
+               name: SToken.fromString('theName')
+            }),
+         ];
+         const results = literalValue.getSTokens(pToken);
+
+         expect(results).toEqual([
+            SToken.fromString('blah'),
+            SToken.fromString('theName'),
+         ]);
+      });
+
+      it('copes if text is missing its text', () => {
+         const pToken = [
+            new text.PToken(),
+            new entityReference.PToken({
+               name: SToken.fromString('theName')
+            }),
+         ];
+
+         const results = literalValue.getSTokens(pToken);
+
+         expect(results).toEqual([
+            SToken.fromString('theName'),
+         ]);
+      });
+   });
+});

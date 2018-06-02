@@ -3,7 +3,7 @@
 import { WellFormedError, XmlWarning,  } from '../../error';
 
 import misc from './misc.js';
-import literal from './literal.js';
+import literal from './literal';
 
 /**********************************************************************\
  The attribute namespace contains the usual tools for processing

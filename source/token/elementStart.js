@@ -114,7 +114,7 @@ function parse(source, open, deliverPToken) {
 
    attribute.parse(source, {
       geRef: true,
-      terminators: [ '>', '/>' ]
+      terminators: [ '>', '/>' ],
    }, (attributes) => {
       pToken.attributes = attributes;
 

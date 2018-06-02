@@ -12,7 +12,7 @@ import text from '../text';
 import unassigned from '../unassigned';
 
 import externalId from './externalId.js';
-import literal from './literal.js';
+import literal from './literal';
 
 describe('externalId (unit)', () => {
 
