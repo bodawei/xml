@@ -112,7 +112,10 @@ function parse(source, open, deliverPToken) {
    source.extractToObject('word', [ '>', '/>' ], pToken, 'name');
    source.extractToObject('space', pToken, 'postNameSpace');
 
-   attribute.parse(source, { terminators: [ '>', '/>' ]}, (attributes) => {
+   attribute.parse(source, {
+      geRef: true,
+      terminators: [ '>', '/>' ]
+   }, (attributes) => {
       pToken.attributes = attributes;
 
       source.extract('match', '>', (sToken) => {

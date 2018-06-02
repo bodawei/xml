@@ -1,10 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData, Range } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
+import { SToken } from '../../sToken';
 
 import attribute from './attribute.js';
 import misc from './misc.js';
@@ -55,6 +56,25 @@ describe('attribute (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual(attributesPChunk);
+      });
+
+      it('calls literal.parse() with appropriate parameters', () => {
+         mockSource = new MockSTokenSource([
+            [ 'version', 'word', [ '=', '>' ] ],
+            [ ' ', 'space' ],
+            [ '=', 'match', '=' ],
+            [ ' ', 'space' ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '=', '>' ] ],
+         ]);
+         attributesPChunk.pop();
+
+         attribute.parse(mockSource, { geRef: true, terminators: [ '>' ] }, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(literal.parse.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(literal.parse.calls.argsFor(0)[1].geRef).toEqual(true);
+         expect(literal.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
       });
 
       it('parses multiple attributes', () => {

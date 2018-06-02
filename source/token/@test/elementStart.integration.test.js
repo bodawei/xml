@@ -8,6 +8,7 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as elementStart from '../elementStart.js';
+import entityReference from '../entityReference';
 import text from '../text';
 
 describe('elementStart (integration)', () => {
@@ -60,6 +61,43 @@ describe('elementStart (integration)', () => {
                   postEqualSpace: undefined,
                   openQuote: makeSToken('"'),
                   value: [ new text.PToken({ text: makeSToken('value two') }) ],
+                  closeQuote: makeSToken('"'),
+                  trailingSpace: undefined,
+               } ],
+               close: makeSToken('>'),
+            }));
+            done();
+         });
+      });
+
+      it('parses an attribute with a general entity reference in it', (done) => {
+         const makeSToken = makeSTokenMaker();
+         source.addText('aName attr1="value1&other;">');
+         source.endText();
+
+         elementStart.parse(source, elementStartPToken.open, (pToken) => {
+            expect(pToken).toEqual(new elementStart.PToken({
+               type: 'ELEMENT_START',
+               open: elementStartPToken.open,
+               postOpenSpace: undefined,
+               name: makeSToken('aName'),
+               postNameSpace: makeSToken(' '),
+               attributes: [ {
+                  name: makeSToken('attr1'),
+                  postNameSpace: undefined,
+                  equal: makeSToken('='),
+                  postEqualSpace: undefined,
+                  openQuote: makeSToken('"'),
+                  value: [
+                     new text.PToken({ text: makeSToken('value1') }),
+                     new entityReference.PToken({
+                        open: makeSToken('&'),
+                        postOpenSpace: undefined,
+                        name: makeSToken('other'),
+                        postNameSpace: undefined,
+                        close: makeSToken(';'),
+                     }),
+                  ],
                   closeQuote: makeSToken('"'),
                   trailingSpace: undefined,
                } ],

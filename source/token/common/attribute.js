@@ -41,6 +41,7 @@ const WARN = XmlWarning.ID;
 
 function parse(source, options = {}, deliverPToken) {
    const newOptions = {
+      geRef: options.geRef,
       terminators: [ '=' ].concat(options.terminators || []),
    };
    getNextAttribute(source, newOptions, [], deliverPToken);
@@ -67,6 +68,7 @@ function addAttribute(source, attrs, options, name, deliverPToken) {
    source.extractToObject('space', attr, 'postEqualSpace');
    literal.parse(source, {
       pToken: attr,
+      geRef: options.geRef || false,
    }, (gotQuoted) => {
       if (gotQuoted) {
          source.extractToObject('space', attr, 'trailingSpace');

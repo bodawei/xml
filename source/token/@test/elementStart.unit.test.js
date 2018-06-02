@@ -118,7 +118,10 @@ describe('elementStart (unit)', () => {
 
          const args = attribute.parse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
-         expect(args[1]).toEqual({ terminators: [ '>', '/>' ]});
+         expect(args[1]).toEqual({
+            terminators: [ '>', '/>' ],
+            geRef: true,
+         });
          expect(args[2]).toBeInstanceOf(Function);
       });
 
