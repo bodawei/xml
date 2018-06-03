@@ -44,6 +44,9 @@ type ElementDeclInfo = {
 }
 
 function setupContextCheck(context: ElementDeclInfo) {
+   if (!context.token.children) {
+      return;
+   }
    context.token.children.names.forEach((item) => {
       if (isXName(item)) {
          if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
@@ -55,13 +58,13 @@ function setupContextCheck(context: ElementDeclInfo) {
 
 class CheckXTokenValidStream extends stream.Transform {
    private queued: Array<ValidityError | XmlWarning>;
-   private docType: XToken;
+   private docType: XToken | void;
    private holding: boolean;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
    private elementDeclarations: { [name: string]: ElementDeclInfo };
    private contentStack: Array<ElementDeclInfo>;
-   private currentContext: ElementDeclInfo;
+   private currentContext: ElementDeclInfo | void;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -84,12 +87,13 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
+      const pToken = (xToken.pToken || {}).open;
       const context = this.currentContext;
 
       if (context && context.matcherType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
-            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ this.currentContext.token.name ],
-               xToken.pToken.open, xToken.pToken.open);
+            const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ context.token.name ],
+               pToken, pToken);
 
             this.queued.push(error);
          }
@@ -97,14 +101,14 @@ class CheckXTokenValidStream extends stream.Transform {
          if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
             if (!context.matcher[xToken.name]) {
                const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                  [ context.token.name, xToken.name ], xToken.pToken.open, xToken.pToken.open);
+                  [ context.token.name, xToken.name ], pToken, pToken);
 
                this.queued.push(error);
             }
          } else if (xToken instanceof comment.XToken || xToken instanceof processingInstruction.XToken) {
             const commentOrPi = xToken instanceof comment.XToken ? 'comment' : 'processing instruction';
             const error = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI,
-               [ context.token.name, commentOrPi ], xToken.pToken.open, xToken.pToken.open);
+               [ context.token.name, commentOrPi ], pToken, pToken);
 
             this.queued.push(error);
          }
@@ -113,7 +117,7 @@ class CheckXTokenValidStream extends stream.Transform {
       if (xToken instanceof notationDeclaration.XToken) {
          if (this.notations[xToken.name]) {
             this.queued.push(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ xToken.name ],
-               xToken.pToken.open, xToken.pToken.open));
+               pToken, pToken));
          } else {
             this.notations[xToken.name] = xToken;
          }
@@ -171,10 +175,11 @@ class CheckXTokenValidStream extends stream.Transform {
 
    private validateAttListDecl(attListDecl: AttListXToken) {
       const openSToken = attListDecl.pToken.open;
+      const elName = attListDecl.elementName || '';
 
-      if (this.attrDefsByElementName[attListDecl.elementName]) {
+      if (this.attrDefsByElementName[elName]) {
          // should include location of previous
-         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ attListDecl.elementName ],
+         const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ elName ],
             openSToken, openSToken);
          this.queued.push(err);
       }
@@ -183,9 +188,9 @@ class CheckXTokenValidStream extends stream.Transform {
       //    an element type not itself declared, but this is not an error.
       // Note: This takes the position that if the element wasn't declared before this, it is a warning.
       // Conceivably this should wait until the end of the DTD and then make this assessment.
-      if (!this.elementDeclarations[attListDecl.elementName]) {
+      if (!this.elementDeclarations[elName]) {
          const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL,
-            [ attListDecl.elementName ], openSToken, openSToken);
+            [ elName ], openSToken, openSToken);
          this.queued.push(err);
       }
 
@@ -198,11 +203,11 @@ class CheckXTokenValidStream extends stream.Transform {
          processedAttrDefs.attributes[attListDecl.attDefs[index].name] = attListDecl.attDefs[index];
       }
 
-      this.attrDefsByElementName[attListDecl.elementName] = processedAttrDefs;
+      this.attrDefsByElementName[elName] = processedAttrDefs;
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
-      const openSToken = elDecl.pToken.open;
+      const openSToken = elDecl.pToken ? elDecl.pToken.open : undefined;
       let isMixed = false;
 
       // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
@@ -291,7 +296,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
 type NamesMap = { [elName: string]: true };
 
-function getNamesFromList(children: XNameList): NamesMap {
+function getNamesFromList(children: XNameList | void): NamesMap {
    if (!children) {
       return {};
    }

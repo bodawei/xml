@@ -87,9 +87,7 @@ class NameListPToken extends base.PToken {
 }
 
 function isNamePToken(value: any): value is NamePToken {
-   if (value && (value.name || value.postNameSpace)) {
-      return true;
-   }
+   return value && (value.name || value.postNameSpace);
 }
 
 /**********************************************************************\
@@ -222,7 +220,6 @@ function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle:
 \**********************************************************************/
 
 function assignUnassigned(nameListPToken: NameListPToken, unValues: UnassignedArray) {
-
    if (unValues.length === 0) {
       return;
    }

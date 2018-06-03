@@ -3,7 +3,7 @@ import { EntityMetaData, Range } from '../basic/index';
 declare class  SToken {
    static fromString(str: string): SToken;
    constructor(str: string, originalStr: string, range?: Range | Array<Range>);
-   str?: string;
+   str: string;
    originalStr: string;
    ranges: Array<any>;
    merge(other:SToken): SToken;

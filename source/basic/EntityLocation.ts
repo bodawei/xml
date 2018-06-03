@@ -22,8 +22,8 @@ function getDirOf(path: string) {
 class EntityLocation {
    public systemId: string;
    public publicId: string | void;
-   public resolvedSystemId: string;
-   private _parent: EntityLocation;
+   public resolvedSystemId?: string;
+   private _parent?: EntityLocation;
 
    /**********************************************************************\
     Constructs an instance with the specified system and public
@@ -67,7 +67,7 @@ class EntityLocation {
       return this.resolvedSystemId || this.systemId;
    }
 
-   equals(other: EntityLocation) {
+   equals(other: EntityLocation|void) {
       if (!other) {
          return false;
       }

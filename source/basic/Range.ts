@@ -19,7 +19,7 @@ import Offset from './Offset.js';
 \**********************************************************************/
 
 class Range {
-   public location: EntityLocation;
+   public location?: EntityLocation;
    public startIndex: number;
    public startRow: number;
    public startColumn: number;
@@ -27,11 +27,11 @@ class Range {
    public endRow: number;
    public endColumn: number;
 
-   constructor(location: EntityLocation,
+   constructor(location: EntityLocation | void,
       index: number = 0, row: number = 0, column: number = 0,
       endIndex: number = 0, endRow: number = 0, endColumn: number = 0) {
 
-         if (location instanceof Offset) {
+      if (location instanceof Offset) {
          this.location = location.location;
          this.startIndex = location.index;
          this.startRow = location.row;

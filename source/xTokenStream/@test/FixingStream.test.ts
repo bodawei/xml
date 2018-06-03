@@ -22,7 +22,7 @@ describe('FixingStream (unit)', () => {
       dummyElPToken = new elementDeclaration.PToken();
    });
 
-   function gatherTokens(stream: FixingStream, cb: (val: XToken) => void) {
+   function gatherTokens(stream: FixingStream, cb: (val: Array<XToken>) => void) {
       const tokens: Array<XToken> = [];
 
       stream.on('data', (item: XToken) => {
@@ -88,7 +88,7 @@ describe('FixingStream (unit)', () => {
          fs.write(before);
          fs.end();
    
-         gatherTokens(fs, (tokens: Array<XToken>) => {
+         gatherTokens(fs, (tokens) => {
             expect(tokens[0].attDefs[0].type).toEqual('CDATA');
             done();
          });
@@ -143,7 +143,7 @@ describe('FixingStream (unit)', () => {
       });
 
       it('changes a missing type to ANY', (done) => {
-         const before = new tokenNs.elementDeclaration.XToken('elName', undefined, undefined, dummyElPToken);
+         const before = new tokenNs.elementDeclaration.XToken('elName', '', undefined, dummyElPToken);
    
          fs.write(before);
          fs.end();

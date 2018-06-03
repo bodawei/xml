@@ -21,5 +21,10 @@ module.exports = function karmaConfig(config) {
       reporters: [ 'progress' ],
    });
 
+   // This doesn't seem to do anything.
+   theConfig.karmaTypescriptConfig.coverageOptions = {
+      instrumentation: false,
+   };
+
    config.set(theConfig);
 };

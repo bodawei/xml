@@ -154,7 +154,7 @@ function flattenMixed(list: XNameList, topList: boolean): Array<XName> {
    const isMixed = list.names.length > 0 && isXName(listItem) && listItem.name === '#PCDATA';
 
    if (topList && !isMixed) {
-      return;
+      return [];
    }
 
    for (let index = list.names.length - 1; index >= 0; index--) {

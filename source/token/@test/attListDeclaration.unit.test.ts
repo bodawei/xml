@@ -80,7 +80,7 @@ describe('attListDeclaration (unit)', () => {
          callback = jasmine.createSpy('callbackSpy');
 
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback'); // TS
-         makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x: UnassignedArray) => void) => {
+         makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x?: UnassignedArray) => void) => {
             checkForPERefCallback = other;
          });
 
@@ -875,13 +875,14 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('reports an error if there are no attribute definitions', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs = [];
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_NO_ATTRIBUTES,
-            params: [ aldPToken.elementName.str ],
+            params: [ elName ],
             position: undefined,
             lastPosition: aldPToken.postElementNameSpace,
          });
@@ -927,26 +928,28 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('reports an error if there is no space after the attribute name', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].postNameSpace;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NAME_NO_SPACE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].name,
          });
       });
 
       it('reports an error if an unknown type is provided', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].type = SToken.fromString('bogus');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_UNKNOWN,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, 'bogus' ],
+            params: [ aldPToken.attDefs[0].name.str, elName, 'bogus' ],
             position: aldPToken.attDefs[0].type,
          });
       });
@@ -1024,38 +1027,41 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('reports an error if an the type is miscased', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].type = SToken.fromString('cdata');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, 'cdata' ],
+            params: [ aldPToken.attDefs[0].name.str, elName, 'cdata' ],
             position: aldPToken.attDefs[0].type,
          });
       });
 
       it('reports an error if there is no space after the attribute type', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].postTypeSpace;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_NO_SPACE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].type,
          });
       });
 
       it('reports an error if an unknown defaultType is provided', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#IMPLICIT');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, '#IMPLICIT' ],
+            params: [ aldPToken.attDefs[0].name.str, elName, '#IMPLICIT' ],
             position: aldPToken.attDefs[0].defaultType,
          });
       });
@@ -1087,18 +1093,20 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('reports an error if an the default type is miscased', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#required');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_DEFAULT_INVALID,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str, '#required' ],
+            params: [ aldPToken.attDefs[0].name.str, elName, '#required' ],
             position: aldPToken.attDefs[0].defaultType,
          });
       });
 
       it('reports an error if there is no space after a fixed type', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
 
@@ -1106,33 +1114,35 @@ describe('attListDeclaration (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_SPACE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].defaultType,
          });
       });
    
       it('reports an error if there is no value and no defaultType', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.attDefs[0].defaultType;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_VALUE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].postTypeSpace,
          });
       });
    
       it('reports an error if there is no value after a #FIXED', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#FIXED');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_FIXED_NO_VALUE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].postDefaultTypeSpace,
          });
@@ -1146,6 +1156,7 @@ describe('attListDeclaration (unit)', () => {
       });
    
       it('reports an error if there is a value after a #REQUIRED', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          aldPToken.attDefs[0].defaultType = SToken.fromString('#REQUIRED');
          aldPToken.attDefs[0].openQuote = SToken.fromString('"');
 
@@ -1153,19 +1164,20 @@ describe('attListDeclaration (unit)', () => {
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_ATTR_EXTRA_VALUE,
-            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName.str ],
+            params: [ aldPToken.attDefs[0].name.str, elName ],
             position: aldPToken.attDefs[0].openQuote,
          });
       });
    
       it('reports an error if there is no close', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          delete aldPToken.close;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTLISTDECL_NO_CLOSE,
-            params: [ aldPToken.elementName.str ],
+            params: [ elName ],
             position: undefined,
             lastPosition: aldPToken.attDefs[0].postDefaultTypeSpace,
          });
@@ -1176,11 +1188,12 @@ describe('attListDeclaration (unit)', () => {
    describe('pTokenToXToken()', () => {
 
       it('creates an XToken', () => {
+         const elName = aldPToken.elementName ? aldPToken.elementName.str : 'BUG';
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 
          expect(xToken).toEqualProps({
             type: attListDeclaration.XTYPE,
-            elementName: aldPToken.elementName.str,
+            elementName: elName,
             pToken: aldPToken,
          });
       });

@@ -17,7 +17,7 @@ const WARN = XmlWarning.ID;
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEF_TYPES = [ '#REQUIRED', '#IMPLIED', '#FIXED' ];
 
-type DeliverPToken = (pToken?:AttListPToken) => void;
+type DeliverPToken = (pToken:AttListPToken) => void;
 
 class AttDefPToken {
    public name: SToken;
@@ -35,7 +35,7 @@ class AttDefPToken {
 }
 
 class AttListPToken extends DeclarationPToken {
-   public readonly type: string;
+   public readonly type: string = ATTLISTDECL_PTOKEN_TYPE;
    public elementName?: SToken;
    public postElementNameSpace?: SToken;
    public attDefs: Array<AttDefPToken>;
@@ -47,7 +47,9 @@ class AttListPToken extends DeclarationPToken {
    constructor(basePToken?: DeclarationPToken|AttListPToken|Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ATTLISTDECL_PTOKEN_TYPE, basePToken);
-      this.attDefs = this.attDefs || [];
+      if (!this.attDefs) {
+         this.attDefs = [];
+      }
    }
 }
 
@@ -279,7 +281,7 @@ function adjustSpaces(attLiPToken: AttListPToken) {
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: AttListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken || pToken.unassigned) {
       return;
    }

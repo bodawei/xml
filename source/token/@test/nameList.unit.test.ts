@@ -51,12 +51,20 @@ describe('nameList (unit)', () => {
       });
    });
 
+   function getAsNamePToken(value: any): NamePToken {
+      if (nameList.isNamePToken(value)) {
+         return value;
+      }
+
+      throw new Error('Passed a parameter that is not a NamePToken.');
+   }
+
    describe('PToken', () => {
 
       describe('getSTokenArray()', () => {
 
          it('returns all the STokens', () => {
-            const nameParticle: NamePToken = nlPToken.names[0].particle;
+            const nameParticle: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             const nameListParticle: NameListPToken = new NameListPToken();
             const subParticle: NamePToken = {};
             const subName: ContentParticlePToken = {
@@ -99,7 +107,7 @@ describe('nameList (unit)', () => {
                nameListParticle.repeat,
                nameListParticle.postRepeatSpace,
                nlPToken.close,
-            ];
+            ] as Array<SToken>;
 
             const result = nlPToken.getSTokenArray();
 
@@ -991,7 +999,7 @@ describe('nameList (unit)', () => {
 
          it('reports an error if the close is missing', () => {
             nlPToken.close = undefined;
-            const expected: NamePToken = nlPToken.names[1].particle;
+            const expected: NamePToken = getAsNamePToken(nlPToken.names[1].particle);
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
 
@@ -1007,7 +1015,7 @@ describe('nameList (unit)', () => {
 
          it('checks if the name is valid', () => {
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-            const expectedName: NamePToken = nlPToken.names[0].particle;
+            const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
 
             expect(misc.checkName).toHaveBeenCalledWith(expectedName.name,
                mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
@@ -1038,7 +1046,7 @@ describe('nameList (unit)', () => {
    
          it('reports an error if there is an extra space between the name and the repeat marker', () => {
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
-            const expectedName: NamePToken = nlPToken.names[0].particle;
+            const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
 
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.NAMELIST_NAME_EXTRA_SPACE,
@@ -1125,7 +1133,7 @@ describe('nameList (unit)', () => {
          });
 
          it('checks if the name is valid', () => {
-            const expectedName: NamePToken = nlPToken.names[0].particle;
+            const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle)
 
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'NOTATION');
    
@@ -1204,7 +1212,7 @@ describe('nameList (unit)', () => {
 
          it('checks if the nmtoken is valid', () => {
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx', 'ENUMERATION');
-            const expectedName: NamePToken = nlPToken.names[0].particle;
+            const expectedName: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
 
             expect(misc.checkNMToken).toHaveBeenCalledWith(expectedName.name,
                mockErrorCollector, emd, WellFormedError.ID.NAMELIST_NAME_INVALID);
@@ -1268,7 +1276,7 @@ describe('nameList (unit)', () => {
       describe('mixed', () => {
 
          it('reports an error if #PCDATA is the wrong case', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#pcData');;
    
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
@@ -1281,7 +1289,7 @@ describe('nameList (unit)', () => {
          });
 
          it('assumes a choice type if it finds #PCDATA', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.names[0].delimiter = SToken.fromString(',');
 
@@ -1295,7 +1303,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if a Mixed contains a sublist', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             const nameListPToken = new nameList.PToken({
                open: SToken.fromString('('),
@@ -1322,7 +1330,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if there is a repeat indicator after a name', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.names[1].particle.repeat = SToken.fromString('*');
    
@@ -1336,7 +1344,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if there is a repeat indicator on a #PCDATA list of 1 item', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             nlPToken.names.pop(); // remove the second
             nlPToken.repeat = SToken.fromString('*');
@@ -1365,7 +1373,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports an error if there is any blank repeat indicator on a #PCDATA list of > 1 item', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
    
             nameList.checkWellFormed(nlPToken, mockErrorCollector, emd, 'xxx');
@@ -1378,7 +1386,7 @@ describe('nameList (unit)', () => {
          });
 
          it('reports no errors if the list ends with a * properly', () => {
-            const namePToken: NamePToken = nlPToken.names[0].particle;
+            const namePToken: NamePToken = getAsNamePToken(nlPToken.names[0].particle);
             namePToken.name = SToken.fromString('#PCDATA');
             delete namePToken.postNameSpace;
             delete nlPToken.names[0].particle.repeat;
@@ -1424,7 +1432,7 @@ describe('nameList (unit)', () => {
       });
 
       it('silently ignores entries without names', () => {
-         const namePToken: NamePToken = nlPToken.names[1].particle;
+         const namePToken: NamePToken = getAsNamePToken(nlPToken.names[1].particle);
          namePToken.name = undefined;
 
          const xNames = nameList.makeXTokenCompatible(nlPToken);

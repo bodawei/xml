@@ -28,9 +28,9 @@ type ContentSpecType = 'EMPTY' | 'ANY' | 'CHILDREN';
 class ElementDeclaration extends base.XToken {
    public name: string;
    public contentSpecType: string; // if not malformed, would only be ContentSpecType
-   public children: XNameList;
+   public children: XNameList | void;
 
-   constructor(name: string, contentSpecType: string, children: XNameList, pToken: ElementDeclarationPToken) {
+   constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken) {
       super(pToken);
 
       this.name = name;
@@ -161,9 +161,9 @@ function parseClose(source: STokenSource, pToken: ElementDeclarationPToken, deli
 \**********************************************************************/
 
 function assignUnassigned(edPToken: ElementDeclarationPToken) {
-   const unValues: UnassignedArray = edPToken.unassigned || [];
+   const unValues: UnassignedArray | void = edPToken.unassigned;
 
-   if (unValues.length === 0) {
+   if (!unValues || unValues.length === 0) {
       delete edPToken.unassigned;
       delete edPToken.nextPropName;
       return;
@@ -176,7 +176,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
    }
 
    if (edPToken.nextPropName === 'name') {
-      unassigned.assignToProps(edPToken.unassigned, edPToken, edPToken.nextPropName, [
+      unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [
          { name: 'postDeclTypeSpace', type: 'space' },
          { name: 'name', type: 'word' },
          { name: 'postNameSpace', type: 'space' },
@@ -191,7 +191,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
       if (unassigned.isTypedText(nextValue) && nextValue.text.str === '(') {
          nameList.assignUnassigned(edPToken.children, edPToken.unassigned);
       } else {
-         unassigned.assignToProps(edPToken.unassigned, edPToken, edPToken.nextPropName, [
+         unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [
             { name: 'contentSpec', type: 'word' },
             { name: 'postContentSpecSpace', type: 'space' },
          ]);
@@ -261,7 +261,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken, ec: ErrorCollector, e
 
 function pTokenToXToken(pToken: ElementDeclarationPToken) {
    let contentSpec: string = misc.textOrBlank(pToken.contentSpec);
-   let children: XNameList;
+   let children: XNameList | void;
 
    if (pToken.children) {
       contentSpec = 'CHILDREN';

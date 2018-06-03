@@ -61,15 +61,11 @@ interface Descriptor {
 type DescriptorArray = Array<Descriptor>;
 
 function isTypedText(value: any): value is SubtypedTextPToken {
-   if (value && value.subType) {
-      return true;
-   }
+   return value && value.subType;
 }
 
 function isLiteral(value: any): value is LiteralPToken {
-   if (value && value.type === TYPE.LITERAL) {
-      return true;
-   }
+   return value && value.type === TYPE.LITERAL;
 }
 
 /**********************************************************************\
@@ -203,7 +199,7 @@ function checkForPERef(source: STokenSource, deliverResult: DeliverUnassignedArr
 function parseAllValues(source: STokenSource, includeNameListChars: boolean, deliverValues: DeliverUnassignedArray) {
    const values: UnassignedArray = [];
 
-   function handleValue(value: UnassignedValue) {
+   function handleValue(value: UnassignedValue | void) {
       if (!value) {
          deliverValues(values);
          return;
@@ -267,13 +263,14 @@ function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: Unas
          if (isTypedText(nextValue)) {
             if (descriptor.type !== TYPE.SPACE && nextValue.subType === TYPE.SPACE) {
                const prevWasSpace = prev && prev.type === TYPE.SPACE;
+               const prevName = prev ? prev.name : '';
                const genericPToken: any = pToken;
 
                if (prevWasSpace) {
-                  if (genericPToken[prev.name]) {
-                     genericPToken[prev.name].merge(nextValue.text);
+                  if (genericPToken[prevName]) {
+                     genericPToken[prevName].merge(nextValue.text);
                   } else {
-                     genericPToken[prev.name] = nextValue.text;
+                     genericPToken[prevName] = nextValue.text;
                   }
 
                   nextValue = cursor.getNext();
@@ -366,7 +363,7 @@ class UnassignedValueCursor {
       this.values = unassignedValues;
    }
 
-   getNext(): UnassignedValue {
+   getNext(): UnassignedValue | void {
       if (this.values.length <= 0) {
          return;
       }
@@ -395,7 +392,7 @@ class UnassignedValueCursor {
       return candidatePToken;
    }
 
-   ungetValue(value: UnassignedValue) {
+   ungetValue(value: UnassignedValue | void) {
       if (value) {
          this.values.unshift(value);
       }
@@ -468,7 +465,7 @@ function getSTokens(unassignedArray: UnassignedArray) {
    return tokens;
 }
 
-function checkExtra(values: UnassignedArray, ec: ErrorCollector, errorCode: string) {
+function checkExtra(values: UnassignedArray | void, ec: ErrorCollector, errorCode: string) {
    if (values && values.length > 0) {
       // convert the unassigned values into a set of STokens
       const sTokens = getSTokens(values);

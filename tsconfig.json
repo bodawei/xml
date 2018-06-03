@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+      // "strict": true,  There are still 95+ problems left
       "noImplicitAny": true,
       "allowJs": true,
       "target": "es5",

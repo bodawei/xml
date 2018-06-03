@@ -8,7 +8,7 @@ import { SToken } from '../stoken';
 \**********************************************************************/
 
 declare class STokenArray extends Array<SToken> {
-   public pushSTokens(...STokens: Array<SToken>):void;
+   public pushSTokens(...STokens: Array<SToken|void>):void;
 };
 
 function pushIfNotVoid(...items: Array<SToken|void>) {
