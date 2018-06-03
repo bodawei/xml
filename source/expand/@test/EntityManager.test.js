@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation } from '../../basic';
@@ -250,6 +250,89 @@ describe('EntityManager (unit)', () => {
          manager.addParameterEntityFromInternalSubset(token);
 
          expect(manager.getParameterEntityToken('test')).toEqual(token);
+      });
+
+   });
+
+   describe('getEntityInfo', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getEntityInfo();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns an object with a getStream() function', () => {
+         const token = pTokenToXToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').getStream).not.toBeUndefined();
+      });
+
+      it('returned stream contains all the text', (done) => {
+         const token = pTokenToXToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expectEntityToMatch(manager.getEntityInfo('test').getStream(), 'two', done);
+      });
+
+      it('sets the isParameter flag to false', () => {
+         const token = pTokenToXToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').isParameter).toBe(false);
+      });
+
+      it('sets the isInternal flag to false if it has an external location', () => {
+         const token = pTokenToXToken('test', 'two', new EntityLocation());
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').isInternal).toBe(false);
+      });
+
+      it('sets the isInternal flag to true if it does not have an external location', () => {
+         const token = pTokenToXToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').isInternal).toBe(true);
+      });
+
+      it('sets the isParsable flag to false if it has a notation name', () => {
+         const token = pTokenToXToken('test', 'two', new EntityLocation(), 'testNData');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').isParsable).toBe(false);
+      });
+
+      it('sets the isParsable flag to true if it does not have an ndata name', () => {
+         const token = pTokenToXToken('test', 'two');
+         manager.addEntityFromInternalSubset(token);
+
+         expect(manager.getEntityInfo('test').isParsable).toBe(true);
+      });
+
+   });
+
+   describe('getParameterEntityInfo', () => {
+
+      it('throws an exception if called without a name', () => {
+         expect(() => {
+            manager.getParameterEntityInfo();
+         }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns an object with a getStream() function', () => {
+         const token = makePEToken('test', 'two');
+         manager.addParameterEntityFromInternalSubset(token);
+
+         expect(manager.getParameterEntityInfo('test').getStream).not.toBeUndefined();
+      });
+
+      it('sets the isParameter flag to false', () => {
+         const token = makePEToken('test', 'two');
+         manager.addParameterEntityFromInternalSubset(token);
+
+         expect(manager.getParameterEntityInfo('test').isParameter).toBe(true);
       });
 
    });

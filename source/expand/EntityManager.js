@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 
 import { EntityMetaData } from '../basic';
 import { defaultExtractors } from '../extractor';
@@ -77,6 +77,14 @@ class EntityManager {
       return this._internalGetToken(name, true);
    }
 
+   getEntityInfo(name) {
+      return this._internalGetInfo(name, false);
+   }
+
+   getParameterEntityInfo(name) {
+      return this._internalGetInfo(name, true);
+   }
+
    /**********************************************************************\
     setExternalSubsetEntity() Adds the specified EntityLocation as the
     location of the external subset entity.
@@ -153,6 +161,27 @@ class EntityManager {
       }
 
       return entityEntry.getBestEntityDeclaration(isParameter);
+   }
+
+   _internalGetInfo(name, isParameter) {
+      const token = this._internalGetToken(name, isParameter);
+
+      return {
+         isParameter: token.isParameter,
+         isInternal: !token.externalLoc,
+         isParsable: !token.notationDataName,
+         // fromInternalSubset?
+         getStream() {
+            const source = new STokenSource(defaultExtractors, new EntityMetaData());
+
+            for (let index = 0; index < token.value.length; index++) {
+               source.addText(token.value[index].text.str);
+            }
+            source.endText();
+
+            return source;
+         },
+      };
    }
 }
 

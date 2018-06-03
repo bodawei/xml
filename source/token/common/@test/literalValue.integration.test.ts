@@ -11,7 +11,7 @@ import entityReference from '../../entityReference.js';
 import literalValue from '../literalValue';
 import text from '../../text';
 
-describe('literal (integration)', () => {
+describe('literalValue (integration)', () => {
    let emd: EntityMetaData;
    let source: STokenSource;
 
