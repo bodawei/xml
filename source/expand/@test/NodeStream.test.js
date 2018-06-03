@@ -1,7 +1,8 @@
-/* Copyright ® 2016 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
+import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken';
 import * as xToken from '../../token';
 
@@ -10,9 +11,20 @@ import EntityManager from '../EntityManager.js';
 
 describe('NodeStream (unit)', () => {
 
-function gatherResults(stream, expect) {
+   function gatherResult(stream, expect) {
       stream.on('data', (item) => {
          expect(item);
+      });
+   }
+
+   function gatherResults(stream, expect) {
+      const cache = [];
+      stream.on('data', (item) => {
+         cache.push(item);
+      });
+
+      stream.on('end', () => {
+         expect(cache);
       });
    }
 
@@ -90,7 +102,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (result) => {
+            gatherResult(nodeStream, (result) => {
                expect(result.value[0]).toEqual(refToken);
             });
          });
@@ -102,7 +114,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (result) => {
+            gatherResult(nodeStream, (result) => {
                expect(result.value[0]).toEqual(refToken);
             });
          });
@@ -119,7 +131,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token).toEqual(declToken);
                done();
             });
@@ -140,7 +152,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
       });
@@ -175,7 +187,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   xToken.unassigned.wordFromSToken(SToken.fromString('value')),
                ]);
@@ -198,7 +210,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   parentPeref,
                ]);
@@ -215,7 +227,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([]);
 
                done();
@@ -242,7 +254,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   parentPeref
                ]);
@@ -272,7 +284,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
                   new xToken.entityEnd.ParamPToken({ refPToken: parentPeref }),
@@ -308,7 +320,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
                   new xToken.entityStart.ParamPToken({}),
@@ -335,7 +347,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token).toEqual(new xToken.entityDeclaration.XToken('newName', [], undefined, '', {
                   name: SToken.fromString('newName'),
                   nextParamName: 'parameter',
@@ -363,7 +375,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
                      unassigned: [
                         peRef
@@ -397,7 +409,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, (token) => {
+            gatherResult(nodeStream, (token) => {
                expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
                      unassigned: [
                         peRef
@@ -448,7 +460,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
          it('expands a series of PERefs that have content', (done) => {
@@ -515,7 +527,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
       });
@@ -541,7 +553,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
          it('handles the lack of an externalId', (done) => {
@@ -559,7 +571,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
          // Other testing is implicitly covered in entity declaration testing
@@ -583,7 +595,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(declToken);
 
-            gatherResults(nodeStream, done);
+            gatherResult(nodeStream, done);
          });
 
          it('passes a complete ATTLIST token through', () => {
@@ -610,7 +622,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -628,7 +640,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -652,7 +664,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -688,7 +700,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -729,7 +741,7 @@ function gatherResults(stream, expect) {
 
             asyncCallback([ new xToken.text.PToken() ]);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -777,7 +789,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -817,7 +829,7 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
                done();
             });
@@ -871,8 +883,75 @@ function gatherResults(stream, expect) {
 
             nodeStream.write(elementStart);
 
-            gatherResults(nodeStream, (results) => {
+            gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('reports an error if a referenced entity is an external one', (done) => {
+            let asyncCallback;
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: false,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               asyncCallback = cb;
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible')
+               .and.returnValue([ new xToken.text.XToken('one', {}) ]);
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+               [ 'refName' ]);
+
+            nodeStream.write(elementStart);
+            nodeStream.end();
+
+            asyncCallback([ new xToken.text.PToken() ]);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results[0]).toEqual(expected);
+               done();
+            });
+         });
+
+         it('does not mind if the pToken has been removed by the time it processes', (done) => {
+            let asyncCallback;
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: false,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               asyncCallback = cb;
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible')
+               .and.returnValue([ new xToken.text.XToken('one', {}) ]);
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+               [ 'refName' ]);
+            delete elementStart.attributes[0].value[0].pToken;
+
+            nodeStream.write(elementStart);
+            nodeStream.end();
+
+            asyncCallback([ new xToken.text.PToken() ]);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results[0]).toEqual(expected);
                done();
             });
          });

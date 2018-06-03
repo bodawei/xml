@@ -1,8 +1,9 @@
-/* Copyright ® 2017 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
 import { Transform } from 'readable-stream';
 
 import { EntityMetaData } from '../basic';
+import { WellFormedError } from '../error';
 import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
 import { STokenSource } from '../sToken';
@@ -342,6 +343,17 @@ class NodeStream extends Transform {
 
    _expandReference(entityRef, indexInAttr, referenceExpanded) {
       const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
+
+      // Well-formedness Constraint: §3.1: No External Entity References
+      //    Attribute values must not contain direct or indirect entity
+      //    references to external entities.
+      if (!entityInfo.isInternal) {
+         const sToken = entityRef.pToken ? entityRef.pToken.open : undefined;
+         const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            [ entityRef.name ], sToken, sToken);
+         this.push(error);
+      }
+
       const sTokenStream = entityInfo.getStream();
 
       literalValue.parse(sTokenStream, [ '&' ], (pTokenResult) => {
