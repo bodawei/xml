@@ -24,6 +24,8 @@ import * as processingInstruction from './processingInstruction.js';
 import unassigned from './unassigned';
 import * as xmlDeclaration from './xmlDeclaration.js';
 
+import literalValue from './common/literalValue';
+
 const token = {
    declaration,
    envelope,
@@ -49,6 +51,8 @@ const token = {
    xmlDeclaration,
 
    unassigned,
+
+   literalValue,
 };
 
 export {
@@ -76,6 +80,8 @@ export {
    xmlDeclaration,
 
    unassigned,
+
+   literalValue,
 };
 
 export default token;

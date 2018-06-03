@@ -254,12 +254,16 @@ describe('EntityManager (unit)', () => {
 
    });
 
-   describe('getEntityInfo', () => {
+   describe('getEntityInfo()', () => {
 
       it('throws an exception if called without a name', () => {
          expect(() => {
             manager.getEntityInfo();
          }).toThrowError('Must call with the name of an entity.');
+      });
+
+      it('returns nothing if the entity does not exist', () => {
+         expect(manager.getEntityInfo('test')).toBeUndefined();
       });
 
       it('returns an object with a getStream() function', () => {

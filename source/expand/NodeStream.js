@@ -10,6 +10,7 @@ import { PToXTokenStream } from '../xTokenStream';
 import {
    attListDeclaration,
    elementDeclaration,
+   elementStart,
    entityDeclaration,
    entityEnd,
    entityReference,
@@ -17,6 +18,7 @@ import {
    notationDeclaration,
    text,
    unassigned,
+   literalValue,
 } from '../token';
 
 import EntityManager from './EntityManager.js';
@@ -83,6 +85,9 @@ class NodeStream extends Transform {
          return;
       } else if (xToken instanceof attListDeclaration.XToken) {
          this._processAttListDeclaration(xToken, callback);
+         return;
+      } else if (xToken.type === elementStart.XTYPE || xToken.type === elementStart.EMPTY_XTYPE) {
+         this._processElementStart(xToken, callback);
          return;
       }
 
@@ -255,7 +260,103 @@ class NodeStream extends Transform {
    }
 
    /**********************************************************************\
-    EntityDeclaration processing
+    Element Start processing
+   \**********************************************************************/
+
+   _processElementStart(startXToken, done) {
+      if (!startXToken.attributes || startXToken.attributes.length === 0) {
+         this.push(startXToken);
+         done();
+         return;
+      }
+
+      let attrsRemaining = startXToken.attributes.length;
+      const self = this;
+
+      function attributeDone(newValue, index) {
+         attrsRemaining--;
+         startXToken.attributes[index].value = newValue;
+
+         if (attrsRemaining === 0) {
+            self.push(startXToken);
+            done();
+         }
+      }
+
+      for (let index = 0; index < startXToken.attributes.length; index++) {
+         const attr = startXToken.attributes[index];
+         this._expandAttributeValue(attr.value, index, attributeDone);
+      }
+   }
+
+   _expandAttributeValue(attrValue, attrIndex, attrExpanded) {
+      if (attrValue.length === 0) {
+         attrExpanded(attrValue, attrIndex);
+         return;
+      }
+
+      let count = 0;
+      let doneProcessing = false;
+      const expansions = {};
+      const self = this;
+
+      function referenceExpanded(refData, refIndex) {
+         expansions[refIndex] = refData;
+         count--;
+
+         if (count === 0 && doneProcessing) {
+            self._buildExpandedAttrValue(attrValue, attrIndex, expansions, attrExpanded);
+         }
+      }
+
+      for (let index = 0; index < attrValue.length; index++) {
+         const item = attrValue[index];
+
+         if (item.type === entityReference.XTYPE) {
+            count++;
+            this._expandReference(item, index, referenceExpanded);
+         }
+      }
+
+      doneProcessing = true;
+      if (count === 0 && doneProcessing) {
+         this._buildExpandedAttrValue(attrValue, attrIndex, expansions, attrExpanded);
+      }
+   }
+
+   _buildExpandedAttrValue(originalAttrValue, attrIndex, expansions, attrExpanded) {
+      let newValue = [];
+
+      for (let index = 0; index < originalAttrValue.length; index++) {
+         const item = originalAttrValue[index];
+
+         if (item.type === entityReference.XTYPE) {
+            newValue = newValue.concat(expansions[index]);
+         } else {
+            newValue.push(item);
+         }
+      }
+
+      attrExpanded(newValue, attrIndex);
+   }
+
+   _expandReference(entityRef, indexInAttr, referenceExpanded) {
+      const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
+      const sTokenStream = entityInfo.getStream();
+
+      literalValue.parse(sTokenStream, [ '&' ], (pTokenResult) => {
+         const xToken = literalValue.makeXTokenCompatible(pTokenResult);
+
+         this._expandAttributeValue(xToken, -1, (subXToken) => {
+            subXToken.unshift(new entityStart.XToken(entityRef.name));
+            subXToken.push(new entityEnd.XToken(entityRef.name));
+            referenceExpanded(subXToken, indexInAttr);
+         });
+      });
+   }
+
+   /**********************************************************************\
+    Entity Declaration processing
    \**********************************************************************/
 
    _processEntityDeclaration(edToken, callback) {

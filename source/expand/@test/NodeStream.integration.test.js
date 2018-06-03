@@ -1,8 +1,11 @@
-/* Copyright ® 2017 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityLocation, Range } from '../../basic';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
+import { SToken } from '../../sToken';
+import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as tokenNs from '../../token';
 
 import EntityManager from '../EntityManager.js';
@@ -269,6 +272,96 @@ describe('NodeStream (integration)', () => {
             '<!NOTATION foo %middle;>' +
          ']>');
          pTokenStream.endText();
+      });
+
+   });
+
+   describe('element start processing', () => {
+      let pTokenStream;
+      let node;
+      let makeSToken;
+
+      beforeEach(() => {
+         pTokenStream = new PTokenStream();
+
+         const manager = new EntityManager();
+         const xTokenStream = new PToXTokenStream();
+         node = new NodeStream(manager);
+
+         pTokenStream.pipe(xTokenStream).pipe(node);
+
+         makeSToken = makeSTokenMaker();
+      });
+
+      function expectProcessing(input, check) {
+         const results = [];
+
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            check(results);
+         });
+
+         pTokenStream.addText(input);
+         pTokenStream.endText();
+      }
+
+      it('expands general entity references in attributes', (done) => {
+         expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY child "(child)">' +
+         ']>' +
+         '<one child="&child;"/>', (results) => {
+            const element = results[5];
+
+            expect(element.attributes[0].value).toEqual([
+               new tokenNs.entityStart.XToken('child'),
+               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+                  text: makeSToken('(child)'),
+               })),
+               new tokenNs.entityEnd.XToken('child'),
+            ]);
+            done();
+         });
+      });
+
+      it('expands a nested entity reference', (done) => {
+         const makeChildSToken = makeSTokenMaker();
+         const childStoken = makeChildSToken('(child)');
+
+         expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY child "(child)">' +
+            '<!ENTITY parent "pre&child;mid&child;post">' +
+         ']>' +
+         '<one child="&child;" parent="&parent;"/>', (results) => {
+            const element = results[6];
+
+            expect(element.attributes[1].value).toEqual([
+               new tokenNs.entityStart.XToken('parent'),
+               new tokenNs.text.XToken('pre', new tokenNs.text.PToken({
+                  text: new SToken('pre', 'pre', new Range(new EntityLocation(),
+                     0, 0, 0, 3, 0, 3)),
+               })),
+               new tokenNs.entityStart.XToken('child'),
+               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+                  text: childStoken,
+               })),
+               new tokenNs.entityEnd.XToken('child'),
+               new tokenNs.text.XToken('mid', new tokenNs.text.PToken({
+                  text: new SToken('mid', 'mid', new Range(new EntityLocation(),
+                     10, 0, 10, 13, 0, 13)),
+               })),
+               new tokenNs.entityStart.XToken('child'),
+               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+                  text: childStoken,
+               })),
+               new tokenNs.entityEnd.XToken('child'),
+               new tokenNs.text.XToken('post', new tokenNs.text.PToken({
+                  text: new SToken('post', 'post', new Range(new EntityLocation(),
+                     20, 0, 20, 24, 0, 24)),
+               })),
+               new tokenNs.entityEnd.XToken('parent'),
+            ]);
+            done();
+         });
       });
 
    });

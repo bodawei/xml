@@ -166,6 +166,10 @@ class EntityManager {
    _internalGetInfo(name, isParameter) {
       const token = this._internalGetToken(name, isParameter);
 
+      if (!token) {
+         return;
+      }
+
       return {
          isParameter: token.isParameter,
          isInternal: !token.externalLoc,

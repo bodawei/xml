@@ -602,6 +602,283 @@ function gatherResults(stream, expect) {
 
       });
 
+      describe('element processing', () => {
+
+         it('processes an element with no attributes without problems', (done) => {
+            const elementStart = new xToken.elementStart.XToken('one', [], {});
+            const expected = new xToken.elementStart.XToken('one', [], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('passes attributes through with no content', (done) => {
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('passes attributes through that are only text', (done) => {
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [ new xToken.text.XToken('one', {}) ],
+            }, {
+               name: 'two',
+               value: [ new xToken.text.XToken('foo', {}) ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [ new xToken.text.XToken('one', {}) ],
+            }, {
+               name: 'two',
+               value: [ new xToken.text.XToken('foo', {}) ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('replaces a general entity', (done) => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one', {}) ];
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+               ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         // Our routines are not always async. and the tests here all exercise sync code.
+         // This test switches the low level parsing to being async so we can
+         // make sure the higher level code still handles this.
+         it('replaces a general entity asynchronously', (done) => {
+            let asyncCallback;
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               asyncCallback = cb;
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible')
+               .and.returnValue([ new xToken.text.XToken('one', {}) ]);
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+               ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            asyncCallback([ new xToken.text.PToken() ]);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('replaces values in multiple attributes', (done) => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one', {}) ];
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'firstAttribute',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }, {
+               name: 'secondAttribute',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'firstAttribute',
+               value: [
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+               ],
+            }, {
+               name: 'secondAttribute',
+               value: [
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+               ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('replaces values in attributes which are a mix of references and text', (done) => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one', {}) ];
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'firstAttribute',
+               value: [
+                  new xToken.text.XToken('some text', {}),
+                  new xToken.entityReference.XToken('refName', {}),
+                  new xToken.text.XToken('more text', {}),
+               ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'firstAttribute',
+               value: [
+                  new xToken.text.XToken('some text', {}),
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+                  new xToken.text.XToken('more text', {}),
+               ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('replaces references in references', (done) => {
+            let callCount = 0;
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ /* PTokens for text, entity ref and text */ ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               callCount ++;
+               if (callCount === 1) {
+                  return [
+                     new xToken.text.XToken('pre ', {}),
+                     new xToken.entityReference.XToken('child', {}),
+                     new xToken.text.XToken(' post', {}),
+                  ];
+               } else {
+                  return [ new xToken.text.XToken('inner', {}) ];
+               }
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'testAttribute',
+               value: [
+                  new xToken.text.XToken('some text', {}),
+                  new xToken.entityReference.XToken('parent', {}),
+                  new xToken.text.XToken('more text', {}),
+               ],
+            }], {});
+            const expected = new xToken.elementStart.XToken('one', [{
+               name: 'testAttribute',
+               value: [
+                  new xToken.text.XToken('some text', {}),
+                  new xToken.entityStart.XToken('parent'),
+                  new xToken.text.XToken('pre ', {}),
+                  new xToken.entityStart.XToken('child'),
+                  new xToken.text.XToken('inner', {}),
+                  new xToken.entityEnd.XToken('child'),
+                  new xToken.text.XToken(' post', {}),
+                  new xToken.entityEnd.XToken('parent'),
+                  new xToken.text.XToken('more text', {}),
+               ],
+            }], {});
+
+            nodeStream.write(elementStart);
+
+            gatherResults(nodeStream, (results) => {
+               expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+      });
+
    });
 
 });
