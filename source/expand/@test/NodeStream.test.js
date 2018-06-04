@@ -889,6 +889,49 @@ describe('NodeStream (unit)', () => {
             });
          });
 
+         it('reports an error if there is a "<" in the replacement text of any attribute value', (done) => {
+            let callCount = 0;
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ /* PTokens for text, entity ref and text */ ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               callCount ++;
+               if (callCount === 1) {
+                  return [
+                     new xToken.text.XToken('pre ', {}),
+                     new xToken.entityReference.XToken('child', {}),
+                     new xToken.text.XToken(' post', {}),
+                  ];
+               } else {
+                  return [ new xToken.text.XToken('inn<er', {}) ];
+               }
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'testAttribute',
+               value: [
+                  new xToken.text.XToken('some text', {}),
+                  new xToken.entityReference.XToken('parent', {}),
+                  new xToken.text.XToken('more text', {}),
+               ],
+            }], {});
+            const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+               [ 'testAttribute' ]);
+
+            nodeStream.write(elementStart);
+            nodeStream.end();
+
+            gatherResults(nodeStream, (results) => {
+               expect(results[0]).toEqual(expected);
+               done();
+            });
+         });
+
          it('reports an error if a referenced entity is an external one', (done) => {
             let asyncCallback;
             spyOn(entityManager, 'getEntityInfo').and.returnValue({

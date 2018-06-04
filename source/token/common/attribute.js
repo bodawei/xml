@@ -2,6 +2,8 @@
 
 import { WellFormedError, XmlWarning,  } from '../../error';
 
+import text from '../text';
+
 import misc from './misc.js';
 import literal from './literal';
 
@@ -121,6 +123,23 @@ function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type,
       ec.setPos(attr.postEqualSpace);
 
       literal.checkWellFormed(attr, ec, entityMetaData, type, () => {
+         // Well-formedness constraint: §3.1: No < in Attribute Values
+         //   The replacement text of any entity referred to directly or indirectly
+         //   in an attribute value must not contain a <.
+         //   (Note that while the text speaks of only the replacement text of
+         //   entity values, the syntax of AttValue doesn't allow it anywhere).
+         if (type === WFEID.NOUN_ATTRIBUTE && attr.value) {
+            for (let index = 0; index < attr.value.length; index++) {
+               const valuePart = attr.value[index];
+
+               if (valuePart && valuePart.type === text.PTYPE) {
+                  if (valuePart.text && valuePart.text.str.indexOf('<') !== -1) {
+                     ec.report(WFEID.ATTRIBUTE_INVALID_VALUE, [ nameText ]);
+                  }
+               }
+            }
+         }
+
          if (checkValue) {
             checkValue(attr.name, attr.value, ec, entityMetaData);
          }

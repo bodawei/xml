@@ -279,6 +279,7 @@ class NodeStream extends Transform {
          startXToken.attributes[index].value = newValue;
 
          if (attrsRemaining === 0) {
+            self._scanForBadText(startXToken);
             self.push(startXToken);
             done();
          }
@@ -287,6 +288,36 @@ class NodeStream extends Transform {
       for (let index = 0; index < startXToken.attributes.length; index++) {
          const attr = startXToken.attributes[index];
          this._expandAttributeValue(attr.value, index, attributeDone);
+      }
+   }
+
+   _scanForBadText(startToken) {
+      const sToken = startToken.pToken && startToken.pToken.open;
+
+      for (let attrIndex = 0; attrIndex < startToken.attributes.length; attrIndex++) {
+         const attribute = startToken.attributes[attrIndex];
+         const value = attribute.value;
+         let entityDepth = 0;
+
+         // Well-formedness constraint: §3.1: No < in Attribute Values
+         //   The replacement text of any entity referred to directly or indirectly
+         //   in an attribute value must not contain a <.
+         for (let index = 0; index < value.length; index++) {
+            const valuePart = value[index];
+
+            if (valuePart.type === entityStart.XTYPE) {
+               entityDepth++;
+            } else if (valuePart.type === entityEnd.XTYPE) {
+               entityDepth--;
+            } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
+               // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
+               if (valuePart.text && valuePart.text.indexOf('<') !== -1) {
+                  const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+                     [ attribute.name ], sToken, sToken);
+                  this.push(error);
+               }
+            }
+         }
       }
    }
 

@@ -7,6 +7,8 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 
+import text from '../text';
+import entityReference from '../entityReference';
 import attribute from './attribute.js';
 import misc from './misc.js';
 import literal from './literal';
@@ -316,6 +318,27 @@ describe('attribute (unit)', () => {
             previousSpace, 'other');
 
          expect(mockErrorCollector.errors.length).toEqual(0);
+      });
+
+      it('reports an error if there is a "<" in the attribute value', () => {
+         literal.checkWellFormed.and.callFake((_1, _2, _3, _4, cb) => {
+            cb();
+         });
+
+         attributesPChunk[1].value = [
+            new text.PToken({ text: SToken.fromString('foo') }),
+            new entityReference.PToken(),
+            new text.PToken({ text: SToken.fromString('t<o') }),
+         ];
+
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+            params: [ 'another' ],
+            lastPosition: attributesPChunk[1].equal
+         });
       });
 
    });
