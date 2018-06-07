@@ -8,11 +8,7 @@ if [ "`git rev-parse --abbrev-ref HEAD`" != "master" ]; then
    exit 0
 fi
 
-echo "PREPARING TO COMMIT TO MASTER"
-echo "----------------------------------------"
-git diff
-echo "----------------------------------------"
-
+echo "PREPARING TO COMMIT TO master"
 # https://stackoverflow.com/questions/3417896/how-do-i-prompt-the-user-from-within-a-commit-msg-hook
 exec < /dev/tty
 

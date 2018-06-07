@@ -5,8 +5,13 @@
       "allowJs": true,
       "target": "es5",
       "sourceMap": true,
-      "outDir": "./temp/typescript"
-    },
+      "outDir": "./temp/typescript",
+
+      "baseUrl": "./",
+      "paths": {
+        "error": [ "./source/error" ],
+      }
+     },
     "include": [
         "build/**/*jasmine*.js",
         "source/**/*.js",
@@ -14,5 +19,5 @@
     ],
     "exclude": [
         "node_modules",
-    ]
+    ],
 }

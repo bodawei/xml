@@ -2,11 +2,8 @@
 /* eslint-disable no-console, no-process-exit */
 
 const fs = require('fs');
+const child_process = require('child_process');
 const semver = require('semver');
-
-const gitLogToJson = require('git-log-to-json');
-
-const promise = gitLogToJson('./');
 
 function computeVersion(logs, final) {
    let version = semver('0.0.0');
@@ -53,12 +50,19 @@ function reportError(error) {
    process.exit(-1);
 }
 
-promise
-   .then((logs) => {
-      const newVersion = computeVersion(logs, process.argv[2]);
+const results = child_process.execSync('git log --pretty=format:"%sÒÒÒÒ%b"')
+const commits = results.toString().split('');
 
-      updateVersion(newVersion);
+const details = commits
+   .filter((commit) => commit !== '')
+   .map((commit) => {
+      const parts = commit.split('ÒÒÒÒ');
+      return {
+         subject: parts[0].toString(),
+         body: parts[1].toString(),
+      }
+   });
 
-      process.exit(0);
-   })
-   .catch(reportError);
+const newVersion = computeVersion(details, process.argv[2]);
+updateVersion(newVersion);
+process.exit(0);

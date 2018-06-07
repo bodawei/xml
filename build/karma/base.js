@@ -3,6 +3,8 @@
 /* eslint-env node */
 /* eslint-disable no-var, prefer-spread */
 
+const path = require('path');
+
 var BASE_PATH = process.cwd();
 var BUILD_DIR = BASE_PATH + '/build/';
 var SOURCE_DIR = BASE_PATH + '/source/';
@@ -17,7 +19,7 @@ prepro[BUILD_DIR + '*.ts'] = [ 'karma-typescript' ];
 // http://karma-runner.github.io/1.0/config/configuration-file.html
 
 const config = {
-   basePath: './',
+   basePath: '.',
    reportSlowerThan: 1000,
    browsers: [ 'Chrome' ],
    captureTimeout: 20000,     // If browser does not capture in given timeout [ms], kill it
