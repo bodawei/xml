@@ -6,6 +6,7 @@ import { SToken } from '../../sToken';
 import {
    attListDeclaration,
    comment,
+   docTypeEnd,
    docTypeStart,
    elementStart,
    elementEnd,
@@ -576,6 +577,27 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
                [ 'elementType',  'idAttr', '' ], attListDecl.pToken.open);
+            expectStream(validator, expected, done);
+         });
+
+         it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
+            const endOfDocType = new docTypeEnd.XToken();
+            const attListDecl = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#IMPLIED',
+            }, {
+               name: 'second',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }], {});
+
+            validator.write(attListDecl);
+            validator.write(endOfDocType);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
+               [ 'elementType',  'second' ]);
             expectStream(validator, expected, done);
          });
 

@@ -8,6 +8,7 @@ import {
    comment,
    elementDeclaration,
    attListDeclaration,
+   docTypeEnd,
    docTypeStart,
    elementStart,
    elementEnd,
@@ -148,6 +149,8 @@ class CheckXTokenValidStream extends stream.Transform {
       } else if (xToken instanceof elementEnd.XToken) {
          this.contentStack.pop();
          this.currentContext = this.contentStack[this.contentStack.length - 1];
+      } else if (xToken instanceof docTypeEnd.XToken) {
+         this.validateDTD();
       }
 
       this.push(xToken);
@@ -293,6 +296,32 @@ class CheckXTokenValidStream extends stream.Transform {
 
          this.setupContextCheck(this.elementDeclarations[elDecl.name]);
       }
+   }
+
+   /*
+    * Does all checks that can only be done once we have the whole DTD processed
+    */
+   private validateDTD() {
+
+      // §3.3.1: Validity constraint: One ID per Element Type
+      //    An element type must not have more than one ID attribute specified.
+      Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
+         const attList = this.attrDefsByElementName[elementType];
+         let idCount = 0;
+
+         Object.keys(attList.attributes).forEach((name) => {
+            const attrDef = attList.attributes[name];
+            if (attrDef.type === 'ID') {
+               idCount ++;
+
+               if (idCount > 1) {
+                  const err = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
+                     [ elementType, attrDef.name ]);
+                  this.push(err);
+               }
+            }
+         });
+      });
    }
 
    _checkelementStart(xToken: XToken) {
