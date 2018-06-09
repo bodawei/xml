@@ -52,6 +52,7 @@ describe('FixingStream (unit)', () => {
             name: 'one',
             type: 'id',
             defaultType: '#IMPLIED',
+            value: [],
          }], dummyPToken);
    
          fs.write(before);
@@ -68,6 +69,7 @@ describe('FixingStream (unit)', () => {
             name: 'one',
             type: 'BOGUS',
             defaultType: '#IMPLIED',
+            value: [],
          }], dummyPToken);
    
          fs.write(before);
@@ -84,6 +86,7 @@ describe('FixingStream (unit)', () => {
             name: 'one',
             type: 'work around typescript',
             defaultType: '#IMPLIED',
+            value: [],
          };
          delete value.type;
          const before = new tokenNs.attListDeclaration.XToken('elName', [value], dummyPToken);
@@ -101,7 +104,8 @@ describe('FixingStream (unit)', () => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
             defaultType: '#required',
-            type: 'ID'
+            type: 'ID',
+            value: [],
          }], dummyPToken);
    
          fs.write(before);
@@ -117,7 +121,8 @@ describe('FixingStream (unit)', () => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
             defaultType: 'BOGUS',
-            type: 'ID'
+            type: 'ID',
+            value: [],
          }], dummyPToken);
    
          fs.write(before);

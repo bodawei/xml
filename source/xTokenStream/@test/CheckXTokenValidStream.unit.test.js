@@ -11,8 +11,11 @@ import {
    elementStart,
    elementEnd,
    elementDeclaration,
+   entityEnd,
+   entityStart,
    notationDeclaration,
    processingInstruction,
+   text,
    xmlDeclaration,
 } from '../../token';
 
@@ -419,6 +422,87 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         it('reports an error if an ID value is used twice', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+            const attListDecl1 = new attListDeclaration.XToken('one', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
+            const attListDecl2 = new attListDeclaration.XToken('two', [{
+               name: 'id',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const startToken1 = new elementStart.XToken('one', [{
+               name: 'idAttr',
+               value: [
+                  new text.XToken('test', {})
+               ]
+            }], {});
+            const startToken2 = new elementStart.XToken('two', [{
+               name: 'id',
+               value: [
+                  new text.XToken('test', {})
+               ]
+            }], {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl2);
+            validator.write(attListDecl1);
+            validator.write(attListDecl2);
+            validator.write(startToken1);
+            validator.write(startToken2);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               [ 'test', 'two', 'id', 'one', 'idAttr' ]);
+            expectStream(validator, expected, done);
+         });
+
+
+         it('reports an error if an ID value built from an entity reference is used twice', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+            const attListDecl1 = new attListDeclaration.XToken('one', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
+            const attListDecl2 = new attListDeclaration.XToken('two', [{
+               name: 'id',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const startToken1 = new elementStart.XToken('one', [{
+               name: 'idAttr',
+               value: [
+                  new text.XToken('test', {})
+               ]
+            }], {});
+            const startToken2 = new elementStart.XToken('two', [{
+               name: 'id',
+               value: [
+                  new entityStart.XToken('ref', {}),
+                  new text.XToken('test', {}),
+                  new entityEnd.XToken('ref', {}),
+               ]
+            }], {});
+
+            validator.write(elDecl1);
+            validator.write(elDecl2);
+            validator.write(attListDecl1);
+            validator.write(attListDecl2);
+            validator.write(startToken1);
+            validator.write(startToken2);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+               [ 'test', 'two', 'id', 'one', 'idAttr' ]);
+            expectStream(validator, expected, done);
+         });
+
       });
 
       describe('EmptyElement tokens', () => {
@@ -586,6 +670,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                name: 'idAttr',
                type: 'ID',
                defaultType: '#IMPLIED',
+            }, {
+               name: 'ref',
+               type: 'IDREF',
+               defaultType: '#REQUIRED',
             }, {
                name: 'second',
                type: 'ID',

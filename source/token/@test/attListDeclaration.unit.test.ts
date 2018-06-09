@@ -53,6 +53,7 @@ describe('attListDeclaration (unit)', () => {
             name: 'attName',
             type: 'CDATA',
             defaultType: '#REQUIRED',
+            value: [],
          }], new attListDeclaration.PToken());
 
          expect(xToken.elementName).toEqual('foo');
@@ -1237,6 +1238,7 @@ describe('attListDeclaration (unit)', () => {
                name: 'att1',
                type: 'CDATA',
                defaultType: '#REQUIRED',
+               value: [],
             }, {
                name: 'attr2',
                type: 'bogus',
@@ -1261,10 +1263,12 @@ describe('attListDeclaration (unit)', () => {
                name: 'att1',
                type: 'CDATA',
                defaultType: '#REQUIRED',
+               value: [],
             }, {
                name: 'attr2',
                type: '',
                defaultType: '',
+               value: [],
             }],
             pToken: aldPToken,
          });

@@ -14,9 +14,11 @@ import {
    elementEnd,
    notationDeclaration,
    processingInstruction,
+   text,
 } from '../token';
 import { AttListXToken, XAttr, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
+import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
 
@@ -54,6 +56,25 @@ type SeenMapping = {
    [xName: string]: boolean;
 };
 
+type IDMap = {
+   [idValue: string]: {
+      token: ElementStart,
+      attrName: string,
+   }
+};
+
+function getAttributeValueText(attribute: XAttr): string {
+   const rawValue = attribute.value;
+   let newValue = '';
+
+   rawValue.forEach((value) => {
+      if (text.isTextXToken(value)) {
+         newValue += value.text;
+      }
+   });
+
+   return newValue;
+}
 
 class CheckXTokenValidStream extends stream.Transform {
    private docType: XToken | void;
@@ -62,6 +83,7 @@ class CheckXTokenValidStream extends stream.Transform {
    private elementDeclarations: { [name: string]: ElementDeclInfo };
    private contentStack: Array<ElementDeclInfo>;
    private currentContext: ElementDeclInfo | void;
+   private idValues: IDMap;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -75,6 +97,7 @@ class CheckXTokenValidStream extends stream.Transform {
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
+      this.idValues = {};
    }
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
@@ -145,7 +168,7 @@ class CheckXTokenValidStream extends stream.Transform {
          this.currentContext = this.elementDeclarations[xToken.name];
          this.contentStack.push(this.currentContext);
 
-         this._checkelementStart(xToken);
+         this.validateElementStart(xToken);
       } else if (xToken instanceof elementEnd.XToken) {
          this.contentStack.pop();
          this.currentContext = this.contentStack[this.contentStack.length - 1];
@@ -324,10 +347,10 @@ class CheckXTokenValidStream extends stream.Transform {
       });
    }
 
-   _checkelementStart(xToken: XToken) {
-      const elemAttrsDef = this.attrDefsByElementName[xToken.name];
-      const elementDecl = this.elementDeclarations[xToken.name];
-      const attributes = xToken.attributes || [];
+   private validateElementStart(elStart: ElementStart) {
+      const elemAttrsDef = this.attrDefsByElementName[elStart.name];
+      const elementDecl = this.elementDeclarations[elStart.name];
+      const attributes = elStart.attributes || [];
 
       if (elemAttrsDef) { // This must be required somewhere...
          // Validity Constraint: §3.1: Validity constraint: Attribute Value Type
@@ -335,12 +358,27 @@ class CheckXTokenValidStream extends stream.Transform {
          //    the type declared for it.
          for (let index = 0; index < attributes.length; index++) {
             const attrName = attributes[index].name || '';
-            const pToken = xToken.pToken;
+            const pToken = elStart.pToken;
+            const attrDef = elemAttrsDef.attributes[attrName];
 
-            if (!elemAttrsDef.attributes[attrName]) {
+            if (!attrDef) {
                const err = new ValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ xToken.name, attrName ], pToken.open);
+                  [ elStart.name, attrName ], pToken.open);
                this.push(err);
+            } else if (attrDef.type === 'ID') {
+               const text = getAttributeValueText(attributes[index]);
+               const previous = this.idValues[text] || {};
+
+               if (previous.token) {
+                  const err = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+                     [ text, elStart.name, attrName,  previous.token.name, previous.attrName ], pToken.open);
+                  this.push(err);
+               } else {
+                  this.idValues[text] = {
+                     token: elStart,
+                     attrName: attrDef.name,
+                  }
+               }
             }
          }
       }
@@ -351,7 +389,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
       // Interoperability: §3.1: For interoperability, the empty-element tag should be
       //    used, and should only be used, for elements which are declared EMPTY.
-      const tokenIsEmptyType = xToken instanceof elementStart.EmptyToken;
+      const tokenIsEmptyType = elStart instanceof elementStart.EmptyToken;
       const declarationIsEmpty = elementDecl.matcherType === 'EMPTY';
       let warningId;
 
@@ -362,7 +400,7 @@ class CheckXTokenValidStream extends stream.Transform {
       }
 
       if (warningId) {
-         const warning = new XmlWarning(warningId, [ xToken.name ], xToken.pToken.open, xToken.pToken.open);
+         const warning = new XmlWarning(warningId, [ elStart.name ], elStart.pToken.open, elStart.pToken.open);
          this.push(warning);
       }
    }

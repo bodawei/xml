@@ -185,4 +185,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   ElementStart,
 };

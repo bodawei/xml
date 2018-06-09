@@ -81,10 +81,12 @@ describe('PToXTokenStream (integration)', () => {
             name: 'atOne',
             type: 'IDREF',
             defaultType: '',
+            value: [],
          }, {
             name: 'atTwo',
             type: 'ENTITY',
             defaultType: '',
+            value: [],
          }], new attListDeclaration.PToken()),
       ], done);
    });

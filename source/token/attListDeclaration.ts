@@ -386,7 +386,7 @@ type XAttr = {
    name: string;
    type: string;
    defaultType: string;
-   value?: LiteralValueXToken;
+   value: LiteralValueXToken;
 };
 
 class AttListXToken {
@@ -414,6 +414,7 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
          name: attDef.name.str,
          type: misc.textOrBlank(attDef.type),
          defaultType: misc.textOrBlank(attDef.defaultType),
+         value: [],
       };
 
       const result = literal.makeTokenCompatible(attDef)
