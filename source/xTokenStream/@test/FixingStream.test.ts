@@ -50,7 +50,8 @@ describe('FixingStream (unit)', () => {
       it('capitalizes a type if it is not capitalized', (done) => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
-            type: 'id'
+            type: 'id',
+            defaultType: '#IMPLIED',
          }], dummyPToken);
    
          fs.write(before);
@@ -65,7 +66,8 @@ describe('FixingStream (unit)', () => {
       it('replaces an unknown type with CDATA', (done) => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
-            type: 'BOGUS'
+            type: 'BOGUS',
+            defaultType: '#IMPLIED',
          }], dummyPToken);
    
          fs.write(before);
@@ -81,6 +83,7 @@ describe('FixingStream (unit)', () => {
          const value = {
             name: 'one',
             type: 'work around typescript',
+            defaultType: '#IMPLIED',
          };
          delete value.type;
          const before = new tokenNs.attListDeclaration.XToken('elName', [value], dummyPToken);

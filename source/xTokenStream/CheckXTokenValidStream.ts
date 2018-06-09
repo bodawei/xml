@@ -14,7 +14,7 @@ import {
    notationDeclaration,
    processingInstruction,
 } from '../token';
-import { AttListXToken, XAttr } from '../token/attListDeclaration';
+import { AttListXToken, XAttr, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
@@ -160,7 +160,7 @@ class CheckXTokenValidStream extends stream.Transform {
       //    return;
       // }
    
-      // if (context.matcherType === 'MIXED' && context.token.children) {
+      if (context.matcherType === 'MIXED' && context.token.children) {
          const names: Array<XName> = context.token.children.names as Array<XName>;
    
          names.forEach((item: XName) => {
@@ -169,8 +169,8 @@ class CheckXTokenValidStream extends stream.Transform {
                   context.mixedMatcher[item.name] = true;
                }
             // }
-         });      
-      // }
+         });
+      }
    
       // context.childrenMatcher = {
       //    currentStateId: 0,
@@ -205,10 +205,28 @@ class CheckXTokenValidStream extends stream.Transform {
       };
 
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
-         processedAttrDefs.attributes[attListDecl.attDefs[index].name] = attListDecl.attDefs[index];
+         const attDef = attListDecl.attDefs[index];
+         this.validateAttrDef(attListDecl, attDef);
+         processedAttrDefs.attributes[attDef.name] = attDef;
       }
 
       this.attrDefsByElementName[elName] = processedAttrDefs;
+   }
+
+   private validateAttrDef(attList: AttListXToken, attDef: XAttr): void {
+      const type = attDef.type.toUpperCase();
+      const defaultType = attDef.defaultType.toUpperCase();
+      const pToken = attList.pToken || {} as AttListPToken; // typeHack
+
+      if (type === 'ID') {
+         // §3.3.1: Validity constraint: ID Attribute Default
+         //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
+         if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
+            const err = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
+               [ attList.elementName, attDef.name, '' ], pToken.open);
+            this.push(err);
+         }
+      }
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
@@ -271,9 +289,9 @@ class CheckXTokenValidStream extends stream.Transform {
                }
                seen[child.name] = true;
             });
-
-            this.setupContextCheck(this.elementDeclarations[elDecl.name]);
          }
+
+         this.setupContextCheck(this.elementDeclarations[elDecl.name]);
       }
    }
 
@@ -323,11 +341,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
 type NamesMap = { [elName: string]: true };
 
-function getNamesFromList(children: XNameList | void): NamesMap {
-   if (!children) {
-      return {};
-   }
-
+function getNamesFromList(children: XNameList): NamesMap {
    let childNames: NamesMap = {};
    for (let index = 0; index < children.names.length; index++) {
       const child = children.names[index];

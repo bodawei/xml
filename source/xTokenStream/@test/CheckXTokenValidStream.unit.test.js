@@ -34,7 +34,7 @@ function toHaveError(util) {
          if (pass) {
             message = `Expected not to find "${JSON.stringify(expected, undefined, 2)}".`;
          } else {
-            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}".`;
+            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}". Instead found ${console.json(actual)}.`;
          }
 
          return {
@@ -531,6 +531,51 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL,
                [ 'elementType', ], attListDecl.pToken.open, attListDecl.pToken.open);
+            expectStream(validator, expected, done);
+         });
+
+         it('has no problems if the PToken is not provided', (done) => {
+            const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+            const attListDecl = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#IMPLIED',
+            }]);
+
+            validator.write(elDecl);
+            validator.write(attListDecl);
+            validator.end();
+
+            expectNoErrors(validator, done);
+         });
+
+         it('reports no errors if an ID attribute is well defined', (done) => {
+            const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+            const attListDecl = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#IMPLIED',
+            }], {});
+
+            validator.write(elDecl);
+            validator.write(attListDecl);
+            validator.end();
+
+            expectNoErrors(validator, done);
+         });
+
+         it('reports an error if an attribute is of type ID but does not have value #IMPLIED or #REQUIRED', (done) => {
+            const attListDecl = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '',
+            }], {});
+
+            validator.write(attListDecl);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
+               [ 'elementType',  'idAttr', '' ], attListDecl.pToken.open);
             expectStream(validator, expected, done);
          });
 

@@ -49,7 +49,7 @@ function adjustAttListDeclaration(token: any) {
    for (let index = 0; index < token.attDefs.length; index++) {
       const attDef = token.attDefs[index];
       const capType = (attDef.type || '').toLocaleUpperCase();
-      const capDefType = (attDef.defaultType || '').toLocaleUpperCase();
+      const capDefType = attDef.defaultType.toLocaleUpperCase();
 
       if (capType !== attDef.type) {
          attDef.type = capType;

@@ -385,13 +385,13 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 type XAttr = {
    name: string;
    type: string;
-   defaultType?: string;
+   defaultType: string;
    value?: LiteralValueXToken;
 };
 
 class AttListXToken {
       readonly type: string;
-      public elementName?: string;
+      public elementName: string;
       public attDefs: Array<XAttr>;
       public defaultType?: string;
       public pToken?: AttListPToken;
@@ -405,7 +405,7 @@ class AttListXToken {
 }
 
 function pTokenToXToken(pToken: AttListPToken): AttListXToken {
-   const name = pToken.elementName ? pToken.elementName.str : '';
+   const name = misc.textOrBlank(pToken.elementName);
    const attrs: Array<XAttr> = [];
 
    for (let index = 0; index < pToken.attDefs.length; index++) {
