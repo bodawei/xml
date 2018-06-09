@@ -2,6 +2,7 @@
 
 import stream from 'readable-stream';
 
+import { EntityMetaData, util } from '../basic';
 import { ValidityError, XmlWarning } from '../error';
 
 import {
@@ -84,6 +85,7 @@ class CheckXTokenValidStream extends stream.Transform {
    private contentStack: Array<ElementDeclInfo>;
    private currentContext: ElementDeclInfo | void;
    private idValues: IDMap;
+   private emd?: EntityMetaData;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -174,6 +176,10 @@ class CheckXTokenValidStream extends stream.Transform {
          this.currentContext = this.contentStack[this.contentStack.length - 1];
       } else if (xToken instanceof docTypeEnd.XToken) {
          this.validateDTD();
+      }
+
+      if (xToken instanceof EntityMetaData) {
+         this.emd = xToken;
       }
 
       this.push(xToken);
@@ -367,11 +373,22 @@ class CheckXTokenValidStream extends stream.Transform {
                this.push(err);
             } else if (attrDef.type === 'ID') {
                const text = getAttributeValueText(attributes[index]);
+               // §3.3.1: Validity constraint: ID
+               //    Values of type ID must match the Name production.  ...
+               if (!util.isName(text, this.emd ? this.emd.version : 1.0, this.emd ? this.emd.revision : 5)) {
+                  const err = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+                     [ text, elStart.name, attrName ], pToken.open);
+                  this.push(err);
+               }
+
+               // §3.3.1: Validity constraint: ID
+               //    ... A name must not appear more than once in an XML document as a value of
+               //    this type; i.e., ID values must uniquely identify the elements which bear them.
                const previous = this.idValues[text] || {};
 
                if (previous.token) {
                   const err = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                     [ text, elStart.name, attrName,  previous.token.name, previous.attrName ], pToken.open);
+                     [ text, elStart.name, attrName, previous.token.name, previous.attrName ], pToken.open);
                   this.push(err);
                } else {
                   this.idValues[text] = {

@@ -1,6 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData, util } from '../../basic';
 import { ValidityError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import {
@@ -422,6 +423,58 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         it('reports an error if an ID value is not a name', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+            const attListDecl1 = new attListDeclaration.XToken('one', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const startToken1 = new elementStart.XToken('one', [{
+               name: 'idAttr',
+               value: [
+                  new text.XToken('$$BAD', {})
+               ]
+            }], {});
+            spyOn(util, 'isName').and.returnValue(false);
+
+            validator.write(elDecl1);
+            validator.write(attListDecl1);
+            validator.write(startToken1);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+               [ '$$BAD', 'one', 'idAttr' ]);
+            expectStream(validator, expected, done);
+         });
+
+         it('it calls util.isName() with the entity meta data', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+            const attListDecl1 = new attListDeclaration.XToken('one', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#REQUIRED',
+            }]);
+            const startToken1 = new elementStart.XToken('one', [{
+               name: 'idAttr',
+               value: [
+                  new text.XToken('$$BAD', {})
+               ]
+            }], {});
+            spyOn(util, 'isName');
+
+            validator.write(new EntityMetaData(undefined, 1.1, 2));
+            validator.write(elDecl1);
+            validator.write(attListDecl1);
+            validator.write(startToken1);
+            validator.end();
+
+            gatherTokens(validator, () => {
+               expect(util.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
+               done();
+            });
+         });
+
          it('reports an error if an ID value is used twice', (done) => {
             const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
             const attListDecl1 = new attListDeclaration.XToken('one', [{
@@ -460,7 +513,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ 'test', 'two', 'id', 'one', 'idAttr' ]);
             expectStream(validator, expected, done);
          });
-
 
          it('reports an error if an ID value built from an entity reference is used twice', (done) => {
             const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});

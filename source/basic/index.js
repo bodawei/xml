@@ -6,3 +6,4 @@ export { EntityKind as EntityKind } from './EntityMetaData';
 export { default as Offset } from './Offset';
 export { default as Range } from './Range';
 export { default as StringBundle } from './StringBundle';
+export { default as util } from './util';
