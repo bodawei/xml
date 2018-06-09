@@ -2,7 +2,7 @@
 /* eslint-disable no-console, no-process-exit */
 
 const fs = require('fs');
-const child_process = require('child_process');
+const child_process = require('child_process'); // eslint-disable-line camelcase
 const semver = require('semver');
 
 function computeVersion(logs, final) {
@@ -44,13 +44,7 @@ function updateVersion(version) {
    fs.writeFileSync('./package.json', JSON.stringify(packageInfo, undefined, 3));
 }
 
-function reportError(error) {
-   console.error('ERROR in pre-commit git hook (.git/hooks/pre-commit).');
-   console.error(JSON.stringify(error, undefined, 3));
-   process.exit(-1);
-}
-
-const results = child_process.execSync('git log --pretty=format:"%sÒÒÒÒ%b"')
+const results = child_process.execSync('git log --pretty=format:"%sÒÒÒÒ%b"'); // eslint-disable-line camelcase
 const commits = results.toString().split('');
 
 const details = commits
@@ -60,7 +54,7 @@ const details = commits
       return {
          subject: parts[0].toString(),
          body: parts[1].toString(),
-      }
+      };
    });
 
 const newVersion = computeVersion(details, process.argv[2]);

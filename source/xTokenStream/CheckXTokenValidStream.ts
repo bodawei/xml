@@ -49,27 +49,10 @@ type ElementDeclInfo = {
    },
 }
 
-function setupContextCheck(context: ElementDeclInfo) {
-   // if (!context.token.children) {
-   //    return;
-   // }
+type SeenMapping = {
+   [xName: string]: boolean;
+};
 
-   if (context.matcherType === 'MIXED' && context.token.children) {
-      const names: Array<XName> = context.token.children.names as Array<XName>;
-      names.forEach((item: XName) => {
-         // if (isXName(item)) {
-            if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
-               context.mixedMatcher[item.name] = true;
-            }
-         // }
-      });
-   }
-
-   // context.childrenMatcher = {
-   //    currentStateId: 0,
-   //    graph: nameList.processContentExpression(context.token.children)
-   // }
-}
 
 class CheckXTokenValidStream extends stream.Transform {
    private docType: XToken | void;
@@ -91,10 +74,6 @@ class CheckXTokenValidStream extends stream.Transform {
       this.elementDeclarations = {};
       this.contentStack = [];
       this.currentContext = undefined;
-   }
-
-   push(...args: Array<any>) {
-      super.push.apply(this, args);
    }
 
    _transform(xToken: XToken, _: string, done: StreamCallback) {
@@ -176,6 +155,29 @@ class CheckXTokenValidStream extends stream.Transform {
       done();
    }
 
+   private setupContextCheck(context: ElementDeclInfo) {
+      // if (!context.token.children) {
+      //    return;
+      // }
+   
+      // if (context.matcherType === 'MIXED' && context.token.children) {
+         const names: Array<XName> = context.token.children.names as Array<XName>;
+   
+         names.forEach((item: XName) => {
+            // if (isXName(item)) {
+               if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
+                  context.mixedMatcher[item.name] = true;
+               }
+            // }
+         });      
+      // }
+   
+      // context.childrenMatcher = {
+      //    currentStateId: 0,
+      //    graph: nameList.processContentExpression(context.token.children)
+      // }
+   }
+   
    private validateAttListDecl(attListDecl: AttListXToken) {
       const openSToken = attListDecl.pToken ? attListDecl.pToken.open : undefined;
       const elName = attListDecl.elementName || '';
@@ -223,25 +225,6 @@ class CheckXTokenValidStream extends stream.Transform {
          return;
       }
 
-      // §3.2: At user option, an XML processor may issue a warning when a declaration mentions an
-      //    element type for which no declaration is provided, but this is not an error.
-      const childNamesMap = getNamesFromList(elDecl.children);
-      const childNames = Object.keys(childNamesMap);
-      for (let index = 0; index < childNames.length; index++) {
-         const childName = childNames[index];
-
-         if (childName.toLocaleUpperCase() === '#PCDATA') {
-            isMixed = true;
-            continue;
-         }
-
-         if (!this.elementDeclarations[childName]) {
-            const err = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
-               [ elDecl.name, childNames[index] ], openSToken);
-            this.push(err);
-         }
-      }
-
       const matcherType = elDecl.contentSpecType === 'EMPTY' || elDecl.contentSpecType === 'ANY'
          ? elDecl.contentSpecType : 'CHILDREN';
 
@@ -250,12 +233,47 @@ class CheckXTokenValidStream extends stream.Transform {
          matcherType,
          mixedMatcher: {},
       };
+
       if (elDecl.children && elDecl.children.names.length > 0) {
+         // §3.2: At user option, an XML processor may issue a warning when a declaration mentions an
+         //    element type for which no declaration is provided, but this is not an error.
+         const childNamesMap = getNamesFromList(elDecl.children);
+         const childNames = Object.keys(childNamesMap);
+         for (let index = 0; index < childNames.length; index++) {
+            const childName = childNames[index];
+
+            if (childName.toLocaleUpperCase() === '#PCDATA') {
+               isMixed = true;
+               continue;
+            }
+
+            if (!this.elementDeclarations[childName]) {
+               const err = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
+                  [ elDecl.name, childNames[index] ], openSToken);
+               this.push(err);
+            }
+         }
+      
          if (isMixed) {
             this.elementDeclarations[elDecl.name].matcherType = 'MIXED';
-         }
 
-         setupContextCheck(this.elementDeclarations[elDecl.name]);
+            // §3.2.2: Validity constraint: No Duplicate Types
+            //    The same name must not appear more than once in a single mixed-content declaration.
+            const seen: SeenMapping = {};
+            const names: Array<XName> = elDecl.children.names as Array<XName>;
+            const pToken = elDecl.pToken;
+
+            names.forEach((child: XName) => {
+               if (seen[child.name]) {
+                  const err = new ValidityError(ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
+                     [ elDecl.name, child.name ], pToken.open);
+                  this.push(err);
+               }
+               seen[child.name] = true;
+            });
+
+            this.setupContextCheck(this.elementDeclarations[elDecl.name]);
+         }
       }
    }
 

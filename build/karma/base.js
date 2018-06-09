@@ -3,8 +3,6 @@
 /* eslint-env node */
 /* eslint-disable no-var, prefer-spread */
 
-const path = require('path');
-
 var BASE_PATH = process.cwd();
 var BUILD_DIR = BASE_PATH + '/build/';
 var SOURCE_DIR = BASE_PATH + '/source/';
