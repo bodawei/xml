@@ -17,7 +17,7 @@ function toContainPTokenProps(util, customEqualityTesters) {
             const args = callbackSpy.calls.allArgs();
 
             if (args.length !== 1 || args[0].length !== 1) {
-               throw new Error('Expected to get one call with one argument. ' +
+               throw new Error('toContainPTokenProps() wanted one call with one argument. ' +
                   `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
             }
 

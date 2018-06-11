@@ -10,6 +10,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import helper from '../@test/helper.js';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
+import nameList from '../common/nameList';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
@@ -55,6 +56,97 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   defaultType: makeSToken('#IMPLICIT'),
                   postDefaultTypeSpace: undefined,
+                  value: [],
+               }],
+               close: makeSToken('>'),
+            }));
+            done();
+         });
+      });
+
+      it('parses an ATTLIST with a NOTATION by calling nameList.parse()', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one NOTATION ( one | two) >');
+         source.endText();
+
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  type: makeSToken('NOTATION'),
+                  postTypeSpace: makeSToken(' '),
+                  nameList: new nameList.PToken({
+                     open: makeSToken('('),
+                     postOpenSpace: makeSToken(' '),
+                     names: [ {
+                        particle: {
+                           name: makeSToken('one'),
+                           postNameSpace: makeSToken(' '),
+                           repeat: undefined,
+                           postRepeatSpace: undefined,
+                        },
+                        delimiter: makeSToken('|'),
+                        postDelimiterSpace: makeSToken(' '),
+                     }, {
+                        particle: {
+                           name: makeSToken('two'),
+                           postNameSpace: undefined,
+                           repeat: undefined,
+                           postRepeatSpace: undefined,
+                        },
+                        delimiter: undefined,
+                        postDelimiterSpace: undefined,
+                     }],
+                     close: makeSToken(')'),
+                     postCloseSpace: makeSToken(' '),
+                     repeat: undefined,
+                     postRepeatSpace: undefined,
+                  }),
+                  value: [],
+               }],
+               close: makeSToken('>'),
+            }));
+            done();
+         });
+      });
+
+      it('parses an ATTLIST with an ENUMERATION by calling nameList.parse()', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName one ( one ) >');
+         source.endText();
+
+         attListDeclaration.parse(source, new declaration.PToken(), (result) => {
+            const makeSToken = makeSTokenMaker();
+            const makeSToken1 = makeSTokenMaker(undefined, 32, 0, 32);
+            expect(result).toEqual(new attListDeclaration.PToken({
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('one'),
+                  postNameSpace: makeSToken(' '),
+                  nameList: new nameList.PToken({
+                     open: makeSToken('('),
+                     postOpenSpace: makeSToken(' '),
+                     names: [ {
+                        particle: {
+                           name: makeSToken('one'),
+                           postNameSpace: makeSToken(' '),
+                           repeat: undefined,
+                           postRepeatSpace: undefined,
+                        },
+                        delimiter: undefined,
+                        postDelimiterSpace: undefined,
+                     }],
+                     close: makeSToken(')'),
+                     postCloseSpace: makeSToken(' '),
+                     repeat: undefined,
+                     postRepeatSpace: undefined,
+                  }),
                   value: [],
                }],
                close: makeSToken('>'),
@@ -343,6 +435,11 @@ describe('attListDeclaration (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
+      let ec: ErrorCollector;
+
+      beforeEach(() => {
+         ec = new ErrorCollector(undefined, WellFormedError);
+      });
 
       it('asks the declaration module to look for problems in the declaration part', (done) => {
          declarationPToken.postOpenSpace = expectedSToken(' ');
@@ -351,8 +448,6 @@ describe('attListDeclaration (integration)', () => {
          source.endText();
 
          attListDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
-
             attListDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
@@ -365,8 +460,6 @@ describe('attListDeclaration (integration)', () => {
          source.addText('$foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
-
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ELEMENT_NAME_INVALID);
@@ -379,8 +472,6 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName $foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
-
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTLISTDECL_ATTR_NAME_INVALID);
@@ -393,11 +484,33 @@ describe('attListDeclaration (integration)', () => {
          source.addText('elName xml:foo>');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
-
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);
+            done();
+         });
+      });
+
+      it('calls nameList.checkWellFormed() on an enumerated list', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName attr ( $badName ) >');
+         source.endText();
+         attListDeclaration.parse(source, declarationPToken, (result) => {
+            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NAMELIST_NAME_INVALID);
+            done();
+         });
+      });
+
+      it('calls nameList.checkWellFormed() on a NOTATION list', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
+         source.endText();
+         attListDeclaration.parse(source, declarationPToken, (result) => {
+            attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NAMELIST_NAME_INVALID);
             done();
          });
       });

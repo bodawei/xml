@@ -13,6 +13,7 @@ import entityReference from '../entityReference.js'
 import text from '../text';
 import unassigned, { UnassignedArray } from '../unassigned';
 import literal from '../common/literal';
+import nameList, { NameListPToken } from '../common/nameList';
 import misc from '../common/misc.js';
 
 type LiteralOptions = {
@@ -77,10 +78,12 @@ describe('attListDeclaration (unit)', () => {
       let checkForPERefCallback: (values?:UnassignedArray) => void;
       let makeCheckCallbackSpy: jasmine.Spy;
       let literalParseSpy: jasmine.Spy;
+      let nameListParseSpy: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
 
+         nameListParseSpy = spyOn(nameList, 'parse');
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback'); // TS
          makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x?: UnassignedArray) => void) => {
             checkForPERefCallback = other;
@@ -283,6 +286,182 @@ describe('attListDeclaration (unit)', () => {
          delete aldPToken.attDefs[0].defaultType;
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
          aldPToken.attDefs[0].value = [ 'dummyValue' ];
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('parses a nameList for a NOTATION type', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'NOTATION', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            // namelist parsing
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done(new NameListPToken({}));
+         });
+         const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
+         aldPToken.attDefs = [ {
+            name: makeSToken('att1'),
+            postNameSpace: makeSToken(' '),
+            type: makeSToken('NOTATION'),
+            postTypeSpace: makeSToken(' '),
+            nameList: new NameListPToken({}),
+            value: [],
+         } ];
+         delete aldPToken.close;
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('calls nameList.parse() with the expected arguments when parsing a NOTATION', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'NOTATION', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            // namelist parsing
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done();
+         });
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         const expectedArgs = nameListParseSpy.calls.argsFor(0);
+         expect(expectedArgs[0]).toEqual(mockSource);
+         expect(expectedArgs[1]).toEqual('NOTATION');
+         expect(expectedArgs[2]).toBeInstanceOf(Function);
+      });
+
+      it('parses the word NOTATION but with no subsequent namelist', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'NOTATION', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            [ ' ', 'space' ],
+            // namelist parsing
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done();
+         });
+         const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
+         aldPToken.attDefs = [ {
+            name: makeSToken('att1'),
+            postNameSpace: makeSToken(' '),
+            type: makeSToken('NOTATION'),
+            postTypeSpace: makeSToken(' '),
+            value: [],
+         } ];
+         delete aldPToken.close;
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('parses a nameList for an ENUMERATION type', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            MockSTokenSource.PEEK('('),
+            // namelist parsing
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done(new NameListPToken({}));
+         });
+         const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
+         aldPToken.attDefs = [ {
+            name: makeSToken('att1'),
+            postNameSpace: makeSToken(' '),
+            nameList: new NameListPToken({}),
+            value: [],
+         } ];
+         delete aldPToken.close;
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toContainPTokenProps(aldPToken);
+      });
+
+      it('calls nameList.parse() with the expected arguments when parsing an ENUMERATION', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            MockSTokenSource.PEEK('('),
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done();
+         });
+
+         attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
+         mockSource.respondInAsyncTime();
+
+         const expectedArgs = nameListParseSpy.calls.argsFor(0);
+         expect(expectedArgs[0]).toEqual(mockSource);
+         expect(expectedArgs[1]).toEqual('ENUMERATION');
+         expect(expectedArgs[2]).toBeInstanceOf(Function);
+      });
+
+      it('parses a malformed type if there is no type', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'elementName', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ 'att1', 'word', [ '>', '%' ] ],
+            [ ' ', 'space' ],
+            [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
+            MockSTokenSource.PEEK('"'),
+            MockSTokenSource.PEEK('"'),
+            [ undefined, 'word', [ '>', '%' ] ],
+            [ undefined, 'match', '>' ],
+         ]);
+         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+            done();
+         });
+         const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
+         aldPToken.attDefs = [ {
+            name: makeSToken('att1'),
+            postNameSpace: makeSToken(' '),
+            value: [],
+         } ];
+         delete aldPToken.close;
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
@@ -824,6 +1003,7 @@ describe('attListDeclaration (unit)', () => {
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
       let emd: EntityMetaData;
+      let nameListCWF: jasmine.Spy;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
@@ -831,6 +1011,7 @@ describe('attListDeclaration (unit)', () => {
 
          spyOn(declaration, 'checkWellFormed');
          spyOn(literal, 'checkWellFormed');
+         nameListCWF = spyOn(nameList, 'checkWellFormed');
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
@@ -1030,6 +1211,8 @@ describe('attListDeclaration (unit)', () => {
 
       it('reports no error if the type is NOTATION', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
+         aldPToken.attDefs[0].nameList = new nameList.PToken();
+         aldPToken.attDefs[0].nameList!.postCloseSpace = SToken.fromString(' ');
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
@@ -1046,6 +1229,76 @@ describe('attListDeclaration (unit)', () => {
             id: WellFormedError.ID.ATTLISTDECL_ATTR_TYPE_INVALID,
             params: [ aldPToken.attDefs[0].name.str, elName, 'cdata' ],
             position: aldPToken.attDefs[0].type,
+         });
+      });
+
+      it('reports an error this an enumerated type but it has no name list', () => {
+         delete aldPToken.attDefs[0].type;
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName!.str ],
+            lastPosition: aldPToken.attDefs[0].postNameSpace,
+         });
+      });
+
+      it('calls nameList.checkWellFormed() if this is an enumerated type', () => {
+         delete aldPToken.attDefs[0].type;
+         aldPToken.attDefs[0].nameList = new nameList.PToken();
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(nameListCWF).toHaveBeenCalledWith(aldPToken.attDefs[0].nameList,
+            mockErrorCollector, emd, 'enumeration', 'ENUMERATION');
+      });
+
+      it('reports an error the enumeration does not end with a space', () => {
+         delete aldPToken.attDefs[0].type;
+         aldPToken.attDefs[0].nameList = new nameList.PToken();
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName!.str ],
+            lastPosition: aldPToken.attDefs[0].postNameSpace,
+         });
+      });
+
+      it('reports an error this an NOTATION type but it has no name list', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName!.str ],
+            position: aldPToken.attDefs[0].postTypeSpace,
+         });
+      });
+
+      it('calls nameList.checkWellFormed() if this is an NOTATION type', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
+         aldPToken.attDefs[0].nameList = new nameList.PToken();
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(nameListCWF).toHaveBeenCalledWith(aldPToken.attDefs[0].nameList,
+            mockErrorCollector, emd, 'NOTATION', 'NOTATION');
+      });
+
+      it('reports an error the NOTATION list does not end with a space', () => {
+         aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
+         aldPToken.attDefs[0].nameList = new nameList.PToken();
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE,
+            params: [ aldPToken.attDefs[0].name.str, aldPToken.elementName!.str ],
+            position: aldPToken.attDefs[0].postTypeSpace, // Should be the end of the name list, but mocked out
          });
       });
 

@@ -30,7 +30,7 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, 'foo');
             } catch (e) {
-               expect(e.message).toEqual('Expected to get one call with one argument. Got 2 calls with 1 arguments.');
+               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 2 calls with 1 arguments.');
             }
          });
 
@@ -41,7 +41,7 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, 'foo');
             } catch (e) {
-               expect(e.message).toEqual('Expected to get one call with one argument. Got 1 calls with 2 arguments.');
+               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 1 calls with 2 arguments.');
             }
          });
 
@@ -51,7 +51,7 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, 'foo');
             } catch (e) {
-               expect(e.message).toEqual('Expected to get one call with one argument. Got 0 calls with 0 arguments.');
+               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 0 calls with 0 arguments.');
             }
          });
 

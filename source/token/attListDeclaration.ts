@@ -8,6 +8,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken } from './common/literal';
+import nameList, { NameListPToken } from './common/nameList';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -24,6 +25,7 @@ type AttDefPToken = {
    postNameSpace?: SToken;
    type?: SToken;
    postTypeSpace?: SToken;
+   nameList?: NameListPToken, // has its own post list space
    defaultType?: SToken;
    postDefaultTypeSpace?: SToken;
    openQuote?: SToken;
@@ -128,14 +130,37 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Deliver
 }
 
 function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
+   function populateList(list?: NameListPToken): void {
+      if (list) {
+         attDef.nameList = list;
+      }
+
+      parseDefaultType(source, pToken, attDef, done);
+   }
+
    const callback = unassigned.makeCheckCallback(pToken, 'type', done, () => {
       source.extract('word', [ '>', '%', '(', '#', '"', '\'' ], (attType: SToken|void) => {
          if (attType) {
             attDef.type = attType;
             source.extractToObject('space', attDef, 'postTypeSpace');
+
+            if (attType.str.toLocaleUpperCase() === 'NOTATION') {
+               nameList.parse(source, 'NOTATION', populateList);
+               return;
+            }
+
+            parseDefaultType(source, pToken, attDef, done);
+            return;
          }
 
-         parseDefaultType(source, pToken, attDef, done);
+         source.extract('peekChar', (charSToken) => {
+            if (charSToken && charSToken.str === '(') {
+               nameList.parse(source, 'ENUMERATION', populateList);
+               return;
+            }
+
+            parseDefaultType(source, pToken, attDef, done);
+         });
       });
    });
 
@@ -331,15 +356,32 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       const attType = misc.textOrBlank(attDef.type);
       const upperAttType = attType.toLocaleUpperCase();
       const knownType = ATTR_TYPES.indexOf(upperAttType) !== -1;
-      ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ attName, elNameText, attType ]);
-      // @@@ don't forget to check the space after NOTATION
 
       if (knownType) {
          ec.check(attType !== upperAttType, WFEID.ATTLISTDECL_ATTR_TYPE_INVALID, [ attName, elNameText, attType ]);
       }
 
-      ec.setPos(attDef.postTypeSpace);
-      ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
+      if (upperAttType === '') {
+         if (!attDef.nameList) {
+            ec.report(WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION, [ attName, elNameText ]);
+         } else {
+            nameList.checkWellFormed(attDef.nameList, ec, entityMetaData, 'enumeration', 'ENUMERATION');
+            ec.check(!attDef.nameList.postCloseSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [ attName, elNameText ]);
+         }
+      } else {
+         ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ attName, elNameText, attType ]);
+         ec.setPos(attDef.postTypeSpace);
+         ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
+
+         if (upperAttType === 'NOTATION') {
+            if (!attDef.nameList) {
+               ec.report(WFEID.ATTLISTDECL_ATTR_NO_NOTATION, [ attName, elNameText ]);
+            } else {
+               nameList.checkWellFormed(attDef.nameList, ec, entityMetaData, 'NOTATION', 'NOTATION');
+               ec.check(!attDef.nameList.postCloseSpace, WFEID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE, [ attName, elNameText ]);
+            }
+         }
+      }
 
       // No default type is not an error
       const defType = misc.textOrBlank(attDef.defaultType);
