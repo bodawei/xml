@@ -78,8 +78,8 @@ function parsePublic(source, extIdPToken, allTerminators, deliverExtId) {
 
       literal.parse(source, {
          pToken: temp,
-      }, (gotQuoted) => {
-         if (!gotQuoted) {
+      }, (alternatePToken) => {
+         if (!alternatePToken) {
             deliverExtId(extIdPToken);
             return;
          }
@@ -105,8 +105,8 @@ function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
          const temp = {};
          literal.parse(source, {
             pToken: temp,
-         }, (gotLiteral) => {
-            if (gotLiteral) {
+         }, (modifiedPToken) => {
+            if (modifiedPToken) {
                extIdPToken.system = temp;
             }
 

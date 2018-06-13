@@ -40,7 +40,7 @@ describe('attribute (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          spyOn(literal, 'parse');
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
       });
 
       it('parses an attribute', () => {
@@ -135,7 +135,7 @@ describe('attribute (unit)', () => {
       });
 
       it('stops at the specified name terminator', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
          mockSource = new MockSTokenSource([
             [ 'versi', 'word', [ '=', 'x' ] ],
             [ undefined, 'space' ],
@@ -158,7 +158,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF where the attribute name should be', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
          mockSource = new MockSTokenSource([
             [ undefined, 'word', [ '=', '>' ] ],
          ]);
@@ -170,7 +170,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF after the name', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
          mockSource = new MockSTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ undefined, 'space' ],

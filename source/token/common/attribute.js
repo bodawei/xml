@@ -71,8 +71,8 @@ function addAttribute(source, attrs, options, name, deliverPToken) {
    literal.parse(source, {
       pToken: attr,
       geRef: options.geRef || false,
-   }, (gotQuoted) => {
-      if (gotQuoted) {
+   }, (modifiedPToken) => {
+      if (modifiedPToken) {
          source.extractToObject('space', attr, 'trailingSpace');
       }
 

@@ -24,7 +24,7 @@ describe('externalId (unit)', () => {
       beforeEach(() => {
          expectedSToken = makeSTokenMaker();
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(literal, 'parse').and.callFake((_1, _2, callback) => { callback(false); });
+         spyOn(literal, 'parse').and.callFake((_1, options, callback) => { callback(); });
          spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, _2, _3, cb) => cb);
          spyOn(unassigned, 'checkForPERef').and.callFake((_1, cb) => {
             cb();
@@ -32,7 +32,7 @@ describe('externalId (unit)', () => {
       });
 
       it('returns simple values', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
          mockSource = new MockSTokenSource([
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
@@ -96,7 +96,7 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it finds an NDATA after finding the PublicId', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
          mockSource = new MockSTokenSource([
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
@@ -119,7 +119,7 @@ describe('externalId (unit)', () => {
       });
 
       it('does not mind if public or ndata are the wrong case', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
          mockSource = new MockSTokenSource([
             [ MockSTokenSource.PEEK('pUbLiC'), 'peekWord', [ '"', '\'' ] ],
             [ 'pUbLiC', 'word', [ '"', '\'' ] ],
@@ -142,7 +142,7 @@ describe('externalId (unit)', () => {
       });
 
       it('stops if it does not find an open quote', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(false); });
+         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
          mockSource = new MockSTokenSource([
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
@@ -162,12 +162,12 @@ describe('externalId (unit)', () => {
 
       it('does not mind if, illegally, no space between PUBLIC and PublicLiteral', () => {
          let didPublic = false;
-         literal.parse.and.callFake((_1, _2, callback) => {
+         literal.parse.and.callFake((_1, options, callback) => {
             if (!didPublic) {
                didPublic = true;
-               callback(true);
+               callback(options.pToken);
             } else {
-               callback(false);
+               callback();
             }
          });
          mockSource = new MockSTokenSource([
@@ -193,7 +193,7 @@ describe('externalId (unit)', () => {
       });
 
       it('does not mind if, illegally, no space between public and system literals', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
          mockSource = new MockSTokenSource([
             [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
             [ 'PUBLIC', 'word', [ '"', '\'' ] ],
@@ -276,7 +276,7 @@ describe('externalId (unit)', () => {
                   return checkCallbackSpy;
                }
             });
-            literal.parse.and.callFake((_1, _2, callback) => { callback(true); });
+            literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
             mockSource = new MockSTokenSource([
                [ MockSTokenSource.PEEK('PUBLIC'), 'peekWord', [ '"', '\'' ] ],
                [ 'PUBLIC', 'word', [ '"', '\'' ] ],

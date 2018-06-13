@@ -132,7 +132,7 @@ describe('unassigned (unit)', () => {
       it('delivers a literal if a double quote is found', () => {
          literal.parse.and.callFake((_1, container, foundOne) => {
             container.pToken.isLiteral = true;
-            foundOne(true);
+            foundOne(container.pToken);
          });
          mockSource = new MockSTokenSource([
             [ undefined, 'space' ],
@@ -151,7 +151,7 @@ describe('unassigned (unit)', () => {
       it('delivers a literal if a single quote is found', () => {
          literal.parse.and.callFake((_1, container, foundOne) => {
             container.pToken.isLiteral = true;
-            foundOne(true);
+            foundOne(container.pToken);
          });
          mockSource = new MockSTokenSource([
             [ undefined, 'space' ],
@@ -272,7 +272,7 @@ describe('unassigned (unit)', () => {
       it('delivers all multiple values', () => {
          literal.parse.and.callFake((_1, container, foundOne) => {
             container.pToken.isLiteral = true;
-            foundOne(true);
+            foundOne(container.pToken);
          });
          entityReference.paramParse.and.callFake((_1, deliver) => {
             deliver({ isPeref: true });

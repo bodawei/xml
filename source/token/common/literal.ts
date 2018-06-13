@@ -15,7 +15,7 @@ import literalValue, {
 
 const WFEID = WellFormedError.ID;
 
-type DeliverFound = (foundLiteral: boolean) => void;
+type DeliverPToken = (foundLiteral?: LiteralPToken) => void;
 type ParseOptions = {
    pToken: any,
    peRef?: boolean,
@@ -51,12 +51,12 @@ type LiteralPToken = {
    closeQuote: SToken|void
 \**********************************************************************/
 
-function parse(source: STokenSource, options: ParseOptions, done: DeliverFound): void {
+function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken): void {
    const pToken = options.pToken;
 
    source.extract('peekChar', (quoteSToken) => {
       if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
-         done(false);
+         done();
          return;
       }
 
@@ -75,21 +75,9 @@ function parse(source: STokenSource, options: ParseOptions, done: DeliverFound):
       literalValue.parse(source, terminators, (valueArray) => {
          pToken.value = valueArray;
          source.extract('match', quoteSToken.str, (closeSToken) => {
-            if (pToken.value.length === 0) {
-               const textPToken = new text.PToken();
-               const newRange = quoteSToken.firstRange.clone();
-               newRange.startIndex = newRange.endIndex;
-               newRange.startRow = newRange.endRow;
-               newRange.startColumn = newRange.endColumn;
-
-               textPToken.text = new SToken('', '', newRange);
-
-               pToken.value.push(textPToken);
-            }
-
             pToken.closeQuote = closeSToken;
 
-            done(true); // may not be gramatically correct, but we at least think we started to get something
+            done(pToken); // may not be gramatically correct, but we at least think we started to get something
          });
       });
    });

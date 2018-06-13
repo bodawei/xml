@@ -1,12 +1,13 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSToken } from '../../sToken/@test/helper';
+import { EntityMetaData, EntityKind, util } from '../../../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../../error';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from '../../../sToken';
+import { makeSToken } from '../../../sToken/@test/helper';
 
-import misc from './misc.js';
+import misc from '../misc.js';
 
 describe('misc', () => {
 
@@ -78,170 +79,34 @@ describe('misc', () => {
       let ec;
       let errorId;
       let emdV1R5;
-      let emdV1R4;
-      let emdV11R2;
 
       beforeEach(() => {
          ec = new ErrorCollector({}, WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
-         emdV1R4 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
-         emdV11R2 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
          spyOn(ec, 'report');
+         spyOn(util, 'isName');
       });
 
-      it('accepts a name that  is just plain letters', () => {
-         const name = 'good';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
+      it('accepts an empty Stoken', () => {
+         misc.checkName(undefined, ec, emdV1R5, errorId);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
 
-      it('accepts a name that has a hyphen, period or digit', () => {
-         const name = 'on.-8';
+      it('calls util.isName()', () => {
+         misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
+         expect(util.isName).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
-      it('accepts a name that has the allowable chars above ascii in it', () => {
-         const name = 'o\u00B7\u0310\u2040e';
+      it('reports an error if util.isName() returns false', () => {
+         util.isName.and.returnValue(false);
 
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts a name that starts with an astral character (e.g. an emoji)', () => {
-         const name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_' +
-               '\u00CE\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts a name that has a uFDF1 in it', () => {
-         const name = 'o\uFDF1e';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('rejects a name with a $ in it', () => {
-         const name = 'o$e';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
+         misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
          expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a digit', () => {
-         const name = '1ne';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a hyphen', () => {
-         const name = '-ne';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a period', () => {
-         const name = '.ne';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a u00B7', () => {
-         const name = '\u00B7ne';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a u0320', () => {
-         const name = '\u0320ne';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that starts with a u2040', () => {
-         const name = '\u2040';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('rejects a name that has u03F4 in version 1.0/4', () => {
-         const name = '\u03F4';
-
-         misc.checkName(makeSToken(name), ec, emdV1R4, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('accepts a name that has u03F4 in version 1.0/5', () => {
-         const name = '\u03F4';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts a name that has u03F4 in version 1.1', () => {
-         const name = '\u03F4';
-
-         misc.checkName(makeSToken(name), ec, emdV11R2, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('rejects a name that contains with some bad 1.0 characters in version 1.0/4', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkName(makeSToken(name), ec, emdV1R4, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('accepts a name that contains with some bad 1.0 characters in version 1.0/5', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkName(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts a name that contains with some bad 1.0 characters in version 1.1', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkName(makeSToken(name), ec, emdV11R2, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
+            errorId, [ 'foo' ], SToken.fromString('foo'));
       });
 
    });

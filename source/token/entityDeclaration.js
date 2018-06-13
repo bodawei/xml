@@ -187,8 +187,8 @@ function parseEntityValue(source, pToken, done) {
       literal.parse(source, {
          pToken,
          peRef: true,
-      }, (gotQuoted) => {
-         if (gotQuoted) {
+      }, (appendedPToken) => {
+         if (appendedPToken) {
             source.extract('space', (sToken) => {
                pToken.postEntityValueSpace = sToken;
                done();

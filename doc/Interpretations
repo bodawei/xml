@@ -1,0 +1,17 @@
+# Validity
+## Element Content
+### EMPTY elements
+This follows the text in section 3.1 of the spec which says that
+for interoperability, if you have an element declared as EMPTY, then you should use
+an empty tag. Since this doesn't seem to be an outright error, this reports a warning,
+but not an error.
+Thus, this allows one to use a start tag immediately followed by an empty tag.
+Anything at all between them is an error.
+
+### Mixed elements
+It was only with versions 1.0/3 and beyond that words were put into section 3.0 that
+said that comments and processing instructions were allowed in the content of a Mixed
+element. It seems likely that this was intended from the start, but it also seems
+very reasonable to assume that they weren't allowed (after all, they're never allowed in
+EMPTY elements, which seems almost as strange. Like the change in 1.0/6, switching
+from no comments to allowing comments will not break previous documents.

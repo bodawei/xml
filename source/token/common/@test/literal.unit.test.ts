@@ -57,7 +57,7 @@ describe('literal (unit)', () => {
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker();
-         expect(litCallback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(litCallback.calls.allArgs()).toEqual([ [ container ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
             value: [ textPToken ],
@@ -80,7 +80,7 @@ describe('literal (unit)', () => {
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker();
-         expect(litCallback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(litCallback.calls.allArgs()).toEqual([ [ container ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('\''),
             value: [ textPToken ],
@@ -88,7 +88,7 @@ describe('literal (unit)', () => {
          });
       });
 
-      it('returns a partial result if there is an EOF after the first quote', () => {
+      it('returns an empty result if there is an EOF after the first quote', () => {
          const container = {};
          valueParseSpy.and.callFake((_1: any, _2: any, callback: LiteralValueCallback) => callback([]));
          mockSource = new MockSTokenSource([
@@ -103,10 +103,10 @@ describe('literal (unit)', () => {
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker();
-         expect(litCallback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(litCallback.calls.allArgs()).toEqual([ [ container ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ new text.PToken({ text: expectedSToken('') }) ],
+            value: [ ],
             closeQuote: undefined,
          });
       });
@@ -125,7 +125,7 @@ describe('literal (unit)', () => {
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker();
-         expect(litCallback.calls.allArgs()).toEqual([ [ true ] ]);
+         expect(litCallback.calls.allArgs()).toEqual([ [ container ] ]);
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
             value: [ textPToken ],
@@ -133,7 +133,7 @@ describe('literal (unit)', () => {
          });
       });
 
-      it('fills in a blank string if there is nothing between the quotes', () => {
+      it('provides an empty value if there is nothing between the quotes', () => {
          valueParseSpy.and.callFake((_1: any, _2: any, callback: LiteralValueCallback) => callback([]));
          const container = {};
          mockSource = new MockSTokenSource([
@@ -150,7 +150,7 @@ describe('literal (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          expect(container).toEqual({
             openQuote: expectedSToken('"'),
-            value: [ new text.PToken({ text: expectedSToken('') }) ],
+            value: [ ],
             closeQuote: expectedSToken('"'),
          });
       });
