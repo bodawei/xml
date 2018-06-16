@@ -39,7 +39,7 @@ function toHaveError(util) {
          if (pass) {
             message = `Expected not to find "${JSON.stringify(expected, undefined, 2)}".`;
          } else {
-            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}". Instead found ${console.json(actual)}.`;
+            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}". Instead found ${JSON.stringify(actual)}.`;
          }
 
          return {
@@ -738,6 +738,63 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
                [ 'elementType',  'second' ]);
+            expectStream(validator, expected, done);
+         });
+
+         it('ignores attribute declarations after the first encountered', (done) => {
+            const endOfDocType = new docTypeEnd.XToken();
+            const attListDecl1 = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#IMPLIED',
+            }, {
+               name: 'anAttribute',
+               type: 'CDATA',
+               defaultType: '#REQUIRED',
+            }], {});
+            const attListDecl2 = new attListDeclaration.XToken('elementType', [{
+               name: 'anAttribute',
+               type: 'ID', // This would cause us to have two ID's, if this were honored
+               defaultType: '#REQUIRED',
+            }], {});
+
+            validator.write(attListDecl1);
+            validator.write(attListDecl2);
+            validator.write(endOfDocType);
+            validator.end();
+
+            const notExpected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
+               [ 'elementType',  'anAttribute' ]);
+            gatherTokens(validator, (tokens) => {
+               expect(tokens).not.toHaveError(notExpected);
+               done();
+            });
+         });
+
+         it('reports a warning if more than one attribute definition is provided for an attribute', (done) => {
+            const endOfDocType = new docTypeEnd.XToken();
+            const attListDecl1 = new attListDeclaration.XToken('elementType', [{
+               name: 'idAttr',
+               type: 'ID',
+               defaultType: '#IMPLIED',
+            }, {
+               name: 'anAttribute',
+               type: 'CDATA',
+               defaultType: '#REQUIRED',
+            }], {});
+            const attListDecl2 = new attListDeclaration.XToken('elementType', [{
+               name: 'anAttribute',
+               type: 'ID', // This would cause us to have two ID's, if this were honored
+               defaultType: '#REQUIRED',
+            }], {});
+
+            validator.write(attListDecl1);
+            validator.write(attListDecl2);
+            validator.write(endOfDocType);
+            validator.end();
+
+            const expected = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION,
+               [ 'elementType',  'anAttribute' ]);
             expectStream(validator, expected, done);
          });
 

@@ -35,7 +35,7 @@ type ElementAttributes = {
 };
 
 type AttrDefinitions = {
-   token: AttListXToken,
+   tokens: Array<AttListXToken>,
    attributes: {
       [attrName: string]: XAttr,
    },
@@ -213,12 +213,28 @@ class CheckXTokenValidStream extends stream.Transform {
    private validateAttListDecl(attListDecl: AttListXToken) {
       const openSToken = attListDecl.pToken ? attListDecl.pToken.open : undefined;
       const elName = attListDecl.elementName || '';
+      let attrDefs = this.attrDefsByElementName[elName];
 
-      if (this.attrDefsByElementName[elName]) {
-         // should include location of previous
+      // Note: We do not report on these cases from §3.3: at most one attribute definition for a
+      // given attribute name in an attribute-list declaration, and at least one attribute
+      // definition in each attribute-list declaration. 
+
+      if (attrDefs) {
+         // §3.3: For interoperability, writers of DTDs may choose to provide at most one
+         //   attribute-list declaration for a given element type ... For interoperability,
+         //   an XML processor may at user option issue a warning when more than one
+         //   attribute-list declaration is provided for a given element type,
          const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ELEMENT_DUPLICATE, [ elName ],
             openSToken, openSToken);
          this.push(err);
+
+         attrDefs.tokens.push(attListDecl);
+      } else {
+         attrDefs = {
+            tokens: [ attListDecl ],
+            attributes: {},
+         };
+         this.attrDefsByElementName[elName] = attrDefs;
       }
 
       // §3.3: At user option, an XML processor may issue a warning if attributes are declared for
@@ -231,18 +247,23 @@ class CheckXTokenValidStream extends stream.Transform {
          this.push(err);
       }
 
-      const processedAttrDefs: AttrDefinitions = {
-         token: attListDecl,
-         attributes: {},
-      };
-
+      // §3.3: When more than one AttlistDecl is provided for a given element type, the contents of
+      //   all those provided are merged. When more than one definition is provided for the same
+      //   attribute of a given element type, the first declaration is binding and later
+      //   declarations are ignored. ... For interoperability, an XML processor may at user option
+      //   issue a warning when ... more than one attribute definition is provided for a given
+      //   attribute, but this is not an error.
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
          const attDef = attListDecl.attDefs[index];
          this.validateAttrDef(attListDecl, attDef);
-         processedAttrDefs.attributes[attDef.name] = attDef;
+         if (!attrDefs.attributes[attDef.name]) {
+            attrDefs.attributes[attDef.name] = attDef;
+         } else {
+            const err = new XmlWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION, [ elName, attDef.name ],
+               openSToken, openSToken);
+            this.push(err);
+         }
       }
-
-      this.attrDefsByElementName[elName] = processedAttrDefs;
    }
 
    private validateAttrDef(attList: AttListXToken, attDef: XAttr): void {
