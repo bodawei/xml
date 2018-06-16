@@ -8,7 +8,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken } from './common/literal';
-import nameList, { NameListPToken } from './common/nameList';
+import nameList, { NameListPToken, XNameList } from './common/nameList';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -427,6 +427,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 type XAttr = {
    name: string;
    type: string;
+   enumeration?: XNameList;
    defaultType: string;
    value: LiteralValueXToken;
 };
@@ -458,6 +459,14 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
          defaultType: misc.textOrBlank(attDef.defaultType),
          value: [],
       };
+
+      if (attDef.nameList) {
+         if (xTokenAttrDef.type === '') {
+            xTokenAttrDef.type = 'ENUMERATION';
+         }
+
+         xTokenAttrDef.enumeration = nameList.makeXTokenCompatible(attDef.nameList);
+      }
 
       const result = literal.makeTokenCompatible(attDef)
       if (result) {

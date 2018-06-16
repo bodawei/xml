@@ -537,6 +537,68 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
+      it('includes an ENUMERATED type', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName attrName ( one | two ) #REQUIRED>');
+         source.endText();
+
+         attListDeclaration.parse(source, declarationPToken, (pToken) => {
+            const token = attListDeclaration.pTokenToXToken(pToken);
+            token.pToken = undefined;
+
+            expect(token).toEqual(new attListDeclaration.XToken('elName', [{
+               name: 'attrName',
+               type: 'ENUMERATION',
+               enumeration: {
+                  names: [{
+                     name: 'one',
+                     repeat: 'ONE',
+                  }, {  
+                     name: 'two',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ONE',
+               },
+               defaultType: '#REQUIRED',
+               value: []
+            }]));
+
+            done();
+         });
+      });
+
+      it('includes an NOTATION type', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName attrName NOTATION ( one | two ) #REQUIRED>');
+         source.endText();
+
+         attListDeclaration.parse(source, declarationPToken, (pToken) => {
+            const token = attListDeclaration.pTokenToXToken(pToken);
+            token.pToken = undefined;
+
+            expect(token).toEqual(new attListDeclaration.XToken('elName', [{
+               name: 'attrName',
+               type: 'NOTATION',
+               enumeration: {
+                  names: [{
+                     name: 'one',
+                     repeat: 'ONE',
+                  }, {  
+                     name: 'two',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ONE',
+               },
+               defaultType: '#REQUIRED',
+               value: []
+            }]));
+
+            done();
+         });
+      });
+
    });
 
 });

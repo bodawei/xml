@@ -1502,6 +1502,47 @@ describe('attListDeclaration (unit)', () => {
          });
       });
 
+      it('hands off to nameList if there is an enumerated value', () => {
+         spyOn(nameList, 'makeXTokenCompatible').and.returnValue({ names: [] });
+         aldPToken.attDefs[0].nameList = new NameListPToken();
+
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: 'elementName',
+            attDefs: [{
+               name: 'att1',
+               type: 'CDATA',
+               enumeration: { names: [] },
+               defaultType: '#REQUIRED',
+               value: [],
+            }],
+            pToken: aldPToken,
+         });
+      });
+
+      it('adds an ENUMERATION type value if there is no type already specified', () => {
+         spyOn(nameList, 'makeXTokenCompatible').and.returnValue({ names: [] });
+         delete aldPToken.attDefs[0].type;
+         aldPToken.attDefs[0].nameList = new NameListPToken();
+
+         const xToken = attListDeclaration.pTokenToXToken(aldPToken);
+
+         expect(xToken).toEqualProps({
+            type: attListDeclaration.XTYPE,
+            elementName: 'elementName',
+            attDefs: [{
+               name: 'att1',
+               type: 'ENUMERATION',
+               enumeration: { names: [] },
+               defaultType: '#REQUIRED',
+               value: [],
+            }],
+            pToken: aldPToken,
+         });
+      });
+
       it('replaces a missing type and defaultType value with a space', () => {
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
