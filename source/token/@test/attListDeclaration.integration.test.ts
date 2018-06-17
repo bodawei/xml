@@ -378,7 +378,7 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('does not assign a # value to a missing type value', (done) => {
+      it('identifies an enumeration if the type value is missing', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName at1 CDATA %foo;>');
          source.endText();
@@ -393,6 +393,9 @@ describe('attListDeclaration (integration)', () => {
                new entityStart.ParamPToken({}),
                unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('(')),
+               unassigned.wordFromSToken(SToken.fromString('one')),
+               unassigned.wordFromSToken(SToken.fromString(')')),
                unassigned.wordFromSToken(SToken.fromString('#ENTITIES')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                new entityEnd.ParamPToken({}),
@@ -411,6 +414,15 @@ describe('attListDeclaration (integration)', () => {
                }, {
                   name: SToken.fromString('at2'),
                   postNameSpace: SToken.fromString(' '),
+                  nameList: new nameList.PToken({
+                     open: SToken.fromString('('),
+                     names: [{
+                        particle: {
+                           name: SToken.fromString('one'),
+                        }
+                     }],
+                     close: SToken.fromString(')'),
+                  }),
                   defaultType: SToken.fromString('#ENTITIES'),
                   postDefaultTypeSpace: SToken.fromString(' '),
                }],
@@ -432,6 +444,71 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
+      it('will expand a list that is in progress', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('elName at1 (one|%foo;>');
+         source.endText();
+
+         attListDeclaration.parse(source, new declaration.PToken(), (pToken) => {
+            if (!pToken) {
+               throw new Error('Unexpected undefined PToken.');
+            }
+
+            // "expand" what should be there.
+            pToken.unassigned = [
+               new entityStart.ParamPToken({}),
+               unassigned.wordFromSToken(SToken.fromString('two')),
+               unassigned.wordFromSToken(SToken.fromString(')')),
+               unassigned.wordFromSToken(SToken.fromString('#REQUIRED')),
+               new entityEnd.ParamPToken({}),
+            ];
+            const makeSToken = makeSTokenMaker();
+            const makeSToken2 = makeSTokenMaker(undefined, 21, 0, 21);
+            const rawExpected = {
+               elementName: makeSToken('elName'),
+               postElementNameSpace: makeSToken(' '),
+               attDefs: [{
+                  name: makeSToken('at1'),
+                  postNameSpace: makeSToken(' '),
+                  nameList: new nameList.PToken({
+                     open: makeSToken('('),
+                     postOpenSpace: undefined,
+                     names: [{
+                        particle: {
+                           name: makeSToken('one'),
+                           postNameSpace: undefined,
+                           repeat: undefined,
+                           postRepeatSpace: undefined,
+                        },
+                        delimiter: makeSToken('|')
+                     }, {
+                        particle: {
+                           name: SToken.fromString('two'),
+                        },
+                     }],
+                     close: SToken.fromString(')'),
+                     postCloseSpace: undefined,
+                     repeat: undefined,
+                     postRepeatSpace: undefined,
+                  }),
+                  defaultType: SToken.fromString('#REQUIRED'),
+                  value: [],
+               }],
+               close: makeSToken2('>'),
+            };
+            // work around some kind of ts issue
+            const expected = new attListDeclaration.PToken(rawExpected);
+            const spaceToken = SToken.fromString(' ');
+            spaceToken.ranges.push(helper.makeInsertedRange());
+            expected.attDefs[0].nameList!.names[0].postDelimiterSpace = spaceToken;
+            expected.attDefs[0].postDefaultTypeSpace = spaceToken;
+
+            attListDeclaration.assignUnassigned(pToken);
+
+            expect(pToken).toEqual(expected);
+            done();
+         });
+      });
    });
 
    describe('checkWellFormed()', () => {

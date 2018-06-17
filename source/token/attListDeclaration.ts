@@ -230,16 +230,14 @@ function assignUnassigned(attLiPToken: AttListPToken) {
    let lastLength = 0;
 
    while (lastLength !== unValues.length && unValues.length !== 0) {
+      const couldNeedList = attLiPToken.nextPropName === 'name' || attLiPToken.nextPropName === 'type' || attLiPToken.nextPropName === 'defaultType';
+
       lastLength = unValues.length;
       let descriptors = [
          { name: 'name', type: 'word' },
          { name: 'postNameSpace', type: 'space' },
-         { name: 'type', type: 'word', allowed: /^[^#].*/i },
+         { name: 'type', type: 'word', allowed: /^[^#(].*/i },
          { name: 'postTypeSpace', type: 'space' },
-         { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
-         { name: 'postDefaultTypeSpace', type: 'space' },
-         { name: 'value', type: 'literal' },
-         { name: 'postValueSpace', type: 'space' },
       ];
 
       if (attLiPToken.nextPropName === 'name') {
@@ -250,6 +248,34 @@ function assignUnassigned(attLiPToken: AttListPToken) {
 
       const nextDef = attLiPToken.attDefs[attLiPToken.attDefs.length -1];
       unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, descriptors);
+
+      if (couldNeedList && (!nextDef.type || nextDef.type.str === '' || nextDef.type.str.toUpperCase() === 'NOTATION')) {
+         const list = nextDef.nameList || new nameList.PToken();
+         const beforeLength = unValues.length;
+         nameList.assignUnassigned(list, unValues);
+         
+         // only add the namelist if we seem to have actually consumed any unassigned values.
+         if (beforeLength !== unValues.length) {
+            nextDef.nameList = list;
+         }
+      }
+
+      const remainingDescriptors = [
+         { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
+         { name: 'postDefaultTypeSpace', type: 'space' },
+         { name: 'value', type: 'literal' },
+         { name: 'postValueSpace', type: 'space' },
+      ];
+
+      if (attLiPToken.nextPropName === 'defaultType') {
+         remainingDescriptors.unshift({ name: 'postTypeSpace', type: 'space' });
+      }
+
+      if (attLiPToken.nextPropName === 'name' || attLiPToken.nextPropName === 'type') {
+         attLiPToken.nextPropName = 'defaultType';
+      }
+
+      unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, remainingDescriptors);
 
       attLiPToken.nextPropName = 'name';
    }
@@ -301,7 +327,8 @@ function adjustSpaces(attLiPToken: AttListPToken) {
          }
 
          delete current.xtra;
-      }
+      }  
+
    }
 }
 

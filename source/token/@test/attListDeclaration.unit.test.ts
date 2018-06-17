@@ -641,9 +641,11 @@ describe('attListDeclaration (unit)', () => {
 
    describe('assignUnassigned()', () => {
       let assignToPropsSpy: jasmine.Spy;
+      let nameListAssignUnassigned: jasmine.Spy;
 
       beforeEach(() => {
          assignToPropsSpy = spyOn(unassigned, 'assignToProps');
+         nameListAssignUnassigned = spyOn(nameList, 'assignUnassigned');
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -712,8 +714,11 @@ describe('attListDeclaration (unit)', () => {
                { name: 'xtra', type: 'space' },
                { name: 'name', type: 'word' },
                { name: 'postNameSpace', type: 'space' },
-               { name: 'type', type: 'word', allowed: /^[^#].*/i },
+               { name: 'type', type: 'word', allowed: /^[^#(].*/i },
                { name: 'postTypeSpace', type: 'space' },
+            ]);
+
+            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'defaultType', [
                { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
                { name: 'postDefaultTypeSpace', type: 'space' },
                { name: 'value', type: 'literal' },
@@ -721,24 +726,6 @@ describe('attListDeclaration (unit)', () => {
             ]);
          });
    
-         it('adds attribute entries for each attribute', () => {
-            const unassignedValue = [ 'attName1', 'attName2' ];
-            assignToPropsSpy.and.callFake((unassigned: UnassignedArray) => {
-               unassigned.pop();
-            })
-            const declPToken = new attListDeclaration.PToken({
-               unassigned: unassignedValue,
-               nextPropName: 'name',
-            });
-            const expected = new attListDeclaration.PToken({
-               attDefs: [ {}, {} ],
-            });
-            
-            attListDeclaration.assignUnassigned(declPToken);
-   
-            expect(declPToken).toEqual(expected);
-         });
-
          it('adds a space before the first attribute to the postElementNameSpace', () => {
             const unassignedValue = [ 'attName1' ];
             assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
@@ -970,6 +957,31 @@ describe('attListDeclaration (unit)', () => {
             }));
          });
 
+         it('copes with attribute definitions not having xtra spaces', () => {
+            const unassignedValue = [ 'attName1' ];
+            assignToPropsSpy.and.callFake((unassigned: UnassignedArray, pToken: AttDefPToken) => {
+               unassigned.pop();
+               // pToken.xtra = SToken.fromString('\t');
+            })
+            const declPToken = new attListDeclaration.PToken({
+               attDefs: [{
+                  value: {},
+                  postValueSpace: SToken.fromString(' ')
+               }],
+               unassigned: unassignedValue,
+               nextPropName: 'name',
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+   
+            expect(declPToken).toEqual(new attListDeclaration.PToken({
+               attDefs: [ {
+                  value: {},
+                  postValueSpace: SToken.fromString(' '),
+               }, {} ],
+            }));
+         });
+
       });
 
       describe('unassigned in attribute type', () => {
@@ -983,19 +995,164 @@ describe('attListDeclaration (unit)', () => {
             });
             
             attListDeclaration.assignUnassigned(declPToken);
-   
-            expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'type', [
+
+            expect(assignToPropsSpy.calls.argsFor(0)).toEqual([unassignedValue, {}, 'type', [
                { name: 'name', type: 'word' },
                { name: 'postNameSpace', type: 'space' },
-               { name: 'type', type: 'word', allowed: /^[^#].*/i },
+               { name: 'type', type: 'word', allowed: /^[^#(].*/i },
+               { name: 'postTypeSpace', type: 'space' },
+            ]]);
+
+            expect(assignToPropsSpy.calls.argsFor(1)).toEqual([unassignedValue, {}, 'defaultType', [
+               { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
+               { name: 'postDefaultTypeSpace', type: 'space' },
+               { name: 'value', type: 'literal' },
+               { name: 'postValueSpace', type: 'space' },
+            ]]);
+         });
+
+         it('assigns a nameList if there is no type', () => {
+            const unassignedValue = [ '(' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'type',
+               attDefs: [ {} ],
+            });
+            // consume one unassigned value, so the system thinks we got a nameList
+            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+         });
+
+         it('assigns a nameList if type is ""', () => {
+            const unassignedValue = [ '(' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'defaultType',
+               attDefs: [ {
+                  type: SToken.fromString(''),
+               } ],
+            });
+            // consume one unassigned value, so the system thinks we got a nameList
+            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+         });
+
+         it('assigns a nameList if type is NOTATION', () => {
+            const unassignedValue = [ '(' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'defaultType',
+               attDefs: [ {
+                  type: SToken.fromString('NOTATION'),
+               } ],
+            });
+            // consume one unassigned value, so the system thinks we got a nameList
+            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+         });
+
+         it('assigns no nameList if nameList.assignUnassigned consumes no tokens', () => {
+            const unassignedValue = [ 'foo' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'type',
+               attDefs: [ {} ],
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(declPToken.attDefs[0].nameList).toBeUndefined();
+         });
+
+         it('calls unassigned.assignToProps() with a postTypeSpace descriptor if this left off on a defaultType', () => {
+            const unassignedValue = [ 'placeholder unassigned' ];
+            const attDef = {
+               type: SToken.fromString('CDATA'),
+            };
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'defaultType',
+               attDefs: [ attDef ],
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(assignToPropsSpy.calls.argsFor(0)).toEqual([unassignedValue, attDef, 'defaultType', [
+               { name: 'name', type: 'word' },
+               { name: 'postNameSpace', type: 'space' },
+               { name: 'type', type: 'word', allowed: /^[^#(].*/i },
+               { name: 'postTypeSpace', type: 'space' },
+            ]]);
+
+            expect(assignToPropsSpy.calls.argsFor(1)).toEqual([unassignedValue, attDef, 'defaultType', [
                { name: 'postTypeSpace', type: 'space' },
                { name: 'defaultType', type: 'word', allowed: /^[#].*/i },
                { name: 'postDefaultTypeSpace', type: 'space' },
                { name: 'value', type: 'literal' },
                { name: 'postValueSpace', type: 'space' },
-            ]);
+            ]]);
          });
 
+      });
+
+      describe('unassigned in enumeration', () => {
+
+         it('builds on the attribute definitions nameList if that is already in play', () => {
+            const unassignedValue = [ 'placeholder unassigned' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'defaultType',
+               attDefs: [ {
+                  name: SToken.fromString('name'),
+                  nameList: new nameList.PToken({
+                     open: SToken.fromString('('),
+                  }),
+                  value: []
+               } ],
+            });
+            const expected: AttDefPToken = {
+               name: SToken.fromString('name'),
+               nameList: new nameList.PToken({
+                  open: SToken.fromString('('),
+                  close: SToken.fromString(')'),
+               }),
+               value: []
+            };
+            // consume one unassigned value, so the system thinks we got a nameList
+            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => {
+               list.close = SToken.fromString(')'),
+               unassignedVals.pop()
+            });
+
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(declPToken.attDefs[0]).toEqual(expected);
+         });
+      });
+
+      describe('unassigned in value', () => {
+
+         it('does not call nameList.assignUnassigned() if the next property is value', () => {
+            const unassignedValue = [ 'placeholder unassigned' ];
+            const declPToken = new attListDeclaration.PToken({
+               unassigned: unassignedValue,
+               nextPropName: 'value',
+               attDefs: [ {} ],
+            });
+            
+            attListDeclaration.assignUnassigned(declPToken);
+
+            expect(nameListAssignUnassigned).not.toHaveBeenCalled();
+         });
       });
 
    });

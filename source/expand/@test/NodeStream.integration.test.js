@@ -124,6 +124,45 @@ describe('NodeStream (integration)', () => {
          pTokenStream.endText();
       });
 
+      it('expands an parameter entity that makes up an ENUMERATION', (done) => {
+         const results = [];
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
+         node.on('data', (token) => results.push(token));
+         node.on('end', () => {
+            const attListDecl = results[5];
+
+            expect(attListDecl.attDefs[0]).toEqual({
+               name: 'attr1',
+               type: 'ENUMERATION',
+               enumeration: {
+                  names: [{
+                     name: 'four',
+                     repeat: 'ONE',
+                  }, {
+                     name: 'five',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ONE',
+               },
+               defaultType: '#REQUIRED',
+               value: [],
+            });
+            done();
+         });
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ELEMENT one ANY>' +
+            '<!ENTITY % goodies "( four | five ) #REQUIRED">' +
+            '<!ATTLIST one attr1 %goodies;>' +
+         ']>');
+         pTokenStream.endText();
+      });
+
    });
 
    describe('element declaration processing', () => {
