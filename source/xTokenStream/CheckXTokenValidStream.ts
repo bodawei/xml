@@ -6,16 +6,22 @@ import { EntityMetaData, util } from '../basic';
 import { ValidityError, XmlWarning } from '../error';
 
 import {
+   charData,
+   cdata,
    comment,
-   elementDeclaration,
-   attListDeclaration,
    docTypeEnd,
    docTypeStart,
    elementStart,
    elementEnd,
-   notationDeclaration,
+   entityEnd,
+   entityStart,
    processingInstruction,
+   space,
    text,
+   
+   elementDeclaration,
+   attListDeclaration,
+   notationDeclaration,
 } from '../token';
 import { AttListXToken, XAttr, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
@@ -85,7 +91,7 @@ class CheckXTokenValidStream extends stream.Transform {
    private contentStack: Array<ElementDeclInfo>;
    private currentContext: ElementDeclInfo | void;
    private idValues: IDMap;
-   private emd?: EntityMetaData;
+   private emd: EntityMetaData = new EntityMetaData();
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -114,21 +120,42 @@ class CheckXTokenValidStream extends stream.Transform {
             this.push(error);
          }
       } else if (context && context.matcherType === 'MIXED') {
-         if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
-            if (!context.mixedMatcher[xToken.name]) {
-               const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                  [ context.token.name, xToken.name ], pToken);
+         switch (xToken.type) {
+            case elementStart.XTYPE:
+            case elementStart.EMPTY_XTYPE:
+               if (!context.mixedMatcher[xToken.name]) {
+                  const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
+                     [ context.token.name, xToken.name ], pToken);
 
+                  this.push(error);
+               }
+               break;
+            case charData.XTYPE:
+            case cdata.XTYPE:
+            case elementEnd.XTYPE:
+            case entityStart.XTYPE:
+            case entityEnd.XTYPE:
+            case space.XTYPE:
+               // These are all OK here
+               break;
+            case comment.XTYPE:
+            case processingInstruction.XTYPE:
+               const expandedMixedAllowance = this.emd.isVersion1dot0 && this.emd.revision >= 3 || this.emd.isVersion1dot1;
+
+               if (!expandedMixedAllowance) {
+                  const error = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
+                     [ context.token.name ], pToken);
+
+                  this.push(error);
+               }
+               break;
+            default:
+               const error = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
+                  [ context.token.name ], pToken);
                this.push(error);
-            }
-         } else if (xToken instanceof comment.XToken || xToken instanceof processingInstruction.XToken) {
-            const commentOrPi = xToken instanceof comment.XToken ? 'comment' : 'processing instruction';
-            const error = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI,
-               [ context.token.name, commentOrPi ], pToken);
-
-            this.push(error);
+               break;
          }
-      // } else if (context && context.matcherType === 'CHILDREN') {
+         // } else if (context && context.matcherType === 'CHILDREN') {
       //    if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
       //       const matcher = context.childrenMatcher;
       //       const currentState = matcher.graph.states[matcher.currentStateId];
@@ -396,7 +423,7 @@ class CheckXTokenValidStream extends stream.Transform {
                const text = getAttributeValueText(attributes[index]);
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
-               if (!util.isName(text, this.emd ? this.emd.version : 1.0, this.emd ? this.emd.revision : 5)) {
+               if (!util.isName(text, this.emd.version, this.emd.revision)) {
                   const err = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
                      [ text, elStart.name, attrName ], pToken.open);
                   this.push(err);

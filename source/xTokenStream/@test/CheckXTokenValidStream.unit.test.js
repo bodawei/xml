@@ -6,6 +6,8 @@ import { ValidityError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import {
    attListDeclaration,
+   charData,
+   cdata,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -13,9 +15,11 @@ import {
    elementEnd,
    elementDeclaration,
    entityEnd,
+   entityReference,
    entityStart,
    notationDeclaration,
    processingInstruction,
+   space,
    text,
    xmlDeclaration,
 } from '../../token';
@@ -281,12 +285,13 @@ describe('CheckXTokenValidStream (unit)', () => {
                const commentToken = new comment.XToken('stuff', {});
                const elStart = new elementStart.XToken('one', [], {});
 
+               validator.write(new EntityMetaData(undefined, 1.0, 1));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(commentToken);
                validator.end();
    
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'comment' ]);
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
                expectStream(validator, expected, done);
             });
 
@@ -300,12 +305,105 @@ describe('CheckXTokenValidStream (unit)', () => {
                const pi = new processingInstruction.XToken('stuff', undefined, {});
                const elStart = new elementStart.XToken('one', [], {});
 
+               validator.write(new EntityMetaData(undefined, 1.0, 1));
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(pi);
                validator.end();
    
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_COMMENT_PI, [ 'one', 'processing instruction' ]);
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if there is a comment found in mixed content in newer version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const commentToken = new comment.XToken('stuff', {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.0, 3));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(commentToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if there is a processing instruction found in mixed content in an newer version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const pi = new processingInstruction.XToken('stuff', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.1, 1));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(pi);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if all the character data types are found in mixed content', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new charData.XToken('test charData', {}));
+               validator.write(new cdata.XToken('test CDATA', {}));
+               validator.write(new space.XToken(' ', {}));
+               validator.write(new elementEnd.XToken('one', [], {}));
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if entity start and end pseudo markers are found in the stream', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new entityStart.XToken('testEntityStart', {}));
+               validator.write(new entityEnd.XToken('testEntityEnd', {}));
+               validator.write(new elementEnd.XToken('one', [], {}));
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error other markup is found in mixed content', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new entityReference.XToken('testEntiyReference', {}));
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
                expectStream(validator, expected, done);
             });
 
