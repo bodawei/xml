@@ -164,13 +164,16 @@ describe('attListDeclaration (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new attListDeclaration.PToken({
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'elementName',
                close: makeSToken1('>'),
             }));
@@ -198,13 +201,16 @@ describe('attListDeclaration (integration)', () => {
                   postDefaultTypeSpace: makeSToken(' '),
                   value: [],
                }],
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'attValue',
                close: makeSToken1('>'),
             }));
@@ -212,7 +218,7 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('parses a PERef in the attribute type location (check unsasigned calls)', (done) => {
+      it('parses a PERef in the attribute type location (check unassigned calls)', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName one CDATA #IMPLICIT two%foo;>');
          source.endText();
@@ -236,13 +242,16 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: undefined,
                   value: [],
                }],
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'type',
                close: makeSToken1('>'),
             }));
@@ -276,13 +285,16 @@ describe('attListDeclaration (integration)', () => {
                   postTypeSpace: makeSToken(' '),
                   value: [],
                }],
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'defaultType',
                close: makeSToken1('>'),
             }));

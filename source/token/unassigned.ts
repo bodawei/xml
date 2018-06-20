@@ -22,10 +22,19 @@ const TYPE = {
    LITERAL : 'literal',
 };
 
-interface SubtypedTextPToken extends TextPToken {
-   type: 'TEXT',
-   text?: SToken,
-   subType: string;
+type UnassignedWord = {
+   type: 'word',
+   token: TextPToken,
+};
+
+type UnassignedSpace = {
+   type: 'space',
+   token: TextPToken,
+};
+
+type UnassignedLiteral = {
+   type: 'literal',
+   token: LiteralPToken,
 };
 
 interface EntityReferencePToken {
@@ -33,16 +42,13 @@ interface EntityReferencePToken {
    getSTokenArray(): Array<SToken>;
 }
 
-interface TypedLiteralPToken {
-   type: string,
-   openQuote?: SToken,
-   value: LiteralValuePToken,
-   closeQuote?: SToken,
-   [other: string]: any,
-}
+type UnassignedReference = {
+   type: 'reference',
+   token: EntityReferencePToken,
+};
 
-type UnassignedValue = SubtypedTextPToken | EntityReferencePToken | TypedLiteralPToken;
-type UnassignedArray = Array<UnassignedValue>;
+type UnassignedValue = UnassignedSpace | UnassignedWord | UnassignedReference | UnassignedLiteral;
+type UnassignedArray = Array<UnassignedValue>; // @@@ Big concern.  There are also entity start and ends in here.
 
 type DeliverUnassigned = (value?: UnassignedValue) => void;
 type DeliverUnassignedArray = (values?: UnassignedArray) => void;
@@ -62,14 +68,6 @@ interface Descriptor {
 };
 
 type DescriptorArray = Array<Descriptor>;
-
-function isTypedText(value: any): value is SubtypedTextPToken {
-   return value && value.subType;
-}
-
-function isLiteral(value: any): value is LiteralPToken {
-   return value && value.type === TYPE.LITERAL;
-}
 
 /**********************************************************************\
  The "unassigned" module contains several routines involved in
@@ -161,16 +159,21 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          break;
       case '%':
          // return the parameter entity reference
-         entityReference.paramParse(source, deliverValue);
+         entityReference.paramParse(source, (reference: EntityReferencePToken) => deliverValue({
+            type: 'reference',
+            token: reference,
+         }));
          break;
       case '"':
       case '\'':
-         const container = { };
+         const container: LiteralPToken = { } as LiteralPToken; // typeHack
          literal.parse(source, { pToken: container }, () => {
-            const litPToken: TypedLiteralPToken = container as TypedLiteralPToken;
-            litPToken.type = TYPE.LITERAL;
+            const literal: UnassignedLiteral = {
+               type: 'literal',
+               token: container,  
+            }
 
-            deliverValue(litPToken);
+            deliverValue(literal);
          });
          break;
       default:
@@ -266,17 +269,17 @@ function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: Unas
           * the space after foo. Our bias is to reproduce the parsing we
           * would have done if the PERef wasn't there.
           */
-         if (isTypedText(nextValue)) {
-            if (descriptor.type !== TYPE.SPACE && nextValue.subType === TYPE.SPACE) {
+         if (nextValue.type === 'word' || nextValue.type === 'space') {
+            if (descriptor.type !== TYPE.SPACE && nextValue.type === TYPE.SPACE) {
                const prevWasSpace = prev && prev.type === TYPE.SPACE;
                const prevName = prev ? prev.name : '';
                const genericPToken: any = pToken;
 
                if (prevWasSpace) {
                   if (genericPToken[prevName]) {
-                     genericPToken[prevName].merge(nextValue.text);
+                     genericPToken[prevName].merge(nextValue.token.text);
                   } else {
-                     genericPToken[prevName] = nextValue.text;
+                     genericPToken[prevName] = nextValue.token.text;
                   }
 
                   nextValue = cursor.getNext();
@@ -311,37 +314,40 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
          return;
       }
 
-      if (isTypedText(nextValue) && descriptor.type === nextValue.subType) {
-         switch (nextValue.subType) {
-            case TYPE.WORD:
+      if (nextValue.type === descriptor.type) {
+         switch (nextValue.type) {
+            case 'word':
                let canAssign = true;
                if (descriptor.allowed) {
-                  const valueText = nextValue.text ? nextValue.text.str : '';
+                  const valueText = nextValue.token.text ? nextValue.token.text.str : '';
                   canAssign = descriptor.allowed.test(valueText.toLocaleLowerCase());
                }
 
                if (canAssign) {
-                  genericPToken[descriptor.name] = nextValue.text;
+                  genericPToken[descriptor.name] = nextValue.token.text;
                } else {
                   cursor.ungetValue(nextValue);
                }
                break;
-            case TYPE.SPACE:
+            case 'space':
                if (genericPToken[descriptor.name]) {
-                  genericPToken[descriptor.name].merge(nextValue.text);
+                  genericPToken[descriptor.name].merge(nextValue.token.text);
                } else {
-                  genericPToken[descriptor.name] = nextValue.text;
+                  genericPToken[descriptor.name] = nextValue.token.text;
                }
                break;
-         }
-      } else if (descriptor.type === nextValue.type) {
-         if (isLiteral(nextValue) && descriptor.flatten) {
-            genericPToken.openQuote = nextValue.openQuote;
-            genericPToken.value = nextValue.value;
-            genericPToken.closeQuote = nextValue.closeQuote;
-         } else {
-            genericPToken[descriptor.name] = nextValue;
-            delete genericPToken[descriptor.name].type;
+            case 'literal':
+               if (descriptor.flatten) {
+                  genericPToken.openQuote = nextValue.token.openQuote;
+                  genericPToken.value = nextValue.token.value;
+                  genericPToken.closeQuote = nextValue.token.closeQuote;
+               } else {
+                  genericPToken[descriptor.name] = nextValue.token;
+               }
+               break;
+            default:
+               genericPToken[descriptor.name] = nextValue.token;
+               break;
          }
       } else {
          cursor.ungetValue(nextValue);
@@ -385,11 +391,11 @@ class UnassignedValueCursor {
        * text must be prefixed and suffixed by a space, that turns this into
        * "   x   ".
        */
-      if (isTypedText(candidatePToken) && candidatePToken.subType === TYPE.SPACE) {
+      if (candidatePToken.type === 'space') {
          let nextValue = this._peekValue();
 
-         while (nextValue && isTypedText(nextValue) && nextValue.subType === TYPE.SPACE) {
-            candidatePToken!.text!.merge(nextValue.text!); // ick
+         while (nextValue && nextValue.type === 'space') {
+            candidatePToken!.token.text!.merge(nextValue.token.text!); // ick
             this.values.shift();
             nextValue = this._peekValue();
          }
@@ -422,22 +428,18 @@ class UnassignedValueCursor {
  Utility routines for some common operations
 \**********************************************************************/
 
-function wordFromSToken(sToken: SToken): SubtypedTextPToken {
-   // Fighting with TypeScript
-   const buildIt: any = text.PToken;
-   const pToken = new buildIt({ text: sToken }) as SubtypedTextPToken
-
-   pToken.subType = TYPE.WORD;
-   return pToken;
+function wordFromSToken(sToken: SToken): UnassignedWord {
+   return {
+      type: 'word',
+      token: new TextPToken({ text: sToken }),  
+   };
 }
 
-function spaceFromSToken(sToken: SToken) {
-   // Fighting with TypeScript
-   const buildIt: any = text.PToken;
-   const pToken = new buildIt({ text: sToken }) as SubtypedTextPToken
-
-   pToken.subType = TYPE.SPACE;
-   return pToken;
+function spaceFromSToken(sToken: SToken): UnassignedSpace {
+   return {
+      type: 'space',
+      token: new TextPToken({ text: sToken }),  
+   };
 }
 
 function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnassigned: (pToken: any) => void, otherwise: () => void): DeliverUnassignedArray {
@@ -459,14 +461,14 @@ function getSTokens(unassignedArray: UnassignedArray) {
    for (let index = 0; index < unassignedArray.length; index++) {
       const value = unassignedArray[index];
 
-      if (isTypedText(value)) {
-         if (value.text) {
-            tokens.push(value.text);
+      if (value.type === 'word' || value.type === 'space') {
+         if (value.token.text) {
+            tokens.push(value.token.text);
          }
-      } else if (isLiteral(value)) {
-         tokens = tokens.concat(literal.getSTokens(value));
-      } else if (value.type == 'PARAMETERENTITYREF') {
-         tokens = tokens.concat(value.getSTokenArray());
+      } else if (value.type === 'literal') {
+         tokens = tokens.concat(literal.getSTokens(value.token));
+      } else if (value.type == 'reference') {
+         tokens = tokens.concat(value.token.getSTokenArray());
       }
    }
 
@@ -500,13 +502,13 @@ const unassigned = {
    makeCheckCallback,
    getSTokens,
    checkExtra,
-   isTypedText,
 };
 
 export default unassigned;
 
 export {
    UnassignedArray,
+   UnassignedValue,
    DescriptorArray,
    Descriptor,
 };

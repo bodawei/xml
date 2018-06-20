@@ -8,7 +8,7 @@ import nameList, { NameListPToken, XNameList, isXName } from './common/nameList'
 import misc from './common/misc.js';
 import base from './base';
 import entityReference from './entityReference';
-import unassigned, { UnassignedArray } from './unassigned';
+import unassigned, { UnassignedArray, UnassignedValue } from './unassigned';
 import { SToken, STokenSource } from '../sToken/index';
 
 const ELEMENTDECL = 'ELEMENTDECL';
@@ -170,7 +170,7 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -187,9 +187,9 @@ function assignUnassigned(edPToken: ElementDeclarationPToken) {
    }
 
    if (edPToken.nextPropName === 'contentSpec') {
-      const nextValue: Object = unValues.length > 0 ? unValues[0] : {};
+      const nextValue: UnassignedValue | void = unValues.length > 0 ? unValues[0] : undefined;
 
-      if (unassigned.isTypedText(nextValue) && nextValue.text && nextValue.text.str === '(') {
+      if (nextValue && nextValue.type === 'word' && nextValue.token.text && nextValue.token.text.str === '(') {
          nameList.assignUnassigned(edPToken.children!, unValues);
       } else {
          unassigned.assignToProps(unValues, edPToken, edPToken.nextPropName, [

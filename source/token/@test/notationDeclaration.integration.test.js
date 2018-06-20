@@ -53,13 +53,16 @@ describe('notationdeDlaration (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new notationDeclaration.PToken({
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'name',
                close: makeSToken1('>'),
             }));
@@ -72,13 +75,16 @@ describe('notationdeDlaration (integration)', () => {
          source.addText('notationName %foo;>');
          source.endText();
          const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13, 13, 0, 13);
-         const unassignedValue = [ new entityReference.ParamPToken({
-            open:  makeSToken1('%'),
-            postOpenSpace: undefined,
-            name:  makeSToken1('foo'),
-            postNameSpace: undefined,
-            close:  makeSToken1(';'),
-         }) ];
+         const unassignedValue = [ {
+            type: 'reference',
+            token: new entityReference.ParamPToken({
+               open:  makeSToken1('%'),
+               postOpenSpace: undefined,
+               name:  makeSToken1('foo'),
+               postNameSpace: undefined,
+               close:  makeSToken1(';'),
+            }),
+          } ];
 
          notationDeclaration.parse(source, {}, (result) => {
             const makeSToken = makeSTokenMaker();
@@ -114,9 +120,11 @@ describe('notationdeDlaration (integration)', () => {
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
                   type: 'literal',
-                  openQuote: SToken.fromString('"'),
-                  value: [ SToken.fromString('foo') ],
-                  closeQuote: SToken.fromString('"'),
+                  token: {
+                     openQuote: SToken.fromString('"'),
+                     value: [ SToken.fromString('foo') ],
+                     closeQuote: SToken.fromString('"'),
+                  }
                },
                new entityEnd.ParamPToken({}),
             ];
@@ -219,9 +227,11 @@ describe('notationdeDlaration (integration)', () => {
             pToken.unassigned = [
                new entityStart.ParamPToken({}), {
                   type: 'literal',
-                  openQuote: new SToken('"', '"', new Range()),
-                  value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
-                  closeQuote: new SToken('"', '"', new Range()),
+                  token: {
+                     openQuote: new SToken('"', '"', new Range()),
+                     value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
+                     closeQuote: new SToken('"', '"', new Range()),
+                  },
                },
                new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);

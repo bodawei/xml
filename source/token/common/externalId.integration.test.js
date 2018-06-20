@@ -67,14 +67,17 @@ describe('externalId (integration)', () => {
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: undefined,
-               unassigned: [ new entityReference.ParamPToken({
-                  type: 'foo',
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     type: 'foo',
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  })
+               } ],
                nextPropName: 'system',
             });
             done();
@@ -98,16 +101,18 @@ describe('externalId (integration)', () => {
 
          externalId.parse(source, [], (extIdPToken) => {
             // expand/replace the publicVal reference
-            expect(extIdPToken.unassigned[0].type).toEqual(entityReference.PARAM_PTYPE);
+            expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: entityEnd.PARAM_PTYPE
             });
             extIdPToken.unassigned.unshift({
                type: 'literal',
-               openQuote: SToken.fromString('"'),
-               value: [ new text.PToken({ text: SToken.fromString('pub.xml') }) ],
-               closeQuote: SToken.fromString('"'),
+               token: {
+                  openQuote: SToken.fromString('"'),
+                  value: [ new text.PToken({ text: SToken.fromString('pub.xml') }) ],
+                  closeQuote: SToken.fromString('"'),
+               }
             });
             extIdPToken.unassigned.unshift({
                type: entityStart.PARAM_PTYPE
@@ -163,15 +168,16 @@ describe('externalId (integration)', () => {
 
          externalId.parse(source, [], (extIdPToken) => {
             // expand/replace the publicVal reference
-            expect(extIdPToken.unassigned[0].type).toEqual(entityReference.PARAM_PTYPE);
+            expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: entityEnd.PARAM_PTYPE
             });
             extIdPToken.unassigned.unshift({
-               type: 'text',
-               subType: 'word',
-               text: SToken.fromString('public'),
+               type: 'word',
+               token: {
+                  text: SToken.fromString('public'),
+               },
             });
             extIdPToken.unassigned.unshift({
                type: entityStart.PARAM_PTYPE
@@ -193,15 +199,16 @@ describe('externalId (integration)', () => {
 
          externalId.parse(source, [], (extIdPToken) => {
             // expand/replace the publicVal reference
-            expect(extIdPToken.unassigned[0].type).toEqual(entityReference.PARAM_PTYPE);
+            expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: entityEnd.PARAM_PTYPE
             });
             extIdPToken.unassigned.unshift({
-               type: 'text',
-               subType: 'word',
-               text: SToken.fromString('public'),
+               type: 'word',
+               token: {
+                  text: SToken.fromString('public'),
+               },
             });
             extIdPToken.unassigned.unshift({
                type: entityStart.PARAM_PTYPE
@@ -253,9 +260,11 @@ describe('externalId (integration)', () => {
                unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range())), 
                unassigned.spaceFromSToken(new SToken(' ', ' ', new Range())), {
                   type: 'literal',
-                  openQuote: new SToken('"', '"', new Range()),
-                  value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
-                  closeQuote: new SToken('"', '"', new Range()),
+                  token: {
+                     openQuote: new SToken('"', '"', new Range()),
+                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
+                     closeQuote: new SToken('"', '"', new Range()),
+                  }
                },
                new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);

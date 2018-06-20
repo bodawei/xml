@@ -291,7 +291,7 @@ describe('elementDeclaration (unit)', () => {
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          elementPToken.unassigned = [ {
-            type: entityReference.PARAM_PTYPE,
+            type: 'reference',
          } ];
          
          elementDeclaration.assignUnassigned(elementPToken);
@@ -367,9 +367,10 @@ describe('elementDeclaration (unit)', () => {
       it('calls nameList.assignToProps() if we left off with a contentSpec, and the first value is "("', () => {
          spyOn(nameList, 'assignUnassigned');
          const unassignedValues = [ {
-            type: 'TEXT',
-            subType: 'word',
-            text: SToken.fromString('('),
+            type: 'word',
+            token: {
+               text: SToken.fromString('('),
+            },
          } ];
          elementPToken = new elementDeclaration.PToken({
             children: new nameList.PToken(),

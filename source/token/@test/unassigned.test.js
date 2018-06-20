@@ -144,7 +144,9 @@ describe('unassigned (unit)', () => {
 
          expect(deliverySpy).toHaveBeenCalledWith({
             type: 'literal',
-            isLiteral: true,
+            token: {
+               isLiteral: true,
+            }
          });
       });
 
@@ -163,7 +165,9 @@ describe('unassigned (unit)', () => {
 
          expect(deliverySpy).toHaveBeenCalledWith({
             type: 'literal',
-            isLiteral: true,
+            token: {
+               isLiteral: true,
+            }
          });
       });
 
@@ -180,7 +184,10 @@ describe('unassigned (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
-            isPeref: true,
+            type: 'reference',
+            token: {
+               isPeref: true,
+            },
          });
       });
 
@@ -297,9 +304,14 @@ describe('unassigned (unit)', () => {
             unassigned.spaceFromSToken(makeSToken('   ')),
             unassigned.wordFromSToken(makeSToken('xyzzy')), {
                type: 'literal',
-               isLiteral: true,
+               token: {
+                  isLiteral: true,
+               },
             }, {
-               isPeref: true
+               type: 'reference',
+               token: {
+                  isPeref: true
+               },
             },
          ]);
       });
@@ -378,9 +390,9 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            two: space.text,
-            three: word2.text,
+            one: word1.token.text,
+            two: space.token.text,
+            three: word2.token.text,
          });
       });
 
@@ -404,9 +416,9 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            two: space.text,
-            three: word2.text,
+            one: word1.token.text,
+            two: space.token.text,
+            three: word2.token.text,
          });
       });
 
@@ -434,9 +446,9 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            two: space.text,
-            four: word2.text,
+            one: word1.token.text,
+            two: space.token.text,
+            four: word2.token.text,
          });
       });
 
@@ -464,9 +476,9 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            two: space.text,
-            three: word2.text,
+            one: word1.token.text,
+            two: space.token.text,
+            three: word2.token.text,
          });
       });
 
@@ -475,7 +487,7 @@ describe('unassigned (unit)', () => {
          const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('BAR'));
-         delete word2.text;
+         delete word2.token.text;
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
@@ -495,8 +507,8 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            two: space.text,
+            one: word1.token.text,
+            two: space.token.text,
             four: undefined,
          });
       });
@@ -520,8 +532,8 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            three: word2.text,
+            one: word1.token.text,
+            three: word2.token.text,
          });
       });
 
@@ -531,9 +543,11 @@ describe('unassigned (unit)', () => {
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
          const literal = {
             type: 'literal',
-            openQuote: SToken.fromString('"'),
-            value: [],
-            closeQuote: SToken.fromString('"'),
+            token: {
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+            }
          };
          const unVals = [ word1, literal, word2 ];
          const descriptors = [ {
@@ -551,11 +565,11 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
-            three: word2.text,
-            openQuote: literal.openQuote,
-            value: literal.value,
-            closeQuote: literal.closeQuote,
+            one: word1.token.text,
+            three: word2.token.text,
+            openQuote: literal.token.openQuote,
+            value: literal.token.value,
+            closeQuote: literal.token.closeQuote,
          });
       });
 
@@ -565,9 +579,11 @@ describe('unassigned (unit)', () => {
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
          const literal = {
             type: 'literal',
-            openQuote: SToken.fromString('"'),
-            value: [],
-            closeQuote: SToken.fromString('"'),
+            token: {
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+            }
          };
          const unVals = [ word1, literal, word2 ];
          const descriptors = [ {
@@ -584,13 +600,13 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
          expect(pToken).toEqual({
-            one: word1.text,
+            one: word1.token.text,
             two: {
-               openQuote: literal.openQuote,
-               value: literal.value,
-               closeQuote: literal.closeQuote,
+               openQuote: literal.token.openQuote,
+               value: literal.token.value,
+               closeQuote: literal.token.closeQuote,
             },
-            three: word2.text,
+            three: word2.token.text,
          });
       });
 
@@ -616,7 +632,7 @@ describe('unassigned (unit)', () => {
          unassigned.assignToProps(unVals, pToken, 'three', descriptors);
 
          expect(pToken).toEqual({
-            three: word1.text,
+            three: word1.token.text,
          });
       });
 
@@ -645,9 +661,9 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: word1.text,
+               one: word1.token.text,
                two: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
-               three: word2.text,
+               three: word2.token.text,
             });
          });
 
@@ -670,8 +686,8 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: word1.text,
-               three: word2.text,
+               one: word1.token.text,
+               three: word2.token.text,
             });
          });
 
@@ -698,7 +714,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: word1.text,
+               one: word1.token.text,
                four: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
             });
          });
@@ -722,8 +738,8 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               two: space.text,
-               three: word.text,
+               two: space.token.text,
+               three: word.token.text,
             });
          });
 
@@ -742,7 +758,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               two: SToken.fromString(' ').merge(space.text),
+               two: SToken.fromString(' ').merge(space.token.text),
             });
          });
 
@@ -773,7 +789,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
 
             expect(pToken).toEqual({
-               one: word.text,
+               one: word.token.text,
                two: new SToken('     ', '     ', [
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
@@ -802,8 +818,8 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: space.text,
-               two: word.text,
+               one: space.token.text,
+               two: word.token.text,
             });
          });
 
@@ -829,7 +845,7 @@ describe('unassigned (unit)', () => {
 
             expect(pToken).toEqual({
                one: SToken.fromString('\t\n'),
-               two: word.text,
+               two: word.token.text,
             });
          });
 
@@ -856,7 +872,7 @@ describe('unassigned (unit)', () => {
 
             expect(pToken).toEqual({
                one: new SToken('\t ', '\t ', [ helper.makeInsertedRange() ]),
-               two: word.text,
+               two: word.token.text,
             });
          });
 
@@ -905,9 +921,9 @@ describe('unassigned (unit)', () => {
          const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-         delete space.text;
-         delete word1.text;
-         delete word2.text;
+         delete space.token.text;
+         delete word1.token.text;
+         delete word2.token.text;
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
@@ -934,8 +950,11 @@ describe('unassigned (unit)', () => {
    describe('spaceFromSToken()', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
-         const expected = new text.PToken({ text: 'hi' });
-         expected.subType = 'space';
+         const expected = {
+            type: 'space',
+            token: new text.PToken({ text: 'hi' }),
+         };
+
          const result = unassigned.spaceFromSToken('hi');
 
          expect(result).toEqual(expected);
@@ -946,8 +965,11 @@ describe('unassigned (unit)', () => {
    describe('wordFromSToken()', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
-         const expected = new text.PToken({ text: 'hi' });
-         expected.subType = 'word';
+         const expected = {
+            type: 'word',
+            token: new text.PToken({ text: 'hi' }),
+         };
+
          const result = unassigned.wordFromSToken('hi');
 
          expect(result).toEqual(expected);
@@ -1026,7 +1048,7 @@ describe('unassigned (unit)', () => {
 
       it('skips a word with no actual text in it (type workaround)', () => {
          const badWord = unassigned.wordFromSToken(SToken.fromString('foo'));
-         delete badWord.text;
+         delete badWord.token.text;
          const result = unassigned.getSTokens([
             badWord,
          ]);
@@ -1045,13 +1067,14 @@ describe('unassigned (unit)', () => {
       });
 
       it('returns STokens for an entity reference', () => {
-         const result = unassigned.getSTokens([
-            new entityReference.ParamPToken({
+         const result = unassigned.getSTokens([{
+            type: 'reference',
+            token: new entityReference.ParamPToken({
                open: SToken.fromString('&'),
                name: SToken.fromString('froo'),
                close: SToken.fromString(';'),
             }),
-         ]);
+         }]);
 
          expect(result).toEqual([
             SToken.fromString('&'),
@@ -1063,9 +1086,11 @@ describe('unassigned (unit)', () => {
       it('returns STokens for an literal', () => {
          const result = unassigned.getSTokens([{
             type: 'literal',
-            openQuote: SToken.fromString('"'),
-            value: [ new text.PToken({ text: SToken.fromString('froo') }) ],
-            closeQuote: SToken.fromString('"'),
+            token: {
+               openQuote: SToken.fromString('"'),
+               value: [ new text.PToken({ text: SToken.fromString('froo') }) ],
+               closeQuote: SToken.fromString('"'),
+            },
          }]);
 
          expect(result).toEqual([
@@ -1089,14 +1114,19 @@ describe('unassigned (unit)', () => {
             unassigned.spaceFromSToken(SToken.fromString(' ')),
             {
                type: 'literal',
-               openQuote: SToken.fromString('"'),
-               closeQuote: SToken.fromString('"'),
+               token: {
+                  openQuote: SToken.fromString('"'),
+                  closeQuote: SToken.fromString('"'),
+               }
             },
-            new entityReference.ParamPToken({
-               open: SToken.fromString('%'),
-               name: SToken.fromString('fred'),
-               close: SToken.fromString(';'),
-            }), 
+            {
+               type: 'reference',
+               token: new entityReference.ParamPToken({
+                  open: SToken.fromString('%'),
+                  name: SToken.fromString('fred'),
+                  close: SToken.fromString(';'),
+               }),
+            },
          ];
 
          unassigned.checkExtra(extra, mockErrorCollector, WellFormedError.ID.EXTERNALID_EXTRA_TEXT);

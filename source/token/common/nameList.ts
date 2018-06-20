@@ -231,7 +231,7 @@ function assignUnassigned(nameListPToken: NameListPToken, unValues: UnassignedAr
       return;
    }
 
-   const unexpandedRef = unValues.filter((item: any) => (item.type === entityReference.PARAM_PTYPE));
+   const unexpandedRef = unValues.filter((item: any) => (item.type === 'reference'));
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -284,11 +284,11 @@ function assignNames(names: Array<ContentParticlePToken>, unValues: UnassignedAr
    let nextUnValue = unValues[0];
 
    while (nextUnValue) {
-      if (!unassigned.isTypedText(nextUnValue) || nextUnValue.subType !== 'word' || nextUnValue.text && nextUnValue.text.str === ')') {
+      if (nextUnValue.type !== 'word' || nextUnValue.token.text && nextUnValue.token.text.str === ')') {
          return;
       }
 
-      if (nextUnValue.text && nextUnValue.text.str === '(') {
+      if (nextUnValue.token.text && nextUnValue.token.text.str === '(') {
          const nlPToken = new NameListPToken();
          particle = nlPToken;
          assignList(nlPToken, unValues);

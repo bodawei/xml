@@ -440,7 +440,10 @@ describe('NodeStream (unit)', () => {
             const declToken = new xToken.entityDeclaration.pTokenToXToken({
                unassigned: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
-                  refToSecond
+                  {
+                     type: 'reference',
+                     token: refToSecond,
+                  },
                ],
                nextParamName: 'parameter',
             });
@@ -487,8 +490,10 @@ describe('NodeStream (unit)', () => {
             });
             const declToken = new xToken.entityDeclaration.pTokenToXToken({
                unassigned: [
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
-                  refToSecond
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                     type: 'reference',
+                     token: refToSecond,
+                  },
                ],
                nextParamName: 'parameter',
             });
@@ -504,9 +509,11 @@ describe('NodeStream (unit)', () => {
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {
                      type: 'literal',
-                     openQuote: SToken.fromString('"'),
-                     value: [ SToken.fromString('http://somewhere.com') ],
-                     closeQuote: SToken.fromString('"'),
+                     token: {
+                        openQuote: SToken.fromString('"'),
+                        value: [ SToken.fromString('http://somewhere.com') ],
+                        closeQuote: SToken.fromString('"'),
+                     }
                   },
                ]);
             });
@@ -517,9 +524,11 @@ describe('NodeStream (unit)', () => {
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {
                      type: 'literal',
-                     openQuote: SToken.fromString('"'),
-                     value: [ SToken.fromString('http://somewhere.com') ],
-                     closeQuote: SToken.fromString('"'),
+                     token: {
+                        openQuote: SToken.fromString('"'),
+                        value: [ SToken.fromString('http://somewhere.com') ],
+                        closeQuote: SToken.fromString('"'),
+                     }
                   },
                   new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
                ]);

@@ -38,30 +38,39 @@ describe('unassigned (integration)', () => {
          source.endText();
 
          unassigned.checkForPERef(source, (pieces) => {
-            expect(pieces).toEqual([
-            new entityReference.ParamPToken({
-               open: makeSToken('%'),
-               postOpenSpace: undefined,
-               name: makeSToken('peref'),
-               postNameSpace: undefined,
-               close: makeSToken(';'),
-            }), unassigned.spaceFromSToken(makeSToken(' ')), {
+            expect(pieces).toEqual([ {
+               type: 'reference',
+               token: new entityReference.ParamPToken({
+                  open: makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name: makeSToken('peref'),
+                  postNameSpace: undefined,
+                  close: makeSToken(';'),
+               }),
+            }, unassigned.spaceFromSToken(makeSToken(' ')), {
                type: 'literal',
-               openQuote: makeSToken('"'),
-               value: [ new text.PToken({ text: makeSToken('double') }) ],
-               closeQuote: makeSToken('"'),
+               token: {
+                  openQuote: makeSToken('"'),
+                  value: [ new text.PToken({ text: makeSToken('double') }) ],
+                  closeQuote: makeSToken('"'),
+               }
             }, unassigned.wordFromSToken(makeSToken('whatever')), {
                type: 'literal',
-               openQuote: makeSToken('\''),
-               value: [ new text.PToken({ text: makeSToken('single') }) ],
-               closeQuote: makeSToken('\''),
-            }, new entityReference.ParamPToken({
-               open: makeSToken('%'),
-               postOpenSpace: undefined,
-               name: makeSToken('peref'),
-               postNameSpace: undefined,
-               close: makeSToken(';'),
-            }) ]);
+               token: {
+                  openQuote: makeSToken('\''),
+                  value: [ new text.PToken({ text: makeSToken('single') }) ],
+                  closeQuote: makeSToken('\''),
+               },
+            }, {
+               type: 'reference',
+               token: new entityReference.ParamPToken({
+                  open: makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name: makeSToken('peref'),
+                  postNameSpace: undefined,
+                  close: makeSToken(';'),
+               }),
+            } ]);
             done();
          });
       });
@@ -75,13 +84,16 @@ describe('unassigned (integration)', () => {
          source.endText();
 
          unassigned.parseNextValue(source, false, (value) => {
-            expect(value).toEqual(new entityReference.ParamPToken({
-               open: makeSToken('%'),
-               postOpenSpace: undefined,
-               name: makeSToken('peref'),
-               postNameSpace: undefined,
-               close: makeSToken(';'),
-            }));
+            expect(value).toEqual({
+               type: 'reference',
+               token: new entityReference.ParamPToken({
+                  open: makeSToken('%'),
+                  postOpenSpace: undefined,
+                  name: makeSToken('peref'),
+                  postNameSpace: undefined,
+                  close: makeSToken(';'),
+               },
+            )});
             done();
          });
       });

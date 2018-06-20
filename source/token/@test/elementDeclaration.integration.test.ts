@@ -44,13 +44,16 @@ describe('elementDeclaration (integration)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new elementDeclaration.PToken({
-               unassigned: [ new entityReference.ParamPToken({
-                  open:  makeSToken('%'),
-                  postOpenSpace: undefined,
-                  name:  makeSToken('foo'),
-                  postNameSpace: undefined,
-                  close:  makeSToken(';'),
-               }) ],
+               unassigned: [ {
+                  type: 'reference',
+                  token: new entityReference.ParamPToken({
+                     open:  makeSToken('%'),
+                     postOpenSpace: undefined,
+                     name:  makeSToken('foo'),
+                     postNameSpace: undefined,
+                     close:  makeSToken(';'),
+                  }),
+               } ],
                nextPropName: 'name',
                close: makeSToken1('>'),
             }));

@@ -185,7 +185,7 @@ describe('notationdeDlaration (unit)', () => {
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          notationPToken.unassigned = [ {
-            type: entityReference.PARAM_PTYPE,
+            type: 'reference',
          } ];
          
          notationDeclaration.assignUnassigned(notationPToken);

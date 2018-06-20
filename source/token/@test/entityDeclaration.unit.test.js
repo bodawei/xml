@@ -487,17 +487,18 @@ describe('entityDeclaration (unit)', () => {
    
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
-            expect(pToken.unassigned).toEqual([
-               new entityReference.ParamPToken({
+            expect(pToken.unassigned).toEqual([ {
+               type: 'reference',
+               token: new entityReference.ParamPToken({
                   open: makeSToken('%'),
                   postOpenSpace: makeSToken(' '),
                   name: makeSToken('entityName'),
                   postNameSpace: makeSToken(' '),
                   close: makeSToken(';'),
-               }), {
-                  one: 1
-               },
-            ])
+               })
+            }, {
+               one: 1
+            } ]);
          });
 
          it('returns an unassigned value when finding a PE Ref at the EntityValue position', () => {
@@ -646,7 +647,7 @@ describe('entityDeclaration (unit)', () => {
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          const declPToken = {
             unassigned: [ {
-               type: entityReference.PARAM_PTYPE,
+               type: 'reference',
             } ],
          };
          
@@ -812,8 +813,8 @@ describe('entityDeclaration (unit)', () => {
 
          it('calls unassigned.assignToProps() if EntityValue IS the peref, and preceeded by space', () => {
             const unassignedValue = [ {
-               type: 'text',
-               subType: 'space',
+               type: 'space',
+               token: {}
             }, {
                type: 'literal',
             } ];

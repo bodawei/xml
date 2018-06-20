@@ -328,9 +328,10 @@ describe('externalId (unit)', () => {
 
       it('does nothing if there is still an unexpanded parameter entity reference', () => {
          const externalIdToken = {
-            unassigned: [
-               new entityReference.ParamPToken(),
-            ],
+            unassigned: [ {
+               type: 'reference',
+               token: new entityReference.ParamPToken(),
+            } ],
          };
 
          externalId.assignUnassigned(externalIdToken);
@@ -463,7 +464,9 @@ describe('externalId (unit)', () => {
       it('passes the necessary parameters to unassigned.assignToProps() when type is system', () => {
          const sysVal = {
             type: 'literal',
-            openQuote: SToken.fromString('"'),
+            token: {
+               openQuote: SToken.fromString('"'),
+            }
          };
          const externalIdToken = {
             unassigned: [
@@ -472,7 +475,7 @@ describe('externalId (unit)', () => {
          };
          unassigned.assignToProps.and.callFake((values, pToken, name) => {
             if (name === 'idType') {
-               pToken.idType = values[0].text;
+               pToken.idType = values[0].token.text;
                values.shift();
             }
          });
@@ -489,11 +492,15 @@ describe('externalId (unit)', () => {
       it('passes the necessary parameters to unassigned.assignToProps() when type is PUBLIC', () => {
          const sysVal = {
             type: 'literal',
-            openQuote: SToken.fromString('"'),
+            token: {
+               openQuote: SToken.fromString('"'),
+            }
          };
          const pubVal = {
             type: 'literal',
-            openQuote: SToken.fromString('\''),
+            token: {
+               openQuote: SToken.fromString('\''),
+            }
          };
          const externalIdToken = {
             unassigned: [
@@ -502,7 +509,7 @@ describe('externalId (unit)', () => {
          };
          unassigned.assignToProps.and.callFake((values, pToken, name) => {
             if (name === 'idType') {
-               pToken.idType = values[0].text;
+               pToken.idType = values[0].token.text;
                values.shift();
             }
          });
@@ -523,16 +530,20 @@ describe('externalId (unit)', () => {
             unassigned: [
                unassigned.wordFromSToken(SToken.fromString('sYsTeM')), {
                   type: 'literal',
-                  openQuote: SToken.fromString('"'),
+                  token: {
+                     openQuote: SToken.fromString('"'),
+                  },
                }, {
                   type: 'literal',
-                  openQuote: SToken.fromString('\''),
+                  token: {
+                     openQuote: SToken.fromString('\''),
+                  }
                },
             ],
          };
          unassigned.assignToProps.and.callFake((values, pToken, name, descriptors) => {
             if (name === 'idType') {
-               pToken.idType = values[0].text;
+               pToken.idType = values[0].token.text;
                values.shift();
             } else {
                pToken.system = values.shift();
@@ -543,7 +554,9 @@ describe('externalId (unit)', () => {
 
          expect(externalIdToken.extra).toEqual([ {
             type: 'literal',
-            openQuote: SToken.fromString('\''),
+            token: {
+               openQuote: SToken.fromString('\''),
+            }
          } ]);
       });
 

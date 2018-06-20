@@ -270,7 +270,7 @@ describe('NodeStream (integration)', () => {
          node.on('end', () => {
             const entityDecl = results[6];
             const values = entityDecl.value;
-            
+
             expect(entityDecl.name).toEqual('child');
             expect(values[0].text.str).toEqual('[(inner)]');
             done();

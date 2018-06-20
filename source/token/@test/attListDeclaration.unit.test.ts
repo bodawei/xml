@@ -669,7 +669,7 @@ describe('attListDeclaration (unit)', () => {
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          const alPToken = new attListDeclaration.PToken({
             unassigned: [ {
-               type: entityReference.PARAM_PTYPE,
+               type: 'reference',
             } ],
          });
          

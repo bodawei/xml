@@ -166,7 +166,10 @@ function parseWordOrPERef(source, pToken, done) {
                });
                pToken.unassigned = values;
                pToken.nextPropName = 'parameter';
-               pToken.unassigned.unshift(entityRef);
+               pToken.unassigned.unshift({
+                  type: 'reference',
+                  token: entityRef,
+               });
                delete pToken.parameter;
                delete pToken.postParameterSpace;
                delete pToken.name;
@@ -274,7 +277,7 @@ function assignUnassigned(pToken) {
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -312,7 +315,7 @@ function assignUnassigned(pToken) {
 
       if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned[0]) {
          const nextThing = pToken.unassigned.find((value) => {
-            if ((value.type === 'text' && value.subType === 'space') ||
+            if ((value.type === 'space') ||
                value.type === entityStart.PARAM_PTYPE ||
                value.type === entityEnd.PARAM_PTYPE) {
                return;

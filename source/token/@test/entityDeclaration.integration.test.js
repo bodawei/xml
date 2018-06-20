@@ -9,6 +9,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration.js';
 import entityEnd from '../entityEnd.js';
+import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
 import unassigned from '../unassigned';
@@ -39,7 +40,7 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
             expect(pToken.type).toEqual(entityDeclaration.PTYPE);
-            expect(pToken.value[1].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.value[1].type).toEqual(entityReference.PARAM_PTYPE);
             done();
          });
       });
@@ -50,7 +51,7 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
             expect(pToken.postNameSpace.str).toEqual(' ');
-            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.close.str).toEqual('>');
             done();
          });
@@ -62,7 +63,7 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
             expect(pToken.parameter).toBeUndefined();
-            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.close.str).toEqual('>');
             done();
          });
@@ -86,7 +87,7 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
             expect(pToken.externalId.idType.str).toEqual('SYSTEM');
-            expect(pToken.unassigned[0].type).toEqual('PARAMETERENTITYREF');
+            expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.unassigned).toBe(pToken.externalId.unassigned);
             expect(pToken.close.str).toEqual('>');
             done();
@@ -109,9 +110,11 @@ describe('entityDeclaration (integration)', () => {
                unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: 'literal',
-                  openQuote: SToken.fromString('"'),
-                  value: [ SToken.fromString('foo') ],
-                  closeQuote: SToken.fromString('"'),
+                  token: {
+                     openQuote: SToken.fromString('"'),
+                     value: [ SToken.fromString('foo') ],
+                     closeQuote: SToken.fromString('"'),
+                  }
                },
                new entityEnd.ParamPToken({}),
             ];
@@ -223,9 +226,11 @@ describe('entityDeclaration (integration)', () => {
             pToken.unassigned = [
                new entityStart.ParamPToken({}), {
                   type: 'literal',
-                  openQuote: new SToken('"', '"', new Range()),
-                  value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
-                  closeQuote: new SToken('"', '"', new Range()),
+                  token: {
+                     openQuote: new SToken('"', '"', new Range()),
+                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
+                     closeQuote: new SToken('"', '"', new Range()),
+                  }
                },
                new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);

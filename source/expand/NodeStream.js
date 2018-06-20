@@ -134,6 +134,33 @@ class NodeStream extends Transform {
       while (unassignedArray.length > 0) {
          const item = unassignedArray.shift();
 
+         if (item.type === 'reference') {
+            this._expandPERefFully(item.token, (expandedItem) => {
+               deliverExpanded(expanded, expandedItem);
+            });
+            return;
+         } else {
+            expanded.push(item);
+         }
+      }
+
+      deliverExpanded(expanded);
+   }
+
+   /*
+    * Same as above, but for entity values @@@@
+    */
+   _expandThroughNextPERefInEntityValue(entityValueArray, deliverExpanded) {
+      if (!entityValueArray) {
+         deliverExpanded([]);
+         return;
+      }
+
+      const expanded = [];
+
+      while (entityValueArray.length > 0) {
+         const item = entityValueArray.shift();
+
          if (item.type === entityReference.PARAM_PTYPE) {
             this._expandPERefFully(item, (expandedItem) => {
                deliverExpanded(expanded, expandedItem);
@@ -417,7 +444,7 @@ class NodeStream extends Transform {
    }
 
    _expandPeRefsInEntityValue(entityValue, deliverExpanded) {
-      this._expandThroughNextPERef(entityValue, (before, expandedPERef) => {
+      this._expandThroughNextPERefInEntityValue(entityValue, (before, expandedPERef) => {
          if (!expandedPERef) {
             deliverExpanded(before);
             return;

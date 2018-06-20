@@ -111,7 +111,7 @@ function assignUnassigned(notationPToken) {
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === entityReference.PARAM_PTYPE));
+   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
 
    if (unexpandedRef.length !== 0) {
       return;
