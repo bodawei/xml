@@ -6,7 +6,6 @@ import declaration from './bridge/declaration';
 import externalId from './common/externalId.js';
 import misc from './common/misc.js';
 import base from './base';
-import entityReference from './entityReference.js';
 import unassigned from './unassigned';
 
 const NOTATIONDECL = 'NOTATIONDECL';

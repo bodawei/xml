@@ -9,6 +9,11 @@ declare class ErrorCollector {
    getErrors(): Array<any>;
 }
 
+declare class XmlError {
+   static ID: IDToStringMapping;
+   constructor(id: string, params: Array<string>, place?: any, contextOffset?: any);
+}
+
 declare class XmlWarning {
    static ID: IDToStringMapping;
    constructor(id: string, params: Array<string>, place?: any, contextOffset?: any);
@@ -30,6 +35,7 @@ declare class ValidityError {
 
 export {
    ErrorCollector,
+   XmlError,
    XmlWarning,
    WellFormedError,
    ValidityError,

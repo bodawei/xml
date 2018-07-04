@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, util } from '../basic';
-import { ValidityError, XmlWarning } from '../error';
+import { ValidityError, XmlError, XmlWarning } from '../error';
 
 import {
    charData,
@@ -108,10 +108,7 @@ class CheckXTokenValidStream extends stream.Transform {
       this.idValues = {};
    }
 
-   _transform(xToken: XToken, _: string, done: StreamCallback) {
-      const pToken = (xToken.pToken || {}).open;
-      const context = this.currentContext;
-
+   private checkContextValidity(xToken: XToken, pToken: any, context: ElementDeclInfo | void) {
       if (context && context.matcherType === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
             const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
@@ -170,6 +167,15 @@ class CheckXTokenValidStream extends stream.Transform {
       //          matcher.currentStateId = destState.stateId;
       //       }
       //    }
+      }
+   }
+
+   _transform(xToken: XToken, _: string, done: StreamCallback) {
+      const pToken = (xToken.pToken || {}).open;
+      const context = this.currentContext;
+
+      if (!(xToken instanceof XmlError)) {
+         this.checkContextValidity(xToken, pToken, context);
       }
 
       if (xToken instanceof notationDeclaration.XToken) {

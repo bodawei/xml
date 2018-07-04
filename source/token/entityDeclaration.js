@@ -3,9 +3,7 @@
 import { WellFormedError, XmlWarning } from '../error';
 
 import base from './base';
-import entityEnd from './entityEnd.js';
 import entityReference from './entityReference.js';
-import entityStart from './entityStart.js';
 import unassigned from './unassigned';
 import declaration from './bridge/declaration';
 import misc from './common/misc.js';

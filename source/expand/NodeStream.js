@@ -195,12 +195,12 @@ class NodeStream extends Transform {
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
       } else {
-         const expanded = [{
+         const expanded = [ {
             type: 'entityStart',
             token: new entityStart.ParamPToken({ refPToken: peRef }),
-         }].concat(entityToken.value, {
+         } ].concat(entityToken.value, {
             type: 'entityEnd',
-            token: new entityEnd.ParamPToken({ refPToken: peRef })
+            token: new entityEnd.ParamPToken({ refPToken: peRef }),
          });
 
          deliverExpanded(expanded);
@@ -228,7 +228,7 @@ class NodeStream extends Transform {
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
       } else {
-         const expanded = [new entityStart.ParamPToken({ refPToken: peRef })]
+         const expanded = [ new entityStart.ParamPToken({ refPToken: peRef }) ]
             .concat(entityToken.value, new entityEnd.ParamPToken({ refPToken: peRef }));
 
          deliverExpanded(expanded);

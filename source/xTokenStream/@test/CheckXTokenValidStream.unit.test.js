@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData, util } from '../../basic';
-import { ValidityError, XmlWarning } from '../../error';
+import { ValidityError, WellFormedError, XmlError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import {
    attListDeclaration,
@@ -1040,6 +1040,27 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
                [ 'one', 'badChild' ], elDecl.pToken.open, elDecl.pToken.open);
             expectStream(validator, expected, done);
+         });
+
+      });
+
+      describe('Error tokens', () => {
+
+         it('ignores Errors when doing overall contextual checking', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+            const startToken = new elementStart.XToken('one', [], { open: new SToken('foo', 'foo')});
+
+            validator.write(elDecl1);
+            validator.write(startToken);
+            validator.write(new WellFormedError(WellFormedError.ID.ELEMENTDECL_NO_NAME, [ 'x' ]));
+            validator.end();
+
+            gatherTokens(validator, (tokens) => {
+               const errors = tokens.filter((token) => token instanceof XmlError);
+
+               expect(errors.length).toBe(1);
+               done();
+            });
          });
 
       });
