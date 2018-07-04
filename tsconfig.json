@@ -3,6 +3,7 @@
       "strict": true,
       "noImplicitAny": true,
       "allowJs": true,
+      "pretty": true,
       "target": "es5",
       "sourceMap": true,
       "outDir": "./temp/typescript",

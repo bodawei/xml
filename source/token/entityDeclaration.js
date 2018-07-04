@@ -314,17 +314,17 @@ function assignUnassigned(pToken) {
       }
 
       if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned[0]) {
-         const nextThing = pToken.unassigned.find((value) => {
+         const nextNonSpaceThing = pToken.unassigned.find((value) => {
             if ((value.type === 'space') ||
-               value.type === entityStart.PARAM_PTYPE ||
-               value.type === entityEnd.PARAM_PTYPE) {
+               value.type === 'entityStart' ||
+               value.type === 'entityEnd') {
                return;
             }
 
             return value;
          });
 
-         if (nextThing.type === 'literal') {
+         if (nextNonSpaceThing.type === 'literal') {
             unassigned.assignToProps(pToken.unassigned, pToken, 'EntityValue', [
                { name: 'postNameSpace', type: 'space' },
                { name: 'EntityValue', type: 'literal', flatten: true },

@@ -12,7 +12,7 @@ import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 import externalId from './externalId.js';
 
@@ -68,7 +68,7 @@ describe('externalId (integration)', () => {
                },
                postPublicSpace: undefined,
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      type: 'foo',
                      open:  makeSToken('%'),
@@ -104,10 +104,11 @@ describe('externalId (integration)', () => {
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
-               type: entityEnd.PARAM_PTYPE
+               type: UnassignedType.ENTITY_END,
+               token: new entityEnd.ParamPToken({}),
             });
             extIdPToken.unassigned.unshift({
-               type: 'literal',
+               type: UnassignedType.LITERAL,
                token: {
                   openQuote: SToken.fromString('"'),
                   value: [ new text.PToken({ text: SToken.fromString('pub.xml') }) ],
@@ -115,7 +116,8 @@ describe('externalId (integration)', () => {
                }
             });
             extIdPToken.unassigned.unshift({
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             });
 
             externalId.assignUnassigned(extIdPToken);
@@ -171,16 +173,18 @@ describe('externalId (integration)', () => {
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
-               type: entityEnd.PARAM_PTYPE
+               type: UnassignedType.ENTITY_END,
+               token: new entityEnd.ParamPToken({}),
             });
             extIdPToken.unassigned.unshift({
-               type: 'word',
+               type: UnassignedType.WORD,
                token: {
                   text: SToken.fromString('public'),
                },
             });
             extIdPToken.unassigned.unshift({
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             });
 
             externalId.assignUnassigned(extIdPToken, container, 'prevProp');
@@ -202,16 +206,18 @@ describe('externalId (integration)', () => {
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
-               type: entityEnd.PARAM_PTYPE
+               type: UnassignedType.ENTITY_END,
+               token: new entityEnd.ParamPToken({}),
             });
             extIdPToken.unassigned.unshift({
-               type: 'word',
+               type: UnassignedType.WORD,
                token: {
                   text: SToken.fromString('public'),
                },
             });
             extIdPToken.unassigned.unshift({
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             });
 
             externalId.assignUnassigned(extIdPToken, container, 'prevProp');
@@ -255,18 +261,22 @@ describe('externalId (integration)', () => {
          externalId.parse(source, [], (pToken) => {
             // "expand" what should be there.
             pToken.unassigned.shift(); // get rid of the peref
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}), 
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               },
                unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range())), 
                unassigned.spaceFromSToken(new SToken(' ', ' ', new Range())), {
-                  type: 'literal',
+                  type: UnassignedType.LITERAL,
                   token: {
                      openQuote: new SToken('"', '"', new Range()),
                      value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
                      closeQuote: new SToken('"', '"', new Range()),
                   }
+               }, {
+                  type: UnassignedType.ENTITY_END,
+                  token: new entityEnd.ParamPToken({}),
                },
-               new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);
             externalId.assignUnassigned(pToken, {}, 'prevSpace');
             const ec = new ErrorCollector(undefined, WellFormedError);

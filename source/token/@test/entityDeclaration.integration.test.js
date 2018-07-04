@@ -12,7 +12,7 @@ import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 import helper from './helper.js';
 
@@ -105,18 +105,21 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, {}, (pToken) => {
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
-               unassigned.wordFromSToken(SToken.fromString('entityName')),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }, unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
-                  type: 'literal',
+                  type: UnassignedType.LITERAL,
                   token: {
                      openQuote: SToken.fromString('"'),
                      value: [ SToken.fromString('foo') ],
                      closeQuote: SToken.fromString('"'),
                   }
-               },
-               new entityEnd.ParamPToken({}),
+               }, {
+                  type: UnassignedType.ENTITY_END,
+                  token: new entityEnd.ParamPToken({}),
+               }
             ];
 
             entityDeclaration.assignUnassigned(pToken);
@@ -223,16 +226,20 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             // "expand" what should be there.
             pToken.unassigned.shift(); // get rid of the peref
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}), {
-                  type: 'literal',
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }, {
+                  type: UnassignedType.LITERAL,
                   token: {
                      openQuote: new SToken('"', '"', new Range()),
                      value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
                      closeQuote: new SToken('"', '"', new Range()),
                   }
+               }, {
+                  type: UnassignedType.ENTITY_END,
+                  token: new entityEnd.ParamPToken({}),
                },
-               new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);
             entityDeclaration.assignUnassigned(pToken);
             const ec = new ErrorCollector(undefined, WellFormedError);

@@ -14,7 +14,7 @@ import nameList from '../common/nameList';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 describe('attListDeclaration (integration)', () => {
    let declarationPToken: AttListPToken;
@@ -165,7 +165,7 @@ describe('attListDeclaration (integration)', () => {
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new attListDeclaration.PToken({
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      open:  makeSToken('%'),
                      postOpenSpace: undefined,
@@ -202,7 +202,7 @@ describe('attListDeclaration (integration)', () => {
                   value: [],
                }],
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      open:  makeSToken('%'),
                      postOpenSpace: undefined,
@@ -243,7 +243,7 @@ describe('attListDeclaration (integration)', () => {
                   value: [],
                }],
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      open:  makeSToken('%'),
                      postOpenSpace: undefined,
@@ -286,7 +286,7 @@ describe('attListDeclaration (integration)', () => {
                   value: [],
                }],
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      open:  makeSToken('%'),
                      postOpenSpace: undefined,
@@ -317,11 +317,15 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               },
                unassigned.wordFromSToken(SToken.fromString('entityName')),
-               unassigned.spaceFromSToken(SToken.fromString(' ')),
-               new entityEnd.ParamPToken({}),
+               unassigned.spaceFromSToken(SToken.fromString(' ')), {
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityEnd.ParamPToken({}),
+               }
             ];
 
             attListDeclaration.assignUnassigned(pToken);
@@ -349,13 +353,16 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
-               unassigned.wordFromSToken(SToken.fromString('at2')),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }, unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('ENTITIES')),
-               unassigned.spaceFromSToken(SToken.fromString(' ')),
-               new entityEnd.ParamPToken({}),
+               unassigned.spaceFromSToken(SToken.fromString(' ')), {
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityEnd.ParamPToken({}),
+               },
             ];
 
             attListDeclaration.assignUnassigned(pToken);
@@ -401,16 +408,20 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               },
                unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('(')),
                unassigned.wordFromSToken(SToken.fromString('one')),
                unassigned.wordFromSToken(SToken.fromString(')')),
                unassigned.wordFromSToken(SToken.fromString('#ENTITIES')),
-               unassigned.spaceFromSToken(SToken.fromString(' ')),
-               new entityEnd.ParamPToken({}),
+               unassigned.spaceFromSToken(SToken.fromString(' ')), {
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }
             ];
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 22, 0, 22);
@@ -467,12 +478,15 @@ describe('attListDeclaration (integration)', () => {
             }
 
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
-               unassigned.wordFromSToken(SToken.fromString('two')),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }, unassigned.wordFromSToken(SToken.fromString('two')),
                unassigned.wordFromSToken(SToken.fromString(')')),
-               unassigned.wordFromSToken(SToken.fromString('#REQUIRED')),
-               new entityEnd.ParamPToken({}),
+               unassigned.wordFromSToken(SToken.fromString('#REQUIRED')), {
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityEnd.ParamPToken({}),
+               },
             ];
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 21, 0, 21);

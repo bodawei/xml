@@ -13,7 +13,7 @@ import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import * as notationDeclaration from '../notationDeclaration.js';
 import text from '../text';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 import helper from './helper.js';
 
@@ -54,7 +54,7 @@ describe('notationdeDlaration (integration)', () => {
             const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(result).toEqual(new notationDeclaration.PToken({
                unassigned: [ {
-                  type: 'reference',
+                  type: UnassignedType.REFERENCE,
                   token: new entityReference.ParamPToken({
                      open:  makeSToken('%'),
                      postOpenSpace: undefined,
@@ -76,7 +76,7 @@ describe('notationdeDlaration (integration)', () => {
          source.endText();
          const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13, 13, 0, 13);
          const unassignedValue = [ {
-            type: 'reference',
+            type: UnassignedType.REFERENCE,
             token: new entityReference.ParamPToken({
                open:  makeSToken1('%'),
                postOpenSpace: undefined,
@@ -114,19 +114,23 @@ describe('notationdeDlaration (integration)', () => {
 
          notationDeclaration.parse(source, {}, (pToken) => {
             // "expand" what should be there.
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}),
+            pToken.unassigned = [{
+                  type: UnassignedType.ENTITY_START,
+                  token: new entityStart.ParamPToken({}),
+               }, 
                unassigned.wordFromSToken(SToken.fromString('notationName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
-                  type: 'literal',
+                  type: UnassignedType.LITERAL,
                   token: {
                      openQuote: SToken.fromString('"'),
                      value: [ SToken.fromString('foo') ],
                      closeQuote: SToken.fromString('"'),
                   }
-               },
-               new entityEnd.ParamPToken({}),
+               }, {
+                  type: UnassignedType.ENTITY_END,
+                  token: new entityEnd.ParamPToken({}),
+               }
             ];
 
             notationDeclaration.assignUnassigned(pToken);
@@ -224,16 +228,20 @@ describe('notationdeDlaration (integration)', () => {
          notationDeclaration.parse(source, declarationPToken, (pToken) => {
             // "expand" what should be there.
             pToken.unassigned.shift(); // get rid of the peref
-            pToken.unassigned = [
-               new entityStart.ParamPToken({}), {
-                  type: 'literal',
+            pToken.unassigned = [{
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
+            }, {
+                  type: UnassignedType.LITERAL,
                   token: {
                      openQuote: new SToken('"', '"', new Range()),
                      value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
                      closeQuote: new SToken('"', '"', new Range()),
                   },
+               }, {
+                  type: UnassignedType.ENTITY_END,
+                  token: new entityEnd.ParamPToken({}),
                },
-               new entityEnd.ParamPToken({}),
             ].concat(pToken.unassigned);
             pToken.externalId.unassigned = pToken.unassigned;
             notationDeclaration.assignUnassigned(pToken);

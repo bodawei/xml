@@ -100,7 +100,7 @@ describe('NodeStream (integration)', () => {
       pTokenStream.endText();
    });
 
-   describe('attlist declaration processing', () => {
+   describe('ATTLIST declaration processing', () => {
 
       it('expands an parameter entity that makes up the attlist declaration body', (done) => {
          const results = [];
@@ -165,9 +165,9 @@ describe('NodeStream (integration)', () => {
 
    });
 
-   describe('element declaration processing', () => {
+   describe('ELEMENT declaration processing', () => {
 
-      it('expands an parameter entity embedded in the content spec', (done) => {
+      it('expands a parameter entity embedded in the content spec', (done) => {
          const results = [];
          const manager = new EntityManager();
          const pTokenStream = new PTokenStream();
@@ -205,7 +205,7 @@ describe('NodeStream (integration)', () => {
 
    });
 
-   describe('entity declaration processing', () => {
+   describe('ENTITY declaration processing', () => {
 
       it('expands an parameter entity values in an EntityValue', (done) => {
          const results = [];
@@ -287,7 +287,7 @@ describe('NodeStream (integration)', () => {
   
    });
 
-   describe('notation declaration processing', () => {
+   describe('NOTATION declaration processing', () => {
 
       it('expands an parameter entity that makes up the notation declaration body', (done) => {
          const results = [];

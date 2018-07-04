@@ -16,24 +16,27 @@ const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+',
 const IS_NAMELIST_CHARS = /[()|,+*?]/;
 const BLANK_ORIGIN = 'https://www.w3.org/TR/xml/#as-PE';
 
-const TYPE = {
-   SPACE: 'space',
-   WORD: 'word',
-   LITERAL : 'literal',
+enum UnassignedType {
+   SPACE = 'space',
+   WORD = 'word',
+   LITERAL = 'literal',
+   REFERENCE = 'reference',
+   ENTITY_START = 'entityStart',
+   ENTITY_END = 'entityEnd',
 };
 
 type UnassignedWord = {
-   type: 'word',
+   type: UnassignedType.WORD,
    token: TextPToken,
 };
 
 type UnassignedSpace = {
-   type: 'space',
+   type: UnassignedType.SPACE,
    token: TextPToken,
 };
 
 type UnassignedLiteral = {
-   type: 'literal',
+   type: UnassignedType.LITERAL,
    token: LiteralPToken,
 };
 
@@ -43,12 +46,22 @@ interface EntityReferencePToken {
 }
 
 type UnassignedReference = {
-   type: 'reference',
+   type: UnassignedType.REFERENCE,
    token: EntityReferencePToken,
 };
 
-type UnassignedValue = UnassignedSpace | UnassignedWord | UnassignedReference | UnassignedLiteral;
-type UnassignedArray = Array<UnassignedValue>; // @@@ Big concern.  There are also entity start and ends in here.
+type UnassignedStartEnity = {
+   type: UnassignedType.ENTITY_START,
+   token: EntityReferencePToken,
+};
+
+type UnassignedEndEnity = {
+   type: UnassignedType.ENTITY_END,
+   token: EntityReferencePToken,
+};
+
+type UnassignedValue = UnassignedSpace | UnassignedWord | UnassignedReference | UnassignedLiteral | UnassignedStartEnity | UnassignedEndEnity;
+type UnassignedArray = Array<UnassignedValue>;
 
 type DeliverUnassigned = (value?: UnassignedValue) => void;
 type DeliverUnassignedArray = (values?: UnassignedArray) => void;
@@ -160,7 +173,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
       case '%':
          // return the parameter entity reference
          entityReference.paramParse(source, (reference: EntityReferencePToken) => deliverValue({
-            type: 'reference',
+            type: UnassignedType.REFERENCE,
             token: reference,
          }));
          break;
@@ -169,7 +182,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          const container: LiteralPToken = { } as LiteralPToken; // typeHack
          literal.parse(source, { pToken: container }, () => {
             const literal: UnassignedLiteral = {
-               type: 'literal',
+               type: UnassignedType.LITERAL,
                token: container,  
             }
 
@@ -270,8 +283,8 @@ function findDescriptorsToUse(propertyDescriptors: DescriptorArray, pToken: Unas
           * would have done if the PERef wasn't there.
           */
          if (nextValue.type === 'word' || nextValue.type === 'space') {
-            if (descriptor.type !== TYPE.SPACE && nextValue.type === TYPE.SPACE) {
-               const prevWasSpace = prev && prev.type === TYPE.SPACE;
+            if (descriptor.type !== UnassignedType.SPACE && nextValue.type === UnassignedType.SPACE) {
+               const prevWasSpace = prev && prev.type === UnassignedType.SPACE;
                const prevName = prev ? prev.name : '';
                const genericPToken: any = pToken;
 
@@ -411,10 +424,10 @@ class UnassignedValueCursor {
    }
 
    _peekValue(): UnassignedValue {
-      const pToken = this.values[0];
-      if (!pToken || (pToken.type !== entityStart.PARAM_PTYPE &&
-         pToken.type !== entityEnd.PARAM_PTYPE)) {
-         return pToken;
+      const unassignedPToken = this.values[0];
+      if (!unassignedPToken || (unassignedPToken.type !== UnassignedType.ENTITY_START &&
+         unassignedPToken.type !== UnassignedType.ENTITY_END)) {
+         return unassignedPToken;
       }
 
       const spaceToken = new SToken(' ', ' ',
@@ -430,14 +443,14 @@ class UnassignedValueCursor {
 
 function wordFromSToken(sToken: SToken): UnassignedWord {
    return {
-      type: 'word',
+      type: UnassignedType.WORD,
       token: new TextPToken({ text: sToken }),  
    };
 }
 
 function spaceFromSToken(sToken: SToken): UnassignedSpace {
    return {
-      type: 'space',
+      type: UnassignedType.SPACE,
       token: new TextPToken({ text: sToken }),  
    };
 }
@@ -511,4 +524,5 @@ export {
    UnassignedValue,
    DescriptorArray,
    Descriptor,
+   UnassignedType,
 };

@@ -454,10 +454,15 @@ describe('NodeStream (unit)', () => {
             });
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake((pToken) => {
                expect(pToken.unassigned).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
-                  new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                     type: 'entityStart',
+                     token: new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
+                  },
                   // the reference is eaten, because it really generates no data.
-                  new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                  {
+                     type: 'entityEnd',
+                     token: new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                  },
                ]);
             });
 
@@ -519,9 +524,10 @@ describe('NodeStream (unit)', () => {
             });
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake((pToken) => {
                expect(pToken.unassigned).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
-                  new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
-                  xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
+                  xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
+                     type: 'entityStart',
+                     token: new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
+                  }, xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {
                      type: 'literal',
                      token: {
@@ -529,8 +535,10 @@ describe('NodeStream (unit)', () => {
                         value: [ SToken.fromString('http://somewhere.com') ],
                         closeQuote: SToken.fromString('"'),
                      }
-                  },
-                  new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                  }, {
+                     type: 'entityEnd',
+                     token: new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                  }
                ]);
             });
 

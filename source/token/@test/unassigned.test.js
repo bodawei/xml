@@ -12,7 +12,7 @@ import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text';
 import literal from '../common/literal';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 import helper from './helper.js';
 
@@ -143,7 +143,7 @@ describe('unassigned (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             token: {
                isLiteral: true,
             }
@@ -164,7 +164,7 @@ describe('unassigned (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             token: {
                isLiteral: true,
             }
@@ -184,7 +184,7 @@ describe('unassigned (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(deliverySpy).toHaveBeenCalledWith({
-            type: 'reference',
+            type: UnassignedType.REFERENCE,
             token: {
                isPeref: true,
             },
@@ -303,12 +303,12 @@ describe('unassigned (unit)', () => {
          expect(deliverySpy).toHaveBeenCalledWith([
             unassigned.spaceFromSToken(makeSToken('   ')),
             unassigned.wordFromSToken(makeSToken('xyzzy')), {
-               type: 'literal',
+               type: UnassignedType.LITERAL,
                token: {
                   isLiteral: true,
                },
             }, {
-               type: 'reference',
+               type: UnassignedType.REFERENCE,
                token: {
                   isPeref: true
                },
@@ -362,7 +362,7 @@ describe('unassigned (unit)', () => {
          const unassVals = [];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unassVals.slice(0), pToken, 'one', descriptors);
@@ -378,13 +378,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -404,13 +404,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
@@ -430,17 +430,17 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
             allowed: /one/,
          }, {
             name: 'four',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
@@ -460,17 +460,17 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
             allowed: /one|bar/,
          }, {
             name: 'four',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
@@ -491,17 +491,17 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
             allowed: /one|bar/,
          }, {
             name: 'four',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, undefined, descriptors);
@@ -520,13 +520,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -542,7 +542,7 @@ describe('unassigned (unit)', () => {
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
          const literal = {
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
                value: [],
@@ -552,14 +552,14 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, literal, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             flatten: true,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -578,7 +578,7 @@ describe('unassigned (unit)', () => {
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
          const literal = {
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
                value: [],
@@ -588,13 +588,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, literal, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'literal',
+            type: UnassignedType.LITERAL,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -620,13 +620,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'three', descriptors);
@@ -643,19 +643,21 @@ describe('unassigned (unit)', () => {
             const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals = [ word1, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, word2, {
-               type: entityEnd.PARAM_PTYPE
+               type: UnassignedType.ENTITY_END,
+               token: new entityEnd.ParamPToken({}),
             } ];
             const descriptors = [ {
                name: 'one',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'two',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -674,13 +676,13 @@ describe('unassigned (unit)', () => {
             const unVals = [ word1, word2 ];
             const descriptors = [ {
                name: 'one',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'two',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -696,19 +698,21 @@ describe('unassigned (unit)', () => {
             const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals = [ word1, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, word2, {
-               type: entityEnd.PARAM_PTYPE
+               type: UnassignedType.ENTITY_END,
+               token: new entityEnd.ParamPToken({}),
             } ];
             const descriptors = [ {
                name: 'one',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'four',
-               type: 'space',
+               type: UnassignedType.SPACE,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -726,13 +730,13 @@ describe('unassigned (unit)', () => {
             const unVals = [ space, word ];
             const descriptors = [ {
                name: 'one',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'two',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -752,7 +756,7 @@ describe('unassigned (unit)', () => {
             const unVals = [ space, word ];
             const descriptors = [ {
                name: 'two',
-               type: 'space',
+               type: UnassignedType.SPACE,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
@@ -767,23 +771,27 @@ describe('unassigned (unit)', () => {
             const space = unassigned.spaceFromSToken(SToken.fromString(' '));
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals = [ word, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, space ];
             const descriptors = [ {
                name: 'one',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'two',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -806,13 +814,13 @@ describe('unassigned (unit)', () => {
             const unVals = [ space, word ];
             const descriptors = [ {
                name: 'one',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'two',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
@@ -832,13 +840,13 @@ describe('unassigned (unit)', () => {
             const unVals = [ space, word ];
             const descriptors = [ {
                name: 'one',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'two',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
@@ -855,17 +863,18 @@ describe('unassigned (unit)', () => {
             };
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals = [ {
-               type: entityStart.PARAM_PTYPE
+               type: UnassignedType.ENTITY_START,
+               token: new entityStart.ParamPToken({}),
             }, word ];
             const descriptors = [ {
                name: 'one',
-               type: 'space',
+               type: UnassignedType.SPACE,
             }, {
                name: 'two',
-               type: 'word',
+               type: UnassignedType.WORD,
             }, {
                name: 'three',
-               type: 'word',
+               type: UnassignedType.WORD,
             } ];
 
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
@@ -886,13 +895,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -908,7 +917,7 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -927,13 +936,13 @@ describe('unassigned (unit)', () => {
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
-            type: 'word',
+            type: UnassignedType.WORD,
          }, {
             name: 'two',
-            type: 'space',
+            type: UnassignedType.SPACE,
          }, {
             name: 'three',
-            type: 'word',
+            type: UnassignedType.WORD,
          } ];
 
          unassigned.assignToProps(unVals, pToken, 'one', descriptors);
@@ -951,7 +960,7 @@ describe('unassigned (unit)', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
          const expected = {
-            type: 'space',
+            type: UnassignedType.SPACE,
             token: new text.PToken({ text: 'hi' }),
          };
 
@@ -966,7 +975,7 @@ describe('unassigned (unit)', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
          const expected = {
-            type: 'word',
+            type: UnassignedType.WORD,
             token: new text.PToken({ text: 'hi' }),
          };
 
@@ -1068,7 +1077,7 @@ describe('unassigned (unit)', () => {
 
       it('returns STokens for an entity reference', () => {
          const result = unassigned.getSTokens([{
-            type: 'reference',
+            type: UnassignedType.REFERENCE,
             token: new entityReference.ParamPToken({
                open: SToken.fromString('&'),
                name: SToken.fromString('froo'),
@@ -1085,7 +1094,7 @@ describe('unassigned (unit)', () => {
 
       it('returns STokens for an literal', () => {
          const result = unassigned.getSTokens([{
-            type: 'literal',
+            type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
                value: [ new text.PToken({ text: SToken.fromString('froo') }) ],
@@ -1113,14 +1122,14 @@ describe('unassigned (unit)', () => {
             unassigned.wordFromSToken(startSToken),
             unassigned.spaceFromSToken(SToken.fromString(' ')),
             {
-               type: 'literal',
+               type: UnassignedType.LITERAL,
                token: {
                   openQuote: SToken.fromString('"'),
                   closeQuote: SToken.fromString('"'),
                }
             },
             {
-               type: 'reference',
+               type: UnassignedType.REFERENCE,
                token: new entityReference.ParamPToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('fred'),

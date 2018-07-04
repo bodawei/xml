@@ -162,7 +162,7 @@ class NodeStream extends Transform {
          const item = entityValueArray.shift();
 
          if (item.type === entityReference.PARAM_PTYPE) {
-            this._expandPERefFully(item, (expandedItem) => {
+            this._expandPERefFullyInEntityValue(item, (expandedItem) => {   // This is going to be a problem
                deliverExpanded(expanded, expandedItem);
             });
             return;
@@ -195,9 +195,41 @@ class NodeStream extends Transform {
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
       } else {
-         const expanded = [
-            new entityStart.ParamPToken({ refPToken: peRef }),
-         ].concat(entityToken.value, new entityEnd.ParamPToken({ refPToken: peRef }));
+         const expanded = [{
+            type: 'entityStart',
+            token: new entityStart.ParamPToken({ refPToken: peRef }),
+         }].concat(entityToken.value, {
+            type: 'entityEnd',
+            token: new entityEnd.ParamPToken({ refPToken: peRef })
+         });
+
+         deliverExpanded(expanded);
+      }
+   }
+
+   /*
+    * Convert a PE reference PToken into an array of an
+    * entity start, the entity value, and an entity end, or
+    * an array containing the PE reference PToken (if it cant be expanded).
+    *
+    * The entity value consists of text PTokens, as well as other
+    * entity start and end's that represent previous PE References that
+    * were expanded when the entity was stored.
+    *
+    * Most callers will do further processing on the entity value.
+    *
+    * CRUCIALLY, right now this assumes the entity value is delivered
+    * synchronously, which is not true i nthe long term.
+    */
+   _expandPERefFullyInEntityValue(peRef, deliverExpanded) {
+      const itemName = peRef.name && peRef.name.str || '';
+      const entityToken = this._entityManager.getParameterEntityToken(itemName);
+
+      if (!entityToken || !entityToken.value) {
+         deliverExpanded([ peRef ]);
+      } else {
+         const expanded = [new entityStart.ParamPToken({ refPToken: peRef })]
+            .concat(entityToken.value, new entityEnd.ParamPToken({ refPToken: peRef }));
 
          deliverExpanded(expanded);
       }
