@@ -802,7 +802,8 @@ describe('unassigned (unit)', () => {
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
-                  helper.makeInsertedRange()
+                  helper.makeInsertedRange(),
+                  new Range(),
                ]),
             });
          });
@@ -880,7 +881,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: new SToken('\t ', '\t ', [ helper.makeInsertedRange() ]),
+               one: new SToken('\t ', '\t ', [ new Range(), helper.makeInsertedRange() ]),
                two: word.token.text,
             });
          });

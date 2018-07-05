@@ -26,17 +26,18 @@ type DeliverCB = (ptoken: ElementDeclarationPToken) => void;
 
 type ContentSpecType = 'EMPTY' | 'ANY' | 'CHILDREN';
 
-class ElementDeclaration extends base.XToken {
+class ElementDeclaration {
+   public readonly type = ELEMENTDECL_XTOKEN;
    public name: string;
    public contentSpecType: string; // if not malformed, would only be ContentSpecType
    public children: XNameList | void;
+   public pToken?: ElementDeclarationPToken;
 
    constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken = {} as ElementDeclarationPToken) {
-      super(ELEMENTDECL_XTOKEN, pToken);
-
       this.name = name;
       this.contentSpecType = contentSpecType;
       this.children = children;
+      this.pToken = pToken;
    }
 }
 
@@ -107,7 +108,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
 function parseName(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken: DeliverCB) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', deliverPToken, () => {
       source.extractToObject('word', [ '>', '(' ], pToken, 'name');
-      source.extractToObject('space', pToken, 'postNameSpace');
+      source.extractToObjectNoParams('space', pToken, 'postNameSpace');
       parseContentSpec(source, pToken, deliverPToken);
    });
 
@@ -116,7 +117,7 @@ function parseName(source: STokenSource, pToken: ElementDeclarationPToken, deliv
 
 function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken, deliverPToken: DeliverCB) {
    const callback = unassigned.makeCheckCallback(pToken, 'contentSpec', deliverPToken, () => {
-      source.extract('peekChar', (charSToken) => {
+      source.extractNoParams('peekChar', (charSToken) => {
          if (!charSToken) {
             deliverPToken(pToken);
             return;
@@ -124,14 +125,14 @@ function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken
 
          if (charSToken.str !== '(') {
             source.extractToObject('word', [ '>' ], pToken, 'contentSpec');
-            source.extractToObject('space', pToken, 'postContentSpecSpace');
+            source.extractToObjectNoParams('space', pToken, 'postContentSpecSpace');
             deliverPToken(pToken);
             return;
          }
 
          nameList.parse(source, 'ANY', (nameList?: NameListPToken) => {
             pToken.children = nameList;
-            source.extract('peekChar', (nextChar) => {
+            source.extractNoParams('peekChar', (nextChar) => {
                if (nextChar && nextChar.str === '%') {
                   unassigned.parseAllValues(source, true, (values) => {
                      pToken.nextPropName = 'midContentSpec';

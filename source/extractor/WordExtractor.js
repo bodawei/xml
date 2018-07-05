@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import AllExtractor from './AllExtractor.js';
+import AllExtractor from './AllExtractor';
 
 const SPACE_TERMINATOR_10 = [ ' ', '\t', '\n', '\r' ];
 const SPACE_TERMINATOR_11 = [ ' ', '\t', '\n', '\r', '\u0085', '\u2028' ];

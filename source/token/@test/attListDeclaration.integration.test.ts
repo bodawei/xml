@@ -335,7 +335,7 @@ describe('attListDeclaration (integration)', () => {
             expect(pToken).toEqual(new attListDeclaration.PToken({
                postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                elementName: SToken.fromString('entityName'),
-               postElementNameSpace: new SToken('  ', '  ', [ helper.makeInsertedRange() ]),
+               postElementNameSpace: new SToken('  ', '  ', [ new Range(undefined), helper.makeInsertedRange() ]),
                close: makeSToken2('>'),
             }));
             done();
@@ -525,7 +525,7 @@ describe('attListDeclaration (integration)', () => {
             // work around some kind of ts issue
             const expected = new attListDeclaration.PToken(rawExpected);
             const spaceToken = SToken.fromString(' ');
-            spaceToken.ranges.push(helper.makeInsertedRange());
+            spaceToken.ranges = [ helper.makeInsertedRange() ];
             expected.attDefs[0].nameList!.names[0].postDelimiterSpace = spaceToken;
             expected.attDefs[0].postDefaultTypeSpace = spaceToken;
 

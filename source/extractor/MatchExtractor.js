@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor.js';
+import Extractor from './Extractor';
 
 /**********************************************************************\
  A MatchExtractor will look for the specified candidate string starting

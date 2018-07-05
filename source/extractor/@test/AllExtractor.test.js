@@ -3,9 +3,9 @@
 
 import { EntityLocation, Range } from '../../basic';
 
-import AllExtractor from '../AllExtractor.js';
-import Extractor from '../Extractor.js';
-import Segment from '../Segment.js';
+import AllExtractor from '../AllExtractor';
+import Extractor from '../Extractor';
+import Segment from '../Segment';
 
 describe('AllExtractor', () => {
    let defaultLoc;

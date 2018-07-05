@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { SToken } from '../stoken';
+import { SToken } from '../sToken';
 
 /**********************************************************************\
  The base namespace just contains the base token class used

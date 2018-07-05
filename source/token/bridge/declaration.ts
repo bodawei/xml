@@ -20,9 +20,12 @@ const UNKNOWNDECL = 'UNKNOWNDECL';
 const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 
-class UnknownDeclaration extends base.XToken {
-   constructor(pToken: DeclarationPToken) {
-      super(UNKNOWNDECL_XTOKEN, pToken);
+class UnknownDeclaration {
+   public readonly type = UNKNOWNDECL_XTOKEN;
+   public pToken?: DeclarationPToken;
+
+   constructor(pToken?: DeclarationPToken) {
+      this.pToken = pToken;
    }
 }
 
@@ -73,10 +76,10 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: 
    const results = new DeclarationPToken();
    results.open = openSToken;
 
-   source.extractToObject('space', results, 'postOpenSpace');
+   source.extractToObjectNoParams('space', results, 'postOpenSpace');
    source.extractToObject('word', [ '>' ], results, 'declType');
 
-   source.extract('space', (sToken) => {
+   source.extractNoParams('space', (sToken) => {
       results.postDeclTypeSpace = sToken;
 
       deliverPToken(results);

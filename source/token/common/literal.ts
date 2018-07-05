@@ -54,13 +54,13 @@ type LiteralPToken = {
 function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken): void {
    const pToken = options.pToken;
 
-   source.extract('peekChar', (quoteSToken) => {
+   source.extractNoParams('peekChar', (quoteSToken) => {
       if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
          done();
          return;
       }
 
-      source.extractToObject('char', pToken, 'openQuote');
+      source.extractToObjectNoParams('char', pToken, 'openQuote');
 
       const terminators: LiteralValueTerminators = [ quoteSToken.str ];
 

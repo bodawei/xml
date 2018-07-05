@@ -119,7 +119,7 @@ function isNamePToken(value: any): value is NamePToken {
 \**********************************************************************/
 
 function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverPToken): void {
-   source.extract('match', '(', (charSToken: SToken) => {
+   source.extract('match', '(', (charSToken) => {
       const namePToken = new NameListPToken();
       if (!charSToken) {
          deliverPToken();
@@ -127,14 +127,14 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
       }
 
       namePToken.open = charSToken;
-      source.extractToObject('space', namePToken, 'postOpenSpace');
+      source.extractToObjectNoParams('space', namePToken, 'postOpenSpace');
 
       const delimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : 'ANY';
       parseNames(source, namePToken, delimiterType, (pToken: NameListPToken) => {
          source.extractToObject('match', ')', pToken, 'close');
-         source.extractToObject('space', pToken, 'postCloseSpace');
+         source.extractToObjectNoParams('space', pToken, 'postCloseSpace');
          source.extractToObject('multi', [ '?', '*', '+' ], pToken, 'repeat');
-         source.extract('space', (spaceSToken: SToken) => {
+         source.extractNoParams('space', (spaceSToken?) => {
             pToken.postRepeatSpace = spaceSToken;
 
             deliverPToken(pToken);
@@ -144,7 +144,7 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
 }
 
 function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: DelimiterType, deliverPToken: InnerDeliverPToken): void {
-   source.extract('peekChar', (charSToken: SToken) => {
+   source.extractNoParams('peekChar', (charSToken) => {
       if (!charSToken || charSToken.str === '>' || charSToken.str === ')' || charSToken.str === '%') {
          deliverPToken(pToken);
          return;
@@ -186,9 +186,9 @@ function parseName(source: STokenSource, wordDelims: Array<string>, deliverName:
    let namePToken: NamePToken = {};
 
    source.extractToObject('word', wordDelims, namePToken, 'name');
-   source.extractToObject('space', namePToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', namePToken, 'postNameSpace');
    source.extractToObject('multi', [ '?', '*', '+' ], namePToken, 'repeat');
-   source.extractToObject('space', namePToken, 'postRepeatSpace');
+   source.extractToObjectNoParams('space', namePToken, 'postRepeatSpace');
    deliverName(namePToken);
 }
 
@@ -208,7 +208,7 @@ function parseDelimiter(source: STokenSource, pToken: NameListPToken,  particle:
    }
 
    source.extractToObject('multi', delimMatch, particle, 'delimiter');
-   source.extract('space', (space: SToken) => {
+   source.extractNoParams('space', (space) => {
       particle.postDelimiterSpace = space;
 
       let newDelimiterType: DelimiterType = delimiterType;

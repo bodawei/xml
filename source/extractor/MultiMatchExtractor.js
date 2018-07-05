@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor.js';
-import MatchExtractor from './MatchExtractor.js';
+import Extractor from './Extractor';
+import MatchExtractor from './MatchExtractor';
 
 /**********************************************************************\
  A MultiMatchExtractor will look for the the best match among the

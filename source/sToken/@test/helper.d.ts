@@ -9,7 +9,7 @@ declare class MockSTokenSource extends STokenSource {
 //declare function sTokenMaker(str: string): SToken;
 type sTokenMaker = (str: string) => SToken;
 
-declare function makeSTokenMaker(location?: any, index?: number, row?: number, column?: number): sTokenMaker;
+declare function makeSTokenMaker(location?: any, index?: number, row?: number, column?: number, endIndex?: number, endRow?: number, endColumn?: number): sTokenMaker;
 
 export {
    MockSTokenSource,

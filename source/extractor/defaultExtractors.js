@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import AllExtractor from './AllExtractor.js';
-import CharExtractor from './CharExtractor.js';
-import DigitExtractor from './DigitExtractor.js';
-import MatchExtractor from './MatchExtractor.js';
-import MultiMatchExtractor from './MultiMatchExtractor.js';
-import PeekExtractor from './PeekExtractor.js';
-import SpaceExtractor from './SpaceExtractor.js';
-import WordExtractor from './WordExtractor.js';
+import AllExtractor from './AllExtractor';
+import CharExtractor from './CharExtractor';
+import DigitExtractor from './DigitExtractor';
+import MatchExtractor from './MatchExtractor';
+import MultiMatchExtractor from './MultiMatchExtractor';
+import PeekExtractor from './PeekExtractor';
+import SpaceExtractor from './SpaceExtractor';
+import WordExtractor from './WordExtractor';
 
 const defaultExtractors = {
    all: AllExtractor,

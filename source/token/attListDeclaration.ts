@@ -96,7 +96,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
 function parseElementName(source: STokenSource, pToken: AttListPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'elementName', done, () => {
       source.extractToObject('word', [ '>', '%' ], pToken, 'elementName');
-      source.extractToObject('space', pToken, 'postElementNameSpace');
+      source.extractToObjectNoParams('space', pToken, 'postElementNameSpace');
 
       parseAttName(source, pToken, done);
    });
@@ -118,7 +118,7 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Deliver
          };
          pToken.attDefs.push(attDef);
 
-         source.extractToObject('space', attDef, 'postNameSpace');
+         source.extractToObjectNoParams('space', attDef, 'postNameSpace');
 
          parseAttType(source, pToken, attDef, () => {
             parseAttName(source, pToken, done);
@@ -142,7 +142,7 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
       source.extract('word', [ '>', '%', '(', '#', '"', '\'' ], (attType: SToken|void) => {
          if (attType) {
             attDef.type = attType;
-            source.extractToObject('space', attDef, 'postTypeSpace');
+            source.extractToObjectNoParams('space', attDef, 'postTypeSpace');
 
             if (attType.str.toLocaleUpperCase() === 'NOTATION') {
                nameList.parse(source, 'NOTATION', populateList);
@@ -153,7 +153,7 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
             return;
          }
 
-         source.extract('peekChar', (charSToken) => {
+         source.extractNoParams('peekChar', (charSToken) => {
             if (charSToken && charSToken.str === '(') {
                nameList.parse(source, 'ENUMERATION', populateList);
                return;
@@ -169,10 +169,10 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
 
 function parseDefaultType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
    const callback = unassigned.makeCheckCallback(pToken, 'defaultType', done, () => {
-      source.extract('peekChar', (charToken: SToken|void) => {
+      source.extractNoParams('peekChar', (charToken: SToken|void) => {
          if (charToken && charToken.str === '#') {
             source.extractToObject('word', [ '>', '%', '"', '\'' ], attDef, 'defaultType');
-            source.extractToObject('space', attDef, 'postDefaultTypeSpace');
+            source.extractToObjectNoParams('space', attDef, 'postDefaultTypeSpace');
          }
 
          parseAttValue(source, pToken, attDef, done);
@@ -460,7 +460,7 @@ type XAttr = {
 };
 
 class AttListXToken {
-      readonly type: string;
+      public readonly type: string;
       public elementName: string;
       public attDefs: Array<XAttr>;
       public defaultType?: string;

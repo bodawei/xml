@@ -316,7 +316,7 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
-      const openSToken = elDecl.pToken.open;
+      const openSToken = elDecl.pToken ? elDecl.pToken.open : undefined;
       let isMixed = false;
 
       // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
@@ -365,12 +365,11 @@ class CheckXTokenValidStream extends stream.Transform {
             //    The same name must not appear more than once in a single mixed-content declaration.
             const seen: SeenMapping = {};
             const names: Array<XName> = elDecl.children.names as Array<XName>;
-            const pToken = elDecl.pToken;
 
             names.forEach((child: XName) => {
                if (seen[child.name]) {
                   const err = new ValidityError(ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
-                     [ elDecl.name, child.name ], pToken.open);
+                     [ elDecl.name, child.name ], openSToken);
                   this.push(err);
                }
                seen[child.name] = true;

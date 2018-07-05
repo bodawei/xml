@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as entityDeclaration from '../entityDeclaration.js';
+import * as entityDeclaration from '../entityDeclaration';
 import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';

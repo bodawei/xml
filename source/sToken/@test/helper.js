@@ -3,7 +3,7 @@
 
 import { Range, EntityLocation } from '../../basic';
 
-import SToken from '../SToken.js';
+import SToken from '../SToken';
 
 const PLACEHOLDER_RANGE = new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1);
 const PEEK = '___PEEK___';
@@ -144,6 +144,10 @@ class MockSTokenSource {
       this.extract = spyOn(this, 'extract').and.callThrough();
    }
 
+   extractToObjectNoParams(type, obj, name) {
+      this.extractToObject(type, undefined, obj, name);
+   }
+
    extractToObject(type, params, obj, name) {
       if (!name) {
          name = obj;
@@ -157,6 +161,10 @@ class MockSTokenSource {
          obj,
          name,
       });
+   }
+
+   extractNoParams(type, callback) {
+      this.extract(type, undefined, callback);
    }
 
    extract(type, params, callback) {

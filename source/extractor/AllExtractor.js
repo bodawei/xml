@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor.js';
-import MatchExtractor from './MatchExtractor.js';
-import MultiMatchExtractor from './MultiMatchExtractor.js';
-import PeekExtractor from './PeekExtractor.js';
+import Extractor from './Extractor';
+import MatchExtractor from './MatchExtractor';
+import MultiMatchExtractor from './MultiMatchExtractor';
+import PeekExtractor from './PeekExtractor';
 
 const regexMemo = {};
 

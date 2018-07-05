@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
-import SToken from '../SToken.js';
+import SToken from '../SToken';
 
 import { makeSToken, RangeMaker, makeSTokenMaker, MockSTokenSource } from './helper';
 

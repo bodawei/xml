@@ -27,7 +27,7 @@ class Range {
    public endRow: number;
    public endColumn: number;
 
-   constructor(location: EntityLocation | void,
+   constructor(location: EntityLocation | void | Offset,
       index: number = 0, row: number = 0, column: number = 0,
       endIndex: number = 0, endRow: number = 0, endColumn: number = 0) {
 

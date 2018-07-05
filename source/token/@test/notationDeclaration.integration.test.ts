@@ -1,25 +1,32 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { SToken, STokenSource } from '../../sToken';
+import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import entityEnd from '../entityEnd.js';
-import entityReference from '../entityReference.js';
-import entityStart from '../entityStart.js';
-import externalId from '../common/externalId.js';
-import * as notationDeclaration from '../notationDeclaration.js';
+import entityEnd from '../entityEnd';
+import entityReference from '../entityReference';
+import entityStart from '../entityStart';
+import externalId from '../common/externalId';
+import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import text from '../text';
 import unassigned, { UnassignedType } from '../unassigned';
 
-import helper from './helper.js';
+import helper from './helper';
 
-describe('notationdeDlaration (integration)', () => {
-   let declarationPToken;
-   let expectedSToken;
+type DeclarationPToken = {
+   open: SToken;
+   postOpenSpace?: SToken;
+   declType?: SToken;
+   postDeclTypeSpace?: SToken;
+};
+
+describe('notationDeclaration (integration)', () => {
+   let declarationPToken: DeclarationPToken;
+   let expectedSToken: (param: string) => SToken;
 
    beforeEach(() => {
       expectedSToken = makeSTokenMaker();
@@ -39,7 +46,7 @@ describe('notationdeDlaration (integration)', () => {
          source.endText();
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            expect(parsing.externalId.type).toEqual(externalId.PTYPE);
+            expect(parsing.externalId!.type).toEqual(externalId.PTYPE);
             done();
          });
       });
@@ -234,16 +241,16 @@ describe('notationdeDlaration (integration)', () => {
             }, {
                   type: UnassignedType.LITERAL,
                   token: {
-                     openQuote: new SToken('"', '"', new Range()),
-                     value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
-                     closeQuote: new SToken('"', '"', new Range()),
+                     openQuote: SToken.fromString('"'),
+                     value: [ new text.PToken({ text: SToken.fromString('sys.dtd') }) ],
+                     closeQuote: SToken.fromString('"'),
                   },
                }, {
                   type: UnassignedType.ENTITY_END,
                   token: new entityEnd.ParamPToken({}),
                },
             ].concat(pToken.unassigned);
-            pToken.externalId.unassigned = pToken.unassigned;
+            pToken.externalId!.unassigned = pToken.unassigned;
             notationDeclaration.assignUnassigned(pToken);
             const ec = new ErrorCollector(undefined, WellFormedError);
 
@@ -266,8 +273,8 @@ describe('notationdeDlaration (integration)', () => {
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
             const token = notationDeclaration.pTokenToXToken(parsing);
 
-            token.pToken = [];
-            expect(token).toEqual(new notationDeclaration.XToken('foo', new EntityLocation('sys.dtd'), []));
+            token.pToken = {} as NotationDeclarationPToken; // typeHack
+            expect(token).toEqual(new notationDeclaration.XToken('foo', new EntityLocation('sys.dtd'), {} as NotationDeclarationPToken)); // typeHack
             done();
          });
       });
@@ -280,7 +287,7 @@ describe('notationdeDlaration (integration)', () => {
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
             const token = notationDeclaration.pTokenToXToken(parsing);
 
-            expect(token.pToken.open).toEqual(declarationPToken.open);
+            expect(token.pToken!.open).toEqual(declarationPToken.open);
             done();
          });
       });

@@ -3,8 +3,8 @@
 
 import { EntityLocation, Range } from '../../basic';
 
-import WordExtractor from '../WordExtractor.js';
-import Segment from '../Segment.js';
+import WordExtractor from '../WordExtractor';
+import Segment from '../Segment';
 
 describe('WordExtractor', () => {
    let defaultLoc;

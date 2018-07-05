@@ -160,7 +160,16 @@ const PARSE_TEST_EXPECTED = {
    open: {
       str: '',
       originalStr: '',
-      ranges: []
+      ranges: [
+         {
+            startIndex: 0,
+            startRow: 0,
+            startColumn: 0,
+            endIndex: 0,
+            endRow: 0,
+            endColumn: 0,
+         }
+      ],
    },
    name: {
       str: 'AnElement',

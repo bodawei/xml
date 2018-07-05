@@ -4,7 +4,7 @@
 import { EntityLocation, Range } from '../../basic';
 
 import { toEqualSTokenText, toEqualSTokenTexts, toEqualSTokenRange } from './beforeEach.js';
-import SToken from '../SToken.js';
+import SToken from '../SToken';
 
 describe('sToken beforeEach', () => {
 

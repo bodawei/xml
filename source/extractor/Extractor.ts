@@ -1,4 +1,24 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+
+import { Range } from '../basic';
+import Segment from './Segment';
+
+type DoneSegment = {
+   range: Range;
+};
+
+type SegmentInfo = {
+   chars: number;
+   rows: number;
+   columns: number;
+   segment: Segment | DoneSegment;
+};
+
+type ExtractResult = {
+   text: string;
+   original: string;
+   segments: Array<SegmentInfo>
+}
 
 const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
 const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
@@ -11,8 +31,20 @@ const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 \**********************************************************************/
 
 class Extractor {
+   protected _version: number;
+   protected _text: Array<string>;
+   protected _normalizedText: Array<string>;
+   protected _segInfo: Array<SegmentInfo>;
+   protected _lastProcessSawCr: boolean = false;
+   public state: string;
 
-   constructor(version) {
+   public static STATE = {
+      WORKING: 'WORKING',
+      SUCCESS: 'SUCCESS',
+      FAILURE: 'FAILURE',
+   };
+
+   constructor(version: number) {
       this._version = version;
       this._text = [];
       this._normalizedText = [];
@@ -20,9 +52,20 @@ class Extractor {
       this.state = Extractor.STATE.WORKING;
    }
 
-   process() {}
+   process(segment: Segment): void {
+      let typeHack = segment;
+      typeHack = typeHack;
+   }
 
-   _processText(originalText, info) {
+   finish(): ExtractResult {
+      return {
+         segments: [],
+         text: '',
+         original: '',
+      };
+   };
+
+   _processText(originalText: string, info: SegmentInfo) {
       const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
       let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
@@ -65,7 +108,7 @@ class Extractor {
       info.columns += newColumns;
    }
 
-   _makeInfo(segment) {
+   _makeInfo(segment: Segment): SegmentInfo {
       return {
          chars: 0,
          rows: 0,
@@ -74,7 +117,7 @@ class Extractor {
       };
    }
 
-   _finish() {
+   _finish(): ExtractResult {
       return {
          text: this._normalizedText.join(''),
          original: this._text.join(''),
@@ -84,10 +127,5 @@ class Extractor {
 
 }
 
-Extractor.STATE = {
-   WORKING: 'WORKING',
-   SUCCESS: 'SUCCESS',
-   FAILURE: 'FAILURE',
-};
-
 export default Extractor;
+export { ExtractResult, SegmentInfo, DoneSegment };

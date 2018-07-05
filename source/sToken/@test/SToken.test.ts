@@ -1,41 +1,41 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
 
-import SToken from '../SToken.js';
+import SToken from '../SToken';
 
 describe('SToken', () => {
 
    describe('construction', () => {
 
       it('creates an SToken with the provided parameters', () => {
-         const sToken = new SToken('one', 'two', new Range());
+         const sToken = new SToken('one', 'two', new Range(undefined));
 
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'two',
-            ranges: [ new Range() ],
+            ranges: [ new Range(undefined) ],
          });
       });
 
       it('creates an SToken with an empty range if none provided', () => {
-         const sToken = new SToken('one', 'two');
+         const sToken = new SToken('one', 'two', []);
 
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'two',
-            ranges: [],
+            ranges: [ ],
          });
       });
 
       it('creates an SToken with a the provided range array', () => {
-         const sToken = new SToken('one', 'two', [ new Range(), new Range() ]);
+         const sToken = new SToken('one', 'two', [ new Range(undefined), new Range(undefined) ]);
 
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'two',
-            ranges: [ new Range(), new Range() ],
+            ranges: [ new Range(undefined), new Range(undefined) ],
          });
       });
 
@@ -49,7 +49,7 @@ describe('SToken', () => {
          expect(sToken).toEqualProps({
             str: 'one',
             originalStr: 'one',
-            ranges: [],
+            ranges: [ new Range(undefined) ],
          });
       });
 
@@ -74,7 +74,7 @@ describe('SToken', () => {
    describe('.firstRange', () => {
 
       it('is undefined if there is no first range', () => {
-         const sToken = new SToken(' \n', ' \r\n');
+         const sToken = new SToken(' \n', ' \r\n', []);
 
          expect(sToken.firstRange).toBeUndefined();
       });
@@ -93,7 +93,7 @@ describe('SToken', () => {
    describe('.lastRange', () => {
 
       it('is undefined if there is no last range', () => {
-         const sToken = new SToken(' \n', ' \r\n');
+         const sToken = new SToken(' \n', ' \r\n', []);
 
          expect(sToken.lastRange).toBeUndefined();
       });
@@ -118,8 +118,8 @@ describe('SToken', () => {
       });
 
       it('merges a second Stoken with the first', () => {
-         const sToken1 = new SToken(' \n', ' \r\n');
-         const sToken2 = new SToken('two', 'two');
+         const sToken1 = new SToken(' \n', ' \r\n', []);
+         const sToken2 = new SToken('two', 'two', []);
 
          sToken1.merge(sToken2);
 
@@ -131,8 +131,8 @@ describe('SToken', () => {
       });
 
       it('returns the target SToken', () => {
-         const sToken1 = new SToken(' \n', ' \r\n');
-         const sToken2 = new SToken('two', 'two');
+         const sToken1 = new SToken(' \n', ' \r\n', []);
+         const sToken2 = new SToken('two', 'two', []);
 
          const result = sToken1.merge(sToken2);
 
@@ -140,7 +140,7 @@ describe('SToken', () => {
       });
 
       it('combines range if first has no range', () => {
-         const sToken1 = new SToken(' \n', ' \r\n');
+         const sToken1 = new SToken(' \n', ' \r\n', []);
          const sToken2 = new SToken('two', 'two', new Range(undefined, 1, 2, 3));
 
          sToken1.merge(sToken2);
@@ -154,7 +154,7 @@ describe('SToken', () => {
 
       it('combines range if second has no range', () => {
          const sToken1 = new SToken(' \n', ' \r\n', new Range(undefined, 1, 2, 3));
-         const sToken2 = new SToken('two', 'two');
+         const sToken2 = new SToken('two', 'two', []);
 
          sToken1.merge(sToken2);
 

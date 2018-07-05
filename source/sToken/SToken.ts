@@ -1,4 +1,6 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+
+import { Range, EntityLocation } from '../basic';
 
 /**********************************************************************\
  A SToken (String token) represents a unit of text. The originalText
@@ -27,11 +29,15 @@
 \**********************************************************************/
 
 class SToken {
-   // public text: string;
-   // public originalText: string;
-   // public ranges: Array<Range>;
+   public str: string;
+   public originalStr: string;
+   public ranges: Array<Range>;
 
-   constructor(str, originalStr, range) {
+   static fromString(str: string) {
+      return new SToken(str, str, new Range(undefined)); // typeHack (we should get rid of this)
+   };
+
+   constructor(str: string, originalStr: string, range: Range | Array<Range>) {
       this.str = str;
       this.originalStr = originalStr;
       if (range) {
@@ -69,7 +75,7 @@ class SToken {
     * range in this and the first in the other are the same),
     * the two ranges will be combined.
     */
-   merge(other) {
+   merge(other: any) {
       if (!(other instanceof SToken)) {
          throw new Error('Can only merge with another SToken.');
       }
@@ -77,12 +83,16 @@ class SToken {
       this.str += other.str;
       this.originalStr += other.originalStr;
 
-      if (canFuseRanges(this.lastRange, other.firstRange)) {
-         const lastRange = this.ranges.pop();
+      if (this.lastRange && other.firstRange) {
+         if (canFuseRanges(this.lastRange, other.firstRange)) {
+            const lastRange = this.lastRange;
 
-         other.firstRange.startIndex = lastRange.startIndex;
-         other.firstRange.startRow = lastRange.startRow;
-         other.firstRange.startColumn = lastRange.startColumn;
+            this.ranges.pop();
+
+            other.firstRange.startIndex = lastRange.startIndex;
+            other.firstRange.startRow = lastRange.startRow;
+            other.firstRange.startColumn = lastRange.startColumn;
+         }
       }
 
       this.ranges = this.ranges.concat(other.ranges);
@@ -91,13 +101,17 @@ class SToken {
    }
 }
 
-function canFuseRanges(range1, range2) {
+function canFuseRanges(range1: Range, range2: Range) {
    if (!range1 || !range2) {
       return false;
    }
 
    const locationsSame = range1.location === range2.location;
-   const locationsEqual = range1.location.equals(range2.location);
+   let locationsEqual = false;
+
+   if (range1.location) {
+      locationsEqual = range1.location.equals(range2.location);
+   }
 
    if (locationsSame || locationsEqual) {
       return range1.getEndOffset().equals(range2.getStartOffset());
@@ -105,9 +119,5 @@ function canFuseRanges(range1, range2) {
 
    return false;
 }
-
-SToken.fromString = function fromString(str) {
-   return new SToken(str, str);
-};
 
 export default SToken;

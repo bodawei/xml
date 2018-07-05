@@ -1,4 +1,6 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+
+import { Range } from '../basic';
 
 /**********************************************************************\
  Segment is a simple data structure that tracks information about a
@@ -8,8 +10,11 @@
 \**********************************************************************/
 
 class Segment {
+   public text: string;
+   public index: number;
+   public range?: Range;
 
-   constructor(text, range) {
+   constructor(text: string, range?: Range) {
       this.text = text;
       this.index = 0;
       this.range = range;

@@ -3,9 +3,9 @@
 
 import { EntityLocation, Range} from '../../basic';
 
-import Extractor from '../Extractor.js';
-import MultiMatchExtractor from '../MultiMatchExtractor.js';
-import Segment from '../Segment.js';
+import Extractor from '../Extractor';
+import MultiMatchExtractor from '../MultiMatchExtractor';
+import Segment from '../Segment';
 
 describe('MultiMatchExtractor', () => {
    let extractor;

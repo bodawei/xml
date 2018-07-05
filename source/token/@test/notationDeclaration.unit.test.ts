@@ -9,15 +9,18 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
 import declaration from '../bridge/declaration';
-import * as notationDeclaration from '../notationDeclaration.js';
-import externalId from '../common/externalId.js';
-import misc from '../common/misc.js';
-import entityReference from '../entityReference.js';
+import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
+import externalId from '../common/externalId';
+import misc from '../common/misc';
 import unassigned from '../unassigned';
 
+type ExternalIDCallback = (x: any) => void;
+type ExternalId = {
+};
+
 describe('notationdeDlaration (unit)', () => {
-   let notationPToken;
-   let makeSToken;
+   let notationPToken: NotationDeclarationPToken;
+   let makeSToken: (param: string) => SToken;
 
    beforeEach(() => {
       makeSToken = makeSTokenMaker();
@@ -40,7 +43,9 @@ describe('notationdeDlaration (unit)', () => {
 
          it('returns all the STokens', () => {
             notationPToken.postOpenSpace = notationPToken.postNameSpace;
-            expect(notationPToken.getSTokenArray()).toEqual([
+            const result = notationPToken.getSTokenArray();
+
+            expect(result).toEqual([
                notationPToken.open,
                notationPToken.postOpenSpace,
                notationPToken.declType,
@@ -49,7 +54,7 @@ describe('notationdeDlaration (unit)', () => {
                notationPToken.postNameSpace,
                notationPToken.postExternalIdSpace,
                notationPToken.close,
-            ]);
+            ] as Array<SToken>); // typeHack
          });
 
       });
@@ -65,20 +70,23 @@ describe('notationdeDlaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
-      let nonPeRefCallback;
+      let callback: jasmine.Spy;
+      let externalIDParseSpy: jasmine.Spy;
+      let unassignedMakeCheckSpy: jasmine.Spy;
+      let unassignedCheckForSpy: jasmine.Spy;
+      let nonPeRefCallback: (x?: any) => void;
 
       beforeEach(() => {
-         nonPeRefCallback = undefined;
+         nonPeRefCallback = () => {};
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parse');
-         externalId.parse.and.callFake((source, terminators, cb) => {
+         externalIDParseSpy = spyOn(externalId, 'parse');
+         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: (arg: any) => void) => {
             cb({ externalId: true });
          });
-         spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, name, cb1, cb2) => {
+         unassignedMakeCheckSpy = spyOn(unassigned, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, cb2: (arg: any) => void) => {
             nonPeRefCallback = cb2;
          });
-         spyOn(unassigned, 'checkForPERef').and.callFake(() => {
+         unassignedCheckForSpy = spyOn(unassigned, 'checkForPERef').and.callFake(() => {
             nonPeRefCallback();
          });
       });
@@ -94,9 +102,9 @@ describe('notationdeDlaration (unit)', () => {
          notationDeclaration.parse(mockSource, notationPToken, callback);
          mockSource.respondInAsyncTime();
 
-         expect(externalId.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(externalId.parse.calls.argsFor(0)[1]).toEqual([ '>' ]);
-         expect(externalId.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(externalIDParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(externalIDParseSpy.calls.argsFor(0)[1]).toEqual([ '>' ]);
+         expect(externalIDParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
       });
 
       it('does a simple parse', () => {
@@ -130,7 +138,7 @@ describe('notationdeDlaration (unit)', () => {
             ' ',
             '>',
          ]);
-         externalId.parse.and.callFake((source, terminators, cb) => {
+         externalIDParseSpy.and.callFake((_1: any, _2: any, cb: ExternalIDCallback) => {
             cb({ unassigned: [ 7734 ] });
          });
 
@@ -144,27 +152,28 @@ describe('notationdeDlaration (unit)', () => {
    
       it('sets up to let unassigned handle checking for a PE Reference', () => {
          const checkCallbackSpy = jasmine.createSpy();
-         unassigned.makeCheckCallback.and.returnValue(checkCallbackSpy);
-         unassigned.checkForPERef.and.callFake(() => {});
+         unassignedMakeCheckSpy.and.returnValue(checkCallbackSpy);
+         unassignedCheckForSpy.and.callFake(() => {});
          const mockSource = new MockSTokenSource([]);
 
          notationDeclaration.parse(mockSource, {}, callback);
          mockSource.respondInAsyncTime();
 
-         expect(unassigned.makeCheckCallback.calls.argsFor(0)[0].type).toEqual(notationDeclaration.PTYPE);
-         expect(unassigned.makeCheckCallback.calls.argsFor(0)[1]).toEqual('name');
-         expect(unassigned.makeCheckCallback.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         expect(unassigned.makeCheckCallback.calls.argsFor(0)[3]).toBeInstanceOf(Function);
+         expect(unassignedMakeCheckSpy.calls.argsFor(0)[0].type).toEqual(notationDeclaration.PTYPE);
+         expect(unassignedMakeCheckSpy.calls.argsFor(0)[1]).toEqual('name');
+         expect(unassignedMakeCheckSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(unassignedMakeCheckSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          expect(unassigned.checkForPERef).toHaveBeenCalledWith(mockSource, checkCallbackSpy);
       });
 
    });
 
    describe('assignUnassigned()', () => {
+      let externalIDAssignSpy: jasmine.Spy;
 
       beforeEach(() => {
          spyOn(unassigned, 'assignToProps');
-         spyOn(externalId, 'assignUnassigned');
+         externalIDAssignSpy = spyOn(externalId, 'assignUnassigned');
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -216,8 +225,8 @@ describe('notationdeDlaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         let testName;
-         externalId.assignUnassigned.and.callFake((external, container, propName) => {
+         let testName: string = '';
+         externalIDAssignSpy.and.callFake((external: ExternalId, container: NotationDeclarationPToken, propName: string) => {
             expect(external).toEqual({
                unassigned: [ 'foo' ],
             });
@@ -238,8 +247,8 @@ describe('notationdeDlaration (unit)', () => {
                nextPropName: 'idType',
             },
          });
-         let testName;
-         externalId.assignUnassigned.and.callFake((external, container, propName) => {
+         let testName = '';
+         externalIDAssignSpy.and.callFake((external: ExternalId, container: NotationDeclarationPToken, propName: string) => {
             expect(external).toEqual({
                unassigned: [ 'different' ],
                nextPropName: 'idType',
@@ -284,9 +293,12 @@ describe('notationdeDlaration (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
+
 
       beforeEach(() => {
+         emd = new EntityMetaData();
          mockErrorCollector = new MockErrorCollector();
          spyOn(declaration, 'checkWellFormed');
          spyOn(externalId, 'checkWellFormed');
@@ -295,16 +307,12 @@ describe('notationdeDlaration (unit)', () => {
       });
 
       it('asks the declaration module to look for problems in the declaration part', () => {
-         const emd = new EntityMetaData();
-
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(declaration.checkWellFormed).toHaveBeenCalledWith(notationPToken, mockErrorCollector, emd);
       });
 
       it('asks the externalId module to look for well formed problems', () => {
-         const emd = new EntityMetaData();
-
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(externalId.checkWellFormed)
@@ -312,7 +320,7 @@ describe('notationdeDlaration (unit)', () => {
       });
 
       it('reports no errors if the notationPToken is undefined', () => {
-         notationDeclaration.checkWellFormed(undefined, mockErrorCollector, new EntityMetaData());
+         notationDeclaration.checkWellFormed(undefined, mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -321,7 +329,7 @@ describe('notationdeDlaration (unit)', () => {
          delete notationPToken.name;
          notationPToken.unassigned = [];
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -329,7 +337,7 @@ describe('notationdeDlaration (unit)', () => {
       it('reports an error if there is no name', () => {
          delete notationPToken.name;
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_NAME,
@@ -340,8 +348,6 @@ describe('notationdeDlaration (unit)', () => {
       });
 
       it('calls misc.checkName() to report on bad names', () => {
-         const emd = new EntityMetaData();
-
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(misc.checkName).toHaveBeenCalledWith(notationPToken.name,
@@ -349,8 +355,6 @@ describe('notationdeDlaration (unit)', () => {
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
-         const emd = new EntityMetaData();
-
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(notationPToken.name,
@@ -361,7 +365,7 @@ describe('notationdeDlaration (unit)', () => {
       it('reports an error if there is no space after the name', () => {
          delete notationPToken.postNameSpace;
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector);
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NAME_NO_SPACE,
@@ -374,7 +378,7 @@ describe('notationdeDlaration (unit)', () => {
       it('reports an error if there is no external ID', () => {
          notationPToken.externalId = undefined;
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector);
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_EXTERNALID,
@@ -386,11 +390,11 @@ describe('notationdeDlaration (unit)', () => {
       it('reports an error if there was no closing', () => {
          delete notationPToken.close;
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.NOTATIONDECL_NO_CLOSE,
-            params: [ notationPToken.name.str ],
+            params: [ notationPToken.name!.str ],
             position: undefined,
             lastPosition: notationPToken.postExternalIdSpace,
          });
@@ -403,7 +407,7 @@ describe('notationdeDlaration (unit)', () => {
             unassigned.wordFromSToken(startSToken),
          ];
 
-         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, new EntityMetaData());
+         notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(unassigned.checkExtra).toHaveBeenCalledWith(notationPToken.extra,
             mockErrorCollector,

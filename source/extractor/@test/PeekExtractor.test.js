@@ -1,9 +1,9 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import Extractor from '../Extractor.js';
-import PeekExtractor from '../PeekExtractor.js';
-import Segment from '../Segment.js';
+import Extractor from '../Extractor';
+import PeekExtractor from '../PeekExtractor';
+import Segment from '../Segment';
 
 describe('PeekExtractor', () => {
    let extractor;

@@ -1,9 +1,32 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData, Offset, Range } from '../basic';
+import { EntityLocation, EntityMetaData, Offset, Range } from '../basic';
 import { Extractor, Segment } from '../extractor';
+import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 
-import SToken from './SToken.js';
+import SToken from './SToken';
+
+type ExtractorParams = Array<any>|any;
+type DeliverSToken = (stoken?: SToken) => void;
+
+type ExtractorConstructor = typeof Extractor;
+
+type ExtractorDefinition = ExtractorConstructor | {
+   extractorConstructor: ExtractorConstructor;
+   params: ExtractorParams | {
+      extractorConstructor: ExtractorConstructor,
+   };
+};
+
+type ExtractorMap = {
+   [extractorName: string]: ExtractorDefinition;
+};
+
+type ExtractorContext = {
+   extractor: Extractor;
+   startIndex?: number;
+   callback: DeliverSToken;
+};
 
 /**********************************************************************\
  A STokenSource combines three things, and returns SToken using them.
@@ -68,8 +91,17 @@ import SToken from './SToken.js';
 \**********************************************************************/
 
 class STokenSource {
+   private _info: EntityMetaData;
+   private _extractorInfo: ExtractorMap;
+   public _segments: Array<Segment>; // typeHack for testing
+   private _version: number;
+   public _extractors: Array<ExtractorContext>; // typeHack for testing
+   private _lastOffset?: Offset;
+   private _allTextAdded: boolean = false;
+   private _orphanedRange?: Range;
+   private _resuming?: boolean;
 
-   constructor(extractorInfo, info) {
+   constructor(extractorInfo: ExtractorMap, info: EntityMetaData) {
       if (typeof extractorInfo !== 'object') {
          throw new Error('Must pass a hash of extractor types to constructor functions to STokenSource().');
       }
@@ -91,7 +123,7 @@ class STokenSource {
       return this._info;
    }
 
-   addText(text, range) {
+   addText(text: string, range?: Range) {
       if (this._allTextAdded) {
          throw new Error('Can not add text after endText() has been called.');
       }
@@ -125,25 +157,33 @@ class STokenSource {
       this._resumeOperation();
    }
 
-   extractToObject(type, params, obj, name) {
+   extractToObjectNoParams(type: string, obj: Object, name: string): void {
+      this.extractToObject(type, undefined, obj, name);
+   }
+
+   extractToObject(type: string, params: any, obj: Object, name: string): void {
       if (typeof name === 'undefined') {
-         name = obj;
+         name = obj as string;
          obj = params;
          params = undefined;
       }
 
       this.extract(type, params, (sToken) => {
-         obj[name] = sToken;
+         (obj as any)[name] = sToken; // typeHack
       });
    }
 
-   extract(type, params, deliverSToken) {
+   extractNoParams(type: string, deliverSToken: DeliverSToken): void {
+      this.extract(type, undefined, deliverSToken);
+   }
+
+   extract(type: string, params: any, deliverSToken: DeliverSToken): void {
       if (typeof params === 'function') {
          deliverSToken = params;
          params = undefined;
       }
       const extractorDefinition = this._extractorInfo[type];
-      let extractorConstructor;
+      let extractorConstructor: ExtractorConstructor;
 
       if (typeof deliverSToken !== 'function') {
          throw new Error('Must pass a callback function of the form function(SToken|undefined):void to extract().');
@@ -165,7 +205,8 @@ class STokenSource {
          extractorConstructor = extractorDefinition;
       }
 
-      const instance = new extractorConstructor(this._version, params);
+      const typeHack = extractorConstructor as any;
+      const instance = new typeHack(this._version, params);
 
       this._extractors.push({
          extractor: instance,
@@ -212,7 +253,7 @@ class STokenSource {
 
          // Store where we left off, unless we got no ranges, or we didn't actually consume any segments
          if (results.segments.length > 0 &&
-            results.segments[0].segment.index !== extContext.startIndex) {
+            ((results.segments[0] as SegmentInfo).segment as Segment).index !== extContext.startIndex) { // typeHack
             this._lastOffset = ranges[ranges.length - 1].getEndOffset();
          }
 
@@ -235,21 +276,21 @@ class STokenSource {
       this._resuming = false;
    }
 
-   _restorePartiallyAndUnusedSegments(segInfos) {
+   _restorePartiallyAndUnusedSegments(segInfos: Array<SegmentInfo>) {
       const returnedSegments = [];
 
       for (let index = 0; index < segInfos.length; index++) {
          const info = segInfos[index];
 
-         if (info.segment.text) {
+         if ((info.segment as Segment).text) { // typeHack
             returnedSegments.push(info.segment);
          }
       }
 
-      this._segments = returnedSegments.concat(this._segments);
+      this._segments = (returnedSegments.concat(this._segments) as Array<Segment>); // typeHack
    }
 
-   _computeRanges(segInfos) {
+   _computeRanges(segInfos: Array<SegmentInfo>) {
       if (segInfos.length === 0) {
          return [];
       }
@@ -263,7 +304,7 @@ class STokenSource {
          const segment = info.segment;
 
          // If we seem to have changed which entity we are reading from, create a new range.
-         if (segment.range && !currentRange.location.equals(segment.range.location)) {
+         if (segment.range && !(currentRange.location as EntityLocation).equals(segment.range.location)) { // typeHack
             // store the range if it actually has changed
             ranges.push(currentRange);
 
@@ -283,7 +324,7 @@ class STokenSource {
       return ranges;
    }
 
-   _reportResults(extractorContext, str, originalStr, ranges) {
+   _reportResults(extractorContext: ExtractorContext, str: string, originalStr: string, ranges: Array<Range>) {
       if (extractorContext.extractor.state === Extractor.STATE.SUCCESS) {
          extractorContext.callback(new SToken(str, originalStr, ranges));
       } else {
@@ -293,3 +334,4 @@ class STokenSource {
 }
 
 export default STokenSource;
+export { ExtractorMap };

@@ -139,14 +139,14 @@ type DescriptorArray = Array<Descriptor>;
 \**********************************************************************/
 
 function parseNextValue(source: STokenSource, includeNameListChars: boolean, deliverValue: DeliverUnassigned) {
-   source.extract('space', (sToken: SToken) => {
+   source.extractNoParams('space', (sToken) => {
       if (sToken) {
          const pToken = spaceFromSToken(sToken);
          deliverValue(pToken);
          return;
       }
 
-      source.extract('peekChar', (sToken) => {
+      source.extractNoParams('peekChar', (sToken) => {
          if (!sToken) {
             deliverValue();
             return;
@@ -160,7 +160,7 @@ function parseNextValue(source: STokenSource, includeNameListChars: boolean, del
 function extractValue(source: STokenSource, peekedChar: string, includeNameListChars: Boolean, deliverValue: DeliverUnassigned) {
    if (includeNameListChars && IS_NAMELIST_CHARS.test(peekedChar)) {
       source.extract('match', peekedChar, (sToken) => {
-         const pToken = wordFromSToken(sToken);
+         const pToken = sToken ? wordFromSToken(sToken) : undefined;
          deliverValue(pToken);
       });
       return;
@@ -193,7 +193,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          const terminators = includeNameListChars ? TERMINATORS_FOR_NAMELIST : TERMINATORS;
 
          source.extract('word', terminators, (sToken) => {
-            const pToken = wordFromSToken(sToken);
+            const pToken = sToken ? wordFromSToken(sToken) : undefined;
             deliverValue(pToken);
          });
          break;
@@ -208,7 +208,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
 \**********************************************************************/
 
 function checkForPERef(source: STokenSource, deliverResult: DeliverUnassignedArray) {
-   source.extract('peekChar', (sToken) => {
+   source.extractNoParams('peekChar', (sToken) => {
       if (!sToken || sToken.str !== '%') {
          deliverResult();
          return;
@@ -329,7 +329,7 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
 
       if (nextValue.type === descriptor.type) {
          switch (nextValue.type) {
-            case 'word':
+            case UnassignedType.WORD:
                let canAssign = true;
                if (descriptor.allowed) {
                   const valueText = nextValue.token.text ? nextValue.token.text.str : '';
@@ -342,14 +342,14 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
                   cursor.ungetValue(nextValue);
                }
                break;
-            case 'space':
+            case UnassignedType.SPACE:
                if (genericPToken[descriptor.name]) {
                   genericPToken[descriptor.name].merge(nextValue.token.text);
                } else {
                   genericPToken[descriptor.name] = nextValue.token.text;
                }
                break;
-            case 'literal':
+            case UnassignedType.LITERAL:
                if (descriptor.flatten) {
                   genericPToken.openQuote = nextValue.token.openQuote;
                   genericPToken.value = nextValue.token.value;
@@ -358,9 +358,7 @@ function assignValues(propertyDescriptors: DescriptorArray, pToken: UnassignedPT
                   genericPToken[descriptor.name] = nextValue.token;
                }
                break;
-            default:
-               genericPToken[descriptor.name] = nextValue.token;
-               break;
+            // Other types won't get here. entity start and ends will have become spaces, and references will have been expanded
          }
       } else {
          cursor.ungetValue(nextValue);

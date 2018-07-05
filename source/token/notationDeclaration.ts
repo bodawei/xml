@@ -1,36 +1,62 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityLocation, EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
+import { SToken, STokenSource } from '../sToken/index';
 
 import declaration from './bridge/declaration';
 import externalId from './common/externalId.js';
 import misc from './common/misc.js';
 import base from './base';
-import unassigned from './unassigned';
+import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './unassigned';
 
 const NOTATIONDECL = 'NOTATIONDECL';
 const NOTATIONDECL_XTOKEN = 'NOTATIONDECL_XTOKEN';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
 
+type ExternalId = {
+   type: string;
+   unassigned?: UnassignedArray,
+   extra?: UnassignedArray,
+   nextPropName?: string,
+};
+
+type DeclarationPToken = {
+
+};
+
+type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
+
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
  an element start tag.
 \**********************************************************************/
 
-class NotationDeclaration extends base.XToken {
+class NotationDeclaration {
+   public readonly type = NOTATIONDECL_XTOKEN;
+   public name: string;
+   public externalId: EntityLocation | void;
+   public pToken?: NotationDeclarationPToken;
+   public nextPropName?: string;
+   public unassigned?: UnassignedArray;
 
-   constructor(name, externalId, pToken) {
-      super(NOTATIONDECL_XTOKEN, pToken);
-
+   constructor(name: string, externalId: EntityLocation | void, pToken: NotationDeclarationPToken) {
       this.name = name;
       this.externalId = externalId;
+      this.pToken = pToken;
    }
 
 }
 
 class NotationDeclarationPToken extends declaration.PToken {
-   constructor(props) {
+   public name?: SToken;
+   public postNameSpace?: SToken;
+   public externalId?: ExternalId;
+   public postExternalIdSpace?: SToken;
+   public close?: SToken;
+
+   constructor(props: NotationDeclarationPToken | Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(NOTATIONDECL, props);
    }
@@ -64,19 +90,19 @@ class NotationDeclarationPToken extends declaration.PToken {
       '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
 \**********************************************************************/
 
-function parse(source, declarationPToken, deliverPToken) {
-   const pToken = new NotationDeclarationPToken(declarationPToken);
+function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: DeliverPToken): void {
+   const pToken = new NotationDeclarationPToken(declarationPToken as NotationDeclarationPToken); // typeHack
 
    const callback = unassigned.makeCheckCallback(pToken, 'name', (thePToken) => {
       getClose(source, thePToken, undefined, deliverPToken);
    }, () => {
       source.extractToObject('word', [ '>' ], pToken, 'name');
-      source.extractToObject('space', pToken, 'postNameSpace');
+      source.extractToObjectNoParams('space', pToken, 'postNameSpace');
 
-      externalId.parse(source, [ '>' ], (externalId) => {
+      externalId.parse(source, [ '>' ], (externalId: ExternalId) => {
          pToken.externalId = externalId;
          if (externalId && !externalId.unassigned) {
-            source.extractToObject('space', pToken, 'postExternalIdSpace');
+            source.extractToObjectNoParams('space', pToken, 'postExternalIdSpace');
          }
 
          getClose(source, pToken, externalId, deliverPToken);
@@ -86,7 +112,7 @@ function parse(source, declarationPToken, deliverPToken) {
    unassigned.checkForPERef(source, callback);
 }
 
-function getClose(source, pToken, externalId, deliverPToken) {
+function getClose(source: STokenSource, pToken: NotationDeclarationPToken, externalId: ExternalId | void, deliverPToken: DeliverPToken): void {
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
       if (externalId) {
@@ -101,8 +127,8 @@ function getClose(source, pToken, externalId, deliverPToken) {
  Recover from finding a parameter param entity ref in the declaration
 \**********************************************************************/
 
-function assignUnassigned(notationPToken) {
-   const unValues = notationPToken.unassigned || [];
+function assignUnassigned(notationPToken: NotationDeclarationPToken): void {
+   const unValues: UnassignedArray = notationPToken.unassigned || [];
 
    if (unValues.length === 0) {
       delete notationPToken.unassigned;
@@ -110,7 +136,7 @@ function assignUnassigned(notationPToken) {
       return;
    }
 
-   const unexpandedRef = unValues.filter((item) => (item.type === 'reference'));
+   const unexpandedRef = unValues.filter((item: UnassignedValue) => (item.type === UnassignedType.REFERENCE));
 
    if (unexpandedRef.length !== 0) {
       return;
@@ -126,16 +152,18 @@ function assignUnassigned(notationPToken) {
 
    notationPToken.externalId = notationPToken.externalId || {
       unassigned: notationPToken.unassigned,
-   };
+   } as ExternalId; // typeHack
    externalId.assignUnassigned(notationPToken.externalId, notationPToken, 'postNameSpace');
 
    if (unValues.length !== 0) {
       notationPToken.extra = notationPToken.unassigned;
    }
 
-   delete notationPToken.externalId.nextPropName;
-   delete notationPToken.externalId.unassigned;
-   delete notationPToken.externalId.extra;
+   if (notationPToken.externalId) {
+      delete notationPToken.externalId.nextPropName;
+      delete notationPToken.externalId.unassigned;
+      delete notationPToken.externalId.extra;
+   }
    delete notationPToken.nextPropName;
    delete notationPToken.unassigned;
 }
@@ -144,12 +172,12 @@ function assignUnassigned(notationPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken || pToken.unassigned) {
       return;
    }
 
-   const nameText = misc.textOrBlank(pToken.name);
+   const nameText: string = misc.textOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
@@ -178,7 +206,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a pToken into a token.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclaration {
    return new NotationDeclaration(misc.textOrBlank(pToken.name),
       externalId.makeEntityLocation(pToken.externalId), pToken);
 }
@@ -192,4 +220,21 @@ export {
    assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
+
+   NotationDeclarationPToken,
+   NotationDeclaration,
+};
+
+export default {
+   PTYPE: NOTATIONDECL,
+   XTYPE: NOTATIONDECL_XTOKEN,
+   XToken: NotationDeclaration,
+   PToken: NotationDeclarationPToken,
+   parse,
+   assignUnassigned,
+   checkWellFormed,
+   pTokenToXToken,
+
+   NotationDeclarationPToken,
+   NotationDeclaration,
 };

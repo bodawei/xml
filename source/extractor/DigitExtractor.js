@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor.js';
+import Extractor from './Extractor';
 
 const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 
