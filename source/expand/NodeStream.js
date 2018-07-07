@@ -77,6 +77,11 @@ class NodeStream extends Transform {
             pTokenStream.pipe(tokenizer).pipe(this._child.stream);
 
             return;
+         } else {
+            const startToken = xToken.pToken && xToken.pToken.open;
+            const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
+               [ xToken.name ], startToken, startToken);
+            this.push(error);
          }
       } else if (xToken instanceof elementDeclaration.XToken) {
          this._processElementDeclaration(xToken, callback);

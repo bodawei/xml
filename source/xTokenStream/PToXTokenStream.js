@@ -37,9 +37,6 @@ class PToXTokenStream extends stream.Transform {
 
    _transform(pToken, _, done) {
       switch (pToken.type) {
-         case EntityMetaData.PTYPE:
-            this.push(pToken);
-            break;
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
             break;
@@ -100,8 +97,12 @@ class PToXTokenStream extends stream.Transform {
             this.push(xmlDeclaration.pTokenToXToken(pToken));
             break;
          default:
+            if (pToken.type === EntityMetaData.TYPE) {
+               this.push(pToken);
+               break;
+            }
             this.push(new Error(`Unknown PToken type "${pToken.type}" encountered.`));
-      }
+         }
 
       done();
    }

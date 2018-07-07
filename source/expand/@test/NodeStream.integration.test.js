@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from '../../sToken';
@@ -17,7 +17,7 @@ describe('NodeStream (integration)', () => {
       let expectedIndex = 0;
 
       for (let actualIndex = 0; actualIndex < actual.length; actualIndex++) {
-         if (actual[actualIndex].type === 'ENTITY_META_DATA' ||
+         if (actual[actualIndex].type === EntityMetaData.TYPE ||
             actual[actualIndex] instanceof tokenNs.space.XToken) {
             continue;
          }

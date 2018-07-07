@@ -28,19 +28,18 @@ enum EntityKind {
 }
 
 class EntityMetaData {
-   public static PTYPE: string = 'ENTITY_META_DATA';
+   public static readonly TYPE = 'ENTITY_META_DATA';
    public location: EntityLocation;
-   public type: string;
-   private _kind: string;
+   public readonly type = EntityMetaData.TYPE;
+   private _kind: EntityKind;
    private _version: XmlVersion = 1.0;
    private _revision: XmlRevision = 5;
 
-   constructor(entityKind?: EntityKind, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location?: EntityLocation) {
-      this.type = EntityMetaData.PTYPE;
-      this._kind = entityKind || EntityKind.DOCUMENT;
+   constructor(entityKind: EntityKind = EntityKind.DOCUMENT, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location: EntityLocation = new EntityLocation()) {
+      this._kind = entityKind;
       this.version = xmlVersion;
       this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : DEFAULT_1DOT1_REVISION));
-      this.location = location || new EntityLocation();
+      this.location = location;
    }
 
    /**********************************************************************\

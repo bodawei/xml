@@ -68,7 +68,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case instruction.PTYPE:
             instruction.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
-         case EntityMetaData.PTYPE:
+         case EntityMetaData.TYPE:
             this._metaData = pToken;
             break;
 

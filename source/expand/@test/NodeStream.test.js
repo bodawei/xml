@@ -63,14 +63,6 @@ describe('NodeStream (unit)', () => {
          expect(nodeStream.read()).toEqual(token);
       });
 
-      it('passes an unknown reference through', () => {
-         const token = new xToken.entityReference.XToken('testReference', []);
-
-         nodeStream.write(token);
-
-         expect(nodeStream.read()).toEqual(token);
-      });
-
       describe('sub-stream processing', () => {
 
          it('adds a start entity token to the stream', () => {
@@ -1016,6 +1008,28 @@ describe('NodeStream (unit)', () => {
             });
          });
 
+      });
+
+      describe('references', () => {
+
+         it('passes an unknown reference through', () => {
+            const token = new xToken.entityReference.XToken('testReference', []);
+   
+            nodeStream.write(token);
+            nodeStream.read(); // skip the error
+   
+            expect(nodeStream.read()).toEqual(token);
+         });
+
+         it('reports an error if an unknown reference is found', () => {
+            const token = new xToken.entityReference.XToken('testReference', {});
+   
+            nodeStream.write(token);
+   
+            expect(nodeStream.read()).toEqual(new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
+               [ token.name ]));
+         });
+   
       });
 
    });

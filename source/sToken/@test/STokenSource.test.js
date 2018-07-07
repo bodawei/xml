@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { EntityKind, EntityLocation, EntityMetaData, Range } from '../../basic';
 import { Extractor } from '../../extractor';
 
 import SToken from '../SToken.js';
@@ -116,8 +116,8 @@ describe('STokenSource (unit)', () => {
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();
-      entityMetaData1dot0 = new EntityMetaData(EntityMetaData.PTYPE.DOCUMENT, 1.0, 5, defaultLoc);
-      entityMetaData1dot1 = new EntityMetaData(EntityMetaData.PTYPE.DOCUMENT, 1.1, 2, defaultLoc);
+      entityMetaData1dot0 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5, defaultLoc);
+      entityMetaData1dot1 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2, defaultLoc);
       testExtractors = {
          foo: () => {},
          all: AllExtractor,
