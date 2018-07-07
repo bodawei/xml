@@ -4,7 +4,8 @@ import EntityLocation from './EntityLocation.js';
 
 const LAST_1DOT0_REVISION = 6;
 const DEFAULT_1DOT0_REVISION = 5;
-const LAST_1DOT1_REVISION = 2;
+const LAST_1DOT1_REVISION = 3;
+const DEFAULT_1DOT1_REVISION = 2;
 
 /**********************************************************************\
  EntityMetaData holds values about an entity that will influence how we
@@ -38,7 +39,7 @@ class EntityMetaData {
       this.type = EntityMetaData.PTYPE;
       this._kind = entityKind || EntityKind.DOCUMENT;
       this.version = xmlVersion;
-      this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : LAST_1DOT1_REVISION));
+      this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : DEFAULT_1DOT1_REVISION));
       this.location = location || new EntityLocation();
    }
 
@@ -84,9 +85,7 @@ class EntityMetaData {
          this._setRevision(DEFAULT_1DOT0_REVISION);
       } else if (newValue === 1.1) {
          this._version = 1.1;
-         this._setRevision(LAST_1DOT1_REVISION);
-      } else {
-         throw new Error('Unknown version passed to EntityMetaData.version.  Got "' + newValue + '".');
+         this._setRevision(DEFAULT_1DOT1_REVISION);
       }
    }
 

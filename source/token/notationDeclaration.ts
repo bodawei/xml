@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from '../basic';
+import { EntityLocation, EntityMetaData } from '../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { SToken, STokenSource } from '../sToken/index';
 

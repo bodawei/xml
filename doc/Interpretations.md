@@ -74,7 +74,7 @@ So, anything other than `CharData | element | CDSect | PI | Comment` are certain
 
 However, not all of those are allowed in the four different content types specified in an ELEMENT declaration (ANY, EMPTY, Mixed, children). The spec is surprisingly imprecise about about these.  The text below captures the assumptions this project is making about these.
 
-### EMPTY elements
+### EMPTY content
 In section 3.0 of the spec which says that none of those values are allowed in an empty element (not even entity references that expand to nothing!).
 
 Section 3.1 does say that (for interoperability), if you have an element declared as EMPTY, then you should use an empty tag. But using a start tag immediately by an end tag is acceptable. This project reports a warning if a start and empty tag are used.
@@ -91,6 +91,17 @@ It is worth noting that in 1.0/4 and beyond, there is an added mention of allowi
 
 Of course, if an element appears in the Mixed content that is not the same type as one any of the types listed in the ELEMENT declaration, it is also treated as an error
 
+### ANY content
+The definition of what is allowed if an element has "ANY" content varies considerably across versions. Going just by the words, we know we can oly pick from `element | CharData | Reference | CDSect | PI | Comment`.
+* Version 1.0/1&2 only speak of child elements
+* 1.0/3 and 1.1/1 allow (after entity replacement) character data and declared child elements.
+* Other versions allow (after entity replacement) character data, CData sections, PI's and comments.
+
+From this parser's standpoint, this means:
+* CharData, Space, EntityReferences, EntityStart and EntityEnd (as well as XMLErrors) are acceptable in all versions.
+* CData, Comments and PI's are allowed in 1.0/4-5 and 1.1/2
+
+Obviously, References will be an error if they can't ultimately be expanded, but they won't be flagged as a violation of the ANY content validity rules.
 
 ## Attribute-list declarations
 * When processing ATTLIST's, ordering is top-to-bottom when processing the DTD, with the inner subset being processed before the external subset.

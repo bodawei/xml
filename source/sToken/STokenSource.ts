@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData, Offset, Range } from '../basic';
+import { EntityLocation, EntityMetaData, Offset, Range } from '../basic/index';
 import { Extractor, Segment } from '../extractor';
 import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 

@@ -14,6 +14,7 @@ import {
    elementStart,
    elementEnd,
    entityEnd,
+   entityReference,
    entityStart,
    processingInstruction,
    space,
@@ -114,6 +115,59 @@ class CheckXTokenValidStream extends stream.Transform {
             const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
                [ context.token.name ], pToken);
 
+            this.push(error);
+         }
+      } else if (context && context.matcherType === 'ANY') {
+         // Addresses Section §3.0 Validity Constraint: Element Valid
+         //  1.0/1-2: 4. The declaration matches ANY, and the types of any child
+         //       elements have been declared.
+         //  1.0/3&1.1/1: 4. The declaration matches ANY, and the content (after
+         //       replacing any entity references with their replacement text) consists
+         //       of character data and child elements whose types have been declared.
+         //  Other: The declaration matches ANY, and the content (after replacing any
+         //       entity references with their replacement text) consists of character
+         //       data , CDATA sections, comments, PIs and child elements whose types
+         //       have been declared.
+         const allowed = (this.emd.isVersion1dot0 && this.emd.revision > 3) || (this.emd.isVersion1dot1 && this.emd.revision > 1);
+         const notAllowedParams = [ context.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
+         const pTokenStart = pToken && pToken.open;
+         let error;
+
+         if (allowed && (xToken.type === cdata.XTYPE || xToken.type === processingInstruction.XTYPE || xToken.type === comment.XTYPE)) {
+            return;
+         }
+
+         switch (xToken.type) {
+            case elementStart.XTYPE:
+            case elementStart.EMPTY_XTYPE:
+               if (!this.elementDeclarations[xToken.name]) {
+                  error = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT,
+                     [ context.token.name, xToken.name ], pTokenStart);
+               }
+               break;
+            case charData.XTYPE:
+            case elementEnd.XTYPE:
+            case entityReference.XTYPE:
+            case entityStart.XTYPE:
+            case entityEnd.XTYPE:
+            case space.XTYPE:
+               // These are all OK here
+               break;
+            case cdata.XTYPE:
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, pTokenStart);
+               break;
+            case processingInstruction.XTYPE:
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, pTokenStart);
+               break;
+            case comment.XTYPE:
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, pTokenStart);
+               break;
+            default:
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ context.token.name ], pTokenStart);
+               break;
+         }
+
+         if (error) {
             this.push(error);
          }
       } else if (context && context.matcherType === 'MIXED') {

@@ -24,6 +24,7 @@ import {
    xmlDeclaration,
 } from '../../token';
 
+
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 
 
@@ -282,6 +283,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      repeat: 'ONE'
                   }]
                }, {});
+
                const commentToken = new comment.XToken('stuff', {});
                const elStart = new elementStart.XToken('one', [], {});
 
@@ -1065,6 +1067,100 @@ describe('CheckXTokenValidStream (unit)', () => {
 
       });
 
+
+      describe('content', () => {
+         describe('ANY', () => {
+            const commentToken = new comment.XToken('testComment', {});
+            const piToken = new processingInstruction.XToken('test', 'pi', {});
+            const cDataToken = new cdata.XToken('testCData', {});
+            const elementStartToken = new elementStart.XToken('one', [], {});
+
+            [
+               [ commentToken, 1, 1, true],
+               [ commentToken, 1, 2, true],
+               [ commentToken, 1, 3, true],
+               [ commentToken, 1, 4, false ],
+               [ commentToken, 1, 5, false ],
+               [ commentToken, 1, 6, false ],
+               [ commentToken, 1.1, 1, true],
+               [ commentToken, 1.1, 2, false ],
+               [ commentToken, 1.1, 3, false ],
+               [ piToken, 1, 1, true],
+               [ piToken, 1, 2, true],
+               [ piToken, 1, 3, true],
+               [ piToken, 1, 4, false ],
+               [ piToken, 1, 5, false ],
+               [ piToken, 1, 6, false ],
+               [ piToken, 1.1, 1, true],
+               [ piToken, 1.1, 2, false ],
+               [ piToken, 1.1, 3, false ],
+               [ cDataToken, 1, 1, true],
+               [ cDataToken, 1, 2, true],
+               [ cDataToken, 1, 3, true],
+               [ cDataToken, 1, 4, false ],
+               [ cDataToken, 1, 5, false ],
+               [ cDataToken, 1, 6, false ],
+               [ cDataToken, 1.1, 1, true],
+               [ cDataToken, 1.1, 2, false ],
+               [ cDataToken, 1.1, 3, false ],
+               [ elementStartToken, 1, 1, false],
+               [ elementStartToken, 1, 2, false],
+               [ elementStartToken, 1, 3, false],
+               [ elementStartToken, 1, 4, false ],
+               [ elementStartToken, 1, 5, false ],
+               [ elementStartToken, 1, 6, false ],
+               [ elementStartToken, 1.1, 1, false ],
+               [ elementStartToken, 1.1, 2, false ],
+               [ elementStartToken, 1.1, 3, false ],
+            ].forEach(([token, version, rev, causesError]) => {
+               let errorToken;
+
+               if (causesError) {
+                  if (token === commentToken) {
+                     errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_COMMENT, [ 'one', version.toString(), rev.toString() ]);
+                  } else if (token === piToken) {
+                     errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_PI, [ 'one', version.toString(), rev.toString() ]);
+                  } else if (token === cDataToken) {
+                     errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_CDATA, [ 'one', version.toString(), rev.toString() ]);
+                  }
+               }
+                     
+               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an ANY element in XML ${version}/${rev}`, (done) => {
+                  const emd = new EntityMetaData('DOCUMENT', version, rev);
+                  const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+                  const startToken = new elementStart.XToken('one', [], {});
+      
+                  validator.write(emd);
+                  validator.write(elementDecl);
+                  validator.write(startToken);
+                  validator.write(token);
+                  validator.end();
+      
+                  if (causesError) {
+                     expectStream(validator, errorToken, done);
+                  } else {
+                     expectNoErrors(validator, done);
+                  }
+               });
+            });
+
+            it('reports an error if an element is used that was not declared', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+               const startToken = new elementStart.XToken('one', [], {});
+               const undeclaredToken = new elementStart.XToken('two', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(startToken);
+               validator.write(undeclaredToken);
+               validator.end();
+   
+               const errorToken = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT, [ 'one', 'two' ]);
+
+               expectStream(validator, errorToken, done);
+            });
+
+         });
+      });
    });
 
 });

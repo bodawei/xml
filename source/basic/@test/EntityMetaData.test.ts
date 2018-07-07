@@ -16,23 +16,23 @@ describe('EntityMetaData', () => {
 
       it('defaults to most conventional values when called with no params', () => {
          const pk = new EntityMetaData();
-         expect(pk).toEqual(new EntityMetaData('DOCUMENT', 1.0, 5));
+         expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
       });
 
       it('fills in the right revision for 1.1 if none specified', () => {
-         const pk = new EntityMetaData('DOCUMENT', 1.1);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1);
          expect(pk.revision).toEqual(2);
       });
 
       it('sets the location that is passed in', () => {
          const loc = new EntityLocation('http://here.com', '-//what//is//this');
-         const pk = new EntityMetaData('DOCUMENT', 1.0, 4, loc);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4, loc);
 
          expect(pk.location).toEqual(loc);
       });
 
       it('sets the type', () => {
-         const pk = new EntityMetaData('DOCUMENT', 1.0, 4);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
 
          expect(pk.type).toEqual('ENTITY_META_DATA');
       });
@@ -111,22 +111,14 @@ describe('EntityMetaData', () => {
          const pk = new EntityMetaData();
          pk.version = 1.1;
 
-         expect(pk).toEqual(new EntityMetaData('DOCUMENT', 1.1, 2));
+         expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
       });
 
       it('changes the revision to 5 when version 1.0 is set', () => {
-         const pk = new EntityMetaData('DOCUMENT', 1.1, 2);
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
          pk.version = 1.0;
 
-         expect(pk).toEqual(new EntityMetaData('DOCUMENT', 1.0, 5));
-      });
-
-      it('throws an exception when a bad version is passed in', () => {
-         const pk = new EntityMetaData();
-
-         expect(() => {
-            pk.version = 32;
-         }).toThrowError('Unknown version passed to EntityMetaData.version.  Got "32".');
+         expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
       });
 
    });
@@ -199,8 +191,8 @@ describe('EntityMetaData', () => {
 
       it('throws an exception when a bad revision is passed in', () => {
          expect(() => {
-            new EntityMetaData(EntityKind.DOCUMENT, 1.0, 7);
-         }).toThrowError('Version and revision do not match. Got "1" and "7".');
+            new EntityMetaData(EntityKind.DOCUMENT, 1.1, 4);
+         }).toThrowError('Version and revision do not match. Got "1.1" and "4".');
       });
 
    });
