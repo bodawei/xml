@@ -128,12 +128,7 @@ class NodeStream extends Transform {
     * find an entity reference, and then expand that, and pass
     * the leading items and the expanded value back to the caller.
     */
-   _expandThroughNextPERef(unassignedArray, deliverExpanded) {
-      if (!unassignedArray) {
-         deliverExpanded([]);
-         return;
-      }
-
+   _expandThroughNextPERef(unassignedArray /* always defined */, deliverExpanded) {
       const expanded = [];
 
       while (unassignedArray.length > 0) {
@@ -191,14 +186,17 @@ class NodeStream extends Transform {
     * Most callers will do further processing on the entity value.
     *
     * CRUCIALLY, right now this assumes the entity value is delivered
-    * synchronously, which is not true i nthe long term.
+    * synchronously, which is not true in the long term.
     */
    _expandPERefFully(peRef, deliverExpanded) {
       const itemName = peRef.name && peRef.name.str || '';
       const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
       if (!entityToken || !entityToken.value) {
-         deliverExpanded([ peRef ]);
+         deliverExpanded([ {
+            type: 'reference',
+            token: peRef,
+         } ]);
       } else {
          const expanded = [ {
             type: 'entityStart',

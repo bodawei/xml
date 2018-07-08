@@ -4,6 +4,7 @@
 import { EntityMetaData, util } from '../../basic';
 import { ValidityError, WellFormedError, XmlError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
+import nameList from '../../token/common/nameList';
 import {
    attListDeclaration,
    charData,
@@ -175,243 +176,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ]));
          expect(validator.read()).toEqual(nTwo);
       });
-
-      describe('element content', () => {
-
-         it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
-            const elStart = new elementStart.XToken('one', [], {});
-            const elTwo = new elementStart.XToken('one', [], {});
-
-            validator.write(elementDecl);
-            validator.write(elStart);
-            validator.write(elTwo);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
-            expectStream(validator, expected, done);
-         });
-
-         it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
-            const elStart = new elementStart.EmptyToken('one', [], {});
-
-            validator.write(elementDecl);
-            validator.write(elStart);
-            validator.end();
-
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(2);
-               done();
-            });
-         });
-
-         it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
-            const elStart = new elementStart.XToken('one', [], {});
-            const elEnd = new elementEnd.XToken('one', {});
-
-            validator.write(elementDecl);
-            validator.write(elStart);
-            validator.write(elEnd);
-            validator.end();
-
-            gatherTokens(validator, (tokens) => {
-               expect(tokens.length).toEqual(4);
-               done();
-            });
-         });
-
-         describe('mixed content', () => {
-
-            it('reports an error if any element start appears in a PCDATA-only element', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-               const elStart = new elementStart.XToken('one', [], {});
-               const child = new elementStart.XToken('sub', [], {});
-   
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(child);
-               validator.end();
-   
-               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
-               expectStream(validator, expected, done);
-            });
-
-
-            it('reports an error if one child element does not match any of the defined ones', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }, {
-                     name: 'one',
-                     repeat: 'ONE'
-                  }, {
-                     name: 'two',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-               const elStart = new elementStart.XToken('one', [], {});
-               const elEnd = new elementEnd.XToken('one', [], {});
-               const child = new elementStart.XToken('two', [], {});
-               const childEnd = new elementEnd.XToken('two', [], {});
-               const thirdStart = new elementStart.XToken('three', [], {});
-
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(elStart);
-               validator.write(elEnd);
-               validator.write(child);
-               validator.write(childEnd);
-               validator.write(thirdStart);
-               validator.end();
-   
-               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if there is a comment found in mixed content in an old version', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-
-               const commentToken = new comment.XToken('stuff', {});
-               const elStart = new elementStart.XToken('one', [], {});
-
-               validator.write(new EntityMetaData(undefined, 1.0, 1));
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(commentToken);
-               validator.end();
-   
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports an error if there is a processing instruction found in mixed content in an old version', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-               const pi = new processingInstruction.XToken('stuff', undefined, {});
-               const elStart = new elementStart.XToken('one', [], {});
-
-               validator.write(new EntityMetaData(undefined, 1.0, 1));
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(pi);
-               validator.end();
-   
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
-               expectStream(validator, expected, done);
-            });
-
-            it('reports no error if there is a comment found in mixed content in newer version', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-               const commentToken = new comment.XToken('stuff', {});
-               const elStart = new elementStart.XToken('one', [], {});
-
-               validator.write(new EntityMetaData(undefined, 1.0, 3));
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(commentToken);
-               validator.end();
-   
-               expectNoErrors(validator, done);
-            });
-
-            it('reports no error if there is a processing instruction found in mixed content in an newer version', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-               const pi = new processingInstruction.XToken('stuff', undefined, {});
-               const elStart = new elementStart.XToken('one', [], {});
-
-               validator.write(new EntityMetaData(undefined, 1.1, 1));
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(pi);
-               validator.end();
-   
-               expectNoErrors(validator, done);
-            });
-
-            it('reports no error if all the character data types are found in mixed content', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-
-               validator.write(elementDecl);
-               validator.write(new elementStart.XToken('one', [], {}));
-               validator.write(new charData.XToken('test charData', {}));
-               validator.write(new cdata.XToken('test CDATA', {}));
-               validator.write(new space.XToken(' ', {}));
-               validator.write(new elementEnd.XToken('one', [], {}));
-               validator.end();
-   
-               expectNoErrors(validator, done);
-            });
-
-            it('reports no error if entity start and end pseudo markers are found in the stream', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-
-               validator.write(elementDecl);
-               validator.write(new elementStart.XToken('one', [], {}));
-               validator.write(new entityStart.XToken('testEntityStart', {}));
-               validator.write(new entityEnd.XToken('testEntityEnd', {}));
-               validator.write(new elementEnd.XToken('one', [], {}));
-               validator.end();
-   
-               expectNoErrors(validator, done);
-            });
-
-            it('reports an error other markup is found in mixed content', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
-                  names: [{
-                     name: '#PCDATA',
-                     repeat: 'ONE'
-                  }]
-               }, {});
-
-               validator.write(elementDecl);
-               validator.write(new elementStart.XToken('one', [], {}));
-               validator.write(new entityReference.XToken('testEntiyReference', {}));
-               validator.end();
-   
-               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
-               expectStream(validator, expected, done);
-            });
-
-         });
-
-      });
    
    });
 
@@ -429,7 +193,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports no error if the attribute is in the ATTLIST', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
             const startToken = new elementStart.XToken('one', [{
                name: 'first',
                value: []
@@ -459,7 +223,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('allows for the start token to have no attributes', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
             const startToken = new elementStart.XToken('one', undefined, { open: new SToken('foo', 'foo')});
 
             validator.write(elementDecl);
@@ -512,7 +276,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
    
          it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
-            const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
             const emptyTag = new elementStart.EmptyToken('one', [], {});
 
             validator.write(elementDecl);
@@ -685,7 +449,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports a warning if the ELEMENT declaration indicates that this element does not need to be EMPTY', (done) => {
-            element = new elementDeclaration.XToken('one', 'CHILDREN', undefined, {});
+            element = new elementDeclaration.XToken('one', 'ANY', undefined, {});
             const startToken = new elementStart.EmptyToken('one', [], { open: new SToken('foo', 'foo') });
 
             validator.write(element);
@@ -1005,17 +769,19 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no warning if an element declaration has itself as a child', (done) => {
-               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+               const elementDecl1 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
+               const elementDecl2 = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
                      repeat: 'ONE'
                   }, {
-                     name: 'one',
+                     name: 'two',
                      repeat: 'ONE'
                   }]
                }, {});
    
-               validator.write(elementDecl);
+               validator.write(elementDecl1);
+               validator.write(elementDecl2);
                validator.end();
    
                expectNoErrors(validator, done);
@@ -1066,7 +832,6 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
       });
-
 
       describe('content', () => {
          describe('ANY', () => {
@@ -1157,6 +922,519 @@ describe('CheckXTokenValidStream (unit)', () => {
                const errorToken = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT, [ 'one', 'two' ]);
 
                expectStream(validator, errorToken, done);
+            });
+
+            it('reports an error if a completely unsupported bit of markup shows up', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+               const startToken = new elementStart.XToken('one', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(startToken);
+               validator.write(elementDecl);
+               validator.end();
+   
+               const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
+
+               expectStream(validator, errorToken, done);
+            });
+
+            it('reports errors even when no ptoken is present', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+               const startToken = new elementStart.XToken('one', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(startToken);
+               validator.write(elementDecl);
+               validator.end();
+   
+               const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
+
+               expectStream(validator, errorToken, done);
+            });
+
+            it('reports no errors when passing char data through it', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+               const characters = new charData.XToken('one', {});
+   
+               validator.write(elementDecl);
+               validator.write(characters);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+         });
+
+         describe('EMPTY', () => {
+
+            it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const elTwo = new elementStart.XToken('one', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(elTwo);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+   
+            it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+               const elStart = new elementStart.EmptyToken('one', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens.length).toEqual(2);
+                  done();
+               });
+            });
+   
+            it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const elEnd = new elementEnd.XToken('one', {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(elEnd);
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens.length).toEqual(4);
+                  done();
+               });
+            });
+   
+         });
+   
+         describe('MIXED', () => {
+
+            it('reports an error if any element start appears in a PCDATA-only element', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const child = new elementStart.XToken('sub', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(child);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
+               expectStream(validator, expected, done);
+            });
+
+
+            it('reports an error if one child element does not match any of the defined ones', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'one',
+                     repeat: 'ONE'
+                  }, {
+                     name: 'two',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const elStart = new elementStart.XToken('one', [], {});
+               const elEnd = new elementEnd.XToken('one', [], {});
+               const child = new elementStart.XToken('two', [], {});
+               const childEnd = new elementEnd.XToken('two', [], {});
+               const thirdStart = new elementStart.XToken('three', [], {});
+
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(elStart);
+               validator.write(elEnd);
+               validator.write(child);
+               validator.write(childEnd);
+               validator.write(thirdStart);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if there is a comment found in mixed content in an old version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               const commentToken = new comment.XToken('stuff', {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.0, 1));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(commentToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if there is a processing instruction found in mixed content in an old version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const pi = new processingInstruction.XToken('stuff', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.0, 1));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(pi);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if there is a comment found in mixed content in newer version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const commentToken = new comment.XToken('stuff', {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.0, 3));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(commentToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if there is a processing instruction found in mixed content in an newer version', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+               const pi = new processingInstruction.XToken('stuff', undefined, {});
+               const elStart = new elementStart.XToken('one', [], {});
+
+               validator.write(new EntityMetaData(undefined, 1.1, 1));
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(pi);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if all the character data types are found in mixed content', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new charData.XToken('test charData', {}));
+               validator.write(new cdata.XToken('test CDATA', {}));
+               validator.write(new space.XToken(' ', {}));
+               validator.write(new elementEnd.XToken('one', [], {}));
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if entity start and end pseudo markers are found in the stream', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new entityStart.XToken('testEntityStart', {}));
+               validator.write(new entityEnd.XToken('testEntityEnd', {}));
+               validator.write(new elementEnd.XToken('one', [], {}));
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error other markup is found in mixed content', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }]
+               }, {});
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', [], {}));
+               validator.write(new entityReference.XToken('testEntiyReference', {}));
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('CHILDREN', () => {
+            const commentToken = new comment.XToken('testComment', {});
+            const piToken = new processingInstruction.XToken('test', 'pi', {});
+            const cDataToken = new cdata.XToken('testCData', {});
+            const nonWhiteChars = new charData.XToken('one', [], {});
+            const whiteChars = new charData.XToken(' \t\n', [], {});
+
+            [
+               [ commentToken, 1, 1, true ],
+               [ commentToken, 1, 2, true ],
+               [ commentToken, 1, 3, false ],
+               [ commentToken, 1, 4, false ],
+               [ commentToken, 1, 5, false ],
+               [ commentToken, 1, 6, false ],
+               [ commentToken, 1.1, 1, false],
+               [ commentToken, 1.1, 2, false ],
+               [ commentToken, 1.1, 3, false ],
+               [ piToken, 1, 1, true ],
+               [ piToken, 1, 2, true ],
+               [ piToken, 1, 3, false ],
+               [ piToken, 1, 4, false ],
+               [ piToken, 1, 5, false ],
+               [ piToken, 1, 6, false ],
+               [ piToken, 1.1, 1, false ],
+               [ piToken, 1.1, 2, false ],
+               [ piToken, 1.1, 3, false ],
+               [ cDataToken, 1, 5, true ],
+               [ cDataToken, 1.1, 2, true ],
+               [ nonWhiteChars, 1, 5, true ],
+               [ nonWhiteChars, 1.1, 2, true ],
+               [ whiteChars, 1, 5, false ],
+               [ whiteChars, 1.1, 2, false ],
+               [ new space.XToken('  ', {}), 1.0, 1, false ],
+               [ new entityReference.XToken('x', {}), 1.0, 1, false ],
+               [ new entityStart.XToken('y'), 1.0, 1, false ],
+               [ new entityEnd.XToken('z'), 1.0, 1, false ],
+            ].forEach(([token, version, rev, causesError]) => {
+               let errorToken;
+
+               if (causesError) {
+                  if (token === commentToken) {
+                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, [ 'one', version.toString(), rev.toString() ]);
+                  } else if (token === piToken) {
+                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, [ 'one', version.toString(), rev.toString() ]);
+                  } else if (token === cDataToken) {
+                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [ 'one', version.toString(), rev.toString() ]);
+                  } else if (token === nonWhiteChars) {
+                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [ 'one', version.toString(), rev.toString() ]);
+                  }
+               }
+
+               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an element in XML ${version}/${rev}`, (done) => {
+                  const emd = new EntityMetaData('DOCUMENT', version, rev);
+                  const elementDecl2 = new elementDeclaration.XToken('two', 'ANY');
+                  const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
+                     names: [{
+                        name: 'two',
+                        repeatType: 'ONE',
+                     }],
+                     repeatType: 'ONE',
+                     listType: 'CHOICE',  
+                  });
+                  const startToken = new elementStart.XToken('one', [], {});
+      
+                  validator.write(emd);
+                  validator.write(elementDecl2);
+                  validator.write(elementDecl1);
+                  validator.write(startToken);
+                  validator.write(token);
+                  validator.end();
+      
+                  if (causesError) {
+                     expectStream(validator, errorToken, done);
+                  } else {
+                     expectNoErrors(validator, done);
+                  }
+               });
+            });
+
+            it('copes with an XToken with no namelist', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined);
+               const elStart = new elementStart.XToken('one', [], {});
+               const child = new elementStart.XToken('sub', [], {});
+   
+               validator.write(elementDecl);
+               validator.write(elStart);
+               validator.write(child);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'one', 'sub' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an end is encountered but the graph is not done', (done) => {
+               const nameListGraph = spyOn(nameList, 'graphFromNameList');
+               nameListGraph.and.returnValue({
+                  startId: 0,
+                  endId: 9,
+                  states: {
+                     0: {
+                        id: 0,
+                        trans: {
+                           two: {
+                              ref: 'x1',
+                              stateId: 1
+                           },
+                           three: {
+                              ref: 'x2',
+                              stateId: 1
+                           },
+                        },
+                        done: false,
+                     },
+                     1: {
+                        id: 1,
+                        trans: {
+                        },
+                        done: true,
+                     },
+                  }
+               });
+               const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [],
+                  repeatType: 'ONE',
+                  listType: 'CHOICE',
+               });
+               const elStart = new elementStart.XToken('one', [], {});
+               const elEnd = new elementEnd.XToken('one', {});
+   
+               validator.write(elementDecl1);
+               validator.write(elStart);
+               validator.write(elEnd);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ 'one', 'two, three' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if an end is encountered when done transitioning through the graph', (done) => {
+               const nameListGraph = spyOn(nameList, 'graphFromNameList');
+               nameListGraph.and.returnValue({
+                  startId: 0,
+                  endId: 9,
+                  states: {
+                     0: {
+                        id: 0,
+                        trans: {
+                           two: {
+                              ref: 'x1',
+                              stateId: 1
+                           },
+                           three: {
+                              ref: 'x2',
+                              stateId: 1
+                           },
+                        },
+                        done: false,
+                     },
+                     1: {
+                        id: 1,
+                        trans: {
+                        },
+                        done: true,
+                     },
+                  }
+               });
+               const elementDecl2 = new elementDeclaration.XToken('two', 'EMPTY');
+               const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [],
+                  repeatType: 'ONE',
+                  listType: 'CHOICE',
+               });
+               const elStart = new elementStart.XToken('one', [], {});
+               const elMiddle = new elementStart.EmptyToken('two', [], {});
+               const elEnd = new elementEnd.XToken('one', {});
+   
+               validator.write(elementDecl2);
+               validator.write(elementDecl1);
+               validator.write(elStart);
+               validator.write(elMiddle);
+               validator.write(elEnd);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if one tries to make an illegal transition in the graph', (done) => {
+               const nameListGraph = spyOn(nameList, 'graphFromNameList');
+               nameListGraph.and.returnValue({
+                  startId: 0,
+                  endId: 9,
+                  states: {
+                     0: {
+                        id: 0,
+                        trans: {
+                           two: {
+                              ref: 'x1',
+                              stateId: 1
+                           },
+                           three: {
+                              ref: 'x2',
+                              stateId: 1
+                           },
+                        },
+                        done: false,
+                     },
+                     1: {
+                        id: 1,
+                        trans: {
+                        },
+                        done: true,
+                     },
+                  }
+               });
+               const elementDecl2 = new elementDeclaration.XToken('four', 'EMPTY');
+               const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [],
+                  repeatType: 'ONE',
+                  listType: 'CHOICE',
+               });
+               const elStart = new elementStart.XToken('one', [], {});
+               const elMiddle = new elementStart.EmptyToken('four', [], {});
+               const elEnd = new elementEnd.XToken('one', {});
+   
+               validator.write(elementDecl2);
+               validator.write(elementDecl1);
+               validator.write(elStart);
+               validator.write(elMiddle);
+               validator.write(elEnd);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'one', 'four' ]);
+               expectStream(validator, expected, done);
             });
 
          });

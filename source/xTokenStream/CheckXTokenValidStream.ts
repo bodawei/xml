@@ -4,7 +4,7 @@ import stream from 'readable-stream';
 
 import { EntityMetaData, util } from '../basic';
 import { ValidityError, XmlError, XmlWarning } from '../error';
-
+import { SToken } from '../sToken';
 import {
    charData,
    cdata,
@@ -48,21 +48,44 @@ type AttrDefinitions = {
    },
 }
 
-type ElementDeclInfo = {
+type MixedChildrenMap = {
+   [xName: string]: true;
+};
+
+type AnyDeclInfo = {
+   type: 'ANY',
    token: ElementDeclaration,
-   matcherType: 'EMPTY' | 'MIXED' | 'CHILDREN' | 'ANY',
-   mixedMatcher: {
-      [key: string]: any
-   },
-   childrenMatcher?: {
-      currentStateId: number,
-      graph: Graph,
-   },
 }
 
-type SeenMapping = {
-   [xName: string]: boolean;
-};
+type EmptyDeclInfo = {
+   type: 'EMPTY',
+   token: ElementDeclaration,
+}
+
+type MixedDeclInfo = {
+   type: 'MIXED',
+   token: ElementDeclaration,
+   children: MixedChildrenMap,
+}
+
+type ChildrenDeclInfo = {
+   type: 'CHILDREN',
+   token: ElementDeclaration,
+   graph: Graph,
+}
+
+type ChildrenContext = {
+   type: 'ACTIVE-CHILDREN',
+   token: ElementDeclaration,
+   graph: Graph,
+   stateId: number;
+}
+
+type ElementDeclInfo = AnyDeclInfo | EmptyDeclInfo | MixedDeclInfo | ChildrenDeclInfo;
+type ContentContext = {
+   declInfo: ElementDeclInfo,
+   stateId: number;
+}
 
 type IDMap = {
    [idValue: string]: {
@@ -89,10 +112,11 @@ class CheckXTokenValidStream extends stream.Transform {
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
    private elementDeclarations: { [name: string]: ElementDeclInfo };
-   private contentStack: Array<ElementDeclInfo>;
-   private currentContext: ElementDeclInfo | void;
+   private contentStack: Array<ContentContext>;
+   private currentContext: ContentContext | void;
    private idValues: IDMap;
    private emd: EntityMetaData = new EntityMetaData();
+   private _seenRoot: boolean = false;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor() {
@@ -109,15 +133,20 @@ class CheckXTokenValidStream extends stream.Transform {
       this.idValues = {};
    }
 
-   private checkContextValidity(xToken: XToken, pToken: any, context: ElementDeclInfo | void) {
-      if (context && context.matcherType === 'EMPTY') {
+   private checkContextValidity(xToken: XToken, sToken: SToken|void, context: ContentContext | void) {
+      if (!context) {
+         return;
+      }
+      let declInfo = context.declInfo;
+
+      if (declInfo.type === 'EMPTY') {
          if (!(xToken instanceof elementEnd.XToken)) {
             const error = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-               [ context.token.name ], pToken);
+               [ declInfo.token.name ], sToken);
 
             this.push(error);
          }
-      } else if (context && context.matcherType === 'ANY') {
+      } else if (declInfo.type === 'ANY') {
          // Addresses Section §3.0 Validity Constraint: Element Valid
          //  1.0/1-2: 4. The declaration matches ANY, and the types of any child
          //       elements have been declared.
@@ -129,8 +158,7 @@ class CheckXTokenValidStream extends stream.Transform {
          //       data , CDATA sections, comments, PIs and child elements whose types
          //       have been declared.
          const allowed = (this.emd.isVersion1dot0 && this.emd.revision > 3) || (this.emd.isVersion1dot1 && this.emd.revision > 1);
-         const notAllowedParams = [ context.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
-         const pTokenStart = pToken && pToken.open;
+         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
          let error;
 
          if (allowed && (xToken.type === cdata.XTYPE || xToken.type === processingInstruction.XTYPE || xToken.type === comment.XTYPE)) {
@@ -142,11 +170,11 @@ class CheckXTokenValidStream extends stream.Transform {
             case elementStart.EMPTY_XTYPE:
                if (!this.elementDeclarations[xToken.name]) {
                   error = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT,
-                     [ context.token.name, xToken.name ], pTokenStart);
+                     [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
-            case charData.XTYPE:
             case elementEnd.XTYPE:
+            case charData.XTYPE:
             case entityReference.XTYPE:
             case entityStart.XTYPE:
             case entityEnd.XTYPE:
@@ -154,35 +182,35 @@ class CheckXTokenValidStream extends stream.Transform {
                // These are all OK here
                break;
             case cdata.XTYPE:
-               error = new ValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, pTokenStart);
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
                break;
             case processingInstruction.XTYPE:
-               error = new ValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, pTokenStart);
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
                break;
             case comment.XTYPE:
-               error = new ValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, pTokenStart);
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
                break;
             default:
-               error = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ context.token.name ], pTokenStart);
+               error = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ declInfo.token.name ], sToken);
                break;
          }
 
          if (error) {
             this.push(error);
          }
-      } else if (context && context.matcherType === 'MIXED') {
+      } else if (declInfo.type === 'MIXED') {
          switch (xToken.type) {
             case elementStart.XTYPE:
             case elementStart.EMPTY_XTYPE:
-               if (!context.mixedMatcher[xToken.name]) {
+               if (!declInfo.children[xToken.name]) {
                   const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-                     [ context.token.name, xToken.name ], pToken);
+                     [ declInfo.token.name, xToken.name ], sToken);
 
                   this.push(error);
                }
                break;
             case charData.XTYPE:
-            case cdata.XTYPE:
+            case cdata.XTYPE: // wanna revisit this given the decision in ANY?
             case elementEnd.XTYPE:
             case entityStart.XTYPE:
             case entityEnd.XTYPE:
@@ -195,32 +223,97 @@ class CheckXTokenValidStream extends stream.Transform {
 
                if (!expandedMixedAllowance) {
                   const error = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-                     [ context.token.name ], pToken);
+                     [ declInfo.token.name ], sToken);
 
                   this.push(error);
                }
                break;
             default:
                const error = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
-                  [ context.token.name ], pToken);
+                  [ declInfo.token.name ], sToken);
                this.push(error);
                break;
          }
-         // } else if (context && context.matcherType === 'CHILDREN') {
-      //    if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
-      //       const matcher = context.childrenMatcher;
-      //       const currentState = matcher.graph.states[matcher.currentStateId];
-      //       const destState = currentState.trans[xToken.name];
+      } else { // 'CHILDREN'
+         // Addresses Section §3.0 Validity Constraint: Element Valid
+         //  1.0/1: 2. The declaration matches children and the sequence of child elements
+         //       belongs to the language generated by the regular expression in the content
+         //       model, with optional white space (characters matching the nonterminal S)
+         //       between each pair of child elements.
+         //  1.0/2: 2. The declaration matches children and the sequence of child elements
+         //       belongs to the language generated by the regular expression in the content
+         //       model, with optional white space (characters matching the nonterminal S)
+         //       between the start-tag and the first child element, between child elements,
+         //       or between the last child element and the end-tag. Note that a CDATA
+         //       section containing only white space does not match the nonterminal S,
+         //       and hence cannot appear in these positions
+         //  Other. The declaration matches children and the sequence of child elements
+         //       belongs to the language generated by the regular expression in the
+         //       content model, with optional white space, comments and PIs (i.e. markup
+         //       matching production [27] Misc) between the start-tag and the first child
+         //       element, between child elements, or between the last child element and
+         //       the end-tag. Note that a CDATA section containing only white space or a
+         //       reference to an entity whose replacement text is character references
+         //       expanding to white space do not match the nonterminal S, and hence cannot
+         //       appear in these positions; however, a reference to an internal entity with
+         //       a literal value consisting of character references expanding to white
+         //       space does match S, since its replacement text is the white space
+         //       resulting from expansion of the character references.
+         const allowed = (this.emd.isVersion1dot0 && this.emd.revision >= 3) || this.emd.isVersion1dot1;
+         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
+         let error;
 
-      //       if (!destState) {
-      //          const error = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
-      //             [ context.token.name, xToken.name ], pToken);
+         if (allowed && (xToken.type === processingInstruction.XTYPE || xToken.type === comment.XTYPE)) {
+            return;
+         }
+         const currentState = declInfo.graph.states[context.stateId];
 
-      //          this.push(error);
-      //       } else {
-      //          matcher.currentStateId = destState.stateId;
-      //       }
-      //    }
+         switch (xToken.type) {
+            case elementStart.XTYPE:
+            case elementStart.EMPTY_XTYPE:
+               const destState = currentState.trans[xToken.name];
+   
+               if (!destState) {
+                  const error = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
+                     [ declInfo.token.name, xToken.name ], sToken);
+   
+                  this.push(error);
+               } else {
+                  context.stateId = destState.stateId;
+               }
+               break;
+            case elementEnd.XTYPE:
+               if (currentState.done !== true) {
+                  error = new ValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ declInfo.token.name,
+                     Object.keys(currentState.trans).join(', ') ], sToken);
+               }
+               break;
+            case entityReference.XTYPE:
+            case entityStart.XTYPE:
+            case entityEnd.XTYPE:
+            case space.XTYPE:
+               // These are all OK here
+               break;
+
+            case charData.XTYPE:
+               if (!util.isSpace(xToken.text)) {
+                  error = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+               }
+               break;
+            case processingInstruction.XTYPE:
+               error = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
+               break;
+            case comment.XTYPE:
+               error = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
+               break;
+            default:
+               error = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+               break;
+         }
+
+         if (error) {
+            this.push(error);
+         }
       }
    }
 
@@ -246,21 +339,39 @@ class CheckXTokenValidStream extends stream.Transform {
       } else if (xToken instanceof docTypeStart.XToken) {
          this.docType = xToken;
       } else if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
-         // if (!this._seenRoot) {
-         if (this.docType && xToken.name !== this.docType.name) {
-            this.push(
-               new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
-                  this.docType.pToken.open));
+         if (!this._seenRoot) {
+            if (this.docType && xToken.name !== this.docType.name) {
+               this.push(
+                  new ValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
+                     this.docType.pToken.open));
+            }
+            this._seenRoot = true;
          }
-         // }
 
-         this.currentContext = this.elementDeclarations[xToken.name];
-         this.contentStack.push(this.currentContext);
+         if (xToken instanceof elementStart.XToken) {
+            if (this.currentContext) {
+               this.contentStack.push(this.currentContext);
+            }
+
+            if (this.elementDeclarations[xToken.name]) {
+               this.currentContext = {
+                  declInfo: this.elementDeclarations[xToken.name],
+                  stateId: 0,
+               };
+            } else {
+               this.currentContext = {
+                  declInfo: {
+                     token: new ElementDeclaration(xToken.name, 'ANY', undefined),
+                     type: 'ANY',
+                  },
+                  stateId: 0,
+               };
+            }
+         }
 
          this.validateElementStart(xToken);
       } else if (xToken instanceof elementEnd.XToken) {
-         this.contentStack.pop();
-         this.currentContext = this.contentStack[this.contentStack.length - 1];
+         this.currentContext = this.contentStack.pop();
       } else if (xToken instanceof docTypeEnd.XToken) {
          this.validateDTD();
       }
@@ -274,29 +385,6 @@ class CheckXTokenValidStream extends stream.Transform {
       done();
    }
 
-   private setupContextCheck(context: ElementDeclInfo) {
-      // if (!context.token.children) {
-      //    return;
-      // }
-   
-      if (context.matcherType === 'MIXED' && context.token.children) {
-         const names: Array<XName> = context.token.children.names as Array<XName>;
-   
-         names.forEach((item: XName) => {
-            // if (isXName(item)) {
-               if (item.name && item.name.toLocaleUpperCase() !== '#PCDATA') {
-                  context.mixedMatcher[item.name] = true;
-               }
-            // }
-         });
-      }
-   
-      // context.childrenMatcher = {
-      //    currentStateId: 0,
-      //    graph: nameList.processContentExpression(context.token.children)
-      // }
-   }
-   
    private validateAttListDecl(attListDecl: AttListXToken) {
       const openSToken = attListDecl.pToken ? attListDecl.pToken.open : undefined;
       const elName = attListDecl.elementName || '';
@@ -370,7 +458,7 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    private validateElementDecl(elDecl: ElementDeclaration): void {
-      const openSToken = elDecl.pToken ? elDecl.pToken.open : undefined;
+      const openSToken = elDecl.pToken && elDecl.pToken.open;
       let isMixed = false;
 
       // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
@@ -383,19 +471,26 @@ class CheckXTokenValidStream extends stream.Transform {
          return;
       }
 
-      const matcherType = elDecl.contentSpecType === 'EMPTY' || elDecl.contentSpecType === 'ANY'
-         ? elDecl.contentSpecType : 'CHILDREN';
+      if (elDecl.contentSpecType === 'EMPTY') {
+         this.elementDeclarations[elDecl.name] = {
+            token: elDecl,
+            type: elDecl.contentSpecType,
+         };
+      } else if (elDecl.contentSpecType === 'ANY') {
+         this.elementDeclarations[elDecl.name] = {
+            token: elDecl,
+            type: elDecl.contentSpecType,
+         };
+      } else {
+         const children: XNameList = elDecl.children || {
+            names: [],
+            listType: 'CHOICE',
+            repeat: 'ONE',
+         };
 
-      this.elementDeclarations[elDecl.name] = {
-         token: elDecl,
-         matcherType,
-         mixedMatcher: {},
-      };
-
-      if (elDecl.children && elDecl.children.names.length > 0) {
          // §3.2: At user option, an XML processor may issue a warning when a declaration mentions an
          //    element type for which no declaration is provided, but this is not an error.
-         const childNamesMap = getNamesFromList(elDecl.children);
+         const childNamesMap = getNamesFromList(children);
          const childNames = Object.keys(childNamesMap);
          for (let index = 0; index < childNames.length; index++) {
             const childName = childNames[index];
@@ -413,26 +508,38 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       
          if (isMixed) {
-            this.elementDeclarations[elDecl.name].matcherType = 'MIXED';
+            const childrenNames: MixedChildrenMap = {};
+
+            this.elementDeclarations[elDecl.name] = {
+               token: elDecl,
+               type: 'MIXED',
+               children: childrenNames,
+            };
 
             // §3.2.2: Validity constraint: No Duplicate Types
             //    The same name must not appear more than once in a single mixed-content declaration.
-            const seen: SeenMapping = {};
-            const names: Array<XName> = elDecl.children.names as Array<XName>;
+            const names: Array<XName> = children.names as Array<XName>;
 
             names.forEach((child: XName) => {
-               if (seen[child.name]) {
+               if (childrenNames[child.name]) {
                   const err = new ValidityError(ValidityError.ID.ELEMENTDECL_MIXED_DUPLICATE_NAME,
                      [ elDecl.name, child.name ], openSToken);
                   this.push(err);
                }
-               seen[child.name] = true;
-            });
-         }
 
-         this.setupContextCheck(this.elementDeclarations[elDecl.name]);
+               if (child.name && child.name.toLocaleUpperCase() !== '#PCDATA') {
+                  childrenNames[child.name] = true;
+               }
+            });
+         } else {
+            this.elementDeclarations[elDecl.name] = {
+               token: elDecl,
+               type: 'CHILDREN',
+               graph: nameList.graphFromNameList(children)
+            };
+         }
       }
-   }
+   }   
 
    /*
     * Does all checks that can only be done once we have the whole DTD processed
@@ -514,7 +621,7 @@ class CheckXTokenValidStream extends stream.Transform {
       // Interoperability: §3.1: For interoperability, the empty-element tag should be
       //    used, and should only be used, for elements which are declared EMPTY.
       const tokenIsEmptyType = elStart instanceof elementStart.EmptyToken;
-      const declarationIsEmpty = elementDecl.matcherType === 'EMPTY';
+      const declarationIsEmpty = elementDecl.type === 'EMPTY';
       let warningId;
 
       if (tokenIsEmptyType && !declarationIsEmpty) {

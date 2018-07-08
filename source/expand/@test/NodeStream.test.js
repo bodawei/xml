@@ -359,9 +359,10 @@ describe('NodeStream (unit)', () => {
 
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
             const declToken = new xToken.entityDeclaration.pTokenToXToken({
-               unassigned: [
-                  peRef
-               ],
+               unassigned: [{
+                  type: 'reference',
+                  token: peRef
+               }],
                nextParamName: 'parameter',
             });
 
@@ -369,9 +370,10 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
-                     unassigned: [
-                        peRef
-                     ],
+                     unassigned: [{
+                        type: 'reference',
+                        token: peRef
+                     }],
                      nextParamName: 'parameter',
                   }));
 
@@ -393,9 +395,10 @@ describe('NodeStream (unit)', () => {
 
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
             const declToken = new xToken.entityDeclaration.pTokenToXToken({
-               unassigned: [
-                  peRef
-               ],
+               unassigned: [{
+                  type: 'reference',
+                  token: peRef
+               }],
                nextParamName: 'parameter',
             });
 
@@ -403,11 +406,41 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
-                     unassigned: [
-                        peRef
-                     ],
-                     nextParamName: 'parameter',
-                  }));
+                  unassigned: [{
+                     type: 'reference',
+                     token: peRef
+                  }],
+                  nextParamName: 'parameter',
+               }));
+
+               done();
+            });
+         });
+
+         it('does not expand a PERef in the unassigned values if it has no name', (done) => {
+            spyOn(entityManager, 'getParameterEntityToken').and.returnValue(undefined);
+            const peRef = new xToken.entityReference.ParamPToken({
+               open: SToken.fromString('%'),
+            });
+            spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
+            const declToken = new xToken.entityDeclaration.pTokenToXToken({
+               unassigned: [{
+                  type: 'reference',
+                  token: peRef
+               }],
+               nextParamName: 'parameter',
+            });
+
+            nodeStream.write(declToken);
+
+            gatherResult(nodeStream, (token) => {
+               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
+                  unassigned: [{
+                     type: 'reference',
+                     token: peRef
+                  }],
+                  nextParamName: 'parameter',
+               }));
 
                done();
             });

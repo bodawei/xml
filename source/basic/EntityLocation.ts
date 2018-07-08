@@ -41,7 +41,7 @@ class EntityLocation {
          resolved = getDirOf(this.base.getSystemProtocol()) + this.systemId;
       }
 
-      return resolved || this.systemId;
+      return resolved;
    }
 
    /**********************************************************************\

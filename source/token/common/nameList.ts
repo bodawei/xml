@@ -10,9 +10,7 @@ import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
 import { textOrBlank } from './/misc.js';
 import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';
-import nameListToGraph from './nameListToGraph';
-import collapseAutoTrans from './collapseAutoTrans';
-import pruneNameListGraph from './pruneNameListGraph';
+import nameListGraph from './nameListGraph';
 import misc from './misc.js';
 
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
@@ -573,13 +571,13 @@ function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameLi
  Public Interface
 \**********************************************************************/
 
-// function processContentExpression(children: XNameList): Graph {
-//    const graph = nameListToGraph(children);
-//    collapseAutoTrans(graph);
-//    pruneNameListGraph(graph);
+function graphFromNameList(children: XNameList): Graph {
+   const graph = nameListGraph.nameListToGraph(children);
+   nameListGraph.collapseAutoTrans(graph);
+   nameListGraph.pruneNameListGraph(graph);
 
-//    return graph;
-// }
+   return graph;
+}
 
 const nameList = {
    PTYPE: NAMELIST_PTOKEN_TYPE,
@@ -591,7 +589,7 @@ const nameList = {
    checkWellFormed,
    makeXTokenCompatible,
 
-   // processContentExpression,
+   graphFromNameList,
 
    isNamePToken,
    isXName,

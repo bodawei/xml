@@ -118,19 +118,6 @@ type DescriptorArray = Array<Descriptor>;
  declaration (e.g. should not be stopped by a ">" inside of a
  literal), but we can not do more detailed parsing until we know
  how they will be used.
-
- TYPES
- class LiteralPseudoPToken extends LiteralPTokenPart {
-    type: 'literal',
-    // The value property always contains a single SToken.
- }
- class AnnotatedTextPToken extends TextPToken {
-    // if 'space' text property contains only space chars
-    // if 'word' text property contains non-space chars
-    subType: 'space'|'word',
- }
- type UnassignedValue = ParamEntityPToken | LiteralPseudoPToken |
-   AnnotatedTextPToken;
 \**********************************************************************/
 
 /**********************************************************************\
@@ -160,7 +147,7 @@ function parseNextValue(source: STokenSource, includeNameListChars: boolean, del
 function extractValue(source: STokenSource, peekedChar: string, includeNameListChars: Boolean, deliverValue: DeliverUnassigned) {
    if (includeNameListChars && IS_NAMELIST_CHARS.test(peekedChar)) {
       source.extract('match', peekedChar, (sToken) => {
-         const pToken = sToken ? wordFromSToken(sToken) : undefined;
+         const pToken = wordFromSToken(sToken!); // typeFix: Because we peeked, this will always be not undefined
          deliverValue(pToken);
       });
       return;
@@ -193,7 +180,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          const terminators = includeNameListChars ? TERMINATORS_FOR_NAMELIST : TERMINATORS;
 
          source.extract('word', terminators, (sToken) => {
-            const pToken = sToken ? wordFromSToken(sToken) : undefined;
+            const pToken = wordFromSToken(sToken!); // typeFix: Because we peeked, this will always be not undefined
             deliverValue(pToken);
          });
          break;

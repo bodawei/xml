@@ -34,6 +34,12 @@ module.exports = function karmaConfig(config) {
          coverageOptions: {
             // Exclude both .js an .ts test files from the coverage reports
             exclude: /\.(d|spec|test)\.(ts|js)$/i,
+            watermarks: { // doesn't seem to do anything
+               statements: [ 99, 100 ],
+               functions: [ 99, 100 ],
+               branches: [ 99, 100 ],
+               lines: [ 99, 100 ]
+             }
          },
          reports: {
             json: {
@@ -52,6 +58,14 @@ module.exports = function karmaConfig(config) {
                filename: 'summary.text',
             },
          },
+      },
+      coverageReporter: {
+         watermarks: { // doesn't seem to do anything
+            statements: [ 99, 100 ],
+            functions: [ 99, 100 ],
+            branches: [ 99, 100 ],
+            lines: [ 99, 100 ]
+         }
       },
    });
 

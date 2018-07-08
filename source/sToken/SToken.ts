@@ -102,10 +102,6 @@ class SToken {
 }
 
 function canFuseRanges(range1: Range, range2: Range) {
-   if (!range1 || !range2) {
-      return false;
-   }
-
    const locationsSame = range1.location === range2.location;
    let locationsEqual = false;
 

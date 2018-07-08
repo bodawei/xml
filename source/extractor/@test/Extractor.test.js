@@ -23,6 +23,14 @@ describe('Extractor', () => {
       }).not.toThrow();
    });
 
+   it('provides a no-op finish() function', () => {
+      expect(extractor.finish()).toEqual({
+         segments: [],
+         text: '',
+         original: '',
+      });
+   });
+
    it('STATE is defined', () => {
       expect(Extractor.STATE).toEqual({
          WORKING: 'WORKING',

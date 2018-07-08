@@ -92,7 +92,7 @@ It is worth noting that in 1.0/4 and beyond, there is an added mention of allowi
 Of course, if an element appears in the Mixed content that is not the same type as one any of the types listed in the ELEMENT declaration, it is also treated as an error
 
 ### ANY content
-The definition of what is allowed if an element has "ANY" content varies considerably across versions. Going just by the words, we know we can oly pick from `element | CharData | Reference | CDSect | PI | Comment`.
+The definition of what is allowed if an element has "ANY" content varies considerably across versions. Going just by the words, we know we can only pick from `element | CharData | Reference | CDSect | PI | Comment`.
 * Version 1.0/1&2 only speak of child elements
 * 1.0/3 and 1.1/1 allow (after entity replacement) character data and declared child elements.
 * Other versions allow (after entity replacement) character data, CData sections, PI's and comments.
@@ -103,6 +103,18 @@ From this parser's standpoint, this means:
 
 Obviously, References will be an error if they can't ultimately be expanded, but they won't be flagged as a violation of the ANY content validity rules.
 
+### CHILDREN content
+Like everything else here, there's differences across different versions of the XML Specification.
+Like the others, it is unclear if the changes are clarifications or changes (if so, they are relxaxations). Like the others, this assumes these are changes.
+
+* Version 1.0/1 only allow elements that match the grammar and whitespace.
+* Version 1.0/2 only allow elements that match the grammar and whitespace (allowing whitespace before first child element and after the last), and explicitly disallows CData sections.
+* All other versions allow elements that match the grammer, whitespace, comments and PI's.
+
+The validity of entity references and character references here are ambiguous, as they are not mentioned in 1.0/1 or 2. They are mentioned in 1.0/3 and beyond, but only enough to say that if the if the replacement text is whitespace, it's OK (but it isn't ok if the replacement text is char refs that expand to whitespace).
+
+This goes with the assumption that entity references are acceptable here.
+
 ## Attribute-list declarations
 * When processing ATTLIST's, ordering is top-to-bottom when processing the DTD, with the inner subset being processed before the external subset.
 * This allows for multiple ATTLIST's for the same element
@@ -112,3 +124,18 @@ Obviously, References will be an error if they can't ultimately be expanded, but
 * If an ATTLIST has no attributes, this reports nothing (it is mentioned as a good practice not to do this, but the spec doesn't encourage a warning)
 * This does report if a warning if there is an ATTLIST for an element type that hasn't been declared.
    * The spec is ambiguous on ordering, in this case. Does it mean that it may warn if the ELEMENT is not declared in the DTD anywhere, or just at the point the ATTLIST is encountered?  This currently assumes the latter, (going on precedence for general entity lookups in default attribute values, which seem to require that the ENTITY must have been declared before the ATTLIST is processes). An argument for the former, however, would be to allow the internal DTD subset to add attributes to elements declared in the external subset.
+
+
+# Stages of processing:
+1. Source
+2. Character set conversion
+3. Line ending replacement
+4. Parsing (identifying markup, including references)
+   (possibly two passes in parsing)
+   ( normalization here? )
+5. Replacement (replacing character and entity references with their replacement text)
+6. Character reference expansion (this is because they are still visible in CHILDREN entity replacement)
+
+Internal entities are parsed twice. The first time replaces any character references.
+   - Are PEReferences allowed here?
+The second time is at the point of use. Those character references from the first parse may form new markup, including other char references, which are all re-parsed and replaced at time of use.

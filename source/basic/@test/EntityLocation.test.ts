@@ -47,7 +47,13 @@ describe('EntityLocation', () => {
 
    });
 
-   describe('.resolve()', () => {
+   describe('.resolvedSystemId()', () => {
+
+      it('produces the systemId if no base has been set', () => {
+         const location = new EntityLocation('system.xml', 'public');
+
+         expect(location.resolvedSystemId).toEqual('system.xml');
+      });
 
       it('produces a resolved ID as a combination from http: parent and plain file name child', () => {
          const parent = new EntityLocation('http://one.com/two/parent.xml');

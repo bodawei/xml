@@ -159,11 +159,9 @@ function assignUnassigned(notationPToken: NotationDeclarationPToken): void {
       notationPToken.extra = notationPToken.unassigned;
    }
 
-   if (notationPToken.externalId) {
-      delete notationPToken.externalId.nextPropName;
-      delete notationPToken.externalId.unassigned;
-      delete notationPToken.externalId.extra;
-   }
+   delete notationPToken.externalId.nextPropName;
+   delete notationPToken.externalId.unassigned;
+   delete notationPToken.externalId.extra;
    delete notationPToken.nextPropName;
    delete notationPToken.unassigned;
 }

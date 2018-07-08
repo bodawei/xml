@@ -5,6 +5,8 @@ import { EntityMetaData, Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { XNameList } from '../common/nameList';
+import nameListGraph from '../common/nameListGraph';
 import { WellFormedError, XmlWarning } from '../../error/index';
 
 import entityReference from '../entityReference.js';
@@ -1734,4 +1736,41 @@ describe('nameList (unit)', () => {
 
    });
 
+   describe('graphFromNameList()', () => {
+      let nameListToGraphSpy: jasmine.Spy;
+      let collapseAutoTransSpy: jasmine.Spy;
+      let pruneNameListGraphSpy: jasmine.Spy;
+
+      beforeEach(() => {
+         nameListToGraphSpy = spyOn(nameListGraph, 'nameListToGraph');
+         collapseAutoTransSpy = spyOn(nameListGraph, 'collapseAutoTrans');
+         pruneNameListGraphSpy = spyOn(nameListGraph, 'pruneNameListGraph');
+      });
+
+      it('calls graph construction routines', () => {
+         const list: XNameList = {
+            names: [],
+            listType: 'CHOICE',
+            repeat: 'ONE',
+         };
+         const graph = {
+            startId: 1,
+            endId: 1,
+            states: {
+               1: {
+                  id: 1,
+                  trans: {},
+               }
+            },
+         };
+         nameListToGraphSpy.and.returnValues(graph);
+         const result = nameList.graphFromNameList(list);
+
+         expect(result).toEqual(graph);
+         expect(nameListToGraphSpy).toHaveBeenCalledWith(list);
+         expect(collapseAutoTransSpy).toHaveBeenCalledWith(graph);
+         expect(pruneNameListGraphSpy).toHaveBeenCalledWith(graph);
+      });
+
+   });
 });

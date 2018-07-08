@@ -82,7 +82,7 @@ class EntityMetaData {
       if (newValue === 1.0) {
          this._version = 1.0;
          this._setRevision(DEFAULT_1DOT0_REVISION);
-      } else if (newValue === 1.1) {
+      } else {
          this._version = 1.1;
          this._setRevision(DEFAULT_1DOT1_REVISION);
       }

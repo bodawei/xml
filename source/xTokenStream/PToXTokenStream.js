@@ -102,7 +102,7 @@ class PToXTokenStream extends stream.Transform {
                break;
             }
             this.push(new Error(`Unknown PToken type "${pToken.type}" encountered.`));
-         }
+      }
 
       done();
    }

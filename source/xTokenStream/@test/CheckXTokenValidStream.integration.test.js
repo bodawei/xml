@@ -8,7 +8,7 @@ import { PTokenStream } from '../../pTokenStream';
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';
 
-describe('CheckXTokenValidStream (integration)', () => {
+xdescribe('CheckXTokenValidStream (integration)', () => {
    let validator;
    let parser;
 
@@ -43,6 +43,59 @@ describe('CheckXTokenValidStream (integration)', () => {
 
       parser.addText('<?xml version="1.0"?><!DOCTYPE one [<!NOTATION one SYSTEM "-//test">' +
          '<!NOTATION one SYSTEM "-//foo">]>');
+      parser.endText();
+   });
+
+   it('reports an error when the an element type appears at an invalid place in the content', (done) => {
+      const results = [];
+      validator.on('data', result => results.push(result));
+      validator.on('end', () => {
+         expect(results[25]).toEqual(new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'one', 'two' ],
+            new Offset(new EntityLocation(), 226, 0, 226)));
+         done();
+      });
+
+      parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
+      parser.addText('  <!ELEMENT two ANY >');
+      parser.addText('  <!ELEMENT three ANY >');
+      parser.addText('  <!ELEMENT four ANY >');
+      parser.addText('  <!ELEMENT five ANY >');
+      parser.addText('  <!ELEMENT one ( two+, ( three | four), five) > ');
+      parser.addText(']>');
+      parser.addText('<one>');
+      parser.addText('  <two></two>');
+      parser.addText('  <two></two>');
+      parser.addText('  <three></three>');
+      parser.addText('  <two></two>');
+      parser.addText('  <five></five>');
+      parser.addText('</one>');
+      parser.endText();
+   });
+
+   it('reports an error when the an element type appears at an invalid place in child content', (done) => {
+      const results = [];
+      validator.on('data', result => results.push(result));
+      validator.on('end', () => {
+         expect(results[24]).toEqual(new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'three', 'one' ],
+            new Offset(new EntityLocation(), 243, 0, 243)));
+         done();
+      });
+
+      parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
+      parser.addText('  <!ELEMENT two ANY >');
+      parser.addText('  <!ELEMENT four ANY >');
+      parser.addText('  <!ELEMENT five ANY >');
+      parser.addText('  <!ELEMENT three ( four+ | two | five)  >');
+      parser.addText('  <!ELEMENT one ( two+, ( three | four), five) > ');
+      parser.addText(']>');
+      parser.addText('<one>');
+      parser.addText('  <two></two>');
+      parser.addText('  <three>');
+      parser.addText('     <two></two>');
+      parser.addText('     <one></one>');
+      parser.addText('  </three>');
+      parser.addText('  <five></five>');
+      parser.addText('</one>');
       parser.endText();
    });
 
