@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import Offset from '../Offset.js';
-import EntityLocation from '../EntityLocation.js';
+import Offset from '../Offset';
+import EntityLocation from '../EntityLocation';
 
 describe('Offset', () => {
 

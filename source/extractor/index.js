@@ -2,7 +2,7 @@
 
 import AllExtractor from './AllExtractor';
 import CharExtractor from './CharExtractor';
-import defaultExtractors from './defaultExtractors.js';
+import defaultExtractors from './defaultExtractors';
 import DigitExtractor from './DigitExtractor';
 import Extractor from './Extractor';
 import MatchExtractor from './MatchExtractor';

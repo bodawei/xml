@@ -419,6 +419,57 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         describe('IDREF', () => {
+
+            it('reports an error if an IDREF value is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('one', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken = new elementStart.XToken('one', [{
+                  name: 'idRefAttr',
+                  value: [
+                     new text.XToken('$badName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
+                  [ '$badName', 'one', 'idRefAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an IDREFS values are not all names', (done) => {
+               const elDecl = new elementDeclaration.XToken('elName', 'ANY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elName', [{
+                  name: 'idRefsAttr',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken = new elementStart.XToken('elName', [{
+                  name: 'idRefsAttr',
+                  value: [
+                     new text.XToken('goodName $badName $anotherBadName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
+                  [ '$badName, $anotherBadName', 'elName', 'idRefsAttr' ]);
+               expectStream(validator, expected, done);
+            });
+   
+         });
       });
 
       describe('EmptyElement tokens', () => {

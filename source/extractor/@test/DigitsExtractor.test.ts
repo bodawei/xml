@@ -8,9 +8,9 @@ import DigitExtractor from '../DigitExtractor';
 import Segment from '../Segment';
 
 describe('DigitExtractor', () => {
-   let extractor;
-   let defaultLoc;
-   let segmentRange;
+   let extractor: Extractor;
+   let defaultLoc: EntityLocation;
+   let segmentRange: Range;
 
    beforeEach(() => {
       defaultLoc = new EntityLocation();

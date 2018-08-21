@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
+import Segment from './Segment';
 
 const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 
@@ -11,21 +12,31 @@ const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 \**********************************************************************/
 
 class DigitExtractor extends Extractor {
+   private foundDigit?: boolean;
 
-   process(segment) {
+   process(segment: Segment) {
       const info = this._makeInfo(segment);
       this._segInfo.push(info);
 
+      /*
+       * First checks whether the next character is a digit.
+       * This does not do the allDigits (as below) check first since
+       * that could match digits that start 1Meg chars afther the
+       * current index. That is, make sure the nexxt char is a digit,
+       * and if so, we can then do a more general scan knowing it
+       * won't go wandering off before it starts finding digits.
+       */
       DIGITS_REGEX.lastIndex = 0;
-      this._foundDigits = DIGITS_REGEX.exec(segment.text[segment.index]);
+      this.foundDigit = DIGITS_REGEX.test(segment.text[segment.index]);
 
-      if (!this._foundDigits) {
+      if (!this.foundDigit) {
          this.state = Extractor.STATE.FAILURE;
          return;
       }
 
       DIGITS_REGEX.lastIndex = segment.index;
-      const allDigits = DIGITS_REGEX.exec(segment.text);
+      const result = DIGITS_REGEX.exec(segment.text);
+      const allDigits = result!; // typeHack
 
       this._processText(allDigits[0], info);
 
@@ -42,7 +53,7 @@ class DigitExtractor extends Extractor {
    }
 
    finish() {
-      this.state = this._foundDigits ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      this.state = this.foundDigit ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
       return this._finish();
    }
 

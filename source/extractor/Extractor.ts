@@ -4,7 +4,7 @@ import { Range } from '../basic';
 import Segment from './Segment';
 
 type DoneSegment = {
-   range: Range;
+   range?: Range;
 };
 
 type SegmentInfo = {

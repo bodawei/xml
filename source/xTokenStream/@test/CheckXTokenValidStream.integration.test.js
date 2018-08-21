@@ -8,7 +8,7 @@ import { PTokenStream } from '../../pTokenStream';
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';
 
-xdescribe('CheckXTokenValidStream (integration)', () => {
+describe('CheckXTokenValidStream (integration)', () => {
    let validator;
    let parser;
 

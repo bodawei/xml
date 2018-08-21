@@ -1,6 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
+import Segment from './Segment';
 
 const SPACE_10_REGEX = /[ \t\n\r]+/g;
 const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
@@ -16,22 +17,31 @@ const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
 \**********************************************************************/
 
 class SpaceExtractor extends Extractor {
+   private foundSpace: boolean = false;
 
-   process(segment) {
+   process(segment: Segment) {
       const spaceRegexp = this._version === 1.0 ? SPACE_10_REGEX : SPACE_11_REGEX;
       const info = this._makeInfo(segment);
       this._segInfo.push(info);
 
+      /*
+       * Check if the next char is a space before doing the full-on search
+       * for spaces. If we don't do this, the full-on check could scan
+       * megabytes of text before finding a space, so we would then both
+       * pay for the full scan, and need to check whether the match started
+       * at the current index, anyway.
+       */
       spaceRegexp.lastIndex = 0;
-      this._foundSpace = spaceRegexp.exec(segment.text[segment.index]);
+      this.foundSpace = spaceRegexp.test(segment.text[segment.index]);
 
-      if (!this._foundSpace) {
+      if (!this.foundSpace) {
          this.state = Extractor.STATE.FAILURE;
          return;
       }
 
       spaceRegexp.lastIndex = segment.index;
-      const allSpace = spaceRegexp.exec(segment.text);
+      const result = spaceRegexp.exec(segment.text);
+      const allSpace = result!; // typeHack Because above check garantues this is not null.
       const spaceLength = allSpace[0].length;
 
       this._processText(allSpace[0], info);
@@ -48,7 +58,7 @@ class SpaceExtractor extends Extractor {
    }
 
    finish() {
-      this.state = this._foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
+      this.state = this.foundSpace ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
       return this._finish();
    }
 

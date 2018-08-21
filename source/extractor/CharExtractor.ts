@@ -1,6 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
+import Extractor, { SegmentInfo } from './Extractor';
+import Segment from './Segment';
 
 /**********************************************************************\
  Extract the next character from the specified segment. This seemingly
@@ -12,12 +13,13 @@ import Extractor from './Extractor';
 \**********************************************************************/
 
 class CharExtractor extends Extractor {
+   private foundCR: boolean = false;
 
-   process(segment) {
+   process(segment: Segment): void {
       const info = this._makeInfo(segment);
       this._segInfo.push(info);
 
-      if (this._foundCR) {
+      if (this.foundCR) {
          this._checkEOL(segment, info);
          this.state = Extractor.STATE.SUCCESS;
          return;
@@ -34,7 +36,7 @@ class CharExtractor extends Extractor {
 
       if (currentChar === '\r') {
          if (segment.atEnd()) {
-            this._foundCR = true;
+            this.foundCR = true;
             return; // We don't know if we're done, so just bail out.
          }
          this._checkEOL(segment, info);
@@ -48,7 +50,7 @@ class CharExtractor extends Extractor {
       return this._finish();
    }
 
-   _incrementSegment(segment, info, foundChar) {
+   _incrementSegment(segment: Segment, info: SegmentInfo, foundChar: string): void {
       // do not increment if no character
       if (foundChar) {
          segment.index ++;
@@ -61,7 +63,7 @@ class CharExtractor extends Extractor {
       }
    }
 
-   _checkEOL(segment, info) {
+   _checkEOL(segment: Segment, info: SegmentInfo): void {
       const candidate = segment.text[segment.index];
 
       if (candidate === '\n' || (candidate === '\u0085' && this._version === 1.1)) {

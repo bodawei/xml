@@ -610,6 +610,33 @@ class CheckXTokenValidStream extends stream.Transform {
                      attrName: attrDef.name,
                   }
                }
+            } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
+               const text = getAttributeValueText(attributes[index]);
+               const names = text.split(' ');
+               const badNames = [];
+
+               // §3.3.1: Validity Constraint: IDREF
+               //    Values of type IDREF must match the Name production, and
+               //    values of type IDREFS must match Names...
+               for (let index = 0; index < names.length; index++) {
+                  if (!util.isName(names[index], this.emd.version, this.emd.revision)) {
+                     badNames.push(names[index]);
+                  }
+               }
+
+               if (badNames.length > 0) {
+                  let err;
+
+                  if (attrDef.type === 'IDREF') {
+                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
+                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  } else {
+                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
+                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  }
+
+                  this.push(err);
+               }
             }
          }
       }
