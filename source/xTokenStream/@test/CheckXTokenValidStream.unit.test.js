@@ -16,6 +16,7 @@ import {
    elementEnd,
    elementDeclaration,
    entityEnd,
+   entityDeclaration,
    entityReference,
    entityStart,
    notationDeclaration,
@@ -25,9 +26,7 @@ import {
    xmlDeclaration,
 } from '../../token';
 
-
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-
 
 function toHaveError(util) {
    return {
@@ -91,9 +90,13 @@ beforeEach(() => {
 
 describe('CheckXTokenValidStream (unit)', () => {
    let validator;
+   let fakeEntityManager;
 
    beforeEach(() => {
-      validator = new CheckXTokenValidStream();
+      fakeEntityManager = {
+         getEntityToken() {},
+      };
+      validator = new CheckXTokenValidStream(fakeEntityManager);
    });
 
    function gatherTokens(stream, cb) {
@@ -515,14 +518,18 @@ describe('CheckXTokenValidStream (unit)', () => {
             let startToken;
 
             beforeEach(() => {
-               elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-               attListDecl = new attListDeclaration.XToken('one', [{
-                  name: 'entityRefAttr',
+               fakeEntityManager.getEntityToken = () => {
+                  return new entityDeclaration.XToken('goodName', [], undefined, 'notation', {});
+               };
+
+               elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'entityAttr',
                   type: 'ENTITY',
                   defaultType: '#REQUIRED',
                }]);
-               startToken = new elementStart.XToken('one', [{
-                  name: 'entityRefAttr',
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'entityAttr',
                   value: [
                      new text.XToken('goodName', {})
                   ]
@@ -554,8 +561,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an ENTITY value is not a name', (done) => {
-               startToken = new elementStart.XToken('one', [{
-                  name: 'entityRefAttr',
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'entityAttr',
                   value: [
                      new text.XToken('$badName', {})
                   ]
@@ -567,18 +574,18 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME,
-                  [ '$badName', 'one', 'entityRefAttr' ]);
+                  [ '$badName', 'testElement', 'entityAttr' ]);
                expectStream(validator, expected, done);
             });
 
             it('reports an error if an ENTITIES values are not all names', (done) => {
-               attListDecl = new attListDeclaration.XToken('elName', [{
-                  name: 'entitiesRefAttr',
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'entitiesAttr',
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
                }]);
-               startToken = new elementStart.XToken('elName', [{
-                  name: 'entitiesRefAttr',
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'entitiesAttr',
                   value: [
                      new text.XToken('goodName $badName      $anotherBadName', {})
                   ]
@@ -590,7 +597,85 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME,
-                  [ '$badName, $anotherBadName', 'elName', 'entitiesRefAttr' ]);
+                  [ '$badName, $anotherBadName', 'testElement', 'entitiesAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an ENTITY value names an unknown entity', (done) => {
+               fakeEntityManager.getEntityToken = () => undefined;
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY,
+                  [ 'goodName', 'testElement', 'entityAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an ENTITY value names a parsed entity', (done) => {
+               fakeEntityManager.getEntityToken = () => {
+                  return new entityDeclaration.XToken('goodName', [], undefined, undefined, {});
+               };
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY,
+                  [ 'goodName', 'testElement', 'entityAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if one or more ENTITIES names are unknown entities', (done) => {
+               fakeEntityManager.getEntityToken = () => undefined;
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'entitiesAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'entitiesAttr',
+                  value: [
+                     new text.XToken('one two   three', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY,
+                  [ 'one, two, three', 'testElement', 'entitiesAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an ENTITIES value names a parsed entity', (done) => {
+               fakeEntityManager.getEntityToken = () => {
+                  return new entityDeclaration.XToken('goodName', [], undefined, undefined, {});
+               };
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'entitiesAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'entitiesAttr',
+                  value: [
+                     new text.XToken('one two   three', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY,
+                  [ 'one, two, three', 'testElement', 'entitiesAttr' ]);
                expectStream(validator, expected, done);
             });
    

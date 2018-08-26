@@ -30,6 +30,8 @@ import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
 
+import EntityManager from '../expand/EntityManager.js';
+
 type XToken = {
    name: string,
    [name: string]: any,
@@ -108,6 +110,7 @@ function getAttributeValueText(attribute: XAttr): string {
 }
 
 class CheckXTokenValidStream extends stream.Transform {
+   private entityManager: EntityManager;
    private docType: XToken | void;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
@@ -119,11 +122,12 @@ class CheckXTokenValidStream extends stream.Transform {
    private _seenRoot: boolean = false;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor() {
+   constructor(entityManager: EntityManager) {
       super({
          objectMode: true,
       });
 
+      this.entityManager = entityManager;
       this.docType = undefined;
       this.notations = {};
       this.attrDefsByElementName = {};
@@ -652,22 +656,46 @@ class CheckXTokenValidStream extends stream.Transform {
                }
 
                if (badNames.length > 0) {
-                  let err;
-
-                  if (attrDef.type === 'ENTITY') {
-                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME,
-                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
-                  } else {
-                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME,
-                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
-                  }
+                  let code = attrDef.type === 'ENTITY' ?
+                     ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME :
+                     ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME;
+                  let err = new ValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
 
                   this.push(err);
                }
 
+               const undeclared = [];
+               const parsed = [];
+
                // §3.3.1: Validity Constraint: Entity Name
                //    each Name must match the name of an unparsed entity declared in the DTD.
+               for (let index = 0; index < names.length; index++) {
+                  const token = this.entityManager.getEntityToken(names[index])
 
+                  if (!token) {
+                     undeclared.push(names[index]);
+                  } else if (!token.notationDataName) {
+                     parsed.push(names[index]);
+                  }
+               }
+
+               if (undeclared.length > 0) {
+                  let code = attrDef.type === 'ENTITY' ?
+                     ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY :
+                     ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY;
+                  let err = new ValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pToken.open);
+
+                  this.push(err);
+               }
+
+               if (parsed.length > 0) {
+                  let code = attrDef.type === 'ENTITY' ?
+                     ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY :
+                     ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY;
+                  let err = new ValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pToken.open);
+
+                  this.push(err);
+               }
             }
          }
       }
