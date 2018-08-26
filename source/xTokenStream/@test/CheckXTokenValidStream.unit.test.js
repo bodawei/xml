@@ -910,7 +910,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
-         it('doe snot blow up if the ATTLIST has no element name', (done) => {
+         it('does not blow up if the ATTLIST has no element name', (done) => {
             const aOne = new attListDeclaration.XToken(undefined, []);
             const aTwo = new attListDeclaration.XToken(undefined, []);
    
@@ -1012,6 +1012,55 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
                [ 'elementType',  'second' ]);
             expectStream(validator, expected, done);
+         });
+
+         describe('NOTATION', () => {
+
+            function setup(emd) {
+               const endOfDocType = new docTypeEnd.XToken();
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'notation1',
+                  type: 'NOTATION',
+                  defaultType: '#IMPLIED',
+               }, {
+                  name: 'ref',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+               }, {
+                  name: 'notation2',
+                  type: 'NOTATION',
+                  defaultType: '#REQUIRED',
+               }], {});
+
+               validator.write(emd);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(endOfDocType);
+               validator.end();
+            };
+
+            it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
+               setup(new EntityMetaData('DOCUMENT', 1.0, 2));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
+                  [ 'elementType',  'notation2' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an 1.1/* ATTLIST has more than one NOTATION attribute', (done) => {
+               setup(new EntityMetaData('DOCUMENT', 1.1, 2));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
+                  [ 'elementType',  'notation2' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
+               setup(new EntityMetaData('DOCUMENT', 1.0, 1));
+
+               expectNoErrors(validator, done);
+            });
          });
 
          it('ignores attribute declarations after the first encountered', (done) => {

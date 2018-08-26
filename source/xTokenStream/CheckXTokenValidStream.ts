@@ -549,21 +549,38 @@ class CheckXTokenValidStream extends stream.Transform {
     * Does all checks that can only be done once we have the whole DTD processed
     */
    private validateDTD() {
-
-      // §3.3.1: Validity constraint: One ID per Element Type
-      //    An element type must not have more than one ID attribute specified.
+      const checkNotations = this.emd.isVersion1dot1 || (this.emd.isVersion1dot0 && this.emd.revision > 1);
+      
       Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
          const attList = this.attrDefsByElementName[elementType];
          let idCount = 0;
+         let notationCount = 0;
+
 
          Object.keys(attList.attributes).forEach((name) => {
             const attrDef = attList.attributes[name];
+
+            // §3.3.1: Validity constraint: One ID per Element Type
+            //    An element type must not have more than one ID attribute specified.
             if (attrDef.type === 'ID') {
                idCount ++;
 
                if (idCount > 1) {
                   const err = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
                      [ elementType, attrDef.name ]);
+
+                  this.push(err);
+               }
+
+            } else if (attrDef.type === 'NOTATION') {
+               // §3.3.1: (in 1.0/2+) Validity constraint: One Notation Per Element Type
+               //    An element type must not have more than one NOTATION attribute specified.
+               notationCount ++;
+
+               if (checkNotations && notationCount > 1) {
+                  const err = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_NOTATION,
+                     [ elementType, attrDef.name ]);
+
                   this.push(err);
                }
             }
