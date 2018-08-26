@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { isName, isSpace } from '../util';
+import { isName, isNmToken, isSpace } from '../util';
 
 type Data = Array<{
    description: string,
@@ -33,6 +33,12 @@ describe('util', () => {
             result: true,
          }, {
             description: 'accepts a name that starts with an astral character (e.g. an emoji)',
+            text: '\uD83D\uDC04moo',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts a name that has many of the characters in it',
             text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_' +
             '\u00CE\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1',
             version: 1.0,
@@ -132,6 +138,138 @@ describe('util', () => {
       ] as Data).forEach((data) => {
          it(data.description, () => {
             expect(isName(data.text, data.version, data.revision)).toEqual(data.result);
+         });
+      });
+
+   });
+
+   describe('isNmToken()', () => {
+      ([
+         {
+            description: 'accepts an Nmtoken that is just plain letters',
+            text: 'good',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that has a hyphen, period or digit',
+            text: 'on.-8',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that has the allowable chars above ascii in it',
+            text: 'o\u00B7\u0310\u2040e',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with an astral character (e.g. an emoji)',
+            text: '\uD83D\uDC04moo',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that contains a bunch of valid values',
+            text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_' +
+            '\u00CE\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that has a uFDF1 in it',
+            text: 'o\uFDF1e',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'rejects an Nmtoken with a $ in it',
+            text: 'o$e',
+            version: 1.0,
+            revision: 5,
+            result: false,
+         }, {
+            description: 'allows an Nmtoken that starts with a digit',
+            text: '1ne',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with a hyphen',
+            text: '-ne',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with a period',
+            text: '.ne',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with a u00B7 (a namechar that is not a namestartchar)',
+            text: '\u00B7ne',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with a u0320 (a namechar that is not a namestartchar)',
+            text: '\u0320ne',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that starts with a u2040 (a namechar that is not a namestartchar)',
+            text: '\u2040',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'rejects an Nmtoken that has u03F4 in version 1.0/4',
+            text: '\u03F4',
+            version: 1.0,
+            revision: 4,
+            result: false,
+         }, {
+            description: 'accepts an Nmtoken that has u03F4 in version 1.0/5',
+            text: '\u03F4',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken that has u03F4 in version 1.0/5',
+            text: '\u03F4',
+            version: 1.1,
+            revision: 1,
+            result: true,
+         }, {
+            description: 'rejects an Nmtoken in 1.0/4 that has characters that are bad in 1.0/4',
+            text: 'f\u0eceb',
+            version: 1.0,
+            revision: 4,
+            result: false,
+         }, {
+            description: 'accepts an Nmtoken in 1.0/5 that has characters that are bad in 1.0/4 but ok in version 1.0/5',
+            text: 'f\u0eceb',
+            version: 1.0,
+            revision: 5,
+            result: true,
+         }, {
+            description: 'accepts an Nmtoken in 1.1 that has characters that are bad in 1.0 but ok in version 1.1',
+            text: 'f\u0eceb',
+            version: 1.1,
+            revision: 2,
+            result: true,
+         }, {
+            description: 'defaults version and revision if none passed',
+            text: 'f\u0eceb',
+            version: undefined,
+            revision: undefined,
+            result: true,
+         },
+      ] as Data).forEach((data) => {
+         it(data.description, () => {
+            expect(isNmToken(data.text, data.version, data.revision)).toEqual(data.result);
          });
       });
 

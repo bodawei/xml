@@ -680,6 +680,94 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
    
          });
+
+         describe('NMTOKEN', () => {
+            let elDecl;
+            let attListDecl;
+            let startToken;
+
+            beforeEach(() => {
+               elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'nmTokenAttr',
+                  type: 'NMTOKEN',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'nmTokenAttr',
+                  value: [
+                     new text.XToken('goodName', {})
+                  ]
+               }], {});
+            });
+
+            it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
+               spyOn(util, 'isNmToken');
+   
+               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               gatherTokens(validator, () => {
+                  expect(util.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  done();
+               });
+            });
+
+            it('reports no error when an the attribute is valid', (done) => {
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a the attribute value is not an Nmtoken', (done) => {
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'nmTokenAttr',
+                  value: [
+                     new text.XToken('$badName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
+                  [ '$badName', 'testElement', 'nmTokenAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an NMTOKENS attribute has values that are not all Nmtokens', (done) => {
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'nmTokenAttr',
+                  type: 'NMTOKENS',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'nmTokenAttr',
+                  value: [
+                     new text.XToken('goodName $badName         $anotherBadName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
+                  [ '$badName, $anotherBadName', 'testElement', 'nmTokenAttr' ]);
+               expectStream(validator, expected, done);
+            });
+   
+         });
+
       });
 
       describe('EmptyElement tokens', () => {

@@ -629,15 +629,10 @@ class CheckXTokenValidStream extends stream.Transform {
                }
 
                if (badNames.length > 0) {
-                  let err;
-
-                  if (attrDef.type === 'IDREF') {
-                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
-                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
-                  } else {
-                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
-                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
-                  }
+                  const code = attrDef.type === 'IDREF' ?
+                     ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME :
+                     ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME;
+                  const err = new ValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
 
                   this.push(err);
                }
@@ -656,10 +651,10 @@ class CheckXTokenValidStream extends stream.Transform {
                }
 
                if (badNames.length > 0) {
-                  let code = attrDef.type === 'ENTITY' ?
+                  const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME;
-                  let err = new ValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  const err = new ValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
 
                   this.push(err);
                }
@@ -680,19 +675,41 @@ class CheckXTokenValidStream extends stream.Transform {
                }
 
                if (undeclared.length > 0) {
-                  let code = attrDef.type === 'ENTITY' ?
+                  const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY;
-                  let err = new ValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pToken.open);
+                  const err = new ValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pToken.open);
 
                   this.push(err);
                }
 
                if (parsed.length > 0) {
-                  let code = attrDef.type === 'ENTITY' ?
+                  const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY;
-                  let err = new ValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pToken.open);
+                  const err = new ValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pToken.open);
+
+                  this.push(err);
+               }
+            } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
+               const text = getAttributeValueText(attributes[index]);
+               const names = text.split(/ +/);
+               const badNames = [];
+
+               // §3.3.1: Validity Constraint: Name Token
+               //    Values of type NMTOKEN must match the Nmtoken production;
+               //    values of type NMTOKENS must match Nmtokens.
+               for (let index = 0; index < names.length; index++) {
+                  if (!util.isNmToken(names[index], this.emd.version, this.emd.revision)) {
+                     badNames.push(names[index]);
+                  }
+               }
+
+               if (badNames.length > 0) {
+                  const code = attrDef.type === 'NMTOKEN' ?
+                     ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN :
+                     ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
+                  const err = new ValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
 
                   this.push(err);
                }
