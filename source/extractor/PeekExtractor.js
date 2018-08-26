@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
-import Segment from './Segment';
 
 /**********************************************************************\
  A PeekExtractor "wraps" another extractor so it can do its work, but

@@ -287,148 +287,187 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
-         it('reports an error if an ID value is not a name', (done) => {
-            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-            const attListDecl1 = new attListDeclaration.XToken('one', [{
-               name: 'idAttr',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const startToken1 = new elementStart.XToken('one', [{
-               name: 'idAttr',
-               value: [
-                  new text.XToken('$$BAD', {})
-               ]
-            }], {});
-            spyOn(util, 'isName').and.returnValue(false);
+         describe('ID', () => {
 
-            validator.write(elDecl1);
-            validator.write(attListDecl1);
-            validator.write(startToken1);
-            validator.end();
+            it('reports an error if an ID value is not a name', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('one', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('one', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('$$BAD', {})
+                  ]
+               }], {});
+               spyOn(util, 'isName').and.returnValue(false);
 
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
-               [ '$$BAD', 'one', 'idAttr' ]);
-            expectStream(validator, expected, done);
-         });
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
 
-         it('it calls util.isName() with the entity meta data', (done) => {
-            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-            const attListDecl1 = new attListDeclaration.XToken('one', [{
-               name: 'idAttr',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const startToken1 = new elementStart.XToken('one', [{
-               name: 'idAttr',
-               value: [
-                  new text.XToken('$$BAD', {})
-               ]
-            }], {});
-            spyOn(util, 'isName');
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
+                  [ '$$BAD', 'one', 'idAttr' ]);
+               expectStream(validator, expected, done);
+            });
 
-            validator.write(new EntityMetaData(undefined, 1.1, 2));
-            validator.write(elDecl1);
-            validator.write(attListDecl1);
-            validator.write(startToken1);
-            validator.end();
+            it('it calls util.isName() with the entity meta data', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('one', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('one', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('$$BAD', {})
+                  ]
+               }], {});
+               spyOn(util, 'isName');
 
-            gatherTokens(validator, () => {
-               expect(util.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
-               done();
+               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
+                  done();
+               });
+            });
+
+            it('reports an error if an ID value is used twice', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('one', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
+               const attListDecl2 = new attListDeclaration.XToken('two', [{
+                  name: 'id',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('one', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('test', {})
+                  ]
+               }], {});
+               const startToken2 = new elementStart.XToken('two', [{
+                  name: 'id',
+                  value: [
+                     new text.XToken('test', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(elDecl2);
+               validator.write(attListDecl1);
+               validator.write(attListDecl2);
+               validator.write(startToken1);
+               validator.write(startToken2);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+                  [ 'test', 'two', 'id', 'one', 'idAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an ID value built from an entity reference is used twice', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('one', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
+               const attListDecl2 = new attListDeclaration.XToken('two', [{
+                  name: 'id',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('one', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('test', {})
+                  ]
+               }], {});
+               const startToken2 = new elementStart.XToken('two', [{
+                  name: 'id',
+                  value: [
+                     new entityStart.XToken('ref', {}),
+                     new text.XToken('test', {}),
+                     new entityEnd.XToken('ref', {}),
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(elDecl2);
+               validator.write(attListDecl1);
+               validator.write(attListDecl2);
+               validator.write(startToken1);
+               validator.write(startToken2);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
+                  [ 'test', 'two', 'id', 'one', 'idAttr' ]);
+               expectStream(validator, expected, done);
             });
          });
 
-         it('reports an error if an ID value is used twice', (done) => {
-            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-            const attListDecl1 = new attListDeclaration.XToken('one', [{
-               name: 'idAttr',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
-            const attListDecl2 = new attListDeclaration.XToken('two', [{
-               name: 'id',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const startToken1 = new elementStart.XToken('one', [{
-               name: 'idAttr',
-               value: [
-                  new text.XToken('test', {})
-               ]
-            }], {});
-            const startToken2 = new elementStart.XToken('two', [{
-               name: 'id',
-               value: [
-                  new text.XToken('test', {})
-               ]
-            }], {});
-
-            validator.write(elDecl1);
-            validator.write(elDecl2);
-            validator.write(attListDecl1);
-            validator.write(attListDecl2);
-            validator.write(startToken1);
-            validator.write(startToken2);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-               [ 'test', 'two', 'id', 'one', 'idAttr' ]);
-            expectStream(validator, expected, done);
-         });
-
-         it('reports an error if an ID value built from an entity reference is used twice', (done) => {
-            const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-            const attListDecl1 = new attListDeclaration.XToken('one', [{
-               name: 'idAttr',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const elDecl2 = new elementDeclaration.XToken('two', 'ANY', undefined, {});
-            const attListDecl2 = new attListDeclaration.XToken('two', [{
-               name: 'id',
-               type: 'ID',
-               defaultType: '#REQUIRED',
-            }]);
-            const startToken1 = new elementStart.XToken('one', [{
-               name: 'idAttr',
-               value: [
-                  new text.XToken('test', {})
-               ]
-            }], {});
-            const startToken2 = new elementStart.XToken('two', [{
-               name: 'id',
-               value: [
-                  new entityStart.XToken('ref', {}),
-                  new text.XToken('test', {}),
-                  new entityEnd.XToken('ref', {}),
-               ]
-            }], {});
-
-            validator.write(elDecl1);
-            validator.write(elDecl2);
-            validator.write(attListDecl1);
-            validator.write(attListDecl2);
-            validator.write(startToken1);
-            validator.write(startToken2);
-            validator.end();
-
-            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-               [ 'test', 'two', 'id', 'one', 'idAttr' ]);
-            expectStream(validator, expected, done);
-         });
-
          describe('IDREF', () => {
+            let elDecl;
+            let attListDecl;
+            let startToken;
 
-            it('reports an error if an IDREF value is not a name', (done) => {
-               const elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-               const attListDecl = new attListDeclaration.XToken('one', [{
+            beforeEach(() => {
+               elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('one', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
                }]);
-               const startToken = new elementStart.XToken('one', [{
+               startToken = new elementStart.XToken('one', [{
+                  name: 'idRefAttr',
+                  value: [
+                     new text.XToken('goodName', {})
+                  ]
+               }], {});
+            });
+
+            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
+               spyOn(util, 'isName');
+   
+               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  done();
+               });
+            });
+
+            it('reports no error when an IDREF attribute is valid', (done) => {
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if an IDREF value is not a name', (done) => {
+               startToken = new elementStart.XToken('one', [{
                   name: 'idRefAttr',
                   value: [
                      new text.XToken('$badName', {})
@@ -446,16 +485,15 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an IDREFS values are not all names', (done) => {
-               const elDecl = new elementDeclaration.XToken('elName', 'ANY', undefined, {});
-               const attListDecl = new attListDeclaration.XToken('elName', [{
+               attListDecl = new attListDeclaration.XToken('elName', [{
                   name: 'idRefsAttr',
                   type: 'IDREFS',
                   defaultType: '#REQUIRED',
                }]);
-               const startToken = new elementStart.XToken('elName', [{
+               startToken = new elementStart.XToken('elName', [{
                   name: 'idRefsAttr',
                   value: [
-                     new text.XToken('goodName $badName $anotherBadName', {})
+                     new text.XToken('goodName $badName         $anotherBadName', {})
                   ]
                }], {});
    
@@ -466,6 +504,93 @@ describe('CheckXTokenValidStream (unit)', () => {
    
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
                   [ '$badName, $anotherBadName', 'elName', 'idRefsAttr' ]);
+               expectStream(validator, expected, done);
+            });
+   
+         });
+
+         describe('ENTITY', () => {
+            let elDecl;
+            let attListDecl;
+            let startToken;
+
+            beforeEach(() => {
+               elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('one', [{
+                  name: 'entityRefAttr',
+                  type: 'ENTITY',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('one', [{
+                  name: 'entityRefAttr',
+                  value: [
+                     new text.XToken('goodName', {})
+                  ]
+               }], {});
+            });
+
+            it('reports no error when an ENTITY attribute is valid', (done) => {
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {   
+               spyOn(util, 'isName');
+
+               validator.write(new EntityMetaData(undefined, 1.1, 2));
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  done();
+               });
+            });
+
+            it('reports an error if an ENTITY value is not a name', (done) => {
+               startToken = new elementStart.XToken('one', [{
+                  name: 'entityRefAttr',
+                  value: [
+                     new text.XToken('$badName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME,
+                  [ '$badName', 'one', 'entityRefAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an ENTITIES values are not all names', (done) => {
+               attListDecl = new attListDeclaration.XToken('elName', [{
+                  name: 'entitiesRefAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('elName', [{
+                  name: 'entitiesRefAttr',
+                  value: [
+                     new text.XToken('goodName $badName      $anotherBadName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME,
+                  [ '$badName, $anotherBadName', 'elName', 'entitiesRefAttr' ]);
                expectStream(validator, expected, done);
             });
    

@@ -612,7 +612,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
             } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
                const text = getAttributeValueText(attributes[index]);
-               const names = text.split(' ');
+               const names = text.split(/ +/);
                const badNames = [];
 
                // §3.3.1: Validity Constraint: IDREF
@@ -637,6 +637,37 @@ class CheckXTokenValidStream extends stream.Transform {
 
                   this.push(err);
                }
+            } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
+               const text = getAttributeValueText(attributes[index]);
+               const names = text.split(/ +/);
+               const badNames = [];
+
+               // §3.3.1: Validity Constraint: Entity Name
+               //    Values of type ENTITY must match the Name production,
+               //    values of type ENTITIES must match Names;
+               for (let index = 0; index < names.length; index++) {
+                  if (!util.isName(names[index], this.emd.version, this.emd.revision)) {
+                     badNames.push(names[index]);
+                  }
+               }
+
+               if (badNames.length > 0) {
+                  let err;
+
+                  if (attrDef.type === 'ENTITY') {
+                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME,
+                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  } else {
+                     err = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME,
+                        [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  }
+
+                  this.push(err);
+               }
+
+               // §3.3.1: Validity Constraint: Entity Name
+               //    each Name must match the name of an unparsed entity declared in the DTD.
+
             }
          }
       }
