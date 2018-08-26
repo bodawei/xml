@@ -768,6 +768,66 @@ describe('CheckXTokenValidStream (unit)', () => {
    
          });
 
+         describe('NOTATION', () => {
+            let elDecl;
+            let attListDecl;
+            let startToken;
+
+            beforeEach(() => {
+               elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'notationAttr',
+                  type: 'NOTATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'notationAttr',
+                  value: [
+                     new text.XToken('first', {})
+                  ]
+               }], {});
+            });
+
+            it('reports no error when an the attribute is valid', (done) => {
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a the attribute value not among the declared values', (done) => {
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'notationAttr',
+                  value: [
+                     new text.XToken('third', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+                  [ 'third', 'testElement', 'notationAttr', 'first, second' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
       });
 
       describe('EmptyElement tokens', () => {

@@ -713,6 +713,23 @@ class CheckXTokenValidStream extends stream.Transform {
 
                   this.push(err);
                }
+            } else if (attrDef.type === 'NOTATION') {
+               const notationName = getAttributeValueText(attributes[index]);
+               const notationNames = attrDef.enumeration && attrDef.enumeration.names;
+               let declaredNames: Array<string> = [];
+
+               for (let index = 0; index < notationNames!.length; index++) { // typeHack
+                  declaredNames.push((notationNames![index] as XName).name); // typeHack
+               }
+
+               // §3.3.1: Validity Constraint: Notation Attributes
+               //    Values of this type must match one of the notation names included in the declaration; ...
+               if (declaredNames.indexOf(notationName) === -1) {
+                  const err = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+                     [ notationName, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+
+                  this.push(err);
+               }
             }
          }
       }
