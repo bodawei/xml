@@ -1,3 +1,9 @@
+### Coding Style
+* in any given section, 
+   * Try to group declarations (const, let) first before doing any significant logic
+   * Blank space after the declarations
+   * The usual space around if and similar blocks.
+
 ### Tests
 #### General Idea
 * Unit tests test logic thoroughly. They should cover 100%, and exercise every major use case

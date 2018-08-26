@@ -770,10 +770,14 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('NOTATION', () => {
             let elDecl;
+            let n1;
+            let n2;
             let attListDecl;
             let startToken;
 
             beforeEach(() => {
+               n1 = new notationDeclaration.XToken('first');
+               n2 = new notationDeclaration.XToken('second');
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined, {});
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'notationAttr',
@@ -800,6 +804,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error when an the attribute is valid', (done) => {
+               validator.write(n1);
+               validator.write(n2);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -816,6 +822,8 @@ describe('CheckXTokenValidStream (unit)', () => {
                   ]
                }], {});
    
+               validator.write(n1);
+               validator.write(n2);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -1022,6 +1030,11 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
+                  enumeration: {
+                     names: [],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
                   defaultType: '#IMPLIED',
                }, {
                   name: 'ref',
@@ -1030,6 +1043,11 @@ describe('CheckXTokenValidStream (unit)', () => {
                }, {
                   name: 'notation2',
                   type: 'NOTATION',
+                  enumeration: {
+                     names: [],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
                   defaultType: '#REQUIRED',
                }], {});
 
@@ -1039,6 +1057,36 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endOfDocType);
                validator.end();
             };
+
+            it('reports an error if a notation value has not been declared at ATTLIST declaration time', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+               const notation = new notationDeclaration.XToken('first', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'notation1',
+                  type: 'NOTATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#IMPLIED',
+               }], {});
+
+               validator.write(notation);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
+                  [ 'elementType',  'notation1', 'second' ]);
+               expectStream(validator, expected, done);
+            });
 
             it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
                setup(new EntityMetaData('DOCUMENT', 1.0, 2));

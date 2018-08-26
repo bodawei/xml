@@ -109,6 +109,17 @@ function getAttributeValueText(attribute: XAttr): string {
    return newValue;
 }
 
+function getEnumerationNames(attDef: XAttr): Array<string> {
+   const notationNames = attDef.enumeration && attDef.enumeration.names;
+   let declaredNames: Array<string> = [];
+
+   for (let index = 0; index < notationNames!.length; index++) { // typeHack
+      declaredNames.push((notationNames![index] as XName).name); // typeHack
+   }
+
+   return declaredNames;
+}
+
 class CheckXTokenValidStream extends stream.Transform {
    private entityManager: EntityManager;
    private docType: XToken | void;
@@ -434,7 +445,9 @@ class CheckXTokenValidStream extends stream.Transform {
       //   attribute, but this is not an error.
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
          const attDef = attListDecl.attDefs[index];
+
          this.validateAttrDef(attListDecl, attDef);
+
          if (!attrDefs.attributes[attDef.name]) {
             attrDefs.attributes[attDef.name] = attDef;
          } else {
@@ -456,7 +469,24 @@ class CheckXTokenValidStream extends stream.Transform {
          if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
             const err = new ValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
                [ attList.elementName, attDef.name, '' ], pToken.open);
-            this.push(err);
+
+               this.push(err);
+         }
+      } else if (type === 'NOTATION') {
+         // §3.3.1: Validity constraint: Notation Attributes
+         //    ...all notation names in the declaration must be declared.
+         const notationNames: Array<string> = getEnumerationNames(attDef);
+
+         for (let index = 0; index < notationNames.length; index++) {
+            const notationName = notationNames[index];
+            const notationDecl = this.notations[notationName];
+
+            if (!notationDecl) {
+               const err = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
+                  [ attList.elementName, attDef.name, notationName ], pToken.open);
+
+                  this.push(err);
+            }
          }
       }
    }
@@ -633,7 +663,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
             } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
                const text = getAttributeValueText(attributes[index]);
-               const names = text.split(/ +/);
+               const names = text.split(/ +/); // Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: IDREF
@@ -655,7 +685,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
             } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
                const text = getAttributeValueText(attributes[index]);
-               const names = text.split(/ +/);
+               const names = text.split(/ +/); // Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Entity Name
@@ -732,12 +762,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
             } else if (attrDef.type === 'NOTATION') {
                const notationName = getAttributeValueText(attributes[index]);
-               const notationNames = attrDef.enumeration && attrDef.enumeration.names;
-               let declaredNames: Array<string> = [];
-
-               for (let index = 0; index < notationNames!.length; index++) { // typeHack
-                  declaredNames.push((notationNames![index] as XName).name); // typeHack
-               }
+               let declaredNames = getEnumerationNames(attrDef);
 
                // §3.3.1: Validity Constraint: Notation Attributes
                //    Values of this type must match one of the notation names included in the declaration; ...
