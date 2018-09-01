@@ -1083,6 +1083,51 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
             };
 
+            function setupDuplicateNotationValues(emd) {
+               const endOfDocType = new docTypeEnd.XToken();
+               const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined, {});
+               const notation1 = new notationDeclaration.XToken('first', undefined, {});
+               const notation2 = new notationDeclaration.XToken('second', undefined, {});
+               const notation3 = new notationDeclaration.XToken('third', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'notationAttr',
+                  type: 'NOTATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'third',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'third',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'first',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#IMPLIED',
+               }], {});
+
+               validator.write(emd);
+               validator.write(notation1);
+               validator.write(notation2);
+               validator.write(notation3);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(endOfDocType);
+               validator.end();
+            };
+
             it('reports an error if a notation value has not been declared at ATTLIST declaration time', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
                const notation = new notationDeclaration.XToken('first', undefined, {});
@@ -1110,6 +1155,28 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION,
                   [ 'elementType',  'notation1', 'second' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a 1.0/1 ATTLISTs NOTATION declaration has duplicate names', (done) => {
+               setupDuplicateNotationValues(new EntityMetaData('DOCUMENT', 1.0, 1));
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a 1.0/3 ATTLISTs NOTATION declaration has duplicate names', (done) => {
+               setupDuplicateNotationValues(new EntityMetaData('DOCUMENT', 1.0, 3));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
+                  [ 'elementType', 'notationAttr', 'first, third' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if a 1.1/* ATTLISTs NOTATION declaration has duplicate names', (done) => {
+               setupDuplicateNotationValues(new EntityMetaData('DOCUMENT', 1.1, 1));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_NOTATION,
+                  [ 'elementType', 'notationAttr', 'first, third' ]);
                expectStream(validator, expected, done);
             });
 
@@ -1156,6 +1223,100 @@ describe('CheckXTokenValidStream (unit)', () => {
                   [ 'elementType',  'notation1' ]);
                expectStream(validator, expected, done);
             });
+         });
+
+         describe('ENUMERATION', () => {
+
+            function setupDuplicateEnumerationValues(emd) {
+               const endOfDocType = new docTypeEnd.XToken();
+               const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'enumerationAttr',
+                  type: 'ENUMERATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'third',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'third',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'first',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#IMPLIED',
+               }], {});
+
+               validator.write(emd);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(endOfDocType);
+               validator.end();
+            };
+
+            it('reports no error if a 1.0/1 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
+               setupDuplicateEnumerationValues(new EntityMetaData('DOCUMENT', 1.0, 1));
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a 1.0/3 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
+               setupDuplicateEnumerationValues(new EntityMetaData('DOCUMENT', 1.0, 3));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
+                  [ 'elementType', 'enumerationAttr', 'first, third' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if a 1.1/* ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
+               setupDuplicateEnumerationValues(new EntityMetaData('DOCUMENT', 1.1, 1));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
+                  [ 'elementType', 'enumerationAttr', 'first, third' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a 1.0/3 ATTLISTs ENUMERATION declaration has no duplicate nmTokens', (done) => {
+               const endOfDocType = new docTypeEnd.XToken();
+               const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'enumerationAttr',
+                  type: 'ENUMERATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#IMPLIED',
+               }], {});
+
+               validator.write(new EntityMetaData('DOCUMENT', 1.0, 3));
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(endOfDocType);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
          });
 
          it('ignores attribute declarations after the first encountered', (done) => {
