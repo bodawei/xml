@@ -126,6 +126,7 @@ This goes with the assumption that entity references are acceptable here.
    * The spec is ambiguous on ordering, in this case. Does it mean that it may warn if the ELEMENT is not declared in the DTD anywhere, or just at the point the ATTLIST is encountered?  This currently assumes the latter, (going on precedence for general entity lookups in default attribute values, which seem to require that the ENTITY must have been declared before the ATTLIST is processes). An argument for the former, however, would be to allow the internal DTD subset to add attributes to elements declared in the external subset.
 * The spec is also ambiguous about whether the values in a NOTATION attribute declaration must have been declared before the ATTLIST declaration. Like the above for the ELEMENT, this assumes that it must have already been declared at this point.
 * Note that this validates individual attribute declarations, even if they are ones that will be ignored because they are a subsquent one (as above)
+* Normally "for compatibility" is interpreted as a warning, not requirement. However, as of 1.0/2 NOTATION attributes may not be on  an EMPTY element, and this is both a validity constraint (error) an for compatibility (warning). We're assuming error
 
 # Stages of processing:
 1. Source

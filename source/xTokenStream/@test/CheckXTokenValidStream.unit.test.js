@@ -1026,7 +1026,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             function setup(emd) {
                const endOfDocType = new docTypeEnd.XToken();
-               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+               const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined, {});
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
@@ -1048,6 +1048,31 @@ describe('CheckXTokenValidStream (unit)', () => {
                      listType: 'CHOICE',
                      repeat: 'ONE',
                   },
+                  defaultType: '#REQUIRED',
+               }], {});
+
+               validator.write(emd);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(endOfDocType);
+               validator.end();
+            };
+
+            function setupEmptyElement(emd) {
+               const endOfDocType = new docTypeEnd.XToken();
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined, {});
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'notation1',
+                  type: 'NOTATION',
+                  enumeration: {
+                     names: [],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#IMPLIED',
+               }, {
+                  name: 'ref',
+                  type: 'IDREF',
                   defaultType: '#REQUIRED',
                }], {});
 
@@ -1088,6 +1113,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
+            it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
+               setup(new EntityMetaData('DOCUMENT', 1.0, 1));
+
+               expectNoErrors(validator, done);
+            });
+
             it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
                setup(new EntityMetaData('DOCUMENT', 1.0, 2));
 
@@ -1104,10 +1135,26 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
-               setup(new EntityMetaData('DOCUMENT', 1.0, 1));
+            it('reports no error if an 1.0/1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
+               setupEmptyElement(new EntityMetaData('DOCUMENT', 1.0, 1));
 
                expectNoErrors(validator, done);
+            });
+
+            it('reports an error if an 1.0/>1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
+               setupEmptyElement(new EntityMetaData('DOCUMENT', 1.0, 2));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
+                  [ 'elementType',  'notation1' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an 1.1/* ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
+               setupEmptyElement(new EntityMetaData('DOCUMENT', 1.1, 2));
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
+                  [ 'elementType',  'notation1' ]);
+               expectStream(validator, expected, done);
             });
          });
 
