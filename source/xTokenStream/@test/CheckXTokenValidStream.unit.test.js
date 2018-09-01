@@ -512,7 +512,7 @@ describe('CheckXTokenValidStream (unit)', () => {
    
          });
 
-         describe('ENTITY', () => {
+         describe('ENTITY attribute', () => {
             let elDecl;
             let attListDecl;
             let startToken;
@@ -681,7 +681,7 @@ describe('CheckXTokenValidStream (unit)', () => {
    
          });
 
-         describe('NMTOKEN', () => {
+         describe('NMTOKEN attribute', () => {
             let elDecl;
             let attListDecl;
             let startToken;
@@ -768,7 +768,7 @@ describe('CheckXTokenValidStream (unit)', () => {
    
          });
 
-         describe('NOTATION', () => {
+         describe('NOTATION attribute', () => {
             let elDecl;
             let n1;
             let n2;
@@ -803,7 +803,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }], {});
             });
 
-            it('reports no error when an the attribute is valid', (done) => {
+            it('reports no error when the attribute is valid', (done) => {
                validator.write(n1);
                validator.write(n2);
                validator.write(elDecl);
@@ -814,7 +814,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectNoErrors(validator, done);
             });
 
-            it('reports an error if a the attribute value not among the declared values', (done) => {
+            it('reports an error if the attribute value not among the declared values', (done) => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'notationAttr',
                   value: [
@@ -831,6 +831,66 @@ describe('CheckXTokenValidStream (unit)', () => {
    
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
                   [ 'third', 'testElement', 'notationAttr', 'first, second' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('ENUMERATION attribute', () => {
+            let elDecl;
+            let attListDecl;
+            let startToken;
+
+            beforeEach(() => {
+               elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('testElement', [{
+                  name: 'enumerationAttr',
+                  type: 'ENUMERATION',
+                  enumeration: {
+                     names: [{
+                        name: 'first',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'second',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'CHOICE',
+                     repeat: 'ONE',
+                  },
+                  defaultType: '#REQUIRED',
+               }]);
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'enumerationAttr',
+                  value: [
+                     new text.XToken('first', {})
+                  ]
+               }], {});
+            });
+
+            it('reports no error when an the attribute is valid', (done) => {
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if the attribute value not among the declared values', (done) => {
+               startToken = new elementStart.XToken('testElement', [{
+                  name: 'enumerationAttr',
+                  value: [
+                     new text.XToken('third', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+                  [ 'third', 'testElement', 'enumerationAttr', 'first, second' ]);
                expectStream(validator, expected, done);
             });
 

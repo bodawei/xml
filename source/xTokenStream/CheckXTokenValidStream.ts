@@ -778,15 +778,22 @@ class CheckXTokenValidStream extends stream.Transform {
                      ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
                   this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
                }
-            } else if (attrDef.type === 'NOTATION') {
-               const notationName = getAttributeValueText(attributes[index]);
+            } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
+               const name = getAttributeValueText(attributes[index]);
                let declaredNames = getEnumerationNames(attrDef);
 
-               // §3.3.1: Validity Constraint: Notation Attributes
-               //    Values of this type must match one of the notation names included in the declaration; ...
-               if (declaredNames.indexOf(notationName) === -1) {
-                  this.pushValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-                     [ notationName, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+               if (declaredNames.indexOf(name) === -1) {
+                  if (attrDef.type === 'NOTATION') {
+                     // §3.3.1: Validity Constraint: Notation Attributes
+                     //    Values of this type must match one of the notation names included in the declaration; ...
+                     this.pushValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+                        [ name, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                  } else {
+                     // §3.3.1: Validity Constraint: Enumeration
+                     //    Values of this type must match one of the Nmtoken tokens in the declaration.
+                     this.pushValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+                        [ name, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                  }
                }
             }
          }
