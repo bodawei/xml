@@ -67,8 +67,10 @@ class AttListPToken extends DeclarationPToken {
    deliverPToken: Callback to deliver the PTokens
 
  SYNTAX
+   § 3.3.0
    [52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
    [53] AttDef         ::= S Name S AttType S DefaultDecl
+
    [54] AttType        ::= StringType | TokenizedType | EnumeratedType
    [55] StringType     ::= 'CDATA'
    [56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY'

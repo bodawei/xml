@@ -122,7 +122,7 @@ This goes with the assumption that entity references are acceptable here.
 * If there are multiple ATTLIST's for the same element, the attribute declarations are combined.
 * If a second attribute declaration is found (as judged soley by the attribute name), whether in the same ATTLIST or a subsequent one, it is ignored and a warning is reported.
 * If an ATTLIST has no attributes, this reports nothing (it is mentioned as a good practice not to do this, but the spec doesn't encourage a warning)
-* This does report if a warning if there is an ATTLIST for an element type that hasn't been declared.
+* This does report if a warning if there is an ATTLIST for an element type that hasn't been declared. (§3.3.0)
    * The spec is ambiguous on ordering, in this case. Does it mean that it may warn if the ELEMENT is not declared in the DTD anywhere, or just at the point the ATTLIST is encountered?  This currently assumes the latter, (going on precedence for general entity lookups in default attribute values, which seem to require that the ENTITY must have been declared before the ATTLIST is processes). An argument for the former, however, would be to allow the internal DTD subset to add attributes to elements declared in the external subset.
 * The spec is also ambiguous about whether the values in a NOTATION attribute declaration must have been declared before the ATTLIST declaration. Like the above for the ELEMENT, this assumes that it must have already been declared at this point.
 * Note that this validates individual attribute declarations, even if they are ones that will be ignored because they are a subsquent one (as above)

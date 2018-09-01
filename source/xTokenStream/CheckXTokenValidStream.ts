@@ -129,6 +129,7 @@ class CheckXTokenValidStream extends stream.Transform {
    private contentStack: Array<ContentContext>;
    private currentContext: ContentContext | void;
    private idValues: IDMap;
+   private unanchoredIDRefs: IDMap;
    private emd: EntityMetaData = new EntityMetaData();
    private _seenRoot: boolean = false;
 
@@ -146,6 +147,7 @@ class CheckXTokenValidStream extends stream.Transform {
       this.contentStack = [];
       this.currentContext = undefined;
       this.idValues = {};
+      this.unanchoredIDRefs = {};
    }
 
    private pushValidityError(id: string, params: Array<string>, pos: SToken|void) {
@@ -380,6 +382,10 @@ class CheckXTokenValidStream extends stream.Transform {
          this.validateElementStart(xToken);
       } else if (xToken instanceof elementEnd.XToken) {
          this.currentContext = this.contentStack.pop();
+
+         if (this.contentStack.length === 0) {
+            this.validateDocumentEnd();
+         }
       } else if (xToken instanceof docTypeEnd.XToken) {
          this.validateDTD();
       }
@@ -398,9 +404,11 @@ class CheckXTokenValidStream extends stream.Transform {
       const elName = attListDecl.elementName || '';
       let attrDefs = this.attrDefsByElementName[elName];
 
-      // Note: We do not report on these cases from §3.3: at most one attribute definition for a
-      // given attribute name in an attribute-list declaration, and at least one attribute
-      // definition in each attribute-list declaration. 
+      // Note: We do not report on these cases from §3.3.0 because the spec doesn't seem
+      // to encourage a warning: For interoperability, writers of DTDs may choose to
+      // provide ... at most one attribute definition for a given attribute name in
+      // an attribute-list declaration, and at least one attribute definition in each
+      // attribute-list declaration. 
 
       if (attrDefs) {
          // §3.3: For interoperability, writers of DTDs may choose to provide at most one
@@ -417,7 +425,7 @@ class CheckXTokenValidStream extends stream.Transform {
          this.attrDefsByElementName[elName] = attrDefs;
       }
 
-      // §3.3: At user option, an XML processor may issue a warning if attributes are declared for
+      // §3.3.0: At user option, an XML processor may issue a warning if attributes are declared for
       //    an element type not itself declared, but this is not an error.
       // Note: This takes the position that if the element wasn't declared before this, it is a warning.
       // Conceivably this should wait until the end of the DTD and then make this assessment.
@@ -425,20 +433,21 @@ class CheckXTokenValidStream extends stream.Transform {
          this.pushWarning(XmlWarning.ID.ATTLISTDECL_NO_ELEMENTDECL, [ elName ], openSToken, openSToken);
       }
 
-      // §3.3: When more than one AttlistDecl is provided for a given element type, the contents of
-      //   all those provided are merged. When more than one definition is provided for the same
-      //   attribute of a given element type, the first declaration is binding and later
-      //   declarations are ignored. ... For interoperability, an XML processor may at user option
-      //   issue a warning when ... more than one attribute definition is provided for a given
-      //   attribute, but this is not an error.
       for (let index = 0; index < attListDecl.attDefs.length; index++) {
          const attDef = attListDecl.attDefs[index];
 
          this.validateAttrDef(attListDecl, attDef);
 
          if (!attrDefs.attributes[attDef.name]) {
+            // §3.3.0: When more than one AttlistDecl is provided for a given element type, the contents of
+            //   all those provided are merged. When more than one definition is provided for the same
+            //   attribute of a given element type, the first declaration is binding and later
+            //   declarations are ignored. ...
             attrDefs.attributes[attDef.name] = attDef;
          } else {
+            // §3.3.0: ... For interoperability, an XML processor may at user option
+            //   issue a warning when ... more than one attribute definition is provided for a given
+            //   attribute, but this is not an error.
             this.pushWarning(XmlWarning.ID.ATTLISTDECL_ATTR_EXTRA_DECLARATION, [ elName, attDef.name ],
                openSToken, openSToken);
          }
@@ -649,6 +658,19 @@ class CheckXTokenValidStream extends stream.Transform {
       });
    }
 
+   private validateDocumentEnd() {
+      Object.keys(this.unanchoredIDRefs).forEach((idName) => {
+         // §3.3.1: Validiatity Constraint: IDREF
+         //    ... each Name must match the value of an ID attribute on some element in the
+         //    XML document; i.e. IDREF values must match the value of some ID attribute.
+         const info = this.unanchoredIDRefs[idName];
+         const pToken = info.token.pToken && info.token.pToken.open;
+
+         this.pushValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
+            [ idName, info.token.name, info.attrName ], pToken);
+      });
+   }
+
    private validateElementStart(elStart: ElementStart) {
       const elemAttrsDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
@@ -689,6 +711,13 @@ class CheckXTokenValidStream extends stream.Transform {
                      attrName: attrDef.name,
                   }
                }
+
+               // §3.3.1: Validiatity Constraint: IDREF
+               //    ... each Name must match the value of an ID attribute on some element in the
+               //    XML document; i.e. IDREF values must match the value of some ID attribute.
+               if (this.unanchoredIDRefs[text]) {
+                  delete this.unanchoredIDRefs[text];
+               }
             } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
                const text = getAttributeValueText(attributes[index]);
                const names = text.split(/ +/); // Can't happen once normalization happens
@@ -698,8 +727,20 @@ class CheckXTokenValidStream extends stream.Transform {
                //    Values of type IDREF must match the Name production, and
                //    values of type IDREFS must match Names...
                for (let index = 0; index < names.length; index++) {
-                  if (!util.isName(names[index], this.emd.version, this.emd.revision)) {
-                     badNames.push(names[index]);
+                  const idRef = names[index];
+                  if (!util.isName(idRef, this.emd.version, this.emd.revision)) {
+                     badNames.push(idRef);
+                  }
+
+                  // §3.3.1: Validiatity Constraint: IDREF
+                  //    ... each Name must match the value of an ID attribute on some element in the
+                  //    XML document; i.e. IDREF values must match the value of some ID attribute.
+                  if (!this.idValues[idRef]) {
+                     // Only store the first occurrence.
+                     this.unanchoredIDRefs[idRef] = this.unanchoredIDRefs[idRef] || {
+                        token: elStart,
+                        attrName: attrDef.name,
+                     };
                   }
                }
 

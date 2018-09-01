@@ -425,24 +425,26 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
          });
 
-         describe('IDREF', () => {
+         describe('IDREF attribute', () => {
             let elDecl;
+            let endElName;
             let attListDecl;
             let startToken;
 
             beforeEach(() => {
-               elDecl = new elementDeclaration.XToken('one', 'ANY', undefined, {});
-               attListDecl = new attListDeclaration.XToken('one', [{
+               elDecl = new elementDeclaration.XToken('testEl', 'ANY', undefined, {});
+               attListDecl = new attListDeclaration.XToken('testEl', [{
                   name: 'idRefAttr',
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
                }]);
-               startToken = new elementStart.XToken('one', [{
+               startToken = new elementStart.XToken('testEl', [{
                   name: 'idRefAttr',
                   value: [
                      new text.XToken('goodName', {})
                   ]
                }], {});
+               endElName = new elementEnd.XToken('testEl', {});
             });
 
             it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
@@ -470,7 +472,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports an error if an IDREF value is not a name', (done) => {
-               startToken = new elementStart.XToken('one', [{
+               startToken = new elementStart.XToken('testEl', [{
                   name: 'idRefAttr',
                   value: [
                      new text.XToken('$badName', {})
@@ -483,7 +485,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
-                  [ '$badName', 'one', 'idRefAttr' ]);
+                  [ '$badName', 'testEl', 'idRefAttr' ]);
                expectStream(validator, expected, done);
             });
 
@@ -509,7 +511,120 @@ describe('CheckXTokenValidStream (unit)', () => {
                   [ '$badName, $anotherBadName', 'elName', 'idRefsAttr' ]);
                expectStream(validator, expected, done);
             });
+
+            it('reports no error if an IDREF references an ID named before the IDREF is found', (done) => {
+               attListDecl = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+               }, {
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const secondStartToken = new elementStart.XToken('testEl', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('goodName', {})
+                  ]
+               }], {});
    
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(secondStartToken);
+               validator.write(startToken);
+               validator.write(endElName);
+               validator.write(endElName);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if an IDREF references an ID named after the IDREF is found', (done) => {
+               attListDecl = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+               }, {
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const secondStartToken = new elementStart.XToken('testEl', [{
+                  name: 'idAttr',
+                  value: [
+                     new text.XToken('goodName', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.write(secondStartToken);
+               validator.write(endElName);
+               validator.write(endElName);
+               validator.end();
+   
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if an IDREF references an ID that is never found', (done) => {
+               attListDecl = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+               }, {
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const secondStartToken = new elementStart.XToken('testEl', [{
+                  name: 'idRefAttr',
+                  value: [
+                     new text.XToken('first', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(secondStartToken);
+               validator.write(endElName);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
+                  [ 'first', 'testEl', 'idRefAttr' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if an IDREFS references an ID that is never found', (done) => {
+               attListDecl = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefsAttr',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+               }, {
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+               }]);
+               const secondStartToken = new elementStart.XToken('testEl', [{
+                  name: 'idRefsAttr',
+                  value: [
+                     new text.XToken('goodName second third', {})
+                  ]
+               }], {});
+   
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(secondStartToken);
+               validator.write(startToken);
+               validator.write(endElName);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
+                  [ 'second', 'testEl', 'idRefsAttr' ]);
+               expectStream(validator, expected, done);
+            });
+  
          });
 
          describe('ENTITY attribute', () => {
