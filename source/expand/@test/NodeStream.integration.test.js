@@ -138,17 +138,7 @@ describe('NodeStream (integration)', () => {
             expect(attListDecl.attDefs[0]).toEqual({
                name: 'attr1',
                type: 'ENUMERATION',
-               enumeration: {
-                  names: [{
-                     name: 'four',
-                     repeat: 'ONE',
-                  }, {
-                     name: 'five',
-                     repeat: 'ONE',
-                  }],
-                  listType: 'CHOICE',
-                  repeat: 'ONE',
-               },
+               enumeration: ['four', 'five'],
                defaultType: '#REQUIRED',
                value: [],
             });

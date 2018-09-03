@@ -24,7 +24,7 @@ import {
    attListDeclaration,
    notationDeclaration,
 } from '../token';
-import { AttListXToken, XAttr, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
+import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
@@ -46,7 +46,7 @@ type ElementAttributes = {
 type AttrDefinitions = {
    tokens: Array<AttListXToken>,
    attributes: {
-      [attrName: string]: XAttr,
+      [attrName: string]: AttDefXToken,
    },
 }
 
@@ -100,7 +100,7 @@ type IDMap = {
  * §3.3.3: Attribute value normalization.
  * This should be done whether or not we are validating.
  */
-function normalizeAttributeValue(attribute: any, attrDef?: XAttr): any { // typeHack
+function normalizeAttributeValue(attribute: any, attrDef?: AttDefXToken): any { // typeHack
    const isCData = !attrDef || attrDef.type === 'CDATA';
    let prevHadTrailingSpace = true; // consider the start to already be space terminated
    let prevPiece: { text: string } | void = undefined;
@@ -149,17 +149,6 @@ function getAttributeValueText(attribute: any): string {
    });
 
    return newValue;
-}
-
-function getEnumerationNames(attDef: XAttr): Array<string> {
-   const notationNames = attDef.enumeration && attDef.enumeration.names;
-   let declaredNames: Array<string> = [];
-
-   for (let index = 0; index < notationNames!.length; index++) { // typeHack
-      declaredNames.push((notationNames![index] as XName).name); // typeHack
-   }
-
-   return declaredNames;
 }
 
 class CheckXTokenValidStream extends stream.Transform {
@@ -496,7 +485,7 @@ class CheckXTokenValidStream extends stream.Transform {
       }
    }
 
-   private validateAttrDef(attList: AttListXToken, attDef: XAttr): void {
+   private validateAttrDef(attList: AttListXToken, attDef: AttDefXToken): void {
       const type = attDef.type.toUpperCase();
       const defaultType = attDef.defaultType.toUpperCase();
       const pToken = attList.pToken || {} as AttListPToken; // typeHack
@@ -512,7 +501,7 @@ class CheckXTokenValidStream extends stream.Transform {
       } else if (type === 'NOTATION') {
          // §3.3.1: Validity constraint: Notation Attributes
          //    ...all notation names in the declaration must be declared.
-         const notationNames: Array<string> = getEnumerationNames(attDef);
+         const notationNames: Array<string> = attDef.enumeration || [];
 
          for (let index = 0; index < notationNames.length; index++) {
             const notationName = notationNames[index];
@@ -534,11 +523,11 @@ class CheckXTokenValidStream extends stream.Transform {
                   [ attList.elementName, attDef.name, duplicates.join(', ') ], pToken.open);
             }
          }
-      } else if (type === 'ENUMERATION') {
+      } else if (attDef.type === 'ENUMERATION') {
          if (oneDotZeroRev3OrHigher) {
             // §3.3.1: Validity constraint: No Duplicate Tokens
             //    ...the NmTokens in a single Enumeration attribute declaration, must all be distinct.
-            const enumerationName: Array<string> = getEnumerationNames(attDef);
+            const enumerationName: Array<string> = attDef.enumeration || [];
             const duplicates = this.findDuplicateNamesInEnumeration(enumerationName);
 
             if (duplicates.length > 0) {
@@ -867,7 +856,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
                }
             } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
-               let declaredNames = getEnumerationNames(attrDef);
+               let declaredNames = attrDef.enumeration || [];
 
                if (declaredNames.indexOf(attrText) === -1) {
                   if (attrDef.type === 'NOTATION') {

@@ -1005,17 +1005,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'notationAttr',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: [ 'first', 'second' ],
                   defaultType: '#REQUIRED',
                }]);
                startToken = new elementStart.XToken('testElement', [{
@@ -1035,6 +1025,21 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                expectNoErrors(validator, done);
+            });
+
+            it('reports an error when the enumeration is empty so any notation value is illegal', (done) => {
+               delete attListDecl.attDefs[0].enumeration;
+
+               validator.write(n1);
+               validator.write(n2);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
+                  [ 'first', 'testElement',  'notationAttr', '' ]);
+               expectStream(validator, expected, done);
             });
 
             it('reports an error if the attribute value not among the declared values', (done) => {
@@ -1069,17 +1074,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: [ 'first', 'second' ],
                   defaultType: '#REQUIRED',
                }]);
                startToken = new elementStart.XToken('testElement', [{
@@ -1097,6 +1092,19 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
    
                expectNoErrors(validator, done);
+            });
+
+            it('reports no error when an the enumeration is empty', (done) => {
+               delete attListDecl.attDefs[0].enumeration;
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.write(startToken);
+               validator.end();
+   
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
+                  [ 'first', 'testElement',  'enumerationAttr', '' ]);
+               expectStream(validator, expected, done);
             });
 
             it('reports an error if the attribute value not among the declared values', (done) => {
@@ -1313,11 +1321,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: [],
                   defaultType: '#IMPLIED',
                }, {
                   name: 'ref',
@@ -1326,11 +1330,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }, {
                   name: 'notation2',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: [],
                   defaultType: '#REQUIRED',
                }], {});
 
@@ -1347,11 +1347,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: [],
                   defaultType: '#IMPLIED',
                }, {
                   name: 'ref',
@@ -1375,29 +1371,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notationAttr',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'third',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'third',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'first',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: ['first', 'second', 'first', 'third', 'third', 'first'],
                   defaultType: '#IMPLIED',
                }], {});
 
@@ -1417,17 +1391,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: ['first', 'second'],
                   defaultType: '#IMPLIED',
                }], {});
 
@@ -1516,29 +1480,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'third',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'third',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'first',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: ['first', 'second', 'first', 'third', 'third', 'first'],
                   defaultType: '#IMPLIED',
                }], {});
 
@@ -1577,17 +1519,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'enumerationAttr',
                   type: 'ENUMERATION',
-                  enumeration: {
-                     names: [{
-                        name: 'first',
-                        repeat: 'ONE',
-                     }, {
-                        name: 'second',
-                        repeat: 'ONE',
-                     }],
-                     listType: 'CHOICE',
-                     repeat: 'ONE',
-                  },
+                  enumeration: ['first', 'second'],
                   defaultType: '#IMPLIED',
                }], {});
 

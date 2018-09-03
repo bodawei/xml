@@ -1671,7 +1671,7 @@ describe('attListDeclaration (unit)', () => {
             attDefs: [{
                name: 'att1',
                type: 'CDATA',
-               enumeration: { names: [] },
+               enumeration: [],
                defaultType: '#REQUIRED',
                value: [],
             }],
@@ -1692,7 +1692,7 @@ describe('attListDeclaration (unit)', () => {
             attDefs: [{
                name: 'att1',
                type: 'ENUMERATION',
-               enumeration: { names: [] },
+               enumeration: [],
                defaultType: '#REQUIRED',
                value: [],
             }],

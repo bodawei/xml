@@ -8,7 +8,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken } from './common/literal';
-import nameList, { NameListPToken, XNameList } from './common/nameList';
+import nameList, { NameListPToken, XName, XNameList } from './common/nameList';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -454,10 +454,10 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
  XToken
 \**********************************************************************/
 
-type XAttr = {
+type AttDefXToken = {
    name: string;
    type: string;
-   enumeration?: XNameList;
+   enumeration?: Array<string>;
    defaultType: string;
    value: LiteralValueXToken;
 };
@@ -465,11 +465,11 @@ type XAttr = {
 class AttListXToken {
       public readonly type: string;
       public elementName: string;
-      public attDefs: Array<XAttr>;
+      public attDefs: Array<AttDefXToken>;
       public defaultType?: string;
       public pToken?: AttListPToken;
 
-      constructor(elementName: string, attDefs: Array<XAttr>, pToken?: AttListPToken) {
+      constructor(elementName: string, attDefs: Array<AttDefXToken>, pToken?: AttListPToken) {
          this.type = ATTLIST_XTOKEN_TYPE;
          this.elementName = elementName;
          this.attDefs = attDefs;
@@ -477,13 +477,24 @@ class AttListXToken {
       }
 }
 
+function getEnumerationNames(nameList: XNameList): Array<string> {
+   const names = nameList.names;
+   let declaredNames: Array<string> = [];
+
+   for (let index = 0; index < names.length; index++) {
+      declaredNames.push((names[index] as XName).name); // typeHack
+   }
+
+   return declaredNames;
+}
+
 function pTokenToXToken(pToken: AttListPToken): AttListXToken {
    const name = misc.textOrBlank(pToken.elementName);
-   const attrs: Array<XAttr> = [];
+   const attrs: Array<AttDefXToken> = [];
 
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
-      const xTokenAttrDef: XAttr = {
+      const xTokenAttrDef: AttDefXToken = {
          name: attDef.name.str,
          type: misc.textOrBlank(attDef.type),
          defaultType: misc.textOrBlank(attDef.defaultType),
@@ -495,7 +506,9 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
             xTokenAttrDef.type = 'ENUMERATION';
          }
 
-         xTokenAttrDef.enumeration = nameList.makeXTokenCompatible(attDef.nameList);
+         const xNameList = nameList.makeXTokenCompatible(attDef.nameList);
+         
+         xTokenAttrDef.enumeration = getEnumerationNames(xNameList);
       }
 
       const result = literal.makeTokenCompatible(attDef)
@@ -530,5 +543,5 @@ export {
    AttListPToken,
    AttDefPToken,
    AttListXToken,
-   XAttr,
+   AttDefXToken,
 };

@@ -652,17 +652,7 @@ describe('attListDeclaration (integration)', () => {
             expect(token).toEqual(new attListDeclaration.XToken('elName', [{
                name: 'attrName',
                type: 'ENUMERATION',
-               enumeration: {
-                  names: [{
-                     name: 'one',
-                     repeat: 'ONE',
-                  }, {  
-                     name: 'two',
-                     repeat: 'ONE',
-                  }],
-                  listType: 'CHOICE',
-                  repeat: 'ONE',
-               },
+               enumeration: [ 'one', 'two' ],
                defaultType: '#REQUIRED',
                value: []
             }]));
@@ -683,17 +673,7 @@ describe('attListDeclaration (integration)', () => {
             expect(token).toEqual(new attListDeclaration.XToken('elName', [{
                name: 'attrName',
                type: 'NOTATION',
-               enumeration: {
-                  names: [{
-                     name: 'one',
-                     repeat: 'ONE',
-                  }, {  
-                     name: 'two',
-                     repeat: 'ONE',
-                  }],
-                  listType: 'CHOICE',
-                  repeat: 'ONE',
-               },
+               enumeration: [ 'one', 'two' ],
                defaultType: '#REQUIRED',
                value: []
             }]));
