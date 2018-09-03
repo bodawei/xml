@@ -70,11 +70,12 @@ class AttListPToken extends DeclarationPToken {
    § 3.3.0
    [52] AttlistDecl    ::= '<!ATTLIST' S Name AttDef* S? '>'
    [53] AttDef         ::= S Name S AttType S DefaultDecl
-
+   §3.3.1
    [54] AttType        ::= StringType | TokenizedType | EnumeratedType
    [55] StringType     ::= 'CDATA'
    [56] TokenizedType  ::= 'ID' | 'IDREF' | 'IDREFS' | 'ENTITY'
                            | 'ENTITIES' | 'NMTOKEN' | 'NMTOKENS'
+
    [57] EnumeratedType ::= NotationType | Enumeration
    [58] NotationType   ::= 'NOTATION' S
                            '(' S? Name (S? '|' S? Name)* S? ')'

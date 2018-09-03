@@ -112,6 +112,7 @@ function isNamePToken(value: any): value is NamePToken {
    [48] cp             ::= (Name | choice | seq) ('?' | '*' | '+')?
    [49] choice         ::= '(' S? cp ( S? '|' S? cp )+ S? ')'
    [50] seq            ::= '(' S? cp ( S? ',' S? cp )* S? ')'
+   §3.2.2
    [51] Mixed          ::= '(' S? '#PCDATA' (S? '|' S? Name)* S? ')*'
                            | '(' S? '#PCDATA' S? ')'
 \**********************************************************************/

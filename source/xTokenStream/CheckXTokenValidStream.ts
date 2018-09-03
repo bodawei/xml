@@ -96,11 +96,53 @@ type IDMap = {
    }
 };
 
-function getAttributeValueText(attribute: XAttr): string {
+/*
+ * §3.3.3: Attribute value normalization.
+ * This should be done whether or not we are validating.
+ */
+function normalizeAttributeValue(attribute: any, attrDef?: XAttr): any { // typeHack
+   const isCData = !attrDef || attrDef.type === 'CDATA';
+   let prevHadTrailingSpace = true; // consider the start to already be space terminated
+   let prevPiece: { text: string } | void = undefined;
+   const newValue = [];
+
+   for (let index = 0; index < attribute.value.length; index++) {
+      const piece = attribute.value[index];
+
+      if (!text.isTextXToken(piece)) {
+         newValue.push(piece)
+         continue;
+      }
+
+      const newPiece = new text.XToken(piece.text, piece.pToken);
+      newValue.push(newPiece);
+
+      if (isCData) {
+         newPiece.text = newPiece.text.replace(/[ \r\n\t]/g, ' ');
+      } else {
+         newPiece.text = newPiece.text.replace(/[ \r\n\t]+/g, ' ');
+
+         if (prevHadTrailingSpace) {
+            newPiece.text = newPiece.text.replace(/^ /, '');
+         }
+
+         prevPiece = newPiece;
+         prevHadTrailingSpace = newPiece.text[newPiece.text.length - 1] === ' ';
+      }
+   };
+
+   if (prevHadTrailingSpace && prevPiece) {
+      prevPiece!.text = prevPiece!.text.replace(/ $/, ''); // typeHack
+   }
+
+   return newValue;
+}
+
+function getAttributeValueText(attribute: any): string {
    const rawValue = attribute.value;
    let newValue = '';
 
-   rawValue.forEach((value) => {
+   rawValue.forEach((value: any) => { // typeHack
       if (text.isTextXToken(value)) {
          newValue += value.text;
       }
@@ -676,37 +718,45 @@ class CheckXTokenValidStream extends stream.Transform {
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes || [];
 
+      // §3.3.3: Normalization
+      for (let index = 0; index < attributes.length; index++) {
+         const attrName = attributes[index].name || '';
+         const attrDef = elemAttrsDef && elemAttrsDef.attributes[attrName];
+
+         attributes[index].value = normalizeAttributeValue(attributes[index], attrDef);
+      }
+
       if (elemAttrsDef) { // This must be required somewhere...
-         // Validity Constraint: §3.1: Validity constraint: Attribute Value Type
+         // §3.1: Validity constraint: Attribute Value Type
          //    The attribute must have been declared; the value must be of
          //    the type declared for it.
          for (let index = 0; index < attributes.length; index++) {
             const attrName = attributes[index].name || '';
             const pToken = elStart.pToken;
             const attrDef = elemAttrsDef.attributes[attrName];
+            const attrText = getAttributeValueText(attributes[index]);
 
             if (!attrDef) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
                   [ elStart.name, attrName ], pToken.open);
             } else if (attrDef.type === 'ID') {
-               const text = getAttributeValueText(attributes[index]);
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
-               if (!util.isName(text, this.emd.version, this.emd.revision)) {
+               if (!util.isName(attrText, this.emd.version, this.emd.revision)) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
-                     [ text, elStart.name, attrName ], pToken.open);
+                     [ attrText, elStart.name, attrName ], pToken.open);
                }
 
                // §3.3.1: Validity constraint: ID
                //    ... A name must not appear more than once in an XML document as a value of
                //    this type; i.e., ID values must uniquely identify the elements which bear them.
-               const previous = this.idValues[text] || {};
+               const previous = this.idValues[attrText] || {};
 
                if (previous.token) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                     [ text, elStart.name, attrName, previous.token.name, previous.attrName ], pToken.open);
+                     [ attrText, elStart.name, attrName, previous.token.name, previous.attrName ], pToken.open);
                } else {
-                  this.idValues[text] = {
+                  this.idValues[attrText] = {
                      token: elStart,
                      attrName: attrDef.name,
                   }
@@ -715,12 +765,11 @@ class CheckXTokenValidStream extends stream.Transform {
                // §3.3.1: Validiatity Constraint: IDREF
                //    ... each Name must match the value of an ID attribute on some element in the
                //    XML document; i.e. IDREF values must match the value of some ID attribute.
-               if (this.unanchoredIDRefs[text]) {
-                  delete this.unanchoredIDRefs[text];
+               if (this.unanchoredIDRefs[attrText]) {
+                  delete this.unanchoredIDRefs[attrText];
                }
             } else if (attrDef.type === 'IDREF' || attrDef.type === 'IDREFS') {
-               const text = getAttributeValueText(attributes[index]);
-               const names = text.split(/ +/); // Can't happen once normalization happens
+               const names = attrText.split(/ +/); // Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: IDREF
@@ -751,8 +800,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
                }
             } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
-               const text = getAttributeValueText(attributes[index]);
-               const names = text.split(/ +/); // Can't happen once normalization happens
+               const names = attrText.split(/ +/); // Can't happen once normalization happens
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Entity Name
@@ -800,8 +848,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pToken.open);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
-               const text = getAttributeValueText(attributes[index]);
-               const names = text.split(/ +/);
+               const names = attrText.split(/ +/);
                const badNames = [];
 
                // §3.3.1: Validity Constraint: Name Token
@@ -820,20 +867,19 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
                }
             } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
-               const name = getAttributeValueText(attributes[index]);
                let declaredNames = getEnumerationNames(attrDef);
 
-               if (declaredNames.indexOf(name) === -1) {
+               if (declaredNames.indexOf(attrText) === -1) {
                   if (attrDef.type === 'NOTATION') {
                      // §3.3.1: Validity Constraint: Notation Attributes
                      //    Values of this type must match one of the notation names included in the declaration; ...
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-                        [ name, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
                   } else {
                      // §3.3.1: Validity Constraint: Enumeration
                      //    Values of this type must match one of the Nmtoken tokens in the declaration.
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
-                        [ name, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
                   }
                }
             }

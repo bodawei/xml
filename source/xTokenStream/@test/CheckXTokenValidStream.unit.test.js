@@ -290,6 +290,114 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         describe('normalization', () => {
+
+            it('replaces non-space white characters with spaces', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+                  value: [
+                     new text.XToken('  this\tis\nfun. \t\n but a\rcan not actually happen  ', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value[0].text)
+                     .toEqual('  this is fun.    but a can not actually happen  ');
+                  done();
+               });
+            });
+
+            it('replaces non-space white characters with spaces in a non-CDATA attribute', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefs',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'idRefs',
+                  value: [
+                     new text.XToken('   one\ttwo', {}),
+                     new text.XToken('\nthree ', {}),
+                     new text.XToken('four ', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value)
+                     .toEqual([
+                        new text.XToken('one two', {}),
+                        new text.XToken(' three ', {}),
+                        new text.XToken('four', {}),
+                     ]);
+                     done();
+               });
+            });
+
+            it('treats an unknown attribute as CDATA', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined, {});
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'idRefs',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'undefinedAttribute',
+                  value: [
+                     new text.XToken('   one\ttwo \nthree four', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[3].attributes[0].value[0].text)
+                     .toEqual('   one two  three four');
+                     done();
+               });
+            });
+
+            it('treats an attribute on an element without an ATTLIST as CDATA', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined, {});
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'undefinedAttribute',
+                  value: [
+                     new text.XToken('   one\ttwo \nthree four', {})
+                  ]
+               }], {});
+
+               validator.write(elDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[1].attributes[0].value[0].text)
+                     .toEqual('   one two  three four');
+                     done();
+               });
+            });
+
+         });
+
          describe('ID', () => {
 
             it('reports an error if an ID value is not a name', (done) => {
