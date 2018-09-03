@@ -1,11 +1,40 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning,  } from '../../error';
+import { EntityMetaData } from '../../basic/index';
+import { ErrorCollector, WellFormedError, XmlWarning,  } from '../../error/index';
+import { SToken, STokenSource } from '../../sToken/index';
 
-import text from '../text';
+import text, { isTextPToken } from '../text';
 
 import misc from './misc.js';
-import literal from './literal';
+import literal, { LiteralPToken } from './literal';
+import { LiteralValuePToken, LiteralValueXToken } from './literalValue';
+
+type ParseOptions = {
+   geRef?: boolean;
+   terminators?: Array<string>;
+}
+
+interface AttributePToken extends LiteralPToken {
+   name: SToken;
+   postNameSpace?: SToken;
+   equal?: SToken;
+   postEqualSpace?: SToken;
+   trailingSpace?: SToken;
+};
+
+type AttributeXToken = {
+   name: string;
+   value?: LiteralValueXToken,
+}
+
+type AttributesXToken = Array<AttributeXToken>;
+
+type AttributesPToken = Array<AttributePToken>;
+type DeliverPToken = (result?: AttributesPToken) => void;
+type CheckAttValue = (name: SToken, value: LiteralValuePToken, ec: ErrorCollector, emd: EntityMetaData) => void;
+type CheckAttName = (name: SToken, index: number, ec: ErrorCollector, emd: EntityMetaData) => void;
+
 
 /**********************************************************************\
  The attribute namespace contains the usual tools for processing
@@ -41,7 +70,7 @@ const WARN = XmlWarning.ID;
     [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
 \**********************************************************************/
 
-function parse(source, options = {}, deliverPToken) {
+function parse(source: STokenSource, options: ParseOptions = {}, deliverPToken: DeliverPToken): void {
    const newOptions = {
       geRef: options.geRef,
       terminators: [ '=' ].concat(options.terminators || []),
@@ -49,31 +78,32 @@ function parse(source, options = {}, deliverPToken) {
    getNextAttribute(source, newOptions, [], deliverPToken);
 }
 
-function getNextAttribute(source, options, attrs, deliverPToken) {
+function getNextAttribute(source: STokenSource, options: ParseOptions, attrs: Array<AttributePToken>, deliverPToken: DeliverPToken) {
    source.extract('word', options.terminators, (sToken) => {
-      addAttribute(source, attrs, options, sToken, deliverPToken);
+      if (!sToken) {
+         deliverPToken(attrs);
+      } else {
+         addAttribute(source, attrs, options, sToken, deliverPToken);
+      }
    });
 }
 
-function addAttribute(source, attrs, options, name, deliverPToken) {
-   if (!name) {
-      deliverPToken(attrs);
-      return;
-   }
-   const attr = {
+function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, options: ParseOptions, name: SToken, deliverPToken: DeliverPToken) {
+   const attr: AttributePToken = {
       name,
+      value: []
    };
    attrs.push(attr);
 
-   source.extractToObject('space', attr, 'postNameSpace');
+   source.extractToObjectNoParams('space', attr, 'postNameSpace');
    source.extractToObject('match', '=', attr, 'equal');
-   source.extractToObject('space', attr, 'postEqualSpace');
+   source.extractToObjectNoParams('space', attr, 'postEqualSpace');
    literal.parse(source, {
       pToken: attr,
       geRef: options.geRef || false,
    }, (modifiedPToken) => {
       if (modifiedPToken) {
-         source.extractToObject('space', attr, 'trailingSpace');
+         source.extractToObjectNoParams('space', attr, 'trailingSpace');
       }
 
       getNextAttribute(source, options, attrs, deliverPToken);
@@ -84,8 +114,8 @@ function addAttribute(source, attrs, options, name, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type, checkName, checkValue) {
-   const seenAttrNames = {};
+function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, preceedingSpace: SToken, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
+   const seenAttrNames: { [ attrName: string ]: true } = {};
 
    for (let index = 0; index < pAttributes.length; index++) {
       const attr = pAttributes[index];
@@ -132,7 +162,7 @@ function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type,
             for (let index = 0; index < attr.value.length; index++) {
                const valuePart = attr.value[index];
 
-               if (valuePart && valuePart.type === text.PTYPE) {
+               if (isTextPToken(valuePart)) {
                   if (valuePart.text && valuePart.text.str.indexOf('<') !== -1) {
                      ec.report(WFEID.ATTRIBUTE_INVALID_VALUE, [ nameText ]);
                   }
@@ -152,50 +182,64 @@ function checkWellFormed(pAttributes, ec, entityMetaData, preceedingSpace, type,
  can be inserted into a token.
 \**********************************************************************/
 
-function makeTokenCompatible(pAttributes = []) {
-   const attrs = [];
+function makeTokenCompatible(pAttributes: AttributesPToken = []) {
+   const attrs: AttributesXToken = [];
 
    for (let index = 0; index < pAttributes.length; index++) {
       const attr = pAttributes[index];
-
-      attrs.push({
+      const value = literal.makeTokenCompatible(attr);
+      const details: AttributeXToken = {
          name: misc.textOrBlank(attr.name),
-         value: literal.makeTokenCompatible(attr),
-      });
+         value: value || [],
+      };
+
+      attrs.push(details);
    }
 
    return attrs;
 }
 
-function makeOneTokenCompatible(attributes = []) {
-   const attrs = [];
+function makeOneTokenCompatible(attributes: AttributesPToken = []) {
+   const attrs: AttributesXToken = [];
 
    for (let index = 0; index < attributes.length; index++) {
       const attr = attributes[index];
-
-      attrs.push({
+      const value = literal.makeOneTokenCompatible(attr);
+      const details: AttributeXToken = {
          name: misc.textOrBlank(attr.name),
-         value: literal.makeOneTokenCompatible(attr),
-      });
+         value: value ? [ new text.XToken(value) ] : [],
+      };
+      
+      attrs.push(details);
    }
 
    return attrs;
 }
 
-function getSTokens(attributes = []) {
-   let results = [];
+function getSTokens(attributes: AttributesPToken = []) {
+   let results: Array<SToken> = [];
 
    for (let index = 0; index < attributes.length; index++) {
       const attr = attributes[index];
 
       results.push(attr.name);
-      results.push(attr.postNameSpace);
-      results.push(attr.equal);
-      results.push(attr.postEqualSpace);
+      if (attr.postNameSpace) {
+         results.push(attr.postNameSpace);
+      }
+
+      if (attr.equal) {
+         results.push(attr.equal);
+      }
+
+      if (attr.postEqualSpace) {
+         results.push(attr.postEqualSpace);
+      }
 
       results = results.concat(literal.getSTokens(attr));
 
-      results.push(attr.trailingSpace);
+      if (attr.trailingSpace) {
+         results.push(attr.trailingSpace);
+      }
    }
 
    return results.filter(item => item);
@@ -210,3 +254,7 @@ const attribute = {
 };
 
 export default attribute;
+
+export {
+   AttributeXToken,
+};

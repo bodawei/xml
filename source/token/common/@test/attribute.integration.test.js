@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { EntityMetaData } from '../../../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../../error';
+import { defaultExtractors } from '../../../extractor';
+import { STokenSource } from '../../../sToken';
+import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import text from '../text';
+import text from '../../text';
 
-import attribute from './attribute.js';
+import attribute from '../attribute';
 
 describe('attribute (integration)', () => {
    let emd;
@@ -73,6 +73,7 @@ describe('attribute (integration)', () => {
                postNameSpace: undefined,
                equal: makeSToken('='),
                postEqualSpace: undefined,
+               value: [],
             } ]);
             done();
          });
@@ -89,6 +90,7 @@ describe('attribute (integration)', () => {
                postNameSpace: undefined,
                equal: undefined,
                postEqualSpace: undefined,
+               value: [],
             } ]);
             done();
          });
@@ -164,10 +166,10 @@ describe('attribute (integration)', () => {
 
          expect(attrs).toEqual([ {
             name: 'one',
-            value: '1',
+            value: [ new text.XToken('1') ],
          }, {
             name: 'two',
-            value: 'two',
+            value: [ new text.XToken('two') ],
          } ]);
       });
    });

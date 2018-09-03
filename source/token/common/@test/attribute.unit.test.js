@@ -1,17 +1,17 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError, XmlWarning } from '../../error';
-import { SToken } from '../../sToken';
+import { EntityMetaData, Range } from '../../../basic';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { WellFormedError, XmlWarning } from '../../../error';
+import { SToken } from '../../../sToken';
 
-import text from '../text';
-import entityReference from '../entityReference';
-import attribute from './attribute.js';
-import misc from './misc.js';
-import literal from './literal';
+import text from '../../text';
+import entityReference from '../../entityReference';
+import attribute from '../attribute';
+import misc from '../misc.js';
+import literal from '../literal';
 
 describe('attribute (unit)', () => {
    let attributesPChunk;
@@ -23,12 +23,14 @@ describe('attribute (unit)', () => {
          postNameSpace: expectedSToken(' '),
          equal: expectedSToken('='),
          postEqualSpace: expectedSToken(' '),
+         value: [],
          trailingSpace: expectedSToken(' '),
       }, {
          name: expectedSToken('another'),
          postNameSpace: undefined,
          equal: expectedSToken('='),
          postEqualSpace: undefined,
+         value: [],
          trailingSpace: undefined,
       } ];
    });
@@ -362,10 +364,10 @@ describe('attribute (unit)', () => {
 
          expect(attrs).toEqual([ {
             name: 'version',
-            value: undefined,
+            value: [],
          }, {
             name: 'another',
-            value: undefined,
+            value: [],
          } ]);
       });
 
@@ -402,10 +404,10 @@ describe('attribute (unit)', () => {
 
          expect(attrs).toEqual([ {
             name: 'version',
-            value: undefined,
+            value: [],
          }, {
             name: 'another',
-            value: undefined,
+            value: [],
          } ]);
       });
 

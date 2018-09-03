@@ -2,7 +2,7 @@
 
 import {
    textOrBlank,
-} from './common/misc.js';
+} from './common/misc';
 import base from './base';
 
 const SPACE = 'SPACE';

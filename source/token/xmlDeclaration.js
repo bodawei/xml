@@ -2,9 +2,9 @@
 
 import { WellFormedError } from '../error';
 
-import { textOrBlank } from './common/misc.js';
-import * as instruction from './bridge/instruction.js';
-import attribute from './common/attribute.js';
+import { textOrBlank } from './common/misc';
+import * as instruction from './bridge/instruction';
+import attribute from './common/attribute';
 import base from './base';
 
 /**********************************************************************\

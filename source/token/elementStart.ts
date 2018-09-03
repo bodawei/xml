@@ -1,8 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityMetaData } from '../basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
+import { SToken, STokenSource } from '../sToken/index';
 
-import attribute from './common/attribute.js';
+import attribute, { AttributeXToken } from './common/attribute';
 import misc from './common/misc.js';
 import base from './base';
 
@@ -13,38 +15,46 @@ const ELEMENT_EMPTY = 'ELEMENT_EMPTY';
 const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
 const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
+type DeliverElementStartPToken = (pToken?: ElementStartPToken) => void;
+
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
  an element start tag.
 \**********************************************************************/
 
-class ElementStart extends base.XToken {
+class ElementStart {
+   public readonly type: string = ELEMENT_START_XTOKEN;
+   public name: string;
+   public attributes: Array<AttributeXToken>;
+   public pToken?: ElementStartPToken;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(name, attributes, pToken) {
-      super(ELEMENT_START_XTOKEN, pToken);
-
+   constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementStartPToken) {
       this.name = name;
       this.attributes = attributes;
+      this.pToken = pToken;
    }
 
 }
 
-class ElementEmpty extends base.XToken {
+class ElementEmpty {
+   public readonly type: string = ELEMENT_EMPTY_XTOKEN;
+   public name: string;
+   public attributes: Array<AttributeXToken>;
+   public pToken?: ElementEmptyPToken;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(name, attributes, pToken) {
-      super(ELEMENT_EMPTY_XTOKEN, pToken);
-
+   constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementEmptyPToken) {
       this.name = name;
       this.attributes = attributes;
+      this.pToken = pToken;
    }
 
 }
 
 class ElementStartPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: { [ any: string]: any }) {
       super(ELEMENT_START, props);
    }
 
@@ -66,7 +76,7 @@ class ElementStartPToken extends base.PToken {
 
 class ElementEmptyPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: { [ any: string]: any }) {
       super(ELEMENT_EMPTY, props);
    }
 
@@ -103,14 +113,14 @@ class ElementEmptyPToken extends base.PToken {
    [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'
 \**********************************************************************/
 
-function parse(source, open, deliverPToken) {
+function parse(source: STokenSource, open: SToken, deliverPToken: DeliverElementStartPToken) {
    const pToken = new ElementStartPToken({
       open,
    });
 
-   source.extractToObject('space', pToken, 'postOpenSpace');
+   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
    source.extractToObject('word', [ '>', '/>' ], pToken, 'name');
-   source.extractToObject('space', pToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', pToken, 'postNameSpace');
 
    attribute.parse(source, {
       geRef: true,
@@ -142,7 +152,7 @@ function parse(source, open, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.postOpenSpace);
    ec.check(pToken.postOpenSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
@@ -166,7 +176,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: ElementStartPToken | ElementEmptyPToken) {
    const className = (pToken.type === ELEMENT_START) ? ElementStart : ElementEmpty;
 
    return new className(misc.textOrBlank(pToken.name),

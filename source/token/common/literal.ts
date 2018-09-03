@@ -4,9 +4,7 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { SToken, STokenSource } from '../../sToken';
 
-import entityReference from '../entityReference';
-import text, { TextPToken, TextXToken } from '../text';
-import misc from './misc.js';
+import text, { TextXToken } from '../text';
 import literalValue, {
    LiteralValuePToken,
    Terminators as LiteralValueTerminators,
@@ -21,18 +19,12 @@ type ParseOptions = {
    peRef?: boolean,
    geRef?: boolean,
 };
-type LiteralPToken = {
+interface LiteralPToken {
    openQuote?: SToken,
    value: LiteralValuePToken,
    closeQuote?: SToken,
    [other: string]: any,
 };
-
-// <typeHack>
-   function isTextXToken(item: any): item is TextXToken {
-      return item.type === text.XTYPE;
-   }
-// </typeHack>
 
 /**********************************************************************\
  The literal namespace has utility routines for dealing with
@@ -116,7 +108,7 @@ function makeOneTokenCompatible(pToken: LiteralPToken): string | void {
    } else {
       const firstItem = result[0];
 
-      if (isTextXToken(firstItem)) {
+      if (text.isTextXToken(firstItem)) {
          return firstItem.text;
       }
    }

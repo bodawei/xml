@@ -27,7 +27,7 @@ import {
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import PToXTokenStream from '../PToXTokenStream.js';
+import PToXTokenStream from '../PToXTokenStream';
 
 describe('PToXTokenStream (integration)', () => {
    let pTokenStream;
@@ -203,7 +203,7 @@ describe('PToXTokenStream (integration)', () => {
       expectInputToProduce('<?xml version="1.0"?>', [
          new xmlDeclaration.XToken([ {
             name: 'version',
-            value: '1.0',
+            value: [ new text.XToken('1.0') ],
          } ], []) ], done);
    });
 

@@ -706,6 +706,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const elemAttrsDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes || [];
+      const pTokenOpen = elStart.pToken && elStart.pToken.open;
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
@@ -721,19 +722,18 @@ class CheckXTokenValidStream extends stream.Transform {
          //    the type declared for it.
          for (let index = 0; index < attributes.length; index++) {
             const attrName = attributes[index].name || '';
-            const pToken = elStart.pToken;
             const attrDef = elemAttrsDef.attributes[attrName];
             const attrText = getAttributeValueText(attributes[index]);
 
             if (!attrDef) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
-                  [ elStart.name, attrName ], pToken.open);
+                  [ elStart.name, attrName ], pTokenOpen);
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
                if (!util.isName(attrText, this.emd.version, this.emd.revision)) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
-                     [ attrText, elStart.name, attrName ], pToken.open);
+                     [ attrText, elStart.name, attrName ], pTokenOpen);
                }
 
                // §3.3.1: Validity constraint: ID
@@ -743,7 +743,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
                if (previous.token) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_DUPLICATE,
-                     [ attrText, elStart.name, attrName, previous.token.name, previous.attrName ], pToken.open);
+                     [ attrText, elStart.name, attrName, previous.token.name, previous.attrName ], pTokenOpen);
                } else {
                   this.idValues[attrText] = {
                      token: elStart,
@@ -786,7 +786,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   const code = attrDef.type === 'IDREF' ?
                      ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME :
                      ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME;
-                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'ENTITY' || attrDef.type === 'ENTITIES') {
                const names = attrText.split(/ +/); // Can't happen once normalization happens
@@ -805,7 +805,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME;
-                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
 
                const undeclared = [];
@@ -827,14 +827,14 @@ class CheckXTokenValidStream extends stream.Transform {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY;
-                  this.pushValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pToken.open);
+                  this.pushValidityError(code, [ undeclared.join(', '), elStart.name, attrName ], pTokenOpen);
                }
 
                if (parsed.length > 0) {
                   const code = attrDef.type === 'ENTITY' ?
                      ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY :
                      ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY;
-                  this.pushValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pToken.open);
+                  this.pushValidityError(code, [ parsed.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'NMTOKEN' || attrDef.type === 'NMTOKENS') {
                const names = attrText.split(/ +/);
@@ -853,7 +853,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   const code = attrDef.type === 'NMTOKEN' ?
                      ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN :
                      ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN;
-                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pToken.open);
+                  this.pushValidityError(code, [ badNames.join(', '), elStart.name, attrName ], pTokenOpen);
                }
             } else if (attrDef.type === 'NOTATION' || attrDef.type === 'ENUMERATION') {
                let declaredNames = attrDef.enumeration || [];
@@ -863,12 +863,12 @@ class CheckXTokenValidStream extends stream.Transform {
                      // §3.3.1: Validity Constraint: Notation Attributes
                      //    Values of this type must match one of the notation names included in the declaration; ...
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
-                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pTokenOpen);
                   } else {
                      // §3.3.1: Validity Constraint: Enumeration
                      //    Values of this type must match one of the Nmtoken tokens in the declaration.
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
-                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pToken.open);
+                        [ attrText, elStart.name, attrName, declaredNames.join(', ') ], pTokenOpen);
                   }
                }
             }
@@ -892,7 +892,7 @@ class CheckXTokenValidStream extends stream.Transform {
       }
 
       if (warningId) {
-         this.pushWarning(warningId, [ elStart.name ], elStart.pToken.open, elStart.pToken.open);
+         this.pushWarning(warningId, [ elStart.name ], pTokenOpen, pTokenOpen);
       }
    }
 }

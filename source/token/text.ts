@@ -21,8 +21,8 @@ class TextXToken extends base.XToken {
    public type = TEXT_XTOKEN;
    public text: string;
 
-   constructor(text: string, pToken: TextPToken) {
-      super(TEXT_XTOKEN, pToken);
+   constructor(text: string, pToken?: TextPToken) {
+      super(TEXT_XTOKEN, pToken || {} as TextPToken);
 
       this.text = text;
    }
@@ -47,6 +47,10 @@ class TextPToken extends base.PToken {
 
       return results;
    }
+}
+
+function isTextPToken(item: any): item is TextPToken {
+   return item.type === TEXT;
 }
 
 function isTextXToken(item: any): item is TextXToken {
@@ -85,7 +89,8 @@ const text = {
    makeXToken,
 
    isTextXToken,
+   isTextPToken,
 };
 
 export default text;
-export { TextPToken, TextXToken };
+export { TextPToken, TextXToken, isTextPToken };

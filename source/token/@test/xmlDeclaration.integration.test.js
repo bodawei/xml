@@ -7,7 +7,8 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as xmlDeclaration from '../xmlDeclaration.js';
+import text from '../text';
+import * as xmlDeclaration from '../xmlDeclaration';
 
 describe('xmlDeclaration (integration)', () => {
    let xmlDeclPToken;
@@ -92,10 +93,10 @@ describe('xmlDeclaration (integration)', () => {
 
             expect(token.params).toEqual([ {
                name: 'version',
-               value: '1.3',
+               value: [ new text.XToken('1.3') ],
             }, {
                name: 'standalone',
-               value: 'yes',
+               value: [ new text.XToken('yes') ],
             } ]);
             done();
          });
