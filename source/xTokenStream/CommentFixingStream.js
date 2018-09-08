@@ -25,7 +25,7 @@ class CommentFixer extends stream.Transform {
    }
 
    _transform(token, encoding, callback) {
-      if (token instanceof comment.XToken && token.text.indexOf('&#') !== -1) {
+      if (token.type === comment.XTYPE && token.text.indexOf('&#') !== -1) {
          adjustCommentContent(token);
       }
 

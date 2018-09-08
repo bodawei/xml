@@ -2,3 +2,4 @@
 
 export { default as SToken } from './SToken';
 export { default as STokenSource } from './STokenSource';
+export { default as STokenArrayBuilder } from './STokenArrayBuilder';

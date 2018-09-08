@@ -76,7 +76,7 @@ describe('CommentFixingStream (integration)', () => {
          });
          cf.on('end', () => {
             expect(results[1] instanceof tokens.xmlDeclaration.XToken).toEqual(true);
-            expect(results[2] instanceof tokens.comment.XToken).toEqual(true);
+            expect(results[2] instanceof tokens.comment.CommentXToken).toEqual(true);
             expect(results[3] instanceof tokens.elementStart.XToken).toEqual(true);
             expect(results[4] instanceof tokens.charData.XToken).toEqual(true);
             expect(results[5] instanceof tokens.elementEnd.XToken).toEqual(true);

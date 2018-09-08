@@ -34,7 +34,7 @@ describe('FixingStream (unit)', () => {
    }
 
    it('passes a comment through', (done) => {
-      const before = new tokenNs.comment.XToken('elName', {});
+      const before = new tokenNs.comment.CommentXToken('elName');
 
       fs.write(before);
       fs.end();

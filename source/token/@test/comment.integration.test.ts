@@ -1,28 +1,26 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as comment from '../comment.js';
+import { CommentPToken, parse, checkWellFormed, PTYPE } from '../comment.js';
 
 describe('comment (integration)', () => {
-   let commentPToken;
-   let emd;
-   let expectedSToken;
+   let commentPToken: CommentPToken;
+   let emd: EntityMetaData;
 
    beforeEach(() => {
-      expectedSToken = makeSTokenMaker();
       emd = new EntityMetaData();
-      commentPToken = {
-         type: 'COMMENT',
+      const expectedSToken = makeSTokenMaker();
+      commentPToken = new CommentPToken({
+         open: SToken.fromString(''),
          text: [ expectedSToken('my comment') ],
          close: expectedSToken('-->'),
-      };
-
+      });
       commentPToken.open = expectedSToken('<!--');
    });
 
@@ -33,7 +31,7 @@ describe('comment (integration)', () => {
          source.addText('my comment-->');
          source.endText();
 
-         comment.parse(source, commentPToken.open, (parsing) => {
+         parse(source, commentPToken.open, (parsing) => {
             expect(parsing).toEqual(commentPToken);
             done();
          });
@@ -42,8 +40,8 @@ describe('comment (integration)', () => {
       it('parses a comment with double hyphens in it that ends early', (done) => {
          const source = new STokenSource(defaultExtractors, emd);
          const expectedSToken = makeSTokenMaker();
-         const pToken = {
-            type: 'COMMENT',
+         const pToken = new CommentPToken({
+            type: PTYPE,
             open: commentPToken.open,
             text: [
                expectedSToken('my '),
@@ -52,11 +50,11 @@ describe('comment (integration)', () => {
                expectedSToken('--'),
             ],
             close: undefined,
-         };
+         });
          source.addText('my --comment--');
          source.endText();
 
-         comment.parse(source, pToken.open, (parsing) => {
+         parse(source, pToken.open, (parsing) => {
             expect(parsing).toEqual(pToken);
             done();
          });
@@ -71,10 +69,10 @@ describe('comment (integration)', () => {
          source.addText('x\u0000y-->');
          source.endText();
 
-         comment.parse(source, commentPToken.open, (parsing) => {
+         parse(source, commentPToken.open, (parsing) => {
             const ec = new ErrorCollector(undefined, WellFormedError);
 
-            comment.checkWellFormed(parsing, ec, emd);
+            checkWellFormed(parsing, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

@@ -51,7 +51,6 @@ With that said, this does have certain patterns that it ties to stick to in term
 * CharData
 * CDATA
 * Space
-* Comment
 * Processing Instruction
 * Entity Reference
 * Element Start
@@ -62,6 +61,8 @@ With that said, this does have certain patterns that it ties to stick to in term
    * EntityEnd
    * <internal subset>?
 
+## Comments
+* Spec says "for interoperability, -- may not occur in a comment, which would imply to me that one can do this, but it should generate some kind of warning.  However, the syntax simply doesn't allow this, making it a well-formed error.
 
 
 # Validity

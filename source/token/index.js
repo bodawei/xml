@@ -7,7 +7,7 @@ import * as instruction from './bridge/instruction';
 import attListDeclaration from './attListDeclaration';
 import * as cdata from './cdata';
 import * as charData from './charData';
-import * as comment from './comment';
+import comment from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as entityDeclaration from './entityDeclaration';

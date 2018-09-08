@@ -1798,7 +1798,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
       describe('content', () => {
          describe('ANY', () => {
-            const commentToken = new comment.XToken('testComment');
+            const commentToken = new comment.CommentXToken('testComment');
             const piToken = new processingInstruction.XToken('test', 'pi');
             const cDataToken = new cdata.XToken('testCData');
             const elementStartToken = new elementStart.XToken('one', []);
@@ -2045,7 +2045,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               const commentToken = new comment.XToken('stuff');
+               const commentToken = new comment.CommentXToken('stuff');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.0, 1));
@@ -2089,7 +2089,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   repeat: 'ONE',
                   listType: 'CHOICE'
                });
-               const commentToken = new comment.XToken('stuff');
+               const commentToken = new comment.CommentXToken('stuff');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.0, 3));
@@ -2185,7 +2185,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          describe('CHILDREN', () => {
-            const commentToken = new comment.XToken('testComment');
+            const commentToken = new comment.CommentXToken('testComment');
             const piToken = new processingInstruction.XToken('test', 'pi');
             const cDataToken = new cdata.XToken('testCData');
             const nonWhiteChars = new charData.XToken('one', []);

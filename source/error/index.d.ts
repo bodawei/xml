@@ -1,9 +1,10 @@
+import { Offset } from '../basic';
 import { SToken } from '../sToken/index';
 
 declare class ErrorCollector {
    constructor(foo: any, errorType: Function);
    setPos(item:SToken | void): void;
-   report(code: string, params?: Array<string>): void;
+   report(code: string, params?: Array<string>, position?: SToken | Offset): void;
    check(condition:any, code: string, params?: Array<string>): void;
    reportError(id: string, constr: Function, params: Array<string>): void;
    getErrors(): Array<any>;

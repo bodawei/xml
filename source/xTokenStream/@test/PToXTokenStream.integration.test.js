@@ -100,7 +100,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes a comment', (done) => {
-      expectInputToProduce('<!--foo-->', new comment.XToken('foo', []), done);
+      expectInputToProduce('<!--foo-->', new comment.CommentXToken('foo', []), done);
    });
 
    it('tokenizes a DOCTYPE start and end', (done) => {

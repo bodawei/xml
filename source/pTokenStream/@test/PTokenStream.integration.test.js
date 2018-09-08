@@ -66,7 +66,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses a comment', (done) => {
-      expectInputToProduceTypes('<!-- my comment-->', 'COMMENT', done);
+      expectInputToProduceTypes('<!-- my comment-->', 'COMMENT_PTOKEN', done);
    });
 
    it('parse start and end without an internal subset', (done) => {
