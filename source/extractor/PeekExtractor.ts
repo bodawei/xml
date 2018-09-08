@@ -1,6 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
+import Segment from './Segment';
 
 /**********************************************************************\
  A PeekExtractor "wraps" another extractor so it can do its work, but
@@ -13,11 +14,11 @@ import Extractor from './Extractor';
 \**********************************************************************/
 
 class PeekExtractor extends Extractor {
-   // private _subExtractor: Extractor;
-   // private _firstIndex: number;
+   private _subExtractor: Extractor;
+   private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(version, subExtractor) {
+   constructor(version: number, subExtractor: Extractor) {
       super(version);
 
       if (!subExtractor.process || !subExtractor.finish) {
@@ -28,7 +29,7 @@ class PeekExtractor extends Extractor {
       this._firstIndex = -1;
    }
 
-   process(segment) {
+   process(segment: Segment) {
       this._segInfo.push(this._makeInfo(segment));
 
       if (this._firstIndex === -1) {
@@ -50,11 +51,11 @@ class PeekExtractor extends Extractor {
          info.chars = subInfo.chars;
          info.rows = subInfo.rows;
          info.columns = subInfo.columns;
-         info.segment.index = 0;
+         (info.segment as Segment).index = 0;   // typeHack
       }
 
       if (this._segInfo[0]) {
-         this._segInfo[0].segment.index = this._firstIndex;
+         (this._segInfo[0].segment as Segment).index = this._firstIndex; // typeHack
       }
 
       result.segments = this._segInfo;

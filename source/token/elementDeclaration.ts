@@ -33,7 +33,7 @@ class ElementDeclaration {
    public children: XNameList | void;
    public pToken?: ElementDeclarationPToken;
 
-   constructor(name: string, contentSpecType: string, children: XNameList | void, pToken: ElementDeclarationPToken = {} as ElementDeclarationPToken) {
+   constructor(name: string, contentSpecType: string, children?: XNameList | void, pToken?: ElementDeclarationPToken) {
       this.name = name;
       this.contentSpecType = contentSpecType;
       this.children = children;

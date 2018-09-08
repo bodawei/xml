@@ -453,6 +453,14 @@ describe('attribute (unit)', () => {
          ]);
       });
 
+      it('handles most attributes being missing', () => {
+         const results = attribute.getSTokens([{
+            value: []
+         }]);
+
+         expect(results).toEqual([]);
+      });
+
       it('returns an empty array if no attributes are passed', () => {
          const results = attribute.getSTokens(undefined);
 

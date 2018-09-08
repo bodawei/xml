@@ -181,13 +181,13 @@ class CheckXTokenValidStream extends stream.Transform {
       this.unanchoredIDRefs = {};
    }
 
-   private pushValidityError(id: string, params: Array<string>, pos: SToken|void) {
-      const error = new ValidityError(id, params, pos);
+   private pushValidityError(id: string, params: Array<string>, pos?: SToken|void, context?: SToken|void) {
+      const error = new ValidityError(id, params, pos, context);
 
       this.push(error);
    }
 
-   private pushWarning(id: string, params: Array<string>, pos: SToken|void, context: SToken|void) {
+   private pushWarning(id: string, params: Array<string>, pos?: SToken|void, context?: SToken|void) {
       const warning = new XmlWarning(id, params, pos, context);
 
       this.push(warning);
@@ -431,8 +431,8 @@ class CheckXTokenValidStream extends stream.Transform {
    }
 
    private validateAttListDecl(attListDecl: AttListXToken) {
-      const openSToken = attListDecl.pToken ? attListDecl.pToken.open : undefined;
-      const elName = attListDecl.elementName || '';
+      const openSToken = attListDecl.pToken && attListDecl.pToken.open;
+      const elName = attListDecl.elementName;
       let attrDefs = this.attrDefsByElementName[elName];
 
       // Note: We do not report on these cases from §3.3.0 because the spec doesn't seem
@@ -694,23 +694,23 @@ class CheckXTokenValidStream extends stream.Transform {
          // §3.3.1: Validiatity Constraint: IDREF
          //    ... each Name must match the value of an ID attribute on some element in the
          //    XML document; i.e. IDREF values must match the value of some ID attribute.
-         const info = this.unanchoredIDRefs[idName];
-         const pToken = info.token.pToken && info.token.pToken.open;
+         const idRefInfo = this.unanchoredIDRefs[idName];
+         const pToken = idRefInfo.token.pToken && idRefInfo.token.pToken.open;
 
          this.pushValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
-            [ idName, info.token.name, info.attrName ], pToken);
+            [ idName, idRefInfo.token.name, idRefInfo.attrName ], pToken, pToken);
       });
    }
 
    private validateElementStart(elStart: ElementStart) {
       const elemAttrsDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
-      const attributes = elStart.attributes || [];
+      const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
-         const attrName = attributes[index].name || '';
+         const attrName = attributes[index].name;
          const attrDef = elemAttrsDef && elemAttrsDef.attributes[attrName];
 
          attributes[index].value = normalizeAttributeValue(attributes[index], attrDef);
@@ -721,7 +721,7 @@ class CheckXTokenValidStream extends stream.Transform {
          //    The attribute must have been declared; the value must be of
          //    the type declared for it.
          for (let index = 0; index < attributes.length; index++) {
-            const attrName = attributes[index].name || '';
+            const attrName = attributes[index].name;
             const attrDef = elemAttrsDef.attributes[attrName];
             const attrText = getAttributeValueText(attributes[index]);
 
@@ -913,6 +913,5 @@ function getNamesFromList(children: XNameList): NamesMap {
 
    return childNames;
 };
-
 
 export default CheckXTokenValidStream;

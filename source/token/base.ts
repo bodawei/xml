@@ -22,17 +22,13 @@ function pushIfNotVoid(this: STokenArray, ...items: Array<SToken|void>) {
 
 class BaseXToken {
    public readonly type: string;
-   public pToken: BaseParsedToken;
+   public pToken?: BaseParsedToken;
 
-   constructor(type: string, pToken: BaseParsedToken) {
+   constructor(type: string, pToken?: BaseParsedToken) {
       // if (typeof type !== 'string') {
       //    pToken = type;
       //    type = undefined;
       // }
-
-      if (!pToken) {
-         throw new Error('Must provide a PToken to the XToken you are constructing.');
-      }
 
       this.type = type;
       this.pToken = pToken;

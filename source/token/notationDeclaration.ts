@@ -41,7 +41,7 @@ class NotationDeclaration {
    public nextPropName?: string;
    public unassigned?: UnassignedArray;
 
-   constructor(name: string, externalId: EntityLocation | void, pToken: NotationDeclarationPToken) {
+   constructor(name: string, externalId?: EntityLocation | void, pToken?: NotationDeclarationPToken) {
       this.name = name;
       this.externalId = externalId;
       this.pToken = pToken;

@@ -197,4 +197,5 @@ export {
    pTokenToXToken,
 
    ElementStart,
+   ElementStartPToken,
 };

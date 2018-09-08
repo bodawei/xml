@@ -5,6 +5,8 @@ declare module "readable-stream" {
          on(event: string, cb: Function): any;
          push(value: any): any;
          write(value: any): void;
+         read(value: any): void;
+         read(): any;
          end(): void;
       }
    }

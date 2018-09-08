@@ -25,7 +25,7 @@ type IDToStringMapping = {
 
 declare class WellFormedError {
    static ID: IDToStringMapping;
-   constructor();
+   constructor(id: string, params: Array<string>, place?: any, contextOffset?: any);
 }
 
 declare class ValidityError {

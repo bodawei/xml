@@ -237,7 +237,7 @@ describe('util', () => {
             revision: 5,
             result: true,
          }, {
-            description: 'accepts an Nmtoken that has u03F4 in version 1.0/5',
+            description: 'accepts an Nmtoken that has u03F4 in version 1.1/1',
             text: '\u03F4',
             version: 1.1,
             revision: 1,

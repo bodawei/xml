@@ -1,13 +1,13 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import Extractor from '../Extractor';
+import Extractor, { ExtractResult, SegmentInfo } from '../Extractor';
 import PeekExtractor from '../PeekExtractor';
 import Segment from '../Segment';
 
 describe('PeekExtractor', () => {
-   let extractor;
-   let sub;
+   let extractor: Extractor;
+   let sub: Extractor;
 
    beforeEach(() => {
       sub = jasmine.createSpyObj('subSpy', [ 'process', 'finish' ]);
@@ -17,12 +17,6 @@ describe('PeekExtractor', () => {
    });
 
    describe('constructor', () => {
-
-      it('throws an error if it is not called with a ducktyped extractor', () => {
-         expect(() => {
-            new PeekExtractor(1.0, {});
-         }).toThrowError('Must pass an object with process() and finish() methods.');
-      });
 
       it('has a state of working by default', () => {
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
@@ -58,7 +52,7 @@ describe('PeekExtractor', () => {
    describe('finish()', () => {
 
       it('calls done() in subExtractor when called', () => {
-         sub.finish.and.returnValue({
+         (sub.finish as jasmine.Spy).and.returnValue({
             segments: [],
          });
          extractor.finish();
@@ -67,7 +61,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to success if sub is success', () => {
-         sub.finish.and.returnValue({
+         (sub.finish as jasmine.Spy).and.returnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.SUCCESS;
@@ -77,7 +71,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to failure if sub is failure', () => {
-         sub.finish.and.returnValue({
+         (sub.finish as jasmine.Spy).and.returnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.FAILURE;
@@ -91,27 +85,29 @@ describe('PeekExtractor', () => {
    describe('extraction', () => {
 
       it('returns the text from the subExtractor', () => {
-         sub.process = function process(segment) {
-            this._text = this._text || [];
-            this._text.push(segment.text + 'normal');
+         const dummySegInfo: SegmentInfo = {
+            chars: 0,   // just giving some dummy data so it doesn't get sick
+            rows: 0,
+            columns: 0,
+            segment: new Segment('foo'),
          };
-         sub.finish = function finish() {
-            return {
-               text: this._text.join(''),
-               segments: [ {
-                  chars: 0,   // just giving some dummy data so it doesn't get sick
-                  rows: 0,
-                  columns: 0,
-                  segment: undefined,
-               }, {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: undefined,
-               } ],
+         class TestExtractor extends Extractor {
+            process(segment: Segment) {
+               this._text = this._text || [];
+               this._text.push(segment.text + 'normal');
             };
-         };
-         sub.state = Extractor.STATE.SUCCESS;
+            finish(): ExtractResult {
+               return {
+                  text: this._text.join(''),
+                  original: '',
+                  segments: [ dummySegInfo, dummySegInfo ],
+               };
+            };
+         }
+         const testExtractor = new TestExtractor(1);
+         testExtractor.state = Extractor.STATE.SUCCESS
+         extractor = new PeekExtractor(1.0, testExtractor);
+
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));
 
@@ -119,27 +115,29 @@ describe('PeekExtractor', () => {
       });
 
       it('returns the original text from the subExtractor', () => {
-         sub.process = function process(segment) {
-            this._text = this._text || [];
-            this._text.push(segment.text + 'xx');
+         const dummySegInfo: SegmentInfo = {
+            chars: 0,   // just giving some dummy data so it doesn't get sick
+            rows: 0,
+            columns: 0,
+            segment: new Segment('foo'),
          };
-         sub.finish = function finish() {
-            return {
-               original: this._text.join(''),
-               segments: [ {
-                  chars: 0,   // just giving some dummy data so it doesn't get sick
-                  rows: 0,
-                  columns: 0,
-                  segment: undefined,
-               }, {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: undefined,
-               } ],
+         class TestExtractor extends Extractor {
+            process(segment: Segment) {
+               this._text = this._text || [];
+               this._text.push(segment.text + 'xx');
             };
-         };
-         sub.state = Extractor.STATE.SUCCESS;
+            finish(): ExtractResult {
+               return {
+                  text: '',
+                  original: this._text.join(''),
+                  segments: [ dummySegInfo, dummySegInfo ],
+               };
+            };
+         }
+         const testExtractor = new TestExtractor(1);
+         testExtractor.state = Extractor.STATE.SUCCESS
+         extractor = new PeekExtractor(1.0, testExtractor);
+
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));
 
@@ -147,9 +145,11 @@ describe('PeekExtractor', () => {
       });
 
       it('returns the text from the subExtractor after finish() and failure', () => {
-         sub.finish = function finish() {
+         sub.finish = function finish(): ExtractResult {
             return {
                text: 'done',
+               original: 'done',
+               segments: []
             };
          };
          sub.state = Extractor.STATE.FAILURE;
@@ -163,13 +163,22 @@ describe('PeekExtractor', () => {
          const segment2 = new Segment('bb');
          const segment3 = new Segment('cc');
          segment1.index = 1;
+         const segments: Array<Segment> = [];
          sub.process = function process(segment) {
-            this._segments = this._segments || [];
-            this._segments.push(segment);
+            segments.push(segment);
          };
-         sub.finish = function finish() {
+         sub.finish = function finish(): ExtractResult {
             return {
-               segments: this._segments,
+               text: '',
+               original: '',
+               segments: segments.map((seg): SegmentInfo => {
+                  return {
+                     chars: 1,
+                     rows: 1,
+                     columns: 1,
+                     segment: seg,
+                  }
+               }),
             };
          };
 
@@ -185,15 +194,15 @@ describe('PeekExtractor', () => {
       });
 
       it('returns the unchanged segments from the subExtractor', () => {
+         const text: Array<string> = [];
          sub.process = function process(segment) {
-            this._text = this._text || [];
-            this._text.push(segment.text + 'xx');
+            text.push(segment.text + 'xx');
             segment.index = segment.text.length;
          };
          sub.finish = function finish() {
             return {
-               text:  this._text.join(''),
-               original: this._text.join(''),
+               text:  text.join(''),
+               original: text.join(''),
                segments: [ {
                   chars: 3,
                   rows: 0,

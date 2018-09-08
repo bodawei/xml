@@ -5,16 +5,6 @@ import base from '../base';
 
 describe('base', () => {
 
-   describe('XToken', () => {
-
-      it('throws an error if called without tokens', () => {
-         expect(() => {
-            new base.XToken();
-         }).toThrowError('Must provide a PToken to the XToken you are constructing.');
-      });
-
-   });
-
    describe('BaseParsedToken', () => {
 
       it('does not assign properties from prototype', () => {
