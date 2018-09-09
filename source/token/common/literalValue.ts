@@ -85,7 +85,9 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
             entityReference.paramParse(source, handleRef);
             break;
          case '&':
-            entityReference.parse(source, handleRef);
+            source.extractNoParams('char', (opening) => {
+               entityReference.parse(source, opening, handleRef);
+            });
             break;
       }
    });

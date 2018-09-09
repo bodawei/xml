@@ -14,6 +14,7 @@ import {
    attListDeclaration,
    cdata,
    charData,
+   charRef,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -187,6 +188,52 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             checker.write(pToken);
 
             expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
+         });
+
+      });
+
+   });
+
+   describe('charRef', () => {
+      let pToken;
+
+      beforeEach(() => {
+         spyOn(charRef, 'checkWellFormed');
+         pToken = new charRef.CharRefPToken({
+            open: makeSToken('&#'),
+            digits: makeSToken('234'),
+            close: makeSToken(';')
+         });
+      });
+
+      it('calls cdata.checkWellFormed() when encountering a charRef', () => {
+         checker.write(metaData);
+         checker.write(pToken);
+
+         const args = charRef.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toEqual(pToken);
+         expect(args[1]).toBeInstanceOf(ErrorCollector);
+         expect(args[2]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports no errors when in the content state', () => {
+            spyOn(checker, 'push');
+            checker._state = 'IN_CONTENT';
+
+            checker.write(pToken);
+
+            expect(checker.push.calls.count()).toEqual(1);
+         });
+
+         it('reports an error if not IN_CONTENT', () => {
+            checker._state = 'START';
+            spyOn(checker, 'push');
+
+            checker.write(pToken);
+
+            expect(checker.push.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.CHARREF_INVALID_DOC_CONTEXT);
          });
 
       });

@@ -1,9 +1,9 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { SToken, STokenSource } from '../../sToken';
 import {
    declaration,
    envelope,
@@ -12,6 +12,7 @@ import {
    attListDeclaration,
    cdata,
    charData,
+   charRef,
    comment,
    docTypeStart,
    elementEnd,
@@ -101,6 +102,19 @@ describe('PTokenStream (unit)', () => {
          expect(attListDeclaration.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(attListDeclaration.parse.calls.argsFor(0)[1].declType.str).toEqual('ATTLIST');
          expect(attListDeclaration.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         done();
+      });
+   });
+
+   it('calls charRef.parse()', (done) => {
+      spyOn(charRef, 'parse').and.callThrough();
+      pTokenStream.addText('&#foo;');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(charRef.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(charRef.parse.calls.argsFor(0)[1]).toBeInstanceOf(SToken);
+         expect(charRef.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -223,7 +237,8 @@ describe('PTokenStream (unit)', () => {
 
       gatherPTokens(pTokenStream, () => {
          expect(entityReference.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(entityReference.parse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+         expect(entityReference.parse.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
+         expect(entityReference.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });

@@ -1,22 +1,28 @@
 import { SToken } from '../sToken';
 
 class STokenArrayBuilder {
-   public sTokenArray: ReadonlyArray<SToken> = [];
+   public sTokenArray: Array<SToken> = [];
 
-   add(value: SToken | Array<SToken> | undefined) {
+   add(...values: Array<SToken | Array<SToken | undefined> | undefined>) {
       const arr = this.sTokenArray as Array<SToken>;
 
-      if (Array.isArray(value)) {
-         for (let index = 0; index < value.length; index++) {
-            const val = value[index];
+      for (let index = 0; index < values.length; index++) {
+         const value = values[index];
 
-            if (val) {
-               arr.push(val);
+         if (Array.isArray(value)) {
+            for (let index = 0; index < value.length; index++) {
+               const val = value[index];
+
+               if (val) {
+                  arr.push(val);
+               }
             }
+         } else if (value) {
+            arr.push(value);
          }
-      } else if (value) {
-         arr.push(value);
       }
+
+      return this.sTokenArray;
    }
 }
 

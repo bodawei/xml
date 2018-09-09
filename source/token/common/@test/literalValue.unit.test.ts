@@ -1,8 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic';
-import { WellFormedError } from '../../../error';
+import { EntityLocation, EntityMetaData, Range } from '../../../basic';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
@@ -84,7 +83,7 @@ describe('literalValue (unit)', () => {
          let paramParseSpy: jasmine.Spy;
 
          beforeEach(() => {
-            generalParseSpy= spyOn(entityReference, 'parse');
+            generalParseSpy = spyOn(entityReference, 'parse');
             paramParseSpy = spyOn(entityReference, 'paramParse');
          });
 
@@ -105,18 +104,20 @@ describe('literalValue (unit)', () => {
             mockSource = new MockSTokenSource([
                undefined,
                MockSTokenSource.PEEK('&'),
+               '&',
             ]);
 
             literalValue.parse(mockSource, [ '"', '&' ], callback);
             mockSource.respondInAsyncTime();
    
             expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(generalParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+            expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
+            expect(generalParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          });
 
 
          it('handles a combination of text, pe and ge refs', () => {
-            generalParseSpy.and.callFake((_1: any, callback: (entityRef: any) => void) => {
+            generalParseSpy.and.callFake((_1: any, _2: any, callback: (entityRef: any) => void) => {
                callback({});
             });
             paramParseSpy.and.callFake((_1: any, callback: (entityRef: any) => void) => {
@@ -125,6 +126,7 @@ describe('literalValue (unit)', () => {
             mockSource = new MockSTokenSource([
                'one',
                MockSTokenSource.PEEK('&'),
+               '&',
                'two',
                MockSTokenSource.PEEK('%'),
                'three',
@@ -137,14 +139,15 @@ describe('literalValue (unit)', () => {
             mockSource.respondInAsyncTime();
 
             const makeSToken = makeSTokenMaker();
+            const makeSToken2 = makeSTokenMaker(undefined, 4, 0, 4);
             expect(value).toEqual([
                new text.PToken({ text: makeSToken('one') }),
                {} as EntityReferencePToken,
-               new text.PToken({ text: makeSToken('two') }),
+               new text.PToken({ text: makeSToken2('two') }),
                {} as EntityReferencePToken,
-               new text.PToken({ text: makeSToken('three') }),
+               new text.PToken({ text: makeSToken2('three') }),
                {} as EntityReferencePToken,
-               new text.PToken({ text: makeSToken('four') }),
+               new text.PToken({ text: makeSToken2('four') }),
             ]);
          });
 

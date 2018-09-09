@@ -1,9 +1,10 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import Extractor from './Extractor';
 import Segment from './Segment';
 
-const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
+const DIGITS_REGEX = /[0-9]+/g;
+const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 
 /**********************************************************************\
   If decimal or hexadecimal digits are to be found from the current
@@ -13,10 +14,18 @@ const DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 
 class DigitExtractor extends Extractor {
    private foundDigit?: boolean;
+   private base: 10 | 16;
+
+   constructor(version: number, base: 10 | 16) {
+      super(version);
+
+      this.base = base;
+   }
 
    process(segment: Segment) {
       const info = this._makeInfo(segment);
       this._segInfo.push(info);
+      const regex = this.base === 10 ? DIGITS_REGEX : HEX_DIGITS_REGEX;
 
       /*
        * First checks whether the next character is a digit.
@@ -26,16 +35,16 @@ class DigitExtractor extends Extractor {
        * and if so, we can then do a more general scan knowing it
        * won't go wandering off before it starts finding digits.
        */
-      DIGITS_REGEX.lastIndex = 0;
-      this.foundDigit = DIGITS_REGEX.test(segment.text[segment.index]);
+      regex.lastIndex = 0;
+      this.foundDigit = regex.test(segment.text[segment.index]);
 
       if (!this.foundDigit) {
          this.state = Extractor.STATE.FAILURE;
          return;
       }
 
-      DIGITS_REGEX.lastIndex = segment.index;
-      const result = DIGITS_REGEX.exec(segment.text);
+      regex.lastIndex = segment.index;
+      const result = regex.exec(segment.text);
       const allDigits = result!; // typeHack
 
       this._processText(allDigits[0], info);

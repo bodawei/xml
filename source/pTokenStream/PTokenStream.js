@@ -13,6 +13,7 @@ import {
    attListDeclaration,
    cdata,
    charData,
+   charRef,
    comment,
    docTypeStart,
    docTypeEnd,
@@ -88,10 +89,8 @@ class PTokenStream extends stream.Readable {
             }
             switch (sToken.str) {
                case '<':
-                  this._markupParse(deliverParse);
-                  break;
                case '&':
-                  entityReference.parse(this._sTokenSource, deliverParse);
+                  this._markupParse(deliverParse);
                   break;
                case '%':
                   entityReference.paramParse(this._sTokenSource, deliverParse);
@@ -134,6 +133,12 @@ class PTokenStream extends stream.Readable {
    _markupParse(deliverParse) {
       this._sTokenSource.extract('markup', (markupStartSToken) => {
          switch (markupStartSToken.str) {
+            case '&':
+               entityReference.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               break;
+            case '&#':
+               charRef.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               break;
             case '<':
                elementStart.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;

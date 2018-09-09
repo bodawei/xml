@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
@@ -16,7 +16,7 @@ describe('DigitExtractor', () => {
       defaultLoc = new EntityLocation();
       segmentRange = new Range(defaultLoc);
 
-      extractor = new DigitExtractor(1.0);
+      extractor = new DigitExtractor(1.0, 10);
    });
 
    describe('basic behavior', () => {
@@ -51,6 +51,7 @@ describe('DigitExtractor', () => {
       });
 
       it('delivers a set of hexidecimal digits from the provided segment', () => {
+         extractor = new DigitExtractor(1.0, 16);
          extractor.process(new Segment('012345ABcdef', segmentRange));
 
          expect(extractor.finish()).toEqual({
@@ -63,6 +64,25 @@ describe('DigitExtractor', () => {
                segment: {
                   range: segmentRange,
                },
+            } ],
+         });
+      });
+
+      it('delivers only the decimal digits when presented with a possibly ambiguous number', () => {
+         const segment = new Segment('012345ABcdef', segmentRange);
+         const expected = new Segment('012345ABcdef', segmentRange);
+         expected.index = 6;
+
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: '012345',
+            original: '012345',
+            segments: [ {
+               chars: 6,
+               rows: 0,
+               columns: 6,
+               segment: expected,
             } ],
          });
       });
@@ -127,11 +147,11 @@ describe('DigitExtractor', () => {
 
       it('returns all digits and ranges across multiple segments', () => {
          extractor.process(new Segment('123', segmentRange));
-         extractor.process(new Segment('abcd'));
+         extractor.process(new Segment('9876'));
 
          expect(extractor.finish()).toEqual({
-            text: '123abcd',
-            original: '123abcd',
+            text: '1239876',
+            original: '1239876',
             segments: [ {
                chars: 3,
                rows: 0,

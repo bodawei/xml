@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import AllExtractor from './AllExtractor';
 import CharExtractor from './CharExtractor';
@@ -19,7 +19,7 @@ const defaultExtractors = {
    word: WordExtractor,
    markup: {
       extractorConstructor: MultiMatchExtractor,
-      params: [ '<!--', '<?', '<!', '</', '&', '<', '<![' ],
+      params: [ '<!--', '<?', '<!', '</', '<', '<![', '&', '&#' ],
    },
    close: {
       extractorConstructor: MultiMatchExtractor,

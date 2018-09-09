@@ -12,6 +12,7 @@ import {
 
    attListDeclaration,
    cdata,
+   charRef,
    charData,
    comment,
    docTypeEnd,
@@ -92,6 +93,13 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
 
             charData.checkWellFormed(pToken, errorCollector, this._metaData);
+            break;
+         case charRef.PTYPE:
+            if (this._state !== STATE.IN_CONTENT) {
+               errorCollector.report(WellFormedError.ID.CHARREF_INVALID_DOC_CONTEXT);
+            }
+
+            charRef.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
          case comment.PTYPE:
             if (this._state === STATE.START) {

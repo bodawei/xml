@@ -1,20 +1,26 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
+import { SToken } from '../../sToken/index';
 
 import entityReference from '../entityReference.js';
 
 describe('entityReference (unit)', () => {
    let generalEntityPToken;
    let parameterEntityPToken;
+   let openSToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
+
+      openSToken = new SToken('&', '&', new Range(0, 0, 0, 1, 0, 1));
+
       generalEntityPToken = new entityReference.PToken({
-         open: makeSToken('&'),
+         open: openSToken,
          postOpenSpace: makeSToken(' '),
          name: makeSToken('entityName'),
          postNameSpace: makeSToken(' '),
@@ -76,14 +82,14 @@ describe('entityReference (unit)', () => {
 
       it('does a full parse', () => {
          const mockSource = new MockSTokenSource([
-            [ '&', 'match', '&' ],
             [ ' ', 'space' ],
             [ 'entityName', 'word', [ ';' ] ],
             [ ' ', 'space' ],
             [ ';', 'match', ';' ],
          ]);
+         generalEntityPToken.open = openSToken;
 
-         entityReference.parse(mockSource, callback);
+         entityReference.parse(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(generalEntityPToken);
@@ -98,12 +104,12 @@ describe('entityReference (unit)', () => {
             undefined,
          ]);
 
-         entityReference.parse(mockSource, callback);
+         entityReference.parse(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
             type: 'ENTITYREF',
-            open: undefined,
+            open: openSToken,
             postOpenSpace: undefined,
             name: undefined,
             postNameSpace: undefined,

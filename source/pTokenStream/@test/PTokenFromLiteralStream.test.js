@@ -30,7 +30,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          expect(pTokenStream.push).toHaveBeenCalledWith(null);
       });
 
-      it('calls entityReference.parse if it is to be looking for entity references and finds a %', () => {
+      it('calls entityReference.paramParse if it is to be looking for entity references and finds a %', () => {
          spyOn(sTokenSource, 'extract').and.callFake((_1, cb) => cb({ str: '%' }));
          const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
          spyOn(entityReference, 'paramParse');
@@ -41,7 +41,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          expect(entityReference.paramParse.calls.argsFor(0)[1]).toBeInstanceOf(Function);
       });
 
-      it('does not entityReference.parse if it is not to be looking for entity references and finds a %', () => {
+      it('does not entityReference.paramParse if it is not to be looking for entity references and finds a %', () => {
          spyOn(sTokenSource, 'extract').and.callFake((_1, cb) => cb({ str: '%' }));
          const pTokenStream = new PTokenFromLiteralStream(sTokenSource);
          spyOn(entityReference, 'paramParse');

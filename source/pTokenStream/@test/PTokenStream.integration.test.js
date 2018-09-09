@@ -69,6 +69,10 @@ describe('PTokenStream (integration)', () => {
       expectInputToProduceTypes('<!-- my comment-->', 'COMMENT_PTOKEN', done);
    });
 
+   it('parses a character reference', (done) => {
+      expectInputToProduceTypes('&#1234;', 'CHARREF_PTOKEN', done);
+   });
+
    it('parse start and end without an internal subset', (done) => {
       expectInputToProduceTypes('<!DOCTYPE goodName SYSTEM "sys.xml">',
          [ 'DOCTYPE_START', 'DOCTYPE_END' ], done);

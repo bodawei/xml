@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { WellFormedError } from '../error';
 
@@ -87,10 +87,10 @@ class ParameterEntityReferencePToken extends base.PToken {
     [68] EntityRef   ::= '&' Name ';'
 \**********************************************************************/
 
-function parse(source, deliverPToken) {
+function parse(source, open, deliverPToken) {
    const pToken = new EntityReferencePToken();
+   pToken.open = open;
 
-   source.extractToObject('match', '&', pToken, 'open');
    parseRef(source, pToken, deliverPToken);
 }
 

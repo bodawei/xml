@@ -184,7 +184,7 @@ describe('comment (unit)', () => {
             .toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, emd);
       });
 
-      it('reports an error if the content ends with a hyphen', () => {
+      it('reports an error when the content ends with a hyphen', () => {
          commentPToken.text[0].str += '-';
          commentPToken.text[0].originalStr += '-';
 
@@ -194,6 +194,20 @@ describe('comment (unit)', () => {
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
             params: undefined,
             position: new Offset(emd.location, 14, 0, 14),
+         });
+      });
+
+      it('reports an error when the content ends with a hyphen, and there is no range', () => {
+         commentPToken.text[0].str += '-';
+         commentPToken.text[0].originalStr += '-';
+         commentPToken.text[0].ranges = [];
+
+         checkWellFormed(commentPToken, mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
+            params: undefined,
+            position: commentPToken.text[0],
          });
       });
 
@@ -210,7 +224,7 @@ describe('comment (unit)', () => {
          });
       });
 
-      it('reports an error if there was no closing', () => {
+      it('reports an error when there was no closing', () => {
          delete commentPToken.close;
 
          checkWellFormed(commentPToken, mockErrorCollector, emd);
@@ -223,7 +237,7 @@ describe('comment (unit)', () => {
          });
       });
 
-      it('reports an error if there was no text and no closing', () => {
+      it('reports an error when there was no text and no closing', () => {
          delete commentPToken.text;
          delete commentPToken.close;
 
@@ -237,7 +251,7 @@ describe('comment (unit)', () => {
          });
       });
 
-      it('reports an error if there was an empty text and no closing', () => {
+      it('reports an error when there was an empty text and no closing', () => {
          commentPToken.text = [];
          delete commentPToken.close;
 
@@ -261,7 +275,7 @@ describe('comment (unit)', () => {
          expect(token.text).toEqual('commentText');
       });
 
-      it('returns the text as an empty string if nothing was found in the source', () => {
+      it('returns the text as an empty string when nothing was found in the source', () => {
          delete commentPToken.text;
 
          const token = pTokenToXToken(commentPToken);
@@ -269,7 +283,7 @@ describe('comment (unit)', () => {
          expect(token.text).toEqual('');
       });
 
-      it('returns the text as an empty string if no text values present', () => {
+      it('returns the text as an empty string when no text values present', () => {
          commentPToken.text = [];
 
          const token = pTokenToXToken(commentPToken);

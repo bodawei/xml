@@ -175,6 +175,15 @@ describe('STokenSource (integration)', () => {
          });
       });
 
+      it('identifies &# as markup', (done) => {
+         source.addText('&#123', new Range(defaultLoc));
+
+         source.extract('markup', (sToken) => {
+            expect(sToken).toEqual(new SToken('&#', '&#', new Range(defaultLoc, 0, 0, 0, 2, 0, 2)));
+            done();
+         });
+      });
+
       it('identifies </ as markup', (done) => {
          source.addText('</foo', new Range(defaultLoc));
 
