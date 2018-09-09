@@ -1,0 +1,101 @@
+
+√ - Add ParamEntityDecls to entity manager
+√ - Recognize PE's when in DTD and expand
+
+-- need to review spec on where PE's can occur
+   2.5: Can't be in comments
+   2.6: Not in PI
+   2.8:
+      not recognized in literals or in ignored conditional sections
+         Except are recognized in entity value literals
+            It is NOT clear to me if in entity values are allowed in internal subset. I assume not
+      can not appear in markup decls in internal subset
+         pe's in DTD must match exSubsetDecl
+      external Parameter entities may contain conditional sections
+   √3.2.1 : balanced, and some restrictions on contents if in elment conent model
+   √3.4 balance, again. do not recognized PE in the ignored sections (not clear why)
+   4: definition
+   4.1: Important wfc stuff <review>>>
+   4.2.2: uri's may be relative to external param entity
+   4.3.2: param entities well formed by definition
+   4.4: A bit weird <review>>
+   √ 5.1: validating and non
+
+5.x
+
+1. validating
+   • attribute defaults in internal and external subset and external (parameter) entity content
+   • entity declarations in internal and external subset and external (parameter) entity content
+
+   2. Non-validating
+      standalone=no (or implicitly so)
+      (2.9 says do not need to read declarations in external subset or PE's)
+      (5.1 is also relevant)
+      • attribute defaults in internal subset
+      • entity declarations in internal subset
+      - read & process the doc
+      - read & process the DTD
+      - stop processing DTD as soon as you see a PE Reference that was not read
+         @@@ Not clear what a non-read PE is.
+
+      3. (2.9) standalone-yes (if no, then the document will change in some way more substantial than having holes)
+         (I do not know why this is useful, though.)
+         - promises
+            - no attr defaults outside doc entity
+            - no entity defs outside doc entity
+            - no entity defs in param entities
+         - there may be entity content outside of the doc
+         =
+            validity failure if:
+               -standalone = yes and external markup declaration has any of
+                  - elment has element content
+                     AND any instance has whitespace
+                  - attribute has tokenized types
+                     AND if it is used in the document
+                     AND if that use would have normalization that would change it
+                  - entities declared
+                     AND references made to those
+                  - attribute has default values
+                     AND elements that would use those are used in the document
+                     AND they do not have values specified for those attributes
+
+4. djb: self-contained: nothing external. so this is also validateable
+5. djb: no stated dtd at all.
+
+External markup declarations: entity, attrlist, element, notation in external subset or in parameter entity
+** validating layer is what makes our thing a validating processor
+   ** so does that affect our expander?  @@@@
+
+
+Notes:
+   Modes:
+      - not validating: still need to process entity values, which may be internal or external and which may contain PERefs?!?
+      standalone: no markup declarations in eternal subset or in param entity
+         why not just say: no such things?
+      Simple:
+         read document and internal subset.
+         No external entities (general or param) read
+         no PE values processed
+
+   internal subset
+      may not contain conditional sections directly (but may through a peref) presumably this is to allow for coping with the DTD without needing to reach out to anything else
+      PE decl
+      PE Ref: Only in DeclSep
+   external subset
+      PE Decl
+      PE Ref: DeclSep or markup
+   external (parameter) entity value
+      PE Decl
+      PE Ref: DeclSep or markup
+
+- Suggest all declarations can be parsed as <!FOO > or <![INCLDUE|IGNORE[
+   - inside is array of words, spaces, quoted values, PERefs and ()'s
+      - some variation for each
+   - then this array post processed
+      - some guidance about that is available per type (e.g. quoted values may be sub-parsed)
+   If PEReference, then we wait until it is expanded (as an array of words, spaces etc?) to do final identification?
+      - another item in each tokenizer?
+
+- By implication in 1.0/1 PE refs are allowed in comments
+- are compatibility things errors?
+
