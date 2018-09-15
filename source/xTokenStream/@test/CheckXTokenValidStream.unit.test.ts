@@ -281,6 +281,50 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         it('reports an error if a required attribute was not included on the attribute', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined);
+            attListDecl.attDefs.push({
+               name: 'needed',
+               type: 'CDATA',
+               value: [],
+               defaultType: '#REQUIRED',
+            });
+            const startToken = new elementStart.XToken('one', [{
+               name: 'first',
+               value: []
+            }]);
+
+            validator.write(elementDecl);
+            validator.write(attListDecl);
+            validator.write(startToken);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NO_REQUIRED,
+               [ 'one', 'needed' ]);
+            expectStream(validator, expected, done);
+         });
+
+         it('reports no error if a required attribute was specified', (done) => {
+            const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined);
+            attListDecl.attDefs.push({
+               name: 'needed',
+               type: 'CDATA',
+               value: [],
+               defaultType: '#REQUIRED',
+            });
+            const startToken = new elementStart.XToken('one', [{
+               name: 'needed',
+               value: []
+            }]);
+
+            validator.write(elementDecl);
+            validator.write(attListDecl);
+            validator.write(startToken);
+            validator.end();
+
+            expectNoErrors(validator, done);
+         });
+
          describe('normalization', () => {
 
             it('replaces non-space white characters with spaces', (done) => {
@@ -349,7 +393,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   name: 'idRefs',
                   type: 'IDREFS',
                   value: [],
-                  defaultType: '#REQUIRED',
+                  defaultType: '#IMPLIED',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'undefinedAttribute',
@@ -627,12 +671,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
-                  defaultType: '#REQUIRED',
+                  defaultType: '#IMPLIED',
                }, {
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
-                  defaultType: '#REQUIRED',
+                  defaultType: '#IMPLIED',
                }]);
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idAttr',
@@ -657,12 +701,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                   name: 'idRefAttr',
                   type: 'IDREF',
                   value: [],
-                  defaultType: '#REQUIRED',
+                  defaultType: '#IMPLIED',
                }, {
                   name: 'idAttr',
                   type: 'ID',
                   value: [],
-                  defaultType: '#REQUIRED',
+                  defaultType: '#IMPLIED',
                }]);
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idAttr',

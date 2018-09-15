@@ -16,7 +16,7 @@ import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
 import unassigned, { UnassignedType } from '../unassigned';
 
-describe('attListDeclaration (integration)', () => {
+describe('charRef (integration)', () => {
    let declarationPToken: AttListPToken;
    let expectedSToken: (value: string) => SToken;
 
