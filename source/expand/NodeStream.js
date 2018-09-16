@@ -296,13 +296,17 @@ class NodeStream extends Transform {
 
    _processAttListDeclaration(alToken, done) {
       this._expandPERefsInUnassignedValue(alToken.pToken, true, () => {
+         const open = alToken.pToken && alToken.pToken.open;
+
          if (alToken.pToken.unassigned) {
             attListDeclaration.assignUnassigned(alToken.pToken);
             alToken = attListDeclaration.pTokenToXToken(alToken.pToken);
          }
 
-         this.push(alToken);
-         done();
+         this._expandAttributeValues(alToken.attDefs, open, () => {
+            this.push(alToken);
+            done();
+         });
       });
    }
 
@@ -333,59 +337,40 @@ class NodeStream extends Transform {
          return;
       }
 
-      let attrsRemaining = startXToken.attributes.length;
+      const openSToken = startXToken.pToken && startXToken.pToken.open;
+
+      this._expandAttributeValues(startXToken.attributes, openSToken, () => {
+         this.push(startXToken);
+         done();
+      });
+   }
+
+   _expandAttributeValues(attributeArray, openSToken, done) {
+      let attrsRemaining = attributeArray.length;
       const self = this;
 
-      function attributeDone(newValue, index) {
-         attrsRemaining--;
-         startXToken.attributes[index].value = newValue;
-
-         if (attrsRemaining === 0) {
-            self._scanForBadText(startXToken);
-            self.push(startXToken);
-            done();
-         }
+      if (attrsRemaining === 0) {
+         done();
+         return;
       }
 
-      for (let index = 0; index < startXToken.attributes.length; index++) {
-         const attr = startXToken.attributes[index];
-         this._expandAttributeValue(attr.value, index, attributeDone);
-      }
-   }
+      for (const attr of attributeArray) {
+         // eslint-disable-next-line no-loop-func
+         this._expandAttributeValue(attr.value, (newValue) => {
+            self._scanValueForBadText(attr.name, newValue, openSToken);
+            attr.value = newValue;
+            attrsRemaining--;
 
-   _scanForBadText(startToken) {
-      const sToken = startToken.pToken && startToken.pToken.open;
-
-      for (let attrIndex = 0; attrIndex < startToken.attributes.length; attrIndex++) {
-         const attribute = startToken.attributes[attrIndex];
-         const value = attribute.value;
-         let entityDepth = 0;
-
-         // Well-formedness constraint: §3.1: No < in Attribute Values
-         //   The replacement text of any entity referred to directly or indirectly
-         //   in an attribute value must not contain a <.
-         for (let index = 0; index < value.length; index++) {
-            const valuePart = value[index];
-
-            if (valuePart.type === entityStart.XTYPE) {
-               entityDepth++;
-            } else if (valuePart.type === entityEnd.XTYPE) {
-               entityDepth--;
-            } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
-               // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
-               if (valuePart.text && valuePart.text.indexOf('<') !== -1) {
-                  const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
-                     [ attribute.name ], sToken, sToken);
-                  this.push(error);
-               }
+            if (attrsRemaining === 0) {
+               done();
             }
-         }
+         });
       }
    }
 
-   _expandAttributeValue(attrValue, attrIndex, attrExpanded) {
+   _expandAttributeValue(attrValue, attrExpanded) {
       if (attrValue.length === 0) {
-         attrExpanded(attrValue, attrIndex);
+         attrExpanded(attrValue);
          return;
       }
 
@@ -399,7 +384,7 @@ class NodeStream extends Transform {
          count--;
 
          if (count === 0 && doneProcessing) {
-            self._buildExpandedAttrValue(attrValue, attrIndex, expansions, attrExpanded);
+            self._buildExpandedAttrValue(attrValue, expansions, attrExpanded);
          }
       }
 
@@ -414,11 +399,11 @@ class NodeStream extends Transform {
 
       doneProcessing = true;
       if (count === 0 && doneProcessing) {
-         this._buildExpandedAttrValue(attrValue, attrIndex, expansions, attrExpanded);
+         this._buildExpandedAttrValue(attrValue, expansions, attrExpanded);
       }
    }
 
-   _buildExpandedAttrValue(originalAttrValue, attrIndex, expansions, attrExpanded) {
+   _buildExpandedAttrValue(originalAttrValue, expansions, attrExpanded) {
       let newValue = [];
 
       for (let index = 0; index < originalAttrValue.length; index++) {
@@ -431,7 +416,29 @@ class NodeStream extends Transform {
          }
       }
 
-      attrExpanded(newValue, attrIndex);
+      attrExpanded(newValue);
+   }
+
+   _scanValueForBadText(name, value, sToken) {
+      let entityDepth = 0;
+
+      // Well-formedness constraint: §3.1: No < in Attribute Values
+      //   The replacement text of any entity referred to directly or indirectly
+      //   in an attribute value must not contain a <.
+      for (const valuePart of value) {
+         if (valuePart.type === entityStart.XTYPE) {
+            entityDepth++;
+         } else if (valuePart.type === entityEnd.XTYPE) {
+            entityDepth--;
+         } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
+            // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
+            if (valuePart.text && valuePart.text.indexOf('<') !== -1) {
+               const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+                  [ name ], sToken, sToken);
+               this.push(error);
+            }
+         }
+      }
    }
 
    _expandReference(entityRef, indexInAttr, referenceExpanded) {
@@ -452,7 +459,7 @@ class NodeStream extends Transform {
       literalValue.parse(sTokenStream, [ '&' ], (pTokenResult) => {
          const xToken = literalValue.makeXTokenCompatible(pTokenResult);
 
-         this._expandAttributeValue(xToken, -1, (subXToken) => {
+         this._expandAttributeValue(xToken, (subXToken) => {
             subXToken.unshift(new entityStart.XToken(entityRef.name));
             subXToken.push(new entityEnd.XToken(entityRef.name));
             referenceExpanded(subXToken, indexInAttr);

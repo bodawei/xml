@@ -101,39 +101,53 @@ describe('NodeStream (integration)', () => {
    });
 
    describe('ATTLIST declaration processing', () => {
+      let pTokenStream;
+      let nodeStream;
+
+      beforeEach(() => {
+         const manager = new EntityManager();
+         pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         nodeStream = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(nodeStream);
+      });
+
+      function gatherTokens(stream, cb) {
+         const tokens = [];
+   
+         stream.on('data', (item) => {
+            tokens.push(item);
+         });
+         stream.on('end', () => {
+            cb(tokens);
+         });
+      }
 
       it('expands an parameter entity that makes up the attlist declaration body', (done) => {
-         const results = [];
-         const manager = new EntityManager();
-         const pTokenStream = new PTokenStream();
-         const xTokenStream = new PToXTokenStream();
-         const node = new NodeStream(manager);
-         pTokenStream.pipe(xTokenStream).pipe(node);
-         node.on('data', (token) => results.push(token));
-         node.on('end', () => {
-            const attListDecl = results[4];
+         pTokenStream.addText(`<?xml version="1.0"?><!DOCTYPE one [
+            <!ENTITY % middle "foo">
+            <!ATTLIST %middle;>
+         ]>`);
+         pTokenStream.endText();
+
+         gatherTokens(nodeStream, (tokens) => {
+            const attListDecl = tokens[6];
 
             expect(attListDecl.elementName).toEqual('foo');
             done();
-         });
-
-         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ENTITY % middle "foo">' +
-            '<!ATTLIST %middle;>' +
-         ']>');
-         pTokenStream.endText();
+         })
       });
 
       it('expands an parameter entity that makes up an ENUMERATION', (done) => {
-         const results = [];
-         const manager = new EntityManager();
-         const pTokenStream = new PTokenStream();
-         const xTokenStream = new PToXTokenStream();
-         const node = new NodeStream(manager);
-         pTokenStream.pipe(xTokenStream).pipe(node);
-         node.on('data', (token) => results.push(token));
-         node.on('end', () => {
-            const attListDecl = results[5];
+         pTokenStream.addText(`<?xml version="1.0"?><!DOCTYPE one [
+            <!ELEMENT one ANY>
+            <!ENTITY % goodies "( four | five ) #REQUIRED">
+            <!ATTLIST one attr1 %goodies;>
+         ]>`);
+         pTokenStream.endText();
+
+         gatherTokens(nodeStream, (tokens) => {
+            const attListDecl = tokens[8];
 
             expect(attListDecl.attDefs[0]).toEqual({
                name: 'attr1',
@@ -143,14 +157,41 @@ describe('NodeStream (integration)', () => {
                value: [],
             });
             done();
-         });
+         })
+      });
 
-         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ELEMENT one ANY>' +
-            '<!ENTITY % goodies "( four | five ) #REQUIRED">' +
-            '<!ATTLIST one attr1 %goodies;>' +
-         ']>');
+      it('expands entity references in attribute values', (done) => {
+         pTokenStream.addText(`<?xml version="1.0"?><!DOCTYPE one [
+            <!ELEMENT one ANY>
+            <!ENTITY test "foo#">
+            <!ATTLIST one
+               attr1 CDATA "#&test;bar#">
+         ]>`);
          pTokenStream.endText();
+
+         gatherTokens(nodeStream, (tokens) => {
+            const attListDecl = tokens[8];
+
+            expect(attListDecl.attDefs[0]).toEqual({
+               name: 'attr1',
+               type: 'CDATA',
+               defaultType: '',
+               value: [
+                  new tokenNs.text.XToken('#', new tokenNs.text.PToken({
+                     text: new SToken('#', '#', new Range(new EntityLocation(), 156, 4, 152, 157, 4, 153)),
+                  })),
+                  new tokenNs.entityStart.XToken('test'),
+                  new tokenNs.text.XToken('foo#', new tokenNs.text.PToken({
+                     text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
+                  })),
+                  new tokenNs.entityEnd.XToken('test'),
+                  new tokenNs.text.XToken('bar#', new tokenNs.text.PToken({
+                     text: new SToken('bar#', 'bar#', new Range(new EntityLocation(), 163, 4, 159, 167, 4, 163)),
+                  })),
+               ],
+            });
+            done();
+         })
       });
 
    });

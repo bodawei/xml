@@ -654,6 +654,67 @@ describe('NodeStream (unit)', () => {
 
          // Other testing is implicitly covered in entity declaration testing
 
+         it('expands entity references in the attribute definitions default valeus', () => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one', {}) ];
+            });
+            const attDecl = new xToken.attListDeclaration.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new xToken.attListDeclaration.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one', {}),
+                  new xToken.entityEnd.XToken('refName'),
+               ],
+            }], {});
+            spyOn(nodeStream, 'push');
+
+            nodeStream.write(attDecl);
+
+            expect(nodeStream.push).toHaveBeenCalledWith(expected);
+         });
+
+         it('reports an error if there is a < in any entity reference', () => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1, _2, cb) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('o<ne', {}) ];
+            });
+            const attDecl = new xToken.attListDeclaration.XToken('attlist', [{
+               name: 'elName',
+               value: [
+                  new xToken.entityReference.XToken('refName', {}),
+               ],
+            }], {});
+            const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+               [ 'elName' ]);
+            spyOn(nodeStream, 'push');
+
+            nodeStream.write(attDecl);
+
+            expect(nodeStream.push).toHaveBeenCalledWith(expected);
+         });
       });
 
       describe('element processing', () => {

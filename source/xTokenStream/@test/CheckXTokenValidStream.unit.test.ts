@@ -51,7 +51,7 @@ function toHaveError(util: any) {
          if (pass) {
             message = `Expected not to find "${JSON.stringify(expected, undefined, 2)}".`;
          } else {
-            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}". Instead found ${JSON.stringify(actual)}.`;
+            message = `Expected to find "${JSON.stringify(expected, undefined, 2)}". Instead found ${JSON.stringify(actual, undefined, 2)}.`;
          }
 
          return {
