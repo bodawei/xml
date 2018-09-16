@@ -534,6 +534,67 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
+            it('reports an error if a #FIXED attribute does not match the declared default', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('oneTwo') ],
+                  defaultType: '#FIXED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+                  value: [ new text.XToken('oneT') ]
+               }]);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_FIXED_NOT_RIGHT,
+                  [ 'testEl', 'textAttr', 'oneTwo', 'oneT' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a #FIXED attribute matches the declared default', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('oneTwo') ],
+                  defaultType: '#FIXED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+                  value: [ new text.XToken('oneTwo') ]
+               }]);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if a #FIXED attribute is not specified on the start attribute', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('oneTwo') ],
+                  defaultType: '#FIXED',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', []);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
          });
 
          describe('ID', () => {

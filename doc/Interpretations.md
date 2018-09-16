@@ -128,6 +128,10 @@ This goes with the assumption that entity references are acceptable here.
 * The spec is also ambiguous about whether the values in a NOTATION attribute declaration must have been declared before the ATTLIST declaration. Like the above for the ELEMENT, this assumes that it must have already been declared at this point.
 * Note that this validates individual attribute declarations, even if they are ones that will be ignored because they are a subsquent one (as above)
 * Normally "for compatibility" is interpreted as a warning, not requirement. However, as of 1.0/2 NOTATION attributes may not be on  an EMPTY element, and this is both a validity constraint (error) an for compatibility (warning). We're assuming error
+* 3.3.2 is a bit unclear about #FIXED handling. if an ATTLIST has a #FIXED attribute definition, and that attribute is not added on a start or empty element, is that an error (was the document author supposed to specify that value? or can it be omitted?. This reader can read the text either way.  The Validity constraint in that section says "If an attribute has a default value declared with the #FIXED keyword, instances of that attribute must match the default value." and the explanatory text says "the #FIXED keyword states that the attribute must always have the default value.". But, the text also says "If a default value is declared, when an XML processor encounters an omitted attribute, it is to behave as though the attribute were present with the declared default value."
+
+
+This interprets this as saying the attribute can be omitted, in which case the default value will be used, but if it is present it must match. This relies on my reading of "If a default value is declared, when an XML processor encounters an omitted attribute, it is to behave as though the attribute were present with the declared default value.".
 
 # Stages of processing:
 1. Source

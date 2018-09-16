@@ -917,6 +917,18 @@ class CheckXTokenValidStream extends stream.Transform {
                   }
                }
             }
+
+            // §3.3.2 Validity Constraint: Fixed Attribute Default
+            //    If an attribute has a default value declared with the #FIXED keyword,
+            //    instances of that attribute must match the default value.
+            // §3.3.2 (text): the #FIXED keyword states that the attribute must always have the default value.
+            if (attrDef && attrDef.defaultType === '#FIXED') {
+               const attrDefaultText = getAttributeValueText(attrDef);
+               if (attrText !== attrDefaultText) {
+                  this.pushValidityError(ValidityError.ID.ELEMENTSTART_FIXED_NOT_RIGHT,
+                     [ elStart.name, attrName, attrDefaultText, attrText ], pTokenOpen);
+                  }
+            }
          }
 
          // §3.3.2: Validity Constraint: Required Attribute
