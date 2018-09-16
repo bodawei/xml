@@ -25,6 +25,7 @@ import {
    notationDeclaration,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
+import { AttributeXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
@@ -45,7 +46,6 @@ type ElementAttributes = {
 
 type AttrDefinitions = {
    tokens: Array<AttListXToken>,
-   requiredAttributes: Array<string>,
    attributes: {
       [attrName: string]: AttDefXToken,
    },
@@ -97,6 +97,8 @@ type IDMap = {
    }
 };
 
+type AttributeMap = { [name: string] : AttributeXToken };
+
 /*
  * §3.3.3: Attribute value normalization.
  * This should be done whether or not we are validating.
@@ -106,6 +108,10 @@ function normalizeAttributeValue(attribute: any, attrDef?: AttDefXToken): any { 
    let prevHadTrailingSpace = true; // consider the start to already be space terminated
    let prevPiece: { text: string } | void = undefined;
    const newValue = [];
+
+   if (!attribute.value) {
+      return;
+   }
 
    for (let index = 0; index < attribute.value.length; index++) {
       const piece = attribute.value[index];
@@ -452,7 +458,6 @@ class CheckXTokenValidStream extends stream.Transform {
       } else {
          attrDefs = {
             tokens: [ attListDecl ],
-            requiredAttributes: [],
             attributes: {},
          };
          this.attrDefsByElementName[elName] = attrDefs;
@@ -477,10 +482,6 @@ class CheckXTokenValidStream extends stream.Transform {
             //   attribute of a given element type, the first declaration is binding and later
             //   declarations are ignored. ...
             attrDefs.attributes[attDef.name] = attDef;
-
-            if (attDef.defaultType === '#REQUIRED') {
-               attrDefs.requiredAttributes.push(attDef.name);
-            }
          } else {
             // §3.3.0: ... For interoperability, an XML processor may at user option
             //   issue a warning when ... more than one attribute definition is provided for a given
@@ -713,6 +714,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
+      const attributesByName: AttributeMap = {};
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
@@ -720,10 +722,43 @@ class CheckXTokenValidStream extends stream.Transform {
          const attrDef = elemAttrDef && elemAttrDef.attributes[attrName];
 
          attributes[index].value = normalizeAttributeValue(attributes[index], attrDef);
+
+         attributesByName[attrName] = attributes[index];
       }
 
       if (elemAttrDef) { // This must be required somewhere...
-         const names = [];
+         const attributeNames = [];
+         const attDefNames = Object.keys(elemAttrDef.attributes);
+         const requiredNames = [];
+
+         // Fill in default values. That is, if the type isn't #REQUIRED, and the attribute is not provided, then use
+         // the default value.  (this assumes an attribute of the form myAttr="" is provided).
+         // §3.3.2: In an attribute declaration, #REQUIRED means that the attribute must always be provided,
+         //      #IMPLIED that no default value is provided. If the declaration is neither #REQUIRED nor
+         //      #IMPLIED, then the AttValue value contains the declared default value;
+         for (let index = 0; index < attDefNames.length; index ++) {
+            const attDefName = attDefNames[index];
+            const attDef = elemAttrDef.attributes[attDefName];
+            const attribute = attributesByName[attDefName];
+
+            if (attDef.defaultType === '#REQUIRED') {
+               requiredNames.push(attDef.name);
+            } else if (attDef.value.length > 0) {
+               let newAttribute = attribute;
+
+               if (!attribute) {
+                  newAttribute = {
+                     name: attDefName,
+                     value: attDef.value,
+                  };
+   
+                  attributesByName[attDefName] = newAttribute;
+                  attributes.push(newAttribute);
+               } else if (!attribute.value || attribute.value.length === 0) {
+                  attribute.value = attDef.value;
+               }
+            }
+         }
 
          // §3.1: Validity constraint: Attribute Value Type
          //    The attribute must have been declared; the value must be of
@@ -733,7 +768,7 @@ class CheckXTokenValidStream extends stream.Transform {
             const attrDef = elemAttrDef.attributes[attrName];
             const attrText = getAttributeValueText(attributes[index]);
 
-            names.push(attrName); // for use further below.
+            attributeNames.push(attrName); // for use further below.
 
             if (!attrDef) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_UNDECLARED_ATTRIBUTE,
@@ -888,10 +923,10 @@ class CheckXTokenValidStream extends stream.Transform {
          //    If the default declaration is the keyword #REQUIRED, then
          //    the attribute must be specified for all elements of the
          //    type in the attribute-list declaration.
-         for (let index = 0; index < elemAttrDef.requiredAttributes.length; index++) {
-            const requiredName = elemAttrDef.requiredAttributes[index];
+         for (let index = 0; index < requiredNames.length; index++) {
+            const requiredName = requiredNames[index];
 
-            if (names.indexOf(requiredName) === -1) {
+            if (attributeNames.indexOf(requiredName) === -1) {
                this.pushValidityError(ValidityError.ID.ELEMENTSTART_NO_REQUIRED,
                   [ elStart.name, requiredName ], pTokenOpen, pTokenOpen);
             }

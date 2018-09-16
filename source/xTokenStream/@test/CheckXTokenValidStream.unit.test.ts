@@ -436,6 +436,106 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          });
 
+         describe('default value', () => {
+
+            it('adds an attribute with a default value if no attribute was on the original start token', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('the default value') ],
+                  defaultType: '',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', []);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value[0].text)
+                     .toEqual('the default value');
+                  done();
+               });
+            });
+
+            it('adds a default value to an attribute if, somehow, it has no value but the attr is still defined', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('the default value') ],
+                  defaultType: '',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+               }]);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value[0].text)
+                     .toEqual('the default value');
+                  done();
+               });
+            });
+
+            it('adds a default value to an attribute if, somehow, it has an empty value but the attr is still defined', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('the default value') ],
+                  defaultType: '',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+                  value: []
+               }]);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value[0].text)
+                     .toEqual('the default value');
+                  done();
+               });
+            });
+
+            it('does not add the default value if an attribute already has a value', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('the default value') ],
+                  defaultType: '',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', [{
+                  name: 'textAttr',
+                  value: [ new text.XToken('original') ]
+               }]);
+
+               validator.write(elDecl1);
+               validator.write(attListDecl1);
+               validator.write(startToken1);
+               validator.end();
+
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[2].attributes[0].value[0].text)
+                     .toEqual('original');
+                  done();
+               });
+            });
+
+         });
+
          describe('ID', () => {
 
             it('reports an error if an ID value is not a name', (done) => {
