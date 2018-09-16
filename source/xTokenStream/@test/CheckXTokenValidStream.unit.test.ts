@@ -1426,7 +1426,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
-         it('doe snot blow up if the ATTLIST has no pToken', (done) => {
+         it('does not blow up if the ATTLIST has no pToken', (done) => {
             const aOne = new attListDeclaration.XToken('one', []);
             const aTwo = new attListDeclaration.XToken('one', []);
    
@@ -1534,6 +1534,363 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_EXTRA_ID,
                [ 'elementType',  'second' ]);
             expectStream(validator, expected, done);
+         });
+
+         describe('ID', () => {
+
+            it('calls util.isName() to validate name', (done) => {
+               spyOn(util, 'isName').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+
+            it('reports an error if the default value for an ID attribute is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idAttr',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_ID_DEFAULT,
+                  [ 'elementType',  'idAttr', '$bad' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('IDREF', () => {
+
+            it('calls util.isName() to validate name', (done) => {
+               spyOn(util, 'isName').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+
+            it('reports an error if the default value for an IDREF attribute is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idRefAttr',
+                  type: 'IDREF',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT,
+                  [ 'elementType',  'idRefAttr', '$bad' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('IDREFS', () => {
+
+            it('calls util.isName() to validate name', (done) => {
+               spyOn(util, 'isName').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idRefsAttr',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $bad2'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+
+            it('reports an error if the default value for an IDREFS attribute has a non-name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'idRefsAttr',
+                  type: 'IDREFS',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $bad2'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREFS_DEFAULT,
+                  [ 'elementType',  'idRefsAttr', '$bad, $bad2' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('ENTITY', () => {
+
+            it('calls util.isName() to validate name', (done) => {
+               spyOn(util, 'isName').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'entityAttr',
+                  type: 'ENTITY',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+
+            it('reports an error if the default value for an IDREF attribute is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'entityAttr',
+                  type: 'ENTITY',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_ENTITY_DEFAULT,
+                  [ 'elementType',  'entityAttr', '$bad' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('ENTITIES', () => {
+
+            it('calls util.isName() to validate name', (done) => {
+               spyOn(util, 'isName').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'entitiesAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $bad2'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+
+            it('reports an error if the default value for an ENTITIES attribute has a non-name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'entitiesAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $bad2'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_ENTITIES_DEFAULT,
+                  [ 'elementType',  'entitiesAttr', '$bad, $bad2' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no errors if the default value for an ENTITIES attribute are all good', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'entitiesAttr',
+                  type: 'ENTITIES',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('all awesome good'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+         });
+
+
+         describe('NMTOKEN', () => {
+
+            it('calls util.isNmToken() to validate name', (done) => {
+               spyOn(util, 'isNmToken').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'nmTokenAttr',
+                  type: 'NMTOKEN',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+            it('reports an error if the default value for an NMTOKEN attribute is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'nmTokenAttr',
+                  type: 'NMTOKEN',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+                  [ 'elementType',  'nmTokenAttr', '$bad' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
+         describe('NMTOKENS', () => {
+
+            it('calls util.isNmToken() to validate name', (done) => {
+               spyOn(util, 'isNmToken').and.returnValue(false);
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'nmTokenAttr',
+                  type: 'NMTOKENS',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $alsoBad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               gatherTokens(validator, () => {
+                  expect(util.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
+                  done();
+               });
+            });
+            it('reports an error if the default value for an NMTOKENS attribute is not a name', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'nmTokensAttr',
+                  type: 'NMTOKENS',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('$bad good $alsoBad'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+                  [ 'elementType',  'nmTokensAttr', '$bad, $alsoBad' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no errors if the default value for an NMTOKENS attribute are all good', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'nmTokensAttr',
+                  type: 'NMTOKENS',
+                  defaultType: '#REQUIRED',
+                  value: [
+                     new text.XToken('all awesome good'),
+                  ],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
          });
 
          describe('NOTATION', () => {
@@ -1700,6 +2057,32 @@ describe('CheckXTokenValidStream (unit)', () => {
                   [ 'elementType',  'notation1' ]);
                expectStream(validator, expected, done);
             });
+
+            it('reports an error if the default value for a NOTATION attribute does not match one of the defined values', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const notation1 = new notationDeclaration.XToken('first');
+               const notation2 = new notationDeclaration.XToken('second');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'noteAttr',
+                  type: 'NOTATION',
+                  enumeration: ['first', 'second'],
+                  value: [
+                     new text.XToken('third'),
+                  ],
+                  defaultType: '',
+               }]);
+
+               validator.write(notation1);
+               validator.write(notation2);
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+                  [ 'elementType',  'noteAttr', 'first, second', 'third' ]);
+               expectStream(validator, expected, done);
+            });
+
          });
 
          describe('ENUMERATION', () => {
@@ -1762,6 +2145,27 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrors(validator, done);
+            });
+
+            it('reports an error if the default value for a enumeration attribute does not match one of the defined values', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'noteAttr',
+                  type: 'ENUMERATION',
+                  enumeration: ['first', 'second'],
+                  value: [
+                     new text.XToken('third'),
+                  ],
+                  defaultType: '',
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+                  [ 'elementType',  'noteAttr', 'first, second', 'third' ]);
+               expectStream(validator, expected, done);
             });
 
          });

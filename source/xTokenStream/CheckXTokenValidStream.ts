@@ -497,6 +497,8 @@ class CheckXTokenValidStream extends stream.Transform {
       const defaultType = attDef.defaultType.toUpperCase();
       const pToken = attList.pToken || {} as AttListPToken; // typeHack
       const oneDotZeroRev3OrHigher = this.emd.isVersion1dot1 || (this.emd.isVersion1dot0 && this.emd.revision > 2);
+      const defaultText = getAttributeValueText(attDef);
+      const hasDefault = attDef.value.length > 0;
 
       if (type === 'ID') {
          // §3.3.1: Validity constraint: ID Attribute Default
@@ -504,6 +506,72 @@ class CheckXTokenValidStream extends stream.Transform {
          if (defaultType !== '#IMPLIED' && defaultType !== '#REQUIRED') {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_ID_BAD_DEFAULT,
                [ attList.elementName, attDef.name, '' ], pToken.open);
+         }
+
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    It doesn't make a lot of sense for an ID to have a default value, but the spec doesn't
+         //    forbid this. We allow it, and follow the spirit of this validity constraint to
+         //    require that value be a legitimate name
+         if (hasDefault && !util.isName(defaultText, this.emd.version, this.emd.revision)) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ID_DEFAULT,
+               [ attList.elementName, attDef.name, defaultText ], pToken.open);
+         }
+      } else if (type === 'IDREF' || type === 'ENTITY') {
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ...of type IDREF or ENTITY must match the Name production;
+         if (hasDefault && !util.isName(defaultText, this.emd.version, this.emd.revision)) {
+            const code = type === 'IDREF' ? ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT
+               : ValidityError.ID.ATTLISTDECL_BAD_ENTITY_DEFAULT;
+
+            this.pushValidityError(code, [ attList.elementName, attDef.name, defaultText ], pToken.open);
+         }
+      } else if (type === 'IDREFS' || type === 'ENTITIES') {
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ...of type IDREFS or ENTITIES must match the Names production;
+         if (hasDefault) {
+            const names = defaultText.split(/ +/);
+            const badNames = [];
+
+            for (const name of names) {
+               if (!util.isName(name, this.emd.version, this.emd.revision)) {
+                  badNames.push(name);
+               }
+            }
+
+            if (badNames.length > 0) {
+               const code = type === 'IDREFS' ? ValidityError.ID.ATTLISTDECL_BAD_IDREFS_DEFAULT
+                  : ValidityError.ID.ATTLISTDECL_BAD_ENTITIES_DEFAULT;
+               this.pushValidityError(code, [ attList.elementName, attDef.name, badNames.join(', ') ], pToken.open);
+            }
+         }
+      } else if (type === 'NMTOKEN') {
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ...of type NMTOKEN must match the Nmtoken production;
+         if (hasDefault && !util.isNmToken(defaultText, this.emd.version, this.emd.revision)) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
+               [ attList.elementName, attDef.name, defaultText ], pToken.open);
+         }
+      } else if (type === 'NMTOKENS') {
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ...of type NMTOKENS must match the Nmtokens production;
+         if (hasDefault) {
+            const names = defaultText.split(/ +/);
+            const badNames = [];
+
+            for (const name of names) {
+               if (!util.isNmToken(name, this.emd.version, this.emd.revision)) {
+                  badNames.push(name);
+               }
+            }
+
+            if (badNames.length > 0) {
+               this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKENS_DEFAULT,
+                  [ attList.elementName, attDef.name, badNames.join(', ') ], pToken.open);
+            }
          }
       } else if (type === 'NOTATION') {
          // §3.3.1: Validity constraint: Notation Attributes
@@ -530,17 +598,34 @@ class CheckXTokenValidStream extends stream.Transform {
                   [ attList.elementName, attDef.name, duplicates.join(', ') ], pToken.open);
             }
          }
+
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ... of an enumerated type (either a NOTATION type or an enumeration) must match one of the enumerated values.
+         if (hasDefault && notationNames.indexOf(defaultText) === -1) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NOTATION_DEFAULT,
+               [ attList.elementName, attDef.name, notationNames.join(', '), defaultText ], pToken.open);
+         }
       } else if (attDef.type === 'ENUMERATION') {
+         const enumerationNames: Array<string> = attDef.enumeration || [];
+
          if (oneDotZeroRev3OrHigher) {
             // §3.3.1: Validity constraint: No Duplicate Tokens
             //    ...the NmTokens in a single Enumeration attribute declaration, must all be distinct.
-            const enumerationName: Array<string> = attDef.enumeration || [];
-            const duplicates = this.findDuplicateNamesInEnumeration(enumerationName);
+            const duplicates = this.findDuplicateNamesInEnumeration(enumerationNames);
 
             if (duplicates.length > 0) {
                this.pushValidityError(ValidityError.ID.ATTLISTDECL_DUPLICATE_ENUMERATION,
                   [ attList.elementName, attDef.name, duplicates.join(', ') ], pToken.open);
             }
+         }
+
+         // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
+         //    The declared default value must meet the syntactic constraints of the declared attribute type.
+         //    ... of an enumerated type (either a NOTATION type or an enumeration) must match one of the enumerated values.
+         if (hasDefault && enumerationNames.indexOf(defaultText) === -1) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ENUMERATION_DEFAULT,
+               [ attList.elementName, attDef.name, enumerationNames.join(', '), defaultText ], pToken.open);
          }
       }
    }

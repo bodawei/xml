@@ -37,10 +37,12 @@ describe('CheckXTokenValidStream (integration)', () => {
    }
 
    beforeEach(() => {
-      parser = new PTokenStream();
+      const entityManager = new EntityManager();
       const tokenizer = new PToXTokenStream();
-      validator = new CheckXTokenValidStream(new EntityManager());
-      replacer = new EntityExpandingStream(new EntityManager());
+
+      parser = new PTokenStream();
+      validator = new CheckXTokenValidStream(entityManager);
+      replacer = new EntityExpandingStream(entityManager);
       (parser as any).pipe(tokenizer).pipe(replacer).pipe(validator); // typeHack
    });
 
@@ -114,15 +116,15 @@ describe('CheckXTokenValidStream (integration)', () => {
 
    describe('ATTLIST', () => {
 
-      xit('reports an error when the an IDREF is not a valid name', (done) => {
-         const error = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'three', 'one' ],
-            new Offset(new EntityLocation(), 243, 0, 243));
+      it('reports an error when the an IDREF is not a valid name', (done) => {
+         const error = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT, [ 'root', 'reference', '$good' ],
+            new Offset(new EntityLocation(), 118, 3, 115));
    
          parser.addText(`<?xml version="1.0"?><!DOCTYPE root [
             <!ENTITY bad "$">
             <!ELEMENT root ANY >
                <!ATTLIST root
-                  reference IDREF "&bxxad;good"
+                  reference IDREF "&bad;good"
                >
             ]>
             <root>

@@ -443,6 +443,7 @@ class NodeStream extends Transform {
 
    _expandReference(entityRef, indexInAttr, referenceExpanded) {
       const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
+      // Note.  Pass a bad reference in, and this will barf
 
       // Well-formedness Constraint: §3.1: No External Entity References
       //    Attribute values must not contain direct or indirect entity
