@@ -1,5 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
+
+import stream from 'readable-stream';
 
 import { PTokenStream } from '../../pTokenStream';
 import * as tokens from '../../token';
@@ -8,23 +10,30 @@ import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream.js';
 
 describe('CommentFixingStream (integration)', () => {
-   let pTokenStream;
-   let xTokenStream;
+   let pTokenStream: PTokenStream;
+   let xTokenStream: PToXTokenStream;
 
-   function testTransformation(before, after, done) {
+   function gatherTokens(stream: stream.Transform, done: (result: Array<any>) => void) {
+      const results: Array<any> = [];
+
+      stream.on('data', (data: any) => {
+         results.push(data);
+      });
+      stream.on('end', () => {
+         done(results);
+      });
+   }
+
+   function testTransformation(before: string, after: string, done: () => void) {
       const cf = new CommentFixingStream();
       pTokenStream = new PTokenStream();
       xTokenStream = new PToXTokenStream();
-      const results = [];
 
       pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
       pTokenStream.endText();
-      pTokenStream.pipe(xTokenStream).pipe(cf);
+      (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
-      cf.on('data', (data) => {
-         results.push(data);
-      });
-      cf.on('end', () => {
+      gatherTokens(cf, (results) => {
          expect(results[2].text).toEqual(after);
          done();
       });
@@ -68,13 +77,9 @@ describe('CommentFixingStream (integration)', () => {
          pTokenStream.endText();
 
          const cf = new CommentFixingStream();
-         const results = [];
-         pTokenStream.pipe(xTokenStream).pipe(cf);
+         (pTokenStream as any).pipe(xTokenStream).pipe(cf); // typeHack
 
-         cf.on('data', (data) => {
-            results.push(data);
-         });
-         cf.on('end', () => {
+         gatherTokens(cf, (results) => {
             expect(results[1] instanceof tokens.xmlDeclaration.XToken).toEqual(true);
             expect(results[2] instanceof tokens.comment.CommentXToken).toEqual(true);
             expect(results[3] instanceof tokens.elementStart.XToken).toEqual(true);

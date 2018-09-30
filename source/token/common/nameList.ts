@@ -105,9 +105,7 @@ function isNamePToken(value: any): value is NamePToken {
    deliverPToken: Callback to deliver the PTokens
 
  SYNTAX
-   [58] NotationType   ::= 'NOTATION' S
-                           '(' S? Name (S? '|' S? Name)* S? ')'
-   [59] Enumeration    ::= '(' S? Nmtoken (S? '|' S? Nmtoken)* S? ')'
+   §3.2.1
    [47] children       ::= (choice | seq) ('?' | '*' | '+')?
    [48] cp             ::= (Name | choice | seq) ('?' | '*' | '+')?
    [49] choice         ::= '(' S? cp ( S? '|' S? cp )+ S? ')'

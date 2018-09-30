@@ -91,6 +91,7 @@ class ElementDeclarationPToken extends declaration.PToken {
    deliverPToken: Callback to deliver the PToken
 
  SYNTAX
+   §3.2.0
    [45] elementdecl ::= '<!ELEMENT' S Name S contentspec S? '>'
    [46] contentspec ::= 'EMPTY' | 'ANY' | Mixed | children
    Note that Mixed and children are handled by nameList

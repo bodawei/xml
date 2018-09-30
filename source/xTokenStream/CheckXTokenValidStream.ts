@@ -654,7 +654,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const openSToken = elDecl.pToken && elDecl.pToken.open;
       let isMixed = false;
 
-      // Validity Constraint: §3.2: Validity constraint: Unique Element Type Declaration
+      // Validity Constraint: §3.2.0: Validity constraint: Unique Element Type Declaration
       //    An element type must not be declared more than once.
       if (this.elementDeclarations[elDecl.name]) {
          this.pushValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION,
@@ -679,7 +679,7 @@ class CheckXTokenValidStream extends stream.Transform {
             repeat: 'ONE',
          };
 
-         // §3.2: At user option, an XML processor may issue a warning when a declaration mentions an
+         // §3.2.0: At user option, an XML processor may issue a warning when a declaration mentions an
          //    element type for which no declaration is provided, but this is not an error.
          const childNamesMap = getNamesFromList(children);
          const childNames = Object.keys(childNamesMap);

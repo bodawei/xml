@@ -1,12 +1,11 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { comment } from '../../token';
 
 import CommentFixingStream from '../CommentFixingStream.js';
 
 describe('CommentFixingStream (unit)', () => {
-   let cfs;
+   let cfs: CommentFixingStream;
 
    beforeEach(() => {
       cfs = new CommentFixingStream();

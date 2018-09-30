@@ -8,7 +8,7 @@ import attListDeclaration from './attListDeclaration';
 import * as cdata from './cdata';
 import * as charData from './charData';
 import charRef from './charRef';
-import comment from './comment';
+import comment, { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as entityDeclaration from './entityDeclaration';
@@ -85,6 +85,8 @@ export {
    unassigned,
 
    literalValue,
+
+   CommentXToken
 };
 
 export default token;
