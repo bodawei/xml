@@ -8,7 +8,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken } from './common/literal';
-import nameList, { NameListPToken, XName, XNameList } from './common/nameList';
+import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -25,7 +25,7 @@ type AttDefPToken = {
    postNameSpace?: SToken;
    type?: SToken;
    postTypeSpace?: SToken;
-   nameList?: NameListPToken, // has its own post list space
+   enumeration?: WordListPToken, // has its own post list space
    defaultType?: SToken;
    postDefaultTypeSpace?: SToken;
    openQuote?: SToken;
@@ -133,9 +133,9 @@ function parseAttName(source: STokenSource, pToken: AttListPToken, done: Deliver
 }
 
 function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDefPToken, done: DeliverPToken) {
-   function populateList(list?: NameListPToken): void {
+   function populateList(list?: WordListPToken): void {
       if (list) {
-         attDef.nameList = list;
+         attDef.enumeration = list;
       }
 
       parseDefaultType(source, pToken, attDef, done);
@@ -148,7 +148,7 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
             source.extractToObjectNoParams('space', attDef, 'postTypeSpace');
 
             if (attType.str.toLocaleUpperCase() === 'NOTATION') {
-               nameList.parse(source, 'NOTATION', populateList);
+               parseWordList(source, WordListType.NOTATION, populateList);
                return;
             }
 
@@ -158,7 +158,7 @@ function parseAttType(source: STokenSource, pToken: AttListPToken, attDef: AttDe
 
          source.extractNoParams('peekChar', (charSToken) => {
             if (charSToken && charSToken.str === '(') {
-               nameList.parse(source, 'ENUMERATION', populateList);
+               parseWordList(source, WordListType.ENUMERATION, populateList);
                return;
             }
 
@@ -253,14 +253,20 @@ function assignUnassigned(attLiPToken: AttListPToken) {
       unassigned.assignToProps(attLiPToken.unassigned, nextDef, attLiPToken.nextPropName, descriptors);
 
       if (couldNeedList && (!nextDef.type || nextDef.type.str === '' || nextDef.type.str.toUpperCase() === 'NOTATION')) {
-         const list = nextDef.nameList || new nameList.PToken();
+         const enumeration = nextDef.enumeration;
          const beforeLength = unValues.length;
-         nameList.assignUnassigned(list, unValues);
-         
-         // only add the namelist if we seem to have actually consumed any unassigned values.
-         if (beforeLength !== unValues.length) {
-            nextDef.nameList = list;
-         }
+         const type = (!nextDef.type || nextDef.type.str === '') ? WordListType.ENUMERATION : WordListType.NOTATION;
+
+         if (enumeration) {
+            nextDef.enumeration = enumeration.newWithUnassigned(unValues);
+         } else {
+            const newEnum = newWordListFromUndefined(type, unValues);
+
+            // only add the namelist if we seem to have actually consumed any unassigned values.
+            if (beforeLength !== unValues.length) {
+               nextDef.enumeration = newEnum;
+            }
+         }         
       }
 
       const remainingDescriptors = [
@@ -392,11 +398,11 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       }
 
       if (upperAttType === '') {
-         if (!attDef.nameList) {
+         if (!attDef.enumeration) {
             ec.report(WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION, [ attName, elNameText ]);
          } else {
-            nameList.checkWellFormed(attDef.nameList, ec, entityMetaData, 'enumeration', 'ENUMERATION');
-            ec.check(!attDef.nameList.postCloseSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [ attName, elNameText ]);
+            attDef.enumeration.checkWellFormed(ec, entityMetaData);
+            ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_ENUMERATION_SPACE, [ attName, elNameText ]);
          }
       } else {
          ec.check(!knownType, WFEID.ATTLISTDECL_ATTR_TYPE_UNKNOWN, [ attName, elNameText, attType ]);
@@ -404,11 +410,11 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
          ec.check(!attDef.postTypeSpace, WFEID.ATTLISTDECL_ATTR_TYPE_NO_SPACE, [ attName, elNameText ]);
 
          if (upperAttType === 'NOTATION') {
-            if (!attDef.nameList) {
+            if (!attDef.enumeration) {
                ec.report(WFEID.ATTLISTDECL_ATTR_NO_NOTATION, [ attName, elNameText ]);
             } else {
-               nameList.checkWellFormed(attDef.nameList, ec, entityMetaData, 'NOTATION', 'NOTATION');
-               ec.check(!attDef.nameList.postCloseSpace, WFEID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE, [ attName, elNameText ]);
+               attDef.enumeration.checkWellFormed(ec, entityMetaData);
+               ec.check(!attDef.enumeration.closeSpace, WFEID.ATTLISTDECL_ATTR_NO_NOTATION_SPACE, [ attName, elNameText ]);
             }
          }
       }
@@ -477,17 +483,6 @@ class AttListXToken {
       }
 }
 
-function getEnumerationNames(nameList: XNameList): Array<string> {
-   const names = nameList.names;
-   let declaredNames: Array<string> = [];
-
-   for (let index = 0; index < names.length; index++) {
-      declaredNames.push((names[index] as XName).name); // typeHack
-   }
-
-   return declaredNames;
-}
-
 function pTokenToXToken(pToken: AttListPToken): AttListXToken {
    const name = misc.textOrBlank(pToken.elementName);
    const attrs: Array<AttDefXToken> = [];
@@ -501,14 +496,12 @@ function pTokenToXToken(pToken: AttListPToken): AttListXToken {
          value: [],
       };
 
-      if (attDef.nameList) {
+      if (attDef.enumeration) {
          if (xTokenAttrDef.type === '') {
             xTokenAttrDef.type = 'ENUMERATION';
          }
 
-         const xNameList = nameList.makeXTokenCompatible(attDef.nameList);
-         
-         xTokenAttrDef.enumeration = getEnumerationNames(xNameList);
+         xTokenAttrDef.enumeration = attDef.enumeration.toXToken();
       }
 
       const result = literal.makeTokenCompatible(attDef)

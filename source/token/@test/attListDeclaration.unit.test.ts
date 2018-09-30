@@ -13,9 +13,10 @@ import entityReference from '../entityReference.js'
 import text from '../text';
 import unassigned, { UnassignedArray } from '../unassigned';
 import literal from '../common/literal';
-import nameList, { NameListPToken } from '../common/nameList';
+import * as wordList from '../common/wordList';
 import misc from '../common/misc.js';
 
+const { WordListPToken, WordListType } = wordList;
 type LiteralOptions = {
    pToken: {
       value: Array<any>,
@@ -83,7 +84,7 @@ describe('attListDeclaration (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
 
-         nameListParseSpy = spyOn(nameList, 'parse');
+         // nameListParseSpy = spyOn(nameList, 'parse');
          makeCheckCallbackSpy = spyOn(unassigned, 'makeCheckCallback'); // TS
          makeCheckCallbackSpy.and.callFake((_1: any, _2: any, _3: any, other: (x?: UnassignedArray) => void) => {
             checkForPERefCallback = other;
@@ -293,7 +294,7 @@ describe('attListDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps(aldPToken);
       });
 
-      it('parses a nameList for a NOTATION type', () => {
+      it('parses a wordList for a NOTATION type', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
@@ -301,13 +302,13 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             [ 'NOTATION', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
-            // namelist parsing
+            // wordList parsing
             MockSTokenSource.PEEK('"'),
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
-            done(new NameListPToken({}));
+         spyOn(wordList, 'parseWordList').and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
+            done(new WordListPToken(WordListType.NOTATION, { open: SToken.fromString('(') }));
          });
          const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
          aldPToken.attDefs = [ {
@@ -315,7 +316,7 @@ describe('attListDeclaration (unit)', () => {
             postNameSpace: makeSToken(' '),
             type: makeSToken('NOTATION'),
             postTypeSpace: makeSToken(' '),
-            nameList: new NameListPToken({}),
+            enumeration: new WordListPToken(WordListType.NOTATION, { open: SToken.fromString('(') }),
             value: [],
          } ];
          delete aldPToken.close;
@@ -326,7 +327,7 @@ describe('attListDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps(aldPToken);
       });
 
-      it('calls nameList.parse() with the expected arguments when parsing a NOTATION', () => {
+      it('calls parseWordList() with the expected arguments when parsing a NOTATION', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
@@ -339,20 +340,21 @@ describe('attListDeclaration (unit)', () => {
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+         const parseSpy = spyOn(wordList, 'parseWordList');
+         parseSpy.and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
             done();
          });
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
-         const expectedArgs = nameListParseSpy.calls.argsFor(0);
+         const expectedArgs = parseSpy.calls.argsFor(0);
          expect(expectedArgs[0]).toEqual(mockSource);
          expect(expectedArgs[1]).toEqual('NOTATION');
          expect(expectedArgs[2]).toBeInstanceOf(Function);
       });
 
-      it('parses the word NOTATION but with no subsequent namelist', () => {
+      it('parses the word NOTATION but with no subsequent enumeration', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
@@ -360,12 +362,13 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             [ 'NOTATION', 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             [ ' ', 'space' ],
-            // namelist parsing
+            // wordList parsing
             MockSTokenSource.PEEK('"'),
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+         const parseSpy = spyOn(wordList, 'parseWordList');
+         parseSpy.and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
             done();
          });
          const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
@@ -392,19 +395,19 @@ describe('attListDeclaration (unit)', () => {
             [ ' ', 'space' ],
             [ undefined, 'word', [ '>', '%', '(', '#', '"', '\'' ] ],
             MockSTokenSource.PEEK('('),
-            // namelist parsing
+            // wordList parsing
             MockSTokenSource.PEEK('"'),
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
-            done(new NameListPToken({}));
+         spyOn(wordList, 'parseWordList').and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
+            done(new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString('(') }));
          });
          const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
          aldPToken.attDefs = [ {
             name: makeSToken('att1'),
             postNameSpace: makeSToken(' '),
-            nameList: new NameListPToken({}),
+            enumeration: new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString('(') }),
             value: [],
          } ];
          delete aldPToken.close;
@@ -415,7 +418,7 @@ describe('attListDeclaration (unit)', () => {
          expect(callback).toContainPTokenProps(aldPToken);
       });
 
-      it('calls nameList.parse() with the expected arguments when parsing an ENUMERATION', () => {
+      it('calls wordList.parse() with the expected arguments when parsing an ENUMERATION', () => {
          const mockSource = new MockSTokenSource([
             [ 'elementName', 'word', [ '>', '%' ] ],
             [ ' ', 'space' ],
@@ -427,16 +430,17 @@ describe('attListDeclaration (unit)', () => {
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+         const parseSpy = spyOn(wordList, 'parseWordList');
+         parseSpy.and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
             done();
          });
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
 
-         const expectedArgs = nameListParseSpy.calls.argsFor(0);
+         const expectedArgs = parseSpy.calls.argsFor(0);
          expect(expectedArgs[0]).toEqual(mockSource);
-         expect(expectedArgs[1]).toEqual('ENUMERATION');
+         expect(expectedArgs[1]).toEqual(WordListType.ENUMERATION);
          expect(expectedArgs[2]).toBeInstanceOf(Function);
       });
 
@@ -452,7 +456,8 @@ describe('attListDeclaration (unit)', () => {
             [ undefined, 'word', [ '>', '%' ] ],
             [ undefined, 'match', '>' ],
          ]);
-         nameListParseSpy.and.callFake((_1: any, type: string, done: (pToken?: NameListPToken) => void) => {
+         const parseSpy = spyOn(wordList, 'parseWordList');
+         parseSpy.and.callFake((_1: any, _2: any, done: (pToken?: any) => void) => {
             done();
          });
          const makeSToken = makeSTokenMaker(undefined, 12, 0, 12);
@@ -641,11 +646,9 @@ describe('attListDeclaration (unit)', () => {
 
    describe('assignUnassigned()', () => {
       let assignToPropsSpy: jasmine.Spy;
-      let nameListAssignUnassigned: jasmine.Spy;
 
       beforeEach(() => {
          assignToPropsSpy = spyOn(unassigned, 'assignToProps');
-         nameListAssignUnassigned = spyOn(nameList, 'assignUnassigned');
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
@@ -686,7 +689,8 @@ describe('attListDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'elementName',
             });
-            
+            spyOn(wordList, 'newWordListFromUndefined');
+
             attListDeclaration.assignUnassigned(declPToken);
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
@@ -701,13 +705,17 @@ describe('attListDeclaration (unit)', () => {
 
       describe('unassigned in attribute name', () => {
 
+         beforeEach(() => {
+            spyOn(wordList, 'newWordListFromUndefined');
+         });
+
          it('calls unassigned.assignToProps() with "xtra" if missing is name', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            
+
             attListDeclaration.assignUnassigned(declPToken);
    
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue, {}, 'name', [
@@ -985,6 +993,11 @@ describe('attListDeclaration (unit)', () => {
       });
 
       describe('unassigned in attribute type', () => {
+         let spy: jasmine.Spy;
+
+         beforeEach(() => {
+            spy = spyOn(wordList, 'newWordListFromUndefined');
+         });
 
          it('calls unassigned.assignToProps() with no "xtra" if missing is type', () => {
             const unassignedValue = [ 'placeholder unassigned' ];
@@ -1011,7 +1024,7 @@ describe('attListDeclaration (unit)', () => {
             ]]);
          });
 
-         it('assigns a nameList if there is no type', () => {
+         it('assigns a enumeration if there is no type', () => {
             const unassignedValue = [ '(' ];
             const declPToken = new attListDeclaration.PToken({
                unassigned: unassignedValue,
@@ -1019,11 +1032,11 @@ describe('attListDeclaration (unit)', () => {
                attDefs: [ {} ],
             });
             // consume one unassigned value, so the system thinks we got a nameList
-            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
             
             attListDeclaration.assignUnassigned(declPToken);
 
-            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+            expect(declPToken.attDefs[0].enumeration).not.toBeUndefined();
          });
 
          it('assigns a nameList if type is ""', () => {
@@ -1035,12 +1048,12 @@ describe('attListDeclaration (unit)', () => {
                   type: SToken.fromString(''),
                } ],
             });
-            // consume one unassigned value, so the system thinks we got a nameList
-            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            // consume one unassigned value, so the system thinks we got an enumeration
+            spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
             
             attListDeclaration.assignUnassigned(declPToken);
 
-            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+            expect(declPToken.attDefs[0].enumeration).not.toBeUndefined();
          });
 
          it('assigns a nameList if type is NOTATION', () => {
@@ -1052,15 +1065,15 @@ describe('attListDeclaration (unit)', () => {
                   type: SToken.fromString('NOTATION'),
                } ],
             });
-            // consume one unassigned value, so the system thinks we got a nameList
-            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
+            // consume one unassigned value, so the system thinks we got an enumeration
+            spy.and.callFake((list: any, unassignedVals: Array<any>) => unassignedVals.pop());
             
             attListDeclaration.assignUnassigned(declPToken);
 
-            expect(declPToken.attDefs[0].nameList).not.toBeUndefined();
+            expect(declPToken.attDefs[0].enumeration).not.toBeUndefined();
          });
 
-         it('assigns no nameList if nameList.assignUnassigned consumes no tokens', () => {
+         it('assigns no enumeration if enumeration.assignUnassigned consumes no tokens', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new attListDeclaration.PToken({
                unassigned: unassignedValue,
@@ -1070,7 +1083,7 @@ describe('attListDeclaration (unit)', () => {
             
             attListDeclaration.assignUnassigned(declPToken);
 
-            expect(declPToken.attDefs[0].nameList).toBeUndefined();
+            expect(declPToken.attDefs[0].enumeration).toBeUndefined();
          });
 
          it('calls unassigned.assignToProps() with a postTypeSpace descriptor if this left off on a defaultType', () => {
@@ -1106,32 +1119,34 @@ describe('attListDeclaration (unit)', () => {
 
       describe('unassigned in enumeration', () => {
 
-         it('builds on the attribute definitions nameList if that is already in play', () => {
+         it('builds on the attribute definitions enumeration if that is already in play', () => {
             const unassignedValue = [ 'placeholder unassigned' ];
+            const enumeration = new WordListPToken(WordListType.ENUMERATION, {
+               open: SToken.fromString('('),
+            });
+            const expectedEnumeration = new WordListPToken(WordListType.ENUMERATION, {
+               open: SToken.fromString('('),
+               close: SToken.fromString(')'),
+            });
             const declPToken = new attListDeclaration.PToken({
                unassigned: unassignedValue,
                nextPropName: 'defaultType',
                attDefs: [ {
                   name: SToken.fromString('name'),
-                  nameList: new nameList.PToken({
-                     open: SToken.fromString('('),
-                  }),
+                  enumeration,
                   value: []
                } ],
             });
             const expected: AttDefPToken = {
                name: SToken.fromString('name'),
-               nameList: new nameList.PToken({
-                  open: SToken.fromString('('),
-                  close: SToken.fromString(')'),
-               }),
+               enumeration: expectedEnumeration,
                value: []
             };
             // consume one unassigned value, so the system thinks we got a nameList
-            nameListAssignUnassigned.and.callFake((list: any, unassignedVals: Array<any>) => {
-               list.close = SToken.fromString(')'),
-               unassignedVals.pop()
-            });
+            (enumeration as any).newWithUnassigned = (unassignedVals: Array<any>): any => {
+               unassignedVals.pop();
+               return expectedEnumeration;
+            };
 
             attListDeclaration.assignUnassigned(declPToken);
 
@@ -1140,6 +1155,11 @@ describe('attListDeclaration (unit)', () => {
       });
 
       describe('unassigned in value', () => {
+         let spy: jasmine.Spy;
+
+         beforeEach(() => {
+            spy = spyOn(wordList, 'newWordListFromUndefined');
+         });
 
          it('does not call nameList.assignUnassigned() if the next property is value', () => {
             const unassignedValue = [ 'placeholder unassigned' ];
@@ -1151,7 +1171,7 @@ describe('attListDeclaration (unit)', () => {
             
             attListDeclaration.assignUnassigned(declPToken);
 
-            expect(nameListAssignUnassigned).not.toHaveBeenCalled();
+            expect(spy).not.toHaveBeenCalled();
          });
       });
 
@@ -1160,7 +1180,6 @@ describe('attListDeclaration (unit)', () => {
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
       let emd: EntityMetaData;
-      let nameListCWF: jasmine.Spy;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
@@ -1168,7 +1187,6 @@ describe('attListDeclaration (unit)', () => {
 
          spyOn(declaration, 'checkWellFormed');
          spyOn(literal, 'checkWellFormed');
-         nameListCWF = spyOn(nameList, 'checkWellFormed');
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
@@ -1368,8 +1386,14 @@ describe('attListDeclaration (unit)', () => {
 
       it('reports no error if the type is NOTATION', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
-         aldPToken.attDefs[0].nameList = new nameList.PToken();
-         aldPToken.attDefs[0].nameList!.postCloseSpace = SToken.fromString(' ');
+         aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.NOTATION, {
+            open: SToken.fromString('('),
+            words: [{
+               word: SToken.fromString('x'),
+            }],
+            close: SToken.fromString(')'),
+            closeSpace: SToken.fromString(' '),
+         });
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
@@ -1402,18 +1426,20 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('calls nameList.checkWellFormed() if this is an enumerated type', () => {
+         const cwfSpy = jasmine.createSpy();
          delete aldPToken.attDefs[0].type;
-         aldPToken.attDefs[0].nameList = new nameList.PToken();
+         aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString(' ') });
+         (aldPToken.attDefs[0].enumeration as any).checkWellFormed = cwfSpy;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(nameListCWF).toHaveBeenCalledWith(aldPToken.attDefs[0].nameList,
-            mockErrorCollector, emd, 'enumeration', 'ENUMERATION');
+         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, emd);
       });
 
       it('reports an error the enumeration does not end with a space', () => {
-         delete aldPToken.attDefs[0].type;
-         aldPToken.attDefs[0].nameList = new nameList.PToken();
+         delete aldPToken.attDefs[0].type; // make it an enumeration
+         aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.ENUMERATION, { open: SToken.fromString(' ') });
+         (aldPToken.attDefs[0].enumeration as any).checkWellFormed = () => {};
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
@@ -1437,18 +1463,20 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('calls nameList.checkWellFormed() if this is an NOTATION type', () => {
+         const cwfSpy = jasmine.createSpy();
          aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
-         aldPToken.attDefs[0].nameList = new nameList.PToken();
+         aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.NOTATION, { open: SToken.fromString(' ') });
+         (aldPToken.attDefs[0].enumeration as any).checkWellFormed = cwfSpy;
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
-         expect(nameListCWF).toHaveBeenCalledWith(aldPToken.attDefs[0].nameList,
-            mockErrorCollector, emd, 'NOTATION', 'NOTATION');
+         expect(cwfSpy).toHaveBeenCalledWith(mockErrorCollector, emd);
       });
 
       it('reports an error the NOTATION list does not end with a space', () => {
          aldPToken.attDefs[0].type = SToken.fromString('NOTATION');
-         aldPToken.attDefs[0].nameList = new nameList.PToken();
+         aldPToken.attDefs[0].enumeration = new WordListPToken(WordListType.NOTATION, { open: SToken.fromString(' ') });
+         (aldPToken.attDefs[0].enumeration as any).checkWellFormed = () => {};
 
          attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
 
@@ -1660,8 +1688,9 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('hands off to nameList if there is an enumerated value', () => {
-         spyOn(nameList, 'makeXTokenCompatible').and.returnValue({ names: [] });
-         aldPToken.attDefs[0].nameList = new NameListPToken();
+         aldPToken.attDefs[0].enumeration =
+            new WordListPToken(WordListType.NOTATION, { open: SToken.fromString('(') });
+         aldPToken.attDefs[0].enumeration!.toXToken = () => [];
 
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 
@@ -1680,9 +1709,10 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('adds an ENUMERATION type value if there is no type already specified', () => {
-         spyOn(nameList, 'makeXTokenCompatible').and.returnValue({ names: [] });
          delete aldPToken.attDefs[0].type;
-         aldPToken.attDefs[0].nameList = new NameListPToken();
+         aldPToken.attDefs[0].enumeration =
+            new WordListPToken(WordListType.NOTATION, { open: SToken.fromString('(') });
+         aldPToken.attDefs[0].enumeration!.toXToken = () => [];
 
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
 

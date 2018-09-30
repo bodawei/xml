@@ -10,7 +10,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import helper from '../@test/helper.js';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
-import nameList from '../common/nameList';
+import { WordListPToken, WordListType } from '../common/wordList';
 import entityEnd from '../entityEnd';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart';
@@ -64,7 +64,7 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('parses an ATTLIST with a NOTATION by calling nameList.parse()', (done) => {
+      it('parses an ATTLIST with a NOTATION by calling parseWordList()', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName one NOTATION ( one | two) >');
          source.endText();
@@ -80,32 +80,22 @@ describe('attListDeclaration (integration)', () => {
                   postNameSpace: makeSToken(' '),
                   type: makeSToken('NOTATION'),
                   postTypeSpace: makeSToken(' '),
-                  nameList: new nameList.PToken({
+                  enumeration: new WordListPToken(WordListType.NOTATION, {
                      open: makeSToken('('),
-                     postOpenSpace: makeSToken(' '),
-                     names: [ {
-                        particle: {
-                           name: makeSToken('one'),
-                           postNameSpace: makeSToken(' '),
-                           repeat: undefined,
-                           postRepeatSpace: undefined,
-                        },
-                        delimiter: makeSToken('|'),
-                        postDelimiterSpace: makeSToken(' '),
+                     openSpace: makeSToken(' '),
+                     words: [ {
+                        word: makeSToken('one'),
+                        wordSpace: makeSToken(' '),
+                        connector: makeSToken('|'),
+                        connectorSpace: makeSToken(' '),
                      }, {
-                        particle: {
-                           name: makeSToken('two'),
-                           postNameSpace: undefined,
-                           repeat: undefined,
-                           postRepeatSpace: undefined,
-                        },
-                        delimiter: undefined,
-                        postDelimiterSpace: undefined,
+                        word: makeSToken('two'),
+                        wordSpace: undefined,
+                        connector: undefined,
+                        connectorSpace: undefined,
                      }],
                      close: makeSToken(')'),
-                     postCloseSpace: makeSToken(' '),
-                     repeat: undefined,
-                     postRepeatSpace: undefined,
+                     closeSpace: makeSToken(' '),
                   }),
                   value: [],
                }],
@@ -115,7 +105,7 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('parses an ATTLIST with an ENUMERATION by calling nameList.parse()', (done) => {
+      it('parses an ATTLIST with an ENUMERATION by calling wordList.parse()', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName one ( one ) >');
          source.endText();
@@ -129,23 +119,17 @@ describe('attListDeclaration (integration)', () => {
                attDefs: [{
                   name: makeSToken('one'),
                   postNameSpace: makeSToken(' '),
-                  nameList: new nameList.PToken({
+                  enumeration: new WordListPToken(WordListType.ENUMERATION, {
                      open: makeSToken('('),
-                     postOpenSpace: makeSToken(' '),
-                     names: [ {
-                        particle: {
-                           name: makeSToken('one'),
-                           postNameSpace: makeSToken(' '),
-                           repeat: undefined,
-                           postRepeatSpace: undefined,
-                        },
-                        delimiter: undefined,
-                        postDelimiterSpace: undefined,
+                     openSpace: makeSToken(' '),
+                     words: [ {
+                        word: makeSToken('one'),
+                        wordSpace: makeSToken(' '),
+                        connector: undefined,
+                        connectorSpace: undefined,
                      }],
                      close: makeSToken(')'),
-                     postCloseSpace: makeSToken(' '),
-                     repeat: undefined,
-                     postRepeatSpace: undefined,
+                     closeSpace: makeSToken(' '),
                   }),
                   value: [],
                }],
@@ -437,12 +421,13 @@ describe('attListDeclaration (integration)', () => {
                }, {
                   name: SToken.fromString('at2'),
                   postNameSpace: SToken.fromString(' '),
-                  nameList: new nameList.PToken({
+                  enumeration: new WordListPToken(WordListType.ENUMERATION, {
                      open: SToken.fromString('('),
-                     names: [{
-                        particle: {
-                           name: SToken.fromString('one'),
-                        }
+                     words: [ {
+                        word: SToken.fromString('one'),
+                        wordSpace: undefined,
+                        connector: undefined,
+                        connectorSpace: undefined,
                      }],
                      close: SToken.fromString(')'),
                   }),
@@ -496,26 +481,22 @@ describe('attListDeclaration (integration)', () => {
                attDefs: [{
                   name: makeSToken('at1'),
                   postNameSpace: makeSToken(' '),
-                  nameList: new nameList.PToken({
+                  enumeration: new WordListPToken(WordListType.ENUMERATION, {
                      open: makeSToken('('),
-                     postOpenSpace: undefined,
-                     names: [{
-                        particle: {
-                           name: makeSToken('one'),
-                           postNameSpace: undefined,
-                           repeat: undefined,
-                           postRepeatSpace: undefined,
-                        },
-                        delimiter: makeSToken('|')
+                     openSpace: undefined,
+                     words: [ {
+                        word: makeSToken('one'),
+                        wordSpace: undefined,
+                        connector: makeSToken('|'),
+                        connectorSpace: undefined,
                      }, {
-                        particle: {
-                           name: SToken.fromString('two'),
-                        },
+                        word: SToken.fromString('two'),
+                        wordSpace: undefined,
+                        connector: undefined,
+                        connectorSpace: undefined,
                      }],
                      close: SToken.fromString(')'),
-                     postCloseSpace: undefined,
-                     repeat: undefined,
-                     postRepeatSpace: undefined,
+                     closeSpace: undefined,
                   }),
                   defaultType: SToken.fromString('#REQUIRED'),
                   value: [],
@@ -526,7 +507,7 @@ describe('attListDeclaration (integration)', () => {
             const expected = new attListDeclaration.PToken(rawExpected);
             const spaceToken = SToken.fromString(' ');
             spaceToken.ranges = [ helper.makeInsertedRange() ];
-            expected.attDefs[0].nameList!.names[0].postDelimiterSpace = spaceToken;
+            (expected.attDefs[0].enumeration!.words[0] as any).connectorSpace = spaceToken;
             expected.attDefs[0].postDefaultTypeSpace = spaceToken;
 
             attListDeclaration.assignUnassigned(pToken);
@@ -594,26 +575,26 @@ describe('attListDeclaration (integration)', () => {
          });
       });
 
-      it('calls nameList.checkWellFormed() on an enumerated list', (done) => {
+      it('calls wordList.checkWellFormed() on an enumerated list', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName attr ( $badName ) >');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NAMELIST_NAME_INVALID);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NMTOKEN);
             done();
          });
       });
 
-      it('calls nameList.checkWellFormed() on a NOTATION list', (done) => {
+      it('calls wordList.checkWellFormed() on a NOTATION list', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
          source.endText();
          attListDeclaration.parse(source, declarationPToken, (result) => {
             attListDeclaration.checkWellFormed(result, ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NAMELIST_NAME_INVALID);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.WORDLIST_INVALID_NAME);
             done();
          });
       });
