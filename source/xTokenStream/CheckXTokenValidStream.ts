@@ -500,6 +500,36 @@ class CheckXTokenValidStream extends stream.Transform {
       const defaultText = getAttributeValueText(attDef);
       const hasDefault = attDef.value.length > 0;
 
+      // §2.1: concerning xml:space:
+      //    it must be given as an enumerated type whose values are one or both of "default"
+      //    and "preserve". ... It is an error for other values to be specified; the XML
+      //    processor may report the error or may recover by ignoring the attribute
+      //    specification or by reporting the (erroneous) value to the application.
+      //    Applications may ignore or reject erroneous values.
+      if (attDef.name.toLowerCase() === 'xml:space') {
+         if (attDef.name !== 'xml:space') {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_CASE,
+               [ attList.elementName, attDef.name ], pToken.open);
+         }
+
+         if (attDef.type !== 'ENUMERATION' || !attDef.enumeration) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_TYPE,
+               [ attList.elementName ], pToken.open);
+         } else {
+            if (attDef.enumeration.length === 0) {
+               this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_MISSING_ENUMRATION,
+                  [ attList.elementName ], pToken.open);
+            } else {
+               for (const element of attDef.enumeration) {
+                  if (element !== 'preserve' && element !== 'default') {
+                     this.pushValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
+                        [ attList.elementName , element, ], pToken.open);
+                  }
+               }
+            }
+         }
+      }
+
       if (type === 'ID') {
          // §3.3.1: Validity constraint: ID Attribute Default
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.

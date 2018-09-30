@@ -1536,6 +1536,138 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         describe('xml:space', () => {
+
+            it('reports no error on an enumeration declaration with preserve and default as values ', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  enumeration: ['preserve', 'default'],
+                  defaultType: '#REQUIRED',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error on an enumeration declaration with just preserve', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  enumeration: ['preserve'],
+                  defaultType: '',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error the xml:space type is not an enumeration', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ID',
+                  defaultType: '#REQUIRED',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_TYPE,
+                  [ 'elementType' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error the xml:space name is not lower case', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'XML:SPACE',
+                  type: 'ENUMERATION',
+                  enumeration: ['default'],
+                  defaultType: '#REQUIRED',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_CASE,
+                  [ 'elementType', 'XML:SPACE' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error the xml:space type has no enumerated values specified', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  enumeration: [],
+                  defaultType: '#IMPLICIT',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_MISSING_ENUMRATION,
+                  [ 'elementType' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error the xml:space type has a value in the wrong case', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  enumeration: ['PRESERVE', 'default'],
+                  defaultType: '#IMPLICIT',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
+                  [ 'elementType', 'PRESERVE' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error the xml:space type has an illegal value', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  enumeration: ['bogus', 'default'],
+                  defaultType: '#IMPLICIT',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_ENUMRATION,
+                  [ 'elementType', 'bogus' ]);
+               expectStream(validator, expected, done);
+            });
+
+         });
+
          describe('ID', () => {
 
             it('calls util.isName() to validate name', (done) => {

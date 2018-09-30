@@ -86,7 +86,7 @@ export {
 
    literalValue,
 
-   CommentXToken
+   CommentXToken,
 };
 
 export default token;

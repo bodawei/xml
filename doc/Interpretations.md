@@ -37,6 +37,13 @@ With that said, this does have certain patterns that it ties to stick to in term
          * Can we make it esy to substitute in other token sets? e.g. put in a custom xmldecl handler?
 
 
+## Whitespace (§2.1. and §3.2.1)
+* `xml:space`: This always generates a validity error if a value other than default and preserve is specified. In lax mode, the erronious value will be passed on to the app.
+   * The spec does allow for the processor to not report an error, and even not reporting the attribute. This could be added here in a latter version.
+   * Note: the spec does not characterize this as a validity constraint.
+
+
+
 ## limits
 - commetn eetc
 
