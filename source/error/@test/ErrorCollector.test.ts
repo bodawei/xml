@@ -1,10 +1,10 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, Range, EntityLocation } from '../../basic';
-import { SToken } from '../../sToken';
+import { Offset, Range, EntityLocation } from '../../basic/index';
+import { SToken } from '../../sToken/index';
 
-import ErrorCollector from '../ErrorCollector.js';
+import ErrorCollector from '../ErrorCollector';
 import WellFormedError from '../WellFormedError.js';
 
 describe('ErrorCollector', () => {
@@ -13,7 +13,7 @@ describe('ErrorCollector', () => {
 
       it('can be constructed without error', () => {
          expect(() => {
-            new ErrorCollector();
+            new ErrorCollector(SToken.fromString('foo'), WellFormedError);
          }).not.toThrow();
       });
 
@@ -23,19 +23,19 @@ describe('ErrorCollector', () => {
       let ec;
 
       it('calls report if condition is truthy', () => {
-         ec = new ErrorCollector({}, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('foo'), WellFormedError);
          spyOn(ec, 'report');
 
-         ec.check(true, 1, 2, 3);
+         ec.check(true, 'foo', [], SToken.fromString('x'));
 
-         expect(ec.report).toHaveBeenCalledWith(1, 2, 3);
+         expect(ec.report).toHaveBeenCalledWith('foo', [], SToken.fromString('x'));
       });
 
       it('does not call report if condition is falsy', () => {
-         ec = new ErrorCollector({}, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('foo'), WellFormedError);
          spyOn(ec, 'report');
 
-         ec.check(false, 1, 2, 3);
+         ec.check(false, 'foo', [], SToken.fromString('x'));
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -43,12 +43,12 @@ describe('ErrorCollector', () => {
    });
 
    describe('report', () => {
-      let ec;
-      let errorId;
-      let loc;
-      let constructorSpy;
-      let contextStart;
-      let errorStart;
+      let ec: ErrorCollector;
+      let errorId: string;
+      let loc: EntityLocation;
+      let constructorSpy: jasmine.Spy;
+      let contextStart: SToken;
+      let errorStart: SToken;
 
       beforeEach(() => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
@@ -56,7 +56,7 @@ describe('ErrorCollector', () => {
          constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
-         ec = new ErrorCollector(contextStart, constructorSpy);
+         ec = new ErrorCollector(contextStart, constructorSpy as any); // typeHack
       });
 
       it('adds an instance of the error to the set of errors', () => {
@@ -89,37 +89,37 @@ describe('ErrorCollector', () => {
    });
 
    describe('reportError()', () => {
-      let ec;
-      let loc;
-      let constructorSpy;
-      let contextStart;
-      let errorStart;
+      let ec: ErrorCollector;
+      let loc: EntityLocation;
+      let constructorSpy: jasmine.Spy;
+      let contextStart: SToken;
+      let errorStart: SToken;
 
       beforeEach(() => {
          loc = new EntityLocation();
          constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
-         ec = new ErrorCollector(contextStart, constructorSpy);
+         ec = new ErrorCollector(contextStart, constructorSpy as any); // typeHack
       });
 
       it('uses the specified constructor instead of the default', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], errorStart);
+         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], errorStart); // typeHack
 
          expect(ec.getErrors()).toEqual([ { otherError: true } ]);
       });
 
       it('passes the start position and the context to the error by default', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], errorStart);
+         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], errorStart); // typeHack
 
          expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 1, 0, 1), contextStart);
       });
 
       it('accepts an offset as the position', () => {
          const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
-         ec.reportError('FOO', otherConstructorSpy, [ 'name' ], new Offset(loc, 5, 5, 5));
+         ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], new Offset(loc, 5, 5, 5)); // typeHack
 
          expect(otherConstructorSpy).toHaveBeenCalledWith('FOO', [ 'name' ], new Offset(loc, 5, 5, 5), contextStart);
       });

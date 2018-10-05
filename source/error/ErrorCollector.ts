@@ -1,6 +1,16 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Offset } from '../basic';
+import { Offset } from '../basic/index';
+
+import { SToken } from '../sToken/index';
+
+type Position = SToken | Offset;
+
+declare class ErrorToken {
+   constructor(id: string, params: Array<string>, position: Position, context: Position);
+};
+
+type ErrConstFunc = typeof ErrorToken;
 
 /**********************************************************************\
  An ErrorCollector collects a set of errors together in an array
@@ -32,52 +42,56 @@ import { Offset } from '../basic';
 \**********************************************************************/
 
 class ErrorCollector {
+   private ErrorConstructor: ErrConstFunc;
+   private context: Position;
+   private position: SToken;
+   private posStart: boolean;
+   public errors: Array<ErrorToken>;
 
-   constructor(context, ErrorConstructor) {
-      this._ErrorConstructor = ErrorConstructor;
-      this._context = context;
-      this._position = context;
-      this._posStart = true;
-      this._errors = [];
+   constructor(context: SToken, ErrorConstructor: ErrConstFunc) {
+      this.ErrorConstructor = ErrorConstructor;
+      this.context = context;
+      this.position = context;
+      this.posStart = true;
+      this.errors = [];
    }
 
-   setPos(currentSToken) {
+   setPos(currentSToken?: SToken) {
+      this.posStart = !!currentSToken;
+
       if (currentSToken) {
-         this._position = currentSToken;
-         this._posStart = true;
-      } else {
-         this._posStart = false;
+         this.position = currentSToken;
       }
    }
 
    getErrors() {
-      return this._errors;
+      return this.errors;
    }
 
-   check(truthy, code, params, position) {
+   check(truthy: boolean, code: string, params: Array<string>, position: Position) {
       if (truthy) {
          this.report(code, params, position);
       }
    }
 
-   report(code, params, position) {
-      this.reportError(code, this._ErrorConstructor, params, position);
+   report(code: string, params: Array<string>, position?: Position) {
+      this.reportError(code, this.ErrorConstructor, params, position);
    }
 
-   reportError(code, constructor, params, position) {
-      let posOffset;
+   reportError(code: string, constructor: ErrConstFunc, params: Array<string>, position?: Position) {
+      let posOffset: Offset;
 
       if (position instanceof Offset) {
          posOffset = position.clone();
       } else if (position) {
          posOffset = position.ranges[0].getStartOffset();
       } else {
-         posOffset = this._posStart ?
-            this._position.ranges[0].getStartOffset() :
-            this._position.ranges[0].getEndOffset();
+         posOffset = this.posStart ?
+            this.position.ranges[0].getStartOffset() :
+            this.position.ranges[0].getEndOffset();
       }
 
-      this._errors.push(new constructor(code, params, posOffset, this._context));
+      this.errors.push(new constructor(code, params, posOffset, this.context));
    }
 }
 

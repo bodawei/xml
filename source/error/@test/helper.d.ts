@@ -1,4 +1,4 @@
-import ErrorCollector from '../ErrorCollector.js';
+import ErrorCollector from '../ErrorCollector';
 
 declare class MockErrorCollector extends ErrorCollector {
    constructor();
