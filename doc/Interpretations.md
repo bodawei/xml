@@ -37,7 +37,7 @@ With that said, this does have certain patterns that it ties to stick to in term
          * Can we make it esy to substitute in other token sets? e.g. put in a custom xmldecl handler?
 
 
-## Whitespace (§2.1. and §3.2.1)
+## Whitespace (§2.10. and §3.2.1)
 * `xml:space`: This always generates a validity error if a value other than default and preserve is specified. In lax mode, the erronious value will be passed on to the app.
    * The spec does allow for the processor to not report an error, and even not reporting the attribute. This could be added here in a latter version.
    * Note: the spec does not characterize this as a validity constraint.
@@ -71,6 +71,15 @@ With that said, this does have certain patterns that it ties to stick to in term
 ## Comments
 * Spec says "for interoperability, -- may not occur in a comment, which would imply to me that one can do this, but it should generate some kind of warning.  However, the syntax simply doesn't allow this, making it a well-formed error.
 
+## Names
+The syntactic construct, Name, is used for the identifiers for elements, attributes, entities notations, and processing instruction targets.
+* Processing instructions may not have `[Xx][Mm][Ll]` anywhere in their target. This treats it as an error if that is found.
+* In all versions of the spec except 1.0/6, names that start with `/^[Xx][Mm][Ll]/` is reserved. This will report a warning on any reserved name (note that PI's may report a warning, but will always report an error in this case)
+* In 1.0/6.
+   * The `/^[Xx][Mm][Ll]/` restriction is lifted for all.
+   * The PI restriction remains and will report an error
+   * Attribute and element names that start with `/^xml:/` are reserved, so a warning will be reported.
+   * PI names starting with `/^xml-/` are reserved. Similarly with other versions, a warning may not be produced.
 
 # Validity
 ## Exlement Content
