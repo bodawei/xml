@@ -367,7 +367,6 @@ function toSTokenArray(pToken: WordListPToken): Array<SToken> {
 \**********************************************************************/
 
 export {
-
    parse as parseWordList,
    newWordListFromUndefined,
 

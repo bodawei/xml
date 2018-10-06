@@ -147,6 +147,19 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, done);
          });
 
+         it('ignores PE Reference processing if there is no pToken', (done) => {
+            const pToken = {
+               name: SToken.fromString('test'),
+               unassigned: [],
+            };
+            const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+            delete declToken.pToken;
+
+            nodeStream.write(declToken);
+
+            gatherResult(nodeStream, done);
+         });
+
       });
 
       describe('entity declaration processing', () => {

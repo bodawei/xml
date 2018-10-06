@@ -19,7 +19,7 @@ import {
    elementStart,
    entityReference,
    notationDeclaration,
-   processingInstruction,
+   ProcessingInstructionXToken,
    space,
    text,
    xmlDeclaration,
@@ -173,7 +173,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes a processing instruction', (done) => {
       expectInputToProduce('<?frozboz askfhasdfkh kje  adsf ?>', [
-         new processingInstruction.XToken('frozboz', 'askfhasdfkh kje  adsf ', []),
+         new ProcessingInstructionXToken('frozboz', 'askfhasdfkh kje  adsf ', []),
       ], done);
    });
 

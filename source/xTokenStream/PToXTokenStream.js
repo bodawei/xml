@@ -20,7 +20,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
+   PROCESSING_INSTRUCTION_PTOKEN,
    space,
    text,
    xmlDeclaration,
@@ -84,8 +84,8 @@ class PToXTokenStream extends stream.Transform {
          case notationDeclaration.PTYPE:
             this.push(notationDeclaration.pTokenToXToken(pToken));
             break;
-         case processingInstruction.PTYPE:
-            this.push(processingInstruction.pTokenToXToken(pToken));
+         case PROCESSING_INSTRUCTION_PTOKEN:
+            this.push(pToken.toXToken(pToken));
             break;
          case space.PTYPE:
             this.push(space.pTokenToXToken(pToken));

@@ -66,6 +66,8 @@ class Extractor {
    };
 
    _processText(originalText: string, info: SegmentInfo) {
+      // §2.11 This section does converson of line endings of various
+      // sorts into a single \n.
       const LINE_ENDING_REGEX = this._version === 1.0 ? LINE_ENDING_10_REGEX : LINE_ENDING_11_REGEX;
       let newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 

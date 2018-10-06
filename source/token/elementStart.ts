@@ -108,6 +108,7 @@ class ElementEmptyPToken extends base.PToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
+   §3.0.0
    [40] STag ::= '<' Name (S Attribute)* S? '>'
    [42] ETag ::= '</' Name S? '>'
    [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'

@@ -3,7 +3,7 @@
 import { Transform } from 'readable-stream';
 
 import { EntityMetaData } from '../basic';
-import { WellFormedError } from '../error';
+import { XmlWarning, ValidationError, WellFormedError } from '../error';
 import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
 import { STokenSource } from '../sToken';
@@ -247,11 +247,11 @@ class NodeStream extends Transform {
     * their values, and deliver the expanded unassigned array to the caller.
     */
    _expandPERefsInUnassignedValue(pToken, includeNameListChars, done) {
-      const unassignedArray = pToken.unassigned;
-      if (!unassignedArray) {
+      if (!pToken || !pToken.unassigned) {
          done();
          return;
       }
+      const unassignedArray = pToken.unassigned;
 
       this._expandThroughNextPERef(unassignedArray, (leadingUnassignedValues, expandedPERef) => {
          if (!expandedPERef) {
@@ -316,7 +316,9 @@ class NodeStream extends Transform {
 
    _processElementDeclaration(edXToken, done) {
       this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
-         if (edXToken.pToken.unassigned) {
+         if (edXToken.pToken && edXToken.pToken.unassigned) {
+//            this._examineUnassigned(edXToken);
+
             elementDeclaration.assignUnassigned(edXToken.pToken);
             edXToken = elementDeclaration.pTokenToXToken(edXToken.pToken);
          }
@@ -324,6 +326,103 @@ class NodeStream extends Transform {
          this.push(edXToken);
          done();
       });
+   }
+
+   /*
+    * Examine the unassigned values, and address these concerns from
+    * §3.2.1
+    *    Parameter-entity replacement text must be properly nested with parenthetized
+    *    groups. That is to say, if either of the opening or closing parentheses in
+    *    a choice, seq, or Mixed construct is contained in the replacement text for
+    *    a parameter entity, both must be contained in the same replacement text.
+    * 
+    *    For interoperability, if a parameter-entity reference appears in a choice,
+    *    seq, or Mixed construct, its replacement text should not be empty, and
+    *    neither the first nor last non-blank character of the replacement text
+    *    should be a connector (| or ,).
+    * 
+    * In practice, that means this general algorithm: Examine the expanded
+    * unassigned values before they are assigned (when we still have access to the
+    * record of which entities were expanded).
+    * 
+    * None of this can happen until we are actually within the contentSpec, which
+    * may have already been started, or not. Thereafter, keep track of the balance
+    * of parentheses and balance of entities. Once we have finished traversing a
+    * topmost entity expansion, check if the parentheses are unbalanced (if so, we
+    * have a validity constrant). Also check if we've seen any relevant text
+    * in the expanded entity, and whether the last "word" we saw was a connector.
+    * 
+    * Report these conditions, reset and then continue, as this may happen
+    * multiple times in one set of unassigned values. Note that we allow for
+    * parentheses to be balanced across entities. A validation error will be
+    * reported, but it will still ultimately be assigned, later, correctly.
+    */
+   _examineUnassigned(edXToken) {
+      const pToken = edXToken.pToken;
+      const unassignedArray = pToken.unassigned;
+      let insideContentSpec = !!pToken.children;
+      let entityDepth = 0;
+      let parenDepth = 0;
+      let sawNonWhite = false;
+      let endedWithConnector = false;
+      let topEntity;
+
+      if (pToken.children.close) {
+         return;
+      }
+
+      for (const entry of unassignedArray) {
+         switch (entry.type) {
+            case 'entityStart':
+               entityDepth ++;
+               if (entityDepth === 1) {
+                  topEntity = entry.token;
+               }
+               break;
+            case 'entityEnd':
+               entityDepth --;
+               break;
+            case 'word':
+               if (entry.token.text === '(') {
+                  insideContentSpec = insideContentSpec && entityDepth > 0;
+                  parenDepth ++;
+               } else if (entry.token.text === ')') {
+                  parenDepth --;
+               }
+               
+               endedWithConnector = (entry.token.text === '|' || entry.token.text === ',');
+               sawNonWhite = true;
+               break;
+            case 'literal':
+               sawNonWhite = true;
+               endedWithConnector = false;
+               break;
+         }
+
+         if (insideContentSpec && entityDepth === 0) {
+            if (parenDepth !== 0) {
+               const error = new ValidationError(ValidationError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+               this.push(error);
+            }
+
+            if (endedWithConnector) {
+               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+               this.push(warning);
+            }
+
+            if (!sawNonWhite) {
+               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+               this.push(warning);
+            }
+
+            sawNonWhite = false;
+            endedWithConnector = false;
+            topEntity = undefined;
+         }
+      }
    }
 
    /**********************************************************************\

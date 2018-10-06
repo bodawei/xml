@@ -96,6 +96,44 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, elementOrAt
    }
    const isV1R6 = entityMd.isVersion1dot0 && entityMd.revision === 6;
 
+   /*
+    * §2.3.0 (all versions except 1.0/6)
+    * Names beginning with the string "xml", or any string which would match
+    * (('X'|'x') ('M'|'m') ('L'|'l')), are reserved for standardization in this
+    * or future versions of this specification.
+    *
+    * Version: 1.0/6
+    * Deletes all that.
+    *
+    * §2.6: (all versions except 1.0/6)
+    * [17] PITarget ::= Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
+    *
+    * Version: 1.0/6
+    * Target names that begin "xml-" are reserved for standardization in this
+    * or future specifications from the XML Core Working Group or its
+    * successors. The target name "xml" is forbidden as it introduces the
+    * XML declaration.
+    *
+    * §3.0.0 (all versions except 1.0/6)
+    * ...names of the element types and attributes, ...except that names
+    * beginning with a match to (('X'|'x')('M'|'m')('L'|'l')) are
+    * reserved for standardization in this or future versions of this
+    * specification.
+    *
+    * Version: 1.0/6
+    * ...except that names beginning with "xml:" are reserved for standardization
+    * in this or future specifications from the XML Core Working Group or its successors.
+    *
+    * Interpretation:
+    *    In all but 1.0/6, /^[Xx][Mm][Ll]/ is reserved, but not an error
+    *       3.0.0 is simply repeating what was already stated in 2.3
+    *    In all, PI Targets must not contain [Xx][Mm][Ll] anywhere in their name
+    *       This is a WFC error if they do.
+    *    In 1.0/6 All names can have xml etc in them (this really just means entity and
+    *       notation names), except:
+    *          - element and attribute names may not have /^xml:/ but may have other case variations
+    *          - target names also reserve xml- (even though syntactially not allowed)
+    */
    if (isV1R6) {
       const isProblematic = (elementOrAttr && nameSToken.str.substring(0, 4) === 'xml:') ||
          (!elementOrAttr && nameSToken.str.substring(0, 4) === 'xml-');
@@ -103,7 +141,7 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, elementOrAt
       if (isProblematic) {
          ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);
       }
-   } else if (nameSToken.str.substring(0, 3).toLocaleLowerCase() === 'xml') {
+   } else if (nameSToken.str.substring(0, 3).toLowerCase() === 'xml') {
       ec.reportError(otherWarning, XmlWarning, [ nameSToken.str ]);
    }
 }

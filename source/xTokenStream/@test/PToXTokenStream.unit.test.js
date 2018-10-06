@@ -1,6 +1,7 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { SToken } from '../../sToken/index';
 import {
    declaration,
    envelope,
@@ -15,7 +16,7 @@ import {
    elementDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
+   ProcessingInstructionPToken,
    space,
    text,
 } from '../../token';
@@ -169,14 +170,14 @@ describe('PToXTokenStream (unit)', () => {
       expect(notationDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls processingInstruction.pTokenToXToken()', () => {
-      spyOn(processingInstruction, 'pTokenToXToken');
-      const pToken = { type: processingInstruction.PTYPE };
+   it('calls pToken.toXToken()', () => {
+      const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(processingInstruction.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls space.pTokenToXToken()', () => {

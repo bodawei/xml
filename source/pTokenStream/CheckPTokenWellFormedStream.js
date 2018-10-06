@@ -23,7 +23,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
+   PROCESSING_INSTRUCTION_PTOKEN,
    space,
    xmlDeclaration,
 } from '../token';
@@ -216,11 +216,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             notationDeclaration.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
-         case processingInstruction.PTYPE:
+         case PROCESSING_INSTRUCTION_PTOKEN:
             if (this._state === STATE.START) {
                errorCollector.report(WellFormedError.ID.PI_INVALID_CONTEXT);
             }
-            processingInstruction.checkWellFormed(pToken, errorCollector, this._metaData);
+            pToken.checkWellFormed(errorCollector, this._metaData);
             break;
          case space.PTYPE:
             if (this._state === STATE.START) {

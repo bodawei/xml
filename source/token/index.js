@@ -21,7 +21,7 @@ import * as elementEnd from './elementEnd';
 import * as space from './space';
 import text from './text';
 import * as notationDeclaration from './notationDeclaration';
-import * as processingInstruction from './processingInstruction';
+export * from './processingInstruction';
 import unassigned from './unassigned';
 import * as xmlDeclaration from './xmlDeclaration';
 
@@ -47,7 +47,6 @@ const token = {
    entityReference,
    entityStart,
    notationDeclaration,
-   processingInstruction,
    space,
    text,
    xmlDeclaration,
@@ -77,7 +76,6 @@ export {
    entityReference,
    entityStart,
    notationDeclaration,
-   processingInstruction,
    space,
    text,
    xmlDeclaration,

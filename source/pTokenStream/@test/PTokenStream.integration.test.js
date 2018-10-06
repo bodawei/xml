@@ -7,6 +7,10 @@ import { STokenSource } from '../../sToken';
 
 import PTokenStream from '../PTokenStream.js';
 
+import {
+   PROCESSING_INSTRUCTION_PTOKEN,
+} from '../../token';
+
 describe('PTokenStream (integration)', () => {
    let pTokenStream;
 
@@ -111,7 +115,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses a processing instruction', (done) => {
-      expectInputToProduceTypes('<?froz adfasdf ?>', 'PROCESSING_INSTRUCTION', done);
+      expectInputToProduceTypes('<?froz adfasdf ?>', PROCESSING_INSTRUCTION_PTOKEN, done);
    });
 
    it('parses a space', (done) => {

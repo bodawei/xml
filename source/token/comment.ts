@@ -158,7 +158,7 @@ function pTokenToXToken(pToken: CommentPToken) {
 }
 
 /**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the component STokens
+ sTokensFromPToken() Returns the ordered array of the STokens
 \**********************************************************************/
 
 function sTokensFromPToken(pToken: CommentPToken): ReadonlyArray<SToken> {

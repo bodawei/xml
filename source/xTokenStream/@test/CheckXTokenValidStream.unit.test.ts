@@ -22,7 +22,7 @@ import {
    entityReference,
    entityStart,
    notationDeclaration,
-   processingInstruction,
+   ProcessingInstructionXToken,
    space,
    text,
    xmlDeclaration,
@@ -1590,6 +1590,24 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
+            it('reports an error the xml:space type is an enumeration but the enumeration array is not present', (done) => {
+               const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
+               const attListDecl = new attListDeclaration.XToken('elementType', [{
+                  name: 'xml:space',
+                  type: 'ENUMERATION',
+                  defaultType: '#REQUIRED',
+                  value: [],
+               }]);
+
+               validator.write(elDecl);
+               validator.write(attListDecl);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_SPACE_BAD_TYPE,
+                  [ 'elementType' ]);
+               expectStream(validator, expected, done);
+            });
+
             it('reports an error the xml:space name is not lower case', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
@@ -2540,7 +2558,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       describe('content', () => {
          describe('ANY', () => {
             const commentToken = new comment.CommentXToken('testComment');
-            const piToken = new processingInstruction.XToken('test', 'pi');
+            const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new cdata.XToken('testCData');
             const elementStartToken = new elementStart.XToken('one', []);
 
@@ -2808,7 +2826,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   repeat: 'ONE',
                   listType: 'CHOICE'
                });
-               const pi = new processingInstruction.XToken('stuff', undefined);
+               const pi = new ProcessingInstructionXToken('stuff', 'other');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.0, 1));
@@ -2851,7 +2869,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   repeat: 'ONE',
                   listType: 'CHOICE'
                });
-               const pi = new processingInstruction.XToken('stuff', undefined);
+               const pi = new ProcessingInstructionXToken('stuff', 'other');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.1, 1));
@@ -2927,7 +2945,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('CHILDREN', () => {
             const commentToken = new comment.CommentXToken('testComment');
-            const piToken = new processingInstruction.XToken('test', 'pi');
+            const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new cdata.XToken('testCData');
             const nonWhiteChars = new charData.XToken('one', []);
             const whiteChars = new charData.XToken(' \t\n', []);

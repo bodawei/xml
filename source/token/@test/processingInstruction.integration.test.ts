@@ -5,22 +5,24 @@ import { EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { SToken } from '../../sToken/index';
 
-import * as processingInstruction from '../processingInstruction.js';
+import {
+   PROCESSING_INSTRUCTION_PTOKEN,
+   parseProcessingInstruction,
+   ProcessingInstructionPToken,
+ } from '../processingInstruction.js';
 
 describe('processingInstruction (integration)', () => {
-   let piPToken;
-   let makeSToken;
+   let piPToken: ProcessingInstructionPToken;
 
    beforeEach(() => {
-      makeSToken = makeSTokenMaker();
-      piPToken = {
-         type: 'PROCESSING_INSTRUCTION',
-         open: makeSToken('<?'),
-         postOpenSpace: undefined,
-         target: makeSToken('targetName'),
+      const proto = {
+         open: SToken.fromString('<?'),
+         openSpace: undefined,
+         target: SToken.fromString('targetName'),
       };
+      piPToken = new ProcessingInstructionPToken(proto);
    });
 
    describe('parse()', () => {
@@ -30,8 +32,8 @@ describe('processingInstruction (integration)', () => {
          source.addText('blah blah?>');
          source.endText();
 
-         processingInstruction.parse(source, {}, (parsing) => {
-            expect(parsing.type).toEqual(processingInstruction.PTYPE);
+         parseProcessingInstruction(source, { open: SToken.fromString('') }, (parsing) => {
+            expect(parsing.type).toEqual(PROCESSING_INSTRUCTION_PTOKEN);
             done();
          });
       });
@@ -41,15 +43,15 @@ describe('processingInstruction (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('asks the instruction module report if there is an extra space', (done) => {
-         piPToken.postOpenSpace = makeSToken(' ');
+         (piPToken as any).postOpenSpace = SToken.fromString(' '); // typeHack
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('blah blah?>');
          source.endText();
 
-         processingInstruction.parse(source, piPToken, (parsing) => {
+         parseProcessingInstruction(source, piPToken, (pToken) => {
             const ec = new ErrorCollector(undefined, WellFormedError);
 
-            processingInstruction.checkWellFormed(parsing, ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
             done();

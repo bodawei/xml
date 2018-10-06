@@ -24,7 +24,7 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
+   ProcessingInstructionPToken,
    space,
    xmlDeclaration,
 } from '../../token';
@@ -772,21 +772,19 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken;
 
       beforeEach(() => {
-         spyOn(processingInstruction, 'checkWellFormed');
-         pToken = {
-            type: processingInstruction.PTYPE,
+         pToken = new ProcessingInstructionPToken({
             open: makeSToken('<?'),
-         };
+         });
+         spyOn(pToken, 'checkWellFormed');
       });
 
-      it('calls processingInstruction.checkWellFormed()', () => {
+      it('calls pToken.checkWellFormed()', () => {
          checker.write(metaData);
          checker.write(pToken);
 
-         const args = processingInstruction.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         const args = pToken.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

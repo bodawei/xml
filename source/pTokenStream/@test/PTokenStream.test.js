@@ -21,10 +21,10 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
    space,
    xmlDeclaration,
 } from '../../token';
+import processingInstruction from '../../token/processingInstruction';
 
 import PTokenStream from '../PTokenStream.js';
 
@@ -281,28 +281,28 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls processingInstruction.parse()', (done) => {
-      spyOn(processingInstruction, 'parse').and.callThrough();
+   it('calls parseProcessingInstruction()', (done) => {
+      spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
       pTokenStream.addText('<?something foo?>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(processingInstruction.parse.calls.argsFor(0)[1].target.str).toEqual('something');
-         expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[1].target.str).toEqual('something');
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });
 
    it('calls processingInstruction.parse() when there is no target name', (done) => {
-      spyOn(processingInstruction, 'parse').and.callThrough();
+      spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
       pTokenStream.addText('<??>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(processingInstruction.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(processingInstruction.parse.calls.argsFor(0)[1].target).toBeUndefined();
-         expect(processingInstruction.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[1].target).toBeUndefined();
+         expect(processingInstruction.parseProcessingInstruction.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });

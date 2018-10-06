@@ -31,6 +31,7 @@ class InstructionPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(type, props) {
       super(type || INSTRUCTION, props);
+      // fix processingInstruction
    }
 
    getSTokenArray() {
@@ -97,6 +98,7 @@ function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
  pTokenToXToken() converts a PToken into a token.
 \**********************************************************************/
 
+// Does this even make sense?  Won't this just be a processinginstruction by default?
 function pTokenToXToken(pToken) {
    return new InstructionToken(misc.textOrBlank(pToken.target), pToken);
 }

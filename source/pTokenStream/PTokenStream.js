@@ -23,10 +23,10 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   processingInstruction,
    space,
    xmlDeclaration,
 } from '../token';
+import { parseProcessingInstruction } from '../token/processingInstruction';
 
 class PTokenStream extends stream.Readable {
 
@@ -152,7 +152,7 @@ class PTokenStream extends stream.Readable {
                   if (target.toLocaleUpperCase() === 'XML') {
                      xmlDeclaration.parse(this._sTokenSource, pToken, deliverParse);
                   } else {
-                     processingInstruction.parse(this._sTokenSource, pToken, deliverParse);
+                     parseProcessingInstruction(this._sTokenSource, pToken, deliverParse);
                   }
                });
                break;
