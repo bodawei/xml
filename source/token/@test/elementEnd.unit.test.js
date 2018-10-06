@@ -107,7 +107,7 @@ describe('elementEnd', () => {
          elementEnd.checkWellFormed(elementEndPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementEndPToken.name,
-            mockErrorCollector, emd, true, XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
+            mockErrorCollector, emd, 'ELEMENT', XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
       });
 

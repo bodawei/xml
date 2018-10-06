@@ -2,17 +2,17 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
-import { WellFormedError } from '../../error';
+import { WellFormedError, XmlWarning } from '../../error';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { MockSTokenSource } from '../../sToken/@test/helper';
 
-import * as instruction from '../bridge/instruction.js';
+import * as instruction from '../bridge/instruction';
+import * as misc from '../common/misc';
 import {
    parseProcessingInstruction,
    ProcessingInstructionPToken,
    ProcessingInstructionXToken,
-   PTYPE,
 } from '../processingInstruction.js';
 
 describe('processingInstruction (unit)', () => {
@@ -20,29 +20,14 @@ describe('processingInstruction (unit)', () => {
 
    beforeEach(() => {
       const protoPToken = {
-         open: SToken.fromString(''),
+         open: SToken.fromString('open'),
          instruction: SToken.fromString('blah'),
          close: SToken.fromString('?>'),
       };
       piPToken = new ProcessingInstructionPToken(protoPToken);
    });
 
-   // describe('PToken', () => {
-
-   //    describe('getSTokenStream()', () => {
-
-   //       it('returns all the STokens', () => {
-   //          expect(piPToken.getSTokenArray()).toEqual([
-   //             piPToken.instruction,
-   //             piPToken.close,
-   //          ]);
-   //       });
-
-   //    });
-
-   // });
-
-   describe('parse()', () => {
+   describe('parseProcessingInstruction()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
@@ -55,7 +40,7 @@ describe('processingInstruction (unit)', () => {
             [ '?>', 'match', '?>' ],
          ]);
 
-         parseProcessingInstruction(mockSource, { open: SToken.fromString('') }, callback);
+         parseProcessingInstruction(mockSource, { open: SToken.fromString('open') }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless(piPToken);
@@ -75,35 +60,103 @@ describe('processingInstruction (unit)', () => {
 
    });
 
-   // describe('checkWellFormed()', () => {
-   //    let mockErrorCollector;
-   //    let emd;
+   describe('checkWellFormed()', () => {
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
 
-   //    beforeEach(() => {
-   //       mockErrorCollector = new MockErrorCollector();
-   //       emd = new EntityMetaData();
-   //       spyOn(instruction, 'checkWellFormed');
-   //    });
+      beforeEach(() => {
+         const protoPToken = {
+            open: SToken.fromString('<?'),
+            openSpace: undefined,
+            target: SToken.fromString('target'),
+            targetSpace: SToken.fromString(' '),
+            instruction: SToken.fromString('blah'),
+            close: SToken.fromString('?>'),
+         };
 
-   //    it('calls instruction.checkWellFormed with the expected arguments', () => {
-   //       processingInstruction.checkWellFormed(piPToken, mockErrorCollector, emd);
+         mockErrorCollector = new MockErrorCollector();
+         emd = new EntityMetaData();
+         piPToken = new ProcessingInstructionPToken(protoPToken);
 
-   //       expect(instruction.checkWellFormed).toHaveBeenCalledWith(piPToken, mockErrorCollector, emd);
-   //    });
+         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkWellFormedNameRecommendation');
+      });
 
-   //    it('reports an error if there is no close', () => {
-   //       delete piPToken.close;
+      it('calls misc.checkWellFormedText()', () => {
+         piPToken.checkWellFormed(mockErrorCollector, emd);
 
-   //       processingInstruction.checkWellFormed(piPToken, mockErrorCollector, new EntityMetaData());
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd);
+      });
 
-   //       expect(mockErrorCollector).toReportError({
-   //          id: WellFormedError.ID.PI_NO_CLOSE,
-   //          params: [ '' ],
-   //          lastPosition: piPToken.instruction,
-   //       });
-   //    });
+      it('calls misc.checkWellFormedNameRecommendation()', () => {
+         piPToken.checkWellFormed(mockErrorCollector, emd);
 
-   // });
+         expect(misc.checkWellFormedNameRecommendation)
+            .toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd, 'PI',
+               XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
+      });
+
+      it('reports an error if there is a space after the "<?"', () => {
+         piPToken.openSpace = SToken.fromString(' ');
+
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_SPACE_AFTER_OPEN,
+            params: [ 'target' ],
+            position: piPToken.openSpace,
+         });
+      });
+
+      it('reports an error if there is no target', () => {
+         delete piPToken.target;
+
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_NO_TARGET,
+            params: undefined,
+            lastPosition: piPToken.open,
+         });
+      });
+
+      it('reports an error if xml in any form shows up in the name', () => {
+         piPToken.target = SToken.fromString('fofoXmLTarget');
+
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_TARGET_HAS_XML,
+            params: [ 'fofoXmLTarget' ],
+            position: piPToken.target,
+         });
+      });
+
+      it('reports an error if there is no space after the target', () => {
+         delete piPToken.targetSpace;
+
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_NO_SPACE_AFTER_TARGET,
+            params: [ 'target' ],
+            lastPosition: piPToken.target,
+         });
+      });
+
+      it('reports an error if there is no close', () => {
+         delete piPToken.close;
+
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.PI_NO_CLOSE,
+            params: [ 'target' ],
+            lastPosition: piPToken.instruction,
+         });
+      });
+
+   });
 
    describe('pToken.toXToken()', () => {
 
@@ -111,6 +164,25 @@ describe('processingInstruction (unit)', () => {
          const xToken = piPToken.toXToken();
 
          expect(xToken).toEqual(new ProcessingInstructionXToken('', 'blah', piPToken));
+      });
+
+   });
+
+   describe('pToken.toSTokenArray()', () => {
+
+      describe('getSTokenStream()', () => {
+
+         it('returns all the STokens', () => {
+            (piPToken as any).openSpace = SToken.fromString(' ');
+
+            expect(piPToken.toSTokenArray()).toEqual([
+               piPToken.open,
+               piPToken.openSpace,
+               piPToken.instruction,
+               piPToken.close,
+            ]);
+         });
+
       });
 
    });

@@ -77,6 +77,8 @@ function parse(source, openSToken, deliverPToken) {
 \**********************************************************************/
 
 function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
+   // Note: This is now only being used by xml declaration.  instruction should just vanish as a pseudo type
+   // Maybe the othe generic markup should vanish too.
    ec.setPos(pToken.open);
    ec.setPos(pToken.postOpenSpace);
    ec.check(pToken.postOpenSpace, WFEID.PI_SPACE_AFTER_OPEN, [ misc.textOrBlank(pToken.target) ]);

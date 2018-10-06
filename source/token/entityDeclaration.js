@@ -378,7 +378,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ENTITYDECL_NO_NAME);
    misc.checkName(pToken.name, ec, entityMetaData, WFEID.ENTITYDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, false,
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, 'ENTITY',
       WARN.ENTITYDECL_NAME_XMLDASH_RESERVED, WARN.ENTITYDECL_NAME_XML_RESERVED);
    ec.setPos(pToken.postNameSpace);
    ec.check(!pToken.postNameSpace, WFEID.ENTITYDECL_NAME_NO_TRAILING_SPACE, [ enNameText ]);

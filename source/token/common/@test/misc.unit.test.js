@@ -43,33 +43,55 @@ describe('misc', () => {
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
-      it('report an error if the version is 1.0/6, and the non-attr/element name starts with "xml-"', () => {
+      it('reports a warning if the version is 1.0/6, and the PI name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml-Foo' ]);
       });
 
-      it('report an error if the version is 1.0/6, and the element or attr name starts with "xml:"', () => {
+      it('reports a warning if the version is 1.0/6, and the element or attr name starts with "xml:"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), true, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ATTRIBUTE', WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
       });
 
-      it('report an error if the version is 1.0/5, and the name starts with "xml"', () => {
+      it('reports no warning if the version is 1.0/6, and the attribute name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
-         new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ATTRIBUTE', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports no warning if the version is 1.0/6, and the entity name starts with "xml"', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ENTITY', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports no warning if the version is 1.0/6, and the PI name starts with "xml"', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports a warning if the version is 1.0/5, and the name starts with "xml"', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ENTITY', WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
       });
 
-      it('report an error if the version is 1.1/5, and the name starts with "xml-"', () => {
+      it('reports a warning if the version is 1.0/5, and the PI name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'PI', WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
       });
 
-      it('report an error if the version is 1.1/5, and the element/attr name starts with "xml:"', () => {
+      it('reports a warning if the version is 1.0/5, and the element/attr name starts with "xml:"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
       });
 

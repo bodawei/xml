@@ -1,13 +1,14 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError } from '../error';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
 import {
+   checkWellFormedText,
+   checkWellFormedNameRecommendation,
    textOrBlank,
 } from './common/misc.js';
-import * as instruction from './bridge/instruction.js';
 
 const WFEID = WellFormedError.ID;
 const PROCESSING_INSTRUCTION_PTOKEN = 'PROCESSING_INSTRUCTION';
@@ -46,7 +47,7 @@ class ProcessingInstructionPToken {
       this.type = PROCESSING_INSTRUCTION_PTOKEN;
 
       // Workaround until instruction redone
-      this.openSpace = (param as any).openSpace;
+      this.openSpace = (param as any).openSpace || (param as any).postOpenSpace;
       this.targetSpace = (param as any).targetSpace;
    }
 
@@ -64,7 +65,8 @@ class ProcessingInstructionPToken {
 }
 
 /**********************************************************************\
- parse() extracts the SToken's that make up an entity reference.
+ parseProcessingInstruction() extracts the SToken's that make up an
+ entity reference.
 
  This depends on being passed an instruction PToken (and with the
  corresponding text already processed).
@@ -82,7 +84,7 @@ class ProcessingInstructionPToken {
       [17] PITarget ::=  Name
 \**********************************************************************/
 
-function parse(source: STokenSource, instr: { open: SToken }, deliverPToken: DeliverPToken) {
+function parseProcessingInstruction(source: STokenSource, instr: { open: SToken }, deliverPToken: DeliverPToken) {
    const raw: any = Object.assign({}, instr);
 
    source.extractToObject('all', [ '?>' ], raw, 'instruction');
@@ -97,11 +99,27 @@ function parse(source: STokenSource, instr: { open: SToken }, deliverPToken: Del
 \**********************************************************************/
 
 function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   instruction.checkWellFormed(pToken, ec, entityMetaData);
+   const targetName = textOrBlank(pToken.target);
+   const lcTarget = targetName.toLowerCase();
+   const hasXml = lcTarget.indexOf('xml') !== -1;
+
+   ec.setPos(pToken.open);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.PI_SPACE_AFTER_OPEN, [ targetName ]);
+
+   ec.setPos(pToken.target);
+   ec.check(!pToken.target, WFEID.PI_NO_TARGET);
+   checkWellFormedText(pToken.target, ec, entityMetaData);
+   ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [ targetName ]);
+   checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, 'PI',
+      XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
+
+   ec.setPos(pToken.targetSpace);
+   ec.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [ targetName ]);
 
    ec.setPos(pToken.instruction);
    ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [ textOrBlank(pToken.target) ]);
+   ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [ targetName ]);
 }
 
 /**********************************************************************\
@@ -135,7 +153,7 @@ export {
    PROCESSING_INSTRUCTION_XTOKEN as XTYPE,
    ProcessingInstructionXToken as XToken,
 
-   parse as parseProcessingInstruction,
+   parseProcessingInstruction,
 
    PROCESSING_INSTRUCTION_PTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,

@@ -90,7 +90,7 @@ function checkNMToken(nameTokenSToken, ec, entityMetaData, errorCode) {
  version.
 \**********************************************************************/
 
-function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, elementOrAttr, v1R6Warning, otherWarning) {
+function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, nameType, v1R6Warning, otherWarning) {
    if (!nameSToken) {
       return;
    }
@@ -135,8 +135,19 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, elementOrAt
     *          - target names also reserve xml- (even though syntactially not allowed)
     */
    if (isV1R6) {
-      const isProblematic = (elementOrAttr && nameSToken.str.substring(0, 4) === 'xml:') ||
-         (!elementOrAttr && nameSToken.str.substring(0, 4) === 'xml-');
+      let isProblematic;
+
+      switch (nameType) {
+         case 'PI':
+            isProblematic = nameSToken.str.substring(0, 4) === 'xml-';
+            break;
+         case 'ELEMENT':
+         case 'ATTRIBUTE':
+            isProblematic = nameSToken.str.substring(0, 4) === 'xml:';
+            break;
+         default:
+            break;
+      }
 
       if (isProblematic) {
          ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);

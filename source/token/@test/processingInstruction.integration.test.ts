@@ -43,7 +43,7 @@ describe('processingInstruction (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('asks the instruction module report if there is an extra space', (done) => {
-         (piPToken as any).postOpenSpace = SToken.fromString(' '); // typeHack
+         (piPToken as any).openSpace = SToken.fromString(' '); // typeHack
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('blah blah?>');
          source.endText();

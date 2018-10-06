@@ -182,7 +182,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorColl
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.NOTATIONDECL_NO_NAME);
    misc.checkName(pToken.name, ec, entityMetaData, WFEID.NOTATIONDECL_NAME_INVALID);
-   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, false,
+   misc.checkWellFormedNameRecommendation(pToken.name, ec, entityMetaData, 'NOTATION',
       WARN.NOTATIONDECL_NAME_XMLDASH_RESERVED,
       WARN.NOTATIONDECL_NAME_XML_RESERVED);
 

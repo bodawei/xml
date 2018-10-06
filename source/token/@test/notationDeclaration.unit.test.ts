@@ -358,7 +358,7 @@ describe('notationdeDlaration (unit)', () => {
          notationDeclaration.checkWellFormed(notationPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(notationPToken.name,
-            mockErrorCollector, emd, false, XmlWarning.ID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
+            mockErrorCollector, emd, 'NOTATION', XmlWarning.ID.NOTATIONDECL_NAME_XMLDASH_RESERVED,
             XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
       });
 

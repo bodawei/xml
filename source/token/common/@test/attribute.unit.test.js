@@ -260,7 +260,7 @@ describe('attribute (unit)', () => {
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE, () => {});
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(
-            attributesPChunk[0].name, mockErrorCollector, emd, true,
+            attributesPChunk[0].name, mockErrorCollector, emd, 'ATTRIBUTE',
             XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
             XmlWarning.ID.ATTRIBUTE_NAME_XML_RESERVED);
       });
