@@ -50,4 +50,12 @@ describe('CommentFixingStream (unit)', () => {
       expect(cfs.push).toHaveBeenCalledWith(after);
    });
 
+   it('does not do anything with a &# that is not followed by digits', () => {
+      const before = new comment.CommentXToken('this is &#z; test', []);
+      const after = new comment.CommentXToken('this is &#z; test', []);
+      cfs.write(before);
+
+      expect(cfs.push).toHaveBeenCalledWith(after);
+   });
+
 });

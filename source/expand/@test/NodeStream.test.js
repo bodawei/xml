@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, Range } from '../../basic';
-import { WellFormedError } from '../../error';
+import { ValidityError, WellFormedError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import * as xToken from '../../token';
 
@@ -160,6 +160,368 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, done);
          });
 
+         describe('parameter entity validation', () => {
+
+            beforeEach(() => {
+               spyOn(xToken.elementDeclaration, 'assignUnassigned');
+            });
+
+            it('does no checks if the content spec is already closed', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     close: SToken.fromString(')'),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString('x') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => ({ foo: true }));
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens).toEqual([{ foo: true }]);
+                  done();
+               });
+            });
+
+            it('reports no warnings with a syntactically ok expansion', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString('x') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => ({ foo: true }));
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens).toEqual([{ foo: true }]);
+                  done();
+               });
+            });
+
+            it('reports a warning if the parameter entity expansion is empty', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => x);
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens[0]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports a warning if the parameter entity expansion is only white space', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => x);
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens[0]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports no error when there is a literal and whitespace in the unassigned', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'literal',
+                     token: {},
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => ({ foo: true }));
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens).toEqual([{ foo: true }]);
+                  done();
+               });
+            });
+
+            it('reports a warning if the parameter entity expansion ends with a |', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString('|') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => x);
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens[0]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports a warning if the parameter entity expansion ends with a ,', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString(',') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => x);
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens[0]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports a validation error if parentheses are not balanced in the top entity', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString('(') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => x);
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens[0]).toEqual(expected);
+                  done();
+               });
+            });
+
+            it('reports no validatio nerror when parentheses are balanced at the top entity level', (done) => {
+               const pToken = {
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'entityStart',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString('(') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }, {
+                     // Note that the parenthesis is closed in another entity
+                     type: 'word',
+                     token: new xToken.text.PToken({ text: SToken.fromString(')') }),
+                  }, {
+                     type: 'space',
+                     token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: 'entityEnd',
+                     token: {
+                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
+                     },
+                  }],
+               };
+               const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
+               const expected = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ 'test', 'testPE' ], pToken.unassigned[0].token.open, pToken.open);
+               spyOn(xToken.elementDeclaration, 'pTokenToXToken').and.callFake((x) => ({ foo: true }));
+
+               nodeStream.write(declToken);
+               nodeStream.end();
+   
+               gatherResults(nodeStream, (tokens) => {
+                  expect(tokens).toEqual([{ foo: true }]);
+                  done();
+               });
+            });
+
+         });
       });
 
       describe('entity declaration processing', () => {

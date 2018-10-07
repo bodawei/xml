@@ -2,16 +2,25 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { ValidityError } from '../../error/index';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as tokenNs from '../../token';
 
-import EntityManager from '../EntityManager.js';
-import NodeStream from '../NodeStream.js';
+import EntityManager from '../EntityManager';
+import NodeStream from '../NodeStream';
 
 describe('NodeStream (integration)', () => {
+
+   function gatherTokens(stream, done) {
+      const results = [];
+      stream.on('data', (token) => results.push(token));
+      stream.on('end', () => {
+         done(results);
+      });
+   }
 
    function matchTokenTypes(actual, expected) {
       let expectedIndex = 0;
@@ -199,14 +208,19 @@ describe('NodeStream (integration)', () => {
    describe('ELEMENT declaration processing', () => {
 
       it('expands a parameter entity embedded in the content spec', (done) => {
-         const results = [];
          const manager = new EntityManager();
          const pTokenStream = new PTokenStream();
          const xTokenStream = new PToXTokenStream();
          const node = new NodeStream(manager);
          pTokenStream.pipe(xTokenStream).pipe(node);
-         node.on('data', (token) => results.push(token));
-         node.on('end', () => {
+
+         pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY % middle "two">' +
+            '<!ELEMENT one ( one | %middle; | three)>' +
+         ']>');
+         pTokenStream.endText();
+
+         gatherTokens(node, (results) => {
             const elementDecl = results[4];
 
             expect(elementDecl.name).toEqual('one');
@@ -226,12 +240,27 @@ describe('NodeStream (integration)', () => {
             });
             done();
          });
+      });
+
+      it('reports a warning if entities are not paremthesis-balanced (§3.2.1)', (done) => {
+         const manager = new EntityManager();
+         const pTokenStream = new PTokenStream();
+         const xTokenStream = new PToXTokenStream();
+         const node = new NodeStream(manager);
+         pTokenStream.pipe(xTokenStream).pipe(node);
 
          pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ENTITY % middle "two">' +
-            '<!ELEMENT one ( one | %middle; | three)>' +
+            '<!ENTITY % last ")">' +
+            '<!ELEMENT one ( one | %last;>' +
          ']>');
          pTokenStream.endText();
+
+         gatherTokens(node, (results) => {
+            const error = results[4];
+
+            expect(error.id).toEqual(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED);
+            done();
+         });
       });
 
    });

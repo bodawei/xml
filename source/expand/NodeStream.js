@@ -3,7 +3,7 @@
 import { Transform } from 'readable-stream';
 
 import { EntityMetaData } from '../basic';
-import { XmlWarning, ValidationError, WellFormedError } from '../error';
+import { XmlWarning, ValidityError, WellFormedError } from '../error';
 import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
 import { STokenSource } from '../sToken';
@@ -317,7 +317,7 @@ class NodeStream extends Transform {
    _processElementDeclaration(edXToken, done) {
       this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
          if (edXToken.pToken && edXToken.pToken.unassigned) {
-//            this._examineUnassigned(edXToken);
+            this._examineUnassigned(edXToken);
 
             elementDeclaration.assignUnassigned(edXToken.pToken);
             edXToken = elementDeclaration.pTokenToXToken(edXToken.pToken);
@@ -330,28 +330,30 @@ class NodeStream extends Transform {
 
    /*
     * Examine the unassigned values, and address these concerns from
-    * §3.2.1
-    *    Parameter-entity replacement text must be properly nested with parenthetized
-    *    groups. That is to say, if either of the opening or closing parentheses in
-    *    a choice, seq, or Mixed construct is contained in the replacement text for
-    *    a parameter entity, both must be contained in the same replacement text.
-    * 
-    *    For interoperability, if a parameter-entity reference appears in a choice,
-    *    seq, or Mixed construct, its replacement text should not be empty, and
-    *    neither the first nor last non-blank character of the replacement text
-    *    should be a connector (| or ,).
-    * 
+    * §3.2.1:
+    *    Parameter-entity replacement text must be properly nested with
+    *    parenthetized groups. That is to say, if either of the opening
+    *    or closing parentheses in a choice, seq, or Mixed construct is
+    *    contained in the replacement text for a parameter entity, both
+    *    must be contained in the same replacement text.
+    *
+    *    For interoperability, if a parameter-entity reference appears in
+    *    a choice, seq, or Mixed construct, its replacement text should
+    *    not be empty, and neither the first nor last non-blank character
+    *    of the replacement text should be a connector (| or ,).
+    *
     * In practice, that means this general algorithm: Examine the expanded
-    * unassigned values before they are assigned (when we still have access to the
-    * record of which entities were expanded).
-    * 
-    * None of this can happen until we are actually within the contentSpec, which
-    * may have already been started, or not. Thereafter, keep track of the balance
-    * of parentheses and balance of entities. Once we have finished traversing a
-    * topmost entity expansion, check if the parentheses are unbalanced (if so, we
-    * have a validity constrant). Also check if we've seen any relevant text
-    * in the expanded entity, and whether the last "word" we saw was a connector.
-    * 
+    * unassigned values before they are assigned (when we still have access
+    * to the record of which entities were expanded).
+    *
+    * None of this can happen until we are actually within the contentSpec,
+    * which may have already been started, or not. Thereafter, keep track of
+    * the balance of parentheses and balance of entities. Once we have
+    * finished traversing a topmost entity expansion, check if the parentheses
+    * are unbalanced (if so, we have a validity constrant). Also check if
+    * we've seen any relevant text in the expanded entity, and whether
+    * the last "word" we saw was a connector.
+    *
     * Report these conditions, reset and then continue, as this may happen
     * multiple times in one set of unassigned values. Note that we allow for
     * parentheses to be balanced across entities. A validation error will be
@@ -365,32 +367,33 @@ class NodeStream extends Transform {
       let parenDepth = 0;
       let sawNonWhite = false;
       let endedWithConnector = false;
-      let topEntity;
+      let topEntityRef;
 
-      if (pToken.children.close) {
+      if (pToken.children && pToken.children.close) {
          return;
       }
 
       for (const entry of unassignedArray) {
          switch (entry.type) {
             case 'entityStart':
-               entityDepth ++;
+               entityDepth++;
                if (entityDepth === 1) {
-                  topEntity = entry.token;
+                  topEntityRef = entry.token.refPToken;
                }
                break;
             case 'entityEnd':
-               entityDepth --;
+               entityDepth--;
                break;
             case 'word':
-               if (entry.token.text === '(') {
+               const content = entry.token.text && entry.token.text.str;
+               if (content === '(') {
                   insideContentSpec = insideContentSpec && entityDepth > 0;
-                  parenDepth ++;
-               } else if (entry.token.text === ')') {
-                  parenDepth --;
+                  parenDepth++;
+               } else if (content === ')') {
+                  parenDepth--;
                }
-               
-               endedWithConnector = (entry.token.text === '|' || entry.token.text === ',');
+
+               endedWithConnector = (content === '|' || content === ',');
                sawNonWhite = true;
                break;
             case 'literal':
@@ -399,28 +402,28 @@ class NodeStream extends Transform {
                break;
          }
 
-         if (insideContentSpec && entityDepth === 0) {
+         if (insideContentSpec && entityDepth === 0 && topEntityRef) {
             if (parenDepth !== 0) {
-               const error = new ValidationError(ValidationError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+               const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ pToken.name.str, topEntityRef.name.str ], topEntityRef.open, pToken.open);
                this.push(error);
             }
 
             if (endedWithConnector) {
                const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+                  [ pToken.name.str, topEntityRef.name.str ], topEntityRef.open, pToken.open);
                this.push(warning);
             }
 
             if (!sawNonWhite) {
                const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  [ pToken.name.str, topEntity.name ], topEntity.pToken.open, pToken.open);
+                  [ pToken.name.str, topEntityRef.name.str ], topEntityRef.open, pToken.open);
                this.push(warning);
             }
 
             sawNonWhite = false;
             endedWithConnector = false;
-            topEntity = undefined;
+            topEntityRef = undefined;
          }
       }
    }

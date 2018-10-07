@@ -82,7 +82,7 @@ The syntactic construct, Name, is used for the identifiers for elements, attribu
    * PI names starting with `/^xml-/` are reserved. Similarly with other versions, a warning may not be produced.
 
 # Validity
-## Exlement Content
+## Element Content
 In production 43, `content` is defined as `(CharData | element | Reference | CDSect | PI | Comment)` (with some variation in latter spec revisions to prevent `]]>` from accidentally being possible).
 
 Further by the time one is actually doing validation, the References must have been replaced by `CharData | element | CDSect | PI | Comment` or else some other error would have been encountered.
@@ -131,6 +131,8 @@ Like the others, it is unclear if the changes are clarifications or changes (if 
 The validity of entity references and character references here are ambiguous, as they are not mentioned in 1.0/1 or 2. They are mentioned in 1.0/3 and beyond, but only enough to say that if the if the replacement text is whitespace, it's OK (but it isn't ok if the replacement text is char refs that expand to whitespace).
 
 This goes with the assumption that entity references are acceptable here.
+
+Note that §3.2.1 has a constraint that the parameter entities must be properly balanced.  Since a parameter entity may be formed from the expansion of other parameter entities, this considers this constraing to mean that each topmost entity in the content spec must ultimately be balanced, but any "sub-entities" need not be. 
 
 ## Attribute-list declarations
 * When processing ATTLIST's, ordering is top-to-bottom when processing the DTD, with the inner subset being processed before the external subset.

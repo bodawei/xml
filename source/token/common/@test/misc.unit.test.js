@@ -58,7 +58,7 @@ describe('misc', () => {
 
       it('reports no warning if the version is 1.0/6, and the attribute name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ATTRIBUTE', WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
 
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
