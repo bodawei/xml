@@ -470,6 +470,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'textAttr',
+                  value: []
                }]);
 
                validator.write(elDecl1);

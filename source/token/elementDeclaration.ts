@@ -48,8 +48,8 @@ class ElementDeclarationPToken extends declaration.PToken {
    public postContentSpecSpace?: SToken;
    public children?: NameListPToken;
    public close?: SToken;
-   public unassigned?: Array<any>;
-   public extra?: Array<any>;
+   public unassigned?: UnassignedArray;
+   public extra?: UnassignedArray;
    public nextPropName?: string;
 
    constructor(props?: Object) {

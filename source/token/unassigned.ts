@@ -5,7 +5,7 @@ import { ErrorCollector } from '../error';
 import { SToken, STokenSource } from '../sToken';
 
 import entityEnd from './entityEnd.js';
-import entityReference from './entityReference.js';
+import entityReference, { ParameterEntityReferencePToken } from './entityReference.js';
 import entityStart from './entityStart.js';
 import text from './text';
 import { TextPToken } from './text';
@@ -40,27 +40,22 @@ type UnassignedLiteral = {
    token: LiteralPToken,
 };
 
-interface EntityReferencePToken {
-   type: string;
-   getSTokenArray(): Array<SToken>;
-}
-
 type UnassignedReference = {
    type: UnassignedType.REFERENCE,
-   token: EntityReferencePToken,
+   token: ParameterEntityReferencePToken,
 };
 
-type UnassignedStartEnity = {
+type UnassignedStartEntity = {
    type: UnassignedType.ENTITY_START,
-   token: EntityReferencePToken,
+   token: ParameterEntityReferencePToken,
 };
 
-type UnassignedEndEnity = {
+type UnassignedEndEntity = {
    type: UnassignedType.ENTITY_END,
-   token: EntityReferencePToken,
+   token: ParameterEntityReferencePToken,
 };
 
-type UnassignedValue = UnassignedSpace | UnassignedWord | UnassignedReference | UnassignedLiteral | UnassignedStartEnity | UnassignedEndEnity;
+type UnassignedValue = UnassignedSpace | UnassignedWord | UnassignedReference | UnassignedLiteral | UnassignedStartEntity | UnassignedEndEntity;
 type UnassignedArray = Array<UnassignedValue>;
 
 type DeliverUnassigned = (value?: UnassignedValue) => void;
@@ -159,7 +154,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          break;
       case '%':
          // return the parameter entity reference
-         entityReference.paramParse(source, (reference: EntityReferencePToken) => deliverValue({
+         entityReference.paramParse(source, (reference: ParameterEntityReferencePToken) => deliverValue({
             type: UnassignedType.REFERENCE,
             token: reference,
          }));

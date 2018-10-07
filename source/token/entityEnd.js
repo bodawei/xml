@@ -57,3 +57,8 @@ const entityEnd = {
 };
 
 export default entityEnd;
+
+export {
+   ParameterEntityEndPToken,
+   EntityEnd,
+};

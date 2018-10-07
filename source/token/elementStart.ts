@@ -197,6 +197,7 @@ export {
    checkWellFormed,
    pTokenToXToken,
 
+   ElementEmpty,
    ElementStart,
    ElementStartPToken,
 };

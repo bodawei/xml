@@ -7,7 +7,7 @@ import entityReference from './entityReference.js';
 import unassigned, { UnassignedArray } from './unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
-import literal, { LiteralValueXToken } from './common/literal';
+import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
 import misc from './common/misc.js';
 
@@ -29,7 +29,7 @@ type AttDefPToken = {
    defaultType?: SToken;
    postDefaultTypeSpace?: SToken;
    openQuote?: SToken;
-   value: Array<any>;
+   value: LiteralValuePToken;
    postValueSpace?: SToken;
    closeQuote?: SToken;
    postAttValueSpace?: SToken;

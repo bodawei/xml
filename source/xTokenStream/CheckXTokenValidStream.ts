@@ -109,10 +109,6 @@ function normalizeAttributeValue(attribute: any, attrDef?: AttDefXToken): any { 
    let prevPiece: { text: string } | void = undefined;
    const newValue = [];
 
-   if (!attribute.value) {
-      return;
-   }
-
    for (let index = 0; index < attribute.value.length; index++) {
       const piece = attribute.value[index];
 

@@ -176,5 +176,8 @@ const entityReference = {
 
 export default entityReference;
 export {
+   EntityReferencePToken,
    EntityReferenceXToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityReferenceXToken,
 };

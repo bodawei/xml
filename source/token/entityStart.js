@@ -58,3 +58,8 @@ const entityStart = {
 };
 
 export default entityStart;
+
+export {
+   ParameterEntityStartPToken,
+   EntityStart,
+};

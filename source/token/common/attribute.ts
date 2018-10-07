@@ -25,7 +25,7 @@ interface AttributePToken extends LiteralPToken {
 
 type AttributeXToken = {
    name: string;
-   value?: LiteralValueXToken,
+   value: LiteralValueXToken,
 }
 
 type AttributesXToken = Array<AttributeXToken>;

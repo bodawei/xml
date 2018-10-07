@@ -436,4 +436,6 @@ export {
    assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
+
+   EntityDeclaration,
 };

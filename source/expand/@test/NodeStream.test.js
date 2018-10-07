@@ -5,9 +5,10 @@ import { EntityLocation, Range } from '../../basic';
 import { ValidityError, WellFormedError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import * as xToken from '../../token';
+import { UnassignedType } from '../../token/unassigned';
 
-import NodeStream from '../NodeStream.js';
-import EntityManager from '../EntityManager.js';
+import NodeStream from '../NodeStream';
+import EntityManager from '../EntityManager';
 
 describe('NodeStream (unit)', () => {
 
@@ -176,7 +177,7 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
+                     type: UnassignedType.ENTITY_START,
                      token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
@@ -185,7 +186,7 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
+                     type: UnassignedType.ENTITY_END,
                      token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
@@ -210,7 +211,7 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
+                     type: UnassignedType.ENTITY_START,
                      token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
@@ -219,7 +220,7 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
+                     type: UnassignedType.ENTITY_END,
                      token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
@@ -244,15 +245,11 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -278,18 +275,14 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -315,10 +308,8 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'literal',
                      token: {},
@@ -326,10 +317,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -353,10 +342,8 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
                      token: new xToken.text.PToken({ text: SToken.fromString('|') }),
@@ -364,10 +351,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -393,10 +378,8 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
                      token: new xToken.text.PToken({ text: SToken.fromString(',') }),
@@ -404,10 +387,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -433,10 +414,8 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
                      token: new xToken.text.PToken({ text: SToken.fromString('(') }),
@@ -444,10 +423,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -473,15 +450,11 @@ describe('NodeStream (unit)', () => {
                      names: [],
                   },
                   unassigned: [{
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
-                     type: 'entityStart',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_START,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
                      token: new xToken.text.PToken({ text: SToken.fromString('(') }),
@@ -489,10 +462,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      // Note that the parenthesis is closed in another entity
                      type: 'word',
@@ -501,10 +472,8 @@ describe('NodeStream (unit)', () => {
                      type: 'space',
                      token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
                   }, {
-                     type: 'entityEnd',
-                     token: {
-                        refPToken: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
-                     },
+                     type: UnassignedType.ENTITY_END,
+                     token: new xToken.entityReference.PToken({ name: SToken.fromString('testPE') }),
                   }],
                };
                const declToken = new xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -855,13 +824,13 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake((pToken) => {
                expect(pToken.unassigned).toEqual([
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
-                     type: 'entityStart',
-                     token: new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
+                     type: UnassignedType.ENTITY_START,
+                     token: refToSecond,
                   },
                   // the reference is eaten, because it really generates no data.
                   {
-                     type: 'entityEnd',
-                     token: new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                     type: UnassignedType.ENTITY_END,
+                     token: refToSecond,
                   },
                ]);
             });
@@ -882,9 +851,9 @@ describe('NodeStream (unit)', () => {
                value: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   // third was expanded ealier in place.
-                  new xToken.entityStart.ParamPToken({ refPToken: refToThird }),
+                  new xToken.entityStart.ParamPToken(refToThird.name),
                   new xToken.text.PToken({ text: SToken.fromString('"http://somewhere.com"') }),
-                  new xToken.entityEnd.ParamPToken({ refPToken: refToThird }),
+                  new xToken.entityEnd.ParamPToken(refToThird.name),
                ],
             });
             const secondDeclXToken = xToken.entityDeclaration.pTokenToXToken(secondDeclPToken);
@@ -925,19 +894,19 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake((pToken) => {
                expect(pToken.unassigned).toEqual([
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
-                     type: 'entityStart',
-                     token: new xToken.entityStart.ParamPToken({ refPToken: refToSecond }),
+                     type: UnassignedType.ENTITY_START,
+                     token: refToSecond,
                   }, xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   {
-                     type: 'literal',
+                     type: UnassignedType.LITERAL,
                      token: {
                         openQuote: SToken.fromString('"'),
                         value: [ SToken.fromString('http://somewhere.com') ],
                         closeQuote: SToken.fromString('"'),
                      }
                   }, {
-                     type: 'entityEnd',
-                     token: new xToken.entityEnd.ParamPToken({ refPToken: refToSecond }),
+                     type: UnassignedType.ENTITY_END,
+                     token: refToSecond,
                   }
                ]);
             });

@@ -14,7 +14,7 @@ import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclarat
 import misc from '../common/misc.js';
 import nameList from '../common/nameList';
 import entityReference from '../entityReference.js';
-import unassigned from '../unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 describe('elementDeclaration (unit)', () => {
    let elementPToken: ElementDeclarationPToken;
@@ -291,7 +291,8 @@ describe('elementDeclaration (unit)', () => {
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          elementPToken.unassigned = [ {
-            type: 'reference',
+            type: UnassignedType.REFERENCE,
+            token: new entityReference.PToken('foo'),
          } ];
          
          elementDeclaration.assignUnassigned(elementPToken);
@@ -391,7 +392,7 @@ describe('elementDeclaration (unit)', () => {
          
          elementDeclaration.assignUnassigned(elementPToken);
 
-         expect(elementPToken.extra).toEqual([ 'foo' ]);
+         expect((elementPToken.extra as any)).toEqual([ 'foo' ]);
       });
 
       it('adds no "extra" property if the unassigned values are consumed', () => {
