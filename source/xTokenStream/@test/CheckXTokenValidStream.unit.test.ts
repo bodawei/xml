@@ -2896,7 +2896,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('one', []));
                validator.write(new charData.XToken('test charData'));
                validator.write(new cdata.XToken('test CDATA'));
-               validator.write(new space.XToken(' '));
+               validator.write(new charData.XToken(' '));
                validator.write(new elementEnd.XToken('one', []));
                validator.end();
    
@@ -3021,6 +3021,28 @@ describe('CheckXTokenValidStream (unit)', () => {
                   } else {
                      expectNoErrors(validator, done);
                   }
+               });
+            });
+
+            it('converts chardata that is just whitespace into space tokens', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(elementDecl);
+               validator.write(new elementStart.XToken('one', []));
+               validator.write(new charData.XToken(' '));
+               validator.write(new elementStart.XToken('child', []));
+               validator.end();
+   
+               gatherTokens(validator, (tokens) => {
+                  expect(tokens[3].type).toEqual(space.XTYPE);
+                  done();
                });
             });
 

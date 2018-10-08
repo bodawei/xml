@@ -34,7 +34,7 @@ import { Graph } from '../token/common/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager.js';
 
 type XToken = {
-   name: string,
+   type: string,
    [name: string]: any,
 };
 
@@ -269,7 +269,6 @@ class CheckXTokenValidStream extends stream.Transform {
             case elementEnd.XTYPE:
             case entityStart.XTYPE:
             case entityEnd.XTYPE:
-            case space.XTYPE:
                // These are all OK here
                break;
             case comment.XTYPE:
@@ -369,6 +368,19 @@ class CheckXTokenValidStream extends stream.Transform {
 
       if (!(xToken instanceof XmlError)) {
          this.checkContextValidity(xToken, pToken, context);
+      }
+
+      /*
+       * §3.2.1
+       *    An element type has **element content** when elements of that type
+       *    must contain only child elements (no character data), optionally
+       *    separated by white space (characters matching the nonterminal S)
+       * Because of this we convert any CHARDATA types here into spaces
+       */
+      if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
+         if (util.isSpace(xToken.text)) {
+            xToken = new space.XToken(xToken.text, xToken.pToken);
+         }
       }
 
       if (xToken instanceof notationDeclaration.XToken) {
