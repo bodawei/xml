@@ -318,6 +318,28 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
+   it('does not call space.parse() if an element start has been found (whitebox)', (done) => {
+      spyOn(space, 'parse').and.callThrough();
+      pTokenStream.addText('<foo>   ');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(space.parse.calls.count()).toEqual(1);
+         done();
+      });
+   });
+
+   it('call space.parse() after the topmost element start and end have been found (whitebox)', (done) => {
+      spyOn(space, 'parse').and.callThrough();
+      pTokenStream.addText('<foo></foo>   ');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(space.parse.calls.count()).toEqual(3);
+         done();
+      });
+   });
+
    it('calls declaration.parse()', (done) => {
       spyOn(declaration, 'parse').and.callThrough();
       pTokenStream.addText('<!FOO >');

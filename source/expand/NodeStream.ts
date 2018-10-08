@@ -396,13 +396,14 @@ class NodeStream extends stream.Transform {
 
    /*
     * Examine the unassigned values, and address these concerns from
-    * §3.2.1:
+    * §3.2.1 Validity Constraint: Proper Group/PE Nesting
     *    Parameter-entity replacement text must be properly nested with
     *    parenthetized groups. That is to say, if either of the opening
     *    or closing parentheses in a choice, seq, or Mixed construct is
     *    contained in the replacement text for a parameter entity, both
     *    must be contained in the same replacement text.
     *
+    * §3.2.1: Interoperability note:
     *    For interoperability, if a parameter-entity reference appears in
     *    a choice, seq, or Mixed construct, its replacement text should
     *    not be empty, and neither the first nor last non-blank character

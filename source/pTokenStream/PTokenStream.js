@@ -41,6 +41,8 @@ class PTokenStream extends stream.Readable {
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource || new EntityMetaData());
       }
 
+      this._elementStack = [];
+      this._inContent = false;
       this._reportedMetaData = false;
    }
 
@@ -63,11 +65,27 @@ class PTokenStream extends stream.Readable {
             this.push(this._sTokenSource.metaData);
          }
 
+         // docstart and end may deliver an array(!)
          if (Array.isArray(result)) {
             for (let index = 0; index < result.length - 1; index++) {
                this.push(result[index]);
             }
             result = result[result.length - 1];
+         }
+
+         if (result) {
+            if (result.type === elementStart.PTYPE) {
+               this._inContent = true;
+               this._elementStack.push((result.name || {}).name);
+            } else if (result.type === elementEnd.PTYPE) {
+               const name = (result.name || {}).name;
+               const topName = this._elementStack[this._elementStack.length - 1];
+
+               if (name === topName) {
+                  this._elementStack.pop();
+                  this._inContent = this._elementStack.length > 0;
+               }
+            }
          }
 
          this._parsing = false;
@@ -76,57 +94,66 @@ class PTokenStream extends stream.Readable {
    }
 
    _parseGeneral(deliverParse) {
-      space.parse(this._sTokenSource, (pToken) => {
-         if (pToken.text) {
-            deliverParse(pToken);
-            return;
-         }
+      if (this._inContent) {
+         this._parseContent(deliverParse);
 
-         this._sTokenSource.extract('peekChar', (sToken) => {
-            if (!sToken) {
-               deliverParse(null);
+      } else {
+         space.parse(this._sTokenSource, (pToken) => {
+            if (pToken.text) {
+               deliverParse(pToken);
                return;
             }
-            switch (sToken.str) {
-               case '<':
-               case '&':
-                  this._markupParse(deliverParse);
-                  break;
-               case '%':
-                  entityReference.paramParse(this._sTokenSource, deliverParse);
-                  break;
-               case ']':
-                  if (this.waitingForInternalClose) {
-                     this._parseClose(deliverParse);
-                     this.waitingForInternalClose = false;
-                  } else {
-                     charData.parse(this._sTokenSource, (charPToken) => {
-                        if (charPToken && charPToken.text) {
-                           deliverParse(charPToken);
-                        } else {
-                           this._sTokenSource.extract('match', ']]>', (sToken) => {
-                              deliverParse({
-                                 type: 'CHARDATA',
-                                 text: sToken,
-                              });
+
+            this._parseContent(deliverParse);
+         });   
+      }
+   }
+
+   _parseContent(deliverParse) {
+      this._sTokenSource.extract('peekChar', (sToken) => {
+         if (!sToken) {
+            deliverParse(null);
+            return;
+         }
+         switch (sToken.str) {
+            case '<':
+            case '&':
+               this._markupParse(deliverParse);
+               break;
+            case '%':
+               entityReference.paramParse(this._sTokenSource, deliverParse);
+               break;
+            case ']':
+               if (this.waitingForInternalClose) {
+                  this._parseClose(deliverParse);
+                  this.waitingForInternalClose = false;
+               } else {
+                  charData.parse(this._sTokenSource, (charPToken) => {
+                     if (charPToken && charPToken.text) {
+                        deliverParse(charPToken);
+                     } else {
+                        this._sTokenSource.extract('match', ']]>', (sToken) => {
+                           deliverParse({
+                              type: 'CHARDATA',
+                              text: sToken,
                            });
-                        }
-                     });
-                  }
-                  break;
-               default:
-                  let terminators = [];
-
-                  if (this.waitingForInternalClose) {
-                     terminators = [ '%' ];
-                  }
-
-                  charData.parse(this._sTokenSource, terminators, (result) => {
-                     deliverParse(result);
+                        });
+                     }
                   });
-                  break;
-            }
-         });
+               }
+               break;
+            default:
+               let terminators = [];
+
+               if (this.waitingForInternalClose) {
+                  terminators = [ '%' ];
+               }
+
+               charData.parse(this._sTokenSource, terminators, (result) => {
+                  deliverParse(result);
+               });
+               break;
+         }
       });
    }
 

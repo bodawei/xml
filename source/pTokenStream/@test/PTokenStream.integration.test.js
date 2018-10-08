@@ -18,13 +18,24 @@ describe('PTokenStream (integration)', () => {
       pTokenStream = new PTokenStream();
    });
 
-   function expectInputToProduceTypes(input, types, done) {
+   function gatherTokens(stream, input, done) {
       const results = [];
 
-      pTokenStream.on('data', (data) => {
+      stream.on('data', (data) => {
          results.push(data);
       });
-      pTokenStream.on('end', () => {
+      stream.on('end', () => {
+         done(results);
+      });
+
+      if (input) {
+         stream.addText(input);
+         stream.endText();
+      }
+   }
+
+   function expectInputToProduceTypes(input, types, done) {
+      gatherTokens(pTokenStream, input, (results) => {
          let expecteds = types;
          if (!Array.isArray(types)) {
             expecteds = [ types ];
@@ -39,11 +50,6 @@ describe('PTokenStream (integration)', () => {
          });
          done();
       });
-
-      if (input) {
-         pTokenStream.addText(input);
-         pTokenStream.endText();
-      }
    }
 
    describe('construction', () => {
@@ -118,8 +124,20 @@ describe('PTokenStream (integration)', () => {
       expectInputToProduceTypes('<?froz adfasdf ?>', PROCESSING_INSTRUCTION_PTOKEN, done);
    });
 
-   it('parses a space', (done) => {
+   it('parses a space at document start', (done) => {
       expectInputToProduceTypes('\t\n ', 'SPACE', done);
+   });
+
+   it('parses no spaces in element content', (done) => {
+      gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
+         expect(results.length).toEqual(6);
+         expect(results[1].type).toEqual('SPACE');
+         expect(results[2].type).toEqual('ELEMENT_START');
+         expect(results[3].type).toEqual('CHARDATA');
+         expect(results[4].type).toEqual('ELEMENT_END');
+         expect(results[5].type).toEqual('SPACE');
+         done();  
+      });
    });
 
    it('parses an unknown declaration', (done) => {

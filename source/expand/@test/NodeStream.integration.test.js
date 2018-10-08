@@ -90,9 +90,11 @@ describe('NodeStream (integration)', () => {
                tokenNs.entityEnd.ParamXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
+               tokenNs.charData.XToken,
                tokenNs.entityStart.XToken,
                   tokenNs.charData.XToken,
                tokenNs.entityEnd.XToken,
+               tokenNs.charData.XToken,
             tokenNs.elementEnd.XToken,
          ]);
          /* eslint-enable indent */
