@@ -10,7 +10,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import declaration, { DeclarationPToken } from '../bridge/declaration';
 import nameList, { ContentParticlePToken, NameListPToken } from '../common/nameList';
 import entityEnd from '../entityEnd.js';
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import elementDeclaration from '../elementDeclaration.js';
@@ -85,7 +85,7 @@ describe('elementDeclaration (integration)', () => {
          source.endText();
 
          elementDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             elementDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -114,7 +114,7 @@ describe('elementDeclaration (integration)', () => {
          source.endText();
 
          elementDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             elementDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 

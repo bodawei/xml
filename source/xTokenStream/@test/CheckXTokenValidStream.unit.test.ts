@@ -4,7 +4,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, EntityKind, util } from '../../basic';
-import { ValidityError, WellFormedError, XmlError, XmlWarning } from '../../error';
+import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from '../../error/index';
 import { SToken } from '../../sToken';
 import nameList, { XNameList } from '../../token/common/nameList';
 import {
@@ -2547,7 +2547,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.end();
 
             gatherTokens(validator, (tokens) => {
-               const errors = tokens.filter((token: any) => token instanceof XmlError);
+               const errors = tokens.filter((token: any) => token.type === ERROR_TYPE);
 
                expect(errors.length).toBe(1);
                done();
@@ -2935,7 +2935,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
-               validator.write(new entityReference.XToken('testEntiyReference', {}));
+               validator.write(new entityReference.XToken('testEntiyReference'));
                validator.end();
    
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
@@ -2977,7 +2977,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ whiteChars, 1, 5, false ],
                [ whiteChars, 1.1, 2, false ],
                [ new space.XToken('  ', {}), 1.0, 1, false ],
-               [ new entityReference.XToken('x', {}), 1.0, 1, false ],
+               [ new entityReference.XToken('x'), 1.0, 1, false ],
                [ new entityStart.XToken('y'), 1.0, 1, false ],
                [ new entityEnd.XToken('z'), 1.0, 1, false ],
             ];

@@ -98,8 +98,10 @@ function doLocaleSet(sourceDir, destDir, setName) {
       const value = baseObject[key];
 
       if (value !== 'OBSOLETE') {
+         const code = parseInt(codesObject[key], 10);
+
          jsonBase[key] = value;
-         jsonCode[key] = parseInt(codesObject[key], 10);
+         jsonCode[key] = code;
          names[key] = key;
       }
    }
@@ -112,8 +114,13 @@ function doLocaleSet(sourceDir, destDir, setName) {
       }
    }
 
-   fs.writeFileSync(destDir + '/' + setName + '.json', JSON.stringify({ base: jsonBase }, undefined, 2));
-   fs.writeFileSync(destDir + '/' + setName + '-code.json', JSON.stringify(jsonCode, undefined, 2));
+   fs.writeFileSync(destDir + '/' + setName + '.json', JSON.stringify({
+      code: jsonCode,
+      id: names,
+      message: {
+         base: jsonBase,
+      },
+   }, undefined, 2));
 }
 
 /**********************************************************************\

@@ -2,12 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../../basic';
-import { WellFormedError } from '../../../error';
+import { WellFormedError } from '../../../error/index';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference.js';
+import entityReference from '../../entityReference';
 import misc from '../misc.js';
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';

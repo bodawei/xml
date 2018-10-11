@@ -9,7 +9,7 @@ import { WellFormedError, XmlWarning } from '../../error';
 
 import declaration from '../bridge/declaration';
 import * as entityDeclaration from '../entityDeclaration';
-import entityReference from '../entityReference.js'
+import entityReference from '../entityReference'
 import unassigned from '../unassigned';
 import externalId from '../common/externalId.js';
 import misc from '../common/misc.js';

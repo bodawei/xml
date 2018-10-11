@@ -4,12 +4,12 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector } from '../../error/index';
 import { SToken, STokenSource } from '../../sToken';
 
-import entityReference, { EntityReferenceXToken } from '../entityReference.js';
+import entityReference, { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';
 import text, { TextPToken, TextXToken } from '../text';
 import misc from './misc.js';
 
 // <typeHack>
-   type EntityReferencePToken = { type: string };
+   // type EntityReferencePToken = { type: string };
    function isTextPToken(item: any): item is TextPToken {
       return item.type === text.PTYPE;
    }
@@ -86,7 +86,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
             break;
          case '&':
             source.extractNoParams('char', (opening) => {
-               entityReference.parse(source, opening, handleRef);
+               entityReference.parse(source, opening!, handleRef); // typeHack
             });
             break;
       }

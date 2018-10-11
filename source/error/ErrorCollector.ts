@@ -4,9 +4,10 @@ import { Offset } from '../basic/index';
 
 import { SToken } from '../sToken/index';
 
-type Position = SToken | Offset;
+type Position = SToken | Offset | void;
 
 declare class ErrorToken {
+   public readonly id: string;
    constructor(id: string, params: Array<string>, position: Position, context: Position);
 };
 
@@ -68,13 +69,13 @@ class ErrorCollector {
       return this.errors;
    }
 
-   check(truthy: boolean, code: string, params: Array<string>, position: Position) {
+   check(truthy: any, code: string, params?: Array<string>, position?: Position) {
       if (truthy) {
          this.report(code, params, position);
       }
    }
 
-   report(code: string, params: Array<string>, position?: Position) {
+   report(code: string, params: Array<string> = [], position?: Position) {
       this.reportError(code, this.ErrorConstructor, params, position);
    }
 

@@ -9,7 +9,6 @@ import { WellFormedError, XmlWarning } from '../../error/index';
 
 import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration.js';
 import declaration from '../bridge/declaration';
-import entityReference from '../entityReference.js'
 import text from '../text';
 import unassigned, { UnassignedArray } from '../unassigned';
 import literal from '../common/literal';
@@ -240,7 +239,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('parses an attribute list with a literal even with #REQUIRED', () => {
          literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
-            options.pToken.value = [ new text.XToken('dummyValue') ];
+            options.pToken.value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
             done();
          });
          const mockSource = new MockSTokenSource([
@@ -258,7 +257,7 @@ describe('attListDeclaration (unit)', () => {
          ]);
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
-         aldPToken.attDefs[0].value = [ new text.XToken('dummyValue') ];
+         aldPToken.attDefs[0].value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
@@ -268,7 +267,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('parses an attribute list with a literal with no defaultType at all', () => {
          literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
-            options.pToken.value = [ new text.XToken('dummyValue') ];
+            options.pToken.value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
             done();
          });
          const mockSource = new MockSTokenSource([
@@ -286,7 +285,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.close = makeSToken('>');
          delete aldPToken.attDefs[0].defaultType;
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
-         aldPToken.attDefs[0].value = [ new text.XToken('dummyValue') ];
+         aldPToken.attDefs[0].value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();

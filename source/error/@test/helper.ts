@@ -1,15 +1,60 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import WellFormedError from '../WellFormedError';
-import XmlWarning from '../XmlWarning';
+import { StringBundle } from '../../basic/index';
+import { SToken } from '../../sToken/index';
+
+import { Position } from '../BaseError';
+import { WellFormedError } from '../WellFormedError';
+import { XmlWarning } from '../XmlWarning';
+import ErrorCollector  from '../ErrorCollector';
+
+// @ts-ignore
+import warningMessages from '../derive/XmlWarning.json';
+// @ts-ignore
+import validityMessages from '../derive/ValidityError.json';
+// @ts-ignore
+import wellFormedMessages from '../derive/WellFormedError.json';
+
+const messages: { [errorTypeName: string]: StringBundle } = {
+   ValidityError: new StringBundle(validityMessages.message),
+   XmlWarning: new StringBundle(warningMessages.message),
+   WellFormedError: new StringBundle(wellFormedMessages.message),
+};
 
 /**********************************************************************\
   Miscellaneous utilities for use in testing things in this namespace
 \**********************************************************************/
 
-class MockErrorCollector {
+type ErrorInfo = {
+   position: Position,
+   id: string,
+   params?: Array<string>,
+   lastPosition?: Position
+};
+
+declare class ErrorToken {
+   public readonly id: string;
+   constructor(id: string, params: Array<string>, position: Position, context: Position);
+};
+
+type ErrConstFunc = typeof ErrorToken;
+
+/*
+ * The chief reason for this mock collector is simply that it stores the individual
+ * properties passed to the error functions, rather than them building a string
+ * immediately with them. This lets us do more checking without needing to test
+ * the strings generated, and helps us validate that we're passing the right
+ * numbers of parameters etc.
+ */
+class MockErrorCollector extends ErrorCollector {
+   public _lastNotNull?: SToken;
+   public _lastPos?: SToken;
+   public _lastPosition?: SToken;
+   public errors: Array<ErrorInfo> = [];
+
    constructor() {
+      super(SToken.fromString('test'), WellFormedError);
       this.errors = [];
       this.setPos = this.setPos.bind(this);
       this.report = this.report.bind(this);
@@ -19,7 +64,7 @@ class MockErrorCollector {
       this.report = jasmine.createSpy('reportSpy').and.callFake(this.report);
    }
 
-   setPos(sToken) {
+   setPos(sToken?: SToken) {
       if (sToken) {
          this._lastNotNull = sToken;
       }
@@ -27,8 +72,8 @@ class MockErrorCollector {
       this._lastPos = sToken;
    }
 
-   report(id, params, position) {
-      const info = {
+   report(id: string, params?: Array<string>, position?: Position) {
+      const info: ErrorInfo = {
          position: position || this._lastPos,
          id,
          params,
@@ -40,7 +85,7 @@ class MockErrorCollector {
       this.errors.push(info);
    }
 
-   check(condition, id, params) {
+   check(condition: any, id: string, params?: Array<string>, position?: Position) {
       if (condition) {
          if (params) {
             this.report(id, params);
@@ -50,24 +95,24 @@ class MockErrorCollector {
       }
    }
 
-   reportError(id, context, params) {
+   reportError(id: string, constructor: ErrConstFunc, params: Array<string>, position?: Position) {
       this.report(id, params);
    }
 }
 
-function toReportError(util) {
+function toReportError(util: any) {
    return makeCompareObject(util, WellFormedError);
 }
 
-function toReportWarning(util) {
+function toReportWarning(util: any) {
    return makeCompareObject(util, XmlWarning);
 }
 
-function makeCompareObject(util, ErrorClass) {
+function makeCompareObject(util: any, ErrorClass: any) {
    return {
-      compare: (mockErrorCollector, expectedError) => {
+      compare: (mockErrorCollector: MockErrorCollector, expectedError: ErrorInfo) => {
          if (!mockErrorCollector) {
-            throw new Error('Did not get a mock error collector as expected');
+            throw new Error('Did not get a mock error collector as expected.');
          }
 
          const errors = mockErrorCollector.errors;
@@ -78,7 +123,7 @@ function makeCompareObject(util, ErrorClass) {
             const actual = errors[index];
 
             if (expectedError.id === actual.id) {
-               const errMsg = ErrorClass.STRING.lookup(actual.id || '');
+               const errMsg = messages[ErrorClass.name].lookup(actual.id || '', 'base');
 
                if (!errMsg) {
                   pass = false;

@@ -1,10 +1,9 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { EntityMetaData } from '../../basic/index';
 import { defaultExtractors } from '../../extractor/index';
-import { SToken, STokenSource } from '../../sToken/index';
+import { STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import unassigned from '../unassigned';

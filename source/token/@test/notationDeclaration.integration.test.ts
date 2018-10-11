@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -174,7 +174,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -189,7 +189,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -218,7 +218,7 @@ describe('notationDeclaration (integration)', () => {
          source.endText();
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -252,7 +252,7 @@ describe('notationDeclaration (integration)', () => {
             ].concat(pToken.unassigned);
             pToken.externalId!.unassigned = pToken.unassigned;
             notationDeclaration.assignUnassigned(pToken);
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
             notationDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
 

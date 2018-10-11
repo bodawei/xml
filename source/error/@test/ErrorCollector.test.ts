@@ -5,7 +5,7 @@ import { Offset, Range, EntityLocation } from '../../basic/index';
 import { SToken } from '../../sToken/index';
 
 import ErrorCollector from '../ErrorCollector';
-import WellFormedError from '../WellFormedError.js';
+import { WellFormedError } from '../WellFormedError.js';
 
 describe('ErrorCollector', () => {
 
@@ -53,7 +53,7 @@ describe('ErrorCollector', () => {
       beforeEach(() => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          loc = new EntityLocation();
-         constructorSpy = jasmine.createSpy('').and.returnValue({ error: true });
+         constructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          contextStart = new SToken('<', '<', new Range(loc, 0, 0, 0, 1, 0, 1));
          errorStart = new SToken('$name', '$name', new Range(loc, 1, 0, 1, 6, 0, 6));
          ec = new ErrorCollector(contextStart, constructorSpy as any); // typeHack
@@ -62,7 +62,7 @@ describe('ErrorCollector', () => {
       it('adds an instance of the error to the set of errors', () => {
          ec.report(errorId, [ 'name' ], errorStart);
 
-         expect(ec.getErrors()).toEqual([ { error: true } ]);
+         expect(ec.getErrors()).toEqual([ { id: 'x' } ]);
       });
 
       it('passes the start position and the context to the error by default', () => {
@@ -104,10 +104,10 @@ describe('ErrorCollector', () => {
       });
 
       it('uses the specified constructor instead of the default', () => {
-         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ otherError: true });
+         const otherConstructorSpy = jasmine.createSpy('').and.returnValue({ id: 'x' });
          ec.reportError('FOO', otherConstructorSpy as any, [ 'name' ], errorStart); // typeHack
 
-         expect(ec.getErrors()).toEqual([ { otherError: true } ]);
+         expect(ec.getErrors()).toEqual([ { id: 'x' } ]);
       });
 
       it('passes the start position and the context to the error by default', () => {

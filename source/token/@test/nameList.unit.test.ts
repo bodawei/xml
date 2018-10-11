@@ -9,7 +9,7 @@ import { XNameList } from '../common/nameList';
 import nameListGraph from '../common/nameListGraph';
 import { WellFormedError, XmlWarning } from '../../error/index';
 
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';
 
 import misc from '../common/misc.js';

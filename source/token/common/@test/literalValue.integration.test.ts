@@ -2,12 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../../basic';
-import { WellFormedError, ErrorCollector } from '../../../error';
+import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from '../../../sToken';
 import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference.js';
+import entityReference from '../../entityReference';
 import literalValue from '../literalValue';
 import text from '../../text';
 
@@ -81,7 +81,7 @@ describe('literalValue (integration)', () => {
          source.addText('b\u0000d"');
          source.endText();
          literalValue.parse(source, ['"'], (pToken) => {
-            const ec = new ErrorCollector({}, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             literalValue.checkWellFormed(pToken, ec, emd);
 
@@ -94,7 +94,7 @@ describe('literalValue (integration)', () => {
          source.addText('good& bad;"');
          source.endText();
          literalValue.parse(source, ['"', '&'], (pToken) => {
-            const ec = new ErrorCollector({}, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             literalValue.checkWellFormed(pToken, ec, emd);
 

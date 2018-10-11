@@ -6,15 +6,11 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference.js';
+import entityReference, { EntityReferencePToken, ParameterEntityReferencePToken } from '../../entityReference';
 import text from '../../text';
 
 import misc from '../misc.js';
 import literalValue, { LiteralValuePToken } from '../literalValue.js';
-
-// <typeHack>
-   type EntityReferencePToken = { type: string };
-// </typeHack>
 
 describe('literalValue (unit)', () => {
 
@@ -30,7 +26,6 @@ describe('literalValue (unit)', () => {
       });
 
       it('does a basic parse', () => {
-         const container = {};
          mockSource = new MockSTokenSource([
             'blah',
             MockSTokenSource.PEEK('"'),
@@ -188,15 +183,11 @@ describe('literalValue (unit)', () => {
       });
 
       it('calls entityReference.checkWellFormed if an entity reference PToken is found', () => {
-         valuePToken.push({
-            type: entityReference.PTYPE,
-         });
+         valuePToken.push(new EntityReferencePToken());
 
          literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
 
-         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual({
-            type: entityReference.PTYPE,
-         });
+         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(new EntityReferencePToken());
          expect(refCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
       });
 
@@ -220,11 +211,10 @@ describe('literalValue (unit)', () => {
 
       it('calls entityReference.makeToken for each reference in the pToken value', () => {
          const refSpy = spyOn(entityReference, 'pTokenToXToken');
-         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }), {
-               type: entityReference.PTYPE,
-            }, {
-               type: entityReference.PARAM_PTYPE,
-            } ];
+         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }),
+            new EntityReferencePToken(),
+            new ParameterEntityReferencePToken(),
+         ];
          literalValue.makeXTokenCompatible(pToken);
 
          expect(refSpy.calls.count()).toEqual(2);

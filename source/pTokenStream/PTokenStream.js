@@ -105,7 +105,7 @@ class PTokenStream extends stream.Readable {
             }
 
             this._parseContent(deliverParse);
-         });   
+         });
       }
    }
 

@@ -2,12 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../../basic';
-import { WellFormedError, ErrorCollector } from '../../../error';
+import { WellFormedError, ErrorCollector } from '../../../error/index';
 import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from '../../../sToken';
 import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference.js';
+import entityReference from '../../entityReference';
 import literal, { LiteralPToken } from '../literal';
 import text from '../../text';
 
@@ -99,7 +99,7 @@ describe('literal (integration)', () => {
          literal.parse(source, {
             pToken: pToken,
          }, () => {
-            const ec = new ErrorCollector({}, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             literal.checkWellFormed(pToken, ec, emd, 'aType');
 
@@ -116,7 +116,7 @@ describe('literal (integration)', () => {
             pToken: pToken,
             geRef: true,
          }, () => {
-            const ec = new ErrorCollector({}, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             literal.checkWellFormed(pToken, ec, emd, 'aType');
 

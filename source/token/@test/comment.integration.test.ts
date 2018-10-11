@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
-import { ErrorCollector, WellFormedError } from '../../error';
+import { ErrorCollector, WellFormedError } from '../../error/index';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -70,7 +70,7 @@ describe('comment (integration)', () => {
          source.endText();
 
          parse(source, commentPToken.open, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             checkWellFormed(parsing, ec, emd);
 

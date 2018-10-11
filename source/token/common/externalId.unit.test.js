@@ -7,7 +7,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import text from '../text';
 import unassigned from '../unassigned';
 

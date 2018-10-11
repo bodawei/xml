@@ -9,7 +9,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper.js';
 import entityEnd from '../entityEnd.js';
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
 import unassigned, { UnassignedType } from '../unassigned';

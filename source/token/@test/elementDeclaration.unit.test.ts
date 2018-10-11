@@ -2,18 +2,16 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
-import { XmlWarning } from '../../error/index';
+import { WellFormedError, XmlWarning } from '../../error/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken/index';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError } from '../../error/index';
 
-import { STokenArray } from '../base';
 import declaration from '../bridge/declaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
 import misc from '../common/misc.js';
 import nameList from '../common/nameList';
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';
 
 describe('elementDeclaration (unit)', () => {

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
-import { ErrorCollector, WellFormedError } from '../../error';
+import { ErrorCollector, WellFormedError } from '../../error/index';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { SToken } from '../../sToken/index';
@@ -49,7 +49,7 @@ describe('processingInstruction (integration)', () => {
          source.endText();
 
          parseProcessingInstruction(source, piPToken, (pToken) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             pToken.checkWellFormed(ec, new EntityMetaData());
 

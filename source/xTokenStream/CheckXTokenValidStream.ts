@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, util } from '../basic';
-import { ValidityError, XmlError, XmlWarning } from '../error';
+import { ValidityError, ERROR_TYPE, XmlWarning } from '../error';
 import { SToken } from '../sToken';
 import {
    charData,
@@ -366,7 +366,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const pToken = (xToken.pToken || {}).open;
       const context = this.currentContext;
 
-      if (!(xToken instanceof XmlError)) {
+      if (!(xToken.type === ERROR_TYPE)) {
          this.checkContextValidity(xToken, pToken, context);
       }
 

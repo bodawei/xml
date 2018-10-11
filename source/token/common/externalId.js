@@ -3,7 +3,7 @@
 import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import unassigned from '../unassigned';
 
 import literal from './literal';

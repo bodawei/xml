@@ -2,11 +2,11 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData, Range } from '../../basic';
-import { XmlWarning } from '../../error';
+import { XmlWarning } from '../../error/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError } from '../../error';
+import { WellFormedError } from '../../error/index';
 
 import declaration from '../bridge/declaration';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';

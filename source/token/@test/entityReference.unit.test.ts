@@ -3,21 +3,21 @@
 
 import { Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, sTokenMaker } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken/index';
 
-import entityReference from '../entityReference.js';
+import entityReference, { EntityReferencePToken, ParameterEntityReferencePToken } from '../entityReference';
 
 describe('entityReference (unit)', () => {
-   let generalEntityPToken;
-   let parameterEntityPToken;
-   let openSToken;
+   let generalEntityPToken: EntityReferencePToken;
+   let parameterEntityPToken: ParameterEntityReferencePToken;
+   let openSToken: SToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
 
-      openSToken = new SToken('&', '&', new Range(0, 0, 0, 1, 0, 1));
+      openSToken = new SToken('&', '&', new Range(undefined, 0, 0, 0, 1, 0, 1));
 
       generalEntityPToken = new entityReference.PToken({
          open: openSToken,
@@ -74,7 +74,7 @@ describe('entityReference (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -120,7 +120,7 @@ describe('entityReference (unit)', () => {
    });
 
    describe('paramParse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -166,21 +166,21 @@ describe('entityReference (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let pToken;
-      let makeSToken;
+      let mockErrorCollector: MockErrorCollector;
+      let pToken: EntityReferencePToken;
+      let makeSToken: sTokenMaker;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          makeSToken = makeSTokenMaker();
 
-         pToken = {
+         pToken = new EntityReferencePToken({
             open: makeSToken('&'),
             postOpenSpace: undefined,
             name: makeSToken('theName'),
             postNameSpace: undefined,
             close: makeSToken(';'),
-         };
+         });
       });
 
       it('reports an error if there is a space after the opening &', () => {

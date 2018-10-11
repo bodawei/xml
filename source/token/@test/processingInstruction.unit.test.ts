@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from '../../basic';
-import { WellFormedError, XmlWarning } from '../../error';
+import { WellFormedError, XmlWarning } from '../../error/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
 import { MockSTokenSource } from '../../sToken/@test/helper';

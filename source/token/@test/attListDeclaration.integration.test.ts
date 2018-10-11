@@ -12,7 +12,7 @@ import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import { WordListPToken, WordListType } from '../common/wordList';
 import entityEnd from '../entityEnd';
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import entityStart from '../entityStart';
 import unassigned, { UnassignedType } from '../unassigned';
 
@@ -522,7 +522,7 @@ describe('attListDeclaration (integration)', () => {
       let ec: ErrorCollector;
 
       beforeEach(() => {
-         ec = new ErrorCollector(undefined, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
       });
 
       it('asks the declaration module to look for problems in the declaration part', (done) => {

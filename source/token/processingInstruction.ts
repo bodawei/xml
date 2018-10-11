@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
-import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
+import { SToken, STokenSource, STokenArrayBuilder } from '../sToken/index';
 
 import {
    checkWellFormedText,

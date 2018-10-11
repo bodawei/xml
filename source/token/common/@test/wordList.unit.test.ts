@@ -8,7 +8,7 @@ import { MockSTokenSource } from '../../../sToken/@test/helper';
 import { parseWordList, WordListPToken, WordListType, ENUMERATION_PTOKEN } from '../wordList';
 import { WellFormedError } from '../../../error/index';
 
-import entityReference from '../../entityReference.js';
+import entityReference from '../../entityReference';
 import text from '../../text';
 import unassigned, { UnassignedType, UnassignedArray } from '../../unassigned';
 

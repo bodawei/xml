@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
+import { ErrorCollector, WellFormedError } from '../error';
+import { SToken, STokenSource } from '../sToken/index';
 
 import base from './base';
 import {
@@ -18,9 +19,12 @@ const PARAMETERENTITYREF = 'PARAMETERENTITYREF';
 const PEREF_XTOKEN = 'PEREF_XTOKEN';
 const WFEID = WellFormedError.ID;
 
-class EntityReferenceXToken extends base.XToken {
+type DeliverPToken = (result: EntityReferencePToken) => void;
 
-   constructor(name, pToken) {
+class EntityReferenceXToken extends base.XToken {
+   public name: string;
+
+   constructor(name: string, pToken?: EntityReferencePToken) {
       super(ENTITYREF_XTOKEN, pToken);
 
       this.name = name;
@@ -29,7 +33,9 @@ class EntityReferenceXToken extends base.XToken {
 }
 
 class ParameterEntityReferenceXToken extends EntityReferenceXToken {
-   constructor(name, pToken) {
+   public type: typeof PEREF_XTOKEN = PEREF_XTOKEN;
+
+   constructor(name: string, pToken?: ParameterEntityReferencePToken) {
       /* istanbul ignore next */
       super(name, pToken);
 
@@ -38,7 +44,7 @@ class ParameterEntityReferenceXToken extends EntityReferenceXToken {
 }
 
 class EntityReferencePToken extends base.PToken {
-   constructor(props) {
+   constructor(props?: Object) {
       super(ENTITYREF, props);
    }
 
@@ -56,7 +62,7 @@ class EntityReferencePToken extends base.PToken {
 }
 
 class ParameterEntityReferencePToken extends base.PToken {
-   constructor(props) {
+   constructor(props?: Object) {
       super(PARAMETERENTITYREF, props);
    }
 
@@ -87,7 +93,7 @@ class ParameterEntityReferencePToken extends base.PToken {
     [68] EntityRef   ::= '&' Name ';'
 \**********************************************************************/
 
-function parse(source, open, deliverPToken) {
+function parse(source: STokenSource, open: SToken, deliverPToken: DeliverPToken) {
    const pToken = new EntityReferencePToken();
    pToken.open = open;
 
@@ -107,17 +113,17 @@ function parse(source, open, deliverPToken) {
     [69] PEReference ::= '%' Name ';'
 \**********************************************************************/
 
-function paramParse(source, deliverPToken) {
+function paramParse(source: STokenSource, deliverPToken: DeliverPToken) {
    const pToken = new ParameterEntityReferencePToken();
 
    source.extractToObject('match', '%', pToken, 'open');
    parseRef(source, pToken, deliverPToken);
 }
 
-function parseRef(source, pToken, deliverPToken) {
-   source.extractToObject('space', pToken, 'postOpenSpace');
+function parseRef(source: STokenSource, pToken: ParameterEntityReferencePToken, deliverPToken: DeliverPToken) {
+   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
    source.extractToObject('word', [ ';' ], pToken, 'name');
-   source.extractToObject('space', pToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', pToken, 'postNameSpace');
    source.extract('match', ';', (sToken) => {
       pToken.close = sToken;
       deliverPToken(pToken);
@@ -128,7 +134,7 @@ function parseRef(source, pToken, deliverPToken) {
  checkWellFormed() does a well formed check on the PToken value.
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec) {
+function checkWellFormed(pToken: EntityReferencePToken, ec: ErrorCollector) {
    const entityName = textOrBlank(pToken.name);
 
    ec.setPos(pToken.open);
@@ -149,7 +155,7 @@ function checkWellFormed(pToken, ec) {
  pTokenToXToken() converts a PToken into a token.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: EntityReferencePToken) {
    let refClass = EntityReferenceXToken;
 
    if (pToken.open && pToken.open.str === '%') {

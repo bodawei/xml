@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
 import { SToken, STokenSource } from '../../sToken/index';
 
 import base, { STokenArray } from '../base';
-import entityReference from '../entityReference.js';
+import entityReference from '../entityReference';
 import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
 import { textOrBlank } from './/misc.js';

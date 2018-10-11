@@ -48,7 +48,10 @@ class CdataPToken extends envelope.PToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
+   [18] CDSect  ::= CDStart CData CDEnd
+   [19] CDStart ::= '<![CDATA['
+   [20] CData   ::= (Char* - (Char* ']]>' Char*))
+   [21] CDEnd   ::= ']]>'
 \**********************************************************************/
 
 function parse(source, envelopePToken, deliverPToken) {
