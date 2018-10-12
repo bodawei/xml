@@ -17,7 +17,7 @@ import {
    elementStart,
    elementEnd,
    elementDeclaration,
-   entityEnd,
+   GeneralEntityEndXToken,
    entityDeclaration,
    entityReference,
    entityStart,
@@ -721,7 +721,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   value: [
                      new entityStart.XToken('ref'),
                      new text.XToken('test'),
-                     new entityEnd.XToken('ref'),
+                     new GeneralEntityEndXToken('ref'),
                   ]
                }]);
 
@@ -2916,7 +2916,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
                validator.write(new entityStart.XToken('testEntityStart'));
-               validator.write(new entityEnd.XToken('testEntityEnd'));
+               validator.write(new GeneralEntityEndXToken('testEntityEnd'));
                validator.write(new elementEnd.XToken('one', []));
                validator.end();
    
@@ -2979,7 +2979,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ new space.XToken('  ', {}), 1.0, 1, false ],
                [ new entityReference.XToken('x'), 1.0, 1, false ],
                [ new entityStart.XToken('y'), 1.0, 1, false ],
-               [ new entityEnd.XToken('z'), 1.0, 1, false ],
+               [ new GeneralEntityEndXToken('z'), 1.0, 1, false ],
             ];
             data.forEach(([token, version, rev, causesError]) => {
                let errorToken: ValidityError;

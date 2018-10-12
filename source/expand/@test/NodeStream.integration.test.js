@@ -8,6 +8,11 @@ import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as tokenNs from '../../token';
+import {
+   GeneralEntityEndXToken,
+   ParameterEntityEndPToken,
+   ParameterEntityEndXToken
+} from '../../token';
 
 import EntityManager from '../EntityManager';
 import NodeStream from '../NodeStream';
@@ -55,12 +60,12 @@ describe('NodeStream (integration)', () => {
             tokenNs.entityStart.XToken,
             tokenNs.entityStart.XToken,
             tokenNs.charData.XToken,
-            tokenNs.entityEnd.XToken,
+            GeneralEntityEndXToken,
             tokenNs.charData.XToken,
             tokenNs.entityStart.XToken,
             tokenNs.charData.XToken,
-            tokenNs.entityEnd.XToken,
-            tokenNs.entityEnd.XToken,
+            GeneralEntityEndXToken,
+            GeneralEntityEndXToken,
             tokenNs.elementEnd.XToken,
          ]);
          done();
@@ -87,13 +92,13 @@ describe('NodeStream (integration)', () => {
                tokenNs.entityDeclaration.ParamXToken,
                tokenNs.entityStart.ParamXToken,
                   tokenNs.entityDeclaration.XToken,
-               tokenNs.entityEnd.ParamXToken,
+               ParameterEntityEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
                tokenNs.charData.XToken,
                tokenNs.entityStart.XToken,
                   tokenNs.charData.XToken,
-               tokenNs.entityEnd.XToken,
+               GeneralEntityEndXToken,
                tokenNs.charData.XToken,
             tokenNs.elementEnd.XToken,
          ]);
@@ -195,7 +200,7 @@ describe('NodeStream (integration)', () => {
                   new tokenNs.text.XToken('foo#', new tokenNs.text.PToken({
                      text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
                   })),
-                  new tokenNs.entityEnd.XToken('test'),
+                  new GeneralEntityEndXToken('test'),
                   new tokenNs.text.XToken('bar#', new tokenNs.text.PToken({
                      text: new SToken('bar#', 'bar#', new Range(new EntityLocation(), 163, 4, 159, 167, 4, 163)),
                   })),
@@ -283,7 +288,7 @@ describe('NodeStream (integration)', () => {
             expect(valueArray[0].text.str).toEqual('one');
             expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
             expect(valueArray[2].text.str).toEqual('two');
-            expect(valueArray[3]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken(valueArray[1].refPToken));
             done();
          });
          pTokenStream.addText('<?xml version="1.0"?><!DOCTYPE one ' +
@@ -307,9 +312,9 @@ describe('NodeStream (integration)', () => {
             expect(valueArray[2].text.str).toEqual('(');
             expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
             expect(valueArray[4].text.str).toEqual('inner');
-            expect(valueArray[5]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[3].refPToken }));
+            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken(valueArray[3].refPToken));
             expect(valueArray[6].text.str).toEqual(')');
-            expect(valueArray[7]).toEqual(new tokenNs.entityEnd.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken(valueArray[1].refPToken));
             expect(valueArray[8].text.str).toEqual(']');
             done();
          });
@@ -418,7 +423,7 @@ describe('NodeStream (integration)', () => {
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: makeSToken('(child)'),
                })),
-               new tokenNs.entityEnd.XToken('child'),
+               new GeneralEntityEndXToken('child'),
             ]);
             done();
          });
@@ -445,7 +450,7 @@ describe('NodeStream (integration)', () => {
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: childStoken,
                })),
-               new tokenNs.entityEnd.XToken('child'),
+               new GeneralEntityEndXToken('child'),
                new tokenNs.text.XToken('mid', new tokenNs.text.PToken({
                   text: new SToken('mid', 'mid', new Range(new EntityLocation(),
                      10, 0, 10, 13, 0, 13)),
@@ -454,12 +459,12 @@ describe('NodeStream (integration)', () => {
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: childStoken,
                })),
-               new tokenNs.entityEnd.XToken('child'),
+               new GeneralEntityEndXToken('child'),
                new tokenNs.text.XToken('post', new tokenNs.text.PToken({
                   text: new SToken('post', 'post', new Range(new EntityLocation(),
                      20, 0, 20, 24, 0, 24)),
                })),
-               new tokenNs.entityEnd.XToken('parent'),
+               new GeneralEntityEndXToken('parent'),
             ]);
             done();
          });

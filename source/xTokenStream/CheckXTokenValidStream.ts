@@ -13,7 +13,7 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
-   entityEnd,
+   GENERAL_ENTITY_END_XTOKEN,
    entityReference,
    entityStart,
    PROCESSING_INSTRUCTION_XTOKEN,
@@ -238,7 +238,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case charData.XTYPE:
             case entityReference.XTYPE:
             case entityStart.XTYPE:
-            case entityEnd.XTYPE:
+            case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
                // These are all OK here
                break;
@@ -268,7 +268,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case cdata.XTYPE: // wanna revisit this given the decision in ANY?
             case elementEnd.XTYPE:
             case entityStart.XTYPE:
-            case entityEnd.XTYPE:
+            case GENERAL_ENTITY_END_XTOKEN:
                // These are all OK here
                break;
             case comment.XTYPE:
@@ -339,7 +339,7 @@ class CheckXTokenValidStream extends stream.Transform {
                break;
             case entityReference.XTYPE:
             case entityStart.XTYPE:
-            case entityEnd.XTYPE:
+            case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
                // These are all OK here
                break;

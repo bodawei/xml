@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { ErrorCollector, WellFormedError } from '../error';
+import { ErrorCollector, WellFormedError } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 
 import base from './base';

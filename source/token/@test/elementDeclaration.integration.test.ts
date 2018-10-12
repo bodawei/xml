@@ -9,7 +9,6 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import declaration, { DeclarationPToken } from '../bridge/declaration';
 import nameList, { ContentParticlePToken, NameListPToken } from '../common/nameList';
-import entityEnd from '../entityEnd.js';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
@@ -138,7 +137,7 @@ describe('elementDeclaration (integration)', () => {
       //             value: [ new text.PToken({ text: new SToken('sys.dtd', 'sys.dtd', new Range()) }) ],
       //             closeQuote: new SToken('"', '"', new Range()),
       //          },
-      //          new entityEnd.ParamPToken({}),
+      //          new ParameterEntityEndPToken({}),
       //       ].concat(pToken.unassigned);
       //       pToken.externalId.unassigned = pToken.unassigned;
       //       notationDeclaration.assignUnassigned(pToken);

@@ -7,12 +7,13 @@ import * as instruction from './bridge/instruction';
 import attListDeclaration from './attListDeclaration';
 import * as cdata from './cdata';
 import * as charData from './charData';
-import charRef from './charRef';
-import comment, { CommentXToken } from './comment';
+import * as charRef from './charRef';
+import * as comment from './comment';
+import { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as entityDeclaration from './entityDeclaration';
-import entityEnd from './entityEnd';
+// import entityEnd from './entityEnd';
 import elementDeclaration from './elementDeclaration';
 import entityReference from './entityReference';
 import entityStart from './entityStart';
@@ -26,6 +27,9 @@ import unassigned from './unassigned';
 import * as xmlDeclaration from './xmlDeclaration';
 
 import literalValue from './common/literalValue';
+
+export * from './generalEntityEnd';
+export * from './parameterEntityEnd';
 
 const token = {
    declaration,
@@ -43,7 +47,6 @@ const token = {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityEnd,
    entityReference,
    entityStart,
    notationDeclaration,
@@ -72,7 +75,6 @@ export {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityEnd,
    entityReference,
    entityStart,
    notationDeclaration,

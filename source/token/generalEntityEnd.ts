@@ -18,15 +18,17 @@ class GeneralEntityEndPToken {
    }
 
    toXToken() {
-      return new GeneralEntityEndXToken(this);
+      return new GeneralEntityEndXToken(this.referencePToken.name.str, this);
    }
 }
 
 class GeneralEntityEndXToken {
    public readonly type: typeof GENERAL_ENTITY_END_XTOKEN = GENERAL_ENTITY_END_XTOKEN;
+   public readonly name: string;
    public readonly pToken?: GeneralEntityEndPToken;
 
-   constructor(pToken: GeneralEntityEndPToken) {
+   constructor(name: string, pToken?: GeneralEntityEndPToken) {
+      this.name = name;
       this.pToken = pToken;
    }
 }

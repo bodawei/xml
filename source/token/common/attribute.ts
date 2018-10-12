@@ -4,11 +4,13 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from '../../error/index';
 import { SToken, STokenSource } from '../../sToken/index';
 
-import text, { isTextPToken } from '../text';
+import { EntityReferenceXToken } from '../entityReference';
+import text, { TextXToken, isTextPToken } from '../text';
 
 import misc from './misc.js';
 import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken, LiteralValueXToken } from './literalValue';
+import { GeneralEntityEndXToken } from '../generalEntityEnd';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -23,9 +25,11 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
+type AttributeValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityEndXToken>;
+
 type AttributeXToken = {
    name: string;
-   value: LiteralValueXToken,
+   value: AttributeValueXToken,
 }
 
 type AttributesXToken = Array<AttributeXToken>;
@@ -257,4 +261,5 @@ export default attribute;
 
 export {
    AttributeXToken,
+   AttributeValueXToken,
 };

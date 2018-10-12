@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
-import entityEnd from '../entityEnd.js';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
 import entityReference from '../entityReference.js';
 import entityStart from '../entityStart.js';
 import text from '../text';
@@ -647,7 +647,7 @@ describe('unassigned (unit)', () => {
                token: new entityStart.ParamPToken({}),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new entityEnd.ParamPToken({}),
+               token: new ParameterEntityEndPToken({}),
             } ];
             const descriptors = [ {
                name: 'one',
@@ -702,7 +702,7 @@ describe('unassigned (unit)', () => {
                token: new entityStart.ParamPToken({}),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new entityEnd.ParamPToken({}),
+               token: new ParameterEntityEndPToken({}),
             } ];
             const descriptors = [ {
                name: 'one',

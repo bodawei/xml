@@ -13,7 +13,10 @@ import {
    elementDeclaration,
    elementStart,
    entityDeclaration,
-   entityEnd,
+   GENERAL_ENTITY_END_XTOKEN,
+   ParameterEntityEndPToken,
+   GeneralEntityEndXToken,
+   ParameterEntityEndXToken,
    entityReference,
    entityStart,
    notationDeclaration,
@@ -21,6 +24,7 @@ import {
    unassigned,
    literalValue,
 } from '../token';
+import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
@@ -29,7 +33,6 @@ import { EntityReferencePToken, EntityReferenceXToken, ParameterEntityReferenceP
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { ParameterEntityStartPToken, EntityStart } from '../token/entityStart'; // badRef
-import { ParameterEntityEndPToken, EntityEnd } from '../token/entityEnd'; // badRef
 
 import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/unassigned';
@@ -44,9 +47,9 @@ type DoneSignal = () => void;
 type EntityValueArray = Array<TextPToken|EntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end 
 type CommonAttributeXToken = {
    name: string,
-   value: LiteralValueXToken,
+   value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|EntityEnd>;
+type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|GeneralEntityEndXToken>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken|EntityReferenceXToken };
 
 /**********************************************************************\
@@ -136,12 +139,12 @@ class NodeStream extends stream.Transform {
 
    _childDone() {
       const isPeRef = (this._child.xToken instanceof entityReference.ParamXToken);
-      const tokenType = isPeRef ? entityEnd.ParamXToken : entityEnd.XToken;
+      const tokenType = isPeRef ? ParameterEntityEndXToken : GeneralEntityEndXToken;
 
       this._child.stream.removeListener('data', this._childData);
       this._child.stream.removeListener('end', this._childDone);
 
-      this.push(new tokenType(this._child.xToken.name));
+      this.push(new (tokenType as any)(this._child.xToken.name)); // typeHack
 
       const temp = this._child.callback;
       delete this._child;
@@ -197,7 +200,7 @@ class NodeStream extends stream.Transform {
          const item = entityValueArray.shift();
 
          if (item!.type === entityReference.PARAM_PTYPE) {  // typeHack
-            this._expandPERefFullyInEntityValue(item!, (expandedItem) => {   // This is going to be a problem
+            this._expandPERefFullyInEntityValue(item as ParameterEntityReferencePToken, (expandedItem) => {   // This is going to be a problem
                deliverExpanded(preExpanded, expandedItem);
             });
             return;
@@ -255,13 +258,13 @@ class NodeStream extends stream.Transform {
             case text.PTYPE:
                result.push({
                   type: UnassignedType.WORD, // could be space!
-                  token: val,
+                  token: val as TextPToken, // typeHack
                });
                break;
             case entityReference.PARAM_PTYPE:
                result.push({
                   type: UnassignedType.REFERENCE, // could be space!
-                  token: val,
+                  token: val as ParameterEntityReferencePToken, // typeHack
                });
                break;
          }
@@ -292,7 +295,8 @@ class NodeStream extends stream.Transform {
          deliverExpanded([ peRef ]);
       } else {
          const expanded: EntityValueArray = [ new entityStart.ParamPToken({ refPToken: peRef }) ]
-            .concat(entityToken.value, new entityEnd.ParamPToken({ refPToken: peRef }));
+            .concat(entityToken.value);
+         expanded.push(new ParameterEntityEndPToken(peRef));
 
          deliverExpanded(expanded);
       }
@@ -453,7 +457,7 @@ class NodeStream extends stream.Transform {
                   topEntityRef = entry.token;
                }
                break;
-            case 'entityEnd':
+            case UnassignedType.ENTITY_END:
                entityDepth--;
                break;
             case 'word':
@@ -542,7 +546,7 @@ class NodeStream extends stream.Transform {
       }
    }
 
-   _expandAttributeValue(attrValue: LiteralValueXToken, attrExpanded: (expanded: LiteralValueXToken) => void) {
+   _expandAttributeValue(attrValue: AttributeValueXToken, attrExpanded: (expanded: AttributeValueXToken) => void) {
       if (attrValue.length === 0) {
          attrExpanded(attrValue);
          return;
@@ -577,8 +581,8 @@ class NodeStream extends stream.Transform {
       }
    }
 
-   _buildExpandedAttrValue(originalAttrValue: LiteralValueXToken, expansions: ExpansionsMap, attrExpanded: (expanded: LiteralValueXToken) => void) {
-      let newValue: LiteralValueXToken = [];
+   _buildExpandedAttrValue(originalAttrValue: AttributeValueXToken, expansions: ExpansionsMap, attrExpanded: (expanded: AttributeValueXToken) => void) {
+      let newValue: AttributeValueXToken = [];
 
       for (let index = 0; index < originalAttrValue.length; index++) {
          const item = originalAttrValue[index];
@@ -602,7 +606,7 @@ class NodeStream extends stream.Transform {
       for (const valuePart of value) {
          if (valuePart.type === entityStart.XTYPE) {
             entityDepth++;
-         } else if (valuePart.type === entityEnd.XTYPE) {
+         } else if (valuePart.type === GENERAL_ENTITY_END_XTOKEN) {
             entityDepth--;
          } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
             // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
@@ -640,9 +644,9 @@ class NodeStream extends stream.Transform {
       literalValue.parse(sTokenStream, [ '&' ], (pTokenResult) => {
          const xToken = literalValue.makeXTokenCompatible(pTokenResult);
 
-         this._expandAttributeValue(xToken, (subXToken) => {
+         this._expandAttributeValue(xToken, (subXToken: Array<any>) => { // typeHack
             subXToken.unshift(new entityStart.XToken(entityRef.name));
-            subXToken.push(new entityEnd.XToken(entityRef.name));
+            subXToken.push(new GeneralEntityEndXToken(entityRef.name));
             referenceExpanded(subXToken, indexInAttr);
          });
       });

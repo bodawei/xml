@@ -1,12 +1,12 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, Range } from '../basic';
-import { ErrorCollector } from '../error';
+import { ErrorCollector } from '../error/index';
 import { SToken, STokenSource } from '../sToken';
 
-import entityEnd from './entityEnd.js';
 import entityReference, { ParameterEntityReferencePToken } from './entityReference.js';
 import entityStart from './entityStart.js';
+import { ParameterEntityEndPToken } from './parameterEntityEnd';
 import text from './text';
 import { TextPToken } from './text';
 import literal, { LiteralPToken, LiteralValuePToken } from './common/literal';

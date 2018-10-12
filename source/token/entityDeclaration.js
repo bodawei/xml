@@ -4,7 +4,7 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import base from './base';
 import entityReference from './entityReference';
-import unassigned from './unassigned';
+import unassigned, { UnassignedType } from './unassigned';
 import declaration from './bridge/declaration';
 import misc from './common/misc';
 import externalId from './common/externalId';
@@ -315,7 +315,7 @@ function assignUnassigned(pToken) {
          const nextNonSpaceThing = pToken.unassigned.find((value) => {
             if ((value.type === 'space') ||
                value.type === 'entityStart' ||
-               value.type === 'entityEnd') {
+               value.type === UnassignedType.ENTITY_END) {
                return;
             }
 

@@ -5,6 +5,7 @@ import { EntityLocation, Range } from '../../basic';
 import { ValidityError, WellFormedError, XmlWarning } from '../../error';
 import { SToken } from '../../sToken';
 import * as xToken from '../../token';
+import { ParameterEntityEndPToken, GeneralEntityEndXToken } from '../../token';
 import { UnassignedType } from '../../token/unassigned';
 
 import NodeStream from '../NodeStream';
@@ -623,7 +624,7 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, (token) => {
                expect(token.value).toEqual([
                   new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
-                  new xToken.entityEnd.ParamPToken({ refPToken: parentPeref }),
+                  new ParameterEntityEndPToken(parentPeref),
                ]);
 
                done();
@@ -638,7 +639,7 @@ describe('NodeStream (unit)', () => {
                   new xToken.entityStart.ParamPToken({}),
                   xToken.unassigned.wordFromSToken(
                      new SToken('childValue', 'childValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9))),
-                  new xToken.entityEnd.ParamPToken({}),
+                  new ParameterEntityEndPToken({}),
                ],
             });
             const parentToken = xToken.entityDeclaration.pTokenToXToken(parentDeclaration);
@@ -661,8 +662,8 @@ describe('NodeStream (unit)', () => {
                   new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
                   new xToken.entityStart.ParamPToken({}),
                   parentDeclaration.value[1],
-                  new xToken.entityEnd.ParamPToken({}),
-                  new xToken.entityEnd.ParamPToken({ refPToken: parentPeref }),
+                  new ParameterEntityEndPToken({}),
+                  new ParameterEntityEndPToken(parentPeref),
                ]);
 
                done();
@@ -853,7 +854,7 @@ describe('NodeStream (unit)', () => {
                   // third was expanded ealier in place.
                   new xToken.entityStart.ParamPToken(refToThird.name),
                   new xToken.text.PToken({ text: SToken.fromString('"http://somewhere.com"') }),
-                  new xToken.entityEnd.ParamPToken(refToThird.name),
+                  new ParameterEntityEndPToken(refToThird.name),
                ],
             });
             const secondDeclXToken = xToken.entityDeclaration.pTokenToXToken(secondDeclPToken);
@@ -1022,7 +1023,7 @@ describe('NodeStream (unit)', () => {
                value: [
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                ],
             }], {});
             spyOn(nodeStream, 'push');
@@ -1141,7 +1142,7 @@ describe('NodeStream (unit)', () => {
                value: [
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                ],
             }], {});
 
@@ -1180,7 +1181,7 @@ describe('NodeStream (unit)', () => {
                value: [
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                ],
             }], {});
 
@@ -1223,14 +1224,14 @@ describe('NodeStream (unit)', () => {
                value: [
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                ],
             }, {
                name: 'secondAttribute',
                value: [
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                ],
             }], {});
 
@@ -1269,7 +1270,7 @@ describe('NodeStream (unit)', () => {
                   new xToken.text.XToken('some text', {}),
                   new xToken.entityStart.XToken('refName'),
                   new xToken.text.XToken('one', {}),
-                  new xToken.entityEnd.XToken('refName'),
+                  new GeneralEntityEndXToken('refName'),
                   new xToken.text.XToken('more text', {}),
                ],
             }], {});
@@ -1321,9 +1322,9 @@ describe('NodeStream (unit)', () => {
                   new xToken.text.XToken('pre ', {}),
                   new xToken.entityStart.XToken('child'),
                   new xToken.text.XToken('inner', {}),
-                  new xToken.entityEnd.XToken('child'),
+                  new GeneralEntityEndXToken('child'),
                   new xToken.text.XToken(' post', {}),
-                  new xToken.entityEnd.XToken('parent'),
+                  new GeneralEntityEndXToken('parent'),
                   new xToken.text.XToken('more text', {}),
                ],
             }], {});

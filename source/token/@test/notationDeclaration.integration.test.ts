@@ -7,8 +7,8 @@ import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken/index';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import entityEnd from '../entityEnd';
-import entityReference from '../entityReference';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd';
+import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
 import entityStart from '../entityStart';
 import externalId from '../common/externalId';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
@@ -136,7 +136,7 @@ describe('notationDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({})),
                }
             ];
 
@@ -247,7 +247,7 @@ describe('notationDeclaration (integration)', () => {
                   },
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({})),
                },
             ].concat(pToken.unassigned);
             pToken.externalId!.unassigned = pToken.unassigned;

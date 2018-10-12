@@ -11,22 +11,24 @@ const PARAMETER_ENTITY_END_XTOKEN = 'PARAMETER_ENTITY_END_XTOKEN';
 
 class ParameterEntityEndPToken {
    public readonly type: typeof PARAMETER_ENTITY_END_PTOKEN = PARAMETER_ENTITY_END_PTOKEN;
-   public readonly referencePToken: ParameterEntityReferencePToken;
+   public readonly refPToken: ParameterEntityReferencePToken;
 
    constructor(entityReferencePToken: ParameterEntityReferencePToken) {
-      this.referencePToken = entityReferencePToken;
+      this.refPToken = entityReferencePToken;
    }
 
    toXToken() {
-      return new ParameterEntityEndXToken(this);
+      return new ParameterEntityEndXToken(this.refPToken.name.str, this);
    }
 }
 
 class ParameterEntityEndXToken {
    public readonly type: typeof PARAMETER_ENTITY_END_XTOKEN = PARAMETER_ENTITY_END_XTOKEN;
+   public readonly name: string;
    public readonly pToken?: ParameterEntityEndPToken;
 
-   constructor(pToken: ParameterEntityEndPToken) {
+   constructor(name: string, pToken?: ParameterEntityEndPToken) {
+      this.name = name;
       this.pToken = pToken;
    }
 }
@@ -35,5 +37,5 @@ export {
    PARAMETER_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_END_XTOKEN,
    ParameterEntityEndPToken,
-   ParameterEntityEndXToken
+   ParameterEntityEndXToken,
 };

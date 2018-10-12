@@ -8,7 +8,7 @@ import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration';
-import entityEnd from '../entityEnd.js';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
@@ -118,7 +118,7 @@ describe('entityDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken({}),
                }
             ];
 
@@ -238,7 +238,7 @@ describe('entityDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken({}),
                },
             ].concat(pToken.unassigned);
             entityDeclaration.assignUnassigned(pToken);

@@ -11,8 +11,8 @@ import helper from '../@test/helper.js';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import { WordListPToken, WordListType } from '../common/wordList';
-import entityEnd from '../entityEnd';
-import entityReference from '../entityReference';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd';
+import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
 import entityStart from '../entityStart';
 import unassigned, { UnassignedType } from '../unassigned';
 
@@ -307,8 +307,8 @@ describe('attListDeclaration (integration)', () => {
                },
                unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
-                  type: UnassignedType.ENTITY_START,
-                  token: new entityEnd.ParamPToken({}),
+                  type: UnassignedType.ENTITY_END,
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
                }
             ];
 
@@ -345,7 +345,7 @@ describe('attListDeclaration (integration)', () => {
                unassigned.wordFromSToken(SToken.fromString('ENTITIES')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
                },
             ];
 
@@ -470,7 +470,7 @@ describe('attListDeclaration (integration)', () => {
                unassigned.wordFromSToken(SToken.fromString(')')),
                unassigned.wordFromSToken(SToken.fromString('#REQUIRED')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
                },
             ];
             const makeSToken = makeSTokenMaker();

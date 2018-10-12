@@ -8,7 +8,7 @@ import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper.js';
-import entityEnd from '../entityEnd.js';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
@@ -105,7 +105,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new entityEnd.ParamPToken({}),
+               token: new ParameterEntityEndPToken({}),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.LITERAL,
@@ -174,7 +174,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new entityEnd.ParamPToken({}),
+               token: new ParameterEntityEndPToken({}),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -207,7 +207,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new entityEnd.ParamPToken({}),
+               token: new ParameterEntityEndPToken({}),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -275,7 +275,7 @@ describe('externalId (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new entityEnd.ParamPToken({}),
+                  token: new ParameterEntityEndPToken({}),
                },
             ].concat(pToken.unassigned);
             externalId.assignUnassigned(pToken, {}, 'prevSpace');

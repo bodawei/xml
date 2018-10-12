@@ -9,11 +9,11 @@ describe('base', () => {
 
       it('does not assign properties from prototype', () => {
          const parent = { parent: true };
-         function Child() {
+         function Child(this: any) {
             this.child = true;
          }
          Child.prototype = parent;
-         const child = new Child();
+         const child = new (Child as any)();
          
          const baseValue = new base.PToken('foo', child);
 
