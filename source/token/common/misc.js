@@ -94,7 +94,21 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, nameType, v
    if (!nameSToken) {
       return;
    }
+
    const isV1R6 = entityMd.isVersion1dot0 && entityMd.revision === 6;
+   const name = nameSToken.str;
+   const lcName = nameSToken.str.toLowerCase();
+
+   /*
+    * §2.10 and §2.12
+    * xml:lang and xml:space are both allowable attributes
+    */
+
+   if (nameType === 'ATTRIBUTE' && (lcName === 'xml:space' || lcName === 'xml:lang')) {
+      if (lcName === name) {
+         return;
+      }
+   }
 
    /*
     * §2.3.0 (all versions except 1.0/6)
@@ -139,21 +153,21 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, nameType, v
 
       switch (nameType) {
          case 'PI':
-            isProblematic = nameSToken.str.substring(0, 4) === 'xml-';
+            isProblematic = name.substring(0, 4) === 'xml-';
             break;
          case 'ELEMENT':
          case 'ATTRIBUTE':
-            isProblematic = nameSToken.str.substring(0, 4) === 'xml:';
+            isProblematic = name.substring(0, 4) === 'xml:';
             break;
          default:
             break;
       }
 
       if (isProblematic) {
-         ec.reportError(v1R6Warning, XmlWarning, [ nameSToken.str ]);
+         ec.reportError(v1R6Warning, XmlWarning, [ name ]);
       }
-   } else if (nameSToken.str.substring(0, 3).toLowerCase() === 'xml') {
-      ec.reportError(otherWarning, XmlWarning, [ nameSToken.str ]);
+   } else if (name.substring(0, 3).toLowerCase() === 'xml') {
+      ec.reportError(otherWarning, XmlWarning, [ name ]);
    }
 }
 

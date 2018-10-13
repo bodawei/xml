@@ -28,18 +28,41 @@ describe('misc', () => {
 
       it('adds no errors if a name is not passed in', () => {
          misc.checkWellFormedNameRecommendation(undefined, errorCollectorSpy, entityMetaData, false, WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if the name does not start with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('foo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports no errors if this is an xml:lang attriute', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:lang'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports no errors if this is an xml:space attriute', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:space'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+      });
+
+      it('reports a warning if XML:LANG is provided', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('XML:LANG'), errorCollectorSpy,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
+
+         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'XML:LANG' ]);
       });
 
       it('reports no error if the version is 1.0/6, and the name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
-            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), false, WARN1, WARN2);
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
          expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
       });
 
@@ -80,18 +103,21 @@ describe('misc', () => {
       it('reports a warning if the version is 1.0/5, and the name starts with "xml"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
          new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ENTITY', WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the PI name starts with "xml-"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'PI', WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the element/attr name starts with "xml:"', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+
          expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
       });
 
