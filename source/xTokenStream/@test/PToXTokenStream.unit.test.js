@@ -4,11 +4,9 @@
 import { SToken } from '../../sToken/index';
 import {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    comment,
    elementEnd,
@@ -19,6 +17,8 @@ import {
    ProcessingInstructionPToken,
    space,
    text,
+
+   CdataPToken,
 } from '../../token';
 
 import PToXTokenStream from '../PToXTokenStream.js';
@@ -38,16 +38,6 @@ describe('PToXTokenStream (unit)', () => {
       tokenStream.read();
 
       expect(declaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
-   });
-
-   it('calls envelope.pTokenToXToken()', () => {
-      spyOn(envelope, 'pTokenToXToken');
-      const pToken = { type: envelope.PTYPE };
-
-      tokenStream.write(pToken);
-      tokenStream.read();
-
-      expect(envelope.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls instruction.pTokenToXToken()', () => {
@@ -71,13 +61,13 @@ describe('PToXTokenStream (unit)', () => {
    });
 
    it('calls cdata.pTokenToXToken()', () => {
-      spyOn(cdata, 'pTokenToXToken');
-      const pToken = { type: cdata.PTYPE };
+      const pToken = new CdataPToken({ open: SToken.fromString('<![') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(cdata.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith(pToken);
    });
 
    it('calls charData.pTokenToXToken()', () => {

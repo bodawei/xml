@@ -3,10 +3,11 @@
 import stream from 'readable-stream';
 
 import {
-   cdata,
    charData,
    elementStart,
    elementEnd,
+
+   CdataXToken,
 } from '../token';
 
 class Node {
@@ -66,7 +67,7 @@ class SimpleObj extends stream.Transform {
       } else if (xToken instanceof charData.XToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);
-      } else if (xToken instanceof cdata.XToken) {
+      } else if (xToken instanceof CdataXToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);
       }

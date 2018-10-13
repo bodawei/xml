@@ -2,7 +2,28 @@
 
 /* eslint-env jasmine */
 
-import { ParameterEntityEndXToken } from '../parameterEntityEnd';
+import { SToken } from '../../sToken/index';
+
+import { EntityReferencePToken } from '../entityReference';
+import { ParameterEntityEndPToken, ParameterEntityEndXToken } from '../parameterEntityEnd';
+
+describe('ParameterEntityEndPToken (unit)', () => {
+
+   it('is constructed with the specified name', () => {
+      const token = new ParameterEntityEndPToken(new EntityReferencePToken());
+
+      expect(token.referencePToken).toEqual(new EntityReferencePToken());
+   });
+
+   it('will create an xToken', () => {
+      const token = new ParameterEntityEndPToken(new EntityReferencePToken({
+         name: SToken.fromString('foo')
+      }));
+
+      expect(token.toXToken()).toEqual(new ParameterEntityEndXToken('foo', token));
+   });
+
+});
 
 describe('ParameterEntityEndXToken (unit)', () => {
 

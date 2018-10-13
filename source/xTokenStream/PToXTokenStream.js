@@ -5,11 +5,9 @@ import { EntityMetaData } from '../basic';
 
 import {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    comment,
    docTypeStart,
@@ -20,10 +18,12 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   PROCESSING_INSTRUCTION_PTOKEN,
    space,
    text,
    xmlDeclaration,
+
+   CDATA_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
 } from '../token';
 
 class PToXTokenStream extends stream.Transform {
@@ -40,17 +40,14 @@ class PToXTokenStream extends stream.Transform {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
             break;
-         case envelope.PTYPE:
-            this.push(envelope.pTokenToXToken(pToken));
-            break;
          case instruction.PTYPE:
             this.push(instruction.pTokenToXToken(pToken));
             break;
          case attListDeclaration.PTYPE:
             this.push(attListDeclaration.pTokenToXToken(pToken));
             break;
-         case cdata.PTYPE:
-            this.push(cdata.pTokenToXToken(pToken));
+         case CDATA_PTOKEN:
+            this.push(pToken.toXToken(pToken));
             break;
          case charData.PTYPE:
             this.push(charData.pTokenToXToken(pToken));

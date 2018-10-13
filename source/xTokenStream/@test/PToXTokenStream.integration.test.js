@@ -5,10 +5,8 @@ import { EntityLocation, Range } from '../../basic';
 import { PTokenStream } from '../../pTokenStream';
 import {
    declaration,
-   envelope,
 
    attListDeclaration,
-   cdata,
    charData,
    comment,
    docTypeStart,
@@ -23,6 +21,8 @@ import {
    space,
    text,
    xmlDeclaration,
+
+   CdataXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -69,12 +69,6 @@ describe('PToXTokenStream (integration)', () => {
       ], done);
    });
 
-   it('tokenizes an UNKNOWN envelope', (done) => {
-      expectInputToProduce('<![BOGUS[', [
-         new envelope.XToken([]),
-      ], done);
-   });
-
    it('tokenizes an ATTLIST declaration', (done) => {
       expectInputToProduce('<!ATTLIST elementName atOne IDREF atTwo ENTITY>', [
          new attListDeclaration.XToken('elementName', [{
@@ -92,7 +86,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes a CDATA element', (done) => {
-      expectInputToProduce('<![CDATA[zowie<one> ]]>', new cdata.XToken('zowie<one> ', []), done);
+      expectInputToProduce('<![CDATA[zowie<one> ]]>', new CdataXToken('zowie<one> '), done);
    });
 
    it('tokenizes a charData', (done) => {

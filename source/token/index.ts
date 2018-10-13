@@ -1,11 +1,9 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import declaration from './bridge/declaration';
-import * as envelope from './bridge/envelope';
 import * as instruction from './bridge/instruction';
 
 import attListDeclaration from './attListDeclaration';
-import * as cdata from './cdata';
 import * as charData from './charData';
 import * as charRef from './charRef';
 import * as comment from './comment';
@@ -13,7 +11,6 @@ import { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as entityDeclaration from './entityDeclaration';
-// import entityEnd from './entityEnd';
 import elementDeclaration from './elementDeclaration';
 import entityReference from './entityReference';
 import entityStart from './entityStart';
@@ -30,14 +27,14 @@ import literalValue from './common/literalValue';
 
 export * from './generalEntityEnd';
 export * from './parameterEntityEnd';
+export * from './bridge/section';
+export * from './cdata';
 
 const token = {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    charRef,
    comment,
@@ -61,11 +58,9 @@ const token = {
 
 export {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    charRef,
    comment,

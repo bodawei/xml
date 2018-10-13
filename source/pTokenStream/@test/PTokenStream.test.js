@@ -4,13 +4,12 @@
 import { EntityLocation, EntityMetaData, Range } from '../../basic';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
+import * as token from '../../token';
 import {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    charRef,
    comment,
@@ -340,6 +339,28 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
+   it('call space.parse() after nameless start and end have been found (whitebox)', (done) => {
+      spyOn(space, 'parse').and.callThrough();
+      pTokenStream.addText('<></>   ');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(space.parse.calls.count()).toEqual(3);
+         done();
+      });
+   });
+
+   it('call space.parse() after a misbalaned end has been found (whitebox)', (done) => {
+      spyOn(space, 'parse').and.callThrough();
+      pTokenStream.addText('<foo></bar></foo>   ');
+      pTokenStream.endText();
+
+      gatherPTokens(pTokenStream, () => {
+         expect(space.parse.calls.count()).toEqual(4);
+         done();
+      });
+   });
+
    it('calls declaration.parse()', (done) => {
       spyOn(declaration, 'parse').and.callThrough();
       pTokenStream.addText('<!FOO >');
@@ -364,39 +385,15 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls envelope.parse()', (done) => {
-      spyOn(envelope, 'parse').and.callThrough();;
+   it('calls parseSection()', (done) => {
+      spyOn(token, 'parseSection').and.callThrough();;
       pTokenStream.addText('<![FOO [');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(envelope.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(envelope.parse.calls.argsFor(0)[1].str).toEqual('<![');
-         expect(envelope.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done();
-      });
-   });
-
-   it('returns the undefined envelope if none provided', (done) => {
-      pTokenStream.addText('<![[');
-      pTokenStream.endText();
-
-      gatherPTokens(pTokenStream, (pTokens) => {
-         // 0 is entitymetadata
-         expect(pTokens[1].type).toEqual('UNKNOWNENVELOPE');
-         done();
-      });
-   });
-
-   it('calls cdata.parse()', (done) => {
-      spyOn(cdata, 'parse').and.callThrough();
-      pTokenStream.addText('<![CDATA[] something]]>');
-      pTokenStream.endText();
-
-      gatherPTokens(pTokenStream, () => {
-         expect(cdata.parse.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(cdata.parse.calls.argsFor(0)[1].envelopeType.str).toEqual('CDATA');
-         expect(cdata.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(token.parseSection.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
+         expect(token.parseSection.calls.argsFor(0)[1].str).toEqual('<![');
+         expect(token.parseSection.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
    });

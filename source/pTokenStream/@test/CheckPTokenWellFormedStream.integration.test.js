@@ -182,15 +182,6 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
          ), done);
    });
 
-   it('reports an error when an UNKNOWN envelope is found', (done) => {
-      expectInputToProduce('<?xml version="1.0"?><![BOGUS[foo]]>',
-         new WellFormedError('ENVELOPE_UNKNOWN',
-            [ 'BOGUS' ],
-            new Offset(new EntityLocation(), 24, 0, 24),
-            new Offset(new EntityLocation(), 21, 0, 21)
-         ), done);
-   });
-
    it('reports an error when an CDATA has a bad character in its content', (done) => {
       expectInputToProduce('<?xml version="1.0"?><![CDATA[foo\u0000 bad',
          new WellFormedError(WellFormedError.ID.CDATA_NO_CLOSE,

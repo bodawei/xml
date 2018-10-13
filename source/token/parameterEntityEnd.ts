@@ -11,14 +11,14 @@ const PARAMETER_ENTITY_END_XTOKEN = 'PARAMETER_ENTITY_END_XTOKEN';
 
 class ParameterEntityEndPToken {
    public readonly type: typeof PARAMETER_ENTITY_END_PTOKEN = PARAMETER_ENTITY_END_PTOKEN;
-   public readonly refPToken: ParameterEntityReferencePToken;
+   public readonly referencePToken: ParameterEntityReferencePToken;
 
    constructor(entityReferencePToken: ParameterEntityReferencePToken) {
-      this.refPToken = entityReferencePToken;
+      this.referencePToken = entityReferencePToken;
    }
 
    toXToken() {
-      return new ParameterEntityEndXToken(this.refPToken.name.str, this);
+      return new ParameterEntityEndXToken(this.referencePToken.name.str, this);
    }
 }
 

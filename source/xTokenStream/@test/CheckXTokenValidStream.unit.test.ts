@@ -10,7 +10,6 @@ import nameList, { XNameList } from '../../token/common/nameList';
 import {
    attListDeclaration,
    charData,
-   cdata,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -26,10 +25,11 @@ import {
    space,
    text,
    xmlDeclaration,
+
+   CdataXToken,
 } from '../../token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
-// import { ElementEnd } from '../../token/elementEnd';
 import { ElementDeclaration } from '../../token/elementDeclaration';
 import { NotationDeclaration } from '../../token/notationDeclaration';
 
@@ -2560,7 +2560,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('ANY', () => {
             const commentToken = new comment.CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
-            const cDataToken = new cdata.XToken('testCData');
+            const cDataToken = new CdataXToken('testCData');
             const elementStartToken = new elementStart.XToken('one', []);
 
             const data: Array<[any, 1|1.1, 1|2|3|4|5|6, boolean]> = [
@@ -2895,7 +2895,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
                validator.write(new charData.XToken('test charData'));
-               validator.write(new cdata.XToken('test CDATA'));
+               validator.write(new CdataXToken('test CDATA'));
                validator.write(new charData.XToken(' '));
                validator.write(new elementEnd.XToken('one', []));
                validator.end();
@@ -2947,7 +2947,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('CHILDREN', () => {
             const commentToken = new comment.CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
-            const cDataToken = new cdata.XToken('testCData');
+            const cDataToken = new CdataXToken('testCData');
             const nonWhiteChars = new charData.XToken('one', []);
             const whiteChars = new charData.XToken(' \t\n', []);
 

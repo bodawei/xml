@@ -7,7 +7,6 @@ import { ValidityError, ERROR_TYPE, XmlWarning } from '../error';
 import { SToken } from '../sToken';
 import {
    charData,
-   cdata,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -20,6 +19,7 @@ import {
    space,
    text,
    
+   CDATA_XTOKEN,
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
@@ -222,7 +222,7 @@ class CheckXTokenValidStream extends stream.Transform {
          const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
          let error;
 
-         if (allowed && (xToken.type === cdata.XTYPE || xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === comment.XTYPE)) {
+         if (allowed && (xToken.type === CDATA_XTOKEN || xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === comment.XTYPE)) {
             return;
          }
 
@@ -242,7 +242,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case space.XTYPE:
                // These are all OK here
                break;
-            case cdata.XTYPE:
+            case CDATA_XTOKEN:
                this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
@@ -265,7 +265,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
                break;
             case charData.XTYPE:
-            case cdata.XTYPE: // wanna revisit this given the decision in ANY?
+            case CDATA_XTOKEN: // wanna revisit this given the decision in ANY?
             case elementEnd.XTYPE:
             case entityStart.XTYPE:
             case GENERAL_ENTITY_END_XTOKEN:

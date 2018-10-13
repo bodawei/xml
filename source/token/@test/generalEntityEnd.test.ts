@@ -2,7 +2,28 @@
 
 /* eslint-env jasmine */
 
-import { GeneralEntityEndXToken } from '../generalEntityEnd';
+import { SToken } from '../../sToken/index';
+
+import { EntityReferencePToken } from '../entityReference';
+import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';
+
+describe('GeneralEntityEndPToken (unit)', () => {
+
+   it('is constructed with the specified name', () => {
+      const token = new GeneralEntityEndPToken(new EntityReferencePToken());
+
+      expect(token.referencePToken).toEqual(new EntityReferencePToken());
+   });
+
+   it('will create an xToken', () => {
+      const token = new GeneralEntityEndPToken(new EntityReferencePToken({
+         name: SToken.fromString('foo')
+      }));
+
+      expect(token.toXToken()).toEqual(new GeneralEntityEndXToken('foo', token));
+   });
+
+});
 
 describe('GeneralEntityEndXToken (unit)', () => {
 

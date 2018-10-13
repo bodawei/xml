@@ -7,11 +7,9 @@ import { ErrorCollector, WellFormedError } from '../error';
 
 import {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charRef,
    charData,
    comment,
@@ -23,9 +21,11 @@ import {
    entityDeclaration,
    entityReference,
    notationDeclaration,
-   PROCESSING_INSTRUCTION_PTOKEN,
    space,
    xmlDeclaration,
+
+   CDATA_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
 } from '../token';
 
 const STATE = {
@@ -63,9 +63,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case declaration.PTYPE:
             declaration.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
-         case envelope.PTYPE:
-            envelope.checkWellFormed(pToken, true, errorCollector, this._metaData);
-            break;
          case instruction.PTYPE:
             instruction.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
@@ -80,12 +77,12 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             attListDeclaration.checkWellFormed(pToken, errorCollector, this._metaData);
             break;
-         case cdata.PTYPE:
+         case CDATA_PTOKEN:
             if (this._state !== STATE.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.CDATA_INVALID_DOC_CONTEXT);
             }
 
-            cdata.checkWellFormed(pToken, errorCollector, this._metaData);
+            pToken.checkWellFormed(errorCollector, this._metaData);
             break;
          case charData.PTYPE:
             if (this._state !== STATE.IN_CONTENT) {

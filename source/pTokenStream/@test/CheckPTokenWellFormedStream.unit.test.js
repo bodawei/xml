@@ -8,11 +8,9 @@ import { SToken } from '../../sToken';
 import { makeSToken } from '../../sToken/@test/helper';
 import {
    declaration,
-   envelope,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    charRef,
    comment,
@@ -27,6 +25,7 @@ import {
    ProcessingInstructionPToken,
    space,
    xmlDeclaration,
+   CdataPToken,
 } from '../../token';
 
 import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream.js';
@@ -48,29 +47,6 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       expect(checker.read()).toEqual({
          type: 'BOGUS',
       });
-   });
-
-   describe('envelope', () => {
-      let pToken;
-
-      beforeEach(() => {
-         spyOn(envelope, 'checkWellFormed');
-         pToken = {
-            type: envelope.PTYPE,
-         };
-      });
-
-      it('calls envelope.checkWellFormed() when encountering a CDATA', () => {
-         checker.write(metaData);
-         checker.write(pToken);
-
-         const args = envelope.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toEqual(true);
-         expect(args[2]).toBeInstanceOf(ErrorCollector);
-         expect(args[3]).toEqual(metaData);
-      });
-
    });
 
    describe('attListDeclaration', () => {
@@ -112,21 +88,20 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken;
 
       beforeEach(() => {
-         spyOn(cdata, 'checkWellFormed');
-         pToken = {
-            type: cdata.PTYPE,
+         pToken = new CdataPToken({
+            open: makeSToken('<!['),
             text: makeSToken('good'),
-         };
+         });
+         spyOn(pToken, 'checkWellFormed');
       });
 
       it('calls cdata.checkWellFormed() when encountering a CDATA', () => {
          checker.write(metaData);
          checker.write(pToken);
 
-         const args = cdata.checkWellFormed.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         const args = pToken.checkWellFormed.calls.argsFor(0);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

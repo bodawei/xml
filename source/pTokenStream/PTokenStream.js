@@ -7,11 +7,10 @@ import { defaultExtractors } from '../extractor';
 import { STokenSource } from '../sToken';
 import {
    declaration,
-   envelope,
+   parseSection,
    instruction,
 
    attListDeclaration,
-   cdata,
    charData,
    charRef,
    comment,
@@ -225,21 +224,7 @@ class PTokenStream extends stream.Readable {
                });
                break;
             case '<![':
-               envelope.parse(this._sTokenSource, markupStartSToken, (pToken) => {
-                  if (!pToken.envelopeType) {
-                     deliverParse(pToken);
-                     return;
-                  }
-
-                  switch (pToken.envelopeType.str.toLocaleUpperCase()) {
-                     case 'CDATA':
-                        cdata.parse(this._sTokenSource, pToken, deliverParse);
-                        break;
-                     default:
-                        deliverParse(pToken);
-                        break;
-                  }
-               });
+               parseSection(this._sTokenSource, markupStartSToken, deliverParse);
                break;
          }
       });
