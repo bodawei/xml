@@ -105,7 +105,7 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
          ec.setPos(item.text);
          misc.checkWellFormedText(item.text, ec, entityMetaData);
       } else {
-         entityReference.checkWellFormed(item, ec);
+         entityReference.checkWellFormed(item, ec, entityMetaData);
       }
    }
 }

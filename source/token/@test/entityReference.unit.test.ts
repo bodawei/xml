@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range } from '../../basic/index';
+import { EntityMetaData, Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, sTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 import { SToken } from '../../sToken/index';
 
@@ -13,6 +13,7 @@ describe('entityReference (unit)', () => {
    let generalEntityPToken: EntityReferencePToken;
    let parameterEntityPToken: ParameterEntityReferencePToken;
    let openSToken: SToken;
+   let emd: EntityMetaData;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -168,7 +169,7 @@ describe('entityReference (unit)', () => {
    describe('checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
       let pToken: EntityReferencePToken;
-      let makeSToken: sTokenMaker;
+      let makeSToken: STokenMaker;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
@@ -186,7 +187,7 @@ describe('entityReference (unit)', () => {
       it('reports an error if there is a space after the opening &', () => {
          pToken.postOpenSpace = makeSToken(' ');
 
-         entityReference.checkWellFormed(pToken, mockErrorCollector);
+         entityReference.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_XTRA_SPACE,
@@ -198,7 +199,7 @@ describe('entityReference (unit)', () => {
       it('reports an error if there is no name', () => {
          delete pToken.name;
 
-         entityReference.checkWellFormed(pToken, mockErrorCollector);
+         entityReference.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_NAME,
@@ -210,7 +211,7 @@ describe('entityReference (unit)', () => {
       it('reports an error if there is a space after the entity name', () => {
          pToken.postNameSpace = makeSToken(' ');
 
-         entityReference.checkWellFormed(pToken, mockErrorCollector);
+         entityReference.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_XTRA_TRAILING_SPACE,
@@ -222,7 +223,7 @@ describe('entityReference (unit)', () => {
       it('reports an error if there was no closing', () => {
          delete pToken.close;
 
-         entityReference.checkWellFormed(pToken, mockErrorCollector);
+         entityReference.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.REFERENCE_NO_SEMICOLON,

@@ -3,6 +3,7 @@
 
 import stream from 'readable-stream';
 
+import { EntityMetaData } from '../../basic';
 import { PTokenStream } from '../../pTokenStream';
 import * as tokens from '../../token';
 
@@ -26,7 +27,7 @@ describe('CommentFixingStream (integration)', () => {
 
    function testTransformation(before: string, after: string, done: () => void) {
       const cf = new CommentFixingStream();
-      pTokenStream = new PTokenStream();
+      pTokenStream = new PTokenStream(new EntityMetaData());
       xTokenStream = new PToXTokenStream();
 
       pTokenStream.addText('<?xml encoding="utf-8"?><!--' + before + '-->');
@@ -70,7 +71,7 @@ describe('CommentFixingStream (integration)', () => {
    describe('passthrough', () => {
 
       it('passes all tokens through', (done) => {
-         pTokenStream = new PTokenStream();
+         pTokenStream = new PTokenStream(new EntityMetaData());
          xTokenStream = new PToXTokenStream();
 
          pTokenStream.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');

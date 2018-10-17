@@ -9,6 +9,7 @@ import unassigned, { UnassignedArray } from './unassigned';
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
+import { AttributeValueXToken } from './common/attribute';
 import misc from './common/misc.js';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
@@ -465,7 +466,7 @@ type AttDefXToken = {
    type: string;
    enumeration?: Array<string>;
    defaultType: string;
-   value: LiteralValueXToken;
+   value: AttributeValueXToken;
 };
 
 class AttListXToken {

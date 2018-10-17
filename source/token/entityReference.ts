@@ -7,6 +7,7 @@ import base from './base';
 import {
    textOrBlank,
  } from './common/misc.js';
+import { EntityMetaData } from 'source/basic';
 
 /**********************************************************************\
  The entityReference namespace has routines for processing general
@@ -134,7 +135,7 @@ function parseRef(source: STokenSource, pToken: ParameterEntityReferencePToken, 
  checkWellFormed() does a well formed check on the PToken value.
 \**********************************************************************/
 
-function checkWellFormed(pToken: EntityReferencePToken, ec: ErrorCollector) {
+function checkWellFormed(pToken: EntityReferencePToken, ec: ErrorCollector, emd: EntityMetaData) {
    const entityName = textOrBlank(pToken.name);
 
    ec.setPos(pToken.open);
@@ -182,6 +183,7 @@ const entityReference = {
 
 export default entityReference;
 export {
+   ENTITYREF as GENERAL_ENTITY_REFERENCE_PTOKEN,
    EntityReferencePToken,
    EntityReferenceXToken,
    ParameterEntityReferencePToken,

@@ -70,7 +70,7 @@ function parse(source, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, docTypeStartPToken, ec) {
+function checkWellFormed(pToken, docTypeStartPToken, ec, emd) {
    ec.setPos(pToken.closeInternalSubset);
 
    if (!docTypeStartPToken || !docTypeStartPToken.startInternalSubset) {
@@ -100,4 +100,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   DocTypeEndPToken,
 };

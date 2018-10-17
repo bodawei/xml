@@ -438,4 +438,6 @@ export {
    pTokenToXToken,
 
    EntityDeclaration,
+   EntityDeclarationPToken,
+   ParameterEntityDeclaration,
 };

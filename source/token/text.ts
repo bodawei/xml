@@ -93,4 +93,4 @@ const text = {
 };
 
 export default text;
-export { TextPToken, TextXToken, isTextPToken };
+export { TEXT as PTYPE, TextPToken, TextXToken, isTextPToken };

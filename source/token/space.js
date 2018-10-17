@@ -66,7 +66,7 @@ function parse(source, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec) {
+function checkWellFormed(pToken, ec, emd) {
    ec.setPos(pToken.text);
 }
 

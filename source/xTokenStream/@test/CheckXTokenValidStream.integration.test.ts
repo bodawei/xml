@@ -3,7 +3,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityLocation, Offset } from '../../basic';
+import { EntityLocation, EntityMetaData, Offset } from '../../basic';
 import { ValidityError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpandingStream } from '../../expand';
@@ -40,7 +40,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       const entityManager = new EntityManager();
       const tokenizer = new PToXTokenStream();
 
-      parser = new PTokenStream();
+      parser = new PTokenStream(new EntityMetaData());
       validator = new CheckXTokenValidStream(entityManager);
       replacer = new EntityExpandingStream(entityManager);
       (parser as any).pipe(tokenizer).pipe(replacer).pipe(validator); // typeHack

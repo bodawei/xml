@@ -67,10 +67,6 @@ class NodeStream extends stream.Transform {
          objectMode: true,
       });
 
-      if (!(entityManager instanceof EntityManager)) {
-         throw new Error('Must call with an EntityManager instance.');
-      }
-
       this._options = options || {};
       this._entityManager = entityManager;
       this._child = undefined;
@@ -338,7 +334,7 @@ class NodeStream extends stream.Transform {
     * unassigned values.
     */
    _parsePERefTexts(peRefContents: UnassignedArray, includeNameListChars: boolean, deliverValues: (parsed: UnassignedArray) => void) {
-      const source = new STokenSource(defaultExtractors, new EntityMetaData());
+      const source = new STokenSource(defaultExtractors as any, new EntityMetaData()); // typeHack
 
       for (let index = 0; index < peRefContents.length; index++) {
          const item = peRefContents[index];

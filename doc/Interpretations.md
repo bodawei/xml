@@ -42,6 +42,22 @@ With that said, this does have certain patterns that it ties to stick to in term
    * The spec does allow for the processor to not report an error, and even not reporting the attribute. This could be added here in a latter version.
    * Note: the spec does not characterize this as a validity constraint.
 
+## xml:lang (§2.12)
+The `xml:lang` attribute is one of those surprisingly complex hidden corners of XML.
+
+In 1.0/1 ( https://www.w3.org/TR/1998/REC-xml-19980210#sec-lang-tag ), there was an explicit syntax for the attribute value listed. It also referenced IETF RFC 1766 ( https://tools.ietf.org/html/rfc1766 ) which actually has slightly different syntax (e.g. XML allows a subtag to be any length, while the RFC allows only 1-8 characters). This implementation goes with the XML syntax in 1.0/1.
+
+In 1.0/2, the syntax in the XML standard is dropped. Instead, only RFC 1766 (or it's successors!) is referenced. This intorudces an interesting detail. The successors of that are (at the time of _this_ writing):
+   1. https://tools.ietf.org/html/rfc1766
+   2. https://tools.ietf .org/html/rfc3066 (aka BCP-47)
+   3. https://tools.ietf.org/html/rfc4646 (aka BCP-47)
+   4. https://tools.ietf.org/html/rfc5646 (aka BCP-47)
+This is interesting because RFC 3066 broadens the allowable syntax (allowing digits in subtags). Note that in both RFC 1766 and 3066, the stated syntax is more general than what the explanatory text allows. In the text, RFC 3066 also allows three letter primary tags (which is easily allowed given the general syntax).
+In turn, RFC 4646 reduces the allowable syntax. In the case of the first tag, this seems to merely encode in the syntax what was in the text in previous versions. However, in all the subtags (no longer so called) there is considerable restriction. However, presumably even though the stated syntax is restricted, these actually take into account what had been registered in earlier versions. So, I assume that these are fully forwards compatible (meaning, everything allowed by earlier versions is allowed.
+
+1.0/3, 1.0/4, and all of 1.1 reference RFC 3066 (or its successor) and also allow "".
+
+1.0/5 references RFC 4646 (or it's successor).
 
 
 ## limits

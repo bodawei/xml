@@ -35,10 +35,7 @@ class StringBundle {
    };
 
    constructor(locales: LocaleMap) {
-      if (!(locales instanceof Object)) {
-         throw new Error('Must pass an object containing locales and messages.');
-      }
-      if (!locales.base || !(locales.base instanceof Object)) {
+      if (!locales.base) {
          throw new Error('Strings must at least have a locale called "base", with an object value.');
       }
 
@@ -63,11 +60,7 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   lookup(key: string, localeNames: string|Array<string>) {
-      if (typeof key !== 'string') {
-         throw new Error('Must pass a string key to look up.');
-      }
-
+   lookup(key: string, localeNames?: string|Array<string>) {
       let locale: Locale;
 
       if (localeNames) {
@@ -119,7 +112,7 @@ class StringBundle {
     A string, or undefined if no relevant string can be found.
    \**********************************************************************/
 
-   substitute(key: string, params: string|Array<string>, localNames: string|Array<string>) {
+   substitute(key: string, params?: string|Array<string>, localNames?: string|Array<string>) {
       let message = this.lookup(key, localNames);
 
       if (!params || !message) {
@@ -162,14 +155,6 @@ class StringBundle {
    \**********************************************************************/
 
    addLocale(localeName: string, locale: Locale) {
-      if (typeof localeName !== 'string') {
-         throw new Error('Must pass in the name of a locale.');
-      }
-      const type = typeof locale; // do this separately to help code coverage!
-      if (type !== 'object') {
-         throw new Error('Must pass an object of key/strings.');
-      }
-
       this._locales[localeName] = locale;
    }
 
@@ -184,10 +169,6 @@ class StringBundle {
    \**********************************************************************/
 
    removeLocale(localeName: string) {
-      if (typeof localeName !== 'string') {
-         throw new Error('Must pass in the name of a locale.');
-      }
-
       const temp = this._locales[localeName];
       delete this._locales[localeName];
 
@@ -203,3 +184,9 @@ function unescapeBraces(message: string) {
 }
 
 export default StringBundle;
+
+export {
+   StringBundle,
+   LocaleMap,
+   Locale,
+};

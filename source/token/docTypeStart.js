@@ -128,4 +128,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   DocTypeStartPToken,
 };

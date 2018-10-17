@@ -23,6 +23,12 @@ type ExtractResult = {
 const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
 const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
 
+enum ExtractorState {
+   WORKING = 'WORKING',
+   SUCCESS = 'SUCCESS',
+   FAILURE = 'FAILURE',
+}
+
 /**********************************************************************\
   Extractor defines some common code for all Extractors.
   Most notably, it provides a routine which will, given some text
@@ -36,13 +42,9 @@ class Extractor {
    protected _normalizedText: Array<string>;
    protected _segInfo: Array<SegmentInfo>;
    protected _lastProcessSawCr: boolean = false;
-   public state: string;
+   public state: ExtractorState;
 
-   public static STATE = {
-      WORKING: 'WORKING',
-      SUCCESS: 'SUCCESS',
-      FAILURE: 'FAILURE',
-   };
+   public static STATE = ExtractorState;
 
    constructor(version: number) {
       this._version = version;
@@ -130,4 +132,10 @@ class Extractor {
 }
 
 export default Extractor;
-export { ExtractResult, SegmentInfo, DoneSegment };
+export {
+   Extractor,
+   ExtractResult,
+   SegmentInfo,
+   DoneSegment,
+   ExtractorState
+};

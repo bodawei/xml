@@ -81,7 +81,7 @@ describe('notationDeclaration (integration)', () => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('notationName %foo;>');
          source.endText();
-         const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13, 13, 0, 13);
+         const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13);
          const unassignedValue = [ {
             type: UnassignedType.REFERENCE,
             token: new entityReference.ParamPToken({

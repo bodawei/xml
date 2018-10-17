@@ -2,7 +2,7 @@
 
 import AllExtractor from './AllExtractor';
 import CharExtractor from './CharExtractor';
-import defaultExtractors from './defaultExtractors';
+export * from './defaultExtractors';
 import DigitExtractor from './DigitExtractor';
 import Extractor from './Extractor';
 import MatchExtractor from './MatchExtractor';
@@ -15,7 +15,6 @@ import WordExtractor from './WordExtractor';
 export {
    AllExtractor,
    CharExtractor,
-   defaultExtractors,
    DigitExtractor,
    Extractor,
    MatchExtractor,

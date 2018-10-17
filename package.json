@@ -1,6 +1,6 @@
 {
    "name": "xt4j",
-   "version": "0.133.0",
+   "version": "0.133.2",
    "description": "Build repository for the XT4J module",
    "copyright": "Copyright ® 2016-2017 by 柏大衛. All rights reserved.",
    "author": "柏大衛",
@@ -61,11 +61,12 @@
       "ts-node": "6.1.0",
       "typescript": "2.9.1",
       "xclap": "0.2.23",
-      "xclap-cli": "^0.1.3"
-   },
-   "dependencies": {
+      "xclap-cli": "^0.1.3",
       "@types/node": "^10.3.2",
       "babel-polyfill": "^6.26.0",
       "karma-typescript-preprocessor": "^0.3.1"
+   },
+   "dependencies": {
+      "bcp47-validate": "^1.0.0"
    }
 }

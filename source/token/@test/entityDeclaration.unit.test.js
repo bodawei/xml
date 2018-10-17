@@ -134,7 +134,7 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'match', ';' ],
             // externalId or literal would have been here
             [ ' ', 'space' ],
-            [ undefined, 'peekWord' [ '>' ] ],
+            [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
          ]);
          entityDeclaration.parse(mockSource, {}, callback);

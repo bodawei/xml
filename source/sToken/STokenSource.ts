@@ -1,26 +1,12 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import { EntityLocation, EntityMetaData, Offset, Range } from '../basic/index';
-import { Extractor, Segment } from '../extractor';
+import { Extractor, Segment, ExtractorConstructor, ExtractorMap } from '../extractor';
 import { SegmentInfo } from '../extractor/Extractor'; // typeHack
 
 import SToken from './SToken';
 
-type ExtractorParams = Array<any>|any;
 type DeliverSToken = (stoken?: SToken) => void;
-
-type ExtractorConstructor = typeof Extractor;
-
-type ExtractorDefinition = ExtractorConstructor | {
-   extractorConstructor: ExtractorConstructor;
-   params: ExtractorParams | {
-      extractorConstructor: ExtractorConstructor,
-   };
-};
-
-type ExtractorMap = {
-   [extractorName: string]: ExtractorDefinition;
-};
 
 type ExtractorContext = {
    extractor: Extractor;

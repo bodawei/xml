@@ -1,0 +1,159 @@
+// import { pattern as BCP47_REGEX } from 'bcp47-validate';
+// import { EntityMetaData } from "../../basic";
+// import { WellFormedError } from "../../error";
+// import { SToken } from "../../sToken";
+// import { GENERAL_ENTITY_REFERENCE_PTOKEN } from "../entityReference";
+// import { PTYPE, isTextPToken } from "../text";
+
+// import { LiteralValuePToken } from "./literalValue";
+// import { ErrorCollector } from "error";
+
+// const WFID = WellFormedError.ID;
+// const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;
+
+// function getAttributeValueText(attribute: any): string {
+//    let newValue = '';
+
+//    for (const piece of attribute.value) {
+//       if (isTextPToken(piece)) {
+//          newValue += piece.text;
+//       }
+//    }
+
+//    return newValue;
+// }
+
+// function firstSToken(value: LiteralValuePToken): SToken | void {
+//    if (value.length === 0) {
+//       return;
+//    }
+
+//    const pToken = value[0].pToken;
+
+//    if (value[0].type === PTYPE) {
+//       return pToken.text;
+//    }
+
+//    return pToken.open;
+// }
+
+// /*
+//  * SYNTAX
+//  *    §2.12
+//  *       1.0/1
+//  *          [33] LanguageID ::= Langcode ('-' Subcode)*
+//  *          [34] Langcode   ::= ISO639Code |  IanaCode |  UserCode
+//  *          [35] ISO639Code ::= ([a-z] | [A-Z]) ([a-z] | [A-Z])
+//  *          [36] IanaCode   ::= ('i' | 'I') '-' ([a-z] | [A-Z])+
+//  *          [37] UserCode   ::= ('x' | 'X') '-' ([a-z] | [A-Z])+
+//  *          [38] Subcode    ::= ([a-z] | [A-Z])+
+//  */
+// function check1dot0rev1(value: LiteralValuePToken, attrValue: string, ec: ErrorCollector) {
+//    const isValid = ONE_DOT_ZERO_REV1_REGEX.test(attrValue);
+
+//    ec.check(!isValid, WFID.ATTRIBUTE_LANG_BAD_CODE, [ attrValue ], firstSToken(value));
+// }
+
+// /*
+//  * https://tools.ietf.org/html/rfc5646
+//  *  Language-Tag  = langtag             ; normal language tags
+//  *               / privateuse          ; private use tag
+//  *               / grandfathered       ; grandfathered tags
+//  * langtag       = language
+//  *                 ["-" script]
+//  *                 ["-" region]
+//  *                 *("-" variant)
+//  *                 *("-" extension)
+//  *                 ["-" privateuse]
+//  * language      = 2*3ALPHA            ; shortest ISO 639 code
+//  *                 ["-" extlang]       ; sometimes followed by
+//  *                                     ; extended language subtags
+//  *               / 4ALPHA              ; or reserved for future use
+//  *               / 5*8ALPHA            ; or registered language subtag
+//  * extlang       = 3ALPHA              ; selected ISO 639 codes
+//  *                 *2("-" 3ALPHA)      ; permanently reserved
+//  * script        = 4ALPHA              ; ISO 15924 code
+//  * region        = 2ALPHA              ; ISO 3166-1 code
+//  *               / 3DIGIT              ; UN M.49 code
+//  * variant       = 5*8alphanum         ; registered variants
+//  *               / (DIGIT 3alphanum)
+//  * extension     = singleton 1*("-" (2*8alphanum))
+//  *                                     ; Single alphanumerics
+//  *                                     ; "x" reserved for private use
+//  * singleton     = DIGIT               ; 0 - 9
+//  *               / %x41-57             ; A - W
+//  *               / %x59-5A             ; Y - Z
+//  *               / %x61-77             ; a - w
+//  *               / %x79-7A             ; y - z
+//  * privateuse    = "x" 1*("-" (1*8alphanum))
+//  * grandfathered = irregular           ; non-redundant tags registered
+//  *               / regular             ; during the RFC 3066 era
+//  * irregular     = "en-GB-oed"         ; irregular tags do not match
+//  *               / "i-ami"             ; the 'langtag' production and
+//  *               / "i-bnn"             ; would not otherwise be
+//  *               / "i-default"         ; considered 'well-formed'
+//  *               / "i-enochian"        ; These tags are all valid,
+//  *               / "i-hak"             ; but most are deprecated
+//  *               / "i-klingon"         ; in favor of more modern
+//  *               / "i-lux"             ; subtags or subtag
+//  *               / "i-mingo"           ; combination
+//  *               / "i-navajo"
+//  *               / "i-pwn"
+//  *               / "i-tao"
+//  *               / "i-tay"
+//  *               / "i-tsu"
+//  *               / "sgn-BE-FR"
+//  *               / "sgn-BE-NL"
+//  *               / "sgn-CH-DE"
+//  * regular       = "art-lojban"        ; these tags match the 'langtag'
+//  *               / "cel-gaulish"       ; production, but their subtags
+//  *               / "no-bok"            ; are not extended language
+//  *               / "no-nyn"            ; or variant subtags: their meaning
+//  *               / "zh-guoyu"          ; is defined by their registration
+//  *               / "zh-hakka"          ; and all of these are deprecated
+//  *               / "zh-min"            ; in favor of a more modern
+//  *               / "zh-min-nan"        ; subtag or sequence of subtags
+//  *               / "zh-xiang"
+//  * alphanum      = (ALPHA / DIGIT)     ; letters and numbers
+//  */
+// function check1dot0rev2AndBeyond(value: LiteralValuePToken, attrValue: string, ec: ErrorCollector) {
+//    if (BCP47_REGEX.test(attrValue)) {
+//       return;
+//    }
+   
+//    ec.report(WFID.ATTRIBUTE_LANG_BAD_CODE, [ attrValue ], firstSToken(value));
+// }
+
+// function hasReference(value: LiteralValuePToken): boolean {
+//    for (const piece of value) {
+//       if (piece.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+//          return true;
+//       }
+//    }
+
+//    return false;
+// }
+
+// function checkXmlLangWellFormed(value: LiteralValuePToken, ec: ErrorCollector, emd: EntityMetaData, expanded: boolean): void {
+//    if (hasReference(value)) {
+//       return;
+//    }
+
+//    const attrValue = getAttributeValueText(value);
+
+//    if (emd.isVersion1dot0 && emd.revision === 1) {
+//       check1dot0rev1(value, attrValue, ec);
+//       return;
+//    }
+   
+//    if (attrValue === '' && (
+//       emd.isVersion1dot0 && emd.revision >= 3 || emd.isVersion1dot1)) {
+//       return;
+//    }
+
+//    check1dot0rev2AndBeyond(value, attrValue, ec);
+// }
+
+// export {
+//    checkXmlLangWellFormed,
+// }

@@ -4,7 +4,7 @@
 import { EntityMetaData, Offset } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, sTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 
 import {
    CommentPToken,
@@ -19,7 +19,7 @@ import misc from '../common/misc.js';
 
 describe('comment (unit)', () => {
    let commentPToken: CommentPToken;
-   let expectedSToken: sTokenMaker;
+   let expectedSToken: STokenMaker;
 
    beforeEach(() => {
       expectedSToken = makeSTokenMaker();
