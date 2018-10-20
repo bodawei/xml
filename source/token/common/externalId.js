@@ -7,7 +7,7 @@ import entityReference from '../entityReference';
 import unassigned from '../unassigned';
 
 import literal from './literal';
-import { textOrBlank } from './misc.js';
+import { textOrBlank } from './misc';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's

@@ -90,6 +90,8 @@ const text = {
 
    isTextXToken,
    isTextPToken,
+   TextPToken,
+   TextXToken,
 };
 
 export default text;

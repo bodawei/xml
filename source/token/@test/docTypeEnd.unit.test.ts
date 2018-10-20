@@ -7,9 +7,11 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
 import * as docTypeEnd from '../docTypeEnd.js';
+import { DocTypeStartPToken } from '../docTypeStart';
+import { EntityMetaData } from 'basic';
 
 describe('docTypeEnd (unit)', () => {
-   let docTypeEndPToken;
+   let docTypeEndPToken: docTypeEnd.DocTypeEndPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -18,7 +20,7 @@ describe('docTypeEnd (unit)', () => {
          closeInternalSubset: makeSToken(']'),
          postCloseInternalSubsetSpace: undefined,
          close: makeSToken('>'),
-      };
+      } as any;
    });
 
    describe('PToken', () => {
@@ -39,7 +41,7 @@ describe('docTypeEnd (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -93,8 +95,8 @@ describe('docTypeEnd (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let docTypeStartPToken;
+      let mockErrorCollector: MockErrorCollector;
+      let docTypeStartPToken: DocTypeStartPToken;
 
       beforeEach(() => {
          const makeSToken = makeSTokenMaker();
@@ -102,17 +104,17 @@ describe('docTypeEnd (unit)', () => {
 
          docTypeStartPToken = {
             startInternalSubset: makeSToken('['),
-         };
+         } as any;
       });
 
       it('returns an an error collector', () => {
-         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector);
+         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(errors).toEqual(mockErrorCollector);
       });
 
       it('returns no errors if no problems ', () => {
-         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector);
+         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(errors.report).not.toHaveBeenCalled();
       });
@@ -120,7 +122,7 @@ describe('docTypeEnd (unit)', () => {
       it('reports an error if there is no close', () => {
          docTypeEndPToken.close = undefined;
 
-         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector);
+         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
@@ -132,7 +134,7 @@ describe('docTypeEnd (unit)', () => {
       it('reports an error if there is a "]", but there was no opening "["', () => {
          delete docTypeStartPToken.startInternalSubset;
 
-         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector);
+         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
@@ -142,7 +144,7 @@ describe('docTypeEnd (unit)', () => {
       });
 
       it('reports an error if there is a "]", but there was no start token', () => {
-         docTypeEnd.checkWellFormed(docTypeEndPToken, undefined, mockErrorCollector);
+         docTypeEnd.checkWellFormed(docTypeEndPToken, undefined as any, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,

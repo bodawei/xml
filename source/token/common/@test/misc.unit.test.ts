@@ -7,137 +7,137 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSToken } from '../../../sToken/@test/helper';
 
-import misc from '../misc.js';
+import misc from '../misc';
 
 describe('misc', () => {
 
    describe('checkWellFormedNameRecommendation()', () => {
-      let WARN1;
-      let WARN2;
-      let entityMetaData;
-      let errorCollectorSpy;
+      let WARN1: string;
+      let WARN2: string;
+      let entityMetaData: EntityMetaData;
+      let ec: ErrorCollector;
 
       beforeEach(() => {
-         errorCollectorSpy = {
-            reportError: jasmine.createSpy('callbackSpy'),
-         };
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
+         ec.reportError = jasmine.createSpy('callbackSpy');
          entityMetaData = new EntityMetaData();
          WARN1 = 'WARN1';
          WARN2 = 'WARN2';
       });
 
       it('adds no errors if a name is not passed in', () => {
-         misc.checkWellFormedNameRecommendation(undefined, errorCollectorSpy, entityMetaData, false, WARN1, WARN2);
+         misc.checkWellFormedNameRecommendation(undefined as any, ec, entityMetaData, 'ELEMENT', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if the name does not start with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('foo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if this is an xml:lang attriute', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml:lang'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:lang'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no errors if this is an xml:space attriute', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml:space'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:space'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if XML:LANG is provided', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('XML:LANG'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('XML:LANG'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ATTRIBUTE', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'XML:LANG' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'XML:LANG' ]);
       });
 
       it('reports no error if the version is 1.0/6, and the name starts with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if the version is 1.0/6, and the PI name starts with "xml-"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml-Foo' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml-Foo' ]);
       });
 
       it('reports a warning if the version is 1.0/6, and the element or attr name starts with "xml:"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ATTRIBUTE', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
       });
 
       it('reports no warning if the version is 1.0/6, and the attribute name starts with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no warning if the version is 1.0/6, and the entity name starts with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ENTITY', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports no warning if the version is 1.0/6, and the PI name starts with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'PI', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).not.toHaveBeenCalled();
+         expect(ec.reportError).not.toHaveBeenCalled();
       });
 
       it('reports a warning if the version is 1.0/5, and the name starts with "xml"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
          new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ENTITY', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlFoo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the PI name starts with "xml-"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml-Foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'PI', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
       });
 
       it('reports a warning if the version is 1.0/5, and the element/attr name starts with "xml:"', () => {
-         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), errorCollectorSpy,
+         misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
 
-         expect(errorCollectorSpy.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
+         expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml:Foo' ]);
       });
 
    });
 
    describe('checkName', () => {
-      let ec;
-      let errorId;
-      let emdV1R5;
+      let ec: ErrorCollector;
+      let errorId: string;
+      let emdV1R5: EntityMetaData;
+      let utilIsName: jasmine.Spy;
 
       beforeEach(() => {
-         ec = new ErrorCollector({}, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
          spyOn(ec, 'report');
-         spyOn(util, 'isName');
+         utilIsName = spyOn(util, 'isName');
       });
 
       it('accepts an empty Stoken', () => {
-         misc.checkName(undefined, ec, emdV1R5, errorId);
+         misc.checkName(undefined as any, ec, emdV1R5, errorId);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
@@ -149,7 +149,7 @@ describe('misc', () => {
       });
 
       it('reports an error if util.isName() returns false', () => {
-         util.isName.and.returnValue(false);
+         utilIsName.and.returnValue(false);
 
          misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
@@ -160,14 +160,14 @@ describe('misc', () => {
    });
 
    describe('checkNMToken', () => {
-      let ec;
-      let errorId;
-      let emdV1R5;
-      let emdV1R4;
-      let emdV11R2;
+      let ec: ErrorCollector;
+      let errorId: string;
+      let emdV1R5: EntityMetaData;
+      let emdV1R4: EntityMetaData;
+      let emdV11R2: EntityMetaData;
 
       beforeEach(() => {
-         ec = new ErrorCollector({}, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          emdV1R4 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
@@ -326,14 +326,14 @@ describe('misc', () => {
    });
 
    describe('checkWellFormedText()', () => {
-      let mockErrorCollector;
+      let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
       });
 
       it('adds no errors if an SToken is not passed in', () => {
-         misc.checkWellFormedText(undefined, mockErrorCollector, new EntityMetaData());
+         misc.checkWellFormedText(undefined as any, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.errors).toEqual([]);
       });

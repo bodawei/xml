@@ -1,20 +1,22 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
-import { WellFormedError, XmlWarning } from '../../error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { EntityMetaData } from '../../../basic';
+import { WellFormedError, XmlWarning } from '../../../error';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
 
-import * as instruction from './instruction.js';
-import misc from '../common/misc.js';
+import * as instruction from '../instruction';
+import { InstructionPToken } from '../instruction';
+import misc from '../../common/misc';
+import { SToken } from 'sToken';
 
 describe('instruction (unit)', () => {
-   let instructionPToken;
+   let instructionPToken: InstructionPToken;
 
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
-      instructionPToken = new instruction.PToken(undefined, {
+      instructionPToken = new instruction.PToken(undefined as any, {
          open: expectedSToken('<?'),
          postOpenSpace: undefined,
          target: expectedSToken('instructionTarget'),
@@ -39,7 +41,7 @@ describe('instruction (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -80,8 +82,8 @@ describe('instruction (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let expectedSToken;
+      let mockErrorCollector: MockErrorCollector;
+      let expectedSToken: STokenMaker;
 
       beforeEach(() => {
          expectedSToken = makeSTokenMaker();
@@ -104,7 +106,7 @@ describe('instruction (unit)', () => {
          instruction.checkWellFormed(instructionPToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation)
-            .toHaveBeenCalledWith(instructionPToken.target, mockErrorCollector, emd, false,
+            .toHaveBeenCalledWith(instructionPToken.target, mockErrorCollector, emd, 'PI',
                XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
       });
 

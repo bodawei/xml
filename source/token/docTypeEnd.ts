@@ -1,8 +1,11 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
+import { WellFormedError, ErrorCollector } from '../error';
 
 import base from './base';
+import { STokenSource } from 'sToken';
+import { EntityMetaData } from 'basic';
+import { DocTypeStartPToken } from './docTypeStart';
 
 /**********************************************************************\
  docTypeEnd is the portion of a DOCTYPE declaration that comes after
@@ -16,14 +19,14 @@ const DOCTYPE_END = 'DOCTYPE_END';
 const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
 class DocTypeEnd extends base.XToken {
-   constructor() {
-      super(DOCTYPE_END_XTOKEN, {});
+   constructor(pToken?: DocTypeEndPToken) {
+      super(DOCTYPE_END_XTOKEN, pToken);
    }
 }
 
 class DocTypeEndPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: Object) {
       super(DOCTYPE_END, props);
    }
 
@@ -52,13 +55,11 @@ class DocTypeEndPToken extends base.PToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parse(source, deliverPToken) {
-   const pToken = {
-      type: DOCTYPE_END,
-   };
+function parse(source: STokenSource, deliverPToken: (result: DocTypeEndPToken) => void) {
+   const pToken = new DocTypeEndPToken();
 
    source.extractToObject('match', ']', pToken, 'closeInternalSubset');
-   source.extractToObject('space', pToken, 'postCloseInternalSubsetSpace');
+   source.extractToObjectNoParams('space', pToken, 'postCloseInternalSubsetSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
@@ -71,7 +72,7 @@ function parse(source, deliverPToken) {
 \**********************************************************************/
 
 // eslint-disable-next-line no-unused-vars
-function checkWellFormed(pToken, docTypeStartPToken, ec, emd) {
+function checkWellFormed(pToken: DocTypeEndPToken, docTypeStartPToken: DocTypeStartPToken, ec: ErrorCollector, emd: EntityMetaData) {
    ec.setPos(pToken.closeInternalSubset);
 
    if (!docTypeStartPToken || !docTypeStartPToken.startInternalSubset) {
@@ -89,7 +90,7 @@ function checkWellFormed(pToken, docTypeStartPToken, ec, emd) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: DocTypeEndPToken) {
    return new DocTypeEnd(pToken);
 }
 

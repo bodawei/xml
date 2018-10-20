@@ -12,7 +12,7 @@ import { WellFormedError, XmlWarning } from '../../error/index';
 import entityReference from '../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';
 
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import nameList, {
    ContentParticlePToken,
    NameListPToken,

@@ -8,7 +8,7 @@ import { EntityReferencePToken, EntityReferenceXToken } from '../entityReference
 import text, { TextXToken, isTextPToken, TextPToken } from '../text';
 
 import { checkXmlLangWellFormed } from './langAttribute';
-import misc from './misc.js';
+import misc from './misc';
 import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken, LiteralValueXToken } from './literalValue';
 import { EntityStartPToken } from '../entityStart';

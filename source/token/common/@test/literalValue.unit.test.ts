@@ -9,7 +9,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper'
 import entityReference, { EntityReferencePToken, ParameterEntityReferencePToken } from '../../entityReference';
 import text from '../../text';
 
-import misc from '../misc.js';
+import misc from '../misc';
 import literalValue, { LiteralValuePToken } from '../literalValue.js';
 
 describe('literalValue (unit)', () => {

@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 
 import attribute, { AttributeXToken } from './common/attribute';
-import misc from './common/misc.js';
+import misc from './common/misc';
 import base from './base';
 
 const WFEID = WellFormedError.ID;

@@ -399,7 +399,7 @@ class CheckXTokenValidStream extends stream.Transform {
          if (!this._seenRoot) {
             if (this.docType && xToken.name !== this.docType.name) {
                this.pushValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
-                     this.docType.pToken.open);
+                     this.docType.pToken && this.docType.pToken.open);
             }
             this._seenRoot = true;
          }

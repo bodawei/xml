@@ -1,16 +1,20 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { WellFormedError } from '../../error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { EntityMetaData } from 'basic';
+import { WellFormedError } from 'error';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from 'sToken';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import declaration from './declaration';
+import declaration, { DeclarationPToken } from '../declaration';
 
 describe('declaration (unit)', () => {
-   let declarationPToken;
+   let declarationPToken: DeclarationPToken;
+   let emd: EntityMetaData;
 
    beforeEach(() => {
+      emd = new EntityMetaData();
       const makeSToken = makeSTokenMaker();
       declarationPToken = {
          type: declaration.PTYPE,
@@ -18,7 +22,7 @@ describe('declaration (unit)', () => {
          postOpenSpace: makeSToken(' '),
          declType: makeSToken('DOCTYPE'),
          postDeclTypeSpace: makeSToken(' '),
-      };
+      } as any;
    });
 
    describe('PToken', () => {
@@ -33,7 +37,7 @@ describe('declaration (unit)', () => {
                pToken.postOpenSpace,
                pToken.declType,
                pToken.postDeclTypeSpace,
-            ]);
+            ] as Array<SToken>);
          });
 
       });
@@ -41,8 +45,8 @@ describe('declaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let mockSource;
-      let callback;
+      let mockSource: MockSTokenSource;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -80,7 +84,7 @@ describe('declaration (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
+      let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
@@ -88,7 +92,7 @@ describe('declaration (unit)', () => {
       });
 
       it('returns an an error collector', () => {
-         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector);
+         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
 
          expect(errors).toEqual(mockErrorCollector);
       });
@@ -97,7 +101,7 @@ describe('declaration (unit)', () => {
          const makeSToken = makeSTokenMaker();
          declarationPToken.postOpenSpace = makeSToken(' ');
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
@@ -109,7 +113,7 @@ describe('declaration (unit)', () => {
       it('reports an error if there is no declaration type provided', () => {
          delete declarationPToken.declType;
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_NO_DECLTYPE,
@@ -120,9 +124,9 @@ describe('declaration (unit)', () => {
       });
 
       it('reports an error if the type is not capitalized', () => {
-         declarationPToken.declType.str = 'docType';
+         (declarationPToken as any).declType.str = 'docType';
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
@@ -132,9 +136,9 @@ describe('declaration (unit)', () => {
       });
 
       it('reports an error if the type is not a valid type', () => {
-         declarationPToken.declType.str = 'BOGUSTYPE';
+         (declarationPToken as any).declType.str = 'BOGUSTYPE';
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector);
+         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DECL_UNKNOWN,

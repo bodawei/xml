@@ -65,7 +65,7 @@ function toHaveError(util: any) {
 function toBeErrorFree() {
    return {
       compare: (actual: any) => {
-         let error: XmlWarning | ValidityError | void = undefined;
+         let error: XmlWarning | ValidityError | void;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -74,14 +74,14 @@ function toBeErrorFree() {
             }
          });
 
-         if (!error) {
+         if (!error!) {
             message = `Expected to find one or more XmlErrors.`;
          } else {
-            message = `Expected to find no XmlErrors, but found ${(error as any).message}.`; // typeHack
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}.`; // typeHack
          }
 
          return {
-            pass: !error,
+            pass: !error!,
             message: message,
          };
       },
@@ -134,14 +134,14 @@ describe('CheckXTokenValidStream (unit)', () => {
    describe('_transform', () => {
 
       it('passes initial tokens through', () => {
-         const xmlDecl = new xmlDeclaration.XToken([], []);
+         const xmlDecl = new xmlDeclaration.XToken([]);
          validator.write(xmlDecl);
 
          expect(validator.read()).toEqual(xmlDecl as any); // typeHack
       });
 
       it('resumes passing through when encountering an elementStart after docTypeStart', () => {
-         const dtStart = new docTypeStart.XToken('foo', undefined, false, []);
+         const dtStart = new docTypeStart.XToken('foo', undefined as any, false);
          const elStart = new elementStart.XToken('foo', []);
 
          validator.write(dtStart);
@@ -152,7 +152,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       it('resumes passing through if end of stream reached', () => {
-         const dtStart = new docTypeStart.XToken('foo', undefined, false, []);
+         const dtStart = new docTypeStart.XToken('foo', undefined as any, false);
 
          validator.write(dtStart);
          validator.end();
@@ -161,7 +161,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       it('adds an error if the DOCTYPE name and the element start name do not match', () => {
-         const dtStart = new docTypeStart.XToken('docTypeName', undefined, false, []);
+         const dtStart = new docTypeStart.XToken('docTypeName', undefined as any, false);
          const elStart = new elementStart.XToken('elementName', []);
 
          validator.write(dtStart);
@@ -2777,9 +2777,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
                const elStart = new elementStart.XToken('one', []);
-               const elEnd = new elementEnd.XToken('one', []);
+               const elEnd = new elementEnd.XToken('one');
                const child = new elementStart.XToken('two', []);
-               const childEnd = new elementEnd.XToken('two', []);
+               const childEnd = new elementEnd.XToken('two');
                const thirdStart = new elementStart.XToken('three', []);
 
                validator.write(elementDecl);
@@ -2897,7 +2897,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new charData.XToken('test charData'));
                validator.write(new CdataXToken('test CDATA'));
                validator.write(new charData.XToken(' '));
-               validator.write(new elementEnd.XToken('one', []));
+               validator.write(new elementEnd.XToken('one'));
                validator.end();
    
                expectNoErrors(validator, done);
@@ -2917,7 +2917,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('one', []));
                validator.write(new entityStart.XToken('testEntityStart'));
                validator.write(new GeneralEntityEndXToken('testEntityEnd'));
-               validator.write(new elementEnd.XToken('one', []));
+               validator.write(new elementEnd.XToken('one'));
                validator.end();
    
                expectNoErrors(validator, done);
@@ -2948,8 +2948,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             const commentToken = new comment.CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
-            const nonWhiteChars = new charData.XToken('one', []);
-            const whiteChars = new charData.XToken(' \t\n', []);
+            const nonWhiteChars = new charData.XToken('one');
+            const whiteChars = new charData.XToken(' \t\n');
 
             const data: Array<[any, 1|1.1, 1|2|3|4|5|6, boolean]> = [
                [ commentToken, 1, 1, true ],
@@ -2976,7 +2976,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ nonWhiteChars, 1.1, 2, true ],
                [ whiteChars, 1, 5, false ],
                [ whiteChars, 1.1, 2, false ],
-               [ new space.XToken('  ', {}), 1.0, 1, false ],
+               [ new space.XToken('  '), 1.0, 1, false ],
                [ new entityReference.XToken('x'), 1.0, 1, false ],
                [ new entityStart.XToken('y'), 1.0, 1, false ],
                [ new GeneralEntityEndXToken('z'), 1.0, 1, false ],

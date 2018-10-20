@@ -4,6 +4,9 @@ import {
    textOrBlank,
 } from './common/misc';
 import base from './base';
+import { STokenSource } from 'sToken';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector } from 'error';
 
 const SPACE = 'SPACE';
 const SPACE_XTOKEN = 'SPACE_XTOKEN';
@@ -14,9 +17,10 @@ const SPACE_XTOKEN = 'SPACE_XTOKEN';
 \**********************************************************************/
 
 class Space extends base.XToken {
+   public text: string;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(text, pToken) {
+   constructor(text: string, pToken?: SpacePToken) {
       super(SPACE_XTOKEN, pToken);
 
       this.text = text;
@@ -26,7 +30,7 @@ class Space extends base.XToken {
 
 class SpacePToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: Object) {
       super(SPACE, props);
    }
 
@@ -51,10 +55,8 @@ class SpacePToken extends base.PToken {
    [15] Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
 \**********************************************************************/
 
-function parse(source, deliverPToken) {
-   const pToken = {
-      type: SPACE,
-   };
+function parse(source: STokenSource, deliverPToken: (result: SpacePToken) => void) {
+   const pToken = new SpacePToken();
 
    source.extract('space', undefined, (sToken) => {
       pToken.text = sToken;
@@ -67,7 +69,7 @@ function parse(source, deliverPToken) {
 \**********************************************************************/
 
 // eslint-disable-next-line no-unused-vars
-function checkWellFormed(pToken, ec, emd) {
+function checkWellFormed(pToken: SpacePToken, ec: ErrorCollector, emd: EntityMetaData) {
    ec.setPos(pToken.text);
 }
 
@@ -75,7 +77,7 @@ function checkWellFormed(pToken, ec, emd) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: SpacePToken) {
    return new Space(textOrBlank(pToken.text), pToken);
 }
 
@@ -87,4 +89,7 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   Space,
+   SpacePToken,
 };

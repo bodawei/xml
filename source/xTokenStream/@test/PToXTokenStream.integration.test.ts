@@ -103,7 +103,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes a DOCTYPE start and end', (done) => {
       expectInputToProduce('<!DOCTYPE one>', [
-         new docTypeStart.XToken('one', undefined, false),
+         new docTypeStart.XToken('one', undefined as any, false),
          new docTypeEnd.XToken(),
       ], done);
    });
@@ -122,7 +122,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes an element end', (done) => {
       expectInputToProduce('</elementName>', [
-         new elementEnd.XToken('elementName', []),
+         new elementEnd.XToken('elementName'),
       ], done);
    });
 
@@ -177,7 +177,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes spaces', (done) => {
       expectInputToProduce('<?xml version="1.0"?>   <one></one>', [
-         new space.XToken('   ', []),
+         new space.XToken('   '),
       ], done);
    });
 
@@ -202,7 +202,7 @@ describe('PToXTokenStream (integration)', () => {
          new xmlDeclaration.XToken([ {
             name: 'version',
             value: [ new text.XToken('1.0') ],
-         } ], []) ], done);
+         } ]) ], done);
    });
 
 });

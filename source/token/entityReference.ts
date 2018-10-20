@@ -6,7 +6,7 @@ import { SToken, STokenSource } from '../sToken/index';
 import base from './base';
 import {
    textOrBlank,
- } from './common/misc.js';
+ } from './common/misc';
 import { EntityMetaData } from 'source/basic';
 
 /**********************************************************************\

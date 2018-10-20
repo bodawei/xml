@@ -1,9 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning } from '../error';
+import { EntityMetaData } from 'basic';
+import { WellFormedError, XmlWarning, ErrorCollector } from '../error';
 
-import misc from './common/misc.js';
+import misc from './common/misc';
 import base from './base';
+import { STokenSource, SToken } from 'sToken';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -16,9 +18,10 @@ const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 \**********************************************************************/
 
 class ElementEnd extends base.XToken {
+   public name: string;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(name, pToken) {
+   constructor(name: string, pToken?: ElementEndPToken) {
       super(ELEMENT_END_XTOKEN, pToken);
 
       this.name = name;
@@ -28,7 +31,7 @@ class ElementEnd extends base.XToken {
 
 class ElementEndPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: Object) {
       super(ELEMENT_END, props);
    }
 
@@ -60,14 +63,14 @@ class ElementEndPToken extends base.PToken {
    [42] ETag ::= '</' Name S? '>'
 \**********************************************************************/
 
-function parse(source, open, deliverPToken) {
+function parse(source: STokenSource, open: SToken, deliverPToken: (result: ElementEndPToken) => void) {
    const pToken = new ElementEndPToken({
       open,
    });
 
-   source.extractToObject('space', pToken, 'postOpenSpace');
+   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
    source.extractToObject('word', [ '>' ], pToken, 'name');
-   source.extractToObject('space', pToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', pToken, 'postNameSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
@@ -79,7 +82,7 @@ function parse(source, open, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.postOpenSpace);
    ec.check(pToken.postOpenSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
@@ -100,7 +103,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: ElementEndPToken) {
    return new ElementEnd(misc.textOrBlank(pToken.name), pToken);
 }
 

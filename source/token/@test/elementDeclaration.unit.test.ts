@@ -9,7 +9,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
 import declaration from '../bridge/declaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import nameList from '../common/nameList';
 import entityReference from '../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';

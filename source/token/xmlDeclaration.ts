@@ -1,11 +1,13 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
+import { WellFormedError, ErrorCollector } from '../error';
 
 import { textOrBlank } from './common/misc';
 import * as instruction from './bridge/instruction';
-import attribute from './common/attribute';
+import attribute, { AttributeXToken, AttributeValuePToken } from './common/attribute';
 import base from './base';
+import { STokenSource, SToken } from 'sToken';
+import { EntityMetaData } from 'basic';
 
 /**********************************************************************\
  The xmlDeclaration namespace contains the usual routines for parsing,
@@ -16,7 +18,7 @@ const WFEID = WellFormedError.ID;
 const XMLDECL = 'XMLDECL';
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 const XMLDECL_NAME_TERMINATORS = [ '?>' ];
-const XMLDECL_PARAMS = {
+const XMLDECL_PARAMS: { [name: string]: string } = {
    version: 'version',
    encoding: 'encoding',
    standalone: 'standalone',
@@ -24,16 +26,17 @@ const XMLDECL_PARAMS = {
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 
 class XmlDeclaration extends base.XToken {
+   public params: Array<AttributeXToken>;
 
-   constructor(params, sTokens) {
-      super(XMLDECL_XTOKEN, sTokens);
+   constructor(params: Array<AttributeXToken>, pToken?: XmlDeclarationPToken) {
+      super(XMLDECL_XTOKEN, pToken);
       this.params = params;
    }
 
 }
 
 class XmlDeclarationPToken extends instruction.PToken {
-   constructor(props) {
+   constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(XMLDECL, props);
    }
@@ -74,7 +77,7 @@ class XmlDeclarationPToken extends instruction.PToken {
    [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
 \**********************************************************************/
 
-function parse(source, piPToken, deliverPToken) {
+function parse(source: STokenSource, piPToken: instruction.InstructionPToken, deliverPToken: (result: XmlDeclarationPToken) => void) {
    const pToken = new instruction.PToken(XMLDECL, piPToken);
 
    attribute.parse(source, { terminators: XMLDECL_NAME_TERMINATORS}, (params) => {
@@ -90,7 +93,7 @@ function parse(source, piPToken, deliverPToken) {
  Do well formed checking on the PToken from the parse().
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    const checks = makeNameCheckClosure();
 
    instruction.checkWellFormed(pToken, ec, entityMetaData, true);
@@ -116,12 +119,12 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  * well as a flag whether an ancoding was found.
  */
 function makeNameCheckClosure() {
-   let foundEncoding;
-   let foundVersion;
-   let seenStandalone;
+   let foundEncoding: boolean;
+   let foundVersion: boolean;
+   let seenStandalone: boolean;
 
    // Inner function as we need to have closure over a couple variables that exist across calls.
-   function checkName(name, index, ec, entityMetaData) {
+   function checkName(name: SToken, index: number, ec: ErrorCollector, entityMetaData: EntityMetaData) {
       const nameText = textOrBlank(name);
       const lcName = nameText.toLocaleLowerCase();
 
@@ -132,7 +135,7 @@ function makeNameCheckClosure() {
       switch (lcName) {
          case 'version':
             foundVersion = true;
-            ec.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index ]);
+            ec.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index.toString() ]);
             break;
          case 'encoding':
             foundEncoding = true;
@@ -163,10 +166,10 @@ function makeNameCheckClosure() {
    };
 }
 
-function checkValue(name, value, ec) {
+function checkValue(name: SToken, value: AttributeValuePToken, ec: ErrorCollector) {
    const nameText = textOrBlank(name);
    const lcName = nameText.toLocaleLowerCase();
-   const valueText = textOrBlank(value[0] ? value[0].text : undefined);
+   const valueText = textOrBlank(value[0] ? (value[0] as any).text : undefined); // typeHack
    const lcValue = valueText.toLocaleLowerCase();
 
    switch (lcName) {
@@ -187,7 +190,7 @@ function checkValue(name, value, ec) {
  Convert a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: XmlDeclarationPToken) {
    return new XmlDeclaration(attribute.makeOneTokenCompatible(pToken.params), pToken);
 }
 

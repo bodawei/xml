@@ -13,7 +13,7 @@ import text from '../text';
 import unassigned, { UnassignedArray } from '../unassigned';
 import literal from '../common/literal';
 import * as wordList from '../common/wordList';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 
 const { WordListPToken, WordListType } = wordList;
 type LiteralOptions = {

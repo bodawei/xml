@@ -32,7 +32,7 @@ describe('processingInstruction (integration)', () => {
          source.addText('blah blah?>');
          source.endText();
 
-         parseProcessingInstruction(source, { open: SToken.fromString('') }, (parsing) => {
+         parseProcessingInstruction(source, { open: SToken.fromString('') } as any, (parsing) => {
             expect(parsing.type).toEqual(PROCESSING_INSTRUCTION_PTOKEN);
             done();
          });
@@ -48,7 +48,7 @@ describe('processingInstruction (integration)', () => {
          source.addText('blah blah?>');
          source.endText();
 
-         parseProcessingInstruction(source, piPToken, (pToken) => {
+         parseProcessingInstruction(source, piPToken as any, (pToken) => {
             const ec = new ErrorCollector(SToken.fromString(''), WellFormedError);
 
             pToken.checkWellFormed(ec, new EntityMetaData());

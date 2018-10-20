@@ -11,21 +11,21 @@ import { WellFormedError } from '../../error';
 import declaration from '../bridge/declaration';
 import * as docTypeStart from '../docTypeStart.js';
 import externalId from '../common/externalId.js';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 
 describe('docTypeStart (unit)', () => {
-   let docTypeStartPToken;
+   let docTypeStartPToken: docTypeStart.DocTypeStartPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      docTypeStartPToken = {
+      docTypeStartPToken = new docTypeStart.DocTypeStartPToken({
          type: 'DOCTYPE_START',
          name: makeSToken('rootElement'),
          postNameSpace: makeSToken(' '),
          externalId: { externalId: true },
          postExternalIdSpace: makeSToken(' '),
          startInternalSubset: makeSToken('['),
-      };
+      });
    });
 
    describe('PToken', () => {
@@ -56,11 +56,11 @@ describe('docTypeStart (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parse').and.callFake((ignored1, ignored2, cb) => {
+         spyOn(externalId, 'parse').and.callFake((ignored1: any, ignored2: any, cb: any) => {
             cb({ externalId: true });
          });
       });
@@ -73,7 +73,7 @@ describe('docTypeStart (unit)', () => {
             [ '[', 'match', '[' ],
          ]);
 
-         docTypeStart.parse(mockSource, {}, callback);
+         docTypeStart.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeStartPToken);
@@ -87,7 +87,7 @@ describe('docTypeStart (unit)', () => {
             undefined,
          ]);
 
-         docTypeStart.parse(mockSource, {}, callback);
+         docTypeStart.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -103,8 +103,8 @@ describe('docTypeStart (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let emd;
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
@@ -118,7 +118,7 @@ describe('docTypeStart (unit)', () => {
       it('asks the declaration module to look for problems in the declaration part', () => {
          const decl = { decl: true };
 
-         docTypeStart.checkWellFormed(decl, mockErrorCollector, emd);
+         docTypeStart.checkWellFormed(decl as any, mockErrorCollector, emd);
 
          expect(declaration.checkWellFormed).toHaveBeenCalledWith(decl, mockErrorCollector, emd);
       });
@@ -140,7 +140,7 @@ describe('docTypeStart (unit)', () => {
       it('reports an error if there is no elment name', () => {
          docTypeStartPToken.name = undefined;
 
-         docTypeStart.checkWellFormed(docTypeStartPToken, mockErrorCollector);
+         docTypeStart.checkWellFormed(docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,
@@ -150,7 +150,7 @@ describe('docTypeStart (unit)', () => {
       });
 
       it('reports no error if there is an elment name', () => {
-         docTypeStart.checkWellFormed(docTypeStartPToken, mockErrorCollector);
+         docTypeStart.checkWellFormed(docTypeStartPToken, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_NAME,

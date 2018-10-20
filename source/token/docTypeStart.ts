@@ -1,11 +1,13 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError } from '../error';
+import { WellFormedError, ErrorCollector } from '../error';
 
 import externalId from './common/externalId.js';
-import declaration from './bridge/declaration';
-import misc from './common/misc.js';
+import declaration, { DeclarationPToken } from './bridge/declaration';
+import misc from './common/misc';
 import base from './base';
+import { EntityLocation, EntityMetaData } from 'basic';
+import { STokenSource } from 'sToken';
 
 const WFEID = WellFormedError.ID;
 const DOCTYPE_START = 'DOCTYPE_START';
@@ -29,9 +31,12 @@ const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 \**********************************************************************/
 
 class DocTypeStart extends base.XToken {
+   public name: string;
+   public externalLoc: EntityLocation;
+   public hasInternalSubset: boolean;
 
-   constructor(name, externalLocation, hasInternalSubset, sTokens) {
-      super(DOCTYPE_START_XTOKEN, sTokens);
+   constructor(name: string, externalLocation: EntityLocation, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
+      super(DOCTYPE_START_XTOKEN, pToken);
 
       this.name = name;
       this.externalLoc = externalLocation;
@@ -41,7 +46,7 @@ class DocTypeStart extends base.XToken {
 }
 
 class DocTypeStartPToken extends declaration.PToken {
-   constructor(props) {
+   constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(DOCTYPE_START, props);
    }
@@ -77,13 +82,13 @@ class DocTypeStartPToken extends declaration.PToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parse(source, declarationPToken, deliverPToken) {
+function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: (result: DocTypeStartPToken) => void) {
    const pToken = new DocTypeStartPToken(declarationPToken);
 
    source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
    source.extractToObject('space', undefined, pToken, 'postNameSpace');
 
-   externalId.parse(source, [ '[', '>' ], (externalId) => {
+   externalId.parse(source, [ '[', '>' ], (externalId: any) => { // typeHack
       pToken.externalId = externalId;
 
       source.extractToObject('space', undefined, pToken, 'postExternalIdSpace');
@@ -99,7 +104,7 @@ function parse(source, declarationPToken, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
    ec.setPos(pToken.name);
@@ -113,9 +118,9 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: DocTypeStartPToken) {
    return new DocTypeStart(misc.textOrBlank(pToken.name),
-      externalId.makeEntityLocation(pToken.externalId),
+      externalId.makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
       !!pToken.startInternalSubset,
       pToken);
 }

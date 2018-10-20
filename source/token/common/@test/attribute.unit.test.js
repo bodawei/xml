@@ -11,7 +11,7 @@ import * as langAttribute from '../langAttribute';
 import text from '../../text';
 import entityReference from '../../entityReference';
 import attribute from '../attribute';
-import misc from '../misc.js';
+import misc from '../misc';
 import literal from '../literal';
 
 describe('attribute (unit)', () => {

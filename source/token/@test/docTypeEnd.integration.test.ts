@@ -8,8 +8,8 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as docTypeEnd from '../docTypeEnd.js';
 
-describe('docTypeStart (integration)', () => {
-   let docTypeEndPToken;
+describe('docTypeEnd (integration)', () => {
+   let docTypeEndPToken: docTypeEnd.DocTypeEndPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -18,7 +18,7 @@ describe('docTypeStart (integration)', () => {
          closeInternalSubset: makeSToken(']'),
          postCloseInternalSubsetSpace: makeSToken('\t'),
          close: makeSToken('>'),
-      };
+      } as any;
    });
 
    describe('parse()', () => {
@@ -29,7 +29,7 @@ describe('docTypeStart (integration)', () => {
          source.endText();
 
          docTypeEnd.parse(source, (parsing) => {
-            expect(parsing).toEqual(docTypeEndPToken);
+            expect(Object.assign({}, parsing)).toEqual(docTypeEndPToken);
             done();
          });
       });

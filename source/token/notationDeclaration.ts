@@ -6,7 +6,7 @@ import { SToken, STokenSource } from '../sToken/index';
 
 import declaration from './bridge/declaration';
 import externalId from './common/externalId.js';
-import misc from './common/misc.js';
+import misc from './common/misc';
 import base from './base';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './unassigned';
 

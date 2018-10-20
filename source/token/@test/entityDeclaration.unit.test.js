@@ -12,7 +12,7 @@ import * as entityDeclaration from '../entityDeclaration';
 import entityReference from '../entityReference'
 import unassigned from '../unassigned';
 import externalId from '../common/externalId.js';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import literal from '../common/literal';
 
 describe('entityDeclaration (unit)', () => {

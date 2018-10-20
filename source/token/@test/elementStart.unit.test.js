@@ -8,7 +8,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 
 import attribute from '../common/attribute';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import * as elementStart from '../elementStart';
 
 describe('elementStart (unit)', () => {

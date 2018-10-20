@@ -1,18 +1,18 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError } from '../../error';
+import { EntityLocation, EntityMetaData, Range } from '../../../basic';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from '../../../sToken';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { WellFormedError } from '../../../error';
 
-import entityReference from '../entityReference';
-import text from '../text';
-import unassigned from '../unassigned';
+import entityReference from '../../entityReference';
+import text from '../../text';
+import unassigned from '../../unassigned';
 
-import externalId from './externalId.js';
-import literal from './literal';
+import externalId from '../externalId.js';
+import literal from '../literal';
 
 describe('externalId (unit)', () => {
 

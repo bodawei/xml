@@ -88,13 +88,6 @@ class STokenSource {
    private _resuming?: boolean;
 
    constructor(extractorInfo: ExtractorMap, info: EntityMetaData) {
-      if (typeof extractorInfo !== 'object') {
-         throw new Error('Must pass a hash of extractor types to constructor functions to STokenSource().');
-      }
-      if (!(info instanceof EntityMetaData)) {
-         throw new Error('Must pass an EntityMetaData, or something that can become one, into STokenSource.');
-      }
-
       this._info = info;
       this._extractorInfo = extractorInfo;
 

@@ -3,7 +3,7 @@
 
 import { EntityMetaData } from '../basic';
 import { WellFormedError, ErrorCollector } from '../error/index';
-import misc from './common/misc.js';
+import misc from './common/misc';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';

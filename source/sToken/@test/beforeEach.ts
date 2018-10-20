@@ -6,7 +6,7 @@ import SToken from '../SToken';
 
 function toEqualSTokenText() {
    return {
-      compare: (actualSToken: SToken | void, expectedStr: string) => {
+      compare: (actualSToken: SToken | void, expectedStr: string | SToken) => {
          let pass = true;
          let message = '';
 
@@ -42,7 +42,7 @@ function toEqualSTokenText() {
 
 function toEqualSTokenTexts() {
    return {
-      compare: (actualArray: Array<any>, expectedTexts: Array<string>) => {
+      compare: (actualArray: Array<any> | void, expectedTexts: Array<string|SToken>) => {
          let pass = true;
          let message = '';
          let mismatchIndex;
@@ -114,7 +114,7 @@ function toSTokenTextObj(expectedStr: string | SToken): SToken {
 
 function toEqualSTokenRange() {
    return {
-      compare: (actualSToken: SToken, expectedRange: Range) => {
+      compare: (actualSToken: SToken | void, expectedRange: Range) => {
          let pass = true;
          let message = '';
 
@@ -148,6 +148,14 @@ beforeEach(() => {
    });
 
 });
+
+declare namespace jasmine {
+   interface Matchers<SToken> {
+      toEqualSTokenText(expectedText: string): void;
+      toEqualSTokenTexts(expectedTexts: Array<string>): void;
+      toEqualSTokenRange(expectedRange: Range): void;
+   }
+}
 
 export {
    toEqualSTokenText,

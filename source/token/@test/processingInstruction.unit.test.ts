@@ -40,7 +40,7 @@ describe('processingInstruction (unit)', () => {
             [ '?>', 'match', '?>' ],
          ]);
 
-         parseProcessingInstruction(mockSource, { open: SToken.fromString('open') }, callback);
+         parseProcessingInstruction(mockSource, { open: SToken.fromString('open') } as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless(piPToken);
@@ -52,7 +52,7 @@ describe('processingInstruction (unit)', () => {
             undefined,
          ]);
 
-         parseProcessingInstruction(mockSource, { open: SToken.fromString('') }, callback);
+         parseProcessingInstruction(mockSource, { open: SToken.fromString('') } as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toEqualRangeless({ open: SToken.fromString('') });

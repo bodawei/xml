@@ -6,7 +6,7 @@ import { EntityMetaData } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import * as charData from '../charData.js';
 
 describe('charData', () => {

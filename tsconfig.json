@@ -12,7 +12,12 @@
       "paths": {
          "basic": [ "./source/basic" ],
          "error": [ "./source/error" ],
+         "expand": [ "./source/expand" ],
+         "extractor": [ "./source/extractor" ],
+         "pTokenStream": [ "./source/pTokenStream" ],
          "sToken": [ "./source/sToken" ],
+         "token": [ "./source/token" ],
+         "xTokenStream": [ "./source/xTokenStream" ],
       }
      },
     "include": [

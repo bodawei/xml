@@ -205,7 +205,7 @@ describe('xmlDeclaration (unit)', () => {
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
-                  params: [ 1 ],
+                  params: [ '1' ],
                   position: undefined,
                });
             });

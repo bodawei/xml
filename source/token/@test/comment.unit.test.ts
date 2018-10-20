@@ -15,7 +15,7 @@ import {
    sTokensFromPToken,
    PTYPE
 } from '../comment';
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 
 describe('comment (unit)', () => {
    let commentPToken: CommentPToken;

@@ -10,7 +10,7 @@ import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
 import { AttributeValueXToken } from './common/attribute';
-import misc from './common/misc.js';
+import misc from './common/misc';
 
 const ATTLISTDECL_PTOKEN_TYPE = 'ATTLISTDECL_PTOKEN_TYPE';
 const ATTLIST_XTOKEN_TYPE = 'ATTLIST_XTOKEN_TYPE';

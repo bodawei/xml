@@ -4,18 +4,19 @@
 import { EntityLocation, EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { STokenSource, SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as docTypeStart from '../docTypeStart.js';
 import text from '../text';
+import { DeclarationPToken } from '../bridge/declaration';
 
 describe('docTypeStart (integration)', () => {
-   let docTypeStartPToken;
+   let docTypeStartPToken: docTypeStart.DocTypeStartPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      docTypeStartPToken = {
+      docTypeStartPToken = new docTypeStart.DocTypeStartPToken({
          type: 'DOCTYPE_START',
          name: makeSToken('rootElement'),
          postNameSpace: makeSToken(' '),
@@ -31,7 +32,7 @@ describe('docTypeStart (integration)', () => {
          },
          postExternalIdSpace: makeSToken(' '),
          startInternalSubset: makeSToken('['),
-      };
+      });
    });
 
    describe('parse()', () => {
@@ -41,7 +42,7 @@ describe('docTypeStart (integration)', () => {
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
-         docTypeStart.parse(source, {}, (parsing) => {
+         docTypeStart.parse(source, {} as any, (parsing) => {
             expect(parsing).toContainPTokenProps(docTypeStartPToken);
             done();
          });
@@ -50,14 +51,14 @@ describe('docTypeStart (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let declaration;
+      let declaration: DeclarationPToken;
 
       beforeEach(() => {
          const makeSToken = makeSTokenMaker();
-         declaration = {
+         declaration = new DeclarationPToken('FOO', {
             open: makeSToken('<!'),
             declType: makeSToken('DOCTYPE'),
-         };
+         });
       });
 
       it('asks the declaration module to report if there is no type', (done) => {
@@ -67,7 +68,7 @@ describe('docTypeStart (integration)', () => {
          delete declaration.declType;
 
          docTypeStart.parse(source, declaration, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             docTypeStart.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -82,7 +83,7 @@ describe('docTypeStart (integration)', () => {
          source.endText();
 
          docTypeStart.parse(source, declaration, (parsing) => {
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             docTypeStart.checkWellFormed(parsing, ec, new EntityMetaData());
 
@@ -94,14 +95,14 @@ describe('docTypeStart (integration)', () => {
    });
 
    describe('pTokenToXToken()', () => {
-      let declaration;
+      let declaration: DeclarationPToken;
 
       beforeEach(() => {
          const makeSToken = makeSTokenMaker();
-         declaration = {
+         declaration = new DeclarationPToken('FOO', {
             open: makeSToken('<!'),
             declType: makeSToken('DOCTYPE'),
-         };
+         });
       });
 
       it('populates the token with data from the PToken', (done) => {
@@ -114,7 +115,7 @@ describe('docTypeStart (integration)', () => {
 
             expect(token.name).toEqual('rootElement');
             expect(token.externalLoc).toEqual(new EntityLocation('sys.dtd'));
-            expect(token.pToken.declType).toEqual(declaration.declType);
+            expect(token.pToken!.declType).toEqual(declaration.declType);
             done();
          });
       });

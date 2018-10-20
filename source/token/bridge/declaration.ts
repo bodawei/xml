@@ -6,7 +6,7 @@ import { SToken, STokenSource } from '../../sToken';
 
 import {
    textOrBlank,
-} from '../common/misc.js';
+} from '../common/misc';
 import base, { STokenArray } from '../base';
 
 /**********************************************************************\

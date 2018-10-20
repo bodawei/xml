@@ -3,13 +3,14 @@
 
 import { EntityMetaData } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 
-import * as space from '../space.js';
+import * as space from '../space';
+import { SpacePToken } from '../space';
 
 describe('space (unit)', () => {
-   let spacePToken;
-   let makeSToken;
+   let spacePToken: SpacePToken;
+   let makeSToken: STokenMaker;
 
    beforeEach(() => {
       makeSToken = makeSTokenMaker();
@@ -33,7 +34,7 @@ describe('space (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -65,8 +66,8 @@ describe('space (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let emd;
+      let mockErrorCollector: MockErrorCollector;
+      let emd: EntityMetaData;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();

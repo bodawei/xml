@@ -8,10 +8,10 @@ import base, { STokenArray } from '../base';
 import entityReference from '../entityReference';
 import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
-import { textOrBlank } from './/misc.js';
+import { textOrBlank } from './/misc';
 import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';
 import nameListGraph from './nameListGraph';
-import misc from './misc.js';
+import misc from './misc';
 
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
 const WFEID = WellFormedError.ID;

@@ -8,7 +8,8 @@ import {
    checkWellFormedText,
    checkWellFormedNameRecommendation,
    textOrBlank,
-} from './common/misc.js';
+} from './common/misc';
+import { InstructionPToken } from './bridge/instruction';
 
 const WFEID = WellFormedError.ID;
 const PROCESSING_INSTRUCTION_PTOKEN = 'PROCESSING_INSTRUCTION';
@@ -84,7 +85,7 @@ class ProcessingInstructionPToken {
       [17] PITarget ::=  Name
 \**********************************************************************/
 
-function parseProcessingInstruction(source: STokenSource, instr: { open: SToken }, deliverPToken: DeliverPToken) {
+function parseProcessingInstruction(source: STokenSource, instr: InstructionPToken, deliverPToken: DeliverPToken) {
    const raw: any = Object.assign({}, instr);
 
    source.extractToObject('all', [ '?>' ], raw, 'instruction');

@@ -6,7 +6,7 @@ import { SToken, STokenSource } from '../../sToken';
 
 import entityReference, { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';
 import text, { TextPToken, TextXToken } from '../text';
-import misc from './misc.js';
+import misc from './misc';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };

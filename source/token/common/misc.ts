@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { util } from '../../basic';
-import { WellFormedError, XmlWarning } from '../../error';
+import { util, EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { SToken } from 'sToken';
 
 const WFEID = WellFormedError.ID;
 const XWID = XmlWarning.ID;
@@ -59,7 +60,7 @@ const WHOLENMTOKEN_REGEX11 = /^[-\.A-Za-z0-9:_\u00B7\u00C0-\u00D6\u00F8-\u02FF\u
  character requirements for names.
 \**********************************************************************/
 
-function checkName(nameSToken, ec, entityMetaData, errorCode) {
+function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
    if (!nameSToken || util.isName(nameSToken.str, entityMetaData.version, entityMetaData.revision)) {
       return;
    }
@@ -72,7 +73,7 @@ function checkName(nameSToken, ec, entityMetaData, errorCode) {
  character requirements for nmtokens.
 \**********************************************************************/
 
-function checkNMToken(nameTokenSToken, ec, entityMetaData, errorCode) {
+function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
    const use11Names = entityMetaData.isVersion1dot1 ||
       (entityMetaData.isVersion1dot0 && entityMetaData.revision === 5);
    const regEx = use11Names ? WHOLENMTOKEN_REGEX11 : WHOLENMTOKEN_REGEX10;
@@ -90,7 +91,7 @@ function checkNMToken(nameTokenSToken, ec, entityMetaData, errorCode) {
  version.
 \**********************************************************************/
 
-function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, nameType, v1R6Warning, otherWarning) {
+function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData, nameType: string, v1R6Warning: string, otherWarning: string) {
    if (!nameSToken) {
       return;
    }
@@ -176,7 +177,7 @@ function checkWellFormedNameRecommendation(nameSToken, ec, entityMd, nameType, v
  SToken matches the requirments for text.
 \**********************************************************************/
 
-function checkWellFormedText(sToken, ec, entityMd) {
+function checkWellFormedText(sToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData) {
    if (!sToken) {
       return;
    }
@@ -197,7 +198,7 @@ function checkWellFormedText(sToken, ec, entityMd) {
       ec.report(WFEID.CHARDATA_INVALID_CHAR, [ badIndices.join(', ') ]);
    }
 
-   let discouragedRegEx;
+   let discouragedRegEx: RegExp;
 
    if (entityMd.isVersion1dot1) {
       discouragedRegEx = DISCOURAGED_CHARS_11;
@@ -217,20 +218,20 @@ function checkWellFormedText(sToken, ec, entityMd) {
       }
    }
 
-   discouragedRegEx.lastIndex = 0;
-   let foundDiscouraged = discouragedRegEx.test(sToken.str);
+   discouragedRegEx!.lastIndex = 0;
+   let foundDiscouraged = discouragedRegEx!.test(sToken.str);
 
    if (foundDiscouraged) {
       while (foundDiscouraged) {
-         discouragedIndices.push(sToken.ranges[0].startIndex - 1 + discouragedRegEx.lastIndex);
-         foundDiscouraged = discouragedRegEx.test(sToken.str);
+         discouragedIndices.push(sToken.ranges[0].startIndex - 1 + discouragedRegEx!.lastIndex);
+         foundDiscouraged = discouragedRegEx!.test(sToken.str);
       }
 
       ec.reportError(XWID.CHARDATA_DISCOURAGED_CHAR, XmlWarning, [ discouragedIndices.join(', ') ]);
    }
 }
 
-function textOrBlank(sToken) {
+function textOrBlank(sToken: SToken | void) {
    return sToken ? sToken.str : '';
 }
 

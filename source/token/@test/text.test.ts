@@ -5,9 +5,11 @@
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
 import text from '../text';
+import { TextPToken, TextXToken } from '../text';
+import { SToken } from 'sToken';
 
 describe('text (unit)', () => {
-   let textPToken;
+   let textPToken: TextPToken;
 
    beforeEach(() => {
       const makeToken = makeSTokenMaker();
@@ -19,12 +21,10 @@ describe('text (unit)', () => {
    describe('Token', () => {
 
       it('is constructed with value and STokens', () => {
-         const token = new text.XToken('foo', [ textPToken.text ]);
+         const token = new text.XToken('foo', textPToken);
 
          expect(token.text).toEqual('foo');
-         expect(token.pToken).toEqual([
-            textPToken.text,
-         ]);
+         expect(token.pToken).toEqual(textPToken);
       });
 
    });
@@ -36,7 +36,7 @@ describe('text (unit)', () => {
          it('returns all the STokens', () => {
             expect(textPToken.getSTokenArray()).toEqual([
                textPToken.text,
-            ]);
+            ] as Array<SToken>);
          });
 
       });
@@ -44,7 +44,7 @@ describe('text (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');

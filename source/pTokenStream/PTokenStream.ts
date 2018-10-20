@@ -28,9 +28,9 @@ import {
 import { parseProcessingInstruction } from '../token/processingInstruction';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { DocTypeEndPToken } from '../token/docTypeEnd';
+import { InstructionPToken } from '../token/bridge/instruction';
 
 type Token = { type: string, text?: SToken };
-type InstructionToken = { open: SToken, target?: SToken};
 type DeliverPToken = (result: any) => void; // icky typeHack
 
 class PTokenStream extends stream.Transform {
@@ -141,7 +141,7 @@ class PTokenStream extends stream.Transform {
                   this._parseClose(deliverParse);
                   this.waitingForInternalClose = false;
                } else {
-                  charData.parse(this._sTokenSource, (charPToken: Token) => {
+                  charData.parse(this._sTokenSource, [], (charPToken: Token) => {
                      if (charPToken && charPToken.text) {
                         deliverParse(charPToken);
                      } else {
@@ -187,7 +187,7 @@ class PTokenStream extends stream.Transform {
                elementEnd.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               instruction.parse(this._sTokenSource, markupStartSToken, (pToken: InstructionToken) => {
+               instruction.parse(this._sTokenSource, markupStartSToken, (pToken: InstructionPToken) => {
                   const target = pToken.target ? pToken.target.str : '';
 
                   if (target.toLocaleUpperCase() === 'XML') {

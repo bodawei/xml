@@ -2,9 +2,12 @@
 
 import {
    textOrBlank,
-} from './common/misc.js';
-import misc from './common/misc.js';
+} from './common/misc';
+import misc from './common/misc';
 import base from './base';
+import { STokenSource } from 'sToken';
+import { ErrorCollector } from 'error';
+import { EntityMetaData } from 'basic';
 
 const CHARDATA = 'CHARDATA';
 const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
@@ -15,10 +18,11 @@ const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
 \**********************************************************************/
 
 class CharData extends base.XToken {
+   public text: string;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(text, sTokens) {
-      super(CHARDATA_XTOKEN, sTokens);
+   constructor(text: string, pToken?: CharDataPToken) {
+      super(CHARDATA_XTOKEN, pToken);
 
       this.text = text;
    }
@@ -27,7 +31,7 @@ class CharData extends base.XToken {
 
 class CharDataPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props) {
+   constructor(props?: Object) {
       super(CHARDATA, props);
    }
 
@@ -53,7 +57,7 @@ class CharDataPToken extends base.PToken {
    [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
-function parse(source, otherTerminators, deliverPToken) {
+function parse(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken) => void) {
    let terminators = [ '<', '&', ']]>' ];
    if (typeof otherTerminators === 'function') {
       deliverPToken = otherTerminators;
@@ -73,7 +77,7 @@ function parse(source, otherTerminators, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData) {
+function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.text);
    misc.checkWellFormedText(pToken.text, ec, entityMetaData);
 }
@@ -82,7 +86,7 @@ function checkWellFormed(pToken, ec, entityMetaData) {
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: CharDataPToken) {
    return new CharData(textOrBlank(pToken.text), pToken);
 }
 

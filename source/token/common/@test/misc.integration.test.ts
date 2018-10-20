@@ -4,20 +4,21 @@
 import { EntityMetaData, EntityKind } from '../../../basic';
 import { ErrorCollector, WellFormedError } from '../../../error';
 import { makeSToken } from '../../../sToken/@test/helper';
+import { SToken } from 'sToken';
 
-import misc from '../misc.js';
+import misc from '../misc';
 
 describe('misc', () => {
 
    describe('checkName', () => {
-      let ec;
-      let errorId;
-      let emdV1R5;
-      let emdV1R4;
-      let emdV11R2;
+      let ec: ErrorCollector;
+      let errorId: string;
+      let emdV1R5: EntityMetaData;
+      let emdV1R4: EntityMetaData;
+      let emdV11R2: EntityMetaData;
 
       beforeEach(() => {
-         ec = new ErrorCollector({}, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          emdV1R4 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4);
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);

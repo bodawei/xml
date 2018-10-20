@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError } from '../../error/index';
 import { SToken, STokenSource, STokenArrayBuilder } from '../../sToken/index';
 import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
 
-import misc from './misc.js';
+import misc from './misc';
 
 const ENUMERATION_PTOKEN = 'ENUMERATION_PTOKEN';
 const NOTATION_PTOKEN = 'NOTATION_PTOKEN';

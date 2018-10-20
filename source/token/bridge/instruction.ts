@@ -1,9 +1,11 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning } from '../../error';
+import { WellFormedError, XmlWarning, ErrorCollector } from '../../error';
 
-import misc from '../common/misc.js';
+import misc from '../common/misc';
 import base from '../base';
+import { SToken, STokenSource } from 'sToken';
+import { EntityMetaData } from 'basic';
 
 /**********************************************************************\
  The instruction namespace has routines for parsing and checking
@@ -17,9 +19,10 @@ const INSTRUCTION = 'INSTRUCTION';
 const INSTRUCTION_XTOKEN = 'INSTRUCTION_XTOKEN';
 
 class InstructionToken extends base.XToken {
+   public target: string;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(target, pToken) {
+   constructor(target: string, pToken?: InstructionPToken) {
       super(INSTRUCTION_XTOKEN, pToken);
 
       this.target = target;
@@ -29,7 +32,7 @@ class InstructionToken extends base.XToken {
 
 class InstructionPToken extends base.PToken {
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(type, props) {
+   constructor(type: string, props?: Object) {
       super(type || INSTRUCTION, props);
       // fix processingInstruction
    }
@@ -59,14 +62,14 @@ class InstructionPToken extends base.PToken {
    instruction ::= '<?' name S
 \**********************************************************************/
 
-function parse(source, openSToken, deliverPToken) {
-   const pToken = new InstructionPToken();
+function parse(source: STokenSource, openSToken: SToken, deliverPToken: (result: InstructionPToken) => void) {
+   const pToken = new InstructionPToken('');
    pToken.open = openSToken;
 
-   source.extractToObject('space', pToken, 'postOpenSpace');
+   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
    source.extractToObject('word', [ '?>' ], pToken, 'target');
 
-   source.extract('space', (sToken) => {
+   source.extractNoParams('space', (sToken) => {
       pToken.postTargetSpace = sToken;
       deliverPToken(pToken);
    });
@@ -76,7 +79,7 @@ function parse(source, openSToken, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
+function checkWellFormed(pToken: InstructionPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, xmlOk: boolean = false) {
    // Note: This is now only being used by xml declaration.  instruction should just vanish as a pseudo type
    // Maybe the othe generic markup should vanish too.
    ec.setPos(pToken.open);
@@ -88,7 +91,7 @@ function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
    misc.checkWellFormedText(pToken.target, ec, entityMetaData);
 
    if (!xmlOk) {
-      misc.checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, false,
+      misc.checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, 'PI',
          WARN.PI_TARGET_XMLDASH_RESERVED, WARN.PI_TARGET_XML_RESERVED);
    }
 
@@ -101,7 +104,7 @@ function checkWellFormed(pToken, ec, entityMetaData, xmlOk) {
 \**********************************************************************/
 
 // Does this even make sense?  Won't this just be a processinginstruction by default?
-function pTokenToXToken(pToken) {
+function pTokenToXToken(pToken: InstructionPToken) {
    return new InstructionToken(misc.textOrBlank(pToken.target), pToken);
 }
 
@@ -113,4 +116,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   InstructionPToken,
 };

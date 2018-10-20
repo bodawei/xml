@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError } from '../error/index';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken/index';
 
 import { SectionStart } from './bridge/section';
-import misc from './common/misc.js';
+import misc from './common/misc';
 
 const CDATA_PTOKEN = 'CDATA_PTOKEN';
 const CDATA_XTOKEN = 'CDATA_XTOKEN';
