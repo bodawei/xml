@@ -2,11 +2,11 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData } from '../basic';
-import { XmlWarning, ValidityError, WellFormedError } from '../error';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
 import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
-import { SToken, STokenSource } from '../sToken';
+import { SToken, STokenSource } from 'sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
    attListDeclaration,
@@ -33,6 +33,7 @@ import { EntityReferencePToken, EntityReferenceXToken, ParameterEntityReferenceP
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { ParameterEntityStartPToken, EntityStart } from '../token/entityStart'; // badRef
+import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 
 import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/unassigned';
@@ -514,6 +515,31 @@ class NodeStream extends stream.Transform {
       const openSToken = startXToken.pToken && startXToken.pToken.open;
 
       this._expandAttributeValues(startXToken.attributes, openSToken, () => {
+         //
+         // §2.12: Language Identification
+         // The value of the xml:lang attribute must match a particular
+         // set of syntactic constraints. Note if this does not have expanded
+         // references, we assume this check was done at initial check time
+         //
+         for (const attr of startXToken.attributes) {
+            const lcName = attr.name.toLowerCase();
+
+            if (lcName === 'xml:lang') {
+               if (attr.value.some((item) => item.type === entityStart.XTYPE)) {
+                  const havePTokens = attr.value.filter((item) => !!item.pToken);
+                  const firstPToken = havePTokens[0]; // because we have expanded, we'll always have ptokens
+                  const firstSToken = (firstPToken as any).pToken.text || (firstPToken as any).pToken.open;
+                  const ec = new ErrorCollector(firstSToken, WellFormedError);
+                  
+                  checkXmlLangWellFormed(attr.value, ec, new EntityMetaData()); // where is our emd?
+
+                  for (const error of ec.errors) {
+                     this.push(error);
+                  }
+               }
+            }
+         }
+
          this.push(startXToken);
          done();
       });

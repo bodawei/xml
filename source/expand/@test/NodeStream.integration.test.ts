@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
-import { ValidityError } from '../../error/index';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from '../../sToken/@test/helper';
 import * as tokenNs from '../../token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
@@ -358,6 +358,18 @@ describe('NodeStream (integration)', () => {
                })),
                new GeneralEntityEndXToken('parent'),
             ]);
+            done();
+         });
+      });
+
+      it('reports an error if an xml:lang attribute is bad', (done) => {
+         expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
+            '<!ENTITY child "99-US">' + // bad language code!
+         ']>' +
+         '<one xml:lang="&child;"/>', (results) => {
+            const element = results[5] as WellFormedError; // typeHack
+
+            expect(element.id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
             done();
          });
       });

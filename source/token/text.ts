@@ -22,7 +22,7 @@ class TextXToken extends base.XToken {
    public text: string;
 
    constructor(text: string, pToken?: TextPToken) {
-      super(TEXT_XTOKEN, pToken || {} as TextPToken);
+      super(TEXT_XTOKEN, pToken as TextPToken);
 
       this.text = text;
    }
@@ -93,4 +93,4 @@ const text = {
 };
 
 export default text;
-export { TEXT as PTYPE, TextPToken, TextXToken, isTextPToken };
+export { TEXT as PTYPE, TextPToken, TextXToken, isTextPToken, isTextXToken };

@@ -66,6 +66,7 @@ function parse(source, deliverPToken) {
  checkWellFormed() does check on validity
 \**********************************************************************/
 
+// eslint-disable-next-line no-unused-vars
 function checkWellFormed(pToken, ec, emd) {
    ec.setPos(pToken.text);
 }

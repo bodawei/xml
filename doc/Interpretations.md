@@ -59,6 +59,7 @@ In turn, RFC 4646 reduces the allowable syntax. In the case of the first tag, th
 
 1.0/5 references RFC 4646 (or it's successor).
 
+It is notable that we will check the value when doing pToken checkWellFormed() checks when it is available, and otherwise wait until expansion to determine if it is ok.
 
 ## limits
 - commetn eetc

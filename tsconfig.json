@@ -10,7 +10,9 @@
 
       "baseUrl": "./",
       "paths": {
-        "error": [ "./source/error" ],
+         "basic": [ "./source/basic" ],
+         "error": [ "./source/error" ],
+         "sToken": [ "./source/sToken" ],
       }
      },
     "include": [

@@ -184,6 +184,7 @@ const entityReference = {
 export default entityReference;
 export {
    ENTITYREF as GENERAL_ENTITY_REFERENCE_PTOKEN,
+   ENTITYREF_XTOKEN as GENERAL_ENTITY_REFERENCE_XTOKEN,
    EntityReferencePToken,
    EntityReferenceXToken,
    ParameterEntityReferencePToken,

@@ -1,16 +1,18 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning,  } from '../../error/index';
-import { SToken, STokenSource } from '../../sToken/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
+import { SToken, STokenSource } from 'sToken';
 
-import { EntityReferenceXToken } from '../entityReference';
-import text, { TextXToken, isTextPToken } from '../text';
+import { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';
+import text, { TextXToken, isTextPToken, TextPToken } from '../text';
 
+import { checkXmlLangWellFormed } from './langAttribute';
 import misc from './misc.js';
 import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken, LiteralValueXToken } from './literalValue';
-import { GeneralEntityEndXToken } from '../generalEntityEnd';
+import { EntityStartPToken } from '../entityStart';
+import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -25,6 +27,7 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
+type AttributeValuePToken = Array<TextPToken|EntityReferencePToken|EntityStartPToken|GeneralEntityEndPToken>;
 type AttributeValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityEndXToken>;
 
 type AttributeXToken = {
@@ -142,6 +145,17 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
          misc.checkWellFormedNameRecommendation(attr.name, ec, entityMetaData, 'ATTRIBUTE',
             WARN.ATTRIBUTE_NAME_XMLCOLON_RESERVED,
             WARN.ATTRIBUTE_NAME_XML_RESERVED);
+
+         //
+         // §2.12: Language Identification
+         // The value of the xml:lang attribute must match a particular
+         // set of syntactic constraints. Note that if the attribute value
+         // has entity references, this won't do any checking.
+         //
+         if (attr.name.str.toLowerCase() === 'xml:lang') {
+            checkXmlLangWellFormed(attr.value, ec, entityMetaData);
+         }
+
          seenAttrNames[nameText] = true;
       }
 
@@ -261,5 +275,6 @@ export default attribute;
 
 export {
    AttributeXToken,
+   AttributeValuePToken,
    AttributeValueXToken,
 };

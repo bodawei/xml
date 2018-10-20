@@ -120,6 +120,18 @@ describe('attribute (integration)', () => {
          });
       });
 
+      it('asks checkXmlLangWellFormed() to complain if the xml:lang value is bad', (done) => {
+         source.addText('xml:lang="99">');
+         source.endText();
+
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
+            attribute.checkWellFormed(parsing, ec, emd, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
+            done();
+         });
+      });
+
       it('asks misc.checkWellFormedNameRecommendation() to complain if the name is bad', (done) => {
          const metaData = new EntityMetaData(undefined, 1.0, 6, undefined);
          source.addText('xml:foo="value">');

@@ -62,4 +62,5 @@ export default entityStart;
 export {
    ParameterEntityStartPToken,
    EntityStart,
+   EntityStartPToken,
 };

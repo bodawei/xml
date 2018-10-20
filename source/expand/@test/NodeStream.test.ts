@@ -3,10 +3,11 @@
 
 import stream from 'readable-stream';
 
-import { EntityLocation, Range } from '../../basic';
-import { ValidityError, WellFormedError, XmlWarning } from '../../error';
+import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { ErrorCollector, ValidityError, WellFormedError, XmlWarning } from '../../error';
 import { SToken, STokenSource } from '../../sToken';
 import * as xToken from '../../token';
+import * as langAttribute from '../../token/common/langAttribute';
 import { ParameterEntityEndPToken, GeneralEntityEndXToken } from '../../token';
 import { UnassignedType } from '../../token/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
@@ -1160,6 +1161,59 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
+               done();
+            });
+         });
+
+         it('checks whether the language is well formed', (done) => {
+            const checkSpy = spyOn(langAttribute, 'checkXmlLangWellFormed');
+            spyOn(entityManager, 'getEntityInfo').and.returnValue({
+               isParameter: false,
+               isInternal: true,
+               isParsable: true,
+               getStream() {}
+            });
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one') ];
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'xml:lang',
+               value: [
+                  new xToken.entityReference.XToken('refName'),
+               ],
+            }]);
+
+            nodeStream.write(elementStart);
+
+            gatherResult(nodeStream, () => {
+               const args = checkSpy.calls.argsFor(0);
+               expect(args[0]).toEqual([
+                  new xToken.entityStart.XToken('refName'),
+                  new xToken.text.XToken('one'),
+                  new GeneralEntityEndXToken('refName'),
+               ]);
+               expect(args[1]).toBeInstanceOf(ErrorCollector);
+               expect(args[2]).toBeInstanceOf(EntityMetaData);
+               done();
+            });
+         });
+
+         it('does not call checkXmlLangWellFormed if there are no expanded refs', (done) => {
+            const checkSpy = spyOn(langAttribute, 'checkXmlLangWellFormed');
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'xml:lang',
+               value: [
+                  new xToken.text.XToken('one'),
+               ],
+            }]);
+
+            nodeStream.write(elementStart);
+
+            gatherResult(nodeStream, () => {
+               expect(checkSpy).not.toHaveBeenCalled();
                done();
             });
          });

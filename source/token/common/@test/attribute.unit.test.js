@@ -1,12 +1,13 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../../basic';
+import { EntityMetaData, Range } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
-import { WellFormedError, XmlWarning } from '../../../error';
-import { SToken } from '../../../sToken';
+import { SToken } from 'sToken';
 
+import * as langAttribute from '../langAttribute';
 import text from '../../text';
 import entityReference from '../../entityReference';
 import attribute from '../attribute';
@@ -208,6 +209,7 @@ describe('attribute (unit)', () => {
          spyOn(misc, 'checkWellFormedText');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          spyOn(literal, 'checkWellFormed');
+         spyOn(langAttribute, 'checkXmlLangWellFormed');
       });
 
       it('calls the misc.checkName() routine', () => {
@@ -215,6 +217,15 @@ describe('attribute (unit)', () => {
 
          expect(misc.checkName).toHaveBeenCalledWith(attributesPChunk[0].name, mockErrorCollector, emd,
             WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
+      });
+
+      it('calls the langAttribute.checkXmlLangWellFormed() routine', () => {
+         attributesPChunk[0].name.str = 'xml:lang';
+         attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
+            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+
+         expect(langAttribute.checkXmlLangWellFormed)
+            .toHaveBeenCalledWith(attributesPChunk[0].value, mockErrorCollector, emd);
       });
 
       it('asks the literal module to look for problems in the declaration part', () => {
