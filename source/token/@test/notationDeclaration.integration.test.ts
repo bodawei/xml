@@ -13,7 +13,7 @@ import entityStart from '../entityStart';
 import externalId from '../common/externalId';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import text from '../text';
-import unassigned, { UnassignedType } from '../unassigned';
+import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper';
 

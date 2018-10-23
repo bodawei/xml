@@ -4,7 +4,7 @@ import { EntityLocation } from '../../basic';
 import { WellFormedError } from '../../error';
 
 import entityReference from '../entityReference';
-import unassigned from '../unassigned';
+import unassigned from '../common/unassigned';
 
 import literal from './literal';
 import { textOrBlank } from './misc';

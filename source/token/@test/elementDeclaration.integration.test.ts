@@ -14,7 +14,7 @@ import entityStart from '../entityStart.js';
 import externalId from '../common/externalId.js';
 import elementDeclaration from '../elementDeclaration.js';
 import text from '../text';
-import unassigned from '../unassigned';
+import unassigned from '../common/unassigned';
 
 import helper from './helper.js';
 

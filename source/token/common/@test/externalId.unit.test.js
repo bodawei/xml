@@ -9,7 +9,7 @@ import { WellFormedError } from '../../../error';
 
 import entityReference from '../../entityReference';
 import text from '../../text';
-import unassigned from '../../unassigned';
+import unassigned from '../../common/unassigned';
 
 import externalId from '../externalId.js';
 import literal from '../literal';

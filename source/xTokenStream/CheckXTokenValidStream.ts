@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, util } from '../basic';
-import { ValidityError, ERROR_TYPE, XmlWarning } from '../error';
+import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 import {
    charData,
@@ -759,10 +759,37 @@ class CheckXTokenValidStream extends stream.Transform {
                }
             });
          } else {
+            const graph = nameList.graphFromNameList(children);
+
+            //
+            // §3.2.1
+            // For compatibility, it is an error if an element in the document can
+            // match more than one occurrence of an element type in the content
+            // model. For more information, see "E. Deterministic Content Models".
+            //
+            const cases: Array<string> = [];
+
+            Object.keys(graph.states).forEach((id) => {
+               const state = graph.states[Number(id)];
+
+               Object.keys(state.trans).forEach((transName) => {
+                  if (state.trans[transName].ref.indexOf(',') != -1) {
+                     cases.push(`${transName} (${state.trans[transName].ref})`);
+                  }
+               });
+            });
+
+            if (cases.length > 0) {
+               const wfe = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
+                  [ cases.join(',') ], openSToken, undefined);
+
+               this.push(wfe);
+            }
+
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
                type: 'CHILDREN',
-               graph: nameList.graphFromNameList(children)
+               graph
             };
          }
       }

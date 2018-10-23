@@ -20,7 +20,7 @@ import * as space from './space';
 import text from './text';
 import * as notationDeclaration from './notationDeclaration';
 export * from './processingInstruction';
-import unassigned from './unassigned';
+import unassigned from './common/unassigned';
 import * as xmlDeclaration from './xmlDeclaration';
 
 import literalValue from './common/literalValue';

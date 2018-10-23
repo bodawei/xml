@@ -1,20 +1,20 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../../basic';
-import { WellFormedError } from '../../error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { EntityLocation, Range } from '../../../basic';
+import { WellFormedError } from '../../../error';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from '../../../sToken';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
-import entityReference from '../entityReference.js';
-import entityStart from '../entityStart.js';
-import text from '../text';
-import literal from '../common/literal';
+import { ParameterEntityEndPToken } from '../../parameterEntityEnd.js';
+import entityReference from '../../entityReference.js';
+import entityStart from '../../entityStart.js';
+import text from '../../text';
+import literal from '../literal';
 import unassigned, { UnassignedType } from '../unassigned';
 
-import helper from './helper.js';
+import helper from '../../@test/helper.js';
 
 describe('unassigned (unit)', () => {
 

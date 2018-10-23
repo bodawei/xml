@@ -4,7 +4,7 @@ import { EntityMetaData } from '../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 import entityReference from './entityReference';
-import unassigned, { UnassignedArray } from './unassigned';
+import unassigned, { UnassignedArray } from './common/unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';

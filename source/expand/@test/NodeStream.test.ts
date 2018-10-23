@@ -9,7 +9,7 @@ import { SToken, STokenSource } from '../../sToken';
 import * as xToken from '../../token';
 import * as langAttribute from '../../token/common/langAttribute';
 import { ParameterEntityEndPToken, GeneralEntityEndXToken } from '../../token';
-import { UnassignedType } from '../../token/unassigned';
+import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
 import { ParameterEntityReferencePToken } from '../../token/entityReference';
 import { ElementDeclarationPToken } from '../../token/elementDeclaration'; // hack

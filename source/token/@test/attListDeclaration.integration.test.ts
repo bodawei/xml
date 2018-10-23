@@ -14,7 +14,7 @@ import { WordListPToken, WordListType } from '../common/wordList';
 import { ParameterEntityEndPToken } from '../parameterEntityEnd';
 import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
 import entityStart from '../entityStart';
-import unassigned, { UnassignedType } from '../unassigned';
+import unassigned, { UnassignedType } from '../common/unassigned';
 
 describe('attListDeclaration (integration)', () => {
    let declarationPToken: AttListPToken;

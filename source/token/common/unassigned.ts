@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, Range } from '../basic';
-import { ErrorCollector } from '../error/index';
-import { SToken, STokenSource } from '../sToken';
+import { EntityLocation, Range } from 'basic';
+import { ErrorCollector } from 'error';
+import { SToken, STokenSource } from 'sToken';
 
-import entityReference, { ParameterEntityReferencePToken } from './entityReference.js';
-import entityStart from './entityStart.js';
-import { ParameterEntityEndPToken } from './parameterEntityEnd';
-import text from './text';
-import { TextPToken } from './text';
-import literal, { LiteralPToken, LiteralValuePToken } from './common/literal';
+import entityReference, { ParameterEntityReferencePToken } from '../entityReference.js';
+import entityStart from '../entityStart.js';
+import { ParameterEntityEndPToken } from '../parameterEntityEnd';
+import text from '../text';
+import { TextPToken } from '../text';
+import literal, { LiteralPToken, LiteralValuePToken } from '../common/literal';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];

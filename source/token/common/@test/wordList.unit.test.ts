@@ -10,7 +10,7 @@ import { WellFormedError } from '../../../error/index';
 
 import entityReference from '../../entityReference';
 import text from '../../text';
-import unassigned, { UnassignedType, UnassignedArray } from '../../unassigned';
+import unassigned, { UnassignedType, UnassignedArray } from '../../common/unassigned';
 
 import misc from '../../common/misc';
 

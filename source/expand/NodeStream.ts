@@ -36,7 +36,7 @@ import { ParameterEntityStartPToken, EntityStart } from '../token/entityStart'; 
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 
 import EntityManager from './EntityManager';
-import { UnassignedArray, UnassignedType } from '../token/unassigned';
+import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
 import { LiteralValueXToken } from '../token/common/literal';
 
 type XToken = { type: string };

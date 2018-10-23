@@ -1,15 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { EntityMetaData } from '../../../basic';
+import { defaultExtractors } from '../../../extractor';
+import { STokenSource } from '../../../sToken';
 
-import { Graph } from '../common/nameListGraphTypes';
-import nameListToGraph from '../common/nameListToGraph';
-import nameList, { NameListPToken, XNameList, XName } from '../common/nameList'
+import { Graph } from '../nameListGraphTypes';
+import nameListToGraph from '../nameListToGraph';
+import nameList, { NameListPToken, XNameList, XName } from '../nameList'
 
-import collapseAutoTrans from '../common/collapseAutoTrans';
+import collapseAutoTrans from '../collapseAutoTrans';
 
 describe('collapseAutoTrans()', () => {
 

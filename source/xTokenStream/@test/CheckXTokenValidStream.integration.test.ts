@@ -4,7 +4,7 @@
 import stream from 'readable-stream';
 
 import { EntityLocation, EntityMetaData, Offset } from '../../basic';
-import { ValidityError } from '../../error';
+import { ValidityError, WellFormedError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpandingStream } from '../../expand';
 
@@ -65,6 +65,26 @@ describe('CheckXTokenValidStream (integration)', () => {
       parser.endText();
 
       expectStream(validator, error, done);
+   });
+
+   it('reports an error if a non-deterministic content model is found', (done) => {
+      const error = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
+         [ 'b (/1/1,/2/1)' ], new Offset(new EntityLocation(), 100, 0, 100));
+
+      parser.addText('<?xml version="1.0"?><!DOCTYPE one [');
+      parser.addText('  <!ELEMENT a ANY > ');
+      parser.addText('  <!ELEMENT b ANY > ');
+      parser.addText('  <!ELEMENT c ANY > ');
+      parser.addText('  <!ELEMENT one ((b , a) | ( b, c)) > ');
+      parser.addText(']>');
+      parser.addText('<one>');
+      parser.addText('</one>');
+      parser.endText();
+
+      gatherTokens(validator, (results) => {
+         expect(results[10]).toEqual(error);
+         done();
+      });
    });
 
    it('reports an error when the an element type appears at an invalid place in the content', (done) => {

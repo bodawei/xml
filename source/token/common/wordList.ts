@@ -3,7 +3,7 @@
 import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError } from '../../error/index';
 import { SToken, STokenSource, STokenArrayBuilder } from '../../sToken/index';
-import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
+import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import misc from './misc';
 

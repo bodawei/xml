@@ -1,9 +1,9 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { StateIdToStateMap, Graph } from '../common/nameListGraphTypes';
+import { StateIdToStateMap, Graph } from '../nameListGraphTypes';
 
-import pruneNameListGraph from '../common/pruneNameListGraph';
+import pruneNameListGraph from '../pruneNameListGraph';
 
 describe('pruneNameListGraph()', () => {
 

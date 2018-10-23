@@ -8,7 +8,7 @@ import declaration from './bridge/declaration';
 import externalId from './common/externalId.js';
 import misc from './common/misc';
 import base from './base';
-import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './unassigned';
+import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
 
 const NOTATIONDECL = 'NOTATIONDECL';
 const NOTATIONDECL_XTOKEN = 'NOTATIONDECL_XTOKEN';

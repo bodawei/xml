@@ -1,13 +1,13 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { EntityMetaData } from '../../../basic';
+import { defaultExtractors } from '../../../extractor';
+import { STokenSource } from '../../../sToken';
+import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference from '../entityReference.js';
-import text from '../text';
+import entityReference from '../../entityReference.js';
+import text from '../../text';
 import unassigned from '../unassigned';
 
 describe('unassigned (integration)', () => {

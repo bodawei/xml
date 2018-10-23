@@ -1,23 +1,23 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic/index';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken/index';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { XNameList } from '../common/nameList';
-import nameListGraph from '../common/nameListGraph';
-import { WellFormedError, XmlWarning } from '../../error/index';
+import { EntityMetaData, Range } from '../../../basic/index';
+import { MockErrorCollector } from '../../../error/@test/helper';
+import { SToken } from '../../../sToken/index';
+import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { XNameList } from '../nameList';
+import nameListGraph from '../nameListGraph';
+import { WellFormedError, XmlWarning } from '../../../error/index';
 
-import entityReference from '../entityReference';
+import entityReference from '../../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';
 
-import misc from '../common/misc';
+import misc from '../misc';
 import nameList, {
    ContentParticlePToken,
    NameListPToken,
    NamePToken,
-} from '../common/nameList.js';
+} from '../nameList.js';
 
 describe('nameList (unit)', () => {
    let nlPToken: NameListPToken;

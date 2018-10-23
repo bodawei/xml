@@ -10,7 +10,7 @@ import { WellFormedError, XmlWarning } from '../../error/index';
 import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration.js';
 import declaration from '../bridge/declaration';
 import text from '../text';
-import unassigned, { UnassignedArray } from '../unassigned';
+import unassigned, { UnassignedArray } from '../common/unassigned';
 import literal from '../common/literal';
 import * as wordList from '../common/wordList';
 import misc from '../common/misc';

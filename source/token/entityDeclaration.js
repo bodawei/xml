@@ -4,7 +4,7 @@ import { WellFormedError, XmlWarning } from '../error';
 
 import base from './base';
 import entityReference from './entityReference';
-import unassigned, { UnassignedType } from './unassigned';
+import unassigned, { UnassignedType } from './common/unassigned';
 import declaration from './bridge/declaration';
 import misc from './common/misc';
 import externalId from './common/externalId';

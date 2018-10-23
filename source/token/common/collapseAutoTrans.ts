@@ -10,8 +10,8 @@ let nextStateId: StateId;
 /*
  * In nameListToGraph(), we create various "autoTrans" transitions for situations
  * where we are allowed to automatically transition from one state to another without
- * first matchign any input. However, we can technically remove all of those.
- * It is very hard to do it while convertign the original expression into a graph,
+ * first matching any input. However, we can technically remove all of those.
+ * It is very hard to do it while converting the original expression into a graph,
  * since this needs to be able to look ahead.
  * 
  * This routine, then, takes the output from a nameListToGraph() call, and re-arranges
@@ -27,7 +27,7 @@ let nextStateId: StateId;
  * A byproduct of this is that we may end up a situation where the same input can
  * transition to multiple states. We cope with this by introducing an "artifical"
  * state that that input transitions to, and then that state will recieve the next
- * input to decide where to transition next. Naturaly, this operation needs to
+ * input to decide where to transition next. Naturally, this operation needs to
  * be processed recursively, since in so doing the artificial state may end up
  * with conflicting transitions.
  * 
@@ -129,6 +129,8 @@ function addAllTransitions(base: State, originator: State, allStates: StateIdToS
       if (baseTrans.ref === originTrans.ref) {
          continue;
       }
+
+      // @@@ here is the problem
 
       // Create a state that we will transition to when we see 'name'.
       // It will then contain the transitions that can be done from there.

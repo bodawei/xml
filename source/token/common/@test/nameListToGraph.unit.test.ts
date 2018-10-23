@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { XNameList } from '../common/nameList'
-import nameListToGraph from '../common/nameListToGraph.js';
+import { XNameList } from '../nameList'
+import nameListToGraph from '../nameListToGraph.js';
 
 describe('nameListToGraph()', () => {
 

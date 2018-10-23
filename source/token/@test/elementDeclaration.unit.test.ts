@@ -12,7 +12,7 @@ import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclarat
 import misc from '../common/misc';
 import nameList from '../common/nameList';
 import entityReference from '../entityReference';
-import unassigned, { UnassignedType } from '../unassigned';
+import unassigned, { UnassignedType } from '../common/unassigned';
 
 describe('elementDeclaration (unit)', () => {
    let elementPToken: ElementDeclarationPToken;

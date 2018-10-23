@@ -5,7 +5,7 @@ import { EntityMetaData } from '../../../basic/index';
 import { defaultExtractors } from '../../../extractor/index';
 import { SToken, STokenSource } from '../../../sToken/index';
 
-import unassigned from '../../unassigned';
+import unassigned from '../../common/unassigned';
 import {
    parseWordList,
    WordListType,

@@ -6,7 +6,7 @@ import { SToken, STokenSource } from '../../sToken/index';
 
 import base, { STokenArray } from '../base';
 import entityReference from '../entityReference';
-import unassigned, { DescriptorArray, UnassignedArray } from '../unassigned';
+import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import { textOrBlank } from './/misc';
 import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';

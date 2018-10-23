@@ -38,12 +38,11 @@ import CheckXTokenValidStream from '../CheckXTokenValidStream';
 function toHaveError(util: any) {
    return {
       compare: (actual: any, expected: any) => {
-         let Constructor = expected instanceof XmlWarning ? XmlWarning : ValidityError;
          let pass = false;
          let message;
 
          actual.forEach((token: any) => {
-            if (token instanceof Constructor) {
+            if (token instanceof XmlWarning || token instanceof ValidityError || token instanceof WellFormedError) {
                pass = pass || util.equals(token, expected);
             }
          });
@@ -69,7 +68,7 @@ function toBeErrorFree() {
          let message: string;
 
          actual.forEach((token: any) => {
-            if (token instanceof XmlWarning || token instanceof ValidityError) {
+            if (token instanceof XmlWarning || token instanceof ValidityError || token instanceof WellFormedError) {
                error = token;
             }
          });
@@ -2420,6 +2419,49 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             const expected = new ValidityError(ValidityError.ID.ELEMENT_EXTRA_DECLARATION, [ 'one' ]);
             expectStream(validator, expected, done);
+         });
+
+         describe('element content', () => {
+            it('reprots an error if an element has a non-deterministic content model', (done) => {
+               const elDeclA = new elementDeclaration.XToken('a', 'EMPTY', undefined);
+               const elDeclB = new elementDeclaration.XToken('b', 'EMPTY', undefined);
+               const elDeclC = new elementDeclaration.XToken('c', 'EMPTY', undefined);
+               const elDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     names: [{
+                        name: 'b',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'a',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'SEQUENCE',
+                     repeat: 'ONE',
+                  }, {
+                     names: [{
+                        name: 'b',
+                        repeat: 'ONE',
+                     }, {
+                        name: 'c',
+                        repeat: 'ONE',
+                     }],
+                     listType: 'SEQUENCE',
+                     repeat: 'ONE',
+                  }],
+                  listType: 'CHOICE',
+                  repeat: 'ONE',
+               });
+               const expected = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
+                  [ 'b (/1/1,/2/1)' ], undefined);
+         
+               validator.write(elDeclA);
+               validator.write(elDeclB);
+               validator.write(elDeclC);
+               validator.write(elDecl);
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
          });
 
          describe('mixed content', () => {

@@ -12,7 +12,7 @@ import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
 import entityReference from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
-import unassigned, { UnassignedType } from '../unassigned';
+import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper.js';
 

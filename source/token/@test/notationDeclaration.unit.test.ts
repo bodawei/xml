@@ -12,7 +12,7 @@ import declaration from '../bridge/declaration';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import externalId from '../common/externalId';
 import misc from '../common/misc';
-import unassigned from '../unassigned';
+import unassigned from '../common/unassigned';
 
 type ExternalIDCallback = (x: any) => void;
 type ExternalId = {
