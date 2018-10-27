@@ -32,10 +32,10 @@ const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
 class DocTypeStart extends base.XToken {
    public name: string;
-   public externalLoc: EntityLocation;
+   public externalLoc: EntityLocation | void;
    public hasInternalSubset: boolean;
 
-   constructor(name: string, externalLocation: EntityLocation, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
+   constructor(name: string, externalLocation: EntityLocation | void, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
       super(DOCTYPE_START_XTOKEN, pToken);
 
       this.name = name;
@@ -134,5 +134,6 @@ export {
    checkWellFormed,
    pTokenToXToken,
 
+   DocTypeStart as DocTypeStartXToken,
    DocTypeStartPToken,
 };

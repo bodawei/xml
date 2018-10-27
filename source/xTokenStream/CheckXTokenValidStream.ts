@@ -23,6 +23,9 @@ import {
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
+   xmlDeclaration,
+   EXTERNAL_SUBSET_START_XTOKEN,
+   EXTERNAL_SUBSET_END_XTOKEN,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken } from '../token/common/attribute';
@@ -41,13 +44,18 @@ type XToken = {
 type StreamCallback = (value?: object) => void;
 
 type ElementAttributes = {
-   [elementName: string]: AttrDefinitions,
+   [elementName: string]: AttDefinitions,
 };
 
-type AttrDefinitions = {
+type AttInfo = {
+   def: AttDefXToken,
+   externallyDeclared: boolean,
+}
+
+type AttDefinitions = {
    tokens: Array<AttListXToken>,
    attributes: {
-      [attrName: string]: AttDefXToken,
+      [attrName: string]: AttInfo,
    },
 }
 
@@ -166,6 +174,8 @@ class CheckXTokenValidStream extends stream.Transform {
    private unanchoredIDRefs: IDMap;
    private emd: EntityMetaData = new EntityMetaData();
    private _seenRoot: boolean = false;
+   private standalone: boolean = false;
+   private externalDeclarations: boolean = false;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(entityManager: EntityManager) {
@@ -341,13 +351,10 @@ class CheckXTokenValidStream extends stream.Transform {
             case entityStart.XTYPE:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
-               // These are all OK here
                break;
-
             case charData.XTYPE:
-               if (!util.isSpace(xToken.text)) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
-               }
+               // Depending on charData that is only space already being converted to spaces
+               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
@@ -367,20 +374,32 @@ class CheckXTokenValidStream extends stream.Transform {
       const context = this.currentContext;
 
       if (!(xToken.type === ERROR_TYPE)) {
+         /*
+          * §3.2.1
+          *    An element type has **element content** when elements of that type
+          *    must contain only child elements (no character data), optionally
+          *    separated by white space (characters matching the nonterminal S)
+          * Because of this we convert any CHARDATA types here into spaces
+          */
+         if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
+            if (util.isSpace(xToken.text)) {
+               xToken = new space.XToken(xToken.text, xToken.pToken);
+            }
+         }
+
          this.checkContextValidity(xToken, pToken, context);
       }
 
-      /*
-       * §3.2.1
-       *    An element type has **element content** when elements of that type
-       *    must contain only child elements (no character data), optionally
-       *    separated by white space (characters matching the nonterminal S)
-       * Because of this we convert any CHARDATA types here into spaces
-       */
-      if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
-         if (util.isSpace(xToken.text)) {
-            xToken = new space.XToken(xToken.text, xToken.pToken);
-         }
+      if (xToken.type === EXTERNAL_SUBSET_START_XTOKEN) {
+         this.externalDeclarations = true;
+      }
+
+      if (xToken.type === EXTERNAL_SUBSET_END_XTOKEN) {
+         this.externalDeclarations = false;
+      }
+
+      if (xToken.type === xmlDeclaration.XTYPE) {
+         this.standalone = xToken.standalone;
       }
 
       if (xToken instanceof notationDeclaration.XToken) {
@@ -489,7 +508,10 @@ class CheckXTokenValidStream extends stream.Transform {
             //   all those provided are merged. When more than one definition is provided for the same
             //   attribute of a given element type, the first declaration is binding and later
             //   declarations are ignored. ...
-            attrDefs.attributes[attDef.name] = attDef;
+            attrDefs.attributes[attDef.name] = {
+               def: attDef,
+               externallyDeclared: this.externalDeclarations,
+            };
          } else {
             // §3.3.0: ... For interoperability, an XML processor may at user option
             //   issue a warning when ... more than one attribute definition is provided for a given
@@ -808,7 +830,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
 
          Object.keys(attList.attributes).forEach((name) => {
-            const attrDef = attList.attributes[name];
+            const attrDef = attList.attributes[name].def;
 
             // §3.3.1: Validity constraint: One ID per Element Type
             //    An element type must not have more than one ID attribute specified.
@@ -869,7 +891,8 @@ class CheckXTokenValidStream extends stream.Transform {
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
          const attrName = attributes[index].name;
-         const attrDef = elemAttrDef && elemAttrDef.attributes[attrName];
+         const attrInfo = elemAttrDef && elemAttrDef.attributes[attrName];
+         const attrDef = attrInfo && attrInfo.def;
 
          attributes[index].value = normalizeAttributeValue(attributes[index], attrDef);
 
@@ -888,7 +911,7 @@ class CheckXTokenValidStream extends stream.Transform {
          //      #IMPLIED, then the AttValue value contains the declared default value;
          for (let index = 0; index < attDefNames.length; index ++) {
             const attDefName = attDefNames[index];
-            const attDef = elemAttrDef.attributes[attDefName];
+            const attDef = elemAttrDef.attributes[attDefName].def;
             const attribute = attributesByName[attDefName];
 
             if (attDef.defaultType === '#REQUIRED') {
@@ -901,7 +924,24 @@ class CheckXTokenValidStream extends stream.Transform {
                      name: attDefName,
                      value: attDef.value,
                   };
-   
+
+                  //
+                  // §2.9 Validity constraint: Standalone Document Declaration
+                  // The standalone document declaration must have the value "no" if any external markup
+                  // declarations contain declarations of:
+                  // - attributes with default values, if elements to which these attributes apply appear
+                  // in the document without specifications of values for these attributes, ...
+                  //
+                  // Translation: If this was marked as standalone="yes", and we find an element without
+                  // an attribute that was declared as having a default value, and that declaration was
+                  // an external declaration, then we have a validity error. (We can't just check this
+                  // at declaration time, since if it isn't used it is not an error).
+                  //
+                  if (this.standalone) {
+                     this.pushValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+                        [ elStart.name, attDefName ], pTokenOpen);
+                  }
+
                   attributesByName[attDefName] = newAttribute;
                   attributes.push(newAttribute);
                } else if (!attribute.value || attribute.value.length === 0) {
@@ -915,7 +955,8 @@ class CheckXTokenValidStream extends stream.Transform {
          //    the type declared for it.
          for (let index = 0; index < attributes.length; index++) {
             const attrName = attributes[index].name;
-            const attrDef = elemAttrDef.attributes[attrName];
+            const attInfo = elemAttrDef.attributes[attrName];
+            const attrDef = attInfo && attInfo.def;
             const attrText = getAttributeValueText(attributes[index]);
 
             attributeNames.push(attrName); // for use further below.

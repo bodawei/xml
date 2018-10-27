@@ -18,6 +18,14 @@ import { NotationDeclarationPToken } from  '../../token/notationDeclaration'; //
 
 import NodeStream from '../NodeStream';
 import EntityManager from '../EntityManager';
+import { DocTypeStartXToken } from 'source/token/docTypeStart';
+import { DocTypeEndXToken } from 'source/token/docTypeEnd';
+import {
+   ExternalSubsetEndXToken,
+   ExternalSubsetStartXToken,
+   InternalSubsetEndXToken,
+   InternalSubsetStartXToken,
+} from '../../token';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -112,6 +120,107 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, (result) => {
                expect((result as EntityDeclaration).value[0]).toEqual(refToken);
             });
+         });
+
+      });
+
+      describe('DOCTYPE processing', () => {
+
+         it('adds an internal subset marker to the stream when there is an internal subset', () => {
+            const declToken = new DocTypeStartXToken('test', undefined, true);
+
+            nodeStream.write(declToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
+         });
+
+         it('adds no internal subset marker to the stream when there is no internal subset', () => {
+            const declToken = new DocTypeStartXToken('test', undefined, false);
+
+            nodeStream.write(declToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(null)
+         });
+
+
+         it('adds an internal subset marker to the stream when there is an internal subset', () => {
+            const declToken = new DocTypeStartXToken('test', undefined, true);
+
+            nodeStream.write(declToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
+         });
+
+         it('adds an end of internal subset marker when there is an internal subset', () => {
+            const declToken = new DocTypeStartXToken('test', undefined, true);
+            const declEndToken = new DocTypeEndXToken();
+
+            nodeStream.write(declToken);
+            nodeStream.write(declEndToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            nodeStream.read(); // internal start
+            expect(nodeStream.read()).toEqual(new InternalSubsetEndXToken())
+         });
+
+         it('adds an end of internal subset marker when there is no internal subset', () => {
+            const declToken = new DocTypeStartXToken('test', undefined, false);
+            const declEndToken = new DocTypeEndXToken();
+
+            nodeStream.write(declToken);
+            nodeStream.write(declEndToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(declEndToken)
+         });
+
+         it('adds an external subset start marker if there is one', () => {
+            const declToken = new DocTypeStartXToken('test', new EntityLocation(), false);
+            const declEndToken = new DocTypeEndXToken();
+
+            nodeStream.write(declToken);
+            nodeStream.write(declEndToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            expect(nodeStream.read()).toEqual(new ExternalSubsetStartXToken())
+         });
+
+         it('adds an external subset end marker if there is one', () => {
+            const declToken = new DocTypeStartXToken('test', new EntityLocation(), false);
+            const declEndToken = new DocTypeEndXToken();
+
+            nodeStream.write(declToken);
+            nodeStream.write(declEndToken);
+            nodeStream.end;
+
+            nodeStream.read(); // decl token
+            nodeStream.read(); // external start
+            expect(nodeStream.read()).toEqual(new ExternalSubsetEndXToken());
+         });
+
+         it('orders internal and external subsets properly', () => {
+            const declToken = new DocTypeStartXToken('test', new EntityLocation(), true);
+            const declEndToken = new DocTypeEndXToken();
+
+            nodeStream.write(declToken);
+            nodeStream.write(declEndToken);
+            nodeStream.end;
+
+            expect(nodeStream.read()).toEqual(declToken);
+            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
+            expect(nodeStream.read()).toEqual(new InternalSubsetEndXToken());
+            expect(nodeStream.read()).toEqual(new ExternalSubsetStartXToken());
+            expect(nodeStream.read()).toEqual(new ExternalSubsetEndXToken());
+            expect(nodeStream.read()).toEqual(declEndToken);
          });
 
       });

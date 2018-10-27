@@ -27,10 +27,19 @@ const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 
 class XmlDeclaration extends base.XToken {
    public params: Array<AttributeXToken>;
+   public readonly standalone: boolean;
 
    constructor(params: Array<AttributeXToken>, pToken?: XmlDeclarationPToken) {
       super(XMLDECL_XTOKEN, pToken);
       this.params = params;
+
+      this.standalone = params.some((param) => {
+         if (param.name === 'standalone') {
+            return (param.value[0] as any).text === 'yes';
+         }
+
+         return false;
+      });
    }
 
 }

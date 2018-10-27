@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import declaration from './bridge/declaration';
 import * as instruction from './bridge/instruction';
@@ -24,11 +24,15 @@ import unassigned from './common/unassigned';
 import * as xmlDeclaration from './xmlDeclaration';
 
 import literalValue from './common/literalValue';
-
-export * from './generalEntityEnd';
 export * from './parameterEntityEnd';
 export * from './bridge/section';
+
 export * from './cdata';
+export * from './externalSubsetEnd';
+export * from './externalSubsetStart';
+export * from './generalEntityEnd';
+export * from './internalSubsetEnd';
+export * from './internalSubsetStart';
 
 const token = {
    declaration,

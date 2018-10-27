@@ -104,4 +104,5 @@ export {
    pTokenToXToken,
 
    DocTypeEndPToken,
+   DocTypeEnd as DocTypeEndXToken,
 };

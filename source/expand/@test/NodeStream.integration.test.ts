@@ -16,11 +16,14 @@ import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
    GeneralEntityEndXToken,
    ParameterEntityEndPToken,
-   ParameterEntityEndXToken
+   ParameterEntityEndXToken,
+   InternalSubsetStartXToken,
+   InternalSubsetEndXToken,
 } from '../../token';
 
 import EntityManager from '../EntityManager';
 import NodeStream from '../NodeStream';
+import { EntityStartPToken } from 'source/token/entityStart';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -46,7 +49,7 @@ describe('NodeStream (integration)', () => {
             continue;
          }
 
-         expect(actual[actualIndex] instanceof expected[expectedIndex]).toEqual(true);
+         expect(actual[actualIndex]).toBeInstanceOf(expected[expectedIndex]);
          expectedIndex++;
       }
    }
@@ -63,13 +66,15 @@ describe('NodeStream (integration)', () => {
       pTokenStream.endText();
    }
 
-   it('adds two levels of entities', (done) => {
+  it('adds two levels of entities', (done) => {
       expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
          '[<!ENTITY child "&quot;grandchild&quot;">]><one>&child;</one>', (results) => {
          matchTokenTypes(results, [
             tokenNs.xmlDeclaration.XToken,
             tokenNs.docTypeStart.XToken,
+            InternalSubsetStartXToken,
             tokenNs.entityDeclaration.XToken,
+            InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
             tokenNs.entityStart.XToken,
@@ -100,10 +105,12 @@ describe('NodeStream (integration)', () => {
          matchTokenTypes(results, [
             tokenNs.xmlDeclaration.XToken,
             tokenNs.docTypeStart.XToken,
+               InternalSubsetStartXToken,
                tokenNs.entityDeclaration.ParamXToken,
                tokenNs.entityStart.ParamXToken,
                   tokenNs.entityDeclaration.XToken,
                ParameterEntityEndXToken,
+               InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
                tokenNs.charData.XToken,
@@ -125,7 +132,7 @@ describe('NodeStream (integration)', () => {
             <!ENTITY % middle "foo">
             <!ATTLIST %middle;>
          ]>`, (tokens) => {
-            const attListDecl = tokens[6] as AttListXToken; // typeHack
+            const attListDecl = tokens[7] as AttListXToken; // typeHack
 
             expect(attListDecl.elementName).toEqual('foo');
             done();
@@ -138,7 +145,7 @@ describe('NodeStream (integration)', () => {
             <!ENTITY % goodies "( four | five ) #REQUIRED">
             <!ATTLIST one attr1 %goodies;>
          ]>`, (tokens) => {
-            const attListDecl = tokens[8] as AttListXToken; // typeHack
+            const attListDecl = tokens[9] as AttListXToken; // typeHack
 
             expect(attListDecl.attDefs[0]).toEqual({
                name: 'attr1',
@@ -158,7 +165,7 @@ describe('NodeStream (integration)', () => {
             <!ATTLIST one
                attr1 CDATA "#&test;bar#">
          ]>`, (tokens) => {
-            const attListDecl = tokens[8] as AttListXToken; // typeHack
+            const attListDecl = tokens[9] as AttListXToken; // typeHack
 
             expect(attListDecl.attDefs[0]).toEqual({
                name: 'attr1',
@@ -191,7 +198,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % middle "two">' +
             '<!ELEMENT one ( one | %middle; | three)>' +
          ']>', (results) => {
-            const elementDecl = results[4] as ElementDeclaration;
+            const elementDecl = results[5] as ElementDeclaration;
 
             expect(elementDecl.name).toEqual('one');
             expect(elementDecl.children).toEqual({
@@ -217,7 +224,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % last ")">' +
             '<!ELEMENT one ( one | %last;>' +
          ']>', (results) => {
-            const error = results[4] as ValidityError;
+            const error = results[5] as ValidityError;
 
             expect(error.id).toEqual(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED);
             done();
@@ -231,11 +238,12 @@ describe('NodeStream (integration)', () => {
       it('expands an parameter entity values in an EntityValue', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
             '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>', (results) => {
-            const valueArray = (results[4] as EntityDeclaration).value; // typeHack
-            expect(valueArray[0].text.str).toEqual('one');
-            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
-            expect(valueArray[2].text.str).toEqual('two');
-            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken(valueArray[1].refPToken));
+            const valueArray: any = (results[5] as EntityDeclaration).value; // typeHack
+
+            expect((valueArray[0] as any).text.str).toEqual('one');
+            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[1] as EntityStartPToken).refPToken }));
+            expect((valueArray[2] as any).text.str).toEqual('two');
+            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken((valueArray[1] as EntityStartPToken).refPToken));
             done();
          });
       });
@@ -246,9 +254,10 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % peOne "(%peTwo;)">' +
             '<!ENTITY child "[%peOne;]">' +
          ']>', (results) => {
-            const valueArray = (results[5] as EntityDeclaration).value; // typeHack
-            expect(valueArray[0].text.str).toEqual('[');
-            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[1].refPToken }));
+            const valueArray: any = (results[6] as EntityDeclaration).value; // typeHack
+
+            expect((valueArray as any)[0].text.str).toEqual('[');
+            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[1] as EntityStartPToken).refPToken }));
             expect(valueArray[2].text.str).toEqual('(');
             expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
             expect(valueArray[4].text.str).toEqual('inner');
@@ -267,8 +276,8 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % body \'child "[%peOne;]"\'>' +
             '<!ENTITY %body;>' +
          ']>', (results) => {
-            const entityDecl = results[6] as EntityDeclaration; // typeHack
-            const values = entityDecl.value;
+            const entityDecl = results[7] as EntityDeclaration; // typeHack
+            const values: any = entityDecl.value;
 
             expect(entityDecl.name).toEqual('child');
             expect(values[0].text.str).toEqual('[(inner)]');
@@ -286,7 +295,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % middle \'PUBLIC "%url;"\'>' +
             '<!NOTATION foo %middle;>' +
          ']>', (results) => {
-            const notationDecl = results[5] as NotationDeclaration; // typeHack
+            const notationDecl = results[6] as NotationDeclaration; // typeHack
 
             expect(notationDecl.name).toEqual('foo');
             expect((notationDecl.externalId as any).publicId).toEqual('http://somewhere.com'); // typeHack
@@ -308,7 +317,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY child "(child)">' +
          ']>' +
          '<one child="&child;"/>', (results) => {
-            const element = results[5] as ElementStart; // typeHack
+            const element = results[7] as ElementStart; // typeHack
 
             expect(element.attributes[0].value).toEqual([
                new tokenNs.entityStart.XToken('child'),
@@ -330,7 +339,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY parent "pre&child;mid&child;post">' +
          ']>' +
          '<one child="&child;" parent="&parent;"/>', (results) => {
-            const element = results[6] as ElementStart; // typeHack
+            const element = results[8] as ElementStart; // typeHack
 
             expect(element.attributes[1].value).toEqual([
                new tokenNs.entityStart.XToken('parent'),
@@ -367,7 +376,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY child "99-US">' + // bad language code!
          ']>' +
          '<one xml:lang="&child;"/>', (results) => {
-            const element = results[5] as WellFormedError; // typeHack
+            const element = results[7] as WellFormedError; // typeHack
 
             expect(element.id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
             done();

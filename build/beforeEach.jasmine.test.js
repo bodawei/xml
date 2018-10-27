@@ -3,6 +3,7 @@
 /* eslint-env jasmine */
 
 const toEqualPropsMatcher = require('./beforeEach.jasmine.js').toEqualProps;
+const toEqualShapeMatcher = require('./beforeEach.jasmine.js').toEqualShape;
 const toBeInstanceOfMatcher = require('./beforeEach.jasmine.js').toBeInstanceOf;
 
 describe('console.json()', () => {
@@ -87,6 +88,69 @@ describe('toEqualProps()', () => {
 
 });
 
+describe('toEqualShape()', () => {
+
+   // describe('jasmine use', () => {
+
+   //    it('reports true when all the properties match', () => {
+   //       expect({
+   //          one: 1,
+   //       }).toEqualProps({
+   //          one: 1,
+   //       });
+   //    });
+
+   //    it('reports true when the specified properties match', () => {
+   //       expect({
+   //          one: 1,
+   //          two: 2,
+   //       }).toEqualProps({
+   //          one: 1,
+   //       });
+   //    });
+
+   //    it('reports false when the specified properties do not match', () => {
+   //       expect({
+   //          one: 1,
+   //          two: 2,
+   //       }).not.toEqualProps({
+   //          one: 2,
+   //       });
+   //    });
+
+   // });
+
+   describe('toEqualShape().compare()', () => {
+
+      it('returns a compare function', () => {
+         expect(typeof toEqualShapeMatcher().compare === 'function').toEqual(true);
+      });
+
+      it('returns a message indicating failure, on success (for not case)', () => {
+         expect(toEqualShapeMatcher().compare({ a: 1 }, { a: 1 })).toEqual({
+            pass: true,
+            message: 'Values did not mismatch (both were: {\n  "a": 1\n})\n',
+         });
+      });
+
+      it('returns a message indicating mismatched properties', () => {
+         expect(toEqualShapeMatcher().compare({ a: 1 }, { a: 2 })).toEqual({
+            pass: false,
+            message: 'Property mismatches:\n\ta: 1  (Expected: 2)\n',
+         });
+      });
+
+      it('returns a message indicating an extra actual property', () => {
+         expect(toEqualShapeMatcher().compare({ a: 1, b: undefined }, { a: 1 })).toEqual({
+            pass: false,
+            message: 'Extra properties in actual:\n\tb: undefined\n',
+         });
+      });
+
+   });
+
+});
+
 describe('toBeInstanceOf()', () => {
 
    function Test() {
@@ -148,7 +212,7 @@ describe('toBeInstanceOf()', () => {
       it('returns a message indicating failure, on failure, for the .toBeInstanceOf() case', () => {
          expect(toBeInstanceOfMatcher({ equals: () => false }, () => true).compare(new Test(), Test2)).toEqual({
             pass: false,
-            message: 'Expected instance to be an instance of Test2.',
+            message: 'Expected instance to be an instance of Test2. Found Test',
          });
       });
 

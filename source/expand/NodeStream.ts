@@ -10,6 +10,8 @@ import { SToken, STokenSource } from 'sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
    attListDeclaration,
+   docTypeStart,
+   docTypeEnd,
    elementDeclaration,
    elementStart,
    entityDeclaration,
@@ -23,6 +25,11 @@ import {
    text,
    unassigned,
    literalValue,
+
+   ExternalSubsetEndXToken,
+   ExternalSubsetStartXToken,
+   InternalSubsetEndXToken,
+   InternalSubsetStartXToken,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
@@ -38,6 +45,7 @@ import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
 import { LiteralValueXToken } from '../token/common/literal';
+import { DocTypeStartXToken } from 'source/token/docTypeStart';
 
 type XToken = { type: string };
 type PToken = {
@@ -62,6 +70,7 @@ class NodeStream extends stream.Transform {
    private _options: {};
    private _child: any;
    private _childCallback: any;
+   private docTypeStart?: DocTypeStartXToken;
 
    constructor(entityManager: EntityManager, options: {} = {}) {
       super({
@@ -124,9 +133,26 @@ class NodeStream extends stream.Transform {
       } else if (xToken.type === elementStart.XTYPE || xToken.type === elementStart.EMPTY_XTYPE) {
          this._processElementStart((xToken as ElementStart), callback);
          return;
+      } else if (xToken.type === docTypeEnd.XTYPE) {
+         if (this.docTypeStart && this.docTypeStart.hasInternalSubset) {
+            this.push(new InternalSubsetEndXToken());
+         }
+
+         if (this.docTypeStart && this.docTypeStart.externalLoc) {
+            this.push(new ExternalSubsetStartXToken());
+            this.push(new ExternalSubsetEndXToken());
+         }
       }
 
       this.push(xToken);
+
+      if (xToken.type === docTypeStart.XTYPE) {
+         this.docTypeStart = xToken as DocTypeStartXToken; // typeHack
+
+         if (this.docTypeStart.hasInternalSubset) {
+            this.push(new InternalSubsetStartXToken());
+         }
+      }
       callback();
    }
 

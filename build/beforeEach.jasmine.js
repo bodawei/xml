@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 /* eslint-env jasmine */
 
@@ -37,6 +37,68 @@ function toEqualProps(util, customEqualityTesters) {
    };
 }
 
+function toEqualShape(util, customEqualityTesters) {
+   return {
+      compare: (actual, expected) => {
+         let pass = true;
+         let message = '';
+         const mismatch = {};
+         const extra = [];
+
+         const actualKeys = Object.keys(actual);
+         const expectedKeys = Object.keys(expected);
+
+         expectedKeys.forEach((key) => {
+            if (actualKeys.indexOf(key) !== -1) {
+               const actualValue = actual[key];
+               const expectedValue = expected[key];
+
+               if (actualValue !== expectedValue) {
+                  mismatch[key] = [actualValue, expectedValue];
+                  pass = false;
+               }
+            } else {
+               mismatch[key] = [undefined, expected[key]];
+               pass = false;
+            }
+         });
+
+         actualKeys.forEach((key) => {
+            if (expectedKeys.indexOf(key) === -1) {
+               extra.push(key);
+               pass = false;
+            }
+         });
+
+         if (pass) {
+            message = 'Values did not mismatch (both were: ' + JSON.stringify(actual, undefined, 2) + ')\n';
+         } else {
+            const mismatchKeys = Object.keys(mismatch);
+
+            if (mismatchKeys.length > 0) {
+               message += 'Property mismatches:\n';
+               mismatchKeys.forEach((key) => {
+                  message += `\t${key}: ${mismatch[key][0]}  (Expected: ${mismatch[key][1]})\n`;
+               });
+            }
+
+            if (extra.length > 0) {
+               message += 'Extra properties in actual:\n';
+
+               extra.forEach((key) => {
+                  message += `\t${key}: ${actual[key]}\n`;
+               });
+            }
+         }
+
+         return {
+            pass: pass,
+            message: message,
+         };
+      },
+   };
+}
+
 function toBeInstanceOf() {
    return {
       compare: (actual, expected) => {
@@ -54,7 +116,7 @@ function toBeInstanceOf() {
          if (pass) {
             message = 'Expected instance not to be an instance of ' + expected.name + '.';
          } else {
-            message = 'Expected instance to be an instance of ' + expected.name + '.';
+            message = 'Expected instance to be an instance of ' + expected.name + '. Found ' + actual.constructor.name;
          }
 
          return {
@@ -80,11 +142,13 @@ console.json = function json() {
 beforeEach(() => {
    jasmine.addMatchers({
       toEqualProps,
+      toEqualShape,
       toBeInstanceOf,
    });
 });
 
 module.exports = {
    toEqualProps,
+   toEqualShape,
    toBeInstanceOf,
 };

@@ -82,7 +82,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       parser.endText();
 
       gatherTokens(validator, (results) => {
-         expect(results[10]).toEqual(error);
+         expect(results[11]).toEqual(error);
          done();
       });
    });

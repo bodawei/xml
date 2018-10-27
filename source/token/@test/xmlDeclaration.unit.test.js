@@ -353,15 +353,31 @@ describe('xmlDeclaration (unit)', () => {
    });
 
    describe('pTokenToXToken()', () => {
+      let attrMake;
 
       beforeEach(() => {
-         spyOn(attribute, 'makeOneTokenCompatible');
+         attrMake = spyOn(attribute, 'makeOneTokenCompatible');
       });
 
       it('asks the attribute to provide the attributes', () => {
+         attrMake.and.returnValue([]);
+
          xmlDeclaration.pTokenToXToken(xmlDeclPToken);
 
          expect(attribute.makeOneTokenCompatible).toHaveBeenCalledWith(xmlDeclPToken.params);
+      });
+
+      it('sets standalone to false when no standalone value was offered', () => {
+         attrMake.and.returnValue([{
+            name: 'version',
+            value: [{
+               text: '1.0',
+            }]
+         }]);
+
+         const result = xmlDeclaration.pTokenToXToken(xmlDeclPToken);
+
+         expect(result.standalone).toEqual(false);
       });
 
    });

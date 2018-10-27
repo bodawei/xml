@@ -3,7 +3,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, EntityKind, util } from '../../basic';
+import { EntityMetaData, EntityKind, util, EntityLocation } from '../../basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from '../../error/index';
 import { SToken } from '../../sToken';
 import nameList, { XNameList } from '../../token/common/nameList';
@@ -27,6 +27,8 @@ import {
    xmlDeclaration,
 
    CdataXToken,
+   ExternalSubsetStartXToken,
+   ExternalSubsetEndXToken,
 } from '../../token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
@@ -34,6 +36,7 @@ import { ElementDeclaration } from '../../token/elementDeclaration';
 import { NotationDeclaration } from '../../token/notationDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
+import { DocTypeStartXToken } from 'source/token/docTypeStart';
 
 function toHaveError(util: any) {
    return {
@@ -594,6 +597,32 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                expectNoErrors(validator, done);
+            });
+
+            it('reports an error if an attribute default must be added, but the declration was external (§2.9)', (done) => {
+               const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+               const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+                  name: 'textAttr',
+                  type: 'CDATA',
+                  value: [ new text.XToken('the default value') ],
+                  defaultType: '',
+               }]);
+               const startToken1 = new elementStart.XToken('testEl', []);
+
+               validator.write(new xmlDeclaration.XToken([{
+                  name: 'standalone',
+                  value: [ new text.TextXToken('yes') ],
+               }]));
+               validator.write(new ExternalSubsetStartXToken());
+               validator.write(elDecl1); // Interestingly, we don't care that this is external
+               validator.write(attListDecl1);
+               validator.write(new ExternalSubsetEndXToken());
+               validator.write(startToken1);
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
+                  [ 'testEl', 'textAttr' ]);
+               expectStream(validator, expected, done);
             });
          });
 
