@@ -4,7 +4,7 @@
 import { EntityMetaData } from '../../../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../../error';
 import { defaultExtractors } from '../../../extractor';
-import { STokenSource } from '../../../sToken';
+import { STokenSource, SToken } from '../../../sToken';
 import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
 import text from '../../text';
@@ -12,9 +12,9 @@ import text from '../../text';
 import attribute from '../attribute';
 
 describe('attribute (integration)', () => {
-   let emd;
-   let source;
-   let attributesPToken;
+   let emd: EntityMetaData;
+   let source: STokenSource;
+   let attributesPToken: any;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -99,21 +99,21 @@ describe('attribute (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let preSpace;
-      let ec;
+      let preSpace: SToken;
+      let ec: ErrorCollector;
 
       beforeEach(() => {
          const makeSToken = makeSTokenMaker();
          preSpace = makeSToken(' ');
-         ec = new ErrorCollector(undefined, WellFormedError);
+         ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
       });
 
       it('asks misc.checkName() to complain if the name is bad', (done) => {
          source.addText('na\u0000me="value">');
          source.endText();
 
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace);
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
+            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_INVALID_NAME);
             done();
@@ -124,7 +124,7 @@ describe('attribute (integration)', () => {
          source.addText('xml:lang="99">');
          source.endText();
 
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
             attribute.checkWellFormed(parsing, ec, emd, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
@@ -137,7 +137,7 @@ describe('attribute (integration)', () => {
          source.addText('xml:foo="value">');
          source.endText();
 
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
             attribute.checkWellFormed(parsing, ec, metaData, preSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ATTRIBUTE_NAME_XMLCOLON_RESERVED);
@@ -149,8 +149,8 @@ describe('attribute (integration)', () => {
          source.addText('name "value">');
          source.endText();
 
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace);
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
+            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
@@ -161,8 +161,8 @@ describe('attribute (integration)', () => {
          source.addText('name="v\u0000alue">');
          source.endText();
 
-         attribute.parse(source, { terminators: [ '>' ]}, (parsing) => {
-            attribute.checkWellFormed(parsing, ec, emd, preSpace);
+         attribute.parse(source, { terminators: [ '>' ]}, (parsing: any) => {
+            attribute.checkWellFormed(parsing, ec, emd, preSpace, 'x');
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

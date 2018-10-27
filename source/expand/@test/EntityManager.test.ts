@@ -44,12 +44,12 @@ describe('EntityManager (unit)', () => {
 
    function pTokenToXToken(name: string, str: string = '', location?: EntityLocation, notationName?: string): EntityDeclaration {
       return new entityDeclaration.XToken(name,
-         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName, []);
+         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName);
    }
 
    function makePEToken(name: string, str: string, location?: EntityLocation, notationName?: string): ParameterEntityDeclaration {
       return new entityDeclaration.ParamXToken(name,
-         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName, []);
+         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName);
    }
 
    describe('construction', () => {

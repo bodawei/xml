@@ -5,11 +5,8 @@ import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
 import entityReference, { ParameterEntityReferencePToken } from '../entityReference.js';
-import entityStart from '../entityStart.js';
-import { ParameterEntityEndPToken } from '../parameterEntityEnd';
-import text from '../text';
 import { TextPToken } from '../text';
-import literal, { LiteralPToken, LiteralValuePToken } from '../common/literal';
+import literal, { LiteralPToken } from '../common/literal';
 
 const TERMINATORS = [ '>', '"', '\'', '%' ];
 const TERMINATORS_FOR_NAMELIST = [ '>', '"', '\'', '%', '(', ')', '|', ',', '+', '*', '?' ];

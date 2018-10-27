@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 /* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
-import { toContainPTokenProps } from './beforeEach.js';
+import { toContainPTokenProps } from './beforeEach';
 
 describe('token custom matchers', () => {
 
@@ -16,7 +16,7 @@ describe('token custom matchers', () => {
 
          it('throws an exception if the callback spy is undefined', () => {
             try {
-               toContainPTokenProps().compare(undefined, 'foo');
+               toContainPTokenProps().compare(undefined, {});
             } catch (e) {
                expect(e.message).toEqual('Did not get a spy as expected.');
             }
@@ -28,7 +28,7 @@ describe('token custom matchers', () => {
             spy(2);
 
             try {
-               toContainPTokenProps().compare(spy, 'foo');
+               toContainPTokenProps().compare(spy, {});
             } catch (e) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 2 calls with 1 arguments.');
             }
@@ -39,7 +39,7 @@ describe('token custom matchers', () => {
             spy(1, 2);
 
             try {
-               toContainPTokenProps().compare(spy, 'foo');
+               toContainPTokenProps().compare(spy, {});
             } catch (e) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 1 calls with 2 arguments.');
             }
@@ -49,7 +49,7 @@ describe('token custom matchers', () => {
             const spy = jasmine.createSpy();
 
             try {
-               toContainPTokenProps().compare(spy, 'foo');
+               toContainPTokenProps().compare(spy, {});
             } catch (e) {
                expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 0 calls with 0 arguments.');
             }

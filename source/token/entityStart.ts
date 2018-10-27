@@ -2,6 +2,8 @@
 
 import base from './base';
 
+import { EntityReferencePToken } from './entityReference';
+
 /**********************************************************************\
  Defines simple token that tracks the start of an entity expansion.
 \**********************************************************************/
@@ -12,9 +14,10 @@ const PARAMETERENTITY_START = 'PARAMETERENTITY_START';
 const PENTITY_XTOKEN = 'PENTITY_XTOKEN';
 
 class EntityStart extends base.XToken {
+   public name: string;
 
-   constructor(name) {
-      super(ENTITY_START_XTOKEN, []);
+   constructor(name: string) {
+      super(ENTITY_START_XTOKEN);
 
       this.name = name;
    }
@@ -22,8 +25,9 @@ class EntityStart extends base.XToken {
 }
 
 class ParameterEntityStart extends EntityStart {
+   public type: string;
 
-   constructor(name) {
+   constructor(name: string) {
       /* istanbul ignore next */
       super(name);
       this.type = PENTITY_XTOKEN;
@@ -32,14 +36,16 @@ class ParameterEntityStart extends EntityStart {
 }
 
 class EntityStartPToken extends base.PToken {
-   constructor(props) {
+   public refPToken: EntityReferencePToken;
+
+   constructor(props?: Object) {
       super(ENTITY_START, props);
-      this.refPToken = props.refPToken;
+      this.refPToken = (props as any).refPToken;
    }
 }
 
 class ParameterEntityStartPToken extends EntityStartPToken {
-   constructor(props) {
+   constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(props);
       this.type = PARAMETERENTITY_START;

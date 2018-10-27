@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import entityStart from '../entityStart.js';
+import entityStart from '../entityStart';
 
 describe('entityStart (unit)', () => {
 
@@ -12,7 +12,7 @@ describe('entityStart (unit)', () => {
          const token = new entityStart.XToken('foo');
 
          expect(token.name).toEqual('foo');
-         expect(token.pToken).toEqual([]);
+         expect(token.pToken).toBeUndefined();
       });
 
    });
@@ -23,7 +23,7 @@ describe('entityStart (unit)', () => {
          const token = new entityStart.ParamXToken('foo');
 
          expect(token.name).toEqual('foo');
-         expect(token.pToken).toEqual([]);
+         expect(token.pToken).toBeUndefined();
       });
 
    });

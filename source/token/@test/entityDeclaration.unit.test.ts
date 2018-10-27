@@ -4,11 +4,12 @@
 import { EntityMetaData, Range } from '../../basic';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 
 import declaration from '../bridge/declaration';
 import * as entityDeclaration from '../entityDeclaration';
+import { EntityDeclarationPToken, ParameterEntityDeclarationPToken } from '../entityDeclaration';
 import entityReference from '../entityReference'
 import unassigned from '../common/unassigned';
 import externalId from '../common/externalId.js';
@@ -16,12 +17,12 @@ import misc from '../common/misc';
 import literal from '../common/literal';
 
 describe('entityDeclaration (unit)', () => {
-   let entityDeclarationPToken;
-   let paramEntityDeclarationPToken;
+   let entityDeclarationPToken: EntityDeclarationPToken;
+   let paramEntityDeclarationPToken: ParameterEntityDeclarationPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      entityDeclarationPToken = new entityDeclaration.PToken({
+      entityDeclarationPToken = new EntityDeclarationPToken({
          name: makeSToken('anEntity'),
          postNameSpace: makeSToken(' '),
          postExternalIdSpace: makeSToken(' '),
@@ -29,7 +30,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       const makeToken = makeSTokenMaker();
-      paramEntityDeclarationPToken = new entityDeclaration.ParamPToken({
+      paramEntityDeclarationPToken = new ParameterEntityDeclarationPToken({
          parameter: makeToken('%'),
          postParameterSpace: makeToken(' '),
          name: makeToken('anEntity'),
@@ -72,6 +73,7 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns all the STokens', () => {
             expect(paramEntityDeclarationPToken.getSTokenArray()).toEqual([
+               SToken.fromString(''),
                paramEntityDeclarationPToken.parameter,
                paramEntityDeclarationPToken.postParameterSpace,
                paramEntityDeclarationPToken.name,
@@ -85,19 +87,22 @@ describe('entityDeclaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
-      let checkForPERefCallback;
+      let callback: jasmine.Spy;
+      let checkForPERefCallback: Function;
+      let literalSpy: jasmine.Spy;
+      let externalIdSpy: jasmine.Spy;
+      let unCheck: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
 
-         spyOn(externalId, 'parse').and.callFake((source, terminators, cb) => {
+         externalIdSpy = spyOn(externalId, 'parse').and.callFake((_1: any, _2: any, cb: Function) => {
             cb({ externalId: true });
          });
 
-         spyOn(literal, 'parse');
+         literalSpy = spyOn(literal, 'parse');
 
-         spyOn(unassigned, 'makeCheckCallback').and.callFake((_1, _2, _3, other) => {
+         unCheck = spyOn(unassigned, 'makeCheckCallback').and.callFake((_1: any, _2: any, _3: any, other: Function) => {
             checkForPERefCallback = other;
          });
 
@@ -114,19 +119,19 @@ describe('entityDeclaration (unit)', () => {
          ]);
          delete entityDeclarationPToken.postExternalIdSpace;
          delete entityDeclarationPToken.close;
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
-         expect(literal.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(literal.parse.calls.argsFor(0)[1]).toEqual({
+         expect(literalSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(literalSpy.calls.argsFor(0)[1]).toEqual({
             pToken: entityDeclarationPToken,
             peRef: true,
          });
-         expect(literal.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+         expect(literalSpy.calls.argsFor(0)[2] instanceof Function).toEqual(true);
       });
 
       it('calls externalId.parse()', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             [ 'entityName', 'word', [ '>', '"', '\'', ';' ] ],
@@ -137,16 +142,16 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'peekWord', [ '>' ] ],
             [ '>', 'match', '>' ],
          ]);
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
-         expect(externalId.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(externalId.parse.calls.argsFor(0)[1]).toEqual([ '>' ]);
-         expect(externalId.parse.calls.argsFor(0)[2] instanceof Function).toEqual(true);
+         expect(externalIdSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(externalIdSpy.calls.argsFor(0)[1]).toEqual([ '>' ]);
+         expect(externalIdSpy.calls.argsFor(0)[2] instanceof Function).toEqual(true);
       });
 
       it('does a parse of a general entity with a literal value', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             [ 'anEntity', 'word', [ '>', '"', '\'', ';' ] ],
@@ -158,7 +163,7 @@ describe('entityDeclaration (unit)', () => {
             [ '>', 'match', '>' ],
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(entityDeclarationPToken);
@@ -169,14 +174,14 @@ describe('entityDeclaration (unit)', () => {
             undefined,
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.allArgs()).toEqual([ [ new entityDeclaration.PToken() ] ]);
       });
 
       it('returns parameter entity info if this is a parameter entity: <!ENTITY % entityName ...', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
@@ -190,7 +195,7 @@ describe('entityDeclaration (unit)', () => {
             [ '>', 'match', '>' ],
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(paramEntityDeclarationPToken);
@@ -198,7 +203,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns parameter entity without the trailing space if none present: <!ENTITY %entityName...', () => {
          const expectedSToken = makeSTokenMaker();
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
             '%',
@@ -212,7 +217,7 @@ describe('entityDeclaration (unit)', () => {
             [ '>', 'match', '>' ],
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -224,8 +229,8 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns nothing if there is no name, space, or start of value: <!ENTITY %', () => {
          const expectedSToken = makeSTokenMaker();
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
-         externalId.parse.and.callFake((_1, _2, callback) => { callback(undefined); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+         externalIdSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(undefined); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('%'),
             [ '%', 'char' ],
@@ -237,7 +242,7 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'match', '>' ],
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -250,7 +255,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('returns no space between entity name and value: <!ENTITY entityName"foo" >', () => {
          const expectedSToken = makeSTokenMaker();
-         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
+         literalSpy.and.callFake((_1: any, options: any, callback: Function) => { callback(options.pToken); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -260,7 +265,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -270,7 +275,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('adds trailing space after quoted value if present: <!ENTITY entityName "foo" >', () => {
-         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
+         literalSpy.and.callFake((_1: any, options: any, callback: Function) => { callback(options.pToken); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -280,7 +285,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 11, 0, 11);
@@ -292,7 +297,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('stops if externalId returns nothing: <!ENTITY entityName >', () => {
          const expectedSToken = makeSTokenMaker();
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -300,11 +305,11 @@ describe('entityDeclaration (unit)', () => {
             '>',
             '>',
          ]);
-         externalId.parse.and.callFake((source, terminators, cb) => {
+         externalIdSpy.and.callFake((_1: any, _2: any, cb: Function) => {
             cb(undefined);
          });
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -315,7 +320,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns a space after the externalID: <!ENTITY entityName SYSTEM "foo" >', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -326,7 +331,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 11, 0, 11);
@@ -340,7 +345,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns an NDATA clause if found: <!ENTITY entityName SYSTEM "foo" NDATA testNData >', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -356,7 +361,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 11, 0, 11);
@@ -371,7 +376,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('recognizes a non-all caps NDATA: <!ENTITY entityName SYSTEM "foo" ndaTa testNData >', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -387,7 +392,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 12, 0, 12);
@@ -397,7 +402,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('does not mind no space after the ndata value: <!ENTITY entityName SYSTEM "foo" ndaTa testNData>', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -413,7 +418,7 @@ describe('entityDeclaration (unit)', () => {
             '>',
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 12, 0, 12);
@@ -427,7 +432,7 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('returns if stops after NDATA: <!ENTITY entityName SYSTEM "foo" NDATA', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          const mockSource = new MockSTokenSource([
             MockSTokenSource.PEEK('e'),
             'entityName',
@@ -443,7 +448,7 @@ describe('entityDeclaration (unit)', () => {
             [ undefined, 'match' ],
          ]);
 
-         entityDeclaration.parse(mockSource, {}, callback);
+         entityDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
          const expectedSToken = makeSTokenMaker(undefined, 11, 0, 11);
@@ -461,10 +466,10 @@ describe('entityDeclaration (unit)', () => {
 
          it('returns an unassigned value when finding a PE Ref at the starting position', () => {
             let count = 0;
-            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+            unCheck.and.callFake((_1: any, _2: any, _3: any, other: any) => {
                checkForPERefCallback = other;
             });
-            spyOn(unassigned, 'parseNextValue').and.callFake((_1, _2, handler) => {
+            spyOn(unassigned, 'parseNextValue').and.callFake((_1: any, _2: any, handler: Function) => {
                if (count === 0) {
                   count ++;
                   handler({ one: 1 });
@@ -482,7 +487,7 @@ describe('entityDeclaration (unit)', () => {
                '>',
             ]);
    
-            entityDeclaration.parse(mockSource, {}, callback);
+            entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -502,7 +507,7 @@ describe('entityDeclaration (unit)', () => {
          });
 
          it('returns an unassigned value when finding a PE Ref at the EntityValue position', () => {
-            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+            unCheck.and.callFake((pToken: any, prop: string, foundRef: Function, other: any) => {
                checkForPERefCallback = other;
 
                if (prop === 'entityValueOrId') {
@@ -520,7 +525,7 @@ describe('entityDeclaration (unit)', () => {
                '>',
             ]);
    
-            entityDeclaration.parse(mockSource, {}, callback);
+            entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -528,8 +533,8 @@ describe('entityDeclaration (unit)', () => {
          });
 
          it('returns an unassigned value when finding a PE Ref in external ID', () => {
-            literal.parse.and.callFake((_1, _2, callback) => { callback(); });
-            externalId.parse.and.callFake((source, terminators, cb) => {
+            literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+            externalIdSpy.and.callFake((_1: any, _2: any, cb: Function) => {
                cb({
                   externalId: true,
                   unassigned: [ { type: 'literal' } ],
@@ -537,7 +542,7 @@ describe('entityDeclaration (unit)', () => {
                });
             });
    
-            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+            unCheck.and.callFake((_1: any, _2: any, _3: any, other: any) => {
                checkForPERefCallback = other;
             });
             const mockSource = new MockSTokenSource([
@@ -548,7 +553,7 @@ describe('entityDeclaration (unit)', () => {
                '>',
             ]);
    
-            entityDeclaration.parse(mockSource, {}, callback);
+            entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
    
             const pToken = callback.calls.argsFor(0)[0];
@@ -557,8 +562,8 @@ describe('entityDeclaration (unit)', () => {
          });
 
          it('returns an unassigned value with a PE Ref in the NDATA name position', () => {
-            literal.parse.and.callFake((_1, _2, callback) => { callback(); });
-            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+            literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+            unCheck.and.callFake((pToken: any, prop: string, foundRef: Function, other: any) => {
                checkForPERefCallback = other;
 
                if (prop === 'nDataName') {
@@ -581,15 +586,15 @@ describe('entityDeclaration (unit)', () => {
                '>',
             ]);
    
-            entityDeclaration.parse(mockSource, {}, callback);
+            entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
    
             expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nDataName' } ])
          });
    
          it('returns an unassigned value with a PE Ref in the NDATA position', () => {
-            literal.parse.and.callFake((_1, _2, callback) => { callback(); });
-            unassigned.makeCheckCallback.and.callFake((pToken, prop, foundRef, other) => {
+            literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+            unCheck.and.callFake((pToken: any, prop: string, foundRef: Function, other: any) => {
                checkForPERefCallback = other;
 
                if (prop === 'nData') {
@@ -609,7 +614,7 @@ describe('entityDeclaration (unit)', () => {
                '>',
             ]);
    
-            entityDeclaration.parse(mockSource, {}, callback);
+            entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
    
             expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nData' } ])
@@ -620,14 +625,16 @@ describe('entityDeclaration (unit)', () => {
    });
 
    describe('assignUnassigned()', () => {
+      let extUnass: jasmine.Spy;
+      let unAssign: jasmine.Spy;
 
       beforeEach(() => {
-         spyOn(unassigned, 'assignToProps');
-         spyOn(externalId, 'assignUnassigned');
+         unAssign = spyOn(unassigned, 'assignToProps');
+         extUnass = spyOn(externalId, 'assignUnassigned');
       });
 
       it('does not call assignToProps() if there is no unassigned', () => {
-         entityDeclaration.assignUnassigned({});
+         entityDeclaration.assignUnassigned({} as any);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });
@@ -638,10 +645,10 @@ describe('entityDeclaration (unit)', () => {
             nextPropName: 'name',
          };
          
-         entityDeclaration.assignUnassigned(declPToken);
+         entityDeclaration.assignUnassigned(declPToken as any);
 
-         expect(entityDeclaration.unassigned).toBeUndefined();
-         expect(entityDeclaration.nextPropName).toBeUndefined();
+         expect(declPToken.unassigned).toBeUndefined();
+         expect(declPToken.nextPropName).toBeUndefined();
       });
 
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
@@ -651,7 +658,7 @@ describe('entityDeclaration (unit)', () => {
             } ],
          };
          
-         entityDeclaration.assignUnassigned(declPToken);
+         entityDeclaration.assignUnassigned(declPToken as any);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });
@@ -683,8 +690,8 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            let propName;
-            externalId.assignUnassigned.and.callFake((externalId, pToken, name) => {
+            let propName: string;
+            extUnass.and.callFake((externalId: any, pToken: any, name: string) => {
                // check externalId now, before it is modified
                expect(externalId).toEqual({
                   unassigned: unassignedValue
@@ -695,7 +702,7 @@ describe('entityDeclaration (unit)', () => {
             
             entityDeclaration.assignUnassigned(declPToken);
    
-            expect(propName).toEqual('postNameSpace'); // make sure we've evaluated above
+            expect(propName!).toEqual('postNameSpace'); // make sure we've evaluated above
          });
 
          it('calls unassigned.assignToProps() with the epilog', () => {
@@ -758,8 +765,8 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            let propName;
-            externalId.assignUnassigned.and.callFake((externalId, pToken, name) => {
+            let propName: string;
+            extUnass.and.callFake((externalId: any, pToken: any, name: string) => {
                // check externalId now, before it is modified
                expect(externalId).toEqual({
                   unassigned: unassignedValue
@@ -770,7 +777,7 @@ describe('entityDeclaration (unit)', () => {
             
             entityDeclaration.assignUnassigned(declPToken);
    
-            expect(propName).toEqual('postNameSpace'); // make sure we've evaluated above
+            expect(propName!).toEqual('postNameSpace'); // make sure we've evaluated above
          });
 
          it('calls unassigned.assignToProps() with the epilog if we found an externalId', () => {
@@ -941,7 +948,7 @@ describe('entityDeclaration (unit)', () => {
             
             entityDeclaration.assignUnassigned(declPToken);
    
-            expect(unassigned.assignToProps.calls.count()).toEqual(1);
+            expect(unAssign.calls.count()).toEqual(1);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [
                   { name: 'postExternalIdSpace', type: 'space' },
@@ -957,11 +964,13 @@ describe('entityDeclaration (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
-      let pToken;
-      let expectedSToken;
+      let mockErrorCollector: MockErrorCollector;
+      let pToken: any;
+      let expectedSToken: STokenMaker;
+      let emd: EntityMetaData;
 
       beforeEach(() => {
+         emd = new EntityMetaData();
          mockErrorCollector = new MockErrorCollector();
          expectedSToken = makeSTokenMaker();
          pToken = {
@@ -1039,8 +1048,6 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('calls misc.checkName() to report on name validity', () => {
-         const emd = new EntityMetaData();
-
          entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(misc.checkName).toHaveBeenCalledWith(pToken.name,
@@ -1048,8 +1055,6 @@ describe('entityDeclaration (unit)', () => {
       });
 
       it('calls misc.checkWellFormedNameRecommendation() to report on bad names', () => {
-         const emd = new EntityMetaData();
-
          entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(pToken.name,
@@ -1060,7 +1065,7 @@ describe('entityDeclaration (unit)', () => {
       it('reports an error if there is no space after the name', () => {
          delete pToken.postNameSpace;
 
-         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NAME_NO_TRAILING_SPACE,
@@ -1088,7 +1093,7 @@ describe('entityDeclaration (unit)', () => {
          pToken.nData = expectedSToken('nData');
          pToken.nDataName = expectedSToken('foo');
 
-         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_INVALID_CASE,
@@ -1101,7 +1106,7 @@ describe('entityDeclaration (unit)', () => {
          pToken.externalId = { externalId: true };
          pToken.nData = expectedSToken('nData');
 
-         entityDeclaration.checkWellFormed(pToken, mockErrorCollector);
+         entityDeclaration.checkWellFormed(pToken, mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ENTITYDECL_NDATA_NO_NAME,
@@ -1166,7 +1171,7 @@ describe('entityDeclaration (unit)', () => {
    });
 
    describe('pTokenToXToken()', () => {
-      let pToken;
+      let pToken: any;
 
       beforeEach(() => {
          const expectedSToken = makeSTokenMaker();

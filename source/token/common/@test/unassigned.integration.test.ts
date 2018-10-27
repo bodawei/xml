@@ -4,16 +4,17 @@
 import { EntityMetaData } from '../../../basic';
 import { defaultExtractors } from '../../../extractor';
 import { STokenSource } from '../../../sToken';
-import { makeSTokenMaker } from '../../../sToken/@test/helper';
+import { makeSTokenMaker, STokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference.js';
+import entityReference from '../../entityReference';
+import { ParameterEntityReferencePToken } from '../../entityReference';
 import text from '../../text';
 import unassigned from '../unassigned';
 
 describe('unassigned (integration)', () => {
-   let emd;
-   let source;
-   let makeSToken;
+   let emd: EntityMetaData;
+   let source: STokenSource;
+   let makeSToken: STokenMaker;
 
    beforeEach(() => {
       emd = new EntityMetaData();
@@ -38,23 +39,27 @@ describe('unassigned (integration)', () => {
          source.endText();
 
          unassigned.checkForPERef(source, (pieces) => {
-            expect(pieces).toEqual([ {
+            expect(pieces).toEqual([{
                type: 'reference',
-               token: new entityReference.ParamPToken({
+               token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
                   postOpenSpace: undefined,
                   name: makeSToken('peref'),
                   postNameSpace: undefined,
                   close: makeSToken(';'),
                }),
-            }, unassigned.spaceFromSToken(makeSToken(' ')), {
+            },
+            unassigned.spaceFromSToken(makeSToken(' ')),
+            {
                type: 'literal',
                token: {
                   openQuote: makeSToken('"'),
                   value: [ new text.PToken({ text: makeSToken('double') }) ],
                   closeQuote: makeSToken('"'),
                }
-            }, unassigned.wordFromSToken(makeSToken('whatever')), {
+            },
+            unassigned.wordFromSToken(makeSToken('whatever')),
+            {
                type: 'literal',
                token: {
                   openQuote: makeSToken('\''),
@@ -63,14 +68,15 @@ describe('unassigned (integration)', () => {
                },
             }, {
                type: 'reference',
-               token: new entityReference.ParamPToken({
+               token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
                   postOpenSpace: undefined,
                   name: makeSToken('peref'),
                   postNameSpace: undefined,
                   close: makeSToken(';'),
                }),
-            } ]);
+            }
+         ] as any);
             done();
          });
       });
@@ -93,7 +99,7 @@ describe('unassigned (integration)', () => {
                   postNameSpace: undefined,
                   close: makeSToken(';'),
                },
-            )});
+            )} as any);
             done();
          });
       });

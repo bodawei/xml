@@ -12,15 +12,15 @@ import { ParameterEntityEndPToken } from '../../parameterEntityEnd';
 import entityReference from '../../entityReference';
 import entityStart from '../../entityStart.js';
 import text from '../../text';
-import unassigned, { UnassignedType } from '../../common/unassigned';
+import unassigned, { UnassignedType } from '../unassigned';
 
 import externalId from '../externalId.js';
 
 describe('externalId (integration)', () => {
 
    describe('parse()', () => {
-      let emd;
-      let source;
+      let emd: EntityMetaData;
+      let source: STokenSource;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -87,8 +87,8 @@ describe('externalId (integration)', () => {
    });
 
    describe('assignUnassigned()', () => {
-      let emd;
-      let source;
+      let emd: EntityMetaData;
+      let source: STokenSource;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -99,13 +99,13 @@ describe('externalId (integration)', () => {
          source.addText('PUBLIC\t%publicVal;\t"sys.xml">');
          source.endText();
 
-         externalId.parse(source, [], (extIdPToken) => {
+         externalId.parse(source, [], (extIdPToken: any) => {
             // expand/replace the publicVal reference
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken({}),
+               token: new ParameterEntityEndPToken({} as any),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.LITERAL,
@@ -168,13 +168,13 @@ describe('externalId (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         externalId.parse(source, [], (extIdPToken) => {
+         externalId.parse(source, [], (extIdPToken: any) => {
             // expand/replace the publicVal reference
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken({}),
+               token: new ParameterEntityEndPToken({} as any),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -196,18 +196,18 @@ describe('externalId (integration)', () => {
       });
 
       it('adds a space to an otherwise missing previous prop name (check unsasigned calls)', (done) => {
-         const container = {};
+         const container: any = {};
          const expectedString = new SToken(' ', ' ', [ helper.makeInsertedRange() ]);
          source.addText('%foo;>');
          source.endText();
 
-         externalId.parse(source, [], (extIdPToken) => {
+         externalId.parse(source, [], (extIdPToken: any) => {
             // expand/replace the publicVal reference
             expect(extIdPToken.unassigned[0].type).toEqual('reference');
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken({}),
+               token: new ParameterEntityEndPToken({} as any),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -232,8 +232,8 @@ describe('externalId (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let source;
+      let emd: EntityMetaData;
+      let source: STokenSource;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -244,7 +244,7 @@ describe('externalId (integration)', () => {
          source.addText('SYSTEM "bad');
          source.endText();
          externalId.parse(source, [], (result) => {
-            const ec = new ErrorCollector({}, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             externalId.checkWellFormed(result, ec, emd);
 
@@ -258,28 +258,28 @@ describe('externalId (integration)', () => {
          source.addText('%wtf; "other">');
          source.endText();
 
-         externalId.parse(source, [], (pToken) => {
+         externalId.parse(source, [], (pToken: any) => {
             // "expand" what should be there.
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
                   token: new entityStart.ParamPToken({}),
                },
-               unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range())), 
-               unassigned.spaceFromSToken(new SToken(' ', ' ', new Range())), {
+               unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation()))), 
+               unassigned.spaceFromSToken(new SToken(' ', ' ', new Range(new EntityLocation()))), {
                   type: UnassignedType.LITERAL,
                   token: {
-                     openQuote: new SToken('"', '"', new Range()),
-                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
-                     closeQuote: new SToken('"', '"', new Range()),
+                     openQuote: new SToken('"', '"', new Range(new EntityLocation())),
+                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
+                     closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken({}),
+                  token: new ParameterEntityEndPToken({} as any),
                },
             ].concat(pToken.unassigned);
             externalId.assignUnassigned(pToken, {}, 'prevSpace');
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             externalId.checkWellFormed(pToken, ec, new EntityMetaData());
 
@@ -291,8 +291,8 @@ describe('externalId (integration)', () => {
    });
 
    describe('getSTokens()', () => {
-      let emd;
-      let source;
+      let emd: EntityMetaData;
+      let source: STokenSource;
 
       beforeEach(() => {
          emd = new EntityMetaData();

@@ -7,21 +7,21 @@ import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
 import misc from '../common/misc';
-import * as charData from '../charData.js';
+import * as charData from '../charData';
+import { CharDataPToken } from '../charData';
 
 describe('charData', () => {
-   let charDataPToken;
+   let charDataPToken: CharDataPToken;
 
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
-      charDataPToken = {
-         type: 'CHARDATA',
+      charDataPToken = new CharDataPToken({
          text: expectedSToken('test text'),
-      };
+      });
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -32,7 +32,7 @@ describe('charData', () => {
             [ 'test text', 'all', [ '<', '&', ']]>' ] ],
          ]);
 
-         charData.parse(mockSource, callback);
+         charData.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charDataPToken);
@@ -54,7 +54,7 @@ describe('charData', () => {
             undefined,
          ]);
 
-         charData.parse(mockSource, callback);
+         charData.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps({
@@ -67,7 +67,7 @@ describe('charData', () => {
             'test text',
          ]);
 
-         charData.parse(mockSource, callback);
+         charData.parse(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0].getSTokenArray()).toEqual([
@@ -78,7 +78,7 @@ describe('charData', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
+      let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();

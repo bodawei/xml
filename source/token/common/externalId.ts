@@ -1,13 +1,15 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation } from '../../basic';
-import { WellFormedError } from '../../error';
+import { EntityLocation, EntityMetaData } from '../../basic';
+import { WellFormedError, ErrorCollector } from '../../error';
 
 import entityReference from '../entityReference';
-import unassigned from '../common/unassigned';
+import unassigned from './unassigned';
 
-import literal from './literal';
+import literal, { LiteralPToken } from './literal';
 import { textOrBlank } from './misc';
+import { STokenSource, SToken } from 'sToken';
+import { UnassignedArray } from './unassigned';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -22,6 +24,19 @@ const EXTERNAL_ID = 'EXTERNAL_ID';
 const ALLOWED_TYPES = [ 'PUBLIC', 'SYSTEM' ];
 const TYPE_TERMINATORS = [ '"', '\'' ];
 const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
+
+type ExternalId = {
+   type: string,
+   public?: LiteralPToken,
+   system?: LiteralPToken,
+   unassigned?: UnassignedArray,
+   extra?: UnassignedArray,
+   nextPropName?: string,
+   idType?: SToken,
+   __bogusWorkaround?: SToken,
+   postIdTypeSpace?: SToken,
+   postPublicSpace?: SToken,
+};
 
 /**********************************************************************\
  parse() tries to extract an ExternalID or a PublicID from
@@ -43,23 +58,23 @@ const PUBID_CHARS = /^[- \n\'\(\)\+,\.\/:=\?;!\*#@$_%a-zA-Z0-9]*/;
    deliverPTokenPart: Callback to deliver the PToken compatible version
 \**********************************************************************/
 
-function parse(source, terminators, deliverExtId) {
+function parse(source: STokenSource, terminators: Array<string>, deliverExtId: (result?: ExternalId) => void) {
    const allTerminators = TYPE_TERMINATORS.concat(terminators);
    const extIdPToken = {
       type: EXTERNAL_ID,
    };
 
-   const callback = unassigned.makeCheckCallback(extIdPToken, 'idType', deliverExtId, () => {
+   const callback = unassigned.makeCheckCallback(extIdPToken, 'idType', deliverExtId, (result?: ExternalId) => {
       source.extract('peekWord', allTerminators, (sToken) => {
          const capitalType = sToken && sToken.str.toLocaleUpperCase();
 
-         if (!sToken || ALLOWED_TYPES.indexOf(capitalType) === -1) {
+         if (!capitalType || ALLOWED_TYPES.indexOf(capitalType) === -1) {
             deliverExtId();
             return;
          }
 
          source.extractToObject('word', allTerminators, extIdPToken, 'idType');
-         source.extractToObject('space', extIdPToken, 'postIdTypeSpace');
+         source.extractToObjectNoParams('space', extIdPToken, 'postIdTypeSpace');
 
          if (capitalType === 'PUBLIC') {
             parsePublic(source, extIdPToken, allTerminators, deliverExtId);
@@ -72,9 +87,11 @@ function parse(source, terminators, deliverExtId) {
    unassigned.checkForPERef(source, callback);
 }
 
-function parsePublic(source, extIdPToken, allTerminators, deliverExtId) {
+function parsePublic(source: STokenSource, extIdPToken: ExternalId, allTerminators: Array<string>, deliverExtId: (result?: ExternalId) => void) {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'public', deliverExtId, () => {
-      const temp = {};
+      const temp: LiteralPToken = {
+         value: [],
+      };
 
       literal.parse(source, {
          pToken: temp,
@@ -85,7 +102,7 @@ function parsePublic(source, extIdPToken, allTerminators, deliverExtId) {
          }
 
          extIdPToken.public = temp;
-         source.extractToObject('space', extIdPToken, 'postPublicSpace');
+         source.extractToObjectNoParams('space', extIdPToken, 'postPublicSpace');
 
          parseSystem(source, allTerminators, extIdPToken, deliverExtId);
       });
@@ -94,7 +111,7 @@ function parsePublic(source, extIdPToken, allTerminators, deliverExtId) {
    unassigned.checkForPERef(source, callback);
 }
 
-function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
+function parseSystem(source: STokenSource, allTerminators: Array<string>, extIdPToken: ExternalId, deliverExtId: (result?: ExternalId) => void) {
    const callback = unassigned.makeCheckCallback(extIdPToken, 'system', deliverExtId, () => {
       source.extract('peekWord', allTerminators, (nData) => {
          if (nData && nData.str.toLocaleUpperCase() === 'NDATA') {
@@ -102,7 +119,9 @@ function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
             return;
          }
 
-         const temp = {};
+         const temp: LiteralPToken = {
+            value: [],
+         };
          literal.parse(source, {
             pToken: temp,
          }, (modifiedPToken) => {
@@ -118,14 +137,14 @@ function parseSystem(source, allTerminators, extIdPToken, deliverExtId) {
    unassigned.checkForPERef(source, callback);
 }
 
-function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
+function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string]: any }, prevSpacePropName?: string) {
    const unValues = externalId.unassigned || [];
    const descriptors = [
       { name: 'idType', type: 'word', allowed: /public|system/i },
       { name: 'postIdTypeSpace', type: 'space' },
    ];
 
-   if (unValues.length === 0) {
+   if (!externalId.unassigned || unValues.length === 0) {
       delete externalId.unassigned;
       delete externalId.nextPropName;
       return;
@@ -145,10 +164,10 @@ function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
    unassigned.assignToProps(externalId.unassigned, externalId, nextPropName, descriptors);
 
    if (externalId.__bogusWorkaround) {
-      if (prevContainer[prevSpacePropName]) {
-         prevContainer[prevSpacePropName].merge(externalId.__bogusWorkaround);
+      if (prevContainer![prevSpacePropName!]) {
+         prevContainer![prevSpacePropName!].merge(externalId.__bogusWorkaround);
       } else {
-         prevContainer[prevSpacePropName] = externalId.__bogusWorkaround;
+         prevContainer![prevSpacePropName!] = externalId.__bogusWorkaround;
       }
    }
 
@@ -189,7 +208,7 @@ function assignUnassigned(externalId, prevContainer, prevSpacePropName) {
    ec: An ErrorCollector instance.
 \**********************************************************************/
 
-function checkWellFormed(pTokenPart, ec, entityMetaData) {
+function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
@@ -210,7 +229,7 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
          }
          const match = PUBID_CHARS.exec(pTokenPart.public.value[0].str);
          ec.check(!match || match[0] !== pTokenPart.public.value[0].str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ pTokenPart.public.value[0].str[match[0].length] ]);
+                  [ pTokenPart.public.value[0].str[match![0].length] ]);
       });
    }
 
@@ -231,7 +250,7 @@ function checkWellFormed(pTokenPart, ec, entityMetaData) {
  can be inserted into a token.
 \**********************************************************************/
 
-function makeEntityLocation(pTokenPart) {
+function makeEntityLocation(pTokenPart: ExternalId | void) {
    if (!pTokenPart || pTokenPart.unassigned) {
       return;
    }
@@ -244,7 +263,7 @@ function makeEntityLocation(pTokenPart) {
    return new EntityLocation(value, publicValue);
 }
 
-function getSTokens(pTokenPart) {
+function getSTokens(pTokenPart?: ExternalId) {
    let results = [];
    if (!pTokenPart) {
       return [];
@@ -270,3 +289,7 @@ const externalId = {
 };
 
 export default externalId;
+
+export { 
+   ExternalId,
+};

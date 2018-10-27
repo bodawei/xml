@@ -115,4 +115,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   ElementEndPToken,
 };

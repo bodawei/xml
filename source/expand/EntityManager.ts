@@ -30,15 +30,15 @@ class EntityManager {
       this._entityMap = {};
 
       const ltEntity = new entityDeclaration.XToken('lt',
-         [ new text.PToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined, []);
+         [ new text.PToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined);
       const gtEntity = new entityDeclaration.XToken('gt',
-         [ new text.PToken({ text: SToken.fromString('>') }) ], undefined, undefined, []);
+         [ new text.PToken({ text: SToken.fromString('>') }) ], undefined, undefined);
       const ampEntity = new entityDeclaration.XToken('amp',
-         [ new text.PToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined, []);
+         [ new text.PToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined);
       const aposEntity = new entityDeclaration.XToken('apos',
-         [ new text.PToken({ text: SToken.fromString('\'') }) ], undefined, undefined, []);
+         [ new text.PToken({ text: SToken.fromString('\'') }) ], undefined, undefined);
       const quotEntity = new entityDeclaration.XToken('quot',
-         [ new text.PToken({ text: SToken.fromString('"') }) ], undefined, undefined, []);
+         [ new text.PToken({ text: SToken.fromString('"') }) ], undefined, undefined);
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
       this._internalAdd(gtEntity, DEFAULT_ENTITY, false);

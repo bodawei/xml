@@ -10,17 +10,16 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as elementEnd from '../elementEnd.js';
 
 describe('elementEnd', () => {
-   let elementEndPToken;
+   let elementEndPToken: elementEnd.ElementEndPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      elementEndPToken = {
-         type: 'ELEMENT_END',
+      elementEndPToken = new elementEnd.ElementEndPToken({
          postOpenSpace: undefined,
          name: makeSToken('elemName'),
          postNameSpace: makeSToken(' '),
          close: makeSToken('>'),
-      };
+      });
       elementEndPToken.open = makeSToken('</');
    });
 
@@ -40,8 +39,8 @@ describe('elementEnd', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let source;
+      let emd: EntityMetaData;
+      let source: STokenSource;
 
       beforeEach(() => {
          emd = new EntityMetaData();

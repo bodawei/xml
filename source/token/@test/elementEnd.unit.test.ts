@@ -11,18 +11,17 @@ import misc from '../common/misc';
 import * as elementEnd from '../elementEnd.js';
 
 describe('elementEnd', () => {
-   let elementEndPToken;
+   let elementEndPToken: elementEnd.ElementEndPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      elementEndPToken = {
-         type: 'ELEMENT_END',
+      elementEndPToken = new elementEnd.ElementEndPToken({
          open: makeSToken('</'),
          postOpenSpace: undefined,
          name: makeSToken('elemName'),
          postNameSpace: makeSToken(' '),
          close: makeSToken('>'),
-      };
+      });
    });
 
    describe('PToken', () => {
@@ -45,7 +44,7 @@ describe('elementEnd', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
@@ -85,8 +84,8 @@ describe('elementEnd', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let mockErrorCollector;
+      let emd: EntityMetaData;
+      let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
          emd = new EntityMetaData();

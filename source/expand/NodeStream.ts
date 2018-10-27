@@ -707,12 +707,12 @@ class NodeStream extends stream.Transform {
    _processEntityDeclaration(edToken: EntityDeclaration, done: DoneSignal) {
       this._expandPERefsInUnassignedValue(edToken.pToken, false, () => {
          if (edToken.pToken && edToken.pToken.unassigned) {
-            entityDeclaration.assignUnassigned(edToken.pToken);
-            edToken = entityDeclaration.pTokenToXToken(edToken.pToken);
+            entityDeclaration.assignUnassigned(edToken.pToken as any); // typeHack
+            edToken = entityDeclaration.pTokenToXToken(edToken.pToken as any); // typeHack
          }
 
          this._expandPeRefsInEntityValue((edToken.value as EntityValueArray), (newValue) => {
-            edToken.value = newValue;
+            edToken.value = newValue as any; // typeHack
             this._addEntityDeclaration(edToken, done);
          });
       });

@@ -12,8 +12,8 @@ import misc from '../common/misc';
 import * as elementStart from '../elementStart';
 
 describe('elementStart (unit)', () => {
-   let elementStartPToken;
-   let elementStartPTokenWithLeading;
+   let elementStartPToken: elementStart.PToken;
+   let elementStartPTokenWithLeading: elementStart.PToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
@@ -94,13 +94,14 @@ describe('elementStart (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
-      let attrArray;
+      let callback: jasmine.Spy;
+      let attrParse: jasmine.Spy;
+      let attrArray: Array<any>;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          attrArray = [];
-         spyOn(attribute, 'parse').and.callFake((_1, _2, deliverPToken) => {
+         attrParse = spyOn(attribute, 'parse').and.callFake((_1: any, _2: any, deliverPToken: any) => {
             deliverPToken(attrArray);
          });
       });
@@ -116,7 +117,7 @@ describe('elementStart (unit)', () => {
          elementStart.parse(mockSource, elementStartPToken.open, callback);
          mockSource.respondInAsyncTime();
 
-         const args = attribute.parse.calls.argsFor(0);
+         const args = attrParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
             terminators: [ '>', '/>' ],
@@ -179,8 +180,9 @@ describe('elementStart (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let mockErrorCollector;
+      let emd: EntityMetaData;
+      let mockErrorCollector: MockErrorCollector;
+      let cwf: jasmine.Spy;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -188,7 +190,7 @@ describe('elementStart (unit)', () => {
 
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedNameRecommendation');
-         spyOn(attribute, 'checkWellFormed');
+         cwf = spyOn(attribute, 'checkWellFormed');
       });
 
       it('asks the misc module to look for errors in the name', () => {
@@ -210,7 +212,7 @@ describe('elementStart (unit)', () => {
          const emd = new EntityMetaData();
          elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
 
-         const args = attribute.checkWellFormed.calls.argsFor(0);
+         const args = cwf.calls.argsFor(0);
          expect(args[0]).toEqual(elementStartPToken.attributes);
          expect(args[1]).toEqual(mockErrorCollector);
          expect(args[2]).toEqual(emd);
@@ -260,9 +262,10 @@ describe('elementStart (unit)', () => {
    });
 
    describe('pTokenToXToken()', () => {
+      let mtc: jasmine.Spy;
 
       beforeEach(() => {
-         spyOn(attribute, 'makeTokenCompatible');
+         mtc = spyOn(attribute, 'makeTokenCompatible');
       });
 
       it('asks the attribute to provide the attributes', () => {
@@ -274,23 +277,23 @@ describe('elementStart (unit)', () => {
       });
 
       it('returns a token with the expected fields defined', () => {
-         attribute.makeTokenCompatible.and.returnValue([ { attributes: true } ]);
+         mtc.and.returnValue([ { attributes: true } ]);
 
          const token = elementStart.pTokenToXToken(elementStartPTokenWithLeading);
 
          expect(token).toEqual(new elementStart.XToken('elemName',
-            [ { attributes: true } ],
+            [ { attributes: true } ] as any,
             elementStartPTokenWithLeading));
       });
 
       it('returns an empty elment XToken if an empty element was provided', () => {
-         attribute.makeTokenCompatible.and.returnValue([ { attributes: true } ]);
+         mtc.and.returnValue([ { attributes: true } ]);
          elementStartPToken.type = elementStart.EMPTY_TYPE;
 
          const token = elementStart.pTokenToXToken(elementStartPToken);
 
          expect(token).toEqual(new elementStart.EmptyToken('elemName',
-            [ { attributes: true } ],
+            [ { attributes: true } ] as any,
             elementStartPToken));
       });
 

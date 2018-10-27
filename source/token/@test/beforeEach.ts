@@ -3,9 +3,11 @@
 
 import { SToken } from '../../sToken/index';
 
-function toContainPTokenProps(util, customEqualityTesters) {
+type Props =  { [name: string]: any, calls?: any };
+
+function toContainPTokenProps(util?: any, customEqualityTesters?: any) {
    return {
-      compare: (callbackSpy, expectedProps) => {
+      compare: (callbackSpy: jasmine.Spy | Props | void, expectedProps: Props) => {
          let pass = true;
          let message = '';
 
@@ -13,7 +15,7 @@ function toContainPTokenProps(util, customEqualityTesters) {
             throw new Error('Did not get a spy as expected.');
          }
 
-         let actualProps = callbackSpy;
+         let actualProps: Props;
 
          if (callbackSpy.calls) {
             const args = callbackSpy.calls.allArgs();
@@ -24,6 +26,8 @@ function toContainPTokenProps(util, customEqualityTesters) {
             }
 
             actualProps = args[0][0];
+         } else {
+            actualProps = callbackSpy;
          }
 
          Object.keys(expectedProps).forEach((propName) => {
@@ -54,8 +58,9 @@ function toContainPTokenProps(util, customEqualityTesters) {
    };
 }
 
-function makeRangeless(item) {
-   const result = {};
+function makeRangeless(item: void | jasmine.Spy | Props) {
+   const result: Props = {};
+   let props: Props;
 
    if (item === null || item === undefined) {
       return item;
@@ -69,15 +74,17 @@ function makeRangeless(item) {
             `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
       }
 
-      item = args[0][0];
+      props = args[0][0];
+   } else {
+      props = item;
    }
 
-   if (typeof item !== 'object') {
-      return item;
+   if (typeof props !== 'object') {
+      return props;
    }
 
-   Object.keys(item).forEach((name) => {
-      const value = item[name];
+   Object.keys(props).forEach((name) => {
+      const value = props[name];
 
       if (value instanceof SToken) {
          result[name] = new SToken(value.str, value.originalStr, []);
@@ -86,14 +93,14 @@ function makeRangeless(item) {
       } else if (typeof value === 'object') {
          result[name] = makeRangeless(value);
       } else {
-         result[name] = item[name];
+         result[name] = props[name];
       }
    });
 
    return result;
 }
 
-function getTheOneArg(callback) {
+function getTheOneArg(callback: jasmine.Spy) {
    if (callback.calls) {
       const args = callback.calls.allArgs();
 
@@ -108,35 +115,36 @@ function getTheOneArg(callback) {
    return callback;
 }
 
-function fixUndef(value) {
+function fixUndef(value: Array<any> | Props | void): string | Props {
    if (Array.isArray(value)) {
       return value.map((entry) => fixUndef(entry));
    } else if (typeof value === 'object') {
-      const newObj = {};
+      const newObj: Props = {};
 
-      Object.entries(value).forEach(([key, val]) => {
+      Object.keys(value).forEach((key) => {
+         const val: any = value[key];
          newObj[key] = fixUndef(val);
       });
 
       return newObj;
    } if (value === undefined) {
-      value = '•undefined•';
+      return '•undefined•';
    }
 
    return value;
 }
 
-function toEqualRangeless(util, customEqualityTesters) {
+function toEqualRangeless(util: any, customEqualityTesters: any) {
    return {
-      compare(callbackSpy, expectedProps) {
+      compare(callbackSpy: jasmine.Spy, expectedProps: Props) {
          if (!callbackSpy) {
             throw new Error('Did not get a spy as expected.');
          }
 
          let pass = true;
          let def = 'Expected properties not to be found in callback, but they were.';
-         let actual = makeRangeless(getTheOneArg(callbackSpy));
-         let expected = makeRangeless(expectedProps);
+         let actual: Props = makeRangeless(getTheOneArg(callbackSpy)) || {};
+         let expected: Props = makeRangeless(expectedProps) || {};
          let message = '';
 
          Object.keys(expected).forEach((propName) => {
@@ -184,3 +192,7 @@ module.exports = {
    toEqualRangeless,
    makeRangeless,
 };
+
+export {
+   toContainPTokenProps,
+}

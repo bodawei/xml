@@ -98,4 +98,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   CharDataPToken,
 };

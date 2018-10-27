@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 
 import declaration from './bridge/declaration';
-import externalId from './common/externalId.js';
+import externalId, { ExternalId } from './common/externalId.js';
 import misc from './common/misc';
 import base from './base';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
@@ -14,13 +14,6 @@ const NOTATIONDECL = 'NOTATIONDECL';
 const NOTATIONDECL_XTOKEN = 'NOTATIONDECL_XTOKEN';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
-
-type ExternalId = {
-   type: string;
-   unassigned?: UnassignedArray,
-   extra?: UnassignedArray,
-   nextPropName?: string,
-};
 
 type DeclarationPToken = {
 
@@ -99,7 +92,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
       source.extractToObject('word', [ '>' ], pToken, 'name');
       source.extractToObjectNoParams('space', pToken, 'postNameSpace');
 
-      externalId.parse(source, [ '>' ], (externalId: ExternalId) => {
+      externalId.parse(source, [ '>' ], (externalId?: ExternalId) => {
          pToken.externalId = externalId;
          if (externalId && !externalId.unassigned) {
             source.extractToObjectNoParams('space', pToken, 'postExternalIdSpace');

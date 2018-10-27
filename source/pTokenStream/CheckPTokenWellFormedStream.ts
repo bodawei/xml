@@ -205,7 +205,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
-            entityDeclaration.checkWellFormed(pToken, errorCollector, this._metaData);
+            entityDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData); // typeHack
             break;
          case entityReference.PTYPE:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {

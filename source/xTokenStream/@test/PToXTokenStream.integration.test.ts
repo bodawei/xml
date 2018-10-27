@@ -147,7 +147,7 @@ describe('PToXTokenStream (integration)', () => {
       pToken.text = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
 
       expectInputToProduce('<!ENTITY entityName "value">', [
-         new entityDeclaration.XToken('entityName', [ pToken ], undefined, '', []),
+         new entityDeclaration.XToken('entityName', [ pToken ], undefined, ''),
       ], done);
    });
 

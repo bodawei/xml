@@ -9,20 +9,21 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import text from '../text';
 import * as xmlDeclaration from '../xmlDeclaration';
+import { InstructionPToken } from '../bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
-   let xmlDeclPToken;
+   let xmlDeclPToken: xmlDeclaration.XmlDeclarationPToken;
 
    beforeEach(() => {
       const makeToken = makeSTokenMaker();
-      xmlDeclPToken = {
+      xmlDeclPToken = new xmlDeclaration.XmlDeclarationPToken({
          open: makeToken('<?'),
          postOpenSpace: undefined,
          target: makeToken('xml'),
          postTargetSpace: makeToken(' '),
          params: [],
          close: makeToken('?>'),
-      };
+      });
    });
 
    describe('parse()', () => {
@@ -32,7 +33,7 @@ describe('xmlDeclaration (integration)', () => {
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
-         xmlDeclaration.parse(source, {}, (parsing) => {
+         xmlDeclaration.parse(source, {} as any, (parsing) => {
             expect(parsing.params[0].name.str).toEqual('version');
             done();
          });
@@ -41,9 +42,9 @@ describe('xmlDeclaration (integration)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let source;
-      let instructionPToken;
+      let emd: EntityMetaData;
+      let source: STokenSource;
+      let instructionPToken: InstructionPToken;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -88,7 +89,7 @@ describe('xmlDeclaration (integration)', () => {
          source.addText('version="1.3" standalone="yes" ?>');
          source.endText();
 
-         xmlDeclaration.parse(source, {}, (pToken) => {
+         xmlDeclaration.parse(source, {} as any, (pToken) => {
             const token = xmlDeclaration.pTokenToXToken(pToken);
 
             expect(token.params).toEqual([ {
@@ -107,10 +108,10 @@ describe('xmlDeclaration (integration)', () => {
          source.addText('version="1.3" standalone="yes" ?>');
          source.endText();
 
-         xmlDeclaration.parse(source, {}, (pToken) => {
+         xmlDeclaration.parse(source, {} as any, (pToken) => {
             const token = xmlDeclaration.pTokenToXToken(pToken);
 
-            expect(token.pToken.params[0].name.str).toEqual('version');
+            expect((token as any).pToken.params[0].name.str).toEqual('version');
             done();
          });
       });

@@ -4,14 +4,14 @@
 import { EntityMetaData, EntityKind } from '../../basic';
 import { WellFormedError } from '../../error';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 
 import * as instruction from '../bridge/instruction.js';
 import attribute from '../common/attribute';
 import * as xmlDeclaration from '../xmlDeclaration.js';
 
 describe('xmlDeclaration (unit)', () => {
-   let xmlDeclPToken;
+   let xmlDeclPToken: xmlDeclaration.PToken;
 
    beforeEach(() => {
       const makeToken = makeSTokenMaker();
@@ -52,12 +52,13 @@ describe('xmlDeclaration (unit)', () => {
    });
 
    describe('parse()', () => {
-      let callback;
+      let callback: jasmine.Spy;
+      let attParse: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(attribute, 'parse');
-         attribute.parse.and.callFake((_1, _2, callback) => { callback([]); });
+         attParse = spyOn(attribute, 'parse');
+         attParse.and.callFake((_1: any, _2: any, callback: Function) => { callback([]); });
       });
 
       it('does a basic parsing', () => {
@@ -70,7 +71,7 @@ describe('xmlDeclaration (unit)', () => {
             postOpenSpace: undefined,
             target: xmlDeclPToken.target,
             postTargetSpace: xmlDeclPToken.postTargetSpace,
-         }, callback);
+         } as any, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(xmlDeclPToken);
@@ -81,10 +82,10 @@ describe('xmlDeclaration (unit)', () => {
             '?>',
          ]);
 
-         xmlDeclaration.parse(mockSource, {}, callback);
+         xmlDeclaration.parse(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
 
-         const args = attribute.parse.calls.argsFor(0);
+         const args = attParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
             terminators: [ '?>' ],
@@ -95,12 +96,13 @@ describe('xmlDeclaration (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let mockErrorCollector;
+      let mockErrorCollector: MockErrorCollector;
+      let attCheck: jasmine.Spy;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          spyOn(instruction, 'checkWellFormed');
-         spyOn(attribute, 'checkWellFormed');
+         attCheck = spyOn(attribute, 'checkWellFormed');
       });
 
       it('calls instruction.checkWellFormed', () => {
@@ -115,7 +117,7 @@ describe('xmlDeclaration (unit)', () => {
          const emd = new EntityMetaData();
          xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
 
-         const args = attribute.checkWellFormed.calls.argsFor(0);
+         const args = attCheck.calls.argsFor(0);
          expect(args[0]).toEqual(xmlDeclPToken.params);
          expect(args[1]).toEqual(mockErrorCollector);
          expect(args[2]).toEqual(emd);
@@ -180,10 +182,10 @@ describe('xmlDeclaration (unit)', () => {
       });
 
       describe('callbacks', () => {
-         let makeToken;
-         let emd;
-         let checkName;
-         let checkValue;
+         let makeToken: STokenMaker;
+         let emd: EntityMetaData;
+         let checkName: Function;
+         let checkValue: Function;
 
          beforeEach(() => {
             makeToken = makeSTokenMaker();
@@ -191,8 +193,8 @@ describe('xmlDeclaration (unit)', () => {
 
             // Gather parameters
             xmlDeclaration.checkWellFormed(xmlDeclPToken, new MockErrorCollector(), emd);
-            checkName = attribute.checkWellFormed.calls.argsFor(0)[5];
-            checkValue = attribute.checkWellFormed.calls.argsFor(0)[6];
+            checkName = attCheck.calls.argsFor(0)[5];
+            checkValue = attCheck.calls.argsFor(0)[6];
          });
 
          describe('checkName()', () => {
@@ -353,7 +355,7 @@ describe('xmlDeclaration (unit)', () => {
    });
 
    describe('pTokenToXToken()', () => {
-      let attrMake;
+      let attrMake: jasmine.Spy;
 
       beforeEach(() => {
          attrMake = spyOn(attribute, 'makeOneTokenCompatible');

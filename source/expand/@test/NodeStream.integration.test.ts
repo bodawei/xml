@@ -259,12 +259,12 @@ describe('NodeStream (integration)', () => {
             expect((valueArray as any)[0].text.str).toEqual('[');
             expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[1] as EntityStartPToken).refPToken }));
             expect(valueArray[2].text.str).toEqual('(');
-            expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: valueArray[3].refPToken }));
-            expect(valueArray[4].text.str).toEqual('inner');
-            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken(valueArray[3].refPToken));
-            expect(valueArray[6].text.str).toEqual(')');
-            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken(valueArray[1].refPToken));
-            expect(valueArray[8].text.str).toEqual(']');
+            expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[3] as EntityStartPToken).refPToken }));
+            expect((valueArray[4] as any).text.str).toEqual('inner');
+            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken((valueArray[3] as EntityStartPToken).refPToken));
+            expect((valueArray[6] as any).text.str).toEqual(')');
+            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken((valueArray[1] as EntityStartPToken).refPToken));
+            expect((valueArray[8] as any).text.str).toEqual(']');
             done();
          });
       });
@@ -280,7 +280,7 @@ describe('NodeStream (integration)', () => {
             const values: any = entityDecl.value;
 
             expect(entityDecl.name).toEqual('child');
-            expect(values[0].text.str).toEqual('[(inner)]');
+            expect((values[0] as any).text.str).toEqual('[(inner)]');
             done();
          });
       });

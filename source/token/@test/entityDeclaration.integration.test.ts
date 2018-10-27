@@ -9,25 +9,26 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration';
 import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
-import entityReference from '../entityReference';
+import entityReference, { EntityReferencePToken } from '../entityReference';
 import entityStart from '../entityStart.js';
 import text from '../text';
 import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper.js';
+import { DeclarationPToken } from '../bridge/declaration';
 
 describe('entityDeclaration (integration)', () => {
-   let declarationPToken;
-   let emd;
-   let source;
+   let declarationPToken: DeclarationPToken;
+   let emd: EntityMetaData;
+   let source: STokenSource;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      declarationPToken = {
+      declarationPToken = new DeclarationPToken('xxx', {
          open: makeSToken('<!'),
          declType: makeSToken('ENTITY'),
          postDeclTypeSpace: makeSToken('\t'),
-      };
+      });
       emd = new EntityMetaData();
       source = new STokenSource(defaultExtractors, emd);
    });
@@ -38,7 +39,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName "frog%foo;">');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.type).toEqual(entityDeclaration.PTYPE);
             expect(pToken.value[1].type).toEqual(entityReference.PARAM_PTYPE);
             done();
@@ -49,7 +50,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName %foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.postNameSpace.str).toEqual(' ');
             expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.close.str).toEqual('>');
@@ -61,7 +62,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('% foo ;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.parameter).toBeUndefined();
             expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.close.str).toEqual('>');
@@ -73,7 +74,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('%foo "value">');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.parameter.str).toEqual('%');
             expect(pToken.unassigned).toBeUndefined();
             expect(pToken.close.str).toEqual('>');
@@ -85,7 +86,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName SYSTEM %foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') }, (pToken) => {
+         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.externalId.idType.str).toEqual('SYSTEM');
             expect(pToken.unassigned[0].type).toEqual('reference');
             expect(pToken.unassigned).toBe(pToken.externalId.unassigned);
@@ -103,7 +104,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, {}, (pToken) => {
+         entityDeclaration.parse(source, {} as DeclarationPToken, (pToken) => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
@@ -118,11 +119,11 @@ describe('entityDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken({}),
+                  token: new ParameterEntityEndPToken(new EntityReferencePToken),
                }
             ];
 
-            entityDeclaration.assignUnassigned(pToken);
+            entityDeclaration.assignUnassigned(pToken as any); // typeHack
 
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
@@ -232,17 +233,17 @@ describe('entityDeclaration (integration)', () => {
                }, {
                   type: UnassignedType.LITERAL,
                   token: {
-                     openQuote: new SToken('"', '"', new Range()),
-                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range()) }) ],
-                     closeQuote: new SToken('"', '"', new Range()),
+                     openQuote: new SToken('"', '"', new Range(new EntityLocation())),
+                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
+                     closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken({}),
+                  token: new ParameterEntityEndPToken(new EntityReferencePToken()),
                },
             ].concat(pToken.unassigned);
             entityDeclaration.assignUnassigned(pToken);
-            const ec = new ErrorCollector(undefined, WellFormedError);
+            const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
             entityDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
 
@@ -258,9 +259,9 @@ describe('entityDeclaration (integration)', () => {
       it('adds the EntityValue (literal.makeTokenCompatible())', (done) => {
          source.addText('entityName "one" >');
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
-            const xToken = entityDeclaration.pTokenToXToken(pToken);
+            const xToken: any = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.value[0].text.str).toEqual('one');
+            expect((xToken.value[0] as any).text.str).toEqual('one');
             done();
          });
       });
@@ -280,7 +281,7 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.pToken.externalId.system.value[0].text.str).toEqual('sys.xml');
+            expect(xToken.pToken!.externalId.system.value[0].text.str).toEqual('sys.xml');
             done();
          });
       });
@@ -290,7 +291,7 @@ describe('entityDeclaration (integration)', () => {
          entityDeclaration.parse(source, declarationPToken, (pToken) => {
             const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.pToken.value[0].text.str).toEqual('dukkha');
+            expect(xToken.pToken!.value[0].text.str).toEqual('dukkha');
             done();
          });
       });

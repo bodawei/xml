@@ -5,7 +5,7 @@ import { EntityMetaData, Range } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
-import { SToken } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 
 import * as langAttribute from '../langAttribute';
 import text from '../../text';
@@ -15,7 +15,7 @@ import misc from '../misc';
 import literal from '../literal';
 
 describe('attribute (unit)', () => {
-   let attributesPChunk;
+   let attributesPChunk: any;
 
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
@@ -37,13 +37,14 @@ describe('attribute (unit)', () => {
    });
 
    describe('parse()', () => {
-      let mockSource;
-      let callback;
+      let mockSource: MockSTokenSource;
+      let callback: jasmine.Spy;
+      let litParse: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(literal, 'parse');
-         literal.parse.and.callFake((_1, options, callback) => { callback(options.pToken); });
+         litParse = spyOn(literal, 'parse');
+         litParse.and.callFake((_1: any, options: any, callback: Function) => { callback(options.pToken); });
       });
 
       it('parses an attribute', () => {
@@ -77,9 +78,9 @@ describe('attribute (unit)', () => {
          attribute.parse(mockSource, { geRef: true, terminators: [ '>' ] }, callback);
          mockSource.respondInAsyncTime();
 
-         expect(literal.parse.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(literal.parse.calls.argsFor(0)[1].geRef).toEqual(true);
-         expect(literal.parse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(litParse.calls.argsFor(0)[0]).toEqual(mockSource);
+         expect(litParse.calls.argsFor(0)[1].geRef).toEqual(true);
+         expect(litParse.calls.argsFor(0)[2]).toBeInstanceOf(Function);
       });
 
       it('parses multiple attributes', () => {
@@ -138,7 +139,7 @@ describe('attribute (unit)', () => {
       });
 
       it('stops at the specified name terminator', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          mockSource = new MockSTokenSource([
             [ 'versi', 'word', [ '=', 'x' ] ],
             [ undefined, 'space' ],
@@ -161,7 +162,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF where the attribute name should be', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          mockSource = new MockSTokenSource([
             [ undefined, 'word', [ '=', '>' ] ],
          ]);
@@ -173,7 +174,7 @@ describe('attribute (unit)', () => {
       });
 
       it('deals with EOF after the name', () => {
-         literal.parse.and.callFake((_1, _2, callback) => { callback(); });
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
          mockSource = new MockSTokenSource([
             [ 'version', 'word', [ '=', '>' ] ],
             [ undefined, 'space' ],
@@ -196,9 +197,10 @@ describe('attribute (unit)', () => {
    });
 
    describe('checkWellFormed()', () => {
-      let emd;
-      let mockErrorCollector;
-      let previousSpace;
+      let emd: EntityMetaData;
+      let mockErrorCollector: MockErrorCollector;
+      let previousSpace: SToken;
+      let litCheck: jasmine.Spy;
 
       beforeEach(() => {
          emd = new EntityMetaData();
@@ -208,7 +210,7 @@ describe('attribute (unit)', () => {
          spyOn(misc, 'checkName');
          spyOn(misc, 'checkWellFormedText');
          spyOn(misc, 'checkWellFormedNameRecommendation');
-         spyOn(literal, 'checkWellFormed');
+         litCheck = spyOn(literal, 'checkWellFormed');
          spyOn(langAttribute, 'checkXmlLangWellFormed');
       });
 
@@ -232,7 +234,7 @@ describe('attribute (unit)', () => {
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
             previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
 
-         const params = literal.checkWellFormed.calls.argsFor(0);
+         const params = litCheck.calls.argsFor(0);
          expect(params[0]).toEqual(attributesPChunk[0]);
          expect(params[1]).toEqual(mockErrorCollector);
          expect(params[2]).toEqual(emd);
@@ -241,10 +243,8 @@ describe('attribute (unit)', () => {
       });
 
       it('reports an error if there is no space before the first attribute name', () => {
-         previousSpace = undefined;
-
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,
-            previousSpace, WellFormedError.ID.NOUN_ATTRIBUTE);
+            undefined as any, WellFormedError.ID.NOUN_ATTRIBUTE);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ATTRIBUTE_NO_SPACE_BEFORE_NAME,
@@ -287,7 +287,7 @@ describe('attribute (unit)', () => {
 
       it('calls the checkValue function, if provided', () => {
          const checkValue = jasmine.createSpy('checkValue spy');
-         literal.checkWellFormed.and.callFake((_2, _3, _4, _5, callback) => {
+         litCheck.and.callFake((_2: any, _3: any, _4: any, _5: any, callback: Function) => {
             callback();
          });
 
@@ -334,7 +334,7 @@ describe('attribute (unit)', () => {
       });
 
       it('reports an error if there is a "<" in the attribute value', () => {
-         literal.checkWellFormed.and.callFake((_1, _2, _3, _4, cb) => {
+         litCheck.and.callFake((_2: any, _3: any, _4: any, _5: any, cb: Function) => {
             cb();
          });
 
@@ -467,7 +467,7 @@ describe('attribute (unit)', () => {
       it('handles most attributes being missing', () => {
          const results = attribute.getSTokens([{
             value: []
-         }]);
+         }] as any);
 
          expect(results).toEqual([]);
       });

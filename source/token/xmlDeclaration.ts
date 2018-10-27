@@ -211,4 +211,6 @@ export {
    parse,
    checkWellFormed,
    pTokenToXToken,
+
+   XmlDeclarationPToken,
 };

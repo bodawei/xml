@@ -75,8 +75,8 @@ function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken)
    });
 }
 
-function checkWellFormed(pTokenPart: LiteralPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, type: string, checkValue?: () => void) {
-   const pToken = pTokenPart || {};
+function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, type: string, checkValue?: () => void) {
+   const pToken: LiteralPToken = pTokenPart || { value: [] };
 
    ec.setPos(pToken.openQuote);
    ec.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [ type ]);

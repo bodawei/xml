@@ -12,23 +12,22 @@ import entityReference from '../entityReference';
 import text from '../text';
 
 describe('elementStart (integration)', () => {
-   let elementStartPToken;
-   let emd;
-   let source;
+   let elementStartPToken: elementStart.ElementStartPToken;
+   let emd: EntityMetaData;
+   let source: STokenSource;
 
    beforeEach(() => {
       emd = new EntityMetaData();
       source = new STokenSource(defaultExtractors, emd);
       const makeSToken = makeSTokenMaker();
-      elementStartPToken = {
-         type: 'ELEMENT_START',
+      elementStartPToken = new elementStart.ElementStartPToken({
          open: makeSToken('<'),
          postOpenSpace: undefined,
          name: makeSToken('elemName'),
          postNameSpace: makeSToken(' '),
          attributes: [],
          close: makeSToken('>'),
-      };
+      });
    });
 
    describe('parse()', () => {
@@ -116,9 +115,9 @@ describe('elementStart (integration)', () => {
          source.endText();
 
          elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken.open, WellFormedError);
+            const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken, ec, emd);
+            elementStart.checkWellFormed(pToken!, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
             done();
@@ -130,9 +129,9 @@ describe('elementStart (integration)', () => {
          source.endText();
 
          elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken.open, WellFormedError);
+            const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken, ec, emd);
+            elementStart.checkWellFormed(pToken!, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
             done();
@@ -143,9 +142,9 @@ describe('elementStart (integration)', () => {
          source.addText('foo blah "value">');
 
          elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            const ec = new ErrorCollector(pToken.open, WellFormedError);
+            const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken, ec, emd);
+            elementStart.checkWellFormed(pToken!, ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
@@ -161,18 +160,18 @@ describe('elementStart (integration)', () => {
          source.endText();
 
          elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            const token = elementStart.pTokenToXToken(pToken);
-            token.pToken = [];
-            token.attributes[0].value[0].pToken = [];
-            token.attributes[1].value[0].pToken = [];
+            const token = elementStart.pTokenToXToken(pToken!);
+            token.pToken = undefined;
+            (token.attributes[0].value[0] as any).pToken = undefined;
+            (token.attributes[1].value[0] as any).pToken = undefined;
 
             expect(token).toEqual(new elementStart.XToken('aName', [ {
                name: 'attr1',
-               value: [ new text.XToken('value1', []) ],
+               value: [ new text.XToken('value1') ],
             }, {
                name: 'attr2',
-               value: [ new text.XToken('value two', []) ],
-            } ], []));
+               value: [ new text.XToken('value two') ],
+            } ]));
             done();
          });
       });

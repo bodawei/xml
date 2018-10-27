@@ -5,31 +5,30 @@ import { EntityLocation, Range } from '../../../basic';
 import { WellFormedError } from '../../../error';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
 
-import { ParameterEntityEndPToken } from '../../parameterEntityEnd.js';
-import entityReference from '../../entityReference.js';
+import entityReference, { ParameterEntityReferencePToken } from '../../entityReference.js';
 import entityStart from '../../entityStart.js';
 import text from '../../text';
 import literal from '../literal';
-import unassigned, { UnassignedType } from '../unassigned';
+import unassigned, { UnassignedType, UnassignedValue, UnassignedArray } from '../unassigned';
 
 import helper from '../../@test/helper.js';
 
 describe('unassigned (unit)', () => {
 
-   function expectDelivery(spy, value) {
+   function expectDelivery(spy: jasmine.Spy, value: any) {
       expect(spy.calls.allArgs()).toEqual([ [ value ] ]);
    }
 
    describe('checkForPERef()', () => {
-      let mockSource;
-      let deliverySpy;
-      let makeSToken;
+      let mockSource: MockSTokenSource;
+      let deliverySpy: jasmine.Spy;
+      let unParse: jasmine.Spy;
 
       beforeEach(() => {
          deliverySpy = jasmine.createSpy('callbackSpy');
-         spyOn(unassigned, 'parseNextValue');
+         unParse = spyOn(unassigned, 'parseNextValue');
       });
 
       it('passes nothing back in the callback if at the end of source', () => {
@@ -59,7 +58,7 @@ describe('unassigned (unit)', () => {
          mockSource = new MockSTokenSource([
             [ '%', 'peekChar' ],
          ]);
-         unassigned.parseNextValue.and.callFake((_1, _2, deliver) => {
+         unParse.and.callFake((_1: any, _2: any, deliver: Function) => {
             if (callCount === 3) {
                deliver();
             } else {
@@ -81,14 +80,16 @@ describe('unassigned (unit)', () => {
    });
 
    describe('parseNextValue()', () => {
-      let mockSource;
-      let deliverySpy;
-      let makeSToken;
+      let mockSource: MockSTokenSource;
+      let deliverySpy: jasmine.Spy;
+      let makeSToken: STokenMaker;
+      let litParse: jasmine.Spy;
+      let entRefParse: jasmine.Spy;
 
       beforeEach(() => {
          deliverySpy = jasmine.createSpy('callbackSpy');
-         spyOn(literal, 'parse');
-         spyOn(entityReference, 'paramParse');
+         litParse = spyOn(literal, 'parse');
+         entRefParse = spyOn(entityReference, 'paramParse');
 
          makeSToken = makeSTokenMaker();
       });
@@ -130,7 +131,7 @@ describe('unassigned (unit)', () => {
       });
 
       it('delivers a literal if a double quote is found', () => {
-         literal.parse.and.callFake((_1, container, foundOne) => {
+         litParse.and.callFake((_1: any, container: any, foundOne: Function) => {
             container.pToken.isLiteral = true;
             foundOne(container.pToken);
          });
@@ -151,7 +152,7 @@ describe('unassigned (unit)', () => {
       });
 
       it('delivers a literal if a single quote is found', () => {
-         literal.parse.and.callFake((_1, container, foundOne) => {
+         litParse.and.callFake((_1: any, container: any, foundOne: Function) => {
             container.pToken.isLiteral = true;
             foundOne(container.pToken);
          });
@@ -172,7 +173,7 @@ describe('unassigned (unit)', () => {
       });
 
       it('delivers a parameter entity reference PToken if a "%" is found', () => {
-         entityReference.paramParse.and.callFake((_1, deliver) => {
+         entRefParse.and.callFake((_1: any, deliver: Function) => {
             deliver({ isPeref: true });
          });
          mockSource = new MockSTokenSource([
@@ -264,24 +265,26 @@ describe('unassigned (unit)', () => {
    });
 
    describe('parseAllValues()', () => {
-      let mockSource;
-      let deliverySpy;
-      let makeSToken;
+      let mockSource: MockSTokenSource;
+      let deliverySpy: jasmine.Spy;
+      let makeSToken: STokenMaker;
+      let litParse: jasmine.Spy;
+      let entRefParse: jasmine.Spy;
 
       beforeEach(() => {
          deliverySpy = jasmine.createSpy('callbackSpy');
-         spyOn(literal, 'parse');
-         spyOn(entityReference, 'paramParse');
+         litParse = spyOn(literal, 'parse');
+         entRefParse = spyOn(entityReference, 'paramParse');
 
          makeSToken = makeSTokenMaker();
       });
 
       it('delivers all multiple values', () => {
-         literal.parse.and.callFake((_1, container, foundOne) => {
+         litParse.and.callFake((_1: any, container: any, foundOne: Function) => {
             container.pToken.isLiteral = true;
             foundOne(container.pToken);
          });
-         entityReference.paramParse.and.callFake((_1, deliver) => {
+         entRefParse.and.callFake((_1: any, deliver: Function) => {
             deliver({ isPeref: true });
          });
          mockSource = new MockSTokenSource([
@@ -359,7 +362,7 @@ describe('unassigned (unit)', () => {
 
       it('does nothing if there is no unassigned items', () => {
          const pToken = {};
-         const unassVals = [];
+         const unassVals: UnassignedArray = [];
          const descriptors = [ {
             name: 'one',
             type: UnassignedType.WORD,
@@ -541,7 +544,7 @@ describe('unassigned (unit)', () => {
          const pToken = {};
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-         const literal = {
+         const literal: any = {
             type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
@@ -549,7 +552,7 @@ describe('unassigned (unit)', () => {
                closeQuote: SToken.fromString('"'),
             }
          };
-         const unVals = [ word1, literal, word2 ];
+         const unVals: UnassignedArray = [ word1, literal, word2 ];
          const descriptors = [ {
             name: 'one',
             type: UnassignedType.WORD,
@@ -577,7 +580,7 @@ describe('unassigned (unit)', () => {
          const pToken = {};
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-         const literal = {
+         const literal: any = {
             type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
@@ -585,7 +588,7 @@ describe('unassigned (unit)', () => {
                closeQuote: SToken.fromString('"'),
             }
          };
-         const unVals = [ word1, literal, word2 ];
+         const unVals: UnassignedArray = [ word1, literal, word2 ];
          const descriptors = [ {
             name: 'one',
             type: UnassignedType.WORD,
@@ -615,8 +618,6 @@ describe('unassigned (unit)', () => {
          const word1 = unassigned.wordFromSToken(SToken.fromString('firstWord'));
          const word2 = unassigned.wordFromSToken(SToken.fromString('secondWord'));
          const space = unassigned.wordFromSToken(SToken.fromString('\t'));
-         const expectedSpace = SToken.fromString('\t');
-         expectedSpace.subType = 'space';
          const unVals = [ word1, space, word2 ];
          const descriptors = [ {
             name: 'one',
@@ -642,12 +643,12 @@ describe('unassigned (unit)', () => {
             const pToken = {};
             const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-            const unVals = [ word1, {
+            const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
                token: new entityStart.ParamPToken({}),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken({}),
+               token: new ParameterEntityReferencePToken(),
             } ];
             const descriptors = [ {
                name: 'one',
@@ -697,12 +698,12 @@ describe('unassigned (unit)', () => {
             const pToken = {};
             const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-            const unVals = [ word1, {
+            const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
                token: new entityStart.ParamPToken({}),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken({}),
+               token: new ParameterEntityReferencePToken(),
             } ];
             const descriptors = [ {
                name: 'one',
@@ -768,9 +769,9 @@ describe('unassigned (unit)', () => {
 
          it('merges the combination of several introduced spaces into one space', () => {
             const pToken = {};
-            const space = unassigned.spaceFromSToken(SToken.fromString(' '));
+            const space = unassigned.spaceFromSToken(new SToken(' ', ' ', [ new Range(new EntityLocation()) ]));
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
-            const unVals = [ word, {
+            const unVals: UnassignedArray = [ word, {
                type: UnassignedType.ENTITY_START,
                token: new entityStart.ParamPToken({}),
             }, {
@@ -803,7 +804,7 @@ describe('unassigned (unit)', () => {
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
                   helper.makeInsertedRange(),
-                  new Range(),
+                  new Range(new EntityLocation()),
                ]),
             });
          });
@@ -833,7 +834,7 @@ describe('unassigned (unit)', () => {
          });
 
          it('merges a leading space into the previous', () => {
-            const pToken = {
+            const pToken: any = {
                one: SToken.fromString('\t'),
             };
             const space = unassigned.spaceFromSToken(SToken.fromString('\n'));
@@ -859,11 +860,11 @@ describe('unassigned (unit)', () => {
          });
 
          it('merges a 4.4.8 introduced space into the previous', () => {
-            const pToken = {
-               one: SToken.fromString('\t'),
+            const pToken: any = {
+               one: new SToken('\t', '\t', new Range(new EntityLocation())),
             };
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
-            const unVals = [ {
+            const unVals: UnassignedArray = [ {
                type: UnassignedType.ENTITY_START,
                token: new entityStart.ParamPToken({}),
             }, word ];
@@ -881,7 +882,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               one: new SToken('\t ', '\t ', [ new Range(), helper.makeInsertedRange() ]),
+               one: new SToken('\t ', '\t ', [ new Range(new EntityLocation()), helper.makeInsertedRange() ]),
                two: word.token.text,
             });
          });
@@ -960,12 +961,12 @@ describe('unassigned (unit)', () => {
    describe('spaceFromSToken()', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
-         const expected = {
+         const expected: any = {
             type: UnassignedType.SPACE,
-            token: new text.PToken({ text: 'hi' }),
+            token: new text.PToken({ text: SToken.fromString('hi') } as any),
          };
 
-         const result = unassigned.spaceFromSToken('hi');
+         const result = unassigned.spaceFromSToken(SToken.fromString('hi'));
 
          expect(result).toEqual(expected);
       });
@@ -975,12 +976,12 @@ describe('unassigned (unit)', () => {
    describe('wordFromSToken()', () => {
 
       it('makes an annotated text PToken with whatever it was given', () => {
-         const expected = {
+         const expected: any = {
             type: UnassignedType.WORD,
-            token: new text.PToken({ text: 'hi' }),
+            token: new text.PToken({ text: SToken.fromString('hi') } as any),
          };
 
-         const result = unassigned.wordFromSToken('hi');
+         const result = unassigned.wordFromSToken(SToken.fromString('hi'));
 
          expect(result).toEqual(expected);
       });
@@ -988,8 +989,8 @@ describe('unassigned (unit)', () => {
    });
 
    describe('makeCheckCallback()', () => {
-      let otherwiseSpy;
-      let foundSpy;
+      let otherwiseSpy: jasmine.Spy;
+      let foundSpy: jasmine.Spy;
 
       beforeEach(() => {
          otherwiseSpy = jasmine.createSpy('otherwise spy');
@@ -997,14 +998,14 @@ describe('unassigned (unit)', () => {
       });
 
       it('returns a function', () => {
-         const result = unassigned.makeCheckCallback({}, 'foo', () => {}, () => {});
+         const result = unassigned.makeCheckCallback({} as any, 'foo', () => {}, () => {});
 
          expect(result).toBeInstanceOf(Function);
       });
 
       it('function calls otherwise() when no value passed to it', () => {
          const otherwise = jasmine.createSpy('otherwise');
-         const func = unassigned.makeCheckCallback({}, 'foo', foundSpy, otherwiseSpy);
+         const func = unassigned.makeCheckCallback({} as any, 'foo', foundSpy, otherwiseSpy);
 
          func();
 
@@ -1013,7 +1014,7 @@ describe('unassigned (unit)', () => {
 
       it('function does not call found() when no value passed to it', () => {
          const otherwise = jasmine.createSpy('otherwise');
-         const func = unassigned.makeCheckCallback({}, 'foo', foundSpy, otherwiseSpy);
+         const func = unassigned.makeCheckCallback({} as any, 'foo', foundSpy, otherwiseSpy);
 
          func();
 
@@ -1023,9 +1024,9 @@ describe('unassigned (unit)', () => {
       it('function calls found() with the annotated pToken when it is called with a value', () => {
          let pToken = {};
          const otherwise = jasmine.createSpy('otherwise');
-         const func = unassigned.makeCheckCallback(pToken, 'foo', foundSpy, otherwiseSpy);
+         const func = unassigned.makeCheckCallback(pToken as any, 'foo', foundSpy, otherwiseSpy);
 
-         func('unassigned array');
+         func('unassigned array' as any);
 
          expect(foundSpy).toHaveBeenCalledWith({
             unassigned: 'unassigned array',
@@ -1035,9 +1036,9 @@ describe('unassigned (unit)', () => {
 
       it('function does not call otherwise() when a value is passed', () => {
          const otherwise = jasmine.createSpy('otherwise');
-         const func = unassigned.makeCheckCallback({}, 'foo', foundSpy, otherwiseSpy);
+         const func = unassigned.makeCheckCallback({} as any, 'foo', foundSpy, otherwiseSpy);
 
-         func('unassigned array');
+         func('unassigned array' as any);
 
          expect(otherwiseSpy).not.toHaveBeenCalled();
       });
@@ -1119,7 +1120,7 @@ describe('unassigned (unit)', () => {
          const mockErrorCollector = new MockErrorCollector();
          const startSToken = SToken.fromString('one');
          startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
-         const extra = [
+         const extra: any = [
             unassigned.wordFromSToken(startSToken),
             unassigned.spaceFromSToken(SToken.fromString(' ')),
             {

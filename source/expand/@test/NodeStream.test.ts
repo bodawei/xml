@@ -11,7 +11,7 @@ import * as langAttribute from '../../token/common/langAttribute';
 import { ParameterEntityEndPToken, GeneralEntityEndXToken } from '../../token';
 import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
-import { ParameterEntityReferencePToken } from '../../token/entityReference';
+import { ParameterEntityReferencePToken, EntityReferencePToken } from '../../token/entityReference';
 import { ElementDeclarationPToken } from '../../token/elementDeclaration'; // hack
 import { EntityDeclaration, EntityDeclarationPToken } from '../../token/entityDeclaration'; // hack
 import { NotationDeclarationPToken } from  '../../token/notationDeclaration'; // hack
@@ -77,7 +77,7 @@ describe('NodeStream (unit)', () => {
       describe('sub-stream processing', () => {
 
          it('adds a start entity token to the stream', () => {
-            const declToken = new xToken.entityDeclaration.XToken('test', [], undefined, undefined, []);
+            const declToken = new xToken.entityDeclaration.XToken('test', [], undefined, undefined);
             const refToken = new xToken.entityReference.XToken('test');
 
             nodeStream.write(declToken);
@@ -88,7 +88,7 @@ describe('NodeStream (unit)', () => {
          });
 
          it('adds a start entity token to the stream when it encounters a parameter entity ref', () => {
-            const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined, []);
+            const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined);
             const refToken = new xToken.entityReference.ParamXToken('test');
 
             nodeStream.write(declToken);
@@ -100,25 +100,25 @@ describe('NodeStream (unit)', () => {
 
          it('passes a reference with no referent straight through', () => {
             const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined);
-            const refToken = new xToken.entityReference.ParamPToken({ name: SToken.fromString('test') });
-            declToken.value.push(refToken);
+            const refToken: any = new xToken.entityReference.ParamPToken({ name: SToken.fromString('test') });
+            (declToken.value  as any).push(refToken);
 
             nodeStream.write(declToken);
 
-            gatherResult(nodeStream, (result) => {
-               expect((result as EntityDeclaration).value[0]).toEqual(refToken);
+            gatherResult(nodeStream, (result: any) => {
+               expect(result.value[0]).toEqual(refToken);
             });
          });
 
          it('does not expand an entity reference that has no name', () => {
             const declToken = new xToken.entityDeclaration.ParamXToken('test', [], undefined, undefined);
             const refToken = new xToken.entityReference.ParamPToken({ name: undefined });
-            declToken.value.push(refToken);
+            (declToken.value  as any).push(refToken);
 
             nodeStream.write(declToken);
 
-            gatherResult(nodeStream, (result) => {
-               expect((result as EntityDeclaration).value[0]).toEqual(refToken);
+            gatherResult(nodeStream, (result: any) => {
+               expect(result.value[0]).toEqual(refToken);
             });
          });
 
@@ -608,7 +608,7 @@ describe('NodeStream (unit)', () => {
 
          it('adds any general entity declarations to the entity manager', () => {
             spyOn(entityManager, 'addEntityFromInternalSubset');
-            const token = new xToken.entityDeclaration.XToken('fred', [], undefined, undefined, []);
+            const token = new xToken.entityDeclaration.XToken('fred', [], undefined, undefined);
    
             nodeStream.write(token);
    
@@ -617,7 +617,7 @@ describe('NodeStream (unit)', () => {
    
          it('adds any parameter entity declarations to the entity manager', () => {
             spyOn(entityManager, 'addParameterEntityFromInternalSubset');
-            const token = new xToken.entityDeclaration.ParamXToken('fred', [], undefined, undefined, []);
+            const token = new xToken.entityDeclaration.ParamXToken('fred', [], undefined, undefined);
    
             nodeStream.write(token);
    
@@ -628,7 +628,7 @@ describe('NodeStream (unit)', () => {
             const pToken = new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
                value: [
-                  xToken.unassigned.wordFromSToken(SToken.fromString('value')),
+                  new xToken.entityReference.ParamPToken()
                ],
             });
             const declToken = xToken.entityDeclaration.pTokenToXToken(pToken);
@@ -637,7 +637,7 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect((token as EntityDeclaration).value).toEqual([
-                  xToken.unassigned.wordFromSToken(SToken.fromString('value')),
+                  new xToken.entityReference.ParamPToken()
                ]);
 
                done();
@@ -651,10 +651,10 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('parentDecl'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
                value: [ parentPeref ],
-            });
+            }));
 
             nodeStream.write(declToken);
 
@@ -669,9 +669,9 @@ describe('NodeStream (unit)', () => {
    
          it('leaves an entity declaration with no value unprocessed', (done) => {
             spyOn(entityManager, 'getParameterEntityToken').and.returnValue(undefined);
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
-            });
+            }));
 
             nodeStream.write(declToken);
 
@@ -695,10 +695,10 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('parentDecl'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
                value: [ parentPeref ],
-            });
+            }));
 
             nodeStream.write(declToken);
 
@@ -725,10 +725,10 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('parentDecl'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
                value: [ parentPeref ],
-            });
+            }));
 
             nodeStream.write(declToken);
 
@@ -761,10 +761,10 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('parentDecl'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                name: SToken.fromString('generalEntityDeclaration'),
                value: [ parentPeref ],
-            });
+            }));
 
             nodeStream.write(declToken);
 
@@ -786,20 +786,20 @@ describe('NodeStream (unit)', () => {
                pToken.name = SToken.fromString('newName');
                delete pToken.unassigned;
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('thename')),
                ],
                nextParamName: 'parameter',
-            });
+            }));
 
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.entityDeclaration.XToken('newName', [], undefined, '', {
+               expect(token).toEqual(new xToken.entityDeclaration.XToken('newName', [], undefined, '', new EntityDeclarationPToken({
                   name: SToken.fromString('newName'),
                   nextParamName: 'parameter',
-               }));
+               })));
 
                done();
             });
@@ -814,24 +814,24 @@ describe('NodeStream (unit)', () => {
             });
 
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [{
                   type: 'reference',
                   token: peRef
                }],
                nextParamName: 'parameter',
-            });
+            }));
 
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
+               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', new EntityDeclarationPToken({
                      unassigned: [{
                         type: 'reference',
                         token: peRef
                      }],
                      nextParamName: 'parameter',
-                  }));
+                  })));
 
                done();
             });
@@ -850,24 +850,24 @@ describe('NodeStream (unit)', () => {
             });
 
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [{
                   type: 'reference',
                   token: peRef
                }],
                nextParamName: 'parameter',
-            });
+            }));
 
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
+               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', new EntityDeclarationPToken({
                   unassigned: [{
                      type: 'reference',
                      token: peRef
                   }],
                   nextParamName: 'parameter',
-               }));
+               })));
 
                done();
             });
@@ -879,24 +879,24 @@ describe('NodeStream (unit)', () => {
                open: SToken.fromString('%'),
             });
             spyOn(xToken.entityDeclaration, 'assignUnassigned').and.callFake(() => {});
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [{
                   type: 'reference',
                   token: peRef
                }],
                nextParamName: 'parameter',
-            });
+            }));
 
             nodeStream.write(declToken);
 
             gatherResult(nodeStream, (token) => {
-               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', {
+               expect(token).toEqual(new xToken.entityDeclaration.XToken('', [], undefined, '', new EntityDeclarationPToken({
                   unassigned: [{
                      type: 'reference',
                      token: peRef
                   }],
                   nextParamName: 'parameter',
-               }));
+               })));
 
                done();
             });
@@ -918,7 +918,7 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('second'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')),
                   {
@@ -927,7 +927,7 @@ describe('NodeStream (unit)', () => {
                   },
                ],
                nextParamName: 'parameter',
-            });
+            }));
             spyOn(entityManager, 'getParameterEntityToken').and.callFake((name: string) => {
                if (name === 'second') {
                   return secondDeclXToken;
@@ -974,7 +974,7 @@ describe('NodeStream (unit)', () => {
                name: SToken.fromString('second'),
                close: SToken.fromString(';'),
             });
-            const declToken = xToken.entityDeclaration.pTokenToXToken({
+            const declToken = xToken.entityDeclaration.pTokenToXToken(new EntityDeclarationPToken({
                unassigned: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('baseDecl')), {
                      type: 'reference',
@@ -982,7 +982,7 @@ describe('NodeStream (unit)', () => {
                   },
                ],
                nextParamName: 'parameter',
-            });
+            }));
             spyOn(entityManager, 'getParameterEntityToken').and.callFake((name: string) => {
                if (name === 'second') {
                   return secondDeclXToken;
@@ -1286,7 +1286,7 @@ describe('NodeStream (unit)', () => {
                cb([ new xToken.text.PToken() ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new xToken.text.XToken('one', new xToken.text.PToken()) ];
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'xml:lang',
@@ -1301,7 +1301,7 @@ describe('NodeStream (unit)', () => {
                const args = checkSpy.calls.argsFor(0);
                expect(args[0]).toEqual([
                   new xToken.entityStart.XToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new xToken.text.XToken('one', new xToken.text.PToken()),
                   new GeneralEntityEndXToken('refName'),
                ]);
                expect(args[1]).toBeInstanceOf(ErrorCollector);

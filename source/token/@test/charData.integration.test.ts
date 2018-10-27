@@ -10,8 +10,8 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 import * as charData from '../charData.js';
 
 describe('charData (integration)', () => {
-   let emd;
-   let source;
+   let emd: EntityMetaData;
+   let source: STokenSource;
 
    beforeEach(() => {
       emd = new EntityMetaData();
@@ -26,7 +26,7 @@ describe('charData (integration)', () => {
          });
          source.addText('some text<foo>');
 
-         charData.parse(source, (result) => {
+         charData.parse(source, [], (result) => {
             expect(result).toEqual(expected);
             done();
          });
@@ -52,7 +52,7 @@ describe('charData (integration)', () => {
          source.addText('bad\u0000&');
          source.endText();
 
-         charData.parse(source, (pToken) => {
+         charData.parse(source, [], (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
             charData.checkWellFormed(pToken, ec, emd);
