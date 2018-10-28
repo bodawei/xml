@@ -26,15 +26,19 @@ import {
    xmlDeclaration,
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
+   entityDeclaration,
+   GeneralEntityEndXToken,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
-import { AttributeXToken } from '../token/common/attribute';
+import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
 
 import EntityManager from '../expand/EntityManager.js';
+import { EntityDeclaration } from 'source/token/entityDeclaration';
+import { EntityStart, ParameterEntityStartXToken } from 'source/token/entityStart';
 
 type XToken = {
    type: string,
@@ -107,6 +111,17 @@ type IDMap = {
 
 type AttributeMap = { [name: string] : AttributeXToken };
 
+type EntityInfo = {
+   token: EntityDeclaration;
+   externallyDeclared: boolean;
+}
+
+type EntityInfoMap = {
+   [entityName: string]: EntityInfo;
+}
+
+const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
+
 /*
  * §3.3.3: Attribute value normalization.
  * This should be done whether or not we are validating.
@@ -164,6 +179,7 @@ function getAttributeValueText(attribute: any): string {
 
 class CheckXTokenValidStream extends stream.Transform {
    private entityManager: EntityManager;
+   private entityInfo: EntityInfoMap = {};
    private docType: XToken | void;
    private notations: { [name: string]: XToken };
    private attrDefsByElementName: ElementAttributes;
@@ -192,6 +208,63 @@ class CheckXTokenValidStream extends stream.Transform {
       this.currentContext = undefined;
       this.idValues = {};
       this.unanchoredIDRefs = {};
+   }
+
+   /*
+    * §2.9 Validity constraint: Standalone Document Declaration
+    * The standalone document declaration must have the value "no" if any external markup
+    * declarations contain declarations of:
+    * - entities (other than amp, lt, gt, apos, quot), if references to those entities
+    *   appear in the document, or ...
+    *
+    * Translation: If this was marked as standalone="yes", and we find an entity reference
+    * where the referenced entity was declared "externally", then it is an error.
+    */
+   private isInvalidEntityReference(item: EntityStart | string): boolean {
+      const entityName = item instanceof EntityStart ? item.name : item
+      const entityInfo = this.entityInfo[entityName];
+      const isExternallyDeclared = entityInfo && entityInfo.externallyDeclared;
+      const isException = PROTECTED_ENTITIES.indexOf(entityName) !== -1;
+
+      return this.standalone && isExternallyDeclared && !isException;
+   }
+
+   private checkAttributeValueStandaloneability(attrName: string, value: AttributeValueXToken, pTokenOpen: any, elementAttribute: boolean) {
+      let depth = 0;
+      let invalidAt = -1;
+
+      value.forEach((part) => {
+         if (part instanceof EntityStart) {
+            if (invalidAt === -1 && this.isInvalidEntityReference(part)) {
+               let errorId: string;
+               invalidAt = depth;
+
+               if (elementAttribute) {
+                  if (part instanceof ParameterEntityStartXToken) {
+                     errorId = ValidityError.ID.ATTRIBUTE_PARAMENTITY_EXTERNAL_DECLARED;
+                  } else {
+                     errorId = ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED;
+                  }
+               } else {
+                  if (part instanceof ParameterEntityStartXToken) {
+                     errorId = ValidityError.ID.ATTLISTDECL_PARAMENTITY_EXTERNAL_DECLARED;
+                  } else {
+                     errorId = ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED;
+                  }
+               }
+
+               this.pushValidityError(errorId, [ part.name, attrName ], pTokenOpen);
+            }
+
+            depth ++;
+         } else if (part instanceof GeneralEntityEndXToken) {
+            depth --;
+
+            if (invalidAt === depth) {
+               invalidAt = -1;
+            }
+         }
+      });
    }
 
    private pushValidityError(id: string, params: Array<string>, pos?: SToken|void, context?: SToken|void) {
@@ -410,6 +483,21 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (xToken instanceof attListDeclaration.XToken) {
          this.validateAttListDecl(xToken);
+      } else if (xToken instanceof EntityDeclaration) {
+         this.entityInfo[xToken.name] = {
+            token: xToken,
+            externallyDeclared: this.externalDeclarations,
+         };
+      } else if (xToken instanceof EntityStart) {
+         if (this.isInvalidEntityReference(xToken)) {
+            if (xToken instanceof ParameterEntityStartXToken) {
+               this.pushValidityError(ValidityError.ID.PARAMENTITY_EXTERNAL_DECLARED,
+                  [ xToken.name ], pToken);
+            } else {
+               this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
+                  [ xToken.name ], pToken);
+            }
+         }
       } else if (xToken instanceof elementDeclaration.XToken) {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
@@ -560,6 +648,9 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       }
 
+      // §2.9
+      this.checkAttributeValueStandaloneability(attDef.name, attDef.value, pToken.open, false);
+
       if (type === 'ID') {
          // §3.3.1: Validity constraint: ID Attribute Default
          //    An ID attribute must have a declared default of #IMPLIED or #REQUIRED.
@@ -586,6 +677,12 @@ class CheckXTokenValidStream extends stream.Transform {
 
             this.pushValidityError(code, [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
+
+         // §2.9
+         if (type === 'ENTITY' && this.isInvalidEntityReference(defaultText)) {
+            this.pushValidityError(ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
+               [ defaultText, attDef.name ], pToken.open);
+         }
       } else if (type === 'IDREFS' || type === 'ENTITIES') {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
@@ -597,6 +694,12 @@ class CheckXTokenValidStream extends stream.Transform {
             for (const name of names) {
                if (!util.isName(name, this.emd.version, this.emd.revision)) {
                   badNames.push(name);
+               }
+
+         // §2.9
+         if (type === 'ENTITIES' && this.isInvalidEntityReference(name)) {
+                  this.pushValidityError(ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
+                     [ name, attDef.name ], pToken.open);
                }
             }
 
@@ -911,7 +1014,8 @@ class CheckXTokenValidStream extends stream.Transform {
          //      #IMPLIED, then the AttValue value contains the declared default value;
          for (let index = 0; index < attDefNames.length; index ++) {
             const attDefName = attDefNames[index];
-            const attDef = elemAttrDef.attributes[attDefName].def;
+            const attrInfo = elemAttrDef.attributes[attDefName];
+            const attDef = attrInfo.def;
             const attribute = attributesByName[attDefName];
 
             if (attDef.defaultType === '#REQUIRED') {
@@ -937,7 +1041,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   // an external declaration, then we have a validity error. (We can't just check this
                   // at declaration time, since if it isn't used it is not an error).
                   //
-                  if (this.standalone) {
+                  if (this.standalone && attrInfo.externallyDeclared) {
                      this.pushValidityError(ValidityError.ID.ELEMENTSTART_DEFAULT_EXTERNAL_DECLARED,
                         [ elStart.name, attDefName ], pTokenOpen);
                   }
@@ -1057,6 +1161,11 @@ class CheckXTokenValidStream extends stream.Transform {
                   } else if (!token.notationDataName) {
                      parsed.push(names[index]);
                   }
+
+                  if (this.isInvalidEntityReference(names[index])) {
+                     this.pushValidityError(ValidityError.ID.ATTRIBUTE_ENTITY_EXTERNAL_DECLARED, // @@ rename
+                        [ names[index], attrName ], pTokenOpen);
+                  }
                }
 
                if (undeclared.length > 0) {
@@ -1134,6 +1243,11 @@ class CheckXTokenValidStream extends stream.Transform {
                   [ elStart.name, requiredName ], pTokenOpen, pTokenOpen);
             }
          }
+      }
+
+      // §2.9
+      for (const attribute of attributes) {
+         this.checkAttributeValueStandaloneability(attribute.name, attribute.value, pTokenOpen, true);
       }
 
       if (!elementDecl) {

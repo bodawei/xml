@@ -60,6 +60,7 @@ const entityStart = {
 export default entityStart;
 
 export {
+   ParameterEntityStart as ParameterEntityStartXToken,
    ParameterEntityStartPToken,
    EntityStart,
    EntityStartPToken,

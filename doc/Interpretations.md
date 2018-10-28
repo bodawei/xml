@@ -170,6 +170,127 @@ Note that §3.2.1 has a constraint that the parameter entities must be properly 
 
 This interprets this as saying the attribute can be omitted, in which case the default value will be used, but if it is present it must match. This relies on my reading of "If a default value is declared, when an XML processor encounters an omitted attribute, it is to behave as though the attribute were present with the declared default value.".
 
+## Literals
+- system literal in an external id
+- public literal in an external id
+- entity value literal
+- attribute value literal
+
+Spec is a little inconsistent about these:
+- PE refs can't appear in most, but can in an entity value literal
+- general entity references can appear in entity and attribute value literals (both on a nelement start tag and an attribute declaration), but are actually processed at different times
+- syntax says that system and public literals cant' have either, but it also goes out of its way to say taht system literal can be parsed without looking for any markup.  implicitly the public can be @@@@QUESTION 1@@@@
+
+## General Entities
+
+- 4.4 says that external entities can't appear in an attribute value (mentioned elsewhere)  [no idea why there is this constraint]
+- We assume a general entity is generally only referenced when content is being processed. That is, it is easy to set up an infinite loop between entities because their values aren't actually processed until they are referenced:
+```
+<!DOCTYPE foo [
+      <!ENTITY one "&two">
+      <!ENTITY two "&one">
+]>
+<foo>
+   &one;
+</foo>
+```
+- while the spec doesn't say, the command line xml processor on the mac does interpret the general entity references in an attribute default (as a part of ATTLIST declarations) at the pont of declaration.  Taht is, unlike entity values, we don't wait to process those values until they are used.  Which means an ATTLIST must follow any entity it wishes to reference.
+
+## Parameter Entities
+- Can appear in an entity value literal
+- Can't appear in any other literal
+- can't appear in content
+- can appear in dtd
+   - must contain whole markup declarations. cant have start or end of one.
+- can appear in markup declarations
+   - Generally can appear between any two S's within the `<!FOO ... >`
+   - in an element declaration, there are constraints about what can be in the replacement text, including that it not be only whitespace, not end with | , and must be properly balanced among the ()'s.
+   - you might expect the same balanced constraint among the enumeration or notation value in an ATTLIST declaration, but nothing says that
+- can appear in a conditional section, but evidently only at X `<![X[...` and replacement text must be one of two values
+
+## Standalone
+We assume that a document like the following is correct, as far as standalone processing goes. Which is to say, the non-validating processor wont' read the parameter entity, but will recognize that the reference to it is ok.
+```
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE foo [
+   <!ENTITY % internallyDeclared "whatever">
+   <!ELEMENT test ANY>
+   <!ATTLIST test
+      attr1 CDATA #REQUIRED "%internallyDeclared">
+]>
+```
+Note that we also assume that this is OK, since generalEntity is never referenced.
+```
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE foo [
+   <!ENTITY % internallyDeclared "<!ENTITY % externalyDeclared 'whatever'>">
+   %internallyDeclared;
+   <!ENTITY generalEntity "%externallyDeclared;">
+]>
+<foo>
+</foo>
+```
+
+
+# Terminology
+
+## Entities ()
+There are five kinds of entities in XML.
+1. Document Entity: This is the "main document" which has the XML Declaration, DOCTYPE declaration (if any) and the root element in it.
+2. External DTD Subset: This is an optional entity which has a portion of the document type declaration for the document.
+3. Parameter Entities: These declare a value, or replacement text, which can be referenced in three places:
+   a. In the body of the DTD (in either the internal or external DTD subset). Here, their replacement text is interpreted as a set of declarations, comments, and processing instructions.
+   b. In entity values (including, potentially, in other parameter entity values). In practice, this means that the parameter entity has to have been declared before the entity declaration (@@@ But I have no idea what happens about uses of parameter entity references in external entities. are they constrained by what was declared at the point of the entity declaration?)
+   c. Within markup declarations. This is only allowed in the external subset (@@ ref?). While the spec says that they must be placed between S's in the syntax, there are various other constraints on their placement that seem implicit in the spec.  Details are given, above, about how this has interpreted this.
+4. General Parsed Entities: These also declare a value (or replacement text) which can be referenced in three places:
+   a. In the content of the document (that is, between start and end tags)
+   b. In attribute values (though, as a constraint, only internal general parsed entities may be referenced here)
+   c. In attribute defaults in an ATTLIST declaration. It is implicit in the spec that these may also only be internal general parsed entities.
+5. Unparsed entities: These declare some kind of non-XML data that can be referenced but not parsed by the XML processor.  These can only be used as an attribute value (not referenced from within an attribute value)
+
+## Internal and External
+There are actually three pairs of meanings for "internal" and "external" in the XML standard:
+
+DTD Subsets (see §2.8)
+   * Internal DTD Subset: This is the portion of the DTD in the main document entity within the DOCTYPE declaration (e.g. `<!DOCTYPE foo [ internalDTDSubset ]>`)
+   * External DTD Subset: This is the portion of the DTD stored in another entity (e.g. a separate file) that is referenced from the DOCTYPE declaration (e.g. `<!DOCTYPE foo SYSTEM 'myExternalDTDSubset.xml'>`)
+
+Entity Types (see §4.2)
+   * Internal Entity: This means that the value of the entity is specified directly in the entity declaration: (e.g. `<!ENTITY foo 'myInternalValue'>`). Crucially, an Internal Entity can be found in either the internal or external DTD subsets. (so, you can have an internal entity in the external subset)
+   * External Entity: The value of the entity is found in another entitity (e.g. a separate file) from where the entity is declared (e.g. `<!ENTITY foo SYSTEM 'myExternalEntityValue.xml'>`). An External Entity can be declared in either the internal or external DTD subsets.
+
+Markup Declarations (§2.9)
+   * Internal Markup Declration: This is not explicitly stated in the spec, but is implicit as the inverse of the next:
+   * External Markup Declaration: This is any markup declaration (ELEMENT, ENTITY, ATTLIST, NOTATION) that is in the external DTD subset _or_ in any parameter entity value. So, it is easy to see that you may have an internal or external entity that has an external markup declaration (the declaration is in the external subset and the value is in the external subset or yet another file). But, you can also have an internal entity in the internal subset that is from an external markup declaration.  An example of this is:
+      ```
+      <!DOCTYPE foo [
+         <!ENTITY % internalParameterEntity
+            "<!ENTITY InternalEntity 'externallyDeclared'>">
+         %internalParameterEntity;
+      ]>
+      ```
+
+## Read ()
+The word "read" is used in various places without being defined. I assume this means a superficial amount of parsing, such that we recognize that `<!ENTITY % foo "x">` is a parameter entity named foo, but we don't really know what is in its value.
+
+## Standalone (§2.9, §4.1, §5.1)
+One of the most head-twisting ideas in XML is that of the "standalone" document. In the XML Declaration, you can specify `standalone="yes"` (or `="no"`, though omitting it is the same as saying "no").
+
+To this writer, the intuitive meaning of this is "the document entity fully describes the document, and there is nothing external to it". Or, more precisely: "This document has no external entities". This might seem to be a signal to a processor that it can do all of its work accurately without waiting to load other data. However, this isn't quite the case for three reasons"
+
+First, one can still have an external subset. The crucial thing is that the content that is delivered by the XML processor will be the same whether or not you read the external subset. Thus, you can have all the NOTATION, ELEMENT and ATTLIST declarations in the external subset that you want, as long as none of them have information you need to have to deliver results to the app.  Things that can cause problems are:
+   1. if your ATTLIST attributes have default values that should be added to any element starts,
+   2. if the ATTLIST attribute types would cause the processor to do more value normalization
+   3. if knowing the content model of an ELEMENT would cause you to ignore whitespace
+
+Second, one can also have external entities declared, as long as they are never referenced in the document. So, in fact, this is not very interesting.
+
+Third, one can have an internally declared external entity that is referenced in the document. 
+
+Fourth, and most head-hurtingly, your document entity may, in fact, be fully self-contained (have no external entities), but still not be standalone.  This is because if there are any markup declarations in any parameter entity values, then the document is considered to be not standalone.  §2.9 mentions that a non-validating processor is not required to process any parameter entity declarations, so they are, in fact, inaccessible to a strict one.
+
+So, what does "standalone" mean? The shortest way I can put it is: bearing in mind that a non-validating processor does not need to read any external entities and does not need to read any parameter entities, a valid document is "standalone" when the data reported to an application by the xml processor will look the same* whether that processor is a validating or non-validating processor. If the document is not valid, then the information delivered is the same* if the validating processor ignores validation errors.  (By the same, I mean ignoring content that was from external entities and from internal parameter entities that are internally declared). Also, any #FIXED values won't be enforced
+
 # Stages of processing:
 1. Source
 2. Character set conversion

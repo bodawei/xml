@@ -58,7 +58,7 @@ type CommonAttributeXToken = {
    name: string,
    value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|GeneralEntityEndXToken>;
+type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|GeneralEntityEndXToken|ParameterEntityEndXToken>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken|EntityReferenceXToken };
 
 /**********************************************************************\

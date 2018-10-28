@@ -11,8 +11,9 @@ import { checkXmlLangWellFormed } from './langAttribute';
 import misc from './misc';
 import literal, { LiteralPToken } from './literal';
 import { LiteralValuePToken, LiteralValueXToken } from './literalValue';
-import { EntityStartPToken } from '../entityStart';
+import { EntityStartPToken, EntityStart } from '../entityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';
+import { ParameterEntityEndXToken } from '../parameterEntityEnd';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -28,7 +29,7 @@ interface AttributePToken extends LiteralPToken {
 };
 
 type AttributeValuePToken = Array<TextPToken|EntityReferencePToken|EntityStartPToken|GeneralEntityEndPToken>;
-type AttributeValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityEndXToken>;
+type AttributeValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|GeneralEntityEndXToken|ParameterEntityEndXToken>;
 
 type AttributeXToken = {
    name: string;
