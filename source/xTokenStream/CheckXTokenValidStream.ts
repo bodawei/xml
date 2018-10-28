@@ -85,20 +85,15 @@ type MixedDeclInfo = {
 
 type ChildrenDeclInfo = {
    type: 'CHILDREN',
+   externallyDeclared: boolean,
    token: ElementDeclaration,
    graph: Graph,
-}
-
-type ChildrenContext = {
-   type: 'ACTIVE-CHILDREN',
-   token: ElementDeclaration,
-   graph: Graph,
-   stateId: number;
 }
 
 type ElementDeclInfo = AnyDeclInfo | EmptyDeclInfo | MixedDeclInfo | ChildrenDeclInfo;
 type ContentContext = {
-   declInfo: ElementDeclInfo,
+   declInfo: ElementDeclInfo;
+   flaggedSpace: boolean,
    stateId: number;
 }
 
@@ -424,6 +419,14 @@ class CheckXTokenValidStream extends stream.Transform {
             case entityStart.XTYPE:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
+                  // §2.9 Validity constraint: Standalone Document Declaration
+                  // The standalone document declaration must have the value "no" if any external markup
+                  // declarations contain declarations of:
+                  // - element types with element content, if white space occurs directly within any instance of those types
+                  if (this.standalone && !context.flaggedSpace) {
+                  context.flaggedSpace = true;
+                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
+               }
                break;
             case charData.XTYPE:
                // Depending on charData that is only space already being converted to spaces
@@ -452,7 +455,7 @@ class CheckXTokenValidStream extends stream.Transform {
           *    An element type has **element content** when elements of that type
           *    must contain only child elements (no character data), optionally
           *    separated by white space (characters matching the nonterminal S)
-          * Because of this we convert any CHARDATA types here into spaces
+          * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
           */
          if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
             if (util.isSpace(xToken.text)) {
@@ -519,6 +522,7 @@ class CheckXTokenValidStream extends stream.Transform {
             if (this.elementDeclarations[xToken.name]) {
                this.currentContext = {
                   declInfo: this.elementDeclarations[xToken.name],
+                  flaggedSpace: false,
                   stateId: 0,
                };
             } else {
@@ -527,6 +531,7 @@ class CheckXTokenValidStream extends stream.Transform {
                      token: new ElementDeclaration(xToken.name, 'ANY', undefined),
                      type: 'ANY',
                   },
+                  flaggedSpace: false,
                   stateId: 0,
                };
             }
@@ -914,6 +919,7 @@ class CheckXTokenValidStream extends stream.Transform {
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
                type: 'CHILDREN',
+               externallyDeclared: this.externalDeclarations,
                graph
             };
          }
