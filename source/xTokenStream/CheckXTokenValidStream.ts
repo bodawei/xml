@@ -28,6 +28,9 @@ import {
    EXTERNAL_SUBSET_END_XTOKEN,
    entityDeclaration,
    GeneralEntityEndXToken,
+   INTERNAL_SUBSET_START_XTOKEN,
+   INTERNAL_SUBSET_END_XTOKEN,
+   ParameterEntityEndXToken,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -117,48 +120,6 @@ type EntityInfoMap = {
 
 const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
-/*
- * §3.3.3: Attribute value normalization.
- * This should be done whether or not we are validating.
- */
-function normalizeAttributeValue(attribute: any, attrDef?: AttDefXToken): any { // typeHack
-   const isCData = !attrDef || attrDef.type === 'CDATA';
-   let prevHadTrailingSpace = true; // consider the start to already be space terminated
-   let prevPiece: { text: string } | void = undefined;
-   const newValue = [];
-
-   for (let index = 0; index < attribute.value.length; index++) {
-      const piece = attribute.value[index];
-
-      if (!text.isTextXToken(piece)) {
-         newValue.push(piece)
-         continue;
-      }
-
-      const newPiece = new text.XToken(piece.text, piece.pToken);
-      newValue.push(newPiece);
-
-      if (isCData) {
-         newPiece.text = newPiece.text.replace(/[ \r\n\t]/g, ' ');
-      } else {
-         newPiece.text = newPiece.text.replace(/[ \r\n\t]+/g, ' ');
-
-         if (prevHadTrailingSpace) {
-            newPiece.text = newPiece.text.replace(/^ /, '');
-         }
-
-         prevPiece = newPiece;
-         prevHadTrailingSpace = newPiece.text[newPiece.text.length - 1] === ' ';
-      }
-   };
-
-   if (prevHadTrailingSpace && prevPiece) {
-      prevPiece!.text = prevPiece!.text.replace(/ $/, ''); // typeHack
-   }
-
-   return newValue;
-}
-
 function getAttributeValueText(attribute: any): string {
    const rawValue = attribute.value;
    let newValue = '';
@@ -187,6 +148,8 @@ class CheckXTokenValidStream extends stream.Transform {
    private _seenRoot: boolean = false;
    private standalone: boolean = false;
    private externalDeclarations: boolean = false;
+   private inInternalSubset: boolean = false;
+   private internalEntityDepth: number = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(entityManager: EntityManager) {
@@ -222,6 +185,69 @@ class CheckXTokenValidStream extends stream.Transform {
       const isException = PROTECTED_ENTITIES.indexOf(entityName) !== -1;
 
       return this.standalone && isExternallyDeclared && !isException;
+   }
+
+   /*
+    * §3.3.3: Attribute value normalization.
+    * This should be done whether or not we are validating.
+    */
+   normalizeAttributeValue(attribute: any, attInfo: AttInfo | void, elName: string, pToken: any): any { // typeHack
+      const attrDef: AttDefXToken | void = attInfo ? attInfo.def : undefined;
+      const externallyDeclared = attInfo ? attInfo.externallyDeclared : false;
+      const isCData = !attrDef || attrDef.type === 'CDATA';
+      let prevHadTrailingSpace = true; // consider the start to already be space terminated
+      let prevPiece: { text: string } | void = undefined;
+      const newValue = [];
+      let cDataDifference = false;
+
+      for (let index = 0; index < attribute.value.length; index++) {
+         const piece = attribute.value[index];
+
+         if (!text.isTextXToken(piece)) {
+            newValue.push(piece)
+            continue;
+         }
+
+         const newPiece = new text.XToken(piece.text, piece.pToken);
+         newValue.push(newPiece);
+
+         const cDataText = newPiece.text.replace(/[ \r\n\t]/g, ' ');
+
+         if (isCData) {
+            newPiece.text = cDataText;
+         } else {
+            newPiece.text = newPiece.text.replace(/[ \r\n\t]+/g, ' ');
+
+            if (prevHadTrailingSpace) {
+               newPiece.text = newPiece.text.replace(/^ /, '');
+            }
+
+            prevPiece = newPiece;
+            prevHadTrailingSpace = newPiece.text[newPiece.text.length - 1] === ' ';
+         }
+
+         if (cDataText !== newPiece.text) {
+            cDataDifference = true;
+         }
+      };
+
+      if (prevHadTrailingSpace && prevPiece) {
+         prevPiece!.text = prevPiece!.text.replace(/ $/, ''); // typeHack
+         cDataDifference = true;
+      }
+
+      // §2.9 Validity constraint: Standalone Document Declaration
+      // The standalone document declaration must have the value "no" if any external markup
+      // declarations contain declarations of:
+      // - attributes with tokenized types, where the attribute appears in the document
+      //   with a value such that normalization will produce a different value from that
+      //   which would be produced in the absence of the declaration
+      if (this.standalone && cDataDifference && externallyDeclared) {
+         this.pushValidityError(ValidityError.ID.ATTLISTDECL_TYPE_EXTERNAL_DECLARED,
+            [ elName, attribute.name ], pToken);
+      }
+
+      return newValue;
    }
 
    private checkAttributeValueStandaloneability(attrName: string, value: AttributeValueXToken, pTokenOpen: any, elementAttribute: boolean) {
@@ -474,6 +500,14 @@ class CheckXTokenValidStream extends stream.Transform {
          this.externalDeclarations = false;
       }
 
+      if (xToken.type === INTERNAL_SUBSET_START_XTOKEN) {
+         this.inInternalSubset = true;
+      }
+
+      if (xToken.type === INTERNAL_SUBSET_END_XTOKEN) {
+         this.inInternalSubset = false;
+      }
+
       if (xToken.type === xmlDeclaration.XTYPE) {
          this.standalone = xToken.standalone;
       }
@@ -499,6 +533,21 @@ class CheckXTokenValidStream extends stream.Transform {
             } else {
                this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
                   [ xToken.name ], pToken);
+            }
+         }
+
+         if (this.inInternalSubset) {
+            if (xToken instanceof ParameterEntityStartXToken) {
+               this.internalEntityDepth ++;
+               this.externalDeclarations = true;
+            }
+         }
+      } else if (xToken instanceof ParameterEntityEndXToken) {
+         if (this.inInternalSubset) {
+            this.internalEntityDepth --;
+
+            if (this.internalEntityDepth === 0) {
+               this.externalDeclarations = false;
             }
          }
       } else if (xToken instanceof elementDeclaration.XToken) {
@@ -996,6 +1045,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const attributes = elStart.attributes;
       const pTokenOpen = elStart.pToken && elStart.pToken.open;
       const attributesByName: AttributeMap = {};
+      const elName = elementDecl ? elementDecl.token.name : '';
 
       // §3.3.3: Normalization
       for (let index = 0; index < attributes.length; index++) {
@@ -1003,7 +1053,8 @@ class CheckXTokenValidStream extends stream.Transform {
          const attrInfo = elemAttrDef && elemAttrDef.attributes[attrName];
          const attrDef = attrInfo && attrInfo.def;
 
-         attributes[index].value = normalizeAttributeValue(attributes[index], attrDef);
+         attributes[index].value = this.normalizeAttributeValue(attributes[index], attrInfo,
+            elName, pTokenOpen);
 
          attributesByName[attrName] = attributes[index];
       }

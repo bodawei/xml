@@ -230,7 +230,8 @@ Note that we also assume that this is OK, since generalEntity is never reference
 <foo>
 </foo>
 ```
-
+I'm puzzled, because a non-validating processor doesn't need to read pe's. 
+It really is not clear to me what standalone means or what it is for. It seems to be that some non-validaing processor may do some (e.g. the second example here).
 
 # Terminology
 
