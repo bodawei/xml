@@ -21,30 +21,6 @@ describe('instruction (integration)', () => {
          ec = new ErrorCollector(undefined as any, WellFormedError);
       });
 
-      it('reports if the target has invalid text (checking misc.checkWellFormedText)', (done) => {
-         source.addText('f\u0000o asdf ?>');
-         source.endText();
-
-         instruction.parse(source, {} as any, (parsing) => {
-            instruction.checkWellFormed(parsing, ec, emd);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
-            done();
-         });
-      });
-
-      it('reports if the target violates checkWellFormedNameRecommendation())', (done) => {
-         source.addText('xml-foo asdf ?>');
-         source.endText();
-
-         instruction.parse(source, {} as any, (parsing) => {
-            instruction.checkWellFormed(parsing, ec, emd);
-
-            expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.PI_TARGET_XML_RESERVED);
-            done();
-         });
-      });
-
    });
 
 });

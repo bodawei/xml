@@ -15,10 +15,11 @@ import { EntityDeclaration } from '../../token/entityDeclaration'; // hack
 import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
    GeneralEntityEndXToken,
-   ParameterEntityEndPToken,
-   ParameterEntityEndXToken,
    InternalSubsetStartXToken,
    InternalSubsetEndXToken,
+   ParameterEntityEndPToken,
+   ParameterEntityEndXToken,
+   XmlDeclarationXToken,
 } from '../../token';
 
 import EntityManager from '../EntityManager';
@@ -70,7 +71,7 @@ describe('NodeStream (integration)', () => {
       expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
          '[<!ENTITY child "&quot;grandchild&quot;">]><one>&child;</one>', (results) => {
          matchTokenTypes(results, [
-            tokenNs.xmlDeclaration.XToken,
+            XmlDeclarationXToken,
             tokenNs.docTypeStart.XToken,
             InternalSubsetStartXToken,
             tokenNs.entityDeclaration.XToken,
@@ -103,7 +104,7 @@ describe('NodeStream (integration)', () => {
       </one>`, (results) => {
          /* eslint-disable indent */
          matchTokenTypes(results, [
-            tokenNs.xmlDeclaration.XToken,
+            XmlDeclarationXToken,
             tokenNs.docTypeStart.XToken,
                InternalSubsetStartXToken,
                tokenNs.entityDeclaration.ParamXToken,

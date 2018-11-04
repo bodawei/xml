@@ -1,350 +1,665 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from '../../basic';
-import { WellFormedError } from '../../error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
+import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
+import { WellFormedError } from 'error';
+import { MockErrorCollector } from 'error-test';
+import { SToken } from 'sToken';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import * as instruction from '../bridge/instruction.js';
-import attribute from '../common/attribute';
-import * as xmlDeclaration from '../xmlDeclaration.js';
+import * as misc from '../common/misc';
+import { parseXmlDeclaration, XmlDeclarationPToken, XmlDeclarationXToken } from '../xmlDeclaration';
+import { InstructionStart } from '../bridge/instruction';
+import literal from '../common/literal';
 
 describe('xmlDeclaration (unit)', () => {
-   let xmlDeclPToken: xmlDeclaration.PToken;
+   let xmlDeclPToken: XmlDeclarationPToken;
+   let start: InstructionStart;
 
    beforeEach(() => {
-      const makeToken = makeSTokenMaker();
-      xmlDeclPToken = new xmlDeclaration.PToken({
-         open: makeToken('<?'),
-         postOpenSpace: undefined,
-         target: makeToken('xml'),
-         postTargetSpace: makeToken(' '),
-         params: [],
-         close: makeToken('?>'),
-      });
-   });
-
-   describe('PToken', () => {
-
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            expect(xmlDeclPToken.getSTokenArray()).toEqual([
-               xmlDeclPToken.open,
-               xmlDeclPToken.target,
-               xmlDeclPToken.postTargetSpace,
-               xmlDeclPToken.close,
-            ]);
-         });
-
+      xmlDeclPToken = new XmlDeclarationPToken({
+         open: SToken.fromString('<?'),
+         openSpace: undefined,
+         target: SToken.fromString('xml'),
+         targetSpace: SToken.fromString(' '),
+         params: [{
+            name: SToken.fromString('version'),
+            nameSpace: undefined,
+            equal: SToken.fromString('='),
+            equalSpace: undefined,
+         }],
+         close: SToken.fromString('?>'),
       });
 
-      it('asks the attribute to provide the STokens', () => {
-         spyOn(attribute, 'getSTokens');
-         xmlDeclPToken.params = [ {} ];
-
-         xmlDeclPToken.getSTokenArray();
-
-         expect(attribute.getSTokens).toHaveBeenCalledWith(xmlDeclPToken.params);
-      });
-
-   });
+      start = {
+         open: xmlDeclPToken.open,
+         openSpace: undefined,
+         target: xmlDeclPToken.target,
+         targetSpace: xmlDeclPToken.targetSpace,
+      };         
+});
 
    describe('parse()', () => {
       let callback: jasmine.Spy;
-      let attParse: jasmine.Spy;
+      let litParse: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         attParse = spyOn(attribute, 'parse');
-         attParse.and.callFake((_1: any, _2: any, callback: Function) => { callback([]); });
+         litParse = spyOn(literal, 'parse');
       });
 
       it('does a basic parsing', () => {
+         litParse.and.callFake((_1: any, _2: any, cb:() => void) => {
+            cb();
+         });
          const mockSource = new MockSTokenSource([
+            [ 'version', 'peekWord', ['=', '?>'] ],
+            [ 'version', 'word', ['=', '?>'] ],
+            [ undefined, 'space' ],
+            [ '=', 'match', '=' ],
+            [ undefined, 'space' ],
+            [ undefined, 'peekWord', ['=', '?>'] ],
             [ '?>', 'match', '?>' ],
-         ], 6, 0, 6);
-
-         xmlDeclaration.parse(mockSource, {
-            open: xmlDeclPToken.open,
-            postOpenSpace: undefined,
-            target: xmlDeclPToken.target,
-            postTargetSpace: xmlDeclPToken.postTargetSpace,
-         } as any, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback).toContainPTokenProps(xmlDeclPToken);
-      });
-
-      it('calls attribute.parse()', () => {
-         const mockSource = new MockSTokenSource([
-            '?>',
          ]);
 
-         xmlDeclaration.parse(mockSource, {} as any, callback);
+         parseXmlDeclaration(mockSource, start, callback);
          mockSource.respondInAsyncTime();
 
-         const args = attParse.calls.argsFor(0);
+         expect(callback).toEqualRangeless(xmlDeclPToken);
+      });
+
+      it('calls literal.parse()', () => {
+         const mockSource = new MockSTokenSource([
+            [ 'version', 'peekWord', ['=', '?>'] ],
+            [ 'version', 'word', ['=', '?>'] ],
+            [ undefined, 'space' ],
+            [ '=', 'match', '=' ],
+            [ undefined, 'space' ],
+            [ undefined, 'peekWord', ['=', '?>'] ],
+            [ '?>', 'match', '?>' ],
+         ]);
+
+         parseXmlDeclaration(mockSource, {} as any, callback);
+         mockSource.respondInAsyncTime();
+
+         const args = litParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
-            terminators: [ '?>' ],
+            pToken: {
+               name: new SToken('version', 'version', new Range(new EntityLocation(), 7, 0, 7, 14, 0, 14)),
+               nameSpace: undefined,
+               equal: new SToken('=', '=', new Range(new EntityLocation(), 14, 0, 14, 15, 0, 15)),
+               equalSpace: undefined,
+            },
          });
          expect(args[2]).toBeInstanceOf(Function);
       });
 
+      it('parses multiple attributes', () => {
+         let calls = 0;
+         (xmlDeclPToken.params[0].valueSpace as any) = SToken.fromString(' ');
+         (xmlDeclPToken.params as any).push({
+            name: SToken.fromString('encoding'),
+            nameSpace: SToken.fromString(' '),
+            equal: SToken.fromString('='),
+            equalSpace: SToken.fromString(' '),
+         });
+         litParse.and.callFake((_1: any, _2: any, cb:(result?: any) => void) => {
+            calls ++;
+            cb(calls === 1 ? { value: [] } : undefined);
+         });
+         const mockSource = new MockSTokenSource([
+            [ 'version', 'peekWord', ['=', '?>'] ],
+            [ 'version', 'word', ['=', '?>'] ],
+            [ undefined, 'space' ],
+            [ '=', 'match', '=' ],
+            [ undefined, 'space' ],
+            [ ' ', 'space' ],
+            [ 'encoding', 'peekWord', ['=', '?>'] ],
+            [ 'encoding', 'word', ['=', '?>'] ],
+            [ ' ', 'space' ],
+            [ '=', 'match', '=' ],
+            [ ' ', 'space' ],
+            [ undefined, 'peekWord', ['=', '?>'] ],
+            [ '?>', 'match', '?>' ],
+         ]);
+
+         parseXmlDeclaration(mockSource, start, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless(xmlDeclPToken);
+      });
+
+      it('parses zero parameters', () => {
+         (xmlDeclPToken.params as any).pop();
+         litParse.and.callFake((_1: any, _2: any, cb:() => void) => {
+            cb();
+         });
+         const mockSource = new MockSTokenSource([
+            [ undefined, 'peekWord', ['=', '?>'] ],
+            [ '?>', 'match', '?>' ],
+         ]);
+
+         parseXmlDeclaration(mockSource, start, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless(xmlDeclPToken);
+      });
+
+      it('stops parsing if an unexpected parameter is found', () => {
+         (xmlDeclPToken as any).close = undefined;
+         litParse.and.callFake((_1: any, _2: any, cb:(result?: any) => void) => {
+            cb();
+         });
+         const mockSource = new MockSTokenSource([
+            [ 'version', 'peekWord', ['=', '?>'] ],
+            [ 'version', 'word', ['=', '?>'] ],
+            [ undefined, 'space' ],
+            [ '=', 'match', '=' ],
+            [ undefined, 'space' ],
+            [ 'bogus', 'peekWord', ['=', '?>'] ],
+            [ undefined, 'match', '?>' ],
+         ]);
+
+         parseXmlDeclaration(mockSource, start, callback);
+         mockSource.respondInAsyncTime();
+
+         expect(callback).toEqualRangeless(xmlDeclPToken);
+      });
+
    });
 
-   describe('checkWellFormed()', () => {
+   describe('pToken.checkWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
-      let attCheck: jasmine.Spy;
+      let emd: EntityMetaData;
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         spyOn(instruction, 'checkWellFormed');
-         attCheck = spyOn(attribute, 'checkWellFormed');
+         emd = new EntityMetaData();
+         spyOn(misc, 'checkWellFormedText');
       });
 
-      it('calls instruction.checkWellFormed', () => {
-         const emd = new EntityMetaData();
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
+      it('calls misc.checkWellFormedText() on the target value', () => {
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(instruction.checkWellFormed)
-            .toHaveBeenCalledWith(xmlDeclPToken, mockErrorCollector, emd, true);
+         expect(misc.checkWellFormedText).toHaveBeenCalledWith(xmlDeclPToken.target, mockErrorCollector, emd);
       });
 
-      it('calls attribute.checkWellFormed', () => {
-         const emd = new EntityMetaData();
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
+      it('calls misc.checkWellFormedText() on the version value', () => {
+         (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
-         const args = attCheck.calls.argsFor(0);
-         expect(args[0]).toEqual(xmlDeclPToken.params);
-         expect(args[1]).toEqual(mockErrorCollector);
-         expect(args[2]).toEqual(emd);
-         expect(args[3]).toEqual(xmlDeclPToken.postTargetSpace);
-         expect(args[4]).toEqual(WellFormedError.ID.NOUN_XMLDECL_PARAM);
-         expect(args[5]).toBeInstanceOf(Function);
-         expect(args[6]).toBeInstanceOf(Function);
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText)
+            .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
+      });
+
+      it('calls misc.checkWellFormedText() on the encoding value', () => {
+         (xmlDeclPToken.params[0].name as any) = SToken.fromString('encoding');
+         (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText)
+            .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
+      });
+
+      it('calls misc.checkWellFormedText() on the standalone value', () => {
+         (xmlDeclPToken.params[0].name as any) = SToken.fromString('standalone');
+         (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(misc.checkWellFormedText)
+            .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
+      });
+
+      it('reports an error if there is a space after the "<?"', () => {
+         (xmlDeclPToken as any).openSpace = SToken.fromString(' ');
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_SPACE_AFTER_OPEN,
+            params: undefined,
+            position: xmlDeclPToken.openSpace,
+         });
+      });
+
+      it('reports an error if there is no target', () => {
+         delete (xmlDeclPToken as any).target;
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_NO_TARGET,
+            params: undefined,
+            lastPosition: xmlDeclPToken.open,
+         });
+      });
+
+      it('reports an error if there is no space after the target', () => {
+         delete (xmlDeclPToken as any).targetSpace;
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.XMLDECL_NO_SPACE_AFTER_TARGET,
+            params: undefined,
+            lastPosition: xmlDeclPToken.target,
+         });
       });
 
       it('reports no errors with ordinary parameters', () => {
-         xmlDeclPToken.params = [ { fakeParam: true } ];
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: undefined,
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.0'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
       it('reports an error if there are no parameters in the base document entity', () => {
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: undefined,
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [],
+            close: SToken.fromString('?>'),
+         });
+
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.XMLDECL_NO_ATTRIBUTES,
+            id: WellFormedError.ID.XMLDECL_NO_PARAMS,
             params: undefined,
-            position: xmlDeclPToken.close,
+            position: xmlDeclPToken.targetSpace,
          });
       });
 
-      it('reports an error if there are no parameters in the text declaration', () => {
-         const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
-         xmlDeclPToken.params = [];
+      it('reports an error if a parameter is in the wrong case', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('VERSION'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.0'),
+            }],
+            close: SToken.fromString('?>'),
+         });
 
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.TEXTDECL_NO_ATTRIBUTES,
-            params: undefined,
-            position: xmlDeclPToken.close,
+            id: WellFormedError.ID.XMLDECL_PARAM_INVALID_CASE,
+            params: [ 'version', 'VERSION' ],
+            position: xmlDeclPToken.params[0].name,
          });
       });
 
-      it('reports an error if there is no encoding in the text declaration', () => {
-         const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
+      // it('reports an error if there are no parameters in the text declaration', () => {
+      //    const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
+      //    (xmlDeclPToken as any).params = [];
 
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, emd);
+      //    xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.TEXTDECL_NO_ENCODING,
-            params: undefined,
-            position: xmlDeclPToken.close,
-         });
-      });
+      //    expect(mockErrorCollector).toReportError({
+      //       id: WellFormedError.ID.TEXTDECL_NO_ATTRIBUTES,
+      //       params: undefined,
+      //       position: xmlDeclPToken.close,
+      //    });
+      // });
+
+      // it('reports an error if there is no encoding in the text declaration', () => {
+      //    const emd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
+
+      //    xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
+
+      //    expect(mockErrorCollector).toReportError({
+      //       id: WellFormedError.ID.TEXTDECL_NO_ENCODING,
+      //       params: undefined,
+      //       position: xmlDeclPToken.close,
+      //    });
+      // });
 
       it('reports an error if there is no close', () => {
-         delete xmlDeclPToken.close;
+         xmlDeclPToken = new XmlDeclarationPToken(start);
 
-         xmlDeclaration.checkWellFormed(xmlDeclPToken, mockErrorCollector, new EntityMetaData());
+         xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.XMLDECL_NO_CLOSE,
             params: undefined,
-            lastPosition: undefined, // not quite right, due to mocking
+            lastPosition: xmlDeclPToken.targetSpace,
          });
       });
 
-      describe('callbacks', () => {
-         let makeToken: STokenMaker;
-         let emd: EntityMetaData;
-         let checkName: Function;
-         let checkValue: Function;
+      describe('version parameter', () => {
 
-         beforeEach(() => {
-            makeToken = makeSTokenMaker();
-            emd = new EntityMetaData();
-
-            // Gather parameters
-            xmlDeclaration.checkWellFormed(xmlDeclPToken, new MockErrorCollector(), emd);
-            checkName = attCheck.calls.argsFor(0)[5];
-            checkValue = attCheck.calls.argsFor(0)[6];
+         it('reports an error if a version is in the wrong order', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               openSpace: SToken.fromString(' '),
+               target: SToken.fromString('xml'),
+               targetSpace: SToken.fromString(' '),
+               params: [{
+                  name: SToken.fromString('encoding'),
+                  nameSpace: SToken.fromString(' '),
+                  equal: SToken.fromString('='),
+                  equalSpace: SToken.fromString(' '),
+                  value: SToken.fromString('ASCII'),
+               }, {
+                  name: SToken.fromString('version'),
+                  nameSpace: SToken.fromString(' '),
+                  equal: SToken.fromString('='),
+                  equalSpace: SToken.fromString(' '),
+                  value: SToken.fromString('1.0'),
+               }],
+               close: SToken.fromString('?>'),
+            });
+   
+            xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
+               params: undefined,
+               position: xmlDeclPToken.params[1].name,
+            });
          });
 
-         describe('checkName()', () => {
-
-            it('reports an error if a version is in the wrong order', () => {
-               checkName(makeToken('foo'), 0, mockErrorCollector, emd);
-               const versionSToken = makeToken('version');
-
-               checkName(versionSToken, 1, mockErrorCollector, emd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
-                  params: [ '1' ],
-                  position: undefined,
-               });
+         it('reports an error if the version is not a legal value', () => {
+            xmlDeclPToken = new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               openSpace: SToken.fromString(' '),
+               target: SToken.fromString('xml'),
+               targetSpace: SToken.fromString(' '),
+               params: [{
+                  name: SToken.fromString('version'),
+                  nameSpace: SToken.fromString(' '),
+                  equal: SToken.fromString('='),
+                  equalSpace: SToken.fromString(' '),
+                  value: SToken.fromString('1.2'),
+               }],
+               close: SToken.fromString('?>'),
+            });
+   
+            xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+   
+            expect(mockErrorCollector).toReportError({
+               id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
+               params: [ '1.2' ],
+               position: xmlDeclPToken.params[0].value,
             });
 
+         });
+
+         describe('encoding parameter', () => {
+
             it('reports an error if a encoding is in the wrong order', () => {
-               checkName(makeToken('version'), 0, mockErrorCollector, emd);
-               checkName(makeToken('standalone'), 1, mockErrorCollector, emd);
-               const encodingSToken = makeToken('encoding');
-
-               checkName(encodingSToken, 2, mockErrorCollector, emd);
-
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('encoding'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('ASCII'),
+                  }, {
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+   
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
-                  position: undefined,
+                  position: xmlDeclPToken.params[0].name,
                });
             });
 
-            it('reports no error about encoding position if this is not a document kind', () => {
-               emd = new EntityMetaData(EntityKind.EXTERNAL);
-               checkName(makeToken('version'), 0, mockErrorCollector, emd);
-               checkName(makeToken('standalone'), 1, mockErrorCollector, emd);
-               const encodingSToken = makeToken('encoding');
-
-               checkName(encodingSToken, 2, mockErrorCollector, emd);
-
+            it('reports no error if a entity is not a document', () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('encoding'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('ASCII'),
+                  }, {
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
+   
                expect(mockErrorCollector).not.toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
-                  position: undefined,
-               });
-            });
-
-            it('reports an error if a standalone is in the wrong order', () => {
-               checkName(makeToken('standalone'), 0, mockErrorCollector, emd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
-                  params: undefined,
-                  position: undefined,
-               });
-            });
-
-            it('reports an error if standalone specified on a non-doc entity', () => {
-               const localEmd = new EntityMetaData(EntityKind.EXTERNALSUBSET);
-               checkName(makeToken('version'), 0, mockErrorCollector, localEmd);
-
-               checkName(makeToken('standalone'), 1, mockErrorCollector, localEmd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.TEXTDECL_XTRA_STANDALONE,
-                  params: undefined,
-                  position: undefined,
-               });
-            });
-
-            it('reports an error if an unknown parameter is provided', () => {
-               checkName(makeToken('bogus'), 0, mockErrorCollector, emd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_ATTR_UNKNOWN,
-                  params: [ 'bogus' ],
-                  position: undefined,
-               });
-            });
-
-            it('reports an error if a param is the wrong case', () => {
-               checkName(makeToken('VERSION'), 0, mockErrorCollector, emd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_ATTR_INVALID_CASE,
-                  params: [ 'version', 'VERSION' ],
-                  position: undefined,
-               });
-            });
-
-         });
-
-         describe('checkValue()', () => {
-
-            it('reports an error if the version is not a legal value', () => {
-               const mockErrorCollector = new MockErrorCollector();
-
-               checkValue(makeToken('version'), [ { text: makeToken('1.2') } ], mockErrorCollector, emd);
-
-               expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
-                  params: [ '1.2' ],
-                  lastPosition: undefined,
+                  position: xmlDeclPToken.params[0].name,
                });
             });
 
             it('reports an error if the encoding is not a legal value', () => {
-               const mockErrorCollector = new MockErrorCollector();
-
-               checkValue(makeToken('encoding'), [ { text: makeToken('$$BAD_ENCODING$$') } ], mockErrorCollector, emd);
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }, {
+                     name: SToken.fromString('encoding'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('$$BAD_ENCODING$$'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID,
                   params: [ '$$BAD_ENCODING$$' ],
-                  lastPosition: undefined,
+                  position: xmlDeclPToken.params[1].value,
+               });
+            });
+
+         });
+
+         describe('standalone parameter', () => {
+
+            it('reports an error if a standalone is in the wrong order', () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('standalone'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('yes'),
+                  }, {
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+   
+               expect(mockErrorCollector).toReportError({
+                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
+                  params: undefined,
+                  position: xmlDeclPToken.params[0].name,
+               });
+            });
+
+            it('reports an error if a standalone is in not in a document entity', () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }, {
+                     name: SToken.fromString('standalone'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('yes'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
+   
+               expect(mockErrorCollector).toReportError({
+                  id: WellFormedError.ID.TEXTDECL_XTRA_STANDALONE,
+                  params: undefined,
+                  position: xmlDeclPToken.params[1].name,
                });
             });
 
             it('reports an error if the standalone is neither "yes" or "no"', () => {
-               const mockErrorCollector = new MockErrorCollector();
-
-               checkValue(makeToken('standalone'), [ { text: makeToken('Maybe') } ], mockErrorCollector, emd);
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }, {
+                     name: SToken.fromString('standalone'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('Maybe'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
                   params: [ 'Maybe' ],
-                  lastPosition: undefined,
+                  position: xmlDeclPToken.params[1].value,
                });
             });
 
-            it('reports an error if the standalone is not all lower case', () => {
-               const mockErrorCollector = new MockErrorCollector();
-
-               checkValue(makeToken('standalone'), [ { text: makeToken('Yes') } ], mockErrorCollector, emd);
+            it('reports an error if the standalone is the wrong case', () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('version'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }, {
+                     name: SToken.fromString('standalone'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('YES'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
 
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_CASE,
-                  params: [ 'yes', 'Yes' ],
-                  lastPosition: undefined,
+                  params: [ 'yes', 'YES' ],
+                  position: xmlDeclPToken.params[1].value,
                });
             });
 
-            it('reports an error if the standalone has no value', () => {
-               const mockErrorCollector = new MockErrorCollector();
+         });
 
-               checkValue(makeToken('standalone'), [ ], mockErrorCollector, emd);
+         describe('other parameter', () => {
 
+            it('reports an error if a an unknown parameter is found (parsing wont actually allow this)', () => {
+               xmlDeclPToken = new XmlDeclarationPToken({
+                  open: SToken.fromString('<?'),
+                  openSpace: SToken.fromString(' '),
+                  target: SToken.fromString('xml'),
+                  targetSpace: SToken.fromString(' '),
+                  params: [{
+                     name: SToken.fromString('bogus'),
+                     nameSpace: SToken.fromString(' '),
+                     equal: SToken.fromString('='),
+                     equalSpace: SToken.fromString(' '),
+                     value: SToken.fromString('1.0'),
+                  }],
+                  close: SToken.fromString('?>'),
+               });
+      
+               xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
+   
                expect(mockErrorCollector).toReportError({
-                  id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID,
-                  params: [ '' ],
-                  lastPosition: undefined,
+                  id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
+                  params: [ 'bogus' ],
+                  position: xmlDeclPToken.params[0].name,
                });
             });
 
@@ -354,34 +669,206 @@ describe('xmlDeclaration (unit)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
-      let attrMake: jasmine.Spy;
+   describe('pToken.toXToken()', () => {
 
-      beforeEach(() => {
-         attrMake = spyOn(attribute, 'makeOneTokenCompatible');
+      it('sets all parameters using the input', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.0'),
+            }, {
+               name: SToken.fromString('encoding'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('UTF-99'),
+            }, {
+               name: SToken.fromString('standalone'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('yes'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         const result = xmlDeclPToken.toXToken();
+
+         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'UTF-99', true, xmlDeclPToken));
       });
 
-      it('asks the attribute to provide the attributes', () => {
-         attrMake.and.returnValue([]);
+      it('sets version to 1.1 if that is what is passed in', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.1'),
+            }],
+            close: SToken.fromString('?>'),
+         });
 
-         xmlDeclaration.pTokenToXToken(xmlDeclPToken);
+         const result = xmlDeclPToken.toXToken();
 
-         expect(attribute.makeOneTokenCompatible).toHaveBeenCalledWith(xmlDeclPToken.params);
+         expect(result).toEqual(new XmlDeclarationXToken(1.1, undefined, undefined, xmlDeclPToken));
       });
 
-      it('sets standalone to false when no standalone value was offered', () => {
-         attrMake.and.returnValue([{
-            name: 'version',
-            value: [{
-               text: '1.0',
-            }]
-         }]);
+      it('sets default parameters when input has none', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [],
+            close: SToken.fromString('?>'),
+         });
 
-         const result = xmlDeclaration.pTokenToXToken(xmlDeclPToken);
+         const result = xmlDeclPToken.toXToken();
 
-         expect(result.standalone).toEqual(false);
+         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'utf-8', false, xmlDeclPToken));
+      });
+
+      it('sets default values when input values are erronious', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.2'),
+            }, {
+               name: SToken.fromString('encoding'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('some-encoding'),
+            }, {
+               name: SToken.fromString('standalone'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('bogus'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         const result = xmlDeclPToken.toXToken();
+
+         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', false, xmlDeclPToken));
+      });
+
+      it('treats a mis-cased standalone as the correct case', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('1.2'),
+            }, {
+               name: SToken.fromString('encoding'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('some-encoding'),
+            }, {
+               name: SToken.fromString('standalone'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('YES'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         const result = xmlDeclPToken.toXToken();
+
+         expect(result).toEqual(new XmlDeclarationXToken(1.0, 'some-encoding', true, xmlDeclPToken));
       });
 
    });
 
+   describe('pToken.toSTokenArray()', () => {
+
+      it('extracts all the STokens', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            openSpace: SToken.fromString(' '),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: SToken.fromString('1.2'),
+               closeQuote: SToken.fromString('"'),
+               valueSpace: SToken.fromString(' '),
+            }, {
+               name: SToken.fromString('encoding'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('some-encoding'),
+            }, {
+               name: SToken.fromString('standalone'),
+               nameSpace: SToken.fromString(' '),
+               equal: SToken.fromString('='),
+               equalSpace: SToken.fromString(' '),
+               value: SToken.fromString('YES'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         const result = xmlDeclPToken.toSTokenArray();
+
+         expect(result).toEqual([
+            xmlDeclPToken.open,
+            xmlDeclPToken.openSpace,
+            xmlDeclPToken.target,
+            xmlDeclPToken.targetSpace,
+            xmlDeclPToken.params[0].name,
+            xmlDeclPToken.params[0].nameSpace,
+            xmlDeclPToken.params[0].equal,
+            xmlDeclPToken.params[0].equalSpace,
+            xmlDeclPToken.params[0].openQuote,
+            xmlDeclPToken.params[0].value,
+            xmlDeclPToken.params[0].closeQuote,
+            xmlDeclPToken.params[0].valueSpace,
+            xmlDeclPToken.params[1].name,
+            xmlDeclPToken.params[1].nameSpace,
+            xmlDeclPToken.params[1].equal,
+            xmlDeclPToken.params[1].equalSpace,
+            xmlDeclPToken.params[1].value,
+            xmlDeclPToken.params[2].name,
+            xmlDeclPToken.params[2].nameSpace,
+            xmlDeclPToken.params[2].equal,
+            xmlDeclPToken.params[2].equalSpace,
+            xmlDeclPToken.params[2].value,
+            xmlDeclPToken.close,
+         ] as any);
+      });
+
+   });
 });

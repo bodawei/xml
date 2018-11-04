@@ -159,7 +159,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses a simple XML Declaration', (done) => {
-      expectInputToProduceTypes('<?xml version="1.0"?>', 'XMLDECL', done);
+      expectInputToProduceTypes('<?xml version="1.0"?>', 'XMLDECL_PTOKEN', done);
    });
 
 });

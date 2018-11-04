@@ -8,7 +8,6 @@ import { SToken } from '../../sToken';
 import { makeSToken } from '../../sToken/@test/helper';
 import {
    declaration,
-   instruction,
 
    attListDeclaration,
    charData,
@@ -26,6 +25,9 @@ import {
    space,
    xmlDeclaration,
    CdataPToken,
+
+   XMLDECL_PTOKEN,
+   XmlDeclarationPToken,
 } from '../../token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -267,21 +269,6 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       const pToken = {
          type: declaration.PTYPE,
          open: makeSToken('<'),
-      };
-      checker.write(metaData);
-      checker.write(pToken);
-
-      const args = cwfSpy.calls.argsFor(0);
-      expect(args[0]).toEqual(pToken);
-      expect(args[1]).toBeInstanceOf(ErrorCollector);
-      expect(args[2]).toEqual(metaData);
-   });
-
-   it('calls instruction.checkWellFormed() when encountering an declaration parsing', () => {
-      const cwfSpy = spyOn(instruction, 'checkWellFormed');
-      const pToken = {
-         type: instruction.PTYPE,
-         open: makeSToken('<?'),
       };
       checker.write(metaData);
       checker.write(pToken);
@@ -823,22 +810,19 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken: Token;
 
       beforeEach(() => {
-         pToken = {
-            type: xmlDeclaration.PTYPE,
+         pToken = new XmlDeclarationPToken({
             open: makeSToken('<?'),
-            params: [],
-         };
+         });
       });
 
-      it('calls xmlDeclaration.checkWellFormed() when encountering an XML Declaration parsing', () => {
-         const cwfSpy = spyOn(xmlDeclaration, 'checkWellFormed');
+      it('calls pToken.checkWellFormed() when encountering an XML Declaration parsing', () => {
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(metaData);
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

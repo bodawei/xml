@@ -4,37 +4,34 @@
 import { EntityMetaData } from '../../basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { STokenSource, SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import text from '../text';
-import * as xmlDeclaration from '../xmlDeclaration';
-import { InstructionPToken } from '../bridge/instruction';
+import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
+import { InstructionStart } from '../bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
-   let xmlDeclPToken: xmlDeclaration.XmlDeclarationPToken;
 
-   beforeEach(() => {
-      const makeToken = makeSTokenMaker();
-      xmlDeclPToken = new xmlDeclaration.XmlDeclarationPToken({
-         open: makeToken('<?'),
-         postOpenSpace: undefined,
-         target: makeToken('xml'),
-         postTargetSpace: makeToken(' '),
-         params: [],
-         close: makeToken('?>'),
-      });
-   });
+   describe('parseXmlDeclaration()', () => {
 
-   describe('parse()', () => {
-
-      it('asks the attributes module to parse the attributes', (done) => {
+      it('parses the input, including the parameters which use literal.parse()', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
-         xmlDeclaration.parse(source, {} as any, (parsing) => {
+         parseXmlDeclaration(source, {} as any, (parsing) => {
             expect(parsing.params[0].name.str).toEqual('version');
+            done();
+         });
+      });
+
+      it('converts the value from literal.parse() to a single SToken', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('version="1.0" encoding="ascii" ?>');
+         source.endText();
+
+         parseXmlDeclaration(source, {} as any, (parsing) => {
+            expect(parsing.params[1].value!.str).toEqual('ascii');
             done();
          });
       });
@@ -44,74 +41,42 @@ describe('xmlDeclaration (integration)', () => {
    describe('checkWellFormed()', () => {
       let emd: EntityMetaData;
       let source: STokenSource;
-      let instructionPToken: InstructionPToken;
-
+      let start: InstructionStart;
+   
       beforeEach(() => {
          emd = new EntityMetaData();
          source = new STokenSource(defaultExtractors, emd);
-         instructionPToken = xmlDeclPToken;
-
-         delete instructionPToken.params;
-         delete instructionPToken.close;
+         start = {
+            open: SToken.fromString('<?'),
+            openSpace: undefined,
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+         };         
       });
 
-      it('reports errors in the PI initial part (instruction.checkWellFormed())', (done) => {
-         instructionPToken.postOpenSpace = instructionPToken.postTargetSpace;
-         source.addText('version="1.1"?>');
-         xmlDeclaration.parse(source, instructionPToken, (result) => {
-            const ec = new ErrorCollector(instructionPToken.open, WellFormedError);
-
-            xmlDeclaration.checkWellFormed(result, ec, emd);
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.PI_SPACE_AFTER_OPEN);
-            done();
-         });
-      });
-
-      it('reports an error when a param is malformed (check attribute.checkWellFormed())', (done) => {
+      it('reports an error when the target text is malformed (check misc.checkWellFormedText())', (done) => {
          source.addText('version "1.0" encoding="usascii"?>');
-         xmlDeclaration.parse(source, instructionPToken, (result) => {
-            const ec = new ErrorCollector(instructionPToken.open, WellFormedError);
+         start.target = SToken.fromString('\u0001xml');
 
-            xmlDeclaration.checkWellFormed(result, ec, emd);
+         parseXmlDeclaration(source, start, (result) => {
+            const ec = new ErrorCollector(start.open, WellFormedError);
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
+            result.checkWellFormed(ec, emd);
+
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
          });
       });
 
-   });
+      it('reports an error when the param value is malformed (check misc.checkWellFormedText())', (done) => {
+         source.addText('version="\u00011.0" encoding="usascii"?>');
 
-   describe('pTokenToXToken()', () => {
+         parseXmlDeclaration(source, start, (result) => {
+            const ec = new ErrorCollector(start.open, WellFormedError);
 
-      it('relies on attribute module to prepare the parameters', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('version="1.3" standalone="yes" ?>');
-         source.endText();
+            result.checkWellFormed(ec, emd);
 
-         xmlDeclaration.parse(source, {} as any, (pToken) => {
-            const token = xmlDeclaration.pTokenToXToken(pToken);
-
-            expect(token.params).toEqual([ {
-               name: 'version',
-               value: [ new text.XToken('1.3') ],
-            }, {
-               name: 'standalone',
-               value: [ new text.XToken('yes') ],
-            } ]);
-            done();
-         });
-      });
-
-      it('relies on attribute module to prepare the STokens', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('version="1.3" standalone="yes" ?>');
-         source.endText();
-
-         xmlDeclaration.parse(source, {} as any, (pToken) => {
-            const token = xmlDeclaration.pTokenToXToken(pToken);
-
-            expect((token as any).pToken.params[0].name.str).toEqual('version');
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
          });
       });

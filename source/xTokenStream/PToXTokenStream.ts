@@ -24,6 +24,7 @@ import {
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   XMLDECL_PTOKEN,
 } from '../token';
 
 class PToXTokenStream extends stream.Transform {
@@ -39,9 +40,6 @@ class PToXTokenStream extends stream.Transform {
       switch (pToken.type) {
          case declaration.PTYPE:
             this.push(declaration.pTokenToXToken(pToken));
-            break;
-         case instruction.PTYPE:
-            this.push(instruction.pTokenToXToken(pToken));
             break;
          case attListDeclaration.PTYPE:
             this.push(attListDeclaration.pTokenToXToken(pToken));
@@ -90,8 +88,8 @@ class PToXTokenStream extends stream.Transform {
          case text.PTYPE:
             this.push(text.makeXToken(pToken));
             break;
-         case xmlDeclaration.PTYPE:
-            this.push(xmlDeclaration.pTokenToXToken(pToken));
+         case XMLDECL_PTOKEN:
+            this.push(pToken.toXToken());
             break;
          default:
             if (pToken.type === EntityMetaData.TYPE) {

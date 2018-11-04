@@ -12,10 +12,12 @@
       "paths": {
          "basic": [ "./source/basic" ],
          "error": [ "./source/error" ],
+         "error-test": [ "./source/error/@test/helper" ],
          "expand": [ "./source/expand" ],
          "extractor": [ "./source/extractor" ],
          "pTokenStream": [ "./source/pTokenStream" ],
          "sToken": [ "./source/sToken" ],
+         "sToken-test": [ "./source/sToken/@test/helper" ],
          "token": [ "./source/token" ],
          "xTokenStream": [ "./source/xTokenStream" ],
       }

@@ -27,12 +27,14 @@ import literalValue from './common/literalValue';
 export * from './parameterEntityEnd';
 export * from './bridge/section';
 
+export * from './bridge/instruction';
 export * from './cdata';
 export * from './externalSubsetEnd';
 export * from './externalSubsetStart';
 export * from './generalEntityEnd';
 export * from './internalSubsetEnd';
 export * from './internalSubsetStart';
+export * from './xmlDeclaration';
 
 const token = {
    declaration,
@@ -60,6 +62,8 @@ const token = {
    literalValue,
 };
 
+const parseXmlDeclaration = xmlDeclaration.parseXmlDeclaration;
+
 export {
    declaration,
    instruction,
@@ -80,6 +84,7 @@ export {
    space,
    text,
    xmlDeclaration,
+   parseXmlDeclaration,
 
    unassigned,
 

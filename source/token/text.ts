@@ -95,4 +95,4 @@ const text = {
 };
 
 export default text;
-export { TEXT as PTYPE, TextPToken, TextXToken, isTextPToken, isTextXToken };
+export { TEXT as PTYPE, TEXT as TEXT_PTOKEN, TextPToken, TextXToken, isTextPToken, isTextXToken };

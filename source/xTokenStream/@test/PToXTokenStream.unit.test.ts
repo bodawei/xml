@@ -40,16 +40,6 @@ describe('PToXTokenStream (unit)', () => {
       expect(declaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls instruction.pTokenToXToken()', () => {
-      spyOn(instruction, 'pTokenToXToken');
-      const pToken = { type: instruction.PTYPE };
-
-      tokenStream.write(pToken);
-      tokenStream.read();
-
-      expect(instruction.pTokenToXToken).toHaveBeenCalledWith(pToken);
-   });
-
    it('calls attListDeclaration.pTokenToXToken()', () => {
       spyOn(attListDeclaration, 'pTokenToXToken');
       const pToken = { type: attListDeclaration.PTYPE };

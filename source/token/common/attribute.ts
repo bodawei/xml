@@ -122,7 +122,7 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, entityMetaData: EntityMetaData, preceedingSpace: SToken, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
+function checkWellFormed(pAttributes: AttributesPToken = [], ec: ErrorCollector, entityMetaData: EntityMetaData, preceedingSpace: SToken | void, type: string, checkName?: CheckAttName, checkValue?: CheckAttValue) {
    const seenAttrNames: { [ attrName: string ]: true } = {};
 
    for (let index = 0; index < pAttributes.length; index++) {
@@ -275,6 +275,7 @@ const attribute = {
 export default attribute;
 
 export {
+   AttributePToken,
    AttributeXToken,
    AttributeValuePToken,
    AttributeValueXToken,

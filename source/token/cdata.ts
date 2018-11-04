@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic/index';
-import { ErrorCollector, WellFormedError } from '../error/index';
-import { SToken, STokenSource, STokenArrayBuilder } from '../sToken/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import { SectionStart } from './bridge/section';
 import misc from './common/misc';
@@ -39,7 +39,7 @@ class CdataPToken {
    public readonly text?: SToken;
    public readonly close?: SToken;
 
-   constructor(param: CdataPToken | SectionStart | { open: SToken }) {
+   constructor(param: CdataPToken | SectionStart) {
       Object.assign(this, param);
       this.open = param.open;
    }
@@ -154,9 +154,8 @@ function sTokensFromPToken(pToken: CdataPToken): Array<SToken> {
 export {
    CDATA_PTOKEN,
    CDATA_XTOKEN,
-
-   parseCdata,
-
    CdataPToken,
    CdataXToken,
+
+   parseCdata,
 };

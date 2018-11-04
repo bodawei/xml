@@ -27,6 +27,7 @@ import {
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   XMLDECL_PTOKEN,
    ProcessingInstructionPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
@@ -78,9 +79,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case declaration.PTYPE:
             declaration.checkWellFormed(pToken as any, errorCollector, this._metaData); // typehack
             break;
-         case instruction.PTYPE:
-            instruction.checkWellFormed(pToken as any, errorCollector, this._metaData);
-            break;
          case EntityMetaData.TYPE:
             this._metaData = pToken as EntityMetaData; // typehack
             break;
@@ -119,13 +117,13 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
             comment.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
             break;
-         case xmlDeclaration.PTYPE:
+         case XMLDECL_PTOKEN:
             if (this._state !== CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
             } else {
                this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
             }
-            xmlDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData);
+            (pToken as any).checkWellFormed(errorCollector, this._metaData);
             break;
          case docTypeStart.PTYPE:
             switch (this._state) {

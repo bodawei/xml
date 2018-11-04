@@ -57,7 +57,7 @@ class ErrorCollector {
       this.errors = [];
    }
 
-   setPos(currentSToken?: SToken) {
+   setPos(currentSToken?: SToken | void) {
       this.posStart = !!currentSToken;
 
       if (currentSToken) {

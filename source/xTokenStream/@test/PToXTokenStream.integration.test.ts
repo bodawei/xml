@@ -20,9 +20,9 @@ import {
    ProcessingInstructionXToken,
    space,
    text,
-   xmlDeclaration,
 
    CdataXToken,
+   XmlDeclarationXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -199,10 +199,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenized an Xml Declaration', (done) => {
       expectInputToProduce('<?xml version="1.0"?>', [
-         new xmlDeclaration.XToken([ {
-            name: 'version',
-            value: [ new text.XToken('1.0') ],
-         } ]) ], done);
+         new XmlDeclarationXToken(1.0) ], done);
    });
 
 });

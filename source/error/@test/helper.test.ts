@@ -90,19 +90,19 @@ describe('error helper', () => {
          it('returns a message if the parameter count does not match the error', () => {
             const mock = new MockErrorCollector();
             mock.errors = [ {
-               id: 'XMLDECL_ATTR_INVALID_CASE', // only has 2 params
+               id: 'XMLDECL_PARAM_INVALID_CASE', // only has 2 params
                params: [ '1', '2', '3' ],
                position: undefined,
             } ];
 
             expect(toReportError({ equals: () => true }).compare(mock,
                {
-                  id: 'XMLDECL_ATTR_INVALID_CASE',
+                  id: 'XMLDECL_PARAM_INVALID_CASE',
                   params: undefined,
                   position: undefined,
                })).toEqual({
                   pass: false,
-                  message: 'XMLDECL_ATTR_INVALID_CASE expects 2 parameters, but 3 found.',
+                  message: 'XMLDECL_PARAM_INVALID_CASE expects 2 parameters, but 3 found.',
                });
          });
 

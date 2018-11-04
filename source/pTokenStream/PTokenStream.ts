@@ -8,7 +8,6 @@ import { SToken, STokenSource } from '../sToken';
 import {
    declaration,
    parseSection,
-   instruction,
 
    attListDeclaration,
    charData,
@@ -23,12 +22,11 @@ import {
    entityReference,
    notationDeclaration,
    space,
-   xmlDeclaration,
+
+   parseInstruction,
 } from '../token';
-import { parseProcessingInstruction } from '../token/processingInstruction';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { DocTypeEndPToken } from '../token/docTypeEnd';
-import { InstructionPToken } from '../token/bridge/instruction';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
@@ -187,15 +185,7 @@ class PTokenStream extends stream.Transform {
                elementEnd.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               instruction.parse(this._sTokenSource, markupStartSToken, (pToken: InstructionPToken) => {
-                  const target = pToken.target ? pToken.target.str : '';
-
-                  if (target.toLocaleUpperCase() === 'XML') {
-                     xmlDeclaration.parse(this._sTokenSource, pToken, deliverParse);
-                  } else {
-                     parseProcessingInstruction(this._sTokenSource, pToken, deliverParse);
-                  }
-               });
+               parseInstruction(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<!--':
                comment.parse(this._sTokenSource, markupStartSToken, deliverParse);

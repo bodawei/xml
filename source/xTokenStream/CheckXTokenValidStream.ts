@@ -23,14 +23,13 @@ import {
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
-   xmlDeclaration,
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
-   entityDeclaration,
    GeneralEntityEndXToken,
    INTERNAL_SUBSET_START_XTOKEN,
    INTERNAL_SUBSET_END_XTOKEN,
    ParameterEntityEndXToken,
+   XMLDECL_XTOKEN,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -508,7 +507,7 @@ class CheckXTokenValidStream extends stream.Transform {
          this.inInternalSubset = false;
       }
 
-      if (xToken.type === xmlDeclaration.XTYPE) {
+      if (xToken.type === XMLDECL_XTOKEN) {
          this.standalone = xToken.standalone;
       }
 

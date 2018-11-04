@@ -1,13 +1,13 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, ErrorCollector } from '../error';
-
-import { textOrBlank } from './common/misc';
-import * as instruction from './bridge/instruction';
-import attribute, { AttributeXToken, AttributeValuePToken } from './common/attribute';
-import base from './base';
-import { STokenSource, SToken } from 'sToken';
 import { EntityMetaData } from 'basic';
+import { WellFormedError, ErrorCollector } from 'error';
+import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+
+import { InstructionStart } from './bridge/instruction';
+import { checkWellFormedText, textOrBlank } from './common/misc';
+import literal from './common/literal';
+import { TEXT_PTOKEN } from './text';
 
 /**********************************************************************\
  The xmlDeclaration namespace contains the usual routines for parsing,
@@ -15,57 +15,78 @@ import { EntityMetaData } from 'basic';
 \**********************************************************************/
 
 const WFEID = WellFormedError.ID;
-const XMLDECL = 'XMLDECL';
+const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
-const XMLDECL_NAME_TERMINATORS = [ '?>' ];
-const XMLDECL_PARAMS: { [name: string]: string } = {
-   version: 'version',
-   encoding: 'encoding',
-   standalone: 'standalone',
-};
+
+const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
+const PARAM_NAMES = [ 'version', 'encoding', 'standalone' ];
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
+const DEFAULT_ENCODING = 'utf-8';
 
-class XmlDeclaration extends base.XToken {
-   public params: Array<AttributeXToken>;
+type XmlVersion = 1.0 | 1.1;
+
+class XmlDeclarationXToken {
+   public readonly type: typeof XMLDECL_XTOKEN = XMLDECL_XTOKEN;
+   public readonly version: XmlVersion;
+   public readonly encoding: string;
    public readonly standalone: boolean;
+   public readonly pToken?: XmlDeclarationPToken;
 
-   constructor(params: Array<AttributeXToken>, pToken?: XmlDeclarationPToken) {
-      super(XMLDECL_XTOKEN, pToken);
-      this.params = params;
+   constructor(version: XmlVersion, encoding?: string, standalone?: boolean, pToken?: XmlDeclarationPToken) {
+      this.version = version;
+      this.encoding = encoding || DEFAULT_ENCODING;
+      this.standalone = standalone || false;
 
-      this.standalone = params.some((param) => {
-         if (param.name === 'standalone') {
-            return (param.value[0] as any).text === 'yes';
-         }
-
-         return false;
-      });
-   }
-
-}
-
-class XmlDeclarationPToken extends instruction.PToken {
-   constructor(props?: Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(XMLDECL, props);
-   }
-
-   getSTokenArray() {
-      const results = super.getSTokenArray();
-      const sTokens = attribute.getSTokens(this.params);
-
-      results.pushSTokens.apply(results, sTokens); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.close);
-
-      return results;
+      this.pToken = pToken;
    }
 }
+
+class XmlDeclarationPToken {
+   public readonly type: typeof XMLDECL_PTOKEN = XMLDECL_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly target?: SToken;
+   public readonly targetSpace?: SToken;
+   public readonly params: ReadonlyArray<XmlDeclarationParam> = [];
+   public readonly close?: SToken;
+
+   constructor(param: InstructionStart | XmlDeclarationPToken) {
+      Object.assign(this, param);
+      this.open = param.open;
+      this.params = this.params;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+      checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken(): XmlDeclarationXToken {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray(): Array<SToken> {
+      return sTokensFromPToken(this);
+   }
+}
+
+type XmlDeclarationParam = {
+   readonly name: SToken;
+   readonly nameSpace?: SToken;
+   readonly equal?: SToken;
+   readonly equalSpace?: SToken;
+   readonly openQuote?: SToken;
+   readonly value?: SToken;
+   readonly closeQuote?: SToken;
+   readonly valueSpace?: SToken;
+};
+
+type DeliverPToken = (result?: Array<XmlDeclarationParam>) => void;
 
 /**********************************************************************\
  parse() extracts the STokens of an XML Declaration.
 
  This assumes that the "<?xml " has already been processed, and those
- STokens are passed in through piParsing.
+ STokens are passed in through instStart.
 
  PARAM
  source: A STokenSource to read from
@@ -73,125 +94,173 @@ class XmlDeclarationPToken extends instruction.PToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl?
-                         SDDecl? S? '?>'
-   [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
-                         '"' VersionNum '"')
-   [25] Eq           ::= S? '=' S?
-   [26] VersionNum   ::= '1.' [0-9]+
-   [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
-                         ('"' ('yes' | 'no') '"'))
-   [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
-                         "'" EncName "'" )
-   [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+   §2.8
+      [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl?
+                            SDDecl? S? '?>'
+      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                            '"' VersionNum '"')
+      [25] Eq           ::= S? '=' S?
+      [26] VersionNum   ::= ([a-zA-Z0-9_.:] | '-')+   // 1.0/1-2
+      [26] VersionNum   ::= '1.0'   // 1.0/3+
+      [26] VersionNum   ::= '1.1'   // 1.1/*
+      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
+                            ('"' ('yes' | 'no') '"'))
+      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                            "'" EncName "'" )
+      [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
+   Lax:
+      (xml, version, encoding, standalone are all any case
+      [23] XMLDecl      ::= '<?' S? 'xml' (VersionInfo? | EncodingDecl?
+                            | SDDecl? S?)+ '?>'
+      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
+                            '"' VersionNum '"')
+      [25] Eq           ::= S? '=' S?
+      [26] VersionNum   ::= '1.0' | '1.1' | [^"]* | [^']*
+      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
+                            ('"' ('yes' | 'no') '"'))
+      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
+                            "'" EncName "'" )
+      [81] EncName      ::= [^"]* | [^']*
 \**********************************************************************/
 
-function parse(source: STokenSource, piPToken: instruction.InstructionPToken, deliverPToken: (result: XmlDeclarationPToken) => void) {
-   const pToken = new instruction.PToken(XMLDECL, piPToken);
+function parseXmlDeclaration(source: STokenSource, instStart: InstructionStart, deliverPToken: (result: XmlDeclarationPToken) => void) {
+   const protoToken: any = Object.assign({}, instStart);
 
-   attribute.parse(source, { terminators: XMLDECL_NAME_TERMINATORS}, (params) => {
-      pToken.params = params;
+   getNextAttribute(source, [], (params) => {
+      protoToken.params = params;
       source.extract('match', '?>', (sToken) => {
-         pToken.close = sToken;
-         deliverPToken(pToken);
+         protoToken.close = sToken;
+         deliverPToken(new XmlDeclarationPToken(protoToken));
       });
    });
 }
+
+function getNextAttribute(source: STokenSource, attrs: Array<XmlDeclarationParam>, deliverPToken: DeliverPToken) {
+   source.extract('peekWord', XMLDECL_NAME_TERMINATORS, (sToken) => {
+      const word = textOrBlank(sToken).toLowerCase();
+      if (!sToken || PARAM_NAMES.indexOf(word) === -1) {
+         deliverPToken(attrs);
+         return;
+      }
+
+      addAttribute(source, attrs, sToken, deliverPToken);
+   });
+}
+   
+function addAttribute(source: STokenSource, attrs: Array<XmlDeclarationParam>, name: SToken, deliverPToken: DeliverPToken) {
+   const attr = {
+      name: name,
+   };
+   attrs.push(attr);
+   
+   source.extractToObject('word', XMLDECL_NAME_TERMINATORS, attr, 'name');
+   source.extractToObjectNoParams('space', attr, 'nameSpace');
+   source.extractToObject('match', '=', attr, 'equal');
+   source.extractToObjectNoParams('space', attr, 'equalSpace');
+   literal.parse(source, {
+      pToken: attr,
+   }, (modifiedAttr) => {
+      if (modifiedAttr) {
+         source.extractToObjectNoParams('space', attr, 'valueSpace');
+
+         // We'll only ever get (at most) one TextPToken from literal, since we pass in no reference types
+         const literalPToken = modifiedAttr.value[0];
+
+         if (literalPToken && literalPToken.type === TEXT_PTOKEN) {
+            (attr as any).value = literalPToken.text;
+         } else {
+            delete (attr as any).value;
+         }
+      }
+   
+      getNextAttribute(source, attrs, deliverPToken);
+   });
+}
+   
 
 /**********************************************************************\
  Do well formed checking on the PToken from the parse().
 \**********************************************************************/
 
 function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   const checks = makeNameCheckClosure();
+   ec.setPos(pToken.open);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.XMLDECL_SPACE_AFTER_OPEN);
 
-   instruction.checkWellFormed(pToken, ec, entityMetaData, true);
+   ec.setPos(pToken.target);
+   ec.check(!pToken.target, WFEID.XMLDECL_NO_TARGET);
+   checkWellFormedText(pToken.target, ec, entityMetaData);
 
-   // check that the parameters are in the right order and have the right values
-   attribute.checkWellFormed(pToken.params, ec, entityMetaData,
-      pToken.postTargetSpace, WFEID.NOUN_XMLDECL_PARAM, checks.checkName, checkValue);
+   ec.setPos(pToken.targetSpace);
+   ec.check(!pToken.targetSpace, WFEID.XMLDECL_NO_SPACE_AFTER_TARGET);
+
+   checkParameters(pToken.params, ec, entityMetaData);
 
    ec.setPos(pToken.close);
-   if (entityMetaData.isDocumentKind) {
-      ec.check(pToken.params.length === 0, WFEID.XMLDECL_NO_ATTRIBUTES);
-   } else {
-      ec.check(pToken.params.length === 0, WFEID.TEXTDECL_NO_ATTRIBUTES);
-      ec.check(!checks.foundEncoding(), WFEID.TEXTDECL_NO_ENCODING);
-   }
-
    ec.check(!pToken.close, WFEID.XMLDECL_NO_CLOSE);
 }
 
-/*
- * This odd function exists because we need a checkName() function to pass
- * to attribute.checkWellFormed() which maintains state across calls, as
- * well as a flag whether an ancoding was found.
- */
-function makeNameCheckClosure() {
-   let foundEncoding: boolean;
-   let foundVersion: boolean;
-   let seenStandalone: boolean;
+function checkParameters(params: ReadonlyArray<XmlDeclarationParam>, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+   let foundVersion = false;
+   let foundEncoding = false;
+   let foundStandalone = false;
 
-   // Inner function as we need to have closure over a couple variables that exist across calls.
-   function checkName(name: SToken, index: number, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-      const nameText = textOrBlank(name);
-      const lcName = nameText.toLocaleLowerCase();
+   for (const param of params) {
+      const nameText = textOrBlank(param.name);
+      const lcName = nameText.toLowerCase();
+      const value = param.value;
+      const valueText = textOrBlank(value); // typeHack
+      const lcValue = valueText.toLowerCase();
 
-      if (XMLDECL_PARAMS[lcName]) {
-         ec.check(nameText !== lcName, WFEID.XMLDECL_ATTR_INVALID_CASE, [ lcName, nameText ]);
+      ec.setPos(param.name);
+
+      if (PARAM_NAMES.indexOf(lcName) !== -1) {
+         ec.check(nameText !== lcName, WFEID.XMLDECL_PARAM_INVALID_CASE, [ lcName, nameText ]);
       }
 
       switch (lcName) {
          case 'version':
             foundVersion = true;
-            ec.check(index !== 0, WFEID.XMLDECL_VERSION_INVALID_ORDER, [ index.toString() ]);
+            ec.check(foundEncoding || foundStandalone, WFEID.XMLDECL_VERSION_INVALID_ORDER);
+
+            ec.setPos(value);
+            checkWellFormedText(value, ec, entityMetaData);
+            ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
             foundEncoding = true;
             if (entityMetaData.isDocumentKind) {
-               ec.check(!foundVersion || seenStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
+               ec.check(!foundVersion || foundStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
             }
+
+            ec.setPos(value);
+            checkWellFormedText(value, ec, entityMetaData);
+            ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
             break;
          case 'standalone':
-            seenStandalone = true;
+            foundStandalone = true;
             if (!entityMetaData.isDocumentKind) {
                ec.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             }
 
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
+
+            ec.setPos(value);
+            checkWellFormedText(value, ec, entityMetaData);
+            ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
+            ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
             break;
          default:
-            ec.report(WFEID.XMLDECL_ATTR_UNKNOWN, [ nameText ]);
+            ec.report(WFEID.XMLDECL_PARAM_UNKNOWN, [ nameText ]);
       }
    }
 
-   function getFoundEncoding() {
-      return foundEncoding;
-   }
-
-   return {
-      checkName,
-      foundEncoding: getFoundEncoding,
-   };
-}
-
-function checkValue(name: SToken, value: AttributeValuePToken, ec: ErrorCollector) {
-   const nameText = textOrBlank(name);
-   const lcName = nameText.toLocaleLowerCase();
-   const valueText = textOrBlank(value[0] ? (value[0] as any).text : undefined); // typeHack
-   const lcValue = valueText.toLocaleLowerCase();
-
-   switch (lcName) {
-      case 'version':
-         ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
-         break;
-      case 'encoding':
-         ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
-         break;
-      case 'standalone':
-         ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
-         ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
-         break;
+   if (entityMetaData.isDocumentKind) {
+      // No need to test if version was found. Either have encoding or standalone (error) or no params.
+      ec.check(params.length === 0, WFEID.XMLDECL_NO_PARAMS);
+   } else {
+      ec.check(params.length === 0, WFEID.TEXTDECL_NO_PARAMS);
+      ec.check(foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
    }
 }
 
@@ -200,17 +269,64 @@ function checkValue(name: SToken, value: AttributeValuePToken, ec: ErrorCollecto
 \**********************************************************************/
 
 function pTokenToXToken(pToken: XmlDeclarationPToken) {
-   return new XmlDeclaration(attribute.makeOneTokenCompatible(pToken.params), pToken);
+   let version: XmlVersion = 1.0;
+   let encoding: string = DEFAULT_ENCODING;
+   let standalone: boolean = false;
+
+   for (const param of pToken.params) {
+      const name = textOrBlank(param.name);
+      const value = textOrBlank(param.value);
+
+      switch (name.toLowerCase()) {
+         case 'version': 
+            version = value === '1.1' ? 1.1 : 1.0;
+            break;
+         case 'encoding': 
+            encoding = value;
+            break;
+         case 'standalone': 
+            standalone = value.toLowerCase() === 'yes' ? true : false;
+            break;
+      }
+   }
+
+   return new XmlDeclarationXToken(version, encoding, standalone, pToken);
 }
 
-export {
-   XMLDECL as PTYPE,
-   XMLDECL_XTOKEN as XTYPE,
-   XmlDeclarationPToken as PToken,
-   XmlDeclaration as XToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the STokens
+\**********************************************************************/
 
+function sTokensFromPToken(pToken: XmlDeclarationPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(pToken.open,
+      pToken.openSpace,
+      pToken.target,
+      pToken.targetSpace);
+
+   for (const param of pToken.params) {
+      builder.add(
+         param.name,
+         param.nameSpace,
+         param.equal,
+         param.equalSpace,
+         param.openQuote,
+         param.value,
+         param.closeQuote,
+         param.valueSpace);
+   }
+   
+   builder.add(pToken.close);
+
+   return builder.sTokenArray;
+}
+
+export {   
+   XMLDECL_PTOKEN,
+   XMLDECL_XTOKEN,
    XmlDeclarationPToken,
+   XmlDeclarationXToken,
+
+   parseXmlDeclaration,
 };

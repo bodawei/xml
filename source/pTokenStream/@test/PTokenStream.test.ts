@@ -6,7 +6,6 @@ import { SToken, STokenSource } from '../../sToken';
 import * as token from '../../token';
 import {
    declaration,
-   instruction,
 
    attListDeclaration,
    charData,
@@ -20,9 +19,8 @@ import {
    entityReference,
    notationDeclaration,
    space,
-   xmlDeclaration,
 } from '../../token';
-import * as processingInstruction from '../../token/processingInstruction';
+import * as instruction from '../../token';
 
 import PTokenStream from '../PTokenStream.js';
 
@@ -248,40 +246,14 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls instruction.parse()', (done) => {
-      const parseSpy = spyOn(instruction, 'parse').and.callThrough();
+   it('calls parseInstruction()', (done) => {
+      const parseSpy = spyOn(instruction, 'parseInstruction').and.callThrough();
       pTokenStream.addText('<?something foo?>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<?');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done();
-      });
-   });
-
-   it('calls parseProcessingInstruction()', (done) => {
-      const parseSpy = spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
-      pTokenStream.addText('<?something foo?>');
-      pTokenStream.endText();
-
-      gatherPTokens(pTokenStream, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].target.str).toEqual('something');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done();
-      });
-   });
-
-   it('calls processingInstruction.parse() when there is no target name', (done) => {
-      const parseSpy = spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
-      pTokenStream.addText('<??>');
-      pTokenStream.endText();
-
-      gatherPTokens(pTokenStream, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].target).toBeUndefined();
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });
@@ -374,19 +346,6 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<![');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-         done();
-      });
-   });
-
-   it('calls xmlDeclaration.parse()', (done) => {
-      const parseSpy = spyOn(xmlDeclaration, 'parse').and.callThrough();
-      pTokenStream.addText('<?xml version="1.0"?>');
-      pTokenStream.endText();
-
-      gatherPTokens(pTokenStream, () => {
-         expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].target.str).toEqual('xml');
          expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          done();
       });

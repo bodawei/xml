@@ -9,10 +9,10 @@ import {
    checkWellFormedNameRecommendation,
    textOrBlank,
 } from './common/misc';
-import { InstructionPToken } from './bridge/instruction';
+import { InstructionStart } from './bridge/instruction';
 
 const WFEID = WellFormedError.ID;
-const PROCESSING_INSTRUCTION_PTOKEN = 'PROCESSING_INSTRUCTION';
+const PROCESSING_INSTRUCTION_PTOKEN = 'PROCESSING_INSTRUCTION_PTOKEN';
 const PROCESSING_INSTRUCTION_XTOKEN = 'PROCESSING_INSTRUCTION_XTOKEN';
 
 type DeliverPToken = (pToken: ProcessingInstructionPToken) => void;
@@ -85,7 +85,7 @@ class ProcessingInstructionPToken {
       [17] PITarget ::=  Name
 \**********************************************************************/
 
-function parseProcessingInstruction(source: STokenSource, instr: InstructionPToken, deliverPToken: DeliverPToken) {
+function parseProcessingInstruction(source: STokenSource, instr: InstructionStart, deliverPToken: DeliverPToken) {
    const raw: any = Object.assign({}, instr);
 
    source.extractToObject('all', [ '?>' ], raw, 'instruction');
@@ -150,14 +150,10 @@ function sTokensFromPToken(pToken: ProcessingInstructionPToken): Array<SToken> {
 }
 
 export {
-   PROCESSING_INSTRUCTION_PTOKEN as PTYPE,
-   PROCESSING_INSTRUCTION_XTOKEN as XTYPE,
-   ProcessingInstructionXToken as XToken,
-
-   parseProcessingInstruction,
-
    PROCESSING_INSTRUCTION_PTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionPToken,
    ProcessingInstructionXToken,
+
+   parseProcessingInstruction,
 };

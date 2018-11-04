@@ -196,7 +196,7 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
    });
 
    it('reports an error if the XML DEclaration version attribute is the wrong case', (done) => {
-      expectInputToProduce('<?xml VERSION="1.0"?>', new WellFormedError('XMLDECL_ATTR_INVALID_CASE',
+      expectInputToProduce('<?xml VERSION="1.0"?>', new WellFormedError('XMLDECL_PARAM_INVALID_CASE',
             [ 'version', 'VERSION' ],
             new Offset(new EntityLocation(), 6, 0, 6),
             new Offset(new EntityLocation(), 0, 0, 0)
