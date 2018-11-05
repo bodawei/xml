@@ -50,7 +50,7 @@ function parseInstruction(source: STokenSource, openSToken: SToken, deliverPToke
       const target = textOrBlank(pToken.target);
 
       if (target.toLocaleLowerCase() === 'xml') {
-         parseXmlDeclaration(source, pToken as any, deliverPToken); // @@@@ HACK @@@@
+         parseXmlDeclaration(source, pToken, deliverPToken);
       } else {
          parseProcessingInstruction(source, pToken, deliverPToken);
       }

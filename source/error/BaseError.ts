@@ -69,7 +69,7 @@ class BaseError {
       if (contextOffset) {
          if (contextOffset instanceof SToken) {
             contextOffset = contextOffset.ranges[0].getStartOffset();
-         } else if (contextOffset instanceof Offset) {
+         } else { // offset
             contextOffset = contextOffset.clone();
          }
       }

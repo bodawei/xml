@@ -27,6 +27,7 @@ import {
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { DocTypeEndPToken } from '../token/docTypeEnd';
+import { textOrBlank } from 'source/token/common/misc';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
@@ -47,7 +48,7 @@ class PTokenStream extends stream.Transform {
       if (metaDataOrTokenSource instanceof STokenSource) {
          this._sTokenSource = metaDataOrTokenSource;
       } else {
-         this._sTokenSource = new STokenSource(defaultExtractors as any, metaDataOrTokenSource || new EntityMetaData()); // typeHack
+         this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
       }
 
       this._elementStack = [];
@@ -83,14 +84,17 @@ class PTokenStream extends stream.Transform {
          }
 
          if (result) {
-            const resultName = (result as any).name; // typeHack
+            const resultSToken = (result as any).name; // typeHack
+            const resultName = textOrBlank(resultSToken);
 
             if (result.type === elementStart.PTYPE) {
                this._inContent = true;
-               this._elementStack.push((resultName || {}).name);
+               this._elementStack.push(result);
             } else if (result.type === elementEnd.PTYPE) {
-               const name = (resultName || {}).name;
-               const topName = this._elementStack[this._elementStack.length - 1];
+               const name = resultName;
+               const topToken = this._elementStack[this._elementStack.length - 1];
+               const topSToken = (topToken as any || {}).name; // typeHack
+               const topName = textOrBlank(topSToken);
 
                if (name === topName) {
                   this._elementStack.pop();

@@ -81,7 +81,7 @@ function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, e
    ec.setPos(pToken.openQuote);
    ec.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [ type ]);
 
-   const pieces = pToken.value || [];
+   const pieces = pToken.value;
    literalValue.checkWellFormed(pieces, ec, entityMetaData);
 
    if (checkValue) {
@@ -93,7 +93,7 @@ function checkWellFormed(pTokenPart: LiteralPToken | void, ec: ErrorCollector, e
 }
 
 function makeTokenCompatible(pToken?: LiteralPToken): LiteralValueXToken | void {
-   const pieces = pToken ? pToken.value || [] : [];
+   const pieces = pToken ? pToken.value : [];
 
    const result = literalValue.makeXTokenCompatible(pieces);
 

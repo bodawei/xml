@@ -122,10 +122,6 @@ class EntityManager {
    \**********************************************************************/
 
    _internalAdd(token: EntityDeclaration, source: string, isParameter: boolean) {
-      if (!token || !(token instanceof entityDeclaration.XToken)) {
-         throw new Error('Must call with an entity declaration token.');
-      }
-
       if (!this._entityMap[token.name]) {
          this._entityMap[token.name] = new EntityEntry();
       }
@@ -157,10 +153,6 @@ class EntityManager {
    }
 
    _internalGetToken(name: string, isParameter: boolean) {
-      if (name === undefined || name === null) {
-         throw new Error('Must call with the name of an entity.');
-      }
-
       const entityEntry = this._entityMap[name];
 
       if (!entityEntry) {

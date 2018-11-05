@@ -141,12 +141,6 @@ class STokenSource {
    }
 
    extractToObject(type: string, params: any, obj: Object, name: string): void {
-      if (typeof name === 'undefined') {
-         name = obj as string;
-         obj = params;
-         params = undefined;
-      }
-
       this.extract(type, params, (sToken) => {
          (obj as any)[name] = sToken; // typeHack
       });
@@ -157,16 +151,8 @@ class STokenSource {
    }
 
    extract(type: string, params: any, deliverSToken: DeliverSToken): void {
-      if (typeof params === 'function') {
-         deliverSToken = params;
-         params = undefined;
-      }
       const extractorDefinition = this._extractorInfo[type];
       let extractorConstructor: ExtractorConstructor;
-
-      if (typeof deliverSToken !== 'function') {
-         throw new Error('Must pass a callback function of the form function(SToken|undefined):void to extract().');
-      }
 
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;

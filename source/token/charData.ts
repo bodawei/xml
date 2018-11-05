@@ -58,12 +58,7 @@ class CharDataPToken extends base.PToken {
 \**********************************************************************/
 
 function parse(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken) => void) {
-   let terminators = [ '<', '&', ']]>' ];
-   if (typeof otherTerminators === 'function') {
-      deliverPToken = otherTerminators;
-   } else {
-      terminators = terminators.concat(otherTerminators);
-   }
+   let terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
 
    const pToken = new CharDataPToken();
 

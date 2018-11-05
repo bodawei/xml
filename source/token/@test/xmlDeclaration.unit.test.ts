@@ -5,7 +5,7 @@ import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
 import { WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
+import { MockSTokenSource } from 'sToken-test';
 
 import * as misc from '../common/misc';
 import { parseXmlDeclaration, XmlDeclarationPToken, XmlDeclarationXToken } from '../xmlDeclaration';

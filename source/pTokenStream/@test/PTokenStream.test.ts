@@ -309,7 +309,7 @@ describe('PTokenStream (unit)', () => {
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(parseSpy.calls.count()).toEqual(4);
+         expect(parseSpy.calls.count()).toEqual(3);
          done();
       });
    });

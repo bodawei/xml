@@ -40,11 +40,7 @@ class SToken {
    constructor(str: string, originalStr: string, range: Range | Array<Range>) {
       this.str = str;
       this.originalStr = originalStr;
-      if (range) {
-         this.ranges = Array.isArray(range) ? range : [ range ];
-      } else {
-         this.ranges = [];
-      }
+      this.ranges = Array.isArray(range) ? range : [ range ];
    }
 
    clone() {

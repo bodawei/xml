@@ -23,7 +23,6 @@ import {
    entityReference,
    notationDeclaration,
    space,
-   xmlDeclaration,
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,

@@ -90,36 +90,6 @@ describe('toEqualProps()', () => {
 
 describe('toEqualShape()', () => {
 
-   // describe('jasmine use', () => {
-
-   //    it('reports true when all the properties match', () => {
-   //       expect({
-   //          one: 1,
-   //       }).toEqualProps({
-   //          one: 1,
-   //       });
-   //    });
-
-   //    it('reports true when the specified properties match', () => {
-   //       expect({
-   //          one: 1,
-   //          two: 2,
-   //       }).toEqualProps({
-   //          one: 1,
-   //       });
-   //    });
-
-   //    it('reports false when the specified properties do not match', () => {
-   //       expect({
-   //          one: 1,
-   //          two: 2,
-   //       }).not.toEqualProps({
-   //          one: 2,
-   //       });
-   //    });
-
-   // });
-
    describe('toEqualShape().compare()', () => {
 
       it('returns a compare function', () => {
@@ -147,6 +117,12 @@ describe('toEqualShape()', () => {
          });
       });
 
+      it('returns a message indicating an extra expected property', () => {
+         expect(toEqualShapeMatcher().compare({ a: 1 }, { a: 1, b: 2 })).toEqual({
+            pass: false,
+            message: 'Property mismatches:\n\tb: undefined  (Expected: 2)\n',
+         });
+      });
    });
 
 });

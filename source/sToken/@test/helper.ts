@@ -75,21 +75,26 @@ class RangeMaker {
   the asynchronous behavior of a STokenSource more tersely in tests.
 \**********************************************************************/
 
-type PeekValue = { type: typeof PEEK, value: string };
+type PeekValue = { type: typeof PEEK, peekedValue: string | void };
 type SimpleMockValue = void | string | PeekValue;
 type TupleMockValue = [SimpleMockValue, string, any] | [SimpleMockValue, string];
 type MockValues = Array<SimpleMockValue | TupleMockValue>;
-type PrepValue = { type: string, token: SToken | void, value?: string, param?: any };
+type PrepValue = {
+   type: string,
+   token: SToken | void,
+   peekedValue?: string | void,
+   param?: any
+};
 type PreparedMockValues = Array<PrepValue>;
 
 class MockSTokenSource extends STokenSource {
    public expectedValues: PreparedMockValues;
    public queuedCalls: Array<any>;
 
-   public static PEEK = (value: string): PeekValue => {
+   public static PEEK = (peekedValue: string | void): PeekValue => {
       return {
          type: PEEK,
-         value,
+         peekedValue,
       };
    };
 
@@ -132,10 +137,11 @@ class MockSTokenSource extends STokenSource {
                   param: entry[2],
                };
             } else {
-                 return {
+               // this is a peek, which allows us to adjust the offsets right
+               return {
                   type: entry[1],
                   token: undefined,
-                  value: first.value,
+                  peekedValue: first.peekedValue,
                   param: entry[2],
                };
             }
@@ -143,13 +149,10 @@ class MockSTokenSource extends STokenSource {
             return {
                type: PEEK,
                token: undefined,
-               value: entry.value,
+               peekedValue: entry.peekedValue,
             };
          } else {
-            return {
-               type: ANY,
-               token: undefined,
-            };
+            throw new Error(`Passed an unknown type to the MockSTokenSource: ${typeof entry}`);
          }
       });
 
@@ -159,13 +162,14 @@ class MockSTokenSource extends STokenSource {
          const next = this.expectedValues[index + 1];
          const prev = this.expectedValues[index - 1];
 
-         if (current.type === PEEK || 'value' in current) {
-            const peekString = current.value;
+         if (current.type === PEEK || 'peekedValue' in current) {
+            const peekString = current.peekedValue;
             let token;
 
             if (peekString === undefined) {
                token = undefined;
-            } else if (next && next.token) {
+            } else
+            if (next && next.token) {
                token = new SToken(peekString, peekString, new Range(new EntityLocation(),
                   next.token.ranges[0].startIndex,
                   next.token.ranges[0].startRow,
@@ -206,12 +210,6 @@ class MockSTokenSource extends STokenSource {
    }
 
    extractToObject(type: string, params: any, obj: Object, name: string): void {
-      if (!name) {
-         name = obj as string;
-         obj = params;
-         params = undefined;
-      }
-
       this.queuedCalls.push({
          type,
          params,
@@ -225,11 +223,6 @@ class MockSTokenSource extends STokenSource {
    }
 
    extract(type: string, params: any, deliverSToken: DeliverSToken): void {
-      if (!deliverSToken) {
-         deliverSToken = params;
-         params = undefined;
-      }
-
       this.queuedCalls.push({
          type,
          params,
@@ -261,12 +254,7 @@ class MockSTokenSource extends STokenSource {
    }
 
    _getAdjustedValue(actualCall: any) {
-      const expected = this.expectedValues.shift();
-      if (!expected) {
-         return;
-      }
-
-      // console.log(expected);
+      const expected = this.expectedValues.shift()!; // never undefined
 
       if (expected.type !== ANY && expected.type !== actualCall.type) {
          throw new Error('Type of call did not match expectation. ' +

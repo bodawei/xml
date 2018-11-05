@@ -77,7 +77,7 @@ class NodeStream extends stream.Transform {
          objectMode: true,
       });
 
-      this._options = options || {};
+      this._options = options;
       this._entityManager = entityManager;
       this._child = undefined;
 
@@ -187,12 +187,7 @@ class NodeStream extends stream.Transform {
       const preExpanded: UnassignedArray = [];
 
       while (unassignedArray.length > 0) {
-         const item = unassignedArray.shift();
-
-         // Keep typescript happy
-         if (!item) {
-            continue;
-         }
+         const item = unassignedArray.shift()!; // we just checked the length, above
 
          if (item.type === UnassignedType.REFERENCE) {
             this._expandPERefFully(item.token, (expandedItem) => {
@@ -339,18 +334,18 @@ class NodeStream extends stream.Transform {
          return;
       }
 
-      this._expandThroughNextPERef(pToken.unassigned, (leadingUnassignedValues, expandedPERef) => {
-         if (!expandedPERef) {
+      this._expandThroughNextPERef(pToken.unassigned, (leadingUnassignedValues, possiblyExpandedPERef) => {
+         if (!possiblyExpandedPERef) {
             pToken.unassigned = leadingUnassignedValues;
             done();
             return;
          }
 
-         const start = expandedPERef.shift();
-         const end = expandedPERef.pop() || []; // if this was an unexpandable peref
+         const startOrRef = possiblyExpandedPERef.shift()!;
+         const end = possiblyExpandedPERef.pop() || [];
 
-         this._parsePERefTexts(expandedPERef, includeNameListChars, (values) => {
-            pToken.unassigned = leadingUnassignedValues.concat(start || [], values, end, pToken.unassigned || []);
+         this._parsePERefTexts(possiblyExpandedPERef, includeNameListChars, (values) => {
+            pToken.unassigned = leadingUnassignedValues.concat(startOrRef, values, end, pToken.unassigned!);
             done();
          });
       });
@@ -368,18 +363,16 @@ class NodeStream extends stream.Transform {
 
          //  This is NOT sufficient. We could have literals in here. 
          if (item.type === UnassignedType.WORD || item.type === UnassignedType.SPACE) {
-            if (!item.token.text) {
-               continue;
-            }
-            
-            source.addText(item.token.text.originalStr, item.token.text.ranges[0]); // there will only ever be one
+            const sToken = item.token.text!;
+
+            source.addText(sToken.originalStr, sToken.ranges[0]); // there will only ever be one
          }
       }
       source.endText();
 
       // setTimeout() candidate
       unassigned.parseAllValues(source, includeNameListChars, (result) => {
-         deliverValues(result || []);
+         deliverValues(result!);
       });
    }
 
@@ -409,9 +402,9 @@ class NodeStream extends stream.Transform {
 
    _processElementDeclaration(edXToken: ElementDeclaration, done: DoneSignal) {
       this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
-         if (edXToken.pToken && edXToken.pToken.unassigned) {
-            this._examineUnassigned(edXToken);
+         this._examineUnassigned(edXToken);
 
+         if (edXToken.pToken && edXToken.pToken.unassigned) {
             elementDeclaration.assignUnassigned(edXToken.pToken);
             edXToken = elementDeclaration.pTokenToXToken(edXToken.pToken);
          }
@@ -681,7 +674,7 @@ class NodeStream extends stream.Transform {
       //    Attribute values must not contain direct or indirect entity
       //    references to external entities.
       if (!entityInfo.isInternal) {
-         const sToken = entityRef.pToken ? entityRef.pToken.open : undefined;
+         const sToken = entityRef.pToken && entityRef.pToken.open;
          const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
             [ entityRef.name ], sToken, sToken);
          this.push(error);

@@ -61,6 +61,21 @@ describe('SToken test utils', () => {
          expect((mock.expectedValues[1].token as SToken).ranges[0].startIndex).toEqual(2);
       });
 
+      it('allows for an unefined peek value', () => {
+         const mock = new MockSTokenSource([
+            'ww',
+            MockSTokenSource.PEEK(undefined),
+         ]);
+
+         expect(mock.expectedValues[1].token).toBeUndefined();
+      });
+
+      it('throws an error if a bad value is passed into the mock stoken source', () => {
+         expect(() => {
+            new MockSTokenSource([ 'one', {} as any ]);
+         }).toThrowError('Passed an unknown type to the MockSTokenSource: object');
+      });
+
       it('will adjust offsets using the parameters if provided', () => {
          const mock = new MockSTokenSource([
             'ww',

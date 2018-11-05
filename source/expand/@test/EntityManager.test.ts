@@ -306,6 +306,16 @@ describe('EntityManager (unit)', () => {
 
    });
 
+   describe('getExternalSubsetEntity()', () => {
+
+      it('is undefined if no external entity has been set yet', () => {
+         const source = manager.getExternalSubsetEntity();
+
+         expect(source).toBeUndefined();
+      });
+
+   });
+
    describe('default entities', () => {
 
       it('includes "lt"', (done) => {

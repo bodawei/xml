@@ -17,23 +17,23 @@ describe('sToken beforeEach', () => {
 
       describe('jasmine use', () => {
 
-         // it('reports pass when the strings all match', () => {
-         //    expect(new SToken('one', 'two', range)).toEqualSTokenText({ str: 'one', originalStr: 'two'});
-         // });
+         it('reports pass when the strings all match', () => {
+            expect(new SToken('one', 'two', range)).toEqualSTokenText({ str: 'one', originalStr: 'two'});
+         });
 
-         // it('reports an exception if the sToken is undefined', () => {
-         //    expect(() => {
-         //       expect(undefined).not.toEqualSTokenText('foo');
-         //    }).toThrowError('SToken with text "foo" is undefined, but should not be.');
-         // });
+         it('reports an exception if the sToken is undefined', () => {
+            expect(() => {
+               expect(undefined).not.toEqualSTokenText('foo');
+            }).toThrowError('SToken with text "foo" is undefined, but should not be.');
+         });
 
-         // it('reports no pass if the text value does not match', () => {
-         //    expect(new SToken('one', 'one', range)).not.toEqualSTokenText('junk');
-         // });
+         it('reports no pass if the text value does not match', () => {
+            expect(new SToken('one', 'one', range)).not.toEqualSTokenText('junk');
+         });
 
-         // it('reports pass when text and original text are the same', () => {
-         //    expect(new SToken('testValue', 'testValue', range)).toEqualSTokenText('testValue');
-         // });
+         it('reports pass when text and original text are the same', () => {
+            expect(new SToken('testValue', 'testValue', range)).toEqualSTokenText('testValue');
+         });
 
       });
 
@@ -87,28 +87,28 @@ describe('sToken beforeEach', () => {
 
       describe('jasmine use', () => {
 
-         // it('reports pass when the STokens all match', () => {
-         //    expect([ new SToken('one', 'two', range), new SToken('three', 'four', range) ])
-         //       .toEqualSTokenTexts([ { str: 'one', originalStr: 'two'}, { str: 'three', originalStr: 'four'} ]);
-         // });
+         it('reports pass when the STokens all match', () => {
+            expect([ new SToken('one', 'two', range), new SToken('three', 'four', range) ])
+               .toEqualSTokenTexts([ { str: 'one', originalStr: 'two'}, { str: 'three', originalStr: 'four'} ]);
+         });
 
-         // it('reports an exception if the array is undefined', () => {
-         //    expect(() => {
-         //       expect(undefined).not.toEqualSTokenTexts([ 'foo' ]);
-         //    }).toThrowError('Expected array of strings or text/original texts, but got undefined or a non-array.');
-         // });
+         it('reports an exception if the array is undefined', () => {
+            expect(() => {
+               expect(undefined).not.toEqualSTokenTexts([ 'foo' ]);
+            }).toThrowError('Expected array of strings or text/original texts, but got undefined or a non-array.');
+         });
 
-         // it('reports a pass if passed an array of arrays of STokens', () => {
-         //    expect([ [ new SToken('one', 'one', range) ] ]).toEqualSTokenTexts([ 'one' ]);
-         // });
+         it('reports a pass if passed an array of arrays of STokens', () => {
+            expect([ [ new SToken('one', 'one', range) ] ]).toEqualSTokenTexts([ 'one' ]);
+         });
 
-         // it('reports no pass if the text value does not match', () => {
-         //    expect([ new SToken('one', 'one', range) ]).not.toEqualSTokenTexts([ 'junk' ]);
-         // });
+         it('reports no pass if the text value does not match', () => {
+            expect([ new SToken('one', 'one', range) ]).not.toEqualSTokenTexts([ 'junk' ]);
+         });
 
-         // it('reports pass when text and original text are the same', () => {
-         //    expect([ new SToken('testValue', 'testValue', range) ]).toEqualSTokenTexts([ 'testValue' ]);
-         // });
+         it('reports pass when text and original text are the same', () => {
+            expect([ new SToken('testValue', 'testValue', range) ]).toEqualSTokenTexts([ 'testValue' ]);
+         });
 
       });
 

@@ -84,6 +84,7 @@ class EntityDeclarationPToken extends declaration.PToken {
 
 class ParameterEntityDeclarationPToken extends EntityDeclarationPToken {
    constructor(props?: Object) {
+      /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(props);
    }
 

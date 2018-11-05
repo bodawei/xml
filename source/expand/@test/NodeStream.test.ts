@@ -1274,6 +1274,29 @@ describe('NodeStream (unit)', () => {
             });
          });
 
+         it('passes an general entity that can not be parsed through unchanged', (done) => {
+            spyOn(entityManager, 'getEntityInfo').and.returnValue(undefined);
+            spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
+               cb([ new xToken.text.PToken() ]);
+            });
+            spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
+               return [ new xToken.text.XToken('one') ];
+            });
+            const elementStart = new xToken.elementStart.XToken('one', [{
+               name: 'foo',
+               value: [
+                  new xToken.entityReference.XToken('refName'),
+               ],
+            }]);
+
+            nodeStream.write(elementStart);
+
+            gatherResult(nodeStream, (results) => {
+               expect(elementStart.attributes[0].value[0]).toEqual(new xToken.entityReference.XToken('refName'));
+               done();
+            });
+         });
+
          it('checks whether the language is well formed', (done) => {
             const checkSpy = spyOn(langAttribute, 'checkXmlLangWellFormed');
             spyOn(entityManager, 'getEntityInfo').and.returnValue({
@@ -1569,7 +1592,7 @@ describe('NodeStream (unit)', () => {
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'foo',
                value: [
-                  new xToken.entityReference.XToken('refName'),
+                  new xToken.entityReference.XToken('refName', new xToken.entityReference.PToken()),
                ],
             }]);
             const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
@@ -1634,7 +1657,7 @@ describe('NodeStream (unit)', () => {
          });
 
          it('reports an error if an unknown reference is found', () => {
-            const token = new xToken.entityReference.XToken('testReference');
+            const token = new xToken.entityReference.XToken('testReference', new xToken.entityReference.PToken());
    
             nodeStream.write(token);
    

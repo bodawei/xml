@@ -58,29 +58,25 @@ function toContainPTokenProps(util?: any, customEqualityTesters?: any) {
    };
 }
 
-function makeRangeless(item: void | jasmine.Spy | Props) {
+function makeRangeless(item: void | Props): Props | void | null {
    const result: Props = {};
-   let props: Props;
 
    if (item === null || item === undefined) {
       return item;
    }
 
-   if (item.calls) {
-      const args = item.calls.allArgs();
-
-      if (args.length !== 1 || args[0].length !== 1) {
-         throw new Error('toContainPTokenProps() wanted one call with one argument. ' +
-            `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
-      }
-
-      props = args[0][0];
-   } else {
-      props = item;
-   }
+   let props = item;
 
    if (typeof props !== 'object') {
       return props;
+   }
+
+   if (props instanceof SToken) {
+      return new SToken(props.str, props.originalStr, []);
+   }
+
+   if (Array.isArray(props)) {
+      return props.map((element) => makeRangeless(element));
    }
 
    Object.keys(props).forEach((name) => {
@@ -105,7 +101,7 @@ function getTheOneArg(callback: jasmine.Spy) {
       const args = callback.calls.allArgs();
 
       if (args.length !== 1 || args[0].length !== 1) {
-         throw new Error('toContainPTokenProps() wanted one call with one argument. ' +
+         throw new Error('toEqualRangeless() wanted one call with one argument. ' +
             `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
       }
 
@@ -136,7 +132,7 @@ function fixUndef(value: Array<any> | Props | void): string | Props {
 
 function toEqualRangeless(util: any, customEqualityTesters: any) {
    return {
-      compare(callbackSpy: jasmine.Spy, expectedProps: Props) {
+      compare(callbackSpy: jasmine.Spy, expectedProps?: Props) {
          if (!callbackSpy) {
             throw new Error('Did not get a spy as expected.');
          }
@@ -164,7 +160,7 @@ function toEqualRangeless(util: any, customEqualityTesters: any) {
             if (!util.equals(act, exp, customEqualityTesters)) {
                pass = false;
                // note JSON.stringify() loses properties that have undefined values
-               message += `${propName}'s value did not match.\n` +
+               message += `"${propName}"'s value did not match.\n` +
                   `   Actual:   ${JSON.stringify(fixUndef(act))}\n` +
                   `   Expected: ${JSON.stringify(fixUndef(exp))}\n`;
             }
@@ -195,4 +191,5 @@ module.exports = {
 
 export {
    toContainPTokenProps,
+   toEqualRangeless,
 }
