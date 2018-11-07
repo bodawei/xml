@@ -8,7 +8,6 @@ import { SToken } from '../sToken';
 
 import {
    declaration,
-   instruction,
 
    attListDeclaration,
    charRef,

@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
-import { SToken, STokenSource } from '../../sToken/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { SToken, STokenSource } from 'sToken';
 
 import base, { STokenArray } from '../base';
 import entityReference from '../entityReference';

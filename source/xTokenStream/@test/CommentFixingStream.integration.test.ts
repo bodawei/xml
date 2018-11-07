@@ -3,7 +3,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData } from 'basic';
 import { PTokenStream } from '../../pTokenStream';
 import * as tokens from '../../token';
 import { XmlDeclarationXToken } from '../../token';

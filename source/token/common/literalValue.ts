@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../../basic/index';
-import { ErrorCollector } from '../../error/index';
+import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from '../../sToken';
 
 import entityReference, { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';

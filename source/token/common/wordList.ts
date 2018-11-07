@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from '../../basic/index';
-import { ErrorCollector, WellFormedError } from '../../error/index';
-import { SToken, STokenSource, STokenArrayBuilder } from '../../sToken/index';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import misc from './misc';

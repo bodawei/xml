@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation } from '../../basic';
+import { EntityLocation } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import {
    entityDeclaration,

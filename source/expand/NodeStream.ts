@@ -16,11 +16,9 @@ import {
    elementStart,
    entityDeclaration,
    GENERAL_ENTITY_END_XTOKEN,
+   GENERAL_ENTITY_START_XTOKEN,
    ParameterEntityEndPToken,
-   GeneralEntityEndXToken,
-   ParameterEntityEndXToken,
    entityReference,
-   entityStart,
    notationDeclaration,
    text,
    unassigned,
@@ -30,6 +28,11 @@ import {
    ExternalSubsetStartXToken,
    InternalSubsetEndXToken,
    InternalSubsetStartXToken,
+   GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
+   ParameterEntityEndXToken,
+   ParameterEntityStartPToken,
+   ParameterEntityStartXToken,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
@@ -39,13 +42,13 @@ import { EntityDeclaration } from '../token/entityDeclaration'; // badRef
 import { EntityReferencePToken, EntityReferenceXToken, ParameterEntityReferencePToken } from '../token/entityReference'; // badRef
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
-import { ParameterEntityStartPToken, EntityStart } from '../token/entityStart'; // badRef
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 
 import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
 import { LiteralValueXToken } from '../token/common/literal';
 import { DocTypeStartXToken } from 'source/token/docTypeStart';
+
 
 type XToken = { type: string };
 type PToken = {
@@ -58,7 +61,7 @@ type CommonAttributeXToken = {
    name: string,
    value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|EntityStart|GeneralEntityEndXToken|ParameterEntityEndXToken>;
+type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken|EntityReferenceXToken };
 
 /**********************************************************************\
@@ -99,7 +102,7 @@ class NodeStream extends stream.Transform {
          const declarationSource = getter.call(this._entityManager, xToken.name);
 
          if (declarationSource) {
-            const tokenType = isPeRef ? entityStart.ParamXToken : entityStart.XToken;
+            const tokenType: any = isPeRef ? ParameterEntityStartXToken : GeneralEntityStartXToken;
             this.push(new tokenType(xToken.name));
             const pTokenStream = new PTokenStream(declarationSource);
             const tokenizer = new PToXTokenStream();
@@ -312,7 +315,7 @@ class NodeStream extends stream.Transform {
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
       } else {
-         const expanded: EntityValueArray = [ new entityStart.ParamPToken({ refPToken: peRef }) ]
+         const expanded: EntityValueArray = [ new ParameterEntityStartPToken(peRef) ]
             .concat(entityToken.value);
          expanded.push(new ParameterEntityEndPToken(peRef));
 
@@ -544,7 +547,7 @@ class NodeStream extends stream.Transform {
             const lcName = attr.name.toLowerCase();
 
             if (lcName === 'xml:lang') {
-               if (attr.value.some((item) => item.type === entityStart.XTYPE)) {
+               if (attr.value.some((item) => item.type === GENERAL_ENTITY_START_XTOKEN)) {
                   const havePTokens = attr.value.filter((item) => !!item.pToken);
                   const firstPToken = havePTokens[0]; // because we have expanded, we'll always have ptokens
                   const firstSToken = (firstPToken as any).pToken.text || (firstPToken as any).pToken.open;
@@ -645,7 +648,7 @@ class NodeStream extends stream.Transform {
       //   The replacement text of any entity referred to directly or indirectly
       //   in an attribute value must not contain a <.
       for (const valuePart of value) {
-         if (valuePart.type === entityStart.XTYPE) {
+         if (valuePart.type === GENERAL_ENTITY_START_XTOKEN) {
             entityDepth++;
          } else if (valuePart.type === GENERAL_ENTITY_END_XTOKEN) {
             entityDepth--;
@@ -686,7 +689,7 @@ class NodeStream extends stream.Transform {
          const xToken = literalValue.makeXTokenCompatible(pTokenResult);
 
          this._expandAttributeValue(xToken, (subXToken: Array<any>) => { // typeHack
-            subXToken.unshift(new entityStart.XToken(entityRef.name));
+            subXToken.unshift(new GeneralEntityStartXToken(entityRef.name));
             subXToken.push(new GeneralEntityEndXToken(entityRef.name));
             referenceExpanded(subXToken, indexInAttr);
          });

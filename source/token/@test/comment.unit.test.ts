@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Offset } from '../../basic';
-import { ErrorCollector, WellFormedError } from '../../error/index';
+import { EntityMetaData, Offset } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 

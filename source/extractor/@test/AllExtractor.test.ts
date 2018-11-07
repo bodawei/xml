@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../../basic';
+import { EntityLocation, Range } from 'basic';
 
 import AllExtractor from '../AllExtractor';
 import Extractor from '../Extractor';

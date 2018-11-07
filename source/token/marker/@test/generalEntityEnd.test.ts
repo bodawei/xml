@@ -2,9 +2,9 @@
 
 /* eslint-env jasmine */
 
-import { SToken } from '../../sToken/index';
+import { SToken } from '../../../sToken/index';
 
-import { EntityReferencePToken } from '../entityReference';
+import { EntityReferencePToken } from '../../entityReference';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';
 
 describe('GeneralEntityEndPToken (unit)', () => {

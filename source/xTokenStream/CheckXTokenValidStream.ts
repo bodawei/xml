@@ -12,10 +12,7 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
-   GENERAL_ENTITY_END_XTOKEN,
    entityReference,
-   entityStart,
-   PROCESSING_INSTRUCTION_XTOKEN,
    space,
    text,
    
@@ -25,10 +22,15 @@ import {
    notationDeclaration,
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
+   GENERAL_ENTITY_END_XTOKEN,
+   GENERAL_ENTITY_START_XTOKEN,
    GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
    INTERNAL_SUBSET_START_XTOKEN,
    INTERNAL_SUBSET_END_XTOKEN,
+   PROCESSING_INSTRUCTION_XTOKEN,
    ParameterEntityEndXToken,
+   ParameterEntityStartXToken,
    XMLDECL_XTOKEN,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
@@ -37,10 +39,8 @@ import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclarat
 import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
-
 import EntityManager from '../expand/EntityManager.js';
 import { EntityDeclaration } from 'source/token/entityDeclaration';
-import { EntityStart, ParameterEntityStartXToken } from 'source/token/entityStart';
 
 type XToken = {
    type: string,
@@ -55,7 +55,7 @@ type ElementAttributes = {
 
 type AttInfo = {
    def: AttDefXToken,
-   externallyDeclared: boolean,
+   externallyDeclared: boolean, // §2.9
 }
 
 type AttDefinitions = {
@@ -87,7 +87,7 @@ type MixedDeclInfo = {
 
 type ChildrenDeclInfo = {
    type: 'CHILDREN',
-   externallyDeclared: boolean,
+   externallyDeclared: boolean, // §2.9
    token: ElementDeclaration,
    graph: Graph,
 }
@@ -110,7 +110,7 @@ type AttributeMap = { [name: string] : AttributeXToken };
 
 type EntityInfo = {
    token: EntityDeclaration;
-   externallyDeclared: boolean;
+   externallyDeclared: boolean; // §2.9
 }
 
 type EntityInfoMap = {
@@ -177,8 +177,8 @@ class CheckXTokenValidStream extends stream.Transform {
     * Translation: If this was marked as standalone="yes", and we find an entity reference
     * where the referenced entity was declared "externally", then it is an error.
     */
-   private isInvalidEntityReference(item: EntityStart | string): boolean {
-      const entityName = item instanceof EntityStart ? item.name : item
+   private isInvalidEntityReference(item: GeneralEntityStartXToken | ParameterEntityStartXToken | string): boolean {
+      const entityName = typeof item === 'string' ? item : item.name;
       const entityInfo = this.entityInfo[entityName];
       const isExternallyDeclared = entityInfo && entityInfo.externallyDeclared;
       const isException = PROTECTED_ENTITIES.indexOf(entityName) !== -1;
@@ -254,7 +254,7 @@ class CheckXTokenValidStream extends stream.Transform {
       let invalidAt = -1;
 
       value.forEach((part) => {
-         if (part instanceof EntityStart) {
+         if (part instanceof GeneralEntityStartXToken || part instanceof ParameterEntityStartXToken) {
             if (invalidAt === -1 && this.isInvalidEntityReference(part)) {
                let errorId: string;
                invalidAt = depth;
@@ -277,7 +277,7 @@ class CheckXTokenValidStream extends stream.Transform {
             }
 
             depth ++;
-         } else if (part instanceof GeneralEntityEndXToken) {
+         } else if (part instanceof GeneralEntityEndXToken || part instanceof ParameterEntityEndXToken) {
             depth --;
 
             if (invalidAt === depth) {
@@ -340,7 +340,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case elementEnd.XTYPE:
             case charData.XTYPE:
             case entityReference.XTYPE:
-            case entityStart.XTYPE:
+            case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
                // These are all OK here
@@ -370,7 +370,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case charData.XTYPE:
             case CDATA_XTOKEN: // wanna revisit this given the decision in ANY?
             case elementEnd.XTYPE:
-            case entityStart.XTYPE:
+            case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
                // These are all OK here
                break;
@@ -441,14 +441,14 @@ class CheckXTokenValidStream extends stream.Transform {
                }
                break;
             case entityReference.XTYPE:
-            case entityStart.XTYPE:
+            case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
-                  // §2.9 Validity constraint: Standalone Document Declaration
-                  // The standalone document declaration must have the value "no" if any external markup
-                  // declarations contain declarations of:
-                  // - element types with element content, if white space occurs directly within any instance of those types
-                  if (this.standalone && !context.flaggedSpace) {
+               // §2.9 Validity constraint: Standalone Document Declaration
+               // The standalone document declaration must have the value "no" if any external markup
+               // declarations contain declarations of:
+               // - element types with element content, if white space occurs directly within any instance of those types
+               if (this.standalone && !context.flaggedSpace) {
                   context.flaggedSpace = true;
                   this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
                }
@@ -524,22 +524,20 @@ class CheckXTokenValidStream extends stream.Transform {
             token: xToken,
             externallyDeclared: this.externalDeclarations,
          };
-      } else if (xToken instanceof EntityStart) {
+      } else if (xToken instanceof GeneralEntityStartXToken) {
          if (this.isInvalidEntityReference(xToken)) {
-            if (xToken instanceof ParameterEntityStartXToken) {
+            this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
+               [ xToken.name ], pToken);
+         }
+      } else if (xToken instanceof ParameterEntityStartXToken) {
+         if (this.isInvalidEntityReference(xToken)) {
                this.pushValidityError(ValidityError.ID.PARAMENTITY_EXTERNAL_DECLARED,
                   [ xToken.name ], pToken);
-            } else {
-               this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
-                  [ xToken.name ], pToken);
-            }
          }
 
          if (this.inInternalSubset) {
-            if (xToken instanceof ParameterEntityStartXToken) {
-               this.internalEntityDepth ++;
-               this.externalDeclarations = true;
-            }
+            this.internalEntityDepth ++;
+            this.externalDeclarations = true;
          }
       } else if (xToken instanceof ParameterEntityEndXToken) {
          if (this.inInternalSubset) {
@@ -749,8 +747,8 @@ class CheckXTokenValidStream extends stream.Transform {
                   badNames.push(name);
                }
 
-         // §2.9
-         if (type === 'ENTITIES' && this.isInvalidEntityReference(name)) {
+               // §2.9
+               if (type === 'ENTITIES' && this.isInvalidEntityReference(name)) {
                   this.pushValidityError(ValidityError.ID.ATTLISTDECL_ENTITY_EXTERNAL_DECLARED,
                      [ name, attDef.name ], pToken.open);
                }
@@ -967,7 +965,7 @@ class CheckXTokenValidStream extends stream.Transform {
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
                type: 'CHILDREN',
-               externallyDeclared: this.externalDeclarations,
+               externallyDeclared: this.externalDeclarations, // §2.9
                graph
             };
          }

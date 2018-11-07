@@ -5,7 +5,7 @@ import { EntityMetaData, Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
-import { SToken } from '../../sToken/index';
+import { SToken } from 'sToken';
 
 import entityReference, { EntityReferencePToken, ParameterEntityReferencePToken } from '../entityReference';
 

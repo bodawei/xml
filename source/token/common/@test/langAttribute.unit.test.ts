@@ -7,12 +7,13 @@ import { SToken } from 'sToken';
 
 import entityReference from '../../entityReference';
 import { TextPToken, TextXToken } from '../../text';
-import { EntityStartPToken } from '../../entityStart';
-import { GeneralEntityEndPToken } from '../../generalEntityEnd';
+import { EntityReferencePToken } from '../../entityReference';
+import { GeneralEntityEndPToken } from '../../marker/generalEntityEnd';
+import { GeneralEntityStartPToken } from '../../marker/generalEntityStart';
 
 import { checkXmlLangWellFormed } from '../langAttribute';
 
-describe('literal (unit)', () => {
+describe('langAttribute (unit)', () => {
    let startSToken: SToken;
    let emd10_1: EntityMetaData;
    let emd: EntityMetaData;
@@ -56,9 +57,9 @@ describe('literal (unit)', () => {
 
       it('reports no errors on an attribute value that has entity start and end values', () => {
          checkXmlLangWellFormed([
-            new EntityStartPToken({ refPToken: new entityReference.PToken() }),
+            new GeneralEntityStartPToken(new EntityReferencePToken()),
             new TextPToken({ text: SToken.fromString('wh') }),
-            new GeneralEntityEndPToken(new entityReference.PToken()),
+            new GeneralEntityEndPToken(new EntityReferencePToken()),
          ], ec, emd);
 
          expect(ec.errors.length).toEqual(0);

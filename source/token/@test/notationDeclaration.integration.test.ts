@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from '../../extractor';
-import { SToken, STokenSource } from '../../sToken/index';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import { ParameterEntityEndPToken } from '../parameterEntityEnd';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
-import entityStart from '../entityStart';
 import externalId from '../common/externalId';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import text from '../text';
@@ -123,7 +123,7 @@ describe('notationDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                }, 
                unassigned.wordFromSToken(SToken.fromString('notationName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
@@ -237,7 +237,7 @@ describe('notationDeclaration (integration)', () => {
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
             }, {
                   type: UnassignedType.LITERAL,
                   token: {

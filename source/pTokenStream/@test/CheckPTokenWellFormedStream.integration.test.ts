@@ -5,7 +5,7 @@ import {
    Offset,
    EntityLocation,
    EntityMetaData,
- } from '../../basic';
+ } from 'basic';
 import { WellFormedError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 

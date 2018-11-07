@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { StringBundle } from '../../basic/index';
-import { SToken } from '../../sToken/index';
+import { SToken } from 'sToken';
 
 import { Position } from '../BaseError';
 import { WellFormedError } from '../WellFormedError';

@@ -3,7 +3,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityLocation, EntityMetaData, Offset } from '../../basic';
+import { EntityLocation, EntityMetaData, Offset } from 'basic';
 import { ValidityError, WellFormedError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpandingStream } from '../../expand';

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../../basic';
+import { EntityLocation, Range } from 'basic';
 
 import Extractor from '../Extractor';
 import DigitExtractor from '../DigitExtractor';

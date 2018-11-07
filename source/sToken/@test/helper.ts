@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range, EntityLocation, EntityMetaData } from '../../basic';
+import { Range, EntityLocation, EntityMetaData } from 'basic';
 
 import STokenSource from '../STokenSource';
 import SToken from '../SToken';

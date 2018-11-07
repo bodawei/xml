@@ -3,9 +3,9 @@
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
 import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken/index';
+import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
-import { WellFormedError, XmlWarning } from '../../error/index';
+import { WellFormedError, XmlWarning } from 'error';
 
 import {
    CharRefPToken,

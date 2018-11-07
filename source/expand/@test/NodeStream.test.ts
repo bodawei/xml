@@ -3,12 +3,11 @@
 
 import stream from 'readable-stream';
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { ErrorCollector, ValidityError, WellFormedError, XmlWarning } from '../../error';
 import { SToken, STokenSource } from '../../sToken';
 import * as xToken from '../../token';
 import * as langAttribute from '../../token/common/langAttribute';
-import { ParameterEntityEndPToken, GeneralEntityEndXToken } from '../../token';
 import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
 import { ParameterEntityReferencePToken, EntityReferencePToken } from '../../token/entityReference';
@@ -23,8 +22,13 @@ import { DocTypeEndXToken } from 'source/token/docTypeEnd';
 import {
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
+   GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
    InternalSubsetEndXToken,
    InternalSubsetStartXToken,
+   ParameterEntityEndPToken,
+   ParameterEntityStartXToken,
+   ParameterEntityStartPToken,
 } from '../../token';
 
 type Token = { type: string };
@@ -84,7 +88,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(refToken);
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new xToken.entityStart.XToken('test'));
+            expect(nodeStream.read()).toEqual(new GeneralEntityStartXToken('test'));
          });
 
          it('adds a start entity token to the stream when it encounters a parameter entity ref', () => {
@@ -95,7 +99,7 @@ describe('NodeStream (unit)', () => {
             nodeStream.write(refToken);
 
             nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new xToken.entityStart.ParamXToken('test'));
+            expect(nodeStream.read()).toEqual(new ParameterEntityStartXToken('test'));
          });
 
          it('passes a reference with no referent straight through', () => {
@@ -734,7 +738,7 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect((token as EntityDeclaration).value).toEqual([
-                  new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
+                  new ParameterEntityStartPToken(parentPeref),
                   new ParameterEntityEndPToken(parentPeref),
                ]);
 
@@ -747,7 +751,7 @@ describe('NodeStream (unit)', () => {
             const parentDeclaration = new xToken.entityDeclaration.ParamPToken({
                name: SToken.fromString('parentDecl'),
                value: [
-                  new xToken.entityStart.ParamPToken({}),
+                  new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                   xToken.unassigned.wordFromSToken(
                      new SToken('childValue', 'childValue', new Range(new EntityLocation(), 0, 0, 0, 9, 0, 9))),
                   new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
@@ -770,8 +774,8 @@ describe('NodeStream (unit)', () => {
 
             gatherResult(nodeStream, (token) => {
                expect((token as any).value).toEqual([ // typeHack
-                  new xToken.entityStart.ParamPToken({ refPToken: parentPeref }),
-                  new xToken.entityStart.ParamPToken({}),
+                  new ParameterEntityStartPToken(parentPeref),
+                  new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                   parentDeclaration.value[1],
                   new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
                   new ParameterEntityEndPToken(parentPeref),
@@ -963,7 +967,7 @@ describe('NodeStream (unit)', () => {
                value: [
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   // third was expanded ealier in place.
-                  new xToken.entityStart.ParamPToken(refToThird.name),
+                  new ParameterEntityStartPToken(refToThird.name),
                   new xToken.text.PToken({ text: SToken.fromString('"http://somewhere.com"') }),
                   new ParameterEntityEndPToken(refToThird.name),
                ],
@@ -1136,7 +1140,7 @@ describe('NodeStream (unit)', () => {
                type: 'test',
                defaultType: 'test',
                value: [
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
@@ -1260,7 +1264,7 @@ describe('NodeStream (unit)', () => {
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'foo',
                value: [
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
@@ -1323,7 +1327,7 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, () => {
                const args = checkSpy.calls.argsFor(0);
                expect(args[0]).toEqual([
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one', new xToken.text.PToken()),
                   new GeneralEntityEndXToken('refName'),
                ]);
@@ -1375,7 +1379,7 @@ describe('NodeStream (unit)', () => {
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'foo',
                value: [
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
@@ -1418,14 +1422,14 @@ describe('NodeStream (unit)', () => {
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'firstAttribute',
                value: [
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             }, {
                name: 'secondAttribute',
                value: [
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
@@ -1464,7 +1468,7 @@ describe('NodeStream (unit)', () => {
                name: 'firstAttribute',
                value: [
                   new xToken.text.XToken('some text'),
-                  new xToken.entityStart.XToken('refName'),
+                  new GeneralEntityStartXToken('refName'),
                   new xToken.text.XToken('one'),
                   new GeneralEntityEndXToken('refName'),
                   new xToken.text.XToken('more text'),
@@ -1514,9 +1518,9 @@ describe('NodeStream (unit)', () => {
                name: 'testAttribute',
                value: [
                   new xToken.text.XToken('some text'),
-                  new xToken.entityStart.XToken('parent'),
+                  new GeneralEntityStartXToken('parent'),
                   new xToken.text.XToken('pre '),
-                  new xToken.entityStart.XToken('child'),
+                  new GeneralEntityStartXToken('child'),
                   new xToken.text.XToken('inner'),
                   new GeneralEntityEndXToken('child'),
                   new xToken.text.XToken(' post'),

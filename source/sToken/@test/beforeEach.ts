@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Range } from '../../basic';
+import { Range } from 'basic';
 import SToken from '../SToken';
 
 function toEqualSTokenText() {

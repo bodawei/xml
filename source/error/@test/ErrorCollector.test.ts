@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Offset, Range, EntityLocation } from '../../basic/index';
-import { SToken } from '../../sToken/index';
+import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';
 import { WellFormedError } from '../WellFormedError.js';

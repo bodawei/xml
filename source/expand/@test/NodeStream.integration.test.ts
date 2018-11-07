@@ -15,16 +15,18 @@ import { EntityDeclaration } from '../../token/entityDeclaration'; // hack
 import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
    GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
    InternalSubsetStartXToken,
    InternalSubsetEndXToken,
    ParameterEntityEndPToken,
+   ParameterEntityStartPToken,
    ParameterEntityEndXToken,
+   ParameterEntityStartXToken,
    XmlDeclarationXToken,
 } from '../../token';
 
 import EntityManager from '../EntityManager';
 import NodeStream from '../NodeStream';
-import { EntityStartPToken } from 'source/token/entityStart';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -78,12 +80,12 @@ describe('NodeStream (integration)', () => {
             InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
-            tokenNs.entityStart.XToken,
-            tokenNs.entityStart.XToken,
+            GeneralEntityStartXToken,
+            GeneralEntityStartXToken,
             tokenNs.charData.XToken,
             GeneralEntityEndXToken,
             tokenNs.charData.XToken,
-            tokenNs.entityStart.XToken,
+            GeneralEntityStartXToken,
             tokenNs.charData.XToken,
             GeneralEntityEndXToken,
             GeneralEntityEndXToken,
@@ -108,14 +110,14 @@ describe('NodeStream (integration)', () => {
             tokenNs.docTypeStart.XToken,
                InternalSubsetStartXToken,
                tokenNs.entityDeclaration.ParamXToken,
-               tokenNs.entityStart.ParamXToken,
+               ParameterEntityStartXToken,
                   tokenNs.entityDeclaration.XToken,
                ParameterEntityEndXToken,
                InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
                tokenNs.charData.XToken,
-               tokenNs.entityStart.XToken,
+               GeneralEntityStartXToken,
                   tokenNs.charData.XToken,
                GeneralEntityEndXToken,
                tokenNs.charData.XToken,
@@ -176,7 +178,7 @@ describe('NodeStream (integration)', () => {
                   new tokenNs.text.XToken('#', new tokenNs.text.PToken({
                      text: new SToken('#', '#', new Range(new EntityLocation(), 156, 4, 152, 157, 4, 153)),
                   })),
-                  new tokenNs.entityStart.XToken('test'),
+                  new GeneralEntityStartXToken('test'),
                   new tokenNs.text.XToken('foo#', new tokenNs.text.PToken({
                      text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
                   })),
@@ -242,9 +244,9 @@ describe('NodeStream (integration)', () => {
             const valueArray: any = (results[5] as EntityDeclaration).value; // typeHack
 
             expect((valueArray[0] as any).text.str).toEqual('one');
-            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[1] as EntityStartPToken).refPToken }));
+            expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
             expect((valueArray[2] as any).text.str).toEqual('two');
-            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken((valueArray[1] as EntityStartPToken).refPToken));
+            expect(valueArray[3]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
             done();
          });
       });
@@ -258,13 +260,13 @@ describe('NodeStream (integration)', () => {
             const valueArray: any = (results[6] as EntityDeclaration).value; // typeHack
 
             expect((valueArray as any)[0].text.str).toEqual('[');
-            expect(valueArray[1]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[1] as EntityStartPToken).refPToken }));
+            expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
             expect(valueArray[2].text.str).toEqual('(');
-            expect(valueArray[3]).toEqual(new tokenNs.entityStart.ParamPToken({ refPToken: (valueArray[3] as EntityStartPToken).refPToken }));
+            expect(valueArray[3]).toEqual(new ParameterEntityStartPToken((valueArray[3] as any).referencePToken));
             expect((valueArray[4] as any).text.str).toEqual('inner');
-            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken((valueArray[3] as EntityStartPToken).refPToken));
+            expect(valueArray[5]).toEqual(new ParameterEntityEndPToken((valueArray[3] as any).referencePToken));
             expect((valueArray[6] as any).text.str).toEqual(')');
-            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken((valueArray[1] as EntityStartPToken).refPToken));
+            expect(valueArray[7]).toEqual(new ParameterEntityEndPToken((valueArray[1] as any).referencePToken));
             expect((valueArray[8] as any).text.str).toEqual(']');
             done();
          });
@@ -321,7 +323,7 @@ describe('NodeStream (integration)', () => {
             const element = results[7] as ElementStart; // typeHack
 
             expect(element.attributes[0].value).toEqual([
-               new tokenNs.entityStart.XToken('child'),
+               new GeneralEntityStartXToken('child'),
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: makeSToken('(child)'),
                })),
@@ -343,12 +345,12 @@ describe('NodeStream (integration)', () => {
             const element = results[8] as ElementStart; // typeHack
 
             expect(element.attributes[1].value).toEqual([
-               new tokenNs.entityStart.XToken('parent'),
+               new GeneralEntityStartXToken('parent'),
                new tokenNs.text.XToken('pre', new tokenNs.text.PToken({
                   text: new SToken('pre', 'pre', new Range(new EntityLocation(),
                      0, 0, 0, 3, 0, 3)),
                })),
-               new tokenNs.entityStart.XToken('child'),
+               new GeneralEntityStartXToken('child'),
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: childStoken,
                })),
@@ -357,7 +359,7 @@ describe('NodeStream (integration)', () => {
                   text: new SToken('mid', 'mid', new Range(new EntityLocation(),
                      10, 0, 10, 13, 0, 13)),
                })),
-               new tokenNs.entityStart.XToken('child'),
+               new GeneralEntityStartXToken('child'),
                new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
                   text: childStoken,
                })),

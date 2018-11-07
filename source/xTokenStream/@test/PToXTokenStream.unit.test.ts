@@ -1,10 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from '../../sToken/index';
+import { SToken } from 'sToken';
 import {
    declaration,
-   instruction,
 
    attListDeclaration,
    charData,

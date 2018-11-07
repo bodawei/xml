@@ -1,19 +1,19 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { EntityMetaData, Range } from '../../basic/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from '../../extractor/index';
-import { SToken, STokenSource } from '../../sToken/index';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper.js';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import { WordListPToken, WordListType } from '../common/wordList';
-import { ParameterEntityEndPToken } from '../parameterEntityEnd';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
-import entityStart from '../entityStart';
 import unassigned, { UnassignedType } from '../common/unassigned';
 
 describe('attListDeclaration (integration)', () => {
@@ -303,7 +303,7 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                },
                unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
@@ -339,7 +339,7 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                }, unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('ENTITIES')),
@@ -394,7 +394,7 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                },
                unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
@@ -404,7 +404,7 @@ describe('attListDeclaration (integration)', () => {
                unassigned.wordFromSToken(SToken.fromString('#ENTITIES')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                }
             ];
             const makeSToken = makeSTokenMaker();
@@ -465,7 +465,7 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
                }, unassigned.wordFromSToken(SToken.fromString('two')),
                unassigned.wordFromSToken(SToken.fromString(')')),
                unassigned.wordFromSToken(SToken.fromString('#REQUIRED')), {

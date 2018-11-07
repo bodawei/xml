@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData } from 'basic';
 import { WellFormedError } from '../../error';
 import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from '../../sToken';

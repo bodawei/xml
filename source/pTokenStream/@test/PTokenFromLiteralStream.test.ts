@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import {

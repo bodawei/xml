@@ -1,21 +1,21 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration';
-import { ParameterEntityEndPToken } from '../parameterEntityEnd.js';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd.js';
 import entityReference, { EntityReferencePToken } from '../entityReference';
-import entityStart from '../entityStart.js';
 import text from '../text';
 import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper.js';
 import { DeclarationPToken } from '../bridge/declaration';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
@@ -108,7 +108,7 @@ describe('entityDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new EntityReferencePToken()),
                }, unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.LITERAL,
@@ -229,7 +229,7 @@ describe('entityDeclaration (integration)', () => {
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new entityStart.ParamPToken({}),
+                  token: new ParameterEntityStartPToken(new EntityReferencePToken()),
                }, {
                   type: UnassignedType.LITERAL,
                   token: {

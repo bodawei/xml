@@ -13,9 +13,10 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { STokenSource } from 'sToken';
 import { UnassignedValue } from './common/unassigned';
 import { TextPToken } from './text';
-import { EntityStartPToken, ParameterEntityStartPToken } from './entityStart';
-import { GeneralEntityEndPToken } from './generalEntityEnd';
-import { ParameterEntityEndPToken } from './parameterEntityEnd';
+import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
+import { GeneralEntityStartPToken } from './marker/generalEntityStart';
+import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
+import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -28,7 +29,7 @@ const ENTITYDECL_XTOKEN = 'ENTITYDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 
-type ExpandedLiteralValuePToken = Array<TextPToken|EntityReferencePToken|EntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type ExpandedLiteralValuePToken = Array<TextPToken|EntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
 class EntityDeclaration extends base.XToken {
    public name: string;

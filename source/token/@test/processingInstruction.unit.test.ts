@@ -1,19 +1,18 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../basic';
-import { WellFormedError, XmlWarning } from '../../error/index';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { SToken } from '../../sToken';
-import { MockSTokenSource } from '../../sToken/@test/helper';
+import { EntityMetaData } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
+import { MockErrorCollector } from 'error-test';
+import { SToken } from 'sToken';
+import { MockSTokenSource } from 'sToken-test';
 
-import * as instruction from '../bridge/instruction';
 import * as misc from '../common/misc';
 import {
    parseProcessingInstruction,
    ProcessingInstructionPToken,
    ProcessingInstructionXToken,
-} from '../processingInstruction.js';
+} from '../processingInstruction';
 
 describe('processingInstruction (unit)', () => {
    let piPToken: any;

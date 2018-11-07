@@ -7,8 +7,7 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference, { ParameterEntityReferencePToken } from '../../entityReference.js';
-import entityStart from '../../entityStart.js';
+import entityReference, { ParameterEntityReferencePToken, EntityReferencePToken } from '../../entityReference.js';
 import text from '../../text';
 import literal from '../literal';
 import unassigned, { UnassignedType, UnassignedValue, UnassignedArray } from '../unassigned';
@@ -645,7 +644,7 @@ describe('unassigned (unit)', () => {
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, word2, {
                type: UnassignedType.ENTITY_END,
                token: new ParameterEntityReferencePToken(),
@@ -700,7 +699,7 @@ describe('unassigned (unit)', () => {
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, word2, {
                type: UnassignedType.ENTITY_END,
                token: new ParameterEntityReferencePToken(),
@@ -773,16 +772,16 @@ describe('unassigned (unit)', () => {
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ word, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, space ];
             const descriptors = [ {
                name: 'one',
@@ -866,7 +865,7 @@ describe('unassigned (unit)', () => {
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ {
                type: UnassignedType.ENTITY_START,
-               token: new entityStart.ParamPToken({}),
+               token: new ParameterEntityReferencePToken(),
             }, word ];
             const descriptors = [ {
                name: 'one',

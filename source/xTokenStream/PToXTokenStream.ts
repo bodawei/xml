@@ -5,7 +5,6 @@ import { EntityMetaData } from '../basic';
 
 import {
    declaration,
-   instruction,
 
    attListDeclaration,
    charData,

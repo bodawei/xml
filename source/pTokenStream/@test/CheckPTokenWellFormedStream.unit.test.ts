@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Offset } from '../../basic';
+import { EntityLocation, EntityMetaData, Offset } from 'basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 
 import { SToken } from '../../sToken';

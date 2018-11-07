@@ -2,21 +2,14 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error/index';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from '../../extractor/index';
-import { SToken, STokenSource } from '../../sToken/index';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import declaration, { DeclarationPToken } from '../bridge/declaration';
-import nameList, { ContentParticlePToken, NameListPToken } from '../common/nameList';
 import entityReference from '../entityReference';
-import entityStart from '../entityStart.js';
-import externalId from '../common/externalId.js';
 import elementDeclaration from '../elementDeclaration.js';
-import text from '../text';
-import unassigned from '../common/unassigned';
-
-import helper from './helper.js';
 
 describe('elementDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;

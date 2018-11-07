@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from '../../basic';
+import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from '../../error';
 
 import entityReference from '../entityReference';

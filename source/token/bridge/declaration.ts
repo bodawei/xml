@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../../basic';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { SToken, STokenSource } from '../../sToken';
 

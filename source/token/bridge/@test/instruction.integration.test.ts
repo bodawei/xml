@@ -6,7 +6,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../../../error';
 import { defaultExtractors } from '../../../extractor';
 import { STokenSource } from '../../../sToken';
 
-import * as instruction from '../instruction.js';
+import * as instruction from '../instruction';
 
 describe('instruction (integration)', () => {
 
