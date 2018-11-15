@@ -2818,7 +2818,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, [expected1, expected2], done);
          });
 
-         it('is reported as an error if it is top-level externally declared and standlone=yes (§2.9)', (done) => {
+         it('is reported as an error if it is top-level externally  embedded in another and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
             validator.write(new EntityDeclaration('extDeclEntity1', []));

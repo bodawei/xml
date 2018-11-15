@@ -26,12 +26,14 @@ import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 
 const ENTITYDECL = 'ENTITYDECL';
 const ENTITYDECL_XTOKEN = 'ENTITYDECL_XTOKEN';
+const PARAMETER_ENTITYDECL_XTOKEN = 'PARAMETER_ENTITYDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 
 type ExpandedLiteralValuePToken = Array<TextPToken|EntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
 class EntityDeclaration extends base.XToken {
+   public type: string;
    public name: string;
    public externalLoc: EntityLocation | void;
    public notationDataName: string | void;
@@ -46,6 +48,7 @@ class EntityDeclaration extends base.XToken {
       this.externalLoc = externalLoc;
       this.notationDataName = notationDataName;
       this.isParameter = false;
+      this.type = ENTITYDECL_XTOKEN;
    }
 
 }
@@ -55,6 +58,7 @@ class ParameterEntityDeclaration extends EntityDeclaration {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(name, value, externalLoc, notationDataName, pToken);
       this.isParameter = true;
+      this.type = PARAMETER_ENTITYDECL_XTOKEN
    }
 }
 
@@ -445,6 +449,7 @@ function pTokenToXToken(pToken: EntityDeclarationPToken | ParameterEntityDeclara
 export {
    ENTITYDECL as PTYPE,
    ENTITYDECL_XTOKEN as XTYPE,
+   PARAMETER_ENTITYDECL_XTOKEN as PARAM_XTYPE,
    EntityDeclarationPToken as PToken,
    ParameterEntityDeclarationPToken as ParamPToken,
    EntityDeclaration as XToken,

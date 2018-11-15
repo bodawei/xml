@@ -33,6 +33,8 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartPToken,
    ParameterEntityStartXToken,
+   XMLDECL_XTOKEN,
+   XmlDeclarationXToken,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
@@ -49,7 +51,6 @@ import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
 import { LiteralValueXToken } from '../token/common/literal';
 import { DocTypeStartXToken } from 'source/token/docTypeStart';
 
-
 type XToken = { type: string };
 type PToken = {
    type: string,
@@ -64,6 +65,16 @@ type CommonAttributeXToken = {
 type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken|EntityReferenceXToken };
 
+enum ProcessMode {
+   VALIDATE,
+   NON_VALIDATING,
+   STANDALONE,
+};
+
+type ExpandOptions = {
+   validating?: boolean,
+}
+
 /**********************************************************************\
  !!!!
 \**********************************************************************/
@@ -72,10 +83,11 @@ class NodeStream extends stream.Transform {
    private _entityManager: EntityManager;
    private _options: {};
    private _child: any;
-   private _childCallback: any;
    private docTypeStart?: DocTypeStartXToken;
+   private processMode: ProcessMode;
+   private skipDeclarations: boolean = false; // §5.1
 
-   constructor(entityManager: EntityManager, options: {} = {}) {
+   constructor(entityManager: EntityManager, options: ExpandOptions = {}) {
       super({
          objectMode: true,
       });
@@ -85,7 +97,7 @@ class NodeStream extends stream.Transform {
       this._child = undefined;
 
       this._child = undefined;
-      this._childCallback = undefined;
+      this.processMode = options.validating === false ? ProcessMode.NON_VALIDATING : ProcessMode.VALIDATE;
 
       // Protect the 'this' of callbacks.
       this._childData = this._childData.bind(this);
@@ -93,44 +105,67 @@ class NodeStream extends stream.Transform {
    }
 
    _transform(xToken: XToken, encoding: string, callback: () => void) {
-      if (xToken instanceof entityDeclaration.XToken) {
-         this._processEntityDeclaration(xToken, callback);
-         return;
-      } else if (xToken instanceof entityReference.XToken) {
+      // May want to give an error if emd is not document, and non-validating
+
+      if (xToken instanceof entityReference.XToken) {
          const isPeRef = (xToken instanceof entityReference.ParamXToken);
          const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
          const declarationSource = getter.call(this._entityManager, xToken.name);
 
+
+         // §5.1: Except when standalone="yes", [non-validating processors] must not
+         // process entity declarations or attribute-list declarations encountered after
+         // a reference to a parameter entity that is not read, since the entity may
+         // have contained overriding declarations.
+         if (this.processMode === ProcessMode.NON_VALIDATING && isPeRef) {
+            this.skipDeclarations = true;
+         }
+         
          if (declarationSource) {
-            const tokenType: any = isPeRef ? ParameterEntityStartXToken : GeneralEntityStartXToken;
-            this.push(new tokenType(xToken.name));
-            const pTokenStream = new PTokenStream(declarationSource);
-            const tokenizer = new PToXTokenStream();
+            if (isPeRef && (this.processMode === ProcessMode.STANDALONE || this.processMode === ProcessMode.NON_VALIDATING)) {
+               // no need to expand in either of these cases.
+            } else {
+               const tokenType: any = isPeRef ? ParameterEntityStartXToken : GeneralEntityStartXToken;
+               this.push(new tokenType(xToken.name));
+               const pTokenStream = new PTokenStream(declarationSource);
+               const tokenizer = new PToXTokenStream();
 
-            this._child = {
-               xToken,
-               callback,
-               stream: new NodeStream(this._entityManager, this._options),
-            };
+               this._child = {
+                  xToken,
+                  callback,
+                  stream: new NodeStream(this._entityManager, this._options),
+               };
 
-            this._child.stream.on('data', this._childData);
-            this._child.stream.on('end', this._childDone);
-            (pTokenStream as any).pipe(tokenizer).pipe(this._child.stream);   // typeHack
-
-            return;
+               this._child.stream.on('data', this._childData);
+               this._child.stream.on('end', this._childDone);
+               (pTokenStream as any).pipe(tokenizer).pipe(this._child.stream);   // typeHack
+               return;
+            }
          } else {
+            // From 4.1 well formedness constraint: entity declared
+            // For a document without any DTD, an entity reference must be to one of amp, lt, gt, apos or quote
+            // For a document with only an internal DTD subset with no param entity references
+            //    (presumably even those in entity values, though that is irrelevant here) the name must must reference a declaration.
+            // For a document that is standalone = yes, name must again match a declaration
+            // This means one with a DTD, or an external DTD, or param references, it need not match a declaration (though validity will catch those)
+            // This has nothing to do with validating or not, interestingly.
+            // however,  parameter entity reference will stop all further processing if this is non-validating
+
             const startToken = xToken.pToken && xToken.pToken.open;
             const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
                [ xToken.name ], startToken, startToken);
             this.push(error);
          }
-      } else if (xToken instanceof elementDeclaration.XToken) {
+      } else if (xToken instanceof entityDeclaration.XToken && !this.skipDeclarations) {
+         this._processEntityDeclaration(xToken, callback);
+         return;
+      } else if (xToken instanceof elementDeclaration.XToken && !this.skipDeclarations) {
          this._processElementDeclaration(xToken, callback);
          return;
-      } else if (xToken instanceof notationDeclaration.XToken) {
+      } else if (xToken instanceof notationDeclaration.XToken && !this.skipDeclarations) {
          this._processNotationDeclaration(xToken, callback);
          return;
-      } else if (xToken instanceof attListDeclaration.XToken) {
+      } else if (xToken instanceof attListDeclaration.XToken && !this.skipDeclarations) {
          this._processAttListDeclaration(xToken, callback);
          return;
       } else if (xToken.type === elementStart.XTYPE || xToken.type === elementStart.EMPTY_XTYPE) {
@@ -145,6 +180,10 @@ class NodeStream extends stream.Transform {
             this.push(new ExternalSubsetStartXToken());
             this.push(new ExternalSubsetEndXToken());
          }
+      } else if (xToken.type === XMLDECL_XTOKEN) {
+         if (this.processMode === ProcessMode.NON_VALIDATING && (xToken as XmlDeclarationXToken).standalone) {
+            this.processMode = ProcessMode.STANDALONE;
+         }
       }
 
       this.push(xToken);
@@ -156,6 +195,7 @@ class NodeStream extends stream.Transform {
             this.push(new InternalSubsetStartXToken());
          }
       }
+
       callback();
    }
 
@@ -220,6 +260,7 @@ class NodeStream extends stream.Transform {
       while (entityValueArray.length > 0) {
          const item = entityValueArray.shift();
 
+         // @@ dont do this if it is a parameter and this is standalone. Not clear an entity reference is even allowed here.
          if (item!.type === entityReference.PARAM_PTYPE) {  // typeHack
             this._expandPERefFullyInEntityValue(item as ParameterEntityReferencePToken, (expandedItem) => {   // This is going to be a problem
                deliverExpanded(preExpanded, expandedItem);
@@ -251,6 +292,7 @@ class NodeStream extends stream.Transform {
       const itemName = peRef.name && peRef.name.str || '';
       const entityToken: ParameterEntityReferencePToken = this._entityManager.getParameterEntityToken(itemName);
 
+      // @@@ don't expand if it is a standalone
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ {
             type: UnassignedType.REFERENCE,
@@ -312,6 +354,7 @@ class NodeStream extends stream.Transform {
       const itemName = peRef.name && peRef.name.str || '';
       const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
+      // @@@ don't expand if it is in standalone
       if (!entityToken || !entityToken.value) {
          deliverExpanded([ peRef ]);
       } else {
@@ -384,6 +427,7 @@ class NodeStream extends stream.Transform {
    \**********************************************************************/
 
    _processAttListDeclaration(alToken: AttListXToken, done: DoneSignal) {
+      // @@ this should not happen in the internal subset
       this._expandPERefsInUnassignedValue(alToken.pToken, true, () => {
          const open = alToken.pToken && alToken.pToken.open;
 
@@ -404,6 +448,7 @@ class NodeStream extends stream.Transform {
    \**********************************************************************/
 
    _processElementDeclaration(edXToken: ElementDeclaration, done: DoneSignal) {
+      // @@ this should not happen in the internal subset
       this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
          this._examineUnassigned(edXToken);
 
@@ -464,6 +509,7 @@ class NodeStream extends stream.Transform {
       let endedWithConnector = false;
       let topEntityRef: ParameterEntityReferencePToken | void;
 
+      // @@ maybe don't do if it is a standalone
       if (pToken.children && pToken.children.close) {
          return;
       }
@@ -701,12 +747,60 @@ class NodeStream extends stream.Transform {
    \**********************************************************************/
 
    _processEntityDeclaration(edToken: EntityDeclaration, done: DoneSignal) {
+      const isParameterEntity = edToken.type === entityDeclaration.PARAM_XTYPE;
+      const isExternalEntity = edToken.externalLoc;
+
+      // This is a bit hard to reason about.  The specification does say something
+      // definitive, but doesn't do it in a place you would expect, so you must
+      // examine several places:
+      // §2.9 An external markup declaration is defined as a markup declaration
+      // occurring in the external subset or in a parameter entity (external
+      // or internal, the latter being included because non-validating
+      // processors are not required to read them).]
+      // SUMMARY: A non-validating processor it nos obligated to read any parameter
+      // entity ("read" is never defined precisely).
+      // §4.1
+      // Note that non-validating processors are not obligated to read and process
+      // entity declarations occurring in parameter entities or in the external subset;
+      // SUMMARY: This section only speaks of nor reading entity declarations in
+      // PE declarations. But this whole section is only about entities, so this
+      // doesn't seem to contradict 2.9
+      // §5.1 Non-validating processors are required to check only the
+      // document entity, including the entire internal DTD subset,
+      // for well-formedness. While they are not required to check the
+      // document for validity, they are required to process all the declarations
+      // they read in the internal DTD subset and in any parameter entity that
+      // they read, up to the first reference to a parameter entity that they
+      // do not read; that is to say, they must use the information in those
+      // declarations to normalize attribute values, include the replacement
+      // text of internal entities, and supply default attribute values
+      // §5.2 [non-validating processors] need not read any part of the
+      // document other than the document entity.
+      // SUMMARY: In conjunction with 2.9, this does say that a processor
+      // need not read any parameter entities. And of course this also
+      // says a non-validating processor need not read any external entities.
+
+      if (this.processMode === ProcessMode.NON_VALIDATING && (isParameterEntity || isExternalEntity)) {
+         done();
+         return;
+      }
+
+      // Store the reference just in case we need to recognize that it was declared later on.
+      // Crucially, the only place this can be referenced in standalone is in the internal
+      // subset body, where we do not expand it.
+      if (this.processMode === ProcessMode.STANDALONE && isParameterEntity) {
+         this._addEntityDeclaration(edToken, done);
+         return;
+      }
+
+      // @@ this should not happen in the internal subset
       this._expandPERefsInUnassignedValue(edToken.pToken, false, () => {
          if (edToken.pToken && edToken.pToken.unassigned) {
             entityDeclaration.assignUnassigned(edToken.pToken as any); // typeHack
             edToken = entityDeclaration.pTokenToXToken(edToken.pToken as any); // typeHack
          }
 
+         // @@ this can only happen in the external subset
          this._expandPeRefsInEntityValue((edToken.value as EntityValueArray), (newValue) => {
             edToken.value = newValue as any; // typeHack
             this._addEntityDeclaration(edToken, done);
@@ -743,6 +837,7 @@ class NodeStream extends stream.Transform {
    \**********************************************************************/
 
    _processNotationDeclaration(ndToken: NotationDeclaration, done: DoneSignal) {
+      // @@ This is getting into 4.1 area, but there should be no unassigned values in the internal subset
       this._expandPERefsInUnassignedValue(ndToken.pToken, false, () => {
          if (ndToken.pToken && ndToken.pToken.unassigned) {
             if (ndToken.pToken.externalId) {

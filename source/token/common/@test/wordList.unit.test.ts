@@ -310,7 +310,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the opening of the list open descriptors', () => {
+      it('calls assignToProps() without the opening of the list open descriptors', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             openSpace: undefined,
             words: [],
@@ -327,7 +327,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the closing of the list open descriptors', () => {
+      it('calls assignToProps() without the closing of the list open descriptors', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             words: [],
             close: undefined,
@@ -399,7 +399,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the space in the previous word when doing a new word', () => {
+      it('calls assignToProps() with the connector in the previous word when doing a new word', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             close: undefined,
             closeSpace: undefined,
@@ -446,7 +446,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the properties to fill a word when all the words are filled', () => {
+      it('calls assignToProps() with the properties to fill a word when the previous word has all but a space', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             close: undefined,
             closeSpace: undefined,
@@ -467,7 +467,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the properties to fill a word when all the words are filled', () => {
+      it('calls assignToProps() with the properties to fill a word when the previous word has no connector', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             close: undefined,
             closeSpace: undefined,
@@ -487,7 +487,7 @@ describe('wordList (unit)', () => {
             ]);
       });
 
-      it('calls assignToProps() with the properties to fill a word when all the words are filled', () => {
+      it('calls assignToProps() with the properties to fill a word when the previous has only the word', () => {
          wlPToken = new WordListPToken(WordListType.NOTATION, wlPToken, {
             close: undefined,
             closeSpace: undefined,

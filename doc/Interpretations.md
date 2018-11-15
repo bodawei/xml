@@ -277,20 +277,32 @@ The word "read" is used in various places without being defined. I assume this m
 ## Standalone (§2.9, §4.1, §5.1)
 One of the most head-twisting ideas in XML is that of the "standalone" document. In the XML Declaration, you can specify `standalone="yes"` (or `="no"`, though omitting it is the same as saying "no").
 
-To this writer, the intuitive meaning of this is "the document entity fully describes the document, and there is nothing external to it". Or, more precisely: "This document has no external entities". This might seem to be a signal to a processor that it can do all of its work accurately without waiting to load other data. However, this isn't quite the case for three reasons"
+To this writer, the intuitive meaning of this is "the document entity fully describes the document, and there is nothing external to it". Or, more precisely: "This document has no external entities". This might seem to be a signal to a processor that it can do all of its work accurately without waiting to load other data. However, this isn't quite the case for four reasons:
 
-First, one can still have an external subset. The crucial thing is that the content that is delivered by the XML processor will be the same whether or not you read the external subset. Thus, you can have all the NOTATION, ELEMENT and ATTLIST declarations in the external subset that you want, as long as none of them have information you need to have to deliver results to the app.  Things that can cause problems are:
+First, one can still have an external subset (§2.9). The crucial thing is that the content that is delivered by the XML processor will be the same whether or not you read the external subset. Thus, you can have all the NOTATION, ELEMENT and ATTLIST declarations in the external subset that you want, as long as none of them have information you need to have to deliver results to the app.  Things that can cause problems are:
    1. if your ATTLIST attributes have default values that should be added to any element starts,
    2. if the ATTLIST attribute types would cause the processor to do more value normalization
    3. if knowing the content model of an ELEMENT would cause you to ignore whitespace
 
-Second, one can also have external entities declared, as long as they are never referenced in the document. So, in fact, this is not very interesting.
+Second, one can also have externally declared entities, as long as they are never referenced in the document. So, in fact, these are not very interesting.
 
 Third, one can have an internally declared external entity that is referenced in the document. 
 
 Fourth, and most head-hurtingly, your document entity may, in fact, be fully self-contained (have no external entities), but still not be standalone.  This is because if there are any markup declarations in any parameter entity values, then the document is considered to be not standalone.  §2.9 mentions that a non-validating processor is not required to process any parameter entity declarations, so they are, in fact, inaccessible to a strict one.
 
-So, what does "standalone" mean? The shortest way I can put it is: bearing in mind that a non-validating processor does not need to read any external entities and does not need to read any parameter entities, a valid document is "standalone" when the data reported to an application by the xml processor will look the same* whether that processor is a validating or non-validating processor. If the document is not valid, then the information delivered is the same* if the validating processor ignores validation errors.  (By the same, I mean ignoring content that was from external entities and from internal parameter entities that are internally declared). Also, any #FIXED values won't be enforced
+So, what does "standalone" mean? I interpret it to mean "Simple DTD". With that in mind, then the opening of section §2.9 makes more sense: "Markup declarations can affect the content of the document... The standalone document declaration ... signals whether or not there are such declarations which appear external to the document entity." (external includes within referenced parameter entity declarations). Put another way, you can ignore the external DTD subset, and ignore any parameter entity references in the internal subset, and the set of declarations that affect the document would be the same if you did read the external DTD subset and did not ignore any parameter entity references in the internal subset.
+
+## Validating and Non-validating (§2.9, §4.1, §5.1)
+A validating XML processor is easy to understand: It reads the document entity, external DTD subset, reads and processes and recognizes all the declarations in the internal and external subset, it reads all external entities, and processes every bit of markup througout the document while validating that all the validation constraints are correct.
+
+A non-validating XML processor is generally also straightforward: A document may have an external subset, external entities, parameter entities, and references to internal entities.  But it doesn't have to process any of those except the document entity. As such there may be huge validity problems in the document that it won't notice. However, it at least assures that the document entity itself is minimally well formed.  There are two catches:
+1) non-validating processors do not have to handle any parmaeter entities or their references. They are allowed to if they want to, but need not.
+2) If there is a reference to a parameter entity in the internal subset (not in an entity value, that is) the non-validating processor need not expand it (of course, by the previous provision). But, that then means that declarations after that in the internal subset may be misleading since the expanded parameter entity might have declared some things that would have changed things that came after (e.g. the PE might have declared an entity foo which is also declared afterwards. because in XML first mention wins, that would mean the second one should be ignored).  Thus, the non-validating processor stops reading then.
+3) Note that standalone is interesting in that if it is processed by a non-validating processor, it can reliably keep reading after the reference to a parameter entity, since the definition of standalone says that there are no relevant declarations in there.
+
+It isn't entirely clear to this author what the point of the non-validating processor or the standalone mode are. Both leave you with potentially invalid documents. They give you a bit more confidence about the basic syntactic soundness of the documents, particularly standalone.  But their motivation is quite opaque to this writer.
+
+
 
 # Stages of processing:
 1. Source
@@ -305,3 +317,12 @@ So, what does "standalone" mean? The shortest way I can put it is: bearing in mi
 Internal entities are parsed twice. The first time replaces any character references.
    - Are PEReferences allowed here?
 The second time is at the point of use. Those character references from the first parse may form new markup, including other char references, which are all re-parsed and replaced at time of use.
+
+
+
+# QUESTIONS
+- Doesn't a standalone=yes still produce wrong attribute values if #fixed is specified? but the specified elemnt starts have a value there so don't need the default?
+- Why does systemliteral call out that it doesn't need to be parsed?
+- "Well-Formedness Constraint: PEs in Internal Subset In the internal DTD subset, parameter-entity references can occur only where markup declarations can occur, not within markup declarations"  Does this apply to values in entity values?
+   - if yes, then we're good.  so standalone is good.
+   - If no, then in standalone are these errors?  4.1 speaks of the necessity of a declaration for a reference, but it isn't clear if this is general or parameter entities. (by 4.1 it seems like it must mean general entities, but then not clear what happens if a parameter entity is not declared).  This whole section is entity reference, and it inclues PERefs, so I asusme this does mean either. so it must mean you can't put these in entity values in the internal subset.  This seems like a horrible restriction.  this is independent of validating or non-validating.  the internal subset is really crippled.  I don't know why we did this. Except the mental model that the external subset is for general purpose use, and can be overridden. 

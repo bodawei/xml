@@ -10,9 +10,9 @@ import * as xToken from '../../token';
 import * as langAttribute from '../../token/common/langAttribute';
 import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
-import { ParameterEntityReferencePToken, EntityReferencePToken } from '../../token/entityReference';
-import { ElementDeclarationPToken } from '../../token/elementDeclaration'; // hack
-import { EntityDeclaration, EntityDeclarationPToken } from '../../token/entityDeclaration'; // hack
+import { ParameterEntityReferencePToken, EntityReferencePToken, ParameterEntityReferenceXToken, EntityReferenceXToken } from '../../token/entityReference';
+import { ElementDeclarationPToken, ElementDeclaration } from '../../token/elementDeclaration'; // hack
+import { EntityDeclaration, EntityDeclarationPToken, ParameterEntityDeclaration } from '../../token/entityDeclaration'; // hack
 import { NotationDeclarationPToken } from  '../../token/notationDeclaration'; // hack
 
 import NodeStream from '../NodeStream';
@@ -29,7 +29,9 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityStartXToken,
    ParameterEntityStartPToken,
+   XmlDeclarationXToken,
 } from '../../token';
+import { ElementStart } from 'source/token/elementStart';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -148,17 +150,6 @@ describe('NodeStream (unit)', () => {
 
             nodeStream.read(); // decl token
             expect(nodeStream.read()).toEqual(null)
-         });
-
-
-         it('adds an internal subset marker to the stream when there is an internal subset', () => {
-            const declToken = new DocTypeStartXToken('test', undefined, true);
-
-            nodeStream.write(declToken);
-            nodeStream.end;
-
-            nodeStream.read(); // decl token
-            expect(nodeStream.read()).toEqual(new InternalSubsetStartXToken());
          });
 
          it('adds an end of internal subset marker when there is an internal subset', () => {
@@ -1669,6 +1660,108 @@ describe('NodeStream (unit)', () => {
                [ token.name ]));
          });
    
+      });
+
+      describe('non-validating (§2.9, §4.1, §5.0, §5.1, §5.2)', () => {
+
+         it('entity declarations are recognized before a reference to a parameter entity when non-validating', (done) => {
+            nodeStream = new NodeStream(entityManager, { validating: false });
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(new EntityDeclaration('aGeneralEntity', []));
+            nodeStream.write(new ParameterEntityReferenceXToken('paramEntity'));
+
+            nodeStream.end();
+
+            gatherResults(nodeStream, () => {
+               const result = entityManager.getEntityToken('aGeneralEntity');
+
+               expect(result).not.toBeUndefined();
+               done();
+            });
+         });
+
+         it('entity declarations are not recognized after a reference to a parameter entity when non-validating', (done) => {
+            nodeStream = new NodeStream(entityManager, { validating: false });
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(new ParameterEntityReferenceXToken('paramEntity'));
+
+            nodeStream.write(new EntityDeclaration('aGeneralEntity', []));
+            nodeStream.end();
+
+            gatherResults(nodeStream, () => {
+               const result = entityManager.getEntityToken('aGeneralEntity');
+
+               expect(result).toBeUndefined();
+               done();
+            });
+         });
+
+         it('does not expand a parameter entity reference non-validating', (done) => {
+            const paramReference = new ParameterEntityReferenceXToken('paramEntity');
+            nodeStream = new NodeStream(entityManager, { validating: false });
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(paramReference);
+            nodeStream.end();
+
+            gatherResults(nodeStream, (results) => {
+
+               expect(results[1]).toEqual(paramReference)
+               done();
+            });
+         });
+
+      });
+
+      describe('standalone=yes (§2.9, §4.1, §5.0, §5.1, §5.2)', () => {
+
+         it('entity declarations are recognized before a reference to a parameter entity when standalone=yes', (done) => {
+            const nodeStream = new NodeStream(entityManager, { validating: false });
+            // nodeStream.write(new XmlDeclarationXToken(1.0, 'USASCII', true));
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(new EntityDeclaration('aGeneralEntity', []));
+            nodeStream.write(new ParameterEntityReferenceXToken('paramEntity'));
+
+            nodeStream.end();
+
+            gatherResults(nodeStream, () => {
+               const result = entityManager.getEntityToken('aGeneralEntity');
+
+               expect(result).not.toBeUndefined();
+               done();
+            });
+         });
+
+         it('entity declarations are recognized after a reference to a parameter entity when standalone=yes', (done) => {
+            const nodeStream = new NodeStream(entityManager, { validating: false });
+            nodeStream.write(new XmlDeclarationXToken(1.0, 'USASCII', true));
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(new ParameterEntityReferenceXToken('paramEntity'));
+
+            nodeStream.write(new EntityDeclaration('aGeneralEntity', []));
+            nodeStream.end();
+
+            gatherResults(nodeStream, () => {
+               const result = entityManager.getEntityToken('aGeneralEntity');
+
+               expect(result).not.toBeUndefined();
+               done();
+            });
+         });
+
+         it('does not expand a parameter entity reference when standalone=yes', (done) => {
+            const parameterRef = new ParameterEntityReferenceXToken('paramEntity');
+            const nodeStream = new NodeStream(entityManager, { validating: false });
+            nodeStream.write(new XmlDeclarationXToken(1.0, 'USASCII', true));
+            nodeStream.write(new ParameterEntityDeclaration('paramEntity', []));
+            nodeStream.write(parameterRef);
+            nodeStream.end();
+
+            gatherResults(nodeStream, (results) => {
+               expect(results[2]).toEqual(parameterRef);
+               done();
+            });
+         });
+
       });
 
    });
