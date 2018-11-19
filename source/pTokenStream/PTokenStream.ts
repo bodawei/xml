@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData } from '../basic';
+import { EntityMetaData, EntityKind } from '../basic';
 import { defaultExtractors } from '../extractor';
 import { SToken, STokenSource } from '../sToken';
 import {
@@ -38,6 +38,7 @@ class PTokenStream extends stream.Transform {
    private _inContent: boolean;
    private _reportedMetaData: boolean;
    private _parsing: boolean = false;
+   private emd: EntityMetaData;
    private waitingForInternalClose: boolean = false;
 
    constructor(metaDataOrTokenSource: STokenSource | EntityMetaData) {
@@ -46,8 +47,10 @@ class PTokenStream extends stream.Transform {
       });
 
       if (metaDataOrTokenSource instanceof STokenSource) {
+         this.emd = new EntityMetaData(EntityKind.DOCUMENT);
          this._sTokenSource = metaDataOrTokenSource;
       } else {
+         this.emd = metaDataOrTokenSource;
          this._sTokenSource = new STokenSource(defaultExtractors, metaDataOrTokenSource);
       }
 
@@ -189,7 +192,7 @@ class PTokenStream extends stream.Transform {
                elementEnd.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               parseInstruction(this._sTokenSource, markupStartSToken, deliverParse);
+               parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
                break;
             case '<!--':
                comment.parse(this._sTokenSource, markupStartSToken, deliverParse);

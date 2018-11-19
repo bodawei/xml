@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import * as token from '../../token';
 import {
@@ -31,7 +31,7 @@ describe('PTokenStream (unit)', () => {
    let pTokenStream: PTokenStream;
 
    beforeEach(() => {
-      pTokenStream = new PTokenStream(new EntityMetaData());
+      pTokenStream = new PTokenStream(new EntityMetaData(EntityKind.DOCUMENT));
    });
 
    function gatherPTokens(pTokenStream: PTokenStream, deliverResults: (result: TokenArray) => void) {
@@ -254,7 +254,8 @@ describe('PTokenStream (unit)', () => {
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<?');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toEqual(new EntityMetaData(EntityKind.DOCUMENT));
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });

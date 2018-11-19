@@ -1,16 +1,28 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource, SToken } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { ErrorCollector, WellFormedError } from 'error';
+import { defaultExtractors } from 'extractor';
+import { STokenSource, SToken } from 'sToken';
+import { makeSTokenMaker } from 'sToken-test';
 
 import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
 import { InstructionStart } from '../bridge/instruction';
 
 describe('xmlDeclaration (integration)', () => {
+   let start: InstructionStart;
+
+   beforeEach(() => {
+      beforeEach(() => {
+         start = {
+            open: SToken.fromString('<?'),
+            openSpace: undefined,
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+         };         
+      });
+   });
 
    describe('parseXmlDeclaration()', () => {
 
@@ -19,7 +31,7 @@ describe('xmlDeclaration (integration)', () => {
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
-         parseXmlDeclaration(source, {} as any, (parsing) => {
+         parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.params[0].name.str).toEqual('version');
             done();
          });
@@ -30,7 +42,7 @@ describe('xmlDeclaration (integration)', () => {
          source.addText('version="1.0" encoding="ascii" ?>');
          source.endText();
 
-         parseXmlDeclaration(source, {} as any, (parsing) => {
+         parseXmlDeclaration(source, start, (parsing) => {
             expect(parsing.params[1].value!.str).toEqual('ascii');
             done();
          });
@@ -41,17 +53,10 @@ describe('xmlDeclaration (integration)', () => {
    describe('checkWellFormed()', () => {
       let emd: EntityMetaData;
       let source: STokenSource;
-      let start: InstructionStart;
    
       beforeEach(() => {
          emd = new EntityMetaData();
          source = new STokenSource(defaultExtractors, emd);
-         start = {
-            open: SToken.fromString('<?'),
-            openSpace: undefined,
-            target: SToken.fromString('xml'),
-            targetSpace: SToken.fromString(' '),
-         };         
       });
 
       it('reports an error when the target text is malformed (check misc.checkWellFormedText())', (done) => {
@@ -77,6 +82,23 @@ describe('xmlDeclaration (integration)', () => {
             result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      });
+
+   });
+
+   describe('pToken.toSTokenArray()', () => {
+
+      it('returns the STokens', (done) => {
+         const source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('version="1.0" encoding="ascii" ?>');
+         source.endText();
+
+         parseXmlDeclaration(source, start, (parsing) => {
+            const result = parsing.toSTokenArray();
+
+            expect(result[0]).toEqual(SToken.fromString('<?'));
             done();
          });
       });

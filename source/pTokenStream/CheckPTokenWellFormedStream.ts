@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData } from '../basic';
+import { EntityMetaData, EntityKind } from '../basic';
 import { ErrorCollector, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 
@@ -25,6 +25,7 @@ import {
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
    ProcessingInstructionPToken,
 } from '../token';
@@ -49,7 +50,7 @@ type Token = {
 
 // This right now only validates the base document.
 class CheckPTokenWellFormedStream extends stream.Transform {
-   private _metaData: EntityMetaData;
+   private emd: EntityMetaData;
    private _state: CheckWellFormedState;
    private _elementNameStack: Array<string>;
    private _startDocType?: DocTypeStartPToken;
@@ -58,7 +59,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       super({
          objectMode: true,
       });
-      this._metaData = new EntityMetaData();
+      this.emd = new EntityMetaData();
       this._state = CheckWellFormedState.START;
       this._elementNameStack = [];
    }
@@ -75,10 +76,10 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
       switch (pToken.type) {
          case declaration.PTYPE:
-            declaration.checkWellFormed(pToken as any, errorCollector, this._metaData); // typehack
+            declaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typehack
             break;
          case EntityMetaData.TYPE:
-            this._metaData = pToken as EntityMetaData; // typehack
+            this.emd = pToken as EntityMetaData; // typehack
             break;
 
          case attListDeclaration.PTYPE:
@@ -86,42 +87,52 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ATTLISTDECL_INVALID_CONTEXT);
             }
 
-            attListDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
+            attListDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case CDATA_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.CDATA_INVALID_DOC_CONTEXT);
             }
 
-            (pToken as any).checkWellFormed(errorCollector, this._metaData); // typeHack
+            (pToken as any).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case charData.PTYPE:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
             }
 
-            charData.checkWellFormed(pToken as any, errorCollector, this._metaData);
+            charData.checkWellFormed(pToken as any, errorCollector, this.emd);
             break;
          case charRef.PTYPE:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.CHARREF_INVALID_DOC_CONTEXT);
             }
 
-            charRef.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
+            charRef.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case comment.PTYPE:
             if (this._state === CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.COMMENT_INVALID_CONTEXT);
             }
-            comment.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
+            comment.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case XMLDECL_PTOKEN:
-            if (this._state !== CheckWellFormedState.START) {
+            // §2.8
+            if (this._state !== CheckWellFormedState.START || this.emd.kind !== EntityKind.DOCUMENT) {
                errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
             } else {
                this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
             }
-            (pToken as any).checkWellFormed(errorCollector, this._metaData);
+            (pToken as any).checkWellFormed(errorCollector, this.emd);
+            break;
+         case TEXTDECL_PTOKEN:
+            // §4.3.1
+            if (this._state !== CheckWellFormedState.START || this.emd.kind === EntityKind.DOCUMENT) {
+               errorCollector.report(WellFormedError.ID.TEXTDECL_INVALID_CONTEXT);
+            } else {
+               this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
+            }
+            (pToken as any).checkWellFormed(errorCollector, this.emd);
             break;
          case docTypeStart.PTYPE:
             switch (this._state) {
@@ -135,7 +146,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                   errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
             }
             this._startDocType = pToken as DocTypeStartPToken; // typeHack
-            docTypeStart.checkWellFormed(pToken as any, errorCollector, this._metaData);
+            docTypeStart.checkWellFormed(pToken as any, errorCollector, this.emd);
             break;
          case docTypeEnd.PTYPE:
             if (this._state !== CheckWellFormedState.PROLOG_PREDOCTYPE && this._state !== CheckWellFormedState.IN_DTD) {
@@ -146,11 +157,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             if (this._startDocType) {
                const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
-               docTypeEnd.checkWellFormed(pToken as any, this._startDocType, specialErrorCollector, this._metaData);
+               docTypeEnd.checkWellFormed(pToken as any, this._startDocType, specialErrorCollector, this.emd);
                delete this._startDocType;
                specialErrorCollector.getErrors().forEach(error => this.push(error));
             } else {
-               docTypeEnd.checkWellFormed(pToken as any, undefined as any, errorCollector, this._metaData);
+               docTypeEnd.checkWellFormed(pToken as any, undefined as any, errorCollector, this.emd);
             }
             break;
          case elementStart.PTYPE:
@@ -168,7 +179,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ]);
             }
 
-            elementStart.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
+            elementStart.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case elementEnd.PTYPE:
             const endNameText = pToken.name ? pToken.name.str : '';
@@ -187,54 +198,54 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ endNameText ]);
             }
 
-            elementEnd.checkWellFormed(pToken as any, errorCollector, this._metaData);
+            elementEnd.checkWellFormed(pToken as any, errorCollector, this.emd);
             break;
          case elementDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ELEMENTDECL_INVALID_CONTEXT);
             }
 
-            elementDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData); //typehack
+            elementDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case entityDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
-            entityDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData); // typeHack
+            entityDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
             break;
          case entityReference.PTYPE:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
-            entityReference.checkWellFormed(pToken as any, errorCollector, this._metaData); // typeHack
+            entityReference.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
             break;
          case entityReference.PARAM_PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
 
-            entityReference.checkWellFormed(pToken as any, errorCollector, this._metaData); // typeHack
+            entityReference.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
             break;
          case notationDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
             }
 
-            notationDeclaration.checkWellFormed(pToken as any, errorCollector, this._metaData); // typeHack
+            notationDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
             break;
          case PROCESSING_INSTRUCTION_PTOKEN:
             if (this._state === CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.PI_INVALID_CONTEXT);
             }
-            (pToken as ProcessingInstructionPToken).checkWellFormed(errorCollector, this._metaData);
+            (pToken as ProcessingInstructionPToken).checkWellFormed(errorCollector, this.emd);
             break;
          case space.PTYPE:
             if (this._state === CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.SPACE_INVALID_CONTEXT);
             }
-            space.checkWellFormed(pToken as any, errorCollector, this._metaData);
+            space.checkWellFormed(pToken as any, errorCollector, this.emd);
             break;
       }
 

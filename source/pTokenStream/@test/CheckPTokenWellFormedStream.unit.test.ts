@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Offset } from 'basic';
+import { EntityLocation, EntityMetaData, Offset, EntityKind } from 'basic';
 import { ErrorCollector, WellFormedError } from '../../error';
 
 import { SToken } from '../../sToken';
@@ -23,11 +23,10 @@ import {
    notationDeclaration,
    ProcessingInstructionPToken,
    space,
-   xmlDeclaration,
    CdataPToken,
 
-   XMLDECL_PTOKEN,
    XmlDeclarationPToken,
+   TextDeclarationPToken,
 } from '../../token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -806,6 +805,50 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
    });
 
+   describe('textDeclaration', () => {
+      let pToken: Token;
+
+      beforeEach(() => {
+         pToken = new TextDeclarationPToken({
+            open: makeSToken('<?'),
+         });
+      });
+
+      it('calls pToken.checkWellFormed() when encountering an Text Declaration parsing', () => {
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
+         checker.write(metaData);
+         checker.write(pToken);
+
+         const args = cwfSpy.calls.argsFor(0);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if encountered not at the start of a file', () => {
+            (checker as any)._state = 'IN_CONTENT';
+            const checkerPushSpy = spyOn(checker, 'push');
+
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.TEXTDECL_INVALID_CONTEXT);
+         });
+
+         it('reports an error if encountered at the start of a document entity', () => {
+            (checker as any)._state = 'START';
+            const checkerPushSpy = spyOn(checker, 'push');
+            checker.write(new EntityMetaData(EntityKind.DOCUMENT));
+
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.TEXTDECL_INVALID_CONTEXT);
+         });
+
+      });
+
+   });
+
    describe('xmlDeclaration', () => {
       let pToken: Token;
 
@@ -827,13 +870,23 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       describe('state checking', () => {
 
-         it('reports an error if encountered ', () => {
+         it('reports an error if encountered after the start of the file', () => {
             (checker as any)._state = 'IN_DTD';
             const checkerPushSpy = spyOn(checker, 'push');
 
             checker.write(pToken);
 
             expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
+         });
+
+         it('reports an error if encountered at the start of a non-document entity', () => {
+            (checker as any)._state = 'START';
+            const checkerPushSpy = spyOn(checker, 'push');
+            checker.write(new EntityMetaData(EntityKind.EXTERNAL));
+
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
          });
 
       });

@@ -1,10 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { EntityMetaData, EntityKind } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 
 import { textOrBlank } from '../common/misc';
-
 import { ProcessingInstructionPToken, parseProcessingInstruction } from '../processingInstruction';
+import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
 
 /**********************************************************************\
@@ -19,7 +20,7 @@ type InstructionStart = {
    target?: SToken,
    targetSpace?: SToken,
 };
-type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclarationPToken) => void;
+type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclarationPToken | TextDeclarationPToken) => void;
 
 /**********************************************************************\
  parseInstruction() extracts a ProcessingInstructionPToken or
@@ -38,21 +39,25 @@ type DeliverInstruction = (section: ProcessingInstructionPToken | XmlDeclaration
       instruction ::= '<?' S? name? S?
 \**********************************************************************/
 
-function parseInstruction(source: STokenSource, openSToken: SToken, deliverPToken: DeliverInstruction) {
-   const pToken: InstructionStart = { open: openSToken };
-   pToken.open = openSToken;
+function parseInstruction(source: STokenSource, openSToken: SToken, emd: EntityMetaData, deliverPToken: DeliverInstruction) {
+   const start: InstructionStart = { open: openSToken };
+   start.open = openSToken;
 
-   source.extractToObjectNoParams('space', pToken, 'openSpace');
-   source.extractToObject('word', [ '?>' ], pToken, 'target');
+   source.extractToObjectNoParams('space', start, 'openSpace');
+   source.extractToObject('word', [ '?>' ], start, 'target');
 
    source.extractNoParams('space', (sToken) => {
-      pToken.targetSpace = sToken;
-      const target = textOrBlank(pToken.target);
+      start.targetSpace = sToken;
+      const target = textOrBlank(start.target);
 
       if (target.toLocaleLowerCase() === 'xml') {
-         parseXmlDeclaration(source, pToken, deliverPToken);
+         if (emd.kind == EntityKind.DOCUMENT) {
+            parseXmlDeclaration(source, start, deliverPToken);
+         } else {
+            parseTextDeclaration(source, start, deliverPToken);
+         }
       } else {
-         parseProcessingInstruction(source, pToken, deliverPToken);
+         parseProcessingInstruction(source, start, deliverPToken);
       }
    });
 }

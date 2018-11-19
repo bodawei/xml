@@ -13,11 +13,13 @@ import {
    elementDeclaration,
    entityReference,
    notationDeclaration,
-   ProcessingInstructionPToken,
    space,
    text,
 
    CdataPToken,
+   ProcessingInstructionPToken,
+   XmlDeclarationPToken,
+   TextDeclarationPToken,
 } from '../../token';
 
 import PToXTokenStream from '../PToXTokenStream.js';
@@ -56,7 +58,7 @@ describe('PToXTokenStream (unit)', () => {
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls charData.pTokenToXToken()', () => {
@@ -149,14 +151,34 @@ describe('PToXTokenStream (unit)', () => {
       expect(notationDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls pToken.toXToken()', () => {
+   it('calls processingInstruction.toXToken()', () => {
       const pToken = new ProcessingInstructionPToken({ open: SToken.fromString('') });
       spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(pToken.toXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls textDeclaration.toXToken()', () => {
+      const pToken = new TextDeclarationPToken({ open: SToken.fromString('') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls xmlDeclaration.toXToken()', () => {
+      const pToken = new XmlDeclarationPToken({ open: SToken.fromString('') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls space.pTokenToXToken()', () => {

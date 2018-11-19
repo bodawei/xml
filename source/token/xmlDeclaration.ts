@@ -6,8 +6,7 @@ import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import { InstructionStart } from './bridge/instruction';
 import { checkWellFormedText, textOrBlank } from './common/misc';
-import literal from './common/literal';
-import { TEXT_PTOKEN } from './text';
+import { sTokensFromPToken, EntityInstructionParam, parseEntityInstruction } from './common/entityInstruction';
 
 /**********************************************************************\
  The xmlDeclaration namespace contains the usual routines for parsing,
@@ -18,7 +17,6 @@ const WFEID = WellFormedError.ID;
 const XMLDECL_PTOKEN = 'XMLDECL_PTOKEN';
 const XMLDECL_XTOKEN = 'XMLDECL_XTOKEN';
 
-const XMLDECL_NAME_TERMINATORS = [ '=', '?>' ];
 const PARAM_NAMES = [ 'version', 'encoding', 'standalone' ];
 const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
 const DEFAULT_ENCODING = 'utf-8';
@@ -47,7 +45,7 @@ class XmlDeclarationPToken {
    public readonly openSpace?: SToken;
    public readonly target?: SToken;
    public readonly targetSpace?: SToken;
-   public readonly params: ReadonlyArray<XmlDeclarationParam> = [];
+   public readonly params: ReadonlyArray<EntityInstructionParam> = [];
    public readonly close?: SToken;
 
    constructor(param: InstructionStart | XmlDeclarationPToken) {
@@ -69,19 +67,6 @@ class XmlDeclarationPToken {
    }
 }
 
-type XmlDeclarationParam = {
-   readonly name: SToken;
-   readonly nameSpace?: SToken;
-   readonly equal?: SToken;
-   readonly equalSpace?: SToken;
-   readonly openQuote?: SToken;
-   readonly value?: SToken;
-   readonly closeQuote?: SToken;
-   readonly valueSpace?: SToken;
-};
-
-type DeliverPToken = (result?: Array<XmlDeclarationParam>) => void;
-
 /**********************************************************************\
  parse() extracts the STokens of an XML Declaration.
 
@@ -90,93 +75,15 @@ type DeliverPToken = (result?: Array<XmlDeclarationParam>) => void;
 
  PARAM
  source: A STokenSource to read from
- piPToken: An processing instruction PToken
+ instStart: The portion of the data already parsed into an InstructionStart
  deliverPToken: Callback to deliver the PToken
-
- SYNTAX
-   §2.8
-      [23] XMLDecl      ::= '<?xml' VersionInfo EncodingDecl?
-                            SDDecl? S? '?>'
-      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
-                            '"' VersionNum '"')
-      [25] Eq           ::= S? '=' S?
-      [26] VersionNum   ::= ([a-zA-Z0-9_.:] | '-')+   // 1.0/1-2
-      [26] VersionNum   ::= '1.0'   // 1.0/3+
-      [26] VersionNum   ::= '1.1'   // 1.1/*
-      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
-                            ('"' ('yes' | 'no') '"'))
-      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
-                            "'" EncName "'" )
-      [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
-   Lax:
-      (xml, version, encoding, standalone are all any case
-      [23] XMLDecl      ::= '<?' S? 'xml' (VersionInfo? | EncodingDecl?
-                            | SDDecl? S?)+ '?>'
-      [24] VersionInfo  ::= S 'version' Eq ("'" VersionNum "'" |
-                            '"' VersionNum '"')
-      [25] Eq           ::= S? '=' S?
-      [26] VersionNum   ::= '1.0' | '1.1' | [^"]* | [^']*
-      [32] SDDecl       ::= S 'standalone' Eq (("'" ('yes' | 'no')"'") |
-                            ('"' ('yes' | 'no') '"'))
-      [80] EncodingDecl ::= S 'encoding' Eq ('"' EncName '"' |
-                            "'" EncName "'" )
-      [81] EncName      ::= [^"]* | [^']*
 \**********************************************************************/
 
 function parseXmlDeclaration(source: STokenSource, instStart: InstructionStart, deliverPToken: (result: XmlDeclarationPToken) => void) {
-   const protoToken: any = Object.assign({}, instStart);
-
-   getNextAttribute(source, [], (params) => {
-      protoToken.params = params;
-      source.extract('match', '?>', (sToken) => {
-         protoToken.close = sToken;
-         deliverPToken(new XmlDeclarationPToken(protoToken));
-      });
+   parseEntityInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
+      deliverPToken(new XmlDeclarationPToken(protoToken));
    });
 }
-
-function getNextAttribute(source: STokenSource, attrs: Array<XmlDeclarationParam>, deliverPToken: DeliverPToken) {
-   source.extract('peekWord', XMLDECL_NAME_TERMINATORS, (sToken) => {
-      const word = textOrBlank(sToken).toLowerCase();
-      if (!sToken || PARAM_NAMES.indexOf(word) === -1) {
-         deliverPToken(attrs);
-         return;
-      }
-
-      addAttribute(source, attrs, sToken, deliverPToken);
-   });
-}
-   
-function addAttribute(source: STokenSource, attrs: Array<XmlDeclarationParam>, name: SToken, deliverPToken: DeliverPToken) {
-   const attr = {
-      name: name,
-   };
-   attrs.push(attr);
-   
-   source.extractToObject('word', XMLDECL_NAME_TERMINATORS, attr, 'name');
-   source.extractToObjectNoParams('space', attr, 'nameSpace');
-   source.extractToObject('match', '=', attr, 'equal');
-   source.extractToObjectNoParams('space', attr, 'equalSpace');
-   literal.parse(source, {
-      pToken: attr,
-   }, (modifiedAttr) => {
-      if (modifiedAttr) {
-         source.extractToObjectNoParams('space', attr, 'valueSpace');
-
-         // We'll only ever get (at most) one TextPToken from literal, since we pass in no reference types
-         const literalPToken = modifiedAttr.value[0];
-
-         if (literalPToken && literalPToken.type === TEXT_PTOKEN) {
-            (attr as any).value = literalPToken.text;
-         } else {
-            delete (attr as any).value;
-         }
-      }
-   
-      getNextAttribute(source, attrs, deliverPToken);
-   });
-}
-   
 
 /**********************************************************************\
  Do well formed checking on the PToken from the parse().
@@ -200,7 +107,7 @@ function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entit
    ec.check(!pToken.close, WFEID.XMLDECL_NO_CLOSE);
 }
 
-function checkParameters(params: ReadonlyArray<XmlDeclarationParam>, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    let foundVersion = false;
    let foundEncoding = false;
    let foundStandalone = false;
@@ -209,7 +116,7 @@ function checkParameters(params: ReadonlyArray<XmlDeclarationParam>, ec: ErrorCo
       const nameText = textOrBlank(param.name);
       const lcName = nameText.toLowerCase();
       const value = param.value;
-      const valueText = textOrBlank(value); // typeHack
+      const valueText = textOrBlank(value);
       const lcValue = valueText.toLowerCase();
 
       ec.setPos(param.name);
@@ -223,28 +130,35 @@ function checkParameters(params: ReadonlyArray<XmlDeclarationParam>, ec: ErrorCo
             foundVersion = true;
             ec.check(foundEncoding || foundStandalone, WFEID.XMLDECL_VERSION_INVALID_ORDER);
 
+            ec.setPos(param.nameSpace);
+            ec.setPos(param.equal);
+            ec.setPos(param.equalSpace);
+            ec.setPos(param.openQuote);
             ec.setPos(value);
             checkWellFormedText(value, ec, entityMetaData);
             ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
             foundEncoding = true;
-            if (entityMetaData.isDocumentKind) {
-               ec.check(!foundVersion || foundStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
-            }
+            ec.check(!foundVersion || foundStandalone, WFEID.XMLDECL_ENCODING_INVALID_ORDER);
 
+            ec.setPos(param.nameSpace);
+            ec.setPos(param.equal);
+            ec.setPos(param.equalSpace);
+            ec.setPos(param.openQuote);
             ec.setPos(value);
             checkWellFormedText(value, ec, entityMetaData);
             ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
             break;
          case 'standalone':
             foundStandalone = true;
-            if (!entityMetaData.isDocumentKind) {
-               ec.report(WFEID.TEXTDECL_XTRA_STANDALONE);
-            }
-
+            ec.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
 
+            ec.setPos(param.nameSpace);
+            ec.setPos(param.equal);
+            ec.setPos(param.equalSpace);
+            ec.setPos(param.openQuote);
             ec.setPos(value);
             checkWellFormedText(value, ec, entityMetaData);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
@@ -255,13 +169,8 @@ function checkParameters(params: ReadonlyArray<XmlDeclarationParam>, ec: ErrorCo
       }
    }
 
-   if (entityMetaData.isDocumentKind) {
-      // No need to test if version was found. Either have encoding or standalone (error) or no params.
-      ec.check(params.length === 0, WFEID.XMLDECL_NO_PARAMS);
-   } else {
-      ec.check(params.length === 0, WFEID.TEXTDECL_NO_PARAMS);
-      ec.check(foundEncoding, WFEID.TEXTDECL_NO_ENCODING);
-   }
+   // No need to test if version was found. Either have encoding or standalone (error) or no params.
+   ec.check(params.length === 0, WFEID.XMLDECL_NO_PARAMS);
 }
 
 /**********************************************************************\
@@ -291,35 +200,6 @@ function pTokenToXToken(pToken: XmlDeclarationPToken) {
    }
 
    return new XmlDeclarationXToken(version, encoding, standalone, pToken);
-}
-
-/**********************************************************************\
- sTokensFromPToken() Returns the ordered array of the STokens
-\**********************************************************************/
-
-function sTokensFromPToken(pToken: XmlDeclarationPToken): Array<SToken> {
-   const builder = new STokenArrayBuilder();
-
-   builder.add(pToken.open,
-      pToken.openSpace,
-      pToken.target,
-      pToken.targetSpace);
-
-   for (const param of pToken.params) {
-      builder.add(
-         param.name,
-         param.nameSpace,
-         param.equal,
-         param.equalSpace,
-         param.openQuote,
-         param.value,
-         param.closeQuote,
-         param.valueSpace);
-   }
-   
-   builder.add(pToken.close);
-
-   return builder.sTokenArray;
 }
 
 export {   

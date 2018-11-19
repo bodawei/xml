@@ -42,7 +42,7 @@ class ProcessingInstructionPToken {
    public readonly close?: SToken;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(param: {open: SToken}) {
+   constructor(param: {open: SToken} | ProcessingInstructionPToken) {
       Object.assign(this, param);
       this.open = param.open;
       this.type = PROCESSING_INSTRUCTION_PTOKEN;

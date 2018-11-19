@@ -34,6 +34,7 @@ export * from './marker/internalSubsetStart';
 export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
 export * from './cdata';
+export * from './textDeclaration';
 export * from './xmlDeclaration';
 
 const token = {

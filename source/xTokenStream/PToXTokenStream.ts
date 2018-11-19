@@ -19,10 +19,10 @@ import {
    notationDeclaration,
    space,
    text,
-   xmlDeclaration,
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
 } from '../token';
 
@@ -42,9 +42,6 @@ class PToXTokenStream extends stream.Transform {
             break;
          case attListDeclaration.PTYPE:
             this.push(attListDeclaration.pTokenToXToken(pToken));
-            break;
-         case CDATA_PTOKEN:
-            this.push(pToken.toXToken(pToken));
             break;
          case charData.PTYPE:
             this.push(charData.pTokenToXToken(pToken));
@@ -78,15 +75,15 @@ class PToXTokenStream extends stream.Transform {
          case notationDeclaration.PTYPE:
             this.push(notationDeclaration.pTokenToXToken(pToken));
             break;
-         case PROCESSING_INSTRUCTION_PTOKEN:
-            this.push(pToken.toXToken(pToken));
-            break;
          case space.PTYPE:
             this.push(space.pTokenToXToken(pToken));
             break;
          case text.PTYPE:
             this.push(text.makeXToken(pToken));
             break;
+         case CDATA_PTOKEN:
+         case PROCESSING_INSTRUCTION_PTOKEN:
+         case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:
             this.push(pToken.toXToken());
             break;

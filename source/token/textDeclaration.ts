@@ -1,0 +1,181 @@
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+
+import { EntityMetaData } from 'basic';
+import { WellFormedError, ErrorCollector } from 'error';
+import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+
+import { InstructionStart } from './bridge/instruction';
+import { checkWellFormedText, textOrBlank } from './common/misc';
+import { EntityInstructionParam, parseEntityInstruction, sTokensFromPToken } from './common/entityInstruction';
+
+/**********************************************************************\
+ The xmlDeclaration namespace contains the usual routines for parsing,
+ validating and tokenizing an XML Declaration.
+\**********************************************************************/
+
+const WFEID = WellFormedError.ID;
+const TEXTDECL_PTOKEN = 'TEXTDECL_PTOKEN';
+const TEXTDECL_XTOKEN = 'TEXTDECL_XTOKEN';
+
+const PARAM_NAMES = [ 'version', 'encoding' ];
+const ENCODING_REGEXP = /^[A-Za-z][-A-Za-z0-9._]*$/;
+const DEFAULT_ENCODING = 'utf-8';
+
+type XmlVersion = 1.0 | 1.1;
+
+class TextDeclarationXToken {
+   public readonly type: typeof TEXTDECL_XTOKEN = TEXTDECL_XTOKEN;
+   public readonly version: XmlVersion;
+   public readonly encoding: string;
+   public readonly pToken?: TextDeclarationPToken;
+
+   constructor(version: XmlVersion, encoding?: string, pToken?: TextDeclarationPToken) {
+      this.version = version;
+      this.encoding = encoding || DEFAULT_ENCODING;
+
+      this.pToken = pToken;
+   }
+}
+
+class TextDeclarationPToken {
+   public readonly type: typeof TEXTDECL_PTOKEN = TEXTDECL_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly target?: SToken;
+   public readonly targetSpace?: SToken;
+   public readonly params: ReadonlyArray<EntityInstructionParam> = [];
+   public readonly close?: SToken;
+
+   constructor(param: InstructionStart | TextDeclarationPToken) {
+      Object.assign(this, param);
+      this.open = param.open;
+      this.params = this.params;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData): void {
+      checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken(): TextDeclarationXToken {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray(): Array<SToken> {
+      return sTokensFromPToken(this);
+   }
+}
+
+/**********************************************************************\
+ parse() extracts the STokens of a Text Declaration.
+
+ This assumes that the "<?xml " has already been processed, and those
+ STokens are passed in through instStart.
+
+ PARAM
+ source: A STokenSource to read from
+ instStart: The portion of the data already parsed into an InstructionStart
+ deliverPToken: Callback to deliver the PToken
+\**********************************************************************/
+
+function parseTextDeclaration(source: STokenSource, instStart: InstructionStart, deliverPToken: (result: TextDeclarationPToken) => void) {
+   parseEntityInstruction(source, instStart, PARAM_NAMES, (protoToken) => {
+      deliverPToken(new TextDeclarationPToken(protoToken));
+   });
+}
+
+/**********************************************************************\
+ Do well formed checking on the PToken from the parse().
+\**********************************************************************/
+
+function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+   ec.setPos(pToken.open);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.TEXTDECL_SPACE_AFTER_OPEN);
+
+   ec.setPos(pToken.target);
+   ec.check(!pToken.target, WFEID.TEXTDECL_NO_TARGET);
+   checkWellFormedText(pToken.target, ec, entityMetaData);
+
+   ec.setPos(pToken.targetSpace);
+   ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
+
+   checkParameters(pToken.params, ec, entityMetaData);
+
+   ec.setPos(pToken.close);
+   ec.check(!pToken.close, WFEID.TEXTDECL_NO_CLOSE);
+}
+
+function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+   let foundEncoding = false;
+
+   for (const param of params) {
+      const nameText = textOrBlank(param.name);
+      const lcName = nameText.toLowerCase();
+      const value = param.value;
+      const valueText = textOrBlank(value);
+
+      ec.setPos(param.name);
+      ec.check(nameText !== lcName, WFEID.TEXTDECL_PARAM_INVALID_CASE, [ lcName, nameText ]);
+
+      switch (lcName) {
+         case 'version':
+            ec.check(foundEncoding, WFEID.TEXTDECL_VERSION_INVALID_ORDER);
+
+            ec.setPos(param.nameSpace);
+            ec.setPos(param.equal);
+            ec.setPos(param.equalSpace);
+            ec.setPos(param.openQuote);
+            ec.setPos(value);
+            checkWellFormedText(value, ec, entityMetaData);
+            ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, [ valueText ]);
+            break;
+         case 'encoding':
+            foundEncoding = true;
+
+            ec.setPos(param.nameSpace);
+            ec.setPos(param.equal);
+            ec.setPos(param.equalSpace);
+            ec.setPos(param.openQuote);
+            ec.setPos(value);
+            checkWellFormedText(value, ec, entityMetaData);
+            ec.check(!valueText.match(ENCODING_REGEXP), WFEID.TEXTDECL_ENCODING_INVALID, [ valueText ]);
+            break;
+      }
+   }
+}
+
+/**********************************************************************\
+ Convert a PToken into an XToken.
+\**********************************************************************/
+
+function pTokenToXToken(pToken: TextDeclarationPToken) {
+   let version: XmlVersion = 1.0;
+   let encoding: string = DEFAULT_ENCODING;
+
+   for (const param of pToken.params) {
+      const name = textOrBlank(param.name);
+      const value = textOrBlank(param.value);
+
+      switch (name.toLowerCase()) {
+         case 'version': 
+            version = value === '1.1' ? 1.1 : 1.0;
+            break;
+         case 'encoding': 
+            encoding = value;
+            break;
+      }
+   }
+
+   return new TextDeclarationXToken(version, encoding, pToken);
+}
+
+
+
+export {   
+   TEXTDECL_PTOKEN,
+   TEXTDECL_XTOKEN,
+   TextDeclarationPToken,
+   TextDeclarationXToken,
+
+   parseTextDeclaration,
+};

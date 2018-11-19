@@ -202,4 +202,9 @@ describe('PToXTokenStream (integration)', () => {
          new XmlDeclarationXToken(1.0) ], done);
    });
 
+   it('tokenized an Xml Declaration', (done) => {
+      expectInputToProduce('<?xml version="1.0"?>', [
+         new XmlDeclarationXToken(1.0) ], done);
+   });
+
 });

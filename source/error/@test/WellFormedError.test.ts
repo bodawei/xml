@@ -39,7 +39,7 @@ describe('WellFormedError', () => {
 
       it('sets the message', () => {
          expect(new WellFormedError(WellFormedError.ID.XMLDECL_NO_CLOSE).message)
-            .toEqual('Missing closing "?>" in an XML or Text Declaration.');
+            .toEqual('Missing closing "?>" in an XML Declaration.');
       });
 
    });

@@ -1,96 +1,98 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic';
-import { WellFormedError, XmlWarning } from '../../../error';
-import { MockErrorCollector } from '../../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
+import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
+import { MockErrorCollector } from 'error-test';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import * as instruction from '../instruction';
-import { InstructionStart } from '../instruction';
+import * as pi from '../../processingInstruction';
+import * as textDeclaration from '../../textDeclaration';
+import * as xmlDeclaration from '../../xmlDeclaration';
+import { parseInstruction, InstructionStart } from '../instruction';
 import misc from '../../common/misc';
 import { SToken } from 'sToken';
 
 describe('instruction (unit)', () => {
-   let instructionPToken: InstructionStart;
+   let open: SToken;
 
    beforeEach(() => {
-      const expectedSToken = makeSTokenMaker();
-      instructionPToken = {
-         open: expectedSToken('<?'),
-         openSpace: undefined,
-         target: expectedSToken('instructionTarget'),
-         targetSpace: expectedSToken(' '),
-      };
+      open = SToken.fromString('<?');
    });
 
-   describe('parse()', () => {
+   describe('parseInstruction()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
       });
 
-      // it('does a basic instruction parse', () => {
-      //    const mockSource = new MockSTokenSource([
-      //       undefined,
-      //       'instructionTarget',
-      //       ' ',
-      //    ], 2, 0, 2);
+      it('does a basic parse of a processing instruction', () => {
+         const piParse = spyOn(pi, 'parseProcessingInstruction');
+         const mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ undefined, 'word', [ '?>' ] ],
+            [ undefined, 'space' ],
+         ]);
 
-      //    instruction.parse(mockSource, instructionPToken.open, callback);
-      //    mockSource.respondInAsyncTime();
+         parseInstruction(mockSource, open, new EntityMetaData(), callback);
+         mockSource.respondInAsyncTime();
 
-      //    expect(callback).toContainPTokenProps(instructionPToken);
-      // });
+         const args = piParse.calls.argsFor(0);
+         expect(args[0]).toEqual(mockSource);
+         expect(args[1]).toEqual({
+            open: open,
+            openSpace: undefined,
+            target: undefined,
+            targetSpace: undefined,
+         });
+         expect(args[2]).toBeInstanceOf(Function);
+      });
 
-      // it('returns all undefined if input ends immediately', () => {
-      //    const mockSource = new MockSTokenSource([
-      //       undefined,
-      //       undefined,
-      //       undefined,
-      //    ], 2, 0, 2);
+      it('does a basic parse of an xml declaration', () => {
+         const xmlParse = spyOn(xmlDeclaration, 'parseXmlDeclaration');
+         const mockSource = new MockSTokenSource([
+            [ undefined, 'space' ],
+            [ 'xml', 'word', [ '?>' ] ],
+            [ undefined, 'space' ],
+         ]);
 
-      //    instruction.parse(mockSource, instructionPToken.open, callback);
-      //    mockSource.respondInAsyncTime();
+         parseInstruction(mockSource, open, new EntityMetaData(), callback);
+         mockSource.respondInAsyncTime();
 
-      //    expect(callback).toContainPTokenProps({
-      //       type: instruction.PTYPE,
-      //       open: instructionPToken.open,
-      //       postOpenSpace: undefined,
-      //       target: undefined,
-      //       postTargetSpace: undefined,
-      //    });
-      // });
+         const args = xmlParse.calls.argsFor(0);
+         expect(args[0]).toEqual(mockSource);
+         expect(args[1]).toEqual({
+            open: open,
+            openSpace: undefined,
+            target: new SToken('xml', 'xml', new Range(new EntityLocation(), 0, 0, 0, 3, 0, 3)),
+            targetSpace: undefined,
+         });
+         expect(args[2]).toBeInstanceOf(Function);
+      });
+
+      it('does a basic parse of an text declaration', () => {
+         const textParse = spyOn(textDeclaration, 'parseTextDeclaration');
+         const mockSource = new MockSTokenSource([
+            [ '\t', 'space' ],
+            [ 'xml', 'word', [ '?>' ] ],
+            [ ' ', 'space' ],
+         ]);
+
+         parseInstruction(mockSource, open, new EntityMetaData(EntityKind.EXTERNAL), callback);
+         mockSource.respondInAsyncTime();
+
+         const args = textParse.calls.argsFor(0);
+         expect(args[0]).toEqual(mockSource);
+         expect(args[1]).toEqual({
+            open: open,
+            openSpace: new SToken('\t', '\t', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)),
+            target: new SToken('xml', 'xml', new Range(new EntityLocation(), 1, 0, 1, 4, 0, 4)),
+            targetSpace: new SToken(' ', ' ', new Range(new EntityLocation(), 4, 0, 4, 5, 0, 5)),
+         });
+         expect(args[2]).toBeInstanceOf(Function);
+      });
 
    });
 
 });
-
-   // it('calls parseProcessingInstruction()', (done) => {
-   //    const parseSpy = spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
-   //    pTokenStream.addText('<?something foo?>');
-   //    pTokenStream.endText();
-
-   //    gatherPTokens(pTokenStream, () => {
-   //       expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-   //       expect(parseSpy.calls.argsFor(0)[1].target.str).toEqual('something');
-   //       expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-   //       done();
-   //    });
-   // });
-
-   // it('calls processingInstruction.parse() when there is no target name', (done) => {
-   //    const parseSpy = spyOn(processingInstruction, 'parseProcessingInstruction').and.callThrough();
-   //    pTokenStream.addText('<??>');
-   //    pTokenStream.endText();
-
-   //    gatherPTokens(pTokenStream, () => {
-   //       expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-   //       expect(parseSpy.calls.argsFor(0)[1].target).toBeUndefined();
-   //       expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-   //       done();
-   //    });
-   // });
-
-
