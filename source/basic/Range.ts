@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import EntityLocation from './EntityLocation';
-import Offset from './Offset.js';
+import Offset from './Offset';
 
 /**********************************************************************\
  A range is used to record the start and end of a range of characters

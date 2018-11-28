@@ -7,11 +7,10 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference';
-import misc from '../misc';
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 import text, { TextPToken } from '../../text';
+import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
 
 type LiteralValueCallback = (value: LiteralValuePToken) => void;
 
@@ -254,7 +253,7 @@ describe('literal (unit)', () => {
       });
 
       it('copes the value being an entity reference', () => {
-         litValMakeCompatSpy.and.returnValue([ new entityReference.XToken('', new entityReference.PToken()) ]);
+         litValMakeCompatSpy.and.returnValue([ new GeneralEntityReferenceXToken('', new GeneralEntityReferencePToken({ open: SToken.fromString('&') })) ]);
          const result = literal.makeOneTokenCompatible(literalPToken);
 
          expect(result).toEqual(undefined);

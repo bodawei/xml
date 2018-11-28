@@ -4,7 +4,7 @@ import { ErrorCollector, WellFormedError } from "error";
 import { SToken } from "sToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';
-import { GENERAL_ENTITY_REFERENCE_PTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN } from "../entityReference";
+import { GENERAL_ENTITY_REFERENCE_PTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN } from "../generalEntityReference";
 import { PTYPE, isTextPToken, isTextXToken } from "../text";
 
 const WFID = WellFormedError.ID;

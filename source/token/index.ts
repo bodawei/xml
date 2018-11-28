@@ -9,22 +9,22 @@ import * as comment from './comment';
 import { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
-import * as entityDeclaration from './entityDeclaration';
 import elementDeclaration from './elementDeclaration';
-import entityReference from './entityReference';
 import * as elementStart from './elementStart';
 import * as elementEnd from './elementEnd';
 import * as space from './space';
 import text from './text';
 import * as notationDeclaration from './notationDeclaration';
-export * from './processingInstruction';
 import unassigned from './common/unassigned';
+import literalValue from './common/literalValue';
+
+import * as entityDeclaration from './entityDeclaration';
+export * from './processingInstruction';
 import * as xmlDeclaration from './xmlDeclaration';
 
-import literalValue from './common/literalValue';
+export * from './bridge/instruction';
 export * from './bridge/section';
 
-export * from './bridge/instruction';
 export * from './marker/externalSubsetEnd';
 export * from './marker/externalSubsetStart';
 export * from './marker/generalEntityEnd';
@@ -33,7 +33,10 @@ export * from './marker/internalSubsetEnd';
 export * from './marker/internalSubsetStart';
 export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
+
 export * from './cdata';
+export * from './generalEntityReference';
+export * from './parameterEntityReference';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
@@ -50,7 +53,6 @@ const token = {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    space,
    text,
@@ -76,7 +78,6 @@ export {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    space,
    text,

@@ -10,7 +10,7 @@ import {
    parseWordList,
    WordListType,
    WordListPToken,
-} from '../wordList.js';
+} from '../wordList';
 
 describe('wordList (integration)', () => {
    let wlPToken: WordListPToken;

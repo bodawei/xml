@@ -4,19 +4,20 @@
 
 import { SToken } from '../../../sToken/index';
 
-import { EntityReferencePToken } from '../../entityReference';
+import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';
 
 describe('GeneralEntityEndPToken (unit)', () => {
 
    it('is constructed with the specified name', () => {
-      const token = new GeneralEntityEndPToken(new EntityReferencePToken());
+      const token = new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
 
-      expect(token.referencePToken).toEqual(new EntityReferencePToken());
+      expect(token.referencePToken).toEqual(new GeneralEntityReferencePToken({ open: SToken.fromString('&') }));
    });
 
    it('will create an xToken', () => {
-      const token = new GeneralEntityEndPToken(new EntityReferencePToken({
+      const token = new GeneralEntityEndPToken(new GeneralEntityReferencePToken({
+         open: SToken.fromString('&'),
          name: SToken.fromString('foo')
       }));
 

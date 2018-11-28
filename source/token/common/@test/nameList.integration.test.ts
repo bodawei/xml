@@ -11,7 +11,7 @@ import nameList, {
    ContentParticlePToken,
    NameListPToken,
    NamePToken,
-} from '../nameList.js';
+} from '../nameList';
 
 describe('nameList (integration)', () => {
    let nlPToken: NameListPToken;

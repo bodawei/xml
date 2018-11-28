@@ -7,14 +7,14 @@ import { defaultExtractors } from '../../../extractor';
 import { SToken, STokenSource } from '../../../sToken';
 import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import helper from '../../@test/helper.js';
+import helper from '../../@test/helper';
 import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
-import entityReference, { EntityReferencePToken } from '../../entityReference';
 import text from '../../text';
 import unassigned, { UnassignedType } from '../unassigned';
 
-import externalId from '../externalId.js';
+import externalId from '../externalId';
 import { ParameterEntityStartPToken } from 'source/token/marker/parameterEntityStart';
+import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 
 describe('externalId (integration)', () => {
 
@@ -69,12 +69,11 @@ describe('externalId (integration)', () => {
                postPublicSpace: undefined,
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
-                     type: 'foo',
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   })
                } ],
@@ -105,7 +104,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(new EntityReferencePToken()),
+               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.LITERAL,
@@ -117,7 +116,7 @@ describe('externalId (integration)', () => {
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
 
             externalId.assignUnassigned(extIdPToken);
@@ -174,7 +173,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(new EntityReferencePToken()),
+               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -184,7 +183,7 @@ describe('externalId (integration)', () => {
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
 
             externalId.assignUnassigned(extIdPToken, container, 'prevProp');
@@ -207,7 +206,7 @@ describe('externalId (integration)', () => {
             extIdPToken.unassigned.shift();
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityEndPToken(new EntityReferencePToken()),
+               token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.WORD,
@@ -217,7 +216,7 @@ describe('externalId (integration)', () => {
             });
             extIdPToken.unassigned.unshift({
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             });
 
             externalId.assignUnassigned(extIdPToken, container, 'prevProp');
@@ -263,7 +262,7 @@ describe('externalId (integration)', () => {
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
                unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation()))), 
                unassigned.spaceFromSToken(new SToken(' ', ' ', new Range(new EntityLocation()))), {
@@ -275,7 +274,7 @@ describe('externalId (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new EntityReferencePToken()),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ].concat(pToken.unassigned);
             externalId.assignUnassigned(pToken, {}, 'prevSpace');

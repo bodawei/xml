@@ -4,9 +4,10 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from '../../sToken';
 
-import entityReference, { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';
 import text, { TextPToken, TextXToken } from '../text';
 import misc from './misc';
+import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
+import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -16,8 +17,8 @@ import misc from './misc';
 // </typeHack>
 
 type Terminators = Array<'&'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|EntityReferencePToken>;
-type LiteralValueXToken = Array<TextXToken|EntityReferenceXToken>;
+type LiteralValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken>;
+type LiteralValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 /**********************************************************************\
@@ -69,9 +70,11 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
          return;
       }
 
-      function handleRef(refPToken: EntityReferencePToken) {
+      function handleRef(refPToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | void) {
          parse(source, terminators, (rest) => {
-            rest.unshift(refPToken);
+            if (refPToken) {
+               rest.unshift(refPToken);
+            }
             deliverPToken(currentValue.concat(rest));
          });
       }
@@ -82,11 +85,11 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
             deliverPToken(currentValue);
             break;
          case '%':
-            entityReference.paramParse(source, handleRef);
+            parseParameterEntityReference(source, handleRef);
             break;
          case '&':
             source.extractNoParams('char', (opening) => {
-               entityReference.parse(source, opening!, handleRef); // typeHack
+               parseGeneralEntityReference(source, opening!, handleRef); // typeHack
             });
             break;
       }
@@ -105,7 +108,7 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
          ec.setPos(item.text);
          misc.checkWellFormedText(item.text, ec, entityMetaData);
       } else {
-         entityReference.checkWellFormed(item, ec, entityMetaData);
+         item.checkWellFormed(ec, entityMetaData);
       }
    }
 }
@@ -125,7 +128,7 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
             value.push(new text.XToken(item.text.str, item));
          }
       } else {
-         value.push(entityReference.pTokenToXToken(item));
+         value.push(item.toXToken());
       }
    }
 
@@ -145,7 +148,7 @@ function getSTokens(pToken: LiteralValuePToken) {
       if (!isTextPToken(item)) {
          const typeHack: any = item
 
-         results = results.concat(typeHack.getSTokenArray());
+         results = results.concat(typeHack.toSTokenArray());
       } else if (item.text) {
          results.push(item.text);
       }

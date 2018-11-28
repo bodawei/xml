@@ -7,7 +7,7 @@ import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from 'error';
 
-import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration.js';
+import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import text from '../text';
 import unassigned, { UnassignedArray } from '../common/unassigned';
@@ -1628,6 +1628,20 @@ describe('attListDeclaration (unit)', () => {
             position: undefined,
             lastPosition: aldPToken.attDefs[0].postDefaultTypeSpace,
          });
+      });
+
+      it('reports an error if there is extra text after unassigned', () => {
+         spyOn(unassigned, 'checkExtra');
+         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         aldPToken.extra = [
+            unassigned.wordFromSToken(startSToken),
+         ];
+
+         attListDeclaration.checkWellFormed(aldPToken, mockErrorCollector, emd);
+
+         expect(unassigned.checkExtra).toHaveBeenCalledWith(aldPToken.extra,
+            mockErrorCollector,
+            WellFormedError.ID.ATTLISTDECL_EXTRA_TEXT);
       });
    
    });

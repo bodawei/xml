@@ -9,7 +9,7 @@ import * as tokens from '../../token';
 import { XmlDeclarationXToken } from '../../token';
 
 import PToXTokenStream from '../PToXTokenStream';
-import CommentFixingStream from '../CommentFixingStream.js';
+import CommentFixingStream from '../CommentFixingStream';
 
 describe('CommentFixingStream (integration)', () => {
    let pTokenStream: PTokenStream;

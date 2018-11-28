@@ -19,11 +19,12 @@ import {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    space,
 
    parseInstruction,
+   parseParameterEntityReference,
+   parseGeneralEntityReference,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { DocTypeEndPToken } from '../token/docTypeEnd';
@@ -139,7 +140,7 @@ class PTokenStream extends stream.Transform {
                this._markupParse(deliverParse);
                break;
             case '%':
-               entityReference.paramParse(this._sTokenSource, deliverParse);
+               parseParameterEntityReference(this._sTokenSource, deliverParse);
                break;
             case ']':
                if (this.waitingForInternalClose) {
@@ -180,7 +181,7 @@ class PTokenStream extends stream.Transform {
          const markupStartSToken = (result as any) as SToken; // typeHack
          switch (markupStartSToken.str) {
             case '&':
-               entityReference.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               parseGeneralEntityReference(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '&#':
                charRef.parse(this._sTokenSource, markupStartSToken, deliverParse);

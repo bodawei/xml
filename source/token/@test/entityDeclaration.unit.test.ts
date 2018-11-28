@@ -10,11 +10,11 @@ import { WellFormedError, XmlWarning } from '../../error';
 import declaration from '../bridge/declaration';
 import * as entityDeclaration from '../entityDeclaration';
 import { EntityDeclarationPToken, ParameterEntityDeclarationPToken } from '../entityDeclaration';
-import entityReference from '../entityReference'
 import unassigned from '../common/unassigned';
-import externalId from '../common/externalId.js';
+import externalId from '../common/externalId';
 import misc from '../common/misc';
 import literal from '../common/literal';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('entityDeclaration (unit)', () => {
    let entityDeclarationPToken: EntityDeclarationPToken;
@@ -494,11 +494,11 @@ describe('entityDeclaration (unit)', () => {
             const makeSToken = makeSTokenMaker();
             expect(pToken.unassigned).toEqual([ {
                type: 'reference',
-               token: new entityReference.ParamPToken({
+               token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
-                  postOpenSpace: makeSToken(' '),
+                  openSpace: makeSToken(' '),
                   name: makeSToken('entityName'),
-                  postNameSpace: makeSToken(' '),
+                  nameSpace: makeSToken(' '),
                   close: makeSToken(';'),
                })
             }, {

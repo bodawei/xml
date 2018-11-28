@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import EntityLocation from './EntityLocation.js';
+import EntityLocation from './EntityLocation';
 
 const LAST_1DOT0_REVISION = 6;
 const DEFAULT_1DOT0_REVISION = 5;

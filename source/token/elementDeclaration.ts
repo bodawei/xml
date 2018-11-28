@@ -6,8 +6,6 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import nameList, { NameListPToken, XNameList, isXName } from './common/nameList';
 import misc from './common/misc';
-import base from './base';
-import entityReference from './entityReference';
 import unassigned, { UnassignedArray, UnassignedValue } from './common/unassigned';
 import { SToken, STokenSource } from '../sToken/index';
 

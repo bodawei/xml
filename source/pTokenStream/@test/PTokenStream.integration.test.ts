@@ -5,11 +5,13 @@ import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 
-import PTokenStream from '../PTokenStream.js';
+import PTokenStream from '../PTokenStream';
 
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    CDATA_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
 } from '../../token';
 
 type Token = { type: string };
@@ -115,11 +117,11 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parse entity reference', (done) => {
-      expectInputToProduceTypes('&foo;', 'ENTITYREF', done);
+      expectInputToProduceTypes('&foo;', GENERAL_ENTITY_REFERENCE_PTOKEN, done);
    });
 
    it('parse parameter entity reference', (done) => {
-      expectInputToProduceTypes('%foo;', 'PARAMETERENTITYREF', done);
+      expectInputToProduceTypes('%foo;', PARAMETER_ENTITY_REFERENCE_PTOKEN, done);
    });
 
    it('parse NOTATION declaration', (done) => {

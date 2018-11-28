@@ -9,7 +9,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
-import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 import externalId from '../common/externalId';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import text from '../text';
@@ -19,7 +19,7 @@ import helper from './helper';
 
 type DeclarationPToken = {
    open: SToken;
-   postOpenSpace?: SToken;
+   openSpace?: SToken;
    declType?: SToken;
    postDeclTypeSpace?: SToken;
 };
@@ -32,7 +32,7 @@ describe('notationDeclaration (integration)', () => {
       expectedSToken = makeSTokenMaker();
       declarationPToken = {
          open: expectedSToken('<!'),
-         postOpenSpace: undefined,
+         openSpace: undefined,
          declType: expectedSToken('NOTATION'),
          postDeclTypeSpace: expectedSToken(' '),
       };
@@ -62,11 +62,11 @@ describe('notationDeclaration (integration)', () => {
             expect(result).toEqual(new notationDeclaration.PToken({
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],
@@ -84,11 +84,11 @@ describe('notationDeclaration (integration)', () => {
          const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13);
          const unassignedValue = [ {
             type: UnassignedType.REFERENCE,
-            token: new entityReference.ParamPToken({
+            token: new ParameterEntityReferencePToken({
                open:  makeSToken1('%'),
-               postOpenSpace: undefined,
+               openSpace: undefined,
                name:  makeSToken1('foo'),
-               postNameSpace: undefined,
+               nameSpace: undefined,
                close:  makeSToken1(';'),
             }),
           } ];
@@ -123,7 +123,7 @@ describe('notationDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, 
                unassigned.wordFromSToken(SToken.fromString('notationName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
@@ -136,7 +136,7 @@ describe('notationDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({})),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
 
@@ -168,9 +168,9 @@ describe('notationDeclaration (integration)', () => {
    describe('checkWellFormed()', () => {
 
       it('asks the declaration module to look for problems in the declaration part', (done) => {
-         declarationPToken.postOpenSpace = expectedSToken(' ');
+         declarationPToken.openSpace = expectedSToken(' ');
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText('foo SYSTEM "sys.dtd">');
+         source.addText(' foo SYSTEM "sys.dtd">');
          source.endText();
 
          notationDeclaration.parse(source, declarationPToken, (parsing) => {
@@ -178,7 +178,7 @@ describe('notationDeclaration (integration)', () => {
 
             notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
 
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
+            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NO_NAME);
             done();
          });
       });
@@ -237,7 +237,7 @@ describe('notationDeclaration (integration)', () => {
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+               token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             }, {
                   type: UnassignedType.LITERAL,
                   token: {
@@ -247,7 +247,7 @@ describe('notationDeclaration (integration)', () => {
                   },
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({})),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ].concat(pToken.unassigned);
             pToken.externalId!.unassigned = pToken.unassigned;

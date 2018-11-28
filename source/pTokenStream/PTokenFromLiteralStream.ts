@@ -4,8 +4,7 @@ import stream from 'readable-stream';
 
 import { STokenSource } from '../sToken';
 import {
-   entityReference,
-   text,
+   text, parseParameterEntityReference,
 } from '../token';
 
 type Options = {
@@ -33,7 +32,7 @@ class PTokenFromLiteralStream extends stream.Transform {
          }
 
          if (this.peRef && sToken.str === '%') {
-            entityReference.paramParse(this.sTokenSource, (sToken) => this.push(sToken));
+            parseParameterEntityReference(this.sTokenSource, (pToken) => this.push(pToken));
          } else {
             const terminators = [];
             if (this.peRef) {

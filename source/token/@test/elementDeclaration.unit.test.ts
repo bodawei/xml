@@ -11,8 +11,8 @@ import declaration from '../bridge/declaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
 import misc from '../common/misc';
 import nameList from '../common/nameList';
-import entityReference from '../entityReference';
 import unassigned, { UnassignedType } from '../common/unassigned';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('elementDeclaration (unit)', () => {
    let elementPToken: ElementDeclarationPToken;
@@ -290,7 +290,7 @@ describe('elementDeclaration (unit)', () => {
       it('does not call assignToProps() if there is still an unexpanded param ref', () => {
          elementPToken.unassigned = [ {
             type: UnassignedType.REFERENCE,
-            token: new entityReference.PToken('foo'),
+            token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
          } ];
          
          elementDeclaration.assignUnassigned(elementPToken);

@@ -4,20 +4,21 @@
 
 import { SToken } from 'sToken';
 
-import { EntityReferencePToken } from '../../entityReference';
+import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import { ParameterEntityEndPToken, ParameterEntityEndXToken } from '../parameterEntityEnd';
 
 describe('ParameterEntityEndPToken (unit)', () => {
 
    it('is constructed with the specified name', () => {
-      const token = new ParameterEntityEndPToken(new EntityReferencePToken());
+      const token = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }));
 
-      expect(token.referencePToken).toEqual(new EntityReferencePToken());
+      expect(token.referencePToken).toEqual(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }));
    });
 
    it('will create an xToken', () => {
-      const token = new ParameterEntityEndPToken(new EntityReferencePToken({
-         name: SToken.fromString('foo')
+      const token = new ParameterEntityEndPToken(new ParameterEntityReferencePToken({
+         open: SToken.fromString('%'),
+         name: SToken.fromString('foo'),
       }));
 
       expect(token.toXToken()).toEqual(new ParameterEntityEndXToken('foo', token));

@@ -7,12 +7,12 @@ import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
 import { WellFormedError } from '../../../error';
 
-import entityReference from '../../entityReference';
 import text from '../../text';
 import unassigned from '../unassigned';
 
-import externalId from '../externalId.js';
+import externalId from '../externalId';
 import literal from '../literal';
+import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 
 describe('externalId (unit)', () => {
 
@@ -349,7 +349,7 @@ describe('externalId (unit)', () => {
          const externalIdToken: any = {
             unassigned: [ {
                type: 'reference',
-               token: new entityReference.ParamPToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             } ],
          };
 

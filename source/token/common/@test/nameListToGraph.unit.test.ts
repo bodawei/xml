@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { XNameList } from '../nameList'
-import nameListToGraph from '../nameListToGraph.js';
+import nameListToGraph from '../nameListToGraph';
 
 describe('nameListToGraph()', () => {
 

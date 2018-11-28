@@ -19,7 +19,6 @@ import {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    space,
 
@@ -28,6 +27,10 @@ import {
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
    ProcessingInstructionPToken,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -214,19 +217,19 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             entityDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
             break;
-         case entityReference.PTYPE:
+         case GENERAL_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
-            entityReference.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
+            (pToken as GeneralEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
-         case entityReference.PARAM_PTYPE:
+         case PARAMETER_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
 
-            entityReference.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
+            (pToken as ParameterEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case notationDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {

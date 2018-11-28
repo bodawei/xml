@@ -2,7 +2,7 @@
 
 import { WellFormedError, ErrorCollector } from '../error';
 
-import externalId from './common/externalId.js';
+import externalId from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import misc from './common/misc';
 import base from './base';

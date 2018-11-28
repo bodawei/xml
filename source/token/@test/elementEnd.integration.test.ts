@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as elementEnd from '../elementEnd.js';
+import * as elementEnd from '../elementEnd';
 
 describe('elementEnd', () => {
    let elementEndPToken: elementEnd.ElementEndPToken;

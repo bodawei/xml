@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { StringBundle, LocaleMap } from '../StringBundle.js';
+import { StringBundle, LocaleMap } from '../StringBundle';
 
 describe('StringBundle', () => {
    let bundle: StringBundle;

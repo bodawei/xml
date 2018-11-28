@@ -8,7 +8,7 @@ import { ValidityError, WellFormedError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpandingStream } from '../../expand';
 
-import EntityManager from '../../expand/EntityManager.js';
+import EntityManager from '../../expand/EntityManager';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import PToXTokenStream from '../PToXTokenStream';

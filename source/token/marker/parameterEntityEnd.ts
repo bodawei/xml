@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityReferencePToken } from '../entityReference';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { textOrBlank } from '../common/misc';
 
 /**********************************************************************\
  Defines a simple token that tracks the end of an entity expansion.
@@ -13,12 +14,12 @@ class ParameterEntityEndPToken {
    public readonly type: typeof PARAMETER_ENTITY_END_PTOKEN = PARAMETER_ENTITY_END_PTOKEN;
    public readonly referencePToken: ParameterEntityReferencePToken;
 
-   constructor(entityReferencePToken: ParameterEntityReferencePToken) {
-      this.referencePToken = entityReferencePToken;
+   constructor(peReferencePToken: ParameterEntityReferencePToken) {
+      this.referencePToken = peReferencePToken;
    }
 
    toXToken() {
-      return new ParameterEntityEndXToken(this.referencePToken.name.str, this);
+      return new ParameterEntityEndXToken(textOrBlank(this.referencePToken.name), this);
    }
 }
 

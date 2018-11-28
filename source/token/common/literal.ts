@@ -4,7 +4,7 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError } from '../../error';
 import { SToken, STokenSource } from '../../sToken';
 
-import text, { TextXToken } from '../text';
+import text from '../text';
 import literalValue, {
    LiteralValuePToken,
    Terminators as LiteralValueTerminators,
@@ -39,7 +39,7 @@ interface LiteralPToken {
  If true is returned, then this modifies the options.pToken value.
  It does so by adding these properties to it:
    openQuote: SToken
-   value: Array<text.PToken|entityReference.PToken|entityReference.ParamPToken>
+   value: Array<text.PToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken>
    closeQuote: SToken|void
 \**********************************************************************/
 

@@ -6,8 +6,7 @@ import { defaultExtractors } from '../../../extractor';
 import { STokenSource } from '../../../sToken';
 import { makeSTokenMaker, STokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference from '../../entityReference';
-import { ParameterEntityReferencePToken } from '../../entityReference';
+import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import text from '../../text';
 import unassigned from '../unassigned';
 
@@ -43,9 +42,9 @@ describe('unassigned (integration)', () => {
                type: 'reference',
                token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
-                  postOpenSpace: undefined,
+                  openSpace: undefined,
                   name: makeSToken('peref'),
-                  postNameSpace: undefined,
+                  nameSpace: undefined,
                   close: makeSToken(';'),
                }),
             },
@@ -70,9 +69,9 @@ describe('unassigned (integration)', () => {
                type: 'reference',
                token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
-                  postOpenSpace: undefined,
+                  openSpace: undefined,
                   name: makeSToken('peref'),
-                  postNameSpace: undefined,
+                  nameSpace: undefined,
                   close: makeSToken(';'),
                }),
             }
@@ -92,11 +91,11 @@ describe('unassigned (integration)', () => {
          unassigned.parseNextValue(source, false, (value) => {
             expect(value).toEqual({
                type: 'reference',
-               token: new entityReference.ParamPToken({
+               token: new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
-                  postOpenSpace: undefined,
+                  openSpace: undefined,
                   name: makeSToken('peref'),
-                  postNameSpace: undefined,
+                  nameSpace: undefined,
                   close: makeSToken(';'),
                },
             )} as any);

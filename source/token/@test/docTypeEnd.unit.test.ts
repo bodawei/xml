@@ -6,7 +6,7 @@ import { MockErrorCollector } from '../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
-import * as docTypeEnd from '../docTypeEnd.js';
+import * as docTypeEnd from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';
 import { EntityMetaData } from 'basic';
 

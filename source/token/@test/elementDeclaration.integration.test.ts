@@ -1,15 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
+import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from '../../extractor/index';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import declaration, { DeclarationPToken } from '../bridge/declaration';
-import entityReference from '../entityReference';
-import elementDeclaration from '../elementDeclaration.js';
+import elementDeclaration from '../elementDeclaration';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('elementDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
@@ -38,11 +38,11 @@ describe('elementDeclaration (integration)', () => {
             expect(result).toEqual(new elementDeclaration.PToken({
                unassigned: [ {
                   type: 'reference',
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],

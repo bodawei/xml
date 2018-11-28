@@ -9,7 +9,7 @@ import {
 } from '../../token';
 import { EntityDeclaration, ParameterEntityDeclaration } from '../../token/entityDeclaration';
 
-import EntityManager from '../EntityManager.js';
+import EntityManager from '../EntityManager';
 
 describe('EntityManager (unit)', () => {
    let manager: EntityManager;

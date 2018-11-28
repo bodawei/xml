@@ -4,7 +4,6 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
-import { EntityReferencePToken, EntityReferenceXToken } from '../entityReference';
 import text, { TextXToken, isTextPToken, TextPToken } from '../text';
 
 import { checkXmlLangWellFormed } from './langAttribute';
@@ -15,6 +14,8 @@ import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/genera
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
+import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from '../generalEntityReference';
+import { ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -29,8 +30,8 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
-type AttributeValuePToken = Array<TextPToken|EntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
-type AttributeValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
+type AttributeValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type AttributeValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 
 type AttributeXToken = {
    name: string;

@@ -5,7 +5,7 @@ import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 
-import * as space from '../space.js';
+import * as space from '../space';
 
 describe('space (integration)', () => {
 

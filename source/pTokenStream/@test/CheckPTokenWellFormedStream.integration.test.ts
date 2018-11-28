@@ -9,7 +9,7 @@ import {
 import { WellFormedError } from '../../error';
 import { PTokenStream } from '../../pTokenStream';
 
-import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream.js';
+import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -152,7 +152,7 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
 
    it('reports an error when a parameter entity reference has the wrong syntax', (done) => {
       expectInputToProduce('<?xml version="1.0"?><one>% peRef;</one>',
-         new WellFormedError('REFERENCE_XTRA_SPACE',
+         new WellFormedError('PEREF_XTRA_SPACE',
             [ 'peRef' ],
             new Offset(new EntityLocation(), 27, 0, 27),
             new Offset(new EntityLocation(), 26, 0, 26)

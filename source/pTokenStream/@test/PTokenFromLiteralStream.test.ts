@@ -5,11 +5,11 @@ import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import {
-   entityReference,
    text,
 } from '../../token';
+import * as tokenStuff from '../../token';
 
-import PTokenFromLiteralStream from '../PTokenFromLiteralStream.js';
+import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 describe('PTokenFromLiteralStream (unit)', () => {
    let sTokenSource: STokenSource;
@@ -30,10 +30,10 @@ describe('PTokenFromLiteralStream (unit)', () => {
          expect(pTokenStream.push).toHaveBeenCalledWith(null);
       });
 
-      it('calls entityReference.paramParse if it is to be looking for entity references and finds a %', () => {
+      it('calls parseParameterEntityReference() if it is to be looking for entity references and finds a %', () => {
          spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: '%' }));
          const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
-         const parseSpy = spyOn(entityReference, 'paramParse');
+         const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference');
 
          pTokenStream.read();
 
@@ -41,15 +41,15 @@ describe('PTokenFromLiteralStream (unit)', () => {
          expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
       });
 
-      it('does not entityReference.paramParse if it is not to be looking for entity references and finds a %', () => {
+      it('does not parseParameterEntityReference() if it is not to be looking for entity references and finds a %', () => {
          spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: '%' }));
          const pTokenStream = new PTokenFromLiteralStream(sTokenSource);
-         spyOn(entityReference, 'paramParse');
+         spyOn(tokenStuff, 'parseParameterEntityReference');
          spyOn(text, 'parse');
 
          pTokenStream.read();
 
-         expect(entityReference.paramParse).not.toHaveBeenCalled();
+         expect(tokenStuff.parseParameterEntityReference).not.toHaveBeenCalled();
       });
 
       it('calls text.parse with no terminators if not looking for any types', () => {

@@ -16,13 +16,13 @@ import {
    elementStart,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    space,
 } from '../../token';
+import * as tokenStuff from '../../token';
 import * as instruction from '../../token';
 
-import PTokenStream from '../PTokenStream.js';
+import PTokenStream from '../PTokenStream';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -208,8 +208,8 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls entityReference.parse()', (done) => {
-      const parseSpy = spyOn(entityReference, 'parse').and.callThrough();
+   it('calls parseGeneralEntityReference()', (done) => {
+      const parseSpy = spyOn(tokenStuff, 'parseGeneralEntityReference').and.callThrough();
       pTokenStream.addText('&foo;');
       pTokenStream.endText();
 
@@ -221,8 +221,8 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls entityReference.paramParse()', (done) => {
-      const parseSpy = spyOn(entityReference, 'paramParse').and.callThrough();
+   it('calls parseParameterEntityReference()', (done) => {
+      const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference').and.callThrough();
       pTokenStream.addText('%foo;');
       pTokenStream.endText();
 

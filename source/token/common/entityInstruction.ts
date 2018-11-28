@@ -7,7 +7,7 @@ import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import { InstructionStart } from '../bridge/instruction';
 import { checkWellFormedText, textOrBlank } from './misc';
 import literal from './literal';
-import { TEXT_PTOKEN } from '../text';
+import { TEXT_PTOKEN, TextPToken } from '../text';
 
 /**********************************************************************\
  An EntityInstruction is actually just the very common parts that
@@ -133,7 +133,7 @@ function addParam(source: STokenSource, attrs: Array<EntityInstructionParam>, na
          const literalPToken = modifiedAttr.value[0];
 
          if (literalPToken && literalPToken.type === TEXT_PTOKEN) {
-            (attr as any).value = literalPToken.text;
+            (attr as any).value = (literalPToken as TextPToken).text;
          } else {
             delete (attr as any).value;
          }

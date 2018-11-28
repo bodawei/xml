@@ -4,7 +4,7 @@
 import { EntityMetaData } from '../basic';
 import { PTokenStream } from '../pTokenStream';
 import { PToXTokenStream } from '../xTokenStream';
-import SimpleObjStream from './so.js';
+import SimpleObjStream from './so';
 
 describe('SimpleObjStream (integration)', () => {
    let pTokenStream: PTokenStream;

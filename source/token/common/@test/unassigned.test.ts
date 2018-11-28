@@ -7,12 +7,13 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
 
-import entityReference, { ParameterEntityReferencePToken, EntityReferencePToken } from '../../entityReference.js';
+import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
+import * as paramReference from '../../parameterEntityReference';
 import text from '../../text';
 import literal from '../literal';
 import unassigned, { UnassignedType, UnassignedValue, UnassignedArray } from '../unassigned';
 
-import helper from '../../@test/helper.js';
+import helper from '../../@test/helper';
 
 describe('unassigned (unit)', () => {
 
@@ -88,7 +89,7 @@ describe('unassigned (unit)', () => {
       beforeEach(() => {
          deliverySpy = jasmine.createSpy('callbackSpy');
          litParse = spyOn(literal, 'parse');
-         entRefParse = spyOn(entityReference, 'paramParse');
+         entRefParse = spyOn(paramReference, 'parseParameterEntityReference');
 
          makeSToken = makeSTokenMaker();
       });
@@ -273,7 +274,7 @@ describe('unassigned (unit)', () => {
       beforeEach(() => {
          deliverySpy = jasmine.createSpy('callbackSpy');
          litParse = spyOn(literal, 'parse');
-         entRefParse = spyOn(entityReference, 'paramParse');
+         entRefParse = spyOn(paramReference, 'parseParameterEntityReference');
 
          makeSToken = makeSTokenMaker();
       });
@@ -644,10 +645,10 @@ describe('unassigned (unit)', () => {
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             } ];
             const descriptors = [ {
                name: 'one',
@@ -699,10 +700,10 @@ describe('unassigned (unit)', () => {
             const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
             const unVals: UnassignedArray = [ word1, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, word2, {
                type: UnassignedType.ENTITY_END,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             } ];
             const descriptors = [ {
                name: 'one',
@@ -772,16 +773,16 @@ describe('unassigned (unit)', () => {
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ word, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, space ];
             const descriptors = [ {
                name: 'one',
@@ -865,7 +866,7 @@ describe('unassigned (unit)', () => {
             const word = unassigned.wordFromSToken(SToken.fromString('firstWord'));
             const unVals: UnassignedArray = [ {
                type: UnassignedType.ENTITY_START,
-               token: new ParameterEntityReferencePToken(),
+               token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
             }, word ];
             const descriptors = [ {
                name: 'one',
@@ -1079,7 +1080,7 @@ describe('unassigned (unit)', () => {
       it('returns STokens for an entity reference', () => {
          const result = unassigned.getSTokens([{
             type: UnassignedType.REFERENCE,
-            token: new entityReference.ParamPToken({
+            token: new ParameterEntityReferencePToken({
                open: SToken.fromString('&'),
                name: SToken.fromString('froo'),
                close: SToken.fromString(';'),
@@ -1131,7 +1132,7 @@ describe('unassigned (unit)', () => {
             },
             {
                type: UnassignedType.REFERENCE,
-               token: new entityReference.ParamPToken({
+               token: new ParameterEntityReferencePToken({
                   open: SToken.fromString('%'),
                   name: SToken.fromString('fred'),
                   close: SToken.fromString(';'),

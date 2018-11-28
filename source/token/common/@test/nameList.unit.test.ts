@@ -9,7 +9,6 @@ import { XNameList } from '../nameList';
 import nameListGraph from '../nameListGraph';
 import { WellFormedError, XmlWarning } from '../../../error/index';
 
-import entityReference from '../../entityReference';
 import unassigned, { UnassignedType } from '../unassigned';
 
 import misc from '../misc';
@@ -17,7 +16,8 @@ import nameList, {
    ContentParticlePToken,
    NameListPToken,
    NamePToken,
-} from '../nameList.js';
+} from '../nameList';
+import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 
 describe('nameList (unit)', () => {
    let nlPToken: NameListPToken;
@@ -551,7 +551,7 @@ describe('nameList (unit)', () => {
       it('does nothing if there is still an unexpanded parameter entity reference', () => {
          const pToken: NameListPToken = new nameList.NameListPToken();
 
-         nameList.assignUnassigned(pToken, [ { type: UnassignedType.REFERENCE, token: new entityReference.ParamPToken() } ]);
+         nameList.assignUnassigned(pToken, [ { type: UnassignedType.REFERENCE, token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }) } ]);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
       });

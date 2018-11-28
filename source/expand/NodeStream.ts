@@ -18,7 +18,6 @@ import {
    GENERAL_ENTITY_END_XTOKEN,
    GENERAL_ENTITY_START_XTOKEN,
    ParameterEntityEndPToken,
-   entityReference,
    notationDeclaration,
    text,
    unassigned,
@@ -35,13 +34,18 @@ import {
    ParameterEntityStartXToken,
    XMLDECL_XTOKEN,
    XmlDeclarationXToken,
+   GeneralEntityReferencePToken,
+   GeneralEntityReferenceXToken,
+   ParameterEntityReferenceXToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   ParameterEntityReferencePToken,
+   GENERAL_ENTITY_REFERENCE_XTOKEN,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
-import { EntityDeclaration } from '../token/entityDeclaration'; // badRef
-import { EntityReferencePToken, EntityReferenceXToken, ParameterEntityReferencePToken } from '../token/entityReference'; // badRef
+import { EntityDeclaration, ParameterEntityDeclarationPToken } from '../token/entityDeclaration'; // badRef
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
@@ -57,13 +61,13 @@ type PToken = {
    unassigned?: UnassignedArray,
 };
 type DoneSignal = () => void;
-type EntityValueArray = Array<TextPToken|EntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end 
+type EntityValueArray = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end 
 type CommonAttributeXToken = {
    name: string,
    value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|EntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
-type ExpansionsMap = { [key: number]: LiteralValueXToken|EntityReferenceXToken };
+type ExpandedLiteralValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
+type ExpansionsMap = { [key: number]: LiteralValueXToken|GeneralEntityReferenceXToken };
 
 enum ProcessMode {
    VALIDATE,
@@ -107,8 +111,8 @@ class NodeStream extends stream.Transform {
    _transform(xToken: XToken, encoding: string, callback: () => void) {
       // May want to give an error if emd is not document, and non-validating
 
-      if (xToken instanceof entityReference.XToken) {
-         const isPeRef = (xToken instanceof entityReference.ParamXToken);
+      if (xToken instanceof GeneralEntityReferenceXToken || xToken instanceof ParameterEntityReferenceXToken) {
+         const isPeRef = (xToken instanceof ParameterEntityReferenceXToken);
          const getter = isPeRef ? this._entityManager.getParameterEntity : this._entityManager.getEntity;
          const declarationSource = getter.call(this._entityManager, xToken.name);
 
@@ -204,7 +208,7 @@ class NodeStream extends stream.Transform {
    }
 
    _childDone() {
-      const isPeRef = (this._child.xToken instanceof entityReference.ParamXToken);
+      const isPeRef = (this._child.xToken instanceof ParameterEntityReferenceXToken);
       const tokenType = isPeRef ? ParameterEntityEndXToken : GeneralEntityEndXToken;
 
       this._child.stream.removeListener('data', this._childData);
@@ -261,7 +265,7 @@ class NodeStream extends stream.Transform {
          const item = entityValueArray.shift();
 
          // @@ dont do this if it is a parameter and this is standalone. Not clear an entity reference is even allowed here.
-         if (item!.type === entityReference.PARAM_PTYPE) {  // typeHack
+         if (item!.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {  // typeHack
             this._expandPERefFullyInEntityValue(item as ParameterEntityReferencePToken, (expandedItem) => {   // This is going to be a problem
                deliverExpanded(preExpanded, expandedItem);
             });
@@ -290,7 +294,7 @@ class NodeStream extends stream.Transform {
     */
    _expandPERefFully(peRef: ParameterEntityReferencePToken, deliverExpanded: (expanded: UnassignedArray) => void) {
       const itemName = peRef.name && peRef.name.str || '';
-      const entityToken: ParameterEntityReferencePToken = this._entityManager.getParameterEntityToken(itemName);
+      const entityToken: ParameterEntityDeclarationPToken = this._entityManager.getParameterEntityToken(itemName);
 
       // @@@ don't expand if it is a standalone
       if (!entityToken || !entityToken.value) {
@@ -324,7 +328,7 @@ class NodeStream extends stream.Transform {
                   token: val as TextPToken, // typeHack
                });
                break;
-            case entityReference.PARAM_PTYPE:
+            case PARAMETER_ENTITY_REFERENCE_PTOKEN:
                result.push({
                   type: UnassignedType.REFERENCE, // could be space!
                   token: val as ParameterEntityReferencePToken, // typeHack
@@ -546,19 +550,19 @@ class NodeStream extends stream.Transform {
          if (insideContentSpec && entityDepth === 0 && topEntityRef) {
             if (parenDepth !== 0) {
                const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  [ elName, topEntityRef.name.str ], topEntityRef.open, pToken.open);
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                this.push(error);
             }
 
             if (endedWithConnector) {
                const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  [ elName, topEntityRef.name.str ], topEntityRef.open, pToken.open);
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                this.push(warning);
             }
 
             if (!sawNonWhite) {
                const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  [ elName, topEntityRef.name.str ], topEntityRef.open, pToken.open);
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
                this.push(warning);
             }
 
@@ -647,7 +651,7 @@ class NodeStream extends stream.Transform {
       const expansions: ExpansionsMap = {};
       const self = this;
 
-      function referenceExpanded(refData: LiteralValueXToken | EntityReferenceXToken, refIndex: number) {
+      function referenceExpanded(refData: LiteralValueXToken | GeneralEntityReferenceXToken, refIndex: number) {
          expansions[refIndex] = refData;
          count--;
 
@@ -659,9 +663,9 @@ class NodeStream extends stream.Transform {
       for (let index = 0; index < attrValue.length; index++) {
          const item = attrValue[index];
 
-         if (item.type === entityReference.XTYPE) {
+         if (item.type === GENERAL_ENTITY_REFERENCE_XTOKEN) {
             count++;
-            this._expandReference((item as EntityReferenceXToken), index, referenceExpanded); // typeHack
+            this._expandReference((item as GeneralEntityReferenceXToken), index, referenceExpanded); // typeHack
          }
       }
 
@@ -677,7 +681,7 @@ class NodeStream extends stream.Transform {
       for (let index = 0; index < originalAttrValue.length; index++) {
          const item = originalAttrValue[index];
 
-         if (item.type === entityReference.XTYPE) {
+         if (item.type === GENERAL_ENTITY_REFERENCE_XTOKEN) {
             newValue = newValue.concat(expansions[index]);
          } else {
             newValue.push(item);
@@ -711,7 +715,7 @@ class NodeStream extends stream.Transform {
       }
    }
 
-   _expandReference(entityRef: EntityReferenceXToken, indexInAttr: number, referenceExpanded: (expanded: LiteralValueXToken | EntityReferenceXToken, index: number) => void) {
+   _expandReference(entityRef: GeneralEntityReferenceXToken, indexInAttr: number, referenceExpanded: (expanded: LiteralValueXToken | GeneralEntityReferenceXToken, index: number) => void) {
       const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
       if (!entityInfo) {
          referenceExpanded(entityRef, indexInAttr);

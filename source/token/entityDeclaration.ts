@@ -3,7 +3,6 @@
 import { WellFormedError, XmlWarning, ErrorCollector } from '../error';
 
 import base from './base';
-import entityReference, { EntityReferencePToken } from './entityReference';
 import unassigned, { UnassignedType } from './common/unassigned';
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import misc from './common/misc';
@@ -17,6 +16,8 @@ import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from './marker/generalEntityStart';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
+import { GeneralEntityReferencePToken } from './generalEntityReference';
+import { ParameterEntityReferencePToken } from './parameterEntityReference';
 
 /**********************************************************************\
  The entityDeclaration namespace contains the usual functionality for
@@ -30,7 +31,7 @@ const PARAMETER_ENTITYDECL_XTOKEN = 'PARAMETER_ENTITYDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
 
-type ExpandedLiteralValuePToken = Array<TextPToken|EntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type ExpandedLiteralValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
 class EntityDeclaration extends base.XToken {
    public type: string;
@@ -176,11 +177,11 @@ function parseWordOrPERef(source: STokenSource, pToken: EntityDeclarationPToken,
       source.extract('match', ';', (semicolon) => {
          if (pToken.parameter && semicolon) {
             unassigned.parseAllValues(source, false, (values) => {
-               const entityRef = new entityReference.ParamPToken({
+               const entityRef = new ParameterEntityReferencePToken({
                   open: pToken.parameter,
-                  postOpenSpace: pToken.postParameterSpace,
+                  openSpace: pToken.postParameterSpace,
                   name: pToken.name,
-                  postNameSpace: pToken.postNameSpace,
+                  nameSpace: pToken.postNameSpace,
                   close: semicolon,
                });
                pToken.unassigned = values;

@@ -5,9 +5,8 @@ import { EntityKind, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken } from 'sToken';
 
-import entityReference from '../../entityReference';
 import { TextPToken, TextXToken } from '../../text';
-import { EntityReferencePToken } from '../../entityReference';
+import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityEndPToken } from '../../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../../marker/generalEntityStart';
 
@@ -57,9 +56,9 @@ describe('langAttribute (unit)', () => {
 
       it('reports no errors on an attribute value that has entity start and end values', () => {
          checkXmlLangWellFormed([
-            new GeneralEntityStartPToken(new EntityReferencePToken()),
+            new GeneralEntityStartPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&'), })),
             new TextPToken({ text: SToken.fromString('wh') }),
-            new GeneralEntityEndPToken(new EntityReferencePToken()),
+            new GeneralEntityEndPToken(new GeneralEntityReferencePToken({ open: SToken.fromString('&'), })),
          ], ec, emd);
 
          expect(ec.errors.length).toEqual(0);
@@ -77,7 +76,7 @@ describe('langAttribute (unit)', () => {
 
       it('does no checks if there are unexpanded references in the value', () => {
          const textToken = new TextPToken({ text: SToken.fromString('99') });
-         const refToken = new entityReference.PToken();
+         const refToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&'), });
 
          checkXmlLangWellFormed([ textToken, refToken ], ec, emd);
 

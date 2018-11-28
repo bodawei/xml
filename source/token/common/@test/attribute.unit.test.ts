@@ -1,18 +1,18 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from 'basic';
+import { EntityMetaData } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from '../../../error/@test/helper';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
-import { SToken, STokenSource } from 'sToken';
+import { SToken } from 'sToken';
 
 import * as langAttribute from '../langAttribute';
 import text from '../../text';
-import entityReference from '../../entityReference';
 import attribute from '../attribute';
 import misc from '../misc';
 import literal from '../literal';
+import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
 
 describe('attribute (unit)', () => {
    let attributesPChunk: any;
@@ -340,7 +340,7 @@ describe('attribute (unit)', () => {
 
          attributesPChunk[1].value = [
             new text.PToken({ text: SToken.fromString('foo') }),
-            new entityReference.PToken(),
+            new GeneralEntityReferencePToken({ open: SToken.fromString('&') }),
             new text.PToken({ text: SToken.fromString('t<o') }),
          ];
 

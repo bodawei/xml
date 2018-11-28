@@ -6,7 +6,8 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import * as xToken from '../../token';
 
-import PTokenFromLiteralStream from '../PTokenFromLiteralStream.js';
+import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../../token';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -50,7 +51,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
    it('produces a mixture of text and parameter entity references if asked to', (done) => {
       expectInputToProduceTypes('one %two; three <four>', { peRef: true }, [
          xToken.text.PTYPE,
-         xToken.entityReference.PARAM_PTYPE,
+         PARAMETER_ENTITY_REFERENCE_PTOKEN,
       ], done);
    });
 

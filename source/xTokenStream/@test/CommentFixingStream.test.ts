@@ -2,7 +2,7 @@
 
 import { comment } from '../../token';
 
-import CommentFixingStream from '../CommentFixingStream.js';
+import CommentFixingStream from '../CommentFixingStream';
 
 describe('CommentFixingStream (unit)', () => {
    let cfs: CommentFixingStream;

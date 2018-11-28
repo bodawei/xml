@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as charData from '../charData.js';
+import * as charData from '../charData';
 
 describe('charData (integration)', () => {
    let emd: EntityMetaData;

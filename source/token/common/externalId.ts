@@ -3,13 +3,13 @@
 import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from '../../error';
 
-import entityReference from '../entityReference';
 import unassigned from './unassigned';
 
 import literal, { LiteralPToken } from './literal';
 import { textOrBlank } from './misc';
 import { STokenSource, SToken } from 'sToken';
 import { UnassignedArray } from './unassigned';
+import { TextPToken } from '../text';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -227,9 +227,9 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
          if (!pTokenPart.public || !pTokenPart.public.value) {
             return;
          }
-         const match = PUBID_CHARS.exec(pTokenPart.public.value[0].str);
-         ec.check(!match || match[0] !== pTokenPart.public.value[0].str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ pTokenPart.public.value[0].str[match![0].length] ]);
+         const match = PUBID_CHARS.exec((pTokenPart.public.value[0] as any).str); //typeHack
+         ec.check(!match || match[0] !== (pTokenPart.public.value[0] as any).str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
+                  [ (pTokenPart.public.value[0] as any).str[match![0].length] ]); //typeHack
       });
    }
 
@@ -256,9 +256,9 @@ function makeEntityLocation(pTokenPart: ExternalId | void) {
    }
 
    const value = (pTokenPart.system && pTokenPart.system.value) ?
-      pTokenPart.system.value[0].text.str : undefined;
+      (pTokenPart.system.value[0] as any).text.str : undefined; // typeHack
    const publicValue = (pTokenPart.public && pTokenPart.public.value) ?
-      pTokenPart.public.value[0].text.str : undefined;
+      (pTokenPart.public.value[0] as any).text.str : undefined; // typeHack
 
    return new EntityLocation(value, publicValue);
 }

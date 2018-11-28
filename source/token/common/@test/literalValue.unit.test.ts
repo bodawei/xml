@@ -6,11 +6,13 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
-import entityReference, { EntityReferencePToken, ParameterEntityReferencePToken } from '../../entityReference';
+import * as generalEntityReference from '../../generalEntityReference';
+import * as parameterEntityReference from '../../parameterEntityReference';
+import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import text from '../../text';
 
 import misc from '../misc';
-import literalValue, { LiteralValuePToken } from '../literalValue.js';
+import literalValue, { LiteralValuePToken } from '../literalValue';
 
 describe('literalValue (unit)', () => {
 
@@ -78,11 +80,11 @@ describe('literalValue (unit)', () => {
          let paramParseSpy: jasmine.Spy;
 
          beforeEach(() => {
-            generalParseSpy = spyOn(entityReference, 'parse');
-            paramParseSpy = spyOn(entityReference, 'paramParse');
+            generalParseSpy = spyOn(generalEntityReference, 'parseGeneralEntityReference');
+            paramParseSpy = spyOn(parameterEntityReference, 'parseParameterEntityReference');
          });
 
-         it('calls out to entityReference.parse when encountering a % and asked to parse peRefs', () => {
+         it('calls out to parseParameterEntityReference() when encountering a % and asked to parse peRefs', () => {
             mockSource = new MockSTokenSource([
                undefined,
                MockSTokenSource.PEEK('%'),
@@ -95,7 +97,7 @@ describe('literalValue (unit)', () => {
             expect(paramParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
          });
 
-         it('calls out to entityReference.parse when encountering a & and asked to parse geRefs', () => {
+         it('calls out to parseGeneralEntityReference() when encountering a & and asked to parse geRefs', () => {
             mockSource = new MockSTokenSource([
                undefined,
                MockSTokenSource.PEEK('&'),
@@ -137,11 +139,11 @@ describe('literalValue (unit)', () => {
             const makeSToken2 = makeSTokenMaker(undefined, 4, 0, 4);
             expect(value).toEqual([
                new text.PToken({ text: makeSToken('one') }),
-               {} as EntityReferencePToken,
+               {} as GeneralEntityReferencePToken,
                new text.PToken({ text: makeSToken2('two') }),
-               {} as EntityReferencePToken,
+               {} as GeneralEntityReferencePToken,
                new text.PToken({ text: makeSToken2('three') }),
-               {} as EntityReferencePToken,
+               {} as GeneralEntityReferencePToken,
                new text.PToken({ text: makeSToken2('four') }),
             ]);
          });
@@ -164,7 +166,6 @@ describe('literalValue (unit)', () => {
          valuePToken = [ new text.PToken({ text: SToken.fromString('xxx') }) ];
 
          miscCheckWellFormedSpy = spyOn(misc, 'checkWellFormedText');
-         refCheckWellFormedSpy = spyOn(entityReference, 'checkWellFormed');
       });
 
       it('calls misc.checkWellFormedText() to check the value', () => {
@@ -182,13 +183,14 @@ describe('literalValue (unit)', () => {
          expect(spy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));
       });
 
-      it('calls entityReference.checkWellFormed if an entity reference PToken is found', () => {
-         valuePToken.push(new EntityReferencePToken());
+      it('calls reference.checkWellFormed if an entity reference PToken is found', () => {
+         const geRef = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+         refCheckWellFormedSpy = spyOn(geRef, 'checkWellFormed');
+         valuePToken.push(geRef);
 
          literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
 
-         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(new EntityReferencePToken());
-         expect(refCheckWellFormedSpy.calls.argsFor(0)[1]).toEqual(mockErrorCollector);
+         expect(refCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(mockErrorCollector);
       });
 
    });
@@ -209,17 +211,14 @@ describe('literalValue (unit)', () => {
          expect(result).toEqual([ ]);
       });
 
-      it('calls entityReference.makeToken for each reference in the pToken value', () => {
-         const refSpy = spyOn(entityReference, 'pTokenToXToken');
-         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }),
-            new EntityReferencePToken(),
-            new ParameterEntityReferencePToken(),
-         ];
+      it('calls reference.toXToken for each reference in the pToken value', () => {
+         const geReference = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+         const refSpy = spyOn(geReference, 'toXToken');
+         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }), geReference ];
          literalValue.makeXTokenCompatible(pToken);
 
-         expect(refSpy.calls.count()).toEqual(2);
-         expect(refSpy.calls.argsFor(0)[0]).toEqual(pToken[1]);
-         expect(refSpy.calls.argsFor(1)[0]).toEqual(pToken[2]);
+         expect(refSpy.calls.count()).toEqual(1);
+         expect(refSpy.calls.argsFor(0)[0]).toBeUndefined();
       });
 
       it('copes with no values at all', () => {
@@ -242,14 +241,16 @@ describe('literalValue (unit)', () => {
       it('adds STokens from any entity references', () => {
          const pToken = [
             new text.PToken({ text: SToken.fromString('blah') }),
-            new entityReference.PToken({
-               name: SToken.fromString('theName')
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('theName'),
             }),
          ];
          const results = literalValue.getSTokens(pToken);
 
          expect(results).toEqual([
             SToken.fromString('blah'),
+            SToken.fromString('&'),
             SToken.fromString('theName'),
          ]);
       });
@@ -257,14 +258,16 @@ describe('literalValue (unit)', () => {
       it('copes if text is missing its text', () => {
          const pToken = [
             new text.PToken(),
-            new entityReference.PToken({
-               name: SToken.fromString('theName')
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('theName'),
             }),
          ];
 
          const results = literalValue.getSTokens(pToken);
 
          expect(results).toEqual([
+            SToken.fromString('&'),
             SToken.fromString('theName'),
          ]);
       });

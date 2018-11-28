@@ -12,25 +12,27 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
-   entityReference,
    space,
    text,
    
-   CDATA_XTOKEN,
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
+   GeneralEntityEndXToken,
+   GeneralEntityStartXToken,
+   ParameterEntityEndXToken,
+   ParameterEntityStartXToken,
+   
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
    GENERAL_ENTITY_END_XTOKEN,
    GENERAL_ENTITY_START_XTOKEN,
-   GeneralEntityEndXToken,
-   GeneralEntityStartXToken,
    INTERNAL_SUBSET_START_XTOKEN,
    INTERNAL_SUBSET_END_XTOKEN,
+
+   CDATA_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
-   ParameterEntityEndXToken,
-   ParameterEntityStartXToken,
+   GENERAL_ENTITY_REFERENCE_XTOKEN,
    XMLDECL_XTOKEN,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
@@ -39,7 +41,7 @@ import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclarat
 import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/common/nameList';
 import { Graph } from '../token/common/nameListGraphTypes';
-import EntityManager from '../expand/EntityManager.js';
+import EntityManager from '../expand/EntityManager';
 import { EntityDeclaration } from 'source/token/entityDeclaration';
 
 type XToken = {
@@ -339,7 +341,7 @@ class CheckXTokenValidStream extends stream.Transform {
                break;
             case elementEnd.XTYPE:
             case charData.XTYPE:
-            case entityReference.XTYPE:
+            case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:
@@ -440,7 +442,7 @@ class CheckXTokenValidStream extends stream.Transform {
                      Object.keys(currentState.trans).join(', ') ], sToken);
                }
                break;
-            case entityReference.XTYPE:
+            case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
             case space.XTYPE:

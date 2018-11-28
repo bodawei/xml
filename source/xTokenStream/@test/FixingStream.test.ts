@@ -5,7 +5,7 @@ import tokenNs from '../../token';
 import attListDecl, { AttListPToken } from '../../token/attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
 
-import FixingStream from '../FixingStream.js';
+import FixingStream from '../FixingStream';
 
 type XToken = {
    [key: string]: any,

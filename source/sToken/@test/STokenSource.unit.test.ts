@@ -4,8 +4,8 @@
 import { EntityKind, EntityLocation, EntityMetaData, Range } from 'basic';
 import { Extractor, Segment, ExtractorMap } from '../../extractor';
 
-import SToken from '../SToken.js';
-import STokenSource from '../STokenSource.js';
+import SToken from '../SToken';
+import STokenSource from '../STokenSource';
 import { SegmentInfo } from 'source/extractor/Extractor';
 
 describe('STokenSource (unit)', () => {

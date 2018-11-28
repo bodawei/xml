@@ -6,7 +6,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as docTypeEnd from '../docTypeEnd.js';
+import * as docTypeEnd from '../docTypeEnd';
 
 describe('docTypeEnd (integration)', () => {
    let docTypeEndPToken: docTypeEnd.DocTypeEndPToken;

@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import EntityMetaData, { EntityKind } from '../EntityMetaData.js';
-import EntityLocation from '../EntityLocation.js';
+import EntityMetaData, { EntityKind } from '../EntityMetaData';
+import EntityLocation from '../EntityLocation';
 
 describe('EntityMetaData', () => {
 

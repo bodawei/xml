@@ -19,7 +19,6 @@ import {
    elementStart,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    ProcessingInstructionPToken,
    space,
@@ -27,6 +26,8 @@ import {
 
    XmlDeclarationPToken,
    TextDeclarationPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
 } from '../../token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -629,24 +630,22 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    });
 
    describe('entity reference', () => {
-      let pToken: Token;
+      let pToken: GeneralEntityReferencePToken;
 
       beforeEach(() => {
-         pToken = {
-            type: entityReference.PTYPE,
+         pToken = new GeneralEntityReferencePToken({
             open: makeSToken('&'),
-         };
+         });
       });
 
       it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
-         const cwfSpy = spyOn(entityReference, 'checkWellFormed');
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(metaData);
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {
@@ -664,15 +663,14 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    });
 
    describe('parameter entity reference', () => {
-      let pToken: Token;
+      let pToken: ParameterEntityReferencePToken;
       let cwfSpy: jasmine.Spy;
 
       beforeEach(() => {
-         cwfSpy = spyOn(entityReference, 'checkWellFormed');
-         pToken = {
-            type: entityReference.PARAM_PTYPE,
+         pToken = new ParameterEntityReferencePToken({
             open: makeSToken('%'),
-         };
+         });
+         cwfSpy = spyOn(pToken, 'checkWellFormed');
       });
 
       it('calls elementEnd.checkWellFormed() when encountering PEReference', () => {
@@ -680,9 +678,8 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

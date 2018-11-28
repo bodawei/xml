@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
@@ -8,8 +8,8 @@ import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as elementStart from '../elementStart';
-import entityReference from '../entityReference';
 import text from '../text';
+import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: elementStart.ElementStartPToken;
@@ -89,11 +89,11 @@ describe('elementStart (integration)', () => {
                   openQuote: makeSToken('"'),
                   value: [
                      new text.PToken({ text: makeSToken('value1') }),
-                     new entityReference.PToken({
+                     new GeneralEntityReferencePToken({
                         open: makeSToken('&'),
-                        postOpenSpace: undefined,
+                        openSpace: undefined,
                         name: makeSToken('other'),
-                        postNameSpace: undefined,
+                        nameSpace: undefined,
                         close: makeSToken(';'),
                      }),
                   ],

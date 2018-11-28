@@ -4,8 +4,8 @@
 import { EntityKind, EntityLocation, EntityMetaData, Range } from 'basic';
 import { defaultExtractors } from '../../extractor';
 
-import SToken from '../SToken.js';
-import STokenSource from '../STokenSource.js';
+import SToken from '../SToken';
+import STokenSource from '../STokenSource';
 
 describe('STokenSource (integration)', () => {
    let source: STokenSource;

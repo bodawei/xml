@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
 
 import declaration from './bridge/declaration';
-import externalId, { ExternalId } from './common/externalId.js';
+import externalId, { ExternalId } from './common/externalId';
 import misc from './common/misc';
 import base from './base';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';

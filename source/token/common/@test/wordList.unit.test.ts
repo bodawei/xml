@@ -8,11 +8,11 @@ import { MockSTokenSource } from '../../../sToken/@test/helper';
 import { parseWordList, WordListPToken, WordListType, ENUMERATION_PTOKEN } from '../wordList';
 import { WellFormedError } from '../../../error/index';
 
-import entityReference from '../../entityReference';
 import text from '../../text';
 import unassigned, { UnassignedType, UnassignedArray } from '../../common/unassigned';
 
 import misc from '../../common/misc';
+import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 
 describe('wordList (unit)', () => {
    let wlPToken: WordListPToken;
@@ -251,7 +251,7 @@ describe('wordList (unit)', () => {
       it('does nothing if there is still an unexpanded parameter entity reference', () => {
          wlPToken.newWithUnassigned([ {
             type: UnassignedType.REFERENCE,
-            token: new entityReference.ParamPToken()
+            token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })
          } ]);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();

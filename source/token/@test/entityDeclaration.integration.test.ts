@@ -8,14 +8,14 @@ import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as entityDeclaration from '../entityDeclaration';
-import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd.js';
-import entityReference, { EntityReferencePToken } from '../entityReference';
+import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import text from '../text';
 import unassigned, { UnassignedType } from '../common/unassigned';
 
-import helper from './helper.js';
+import helper from './helper';
 import { DeclarationPToken } from '../bridge/declaration';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
@@ -41,7 +41,7 @@ describe('entityDeclaration (integration)', () => {
 
          entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.type).toEqual(entityDeclaration.PTYPE);
-            expect(pToken.value[1].type).toEqual(entityReference.PARAM_PTYPE);
+            expect(pToken.value[1].type).toEqual(PARAMETER_ENTITY_REFERENCE_PTOKEN);
             done();
          });
       });
@@ -108,7 +108,7 @@ describe('entityDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.LITERAL,
@@ -119,7 +119,7 @@ describe('entityDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new EntityReferencePToken),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
 
@@ -229,7 +229,7 @@ describe('entityDeclaration (integration)', () => {
             pToken.unassigned.shift(); // get rid of the peref
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new EntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, {
                   type: UnassignedType.LITERAL,
                   token: {
@@ -239,7 +239,7 @@ describe('entityDeclaration (integration)', () => {
                   }
                }, {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new EntityReferencePToken()),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ].concat(pToken.unassigned);
             entityDeclaration.assignUnassigned(pToken);

@@ -3,7 +3,6 @@
 import { EntityMetaData } from '../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 import { SToken, STokenSource } from '../sToken/index';
-import entityReference from './entityReference';
 import unassigned, { UnassignedArray } from './common/unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
@@ -451,10 +450,12 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       }
 
       literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
-
-      ec.setPos(pToken.close);
-      ec.check(!pToken.close, WFEID.ATTLISTDECL_NO_CLOSE, [ elNameText ]);
    }
+
+   ec.setPos(pToken.close);
+   ec.check(!pToken.close, WFEID.ATTLISTDECL_NO_CLOSE, [ elNameText ]);
+
+   unassigned.checkExtra(pToken.extra, ec, WFEID.ATTLISTDECL_EXTRA_TEXT);
 }
 
 /**********************************************************************\

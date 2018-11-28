@@ -4,8 +4,7 @@ import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
-import base, { STokenArray } from '../base';
-import entityReference from '../entityReference';
+import base from '../base';
 import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
 import { textOrBlank } from './/misc';

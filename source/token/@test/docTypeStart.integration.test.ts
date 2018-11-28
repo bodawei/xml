@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource, SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as docTypeStart from '../docTypeStart.js';
+import * as docTypeStart from '../docTypeStart';
 import text from '../text';
 import { DeclarationPToken } from '../bridge/declaration';
 

@@ -8,7 +8,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError, XmlWarning } from '../../error';
 
 import misc from '../common/misc';
-import * as elementEnd from '../elementEnd.js';
+import * as elementEnd from '../elementEnd';
 
 describe('elementEnd', () => {
    let elementEndPToken: elementEnd.ElementEndPToken;

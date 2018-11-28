@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityReferencePToken } from '../entityReference';
+import { textOrBlank } from "../common/misc";
+import { GeneralEntityReferencePToken } from "../generalEntityReference";
 
 /**********************************************************************\
  Defines a simple token that tracks the end of an entity expansion.
@@ -11,14 +12,14 @@ const GENERAL_ENTITY_END_XTOKEN = 'GENERAL_ENTITY_END_XTOKEN';
 
 class GeneralEntityEndPToken {
    public readonly type: typeof GENERAL_ENTITY_END_PTOKEN = GENERAL_ENTITY_END_PTOKEN;
-   public readonly referencePToken: EntityReferencePToken;
+   public readonly referencePToken: GeneralEntityReferencePToken;
 
-   constructor(entityReferencePToken: EntityReferencePToken) {
-      this.referencePToken = entityReferencePToken;
+   constructor(geReferencePToken: GeneralEntityReferencePToken) {
+      this.referencePToken = geReferencePToken;
    }
 
    toXToken() {
-      return new GeneralEntityEndXToken(this.referencePToken.name.str, this);
+      return new GeneralEntityEndXToken(textOrBlank(this.referencePToken.name), this);
    }
 }
 

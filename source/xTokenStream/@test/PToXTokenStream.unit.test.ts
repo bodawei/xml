@@ -11,7 +11,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   entityReference,
    notationDeclaration,
    space,
    text,
@@ -20,9 +19,11 @@ import {
    ProcessingInstructionPToken,
    XmlDeclarationPToken,
    TextDeclarationPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
 } from '../../token';
 
-import PToXTokenStream from '../PToXTokenStream.js';
+import PToXTokenStream from '../PToXTokenStream';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
@@ -121,24 +122,24 @@ describe('PToXTokenStream (unit)', () => {
       expect(elementDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls entityReference.pTokenToXToken() with a parameter entity reference', () => {
-      spyOn(entityReference, 'pTokenToXToken');
-      const pToken = { type: entityReference.PARAM_PTYPE };
+   it('calls peRef.toXToken() with a parameter entity reference', () => {
+      const pToken = new ParameterEntityReferencePToken({ open: SToken.fromString('&') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(entityReference.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls entityReference.pTokenToXToken()', () => {
-      spyOn(entityReference, 'pTokenToXToken');
-      const pToken = { type: entityReference.PTYPE };
+   it('calls geRef.toXToken()', () => {
+      const pToken = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(entityReference.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls notationDeclaration.pTokenToXToken()', () => {

@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import { CommentPToken, parse, checkWellFormed, PTYPE } from '../comment.js';
+import { CommentPToken, parse, checkWellFormed, PTYPE } from '../comment';
 
 describe('comment (integration)', () => {
    let commentPToken: CommentPToken;

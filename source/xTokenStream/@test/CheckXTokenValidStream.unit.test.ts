@@ -17,7 +17,6 @@ import {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   entityReference,
    notationDeclaration,
    ProcessingInstructionXToken,
    space,
@@ -33,6 +32,7 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
    XmlDeclarationXToken,
+   GeneralEntityReferenceXToken,
 } from '../../token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
@@ -3452,7 +3452,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
-               validator.write(new entityReference.XToken('testEntiyReference'));
+               validator.write(new GeneralEntityReferenceXToken('testEntiyReference'));
                validator.end();
    
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
@@ -3494,7 +3494,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ whiteChars, 1, 5, false ],
                [ whiteChars, 1.1, 2, false ],
                [ new space.XToken('  '), 1.0, 1, false ],
-               [ new entityReference.XToken('x'), 1.0, 1, false ],
+               [ new GeneralEntityReferenceXToken('x'), 1.0, 1, false ],
                [ new GeneralEntityStartXToken('y'), 1.0, 1, false ],
                [ new GeneralEntityEndXToken('z'), 1.0, 1, false ],
             ];

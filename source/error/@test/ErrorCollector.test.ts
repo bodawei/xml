@@ -5,7 +5,7 @@ import { Offset, Range, EntityLocation } from '../../basic/index';
 import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';
-import { WellFormedError } from '../WellFormedError.js';
+import { WellFormedError } from '../WellFormedError';
 
 describe('ErrorCollector', () => {
 

@@ -7,14 +7,14 @@ import { defaultExtractors } from '../../extractor/index';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import helper from '../@test/helper.js';
+import helper from '../@test/helper';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
 import declaration from '../bridge/declaration';
 import { WordListPToken, WordListType } from '../common/wordList';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
-import entityReference, { ParameterEntityReferencePToken } from '../entityReference';
 import unassigned, { UnassignedType } from '../common/unassigned';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('attListDeclaration (integration)', () => {
    let declarationPToken: AttListPToken;
@@ -24,7 +24,7 @@ describe('attListDeclaration (integration)', () => {
       expectedSToken = makeSTokenMaker();
       declarationPToken = new attListDeclaration.PToken({
          open: expectedSToken('<!'),
-         postOpenSpace: undefined,
+         openSpace: undefined,
          declType: expectedSToken('ATTLIST'),
          postDeclTypeSpace: expectedSToken(' '),
       });
@@ -150,11 +150,11 @@ describe('attListDeclaration (integration)', () => {
             expect(result).toEqual(new attListDeclaration.PToken({
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],
@@ -187,11 +187,11 @@ describe('attListDeclaration (integration)', () => {
                }],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],
@@ -228,11 +228,11 @@ describe('attListDeclaration (integration)', () => {
                }],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],
@@ -271,11 +271,11 @@ describe('attListDeclaration (integration)', () => {
                }],
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
-                  token: new entityReference.ParamPToken({
+                  token: new ParameterEntityReferencePToken({
                      open:  makeSToken('%'),
-                     postOpenSpace: undefined,
+                     openSpace: undefined,
                      name:  makeSToken('foo'),
-                     postNameSpace: undefined,
+                     nameSpace: undefined,
                      close:  makeSToken(';'),
                   }),
                } ],
@@ -303,12 +303,12 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
                unassigned.wordFromSToken(SToken.fromString('entityName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.ENTITY_END,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
 
@@ -339,13 +339,13 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('ENTITIES')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ];
 
@@ -394,7 +394,7 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
                unassigned.wordFromSToken(SToken.fromString('at2')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
@@ -404,7 +404,7 @@ describe('attListDeclaration (integration)', () => {
                unassigned.wordFromSToken(SToken.fromString('#ENTITIES')),
                unassigned.spaceFromSToken(SToken.fromString(' ')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }
             ];
             const makeSToken = makeSTokenMaker();
@@ -465,12 +465,12 @@ describe('attListDeclaration (integration)', () => {
             // "expand" what should be there.
             pToken.unassigned = [{
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('two')),
                unassigned.wordFromSToken(SToken.fromString(')')),
                unassigned.wordFromSToken(SToken.fromString('#REQUIRED')), {
                   type: UnassignedType.ENTITY_START,
-                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken()),
+                  token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ];
             const makeSToken = makeSTokenMaker();

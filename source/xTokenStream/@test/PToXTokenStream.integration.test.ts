@@ -15,7 +15,6 @@ import {
    entityDeclaration,
    elementEnd,
    elementStart,
-   entityReference,
    notationDeclaration,
    ProcessingInstructionXToken,
    space,
@@ -23,6 +22,8 @@ import {
 
    CdataXToken,
    XmlDeclarationXToken,
+   GeneralEntityReferenceXToken,
+   ParameterEntityReferenceXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -153,13 +154,13 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes an entity reference', (done) => {
       expectInputToProduce('&entityRef;', [
-         new entityReference.XToken('entityRef'),
+         new GeneralEntityReferenceXToken('entityRef'),
       ], done);
    });
 
    it('tokenizes a parameter entity reference', (done) => {
       expectInputToProduce('%peRef;', [
-         new entityReference.ParamXToken('peRef'),
+         new ParameterEntityReferenceXToken('peRef'),
       ], done);
    });
 

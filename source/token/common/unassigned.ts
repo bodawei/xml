@@ -4,7 +4,7 @@ import { EntityLocation, Range } from 'basic';
 import { ErrorCollector } from 'error';
 import { SToken, STokenSource } from 'sToken';
 
-import entityReference, { ParameterEntityReferencePToken } from '../entityReference.js';
+import { ParameterEntityReferencePToken, parseParameterEntityReference } from '../parameterEntityReference';
 import { TextPToken } from '../text';
 import literal, { LiteralPToken } from '../common/literal';
 
@@ -151,10 +151,15 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          break;
       case '%':
          // return the parameter entity reference
-         entityReference.paramParse(source, (reference: ParameterEntityReferencePToken) => deliverValue({
-            type: UnassignedType.REFERENCE,
-            token: reference,
-         }));
+         parseParameterEntityReference(source, (reference: ParameterEntityReferencePToken | void) => {
+            if (!reference) { // this can't happen
+               return;
+            }
+            deliverValue({
+               type: UnassignedType.REFERENCE,
+               token: reference,
+            });
+         });
          break;
       case '"':
       case '\'':
@@ -458,7 +463,7 @@ function getSTokens(unassignedArray: UnassignedArray) {
       } else if (value.type === 'literal') {
          tokens = tokens.concat(literal.getSTokens(value.token));
       } else if (value.type == 'reference') {
-         tokens = tokens.concat(value.token.getSTokenArray());
+         tokens = tokens.concat(value.token.toSTokenArray());
       }
    }
 
