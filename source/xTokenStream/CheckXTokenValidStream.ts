@@ -39,8 +39,8 @@ import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../tok
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
 import { ElementStart } from '../token/elementStart';
-import nameList, { XName } from '../token/common/nameList';
-import { Graph } from '../token/common/nameListGraphTypes';
+import nameList, { XName } from '../token/contentspec/nameList';
+import { Graph } from '../token/contentspec/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager';
 import { EntityDeclaration } from 'source/token/entityDeclaration';
 

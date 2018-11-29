@@ -10,7 +10,7 @@ import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import declaration from '../bridge/declaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
 import misc from '../common/misc';
-import nameList from '../common/nameList';
+import nameList from '../contentspec/nameList';
 import unassigned, { UnassignedType } from '../common/unassigned';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
@@ -147,12 +147,11 @@ describe('elementDeclaration (unit)', () => {
          mockSource.respondInAsyncTime();
 
          expect(nameListParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-         expect(nameListParseSpy.calls.argsFor(0)[1]).toEqual('ANY');
-         expect(nameListParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(nameListParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
       });
 
       it('delivers children and end of list', () => {
-         spyOn(nameList, 'parse').and.callFake((_1: any, _2: any, callback: (nl: any) => void) => {
+         spyOn(nameList, 'parse').and.callFake((_1: any, callback: (nl: any) => void) => {
             callback({ nameList: true });
          });
          const mockSource = new MockSTokenSource([
@@ -218,7 +217,7 @@ describe('elementDeclaration (unit)', () => {
 
       it('uses unassigned to parse any values after the nameList', () => {
          const unassignedParseSpy = spyOn(unassigned, 'parseAllValues');
-         spyOn(nameList, 'parse').and.callFake((_1: any, _2: any, callback: (nl: any) => void) => {
+         spyOn(nameList, 'parse').and.callFake((_1: any, callback: (nl: any) => void) => {
             callback({ nameList: true });
          });
          const mockSource = new MockSTokenSource([
@@ -241,7 +240,7 @@ describe('elementDeclaration (unit)', () => {
          spyOn(unassigned, 'parseAllValues').and.callFake((_1: any, _2: any, cb: (vals: any) => void) => {
             cb({ values: true });
          });
-         spyOn(nameList, 'parse').and.callFake((_1: any, _2: any, callback: (nl: any) => void) => {
+         spyOn(nameList, 'parse').and.callFake((_1: any, callback: (nl: any) => void) => {
             callback({ nameList: true });
          });
          const mockSource = new MockSTokenSource([
@@ -558,7 +557,7 @@ describe('elementDeclaration (unit)', () => {
          elementDeclaration.checkWellFormed(elementPToken, mockErrorCollector, new EntityMetaData());
 
          expect(nameListCWFSpy).toHaveBeenCalledWith(elementPToken.children,
-            mockErrorCollector, new EntityMetaData(), 'children', 'ANY');
+            mockErrorCollector, new EntityMetaData());
       });
 
       it('calls unassigned.checkExtra() with extras', () => {
@@ -616,7 +615,7 @@ describe('elementDeclaration (unit)', () => {
          
          elementDeclaration.pTokenToXToken(elementPToken);
 
-         expect(nameListMakeSpy).toHaveBeenCalledWith(elementPToken.children, 'ANY');
+         expect(nameListMakeSpy).toHaveBeenCalledWith(elementPToken.children);
       });
 
    });

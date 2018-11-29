@@ -6,7 +6,7 @@ import stream from 'readable-stream';
 import { EntityMetaData, EntityKind, util, EntityLocation } from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from '../../sToken';
-import nameList, { XNameList } from '../../token/common/nameList';
+import nameList, { XNameList } from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
    charData,

@@ -7,10 +7,10 @@ import { SToken, STokenSource } from 'sToken';
 import base from '../base';
 import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
-import { textOrBlank } from './/misc';
+import { textOrBlank } from '../common/misc';
 import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';
 import nameListGraph from './nameListGraph';
-import misc from './misc';
+import misc from '../common/misc';
 
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
@@ -114,7 +114,7 @@ function isNamePToken(value: any): value is NamePToken {
                            | '(' S? '#PCDATA' S? ')'
 \**********************************************************************/
 
-function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverPToken): void {
+function parse(source: STokenSource, deliverPToken: DeliverPToken): void {
    source.extract('match', '(', (charSToken) => {
       const namePToken = new NameListPToken();
       if (!charSToken) {
@@ -125,8 +125,7 @@ function parse(source: STokenSource, listType: ListType, deliverPToken: DeliverP
       namePToken.open = charSToken;
       source.extractToObjectNoParams('space', namePToken, 'postOpenSpace');
 
-      const delimiterType = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : 'ANY';
-      parseNames(source, namePToken, delimiterType, (pToken: NameListPToken) => {
+      parseNames(source, namePToken, 'ANY', (pToken: NameListPToken) => {
          source.extractToObject('match', ')', pToken, 'close');
          source.extractToObjectNoParams('space', pToken, 'postCloseSpace');
          source.extractToObject('multi', [ '?', '*', '+' ], pToken, 'repeat');
@@ -165,7 +164,7 @@ function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: 
       pToken.names.push(particle);
 
       if (charSToken.str === '(') {
-         parse(source, 'ANY', (listPToken?: NameListPToken) => {
+         parse(source, (listPToken?: NameListPToken) => {
             particle.particle = listPToken;
             parseDelimiter(source, pToken, particle, delimterType, deliverPToken);
          });
@@ -374,19 +373,17 @@ function assignListClose(nameList: NameListPToken, unValues: Array<any>) {
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: NameListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData,
-   type: string, listType?: ListType) {
+function checkWellFormed(pToken: NameListPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken) {
       return;
    }
 
-   checkListWellFormed(pToken, ec, entityMetaData, type, listType || 'ANY', true);
+   checkListWellFormed(pToken, ec, entityMetaData);
 }
 
-function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData,
-   type: string, listType: ListType, isTop: boolean) {
-   let delimType: DelimiterType | void = (listType === 'ENUMERATION' || listType === 'NOTATION') ? 'CHOICE' : undefined;
-   const particleType: NameType = listType === 'ENUMERATION' ? 'NMTOKEN' : 'NAME';
+function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+   let delimType: DelimiterType | void = undefined;
+   let isMixedType = false;
 
    ec.setPos(pToken.open);
    ec.check(!pToken.open, WFEID.NAMELIST_NO_OPEN);
@@ -395,7 +392,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
    if (pToken.names.length <= 0) {
       ec.setPos(undefined);
-      ec.report(WFEID.NAMELIST_NO_NAMES, [ type ]);
+      ec.report(WFEID.NAMELIST_NO_NAMES);
    }
 
    for (let index = 0; index < pToken.names.length; index++) {
@@ -407,16 +404,12 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
          const namePTokenName = textOrBlank(entry.particle.name);
          const ucName = namePTokenName.toUpperCase();
 
-         if (index === 0 && listType === 'ANY' && ucName === PCDATA) {
+         if (index === 0 && !isMixedType && ucName === PCDATA) {
             ec.check(ucName !== namePTokenName, WFEID.NAMELIST_PCDATA_INVALID_CASE, [ namePTokenName ]);
-            listType = 'MIXED';
+            isMixedType = true;
             delimType = 'CHOICE';
          } else {
-            if (particleType === 'NMTOKEN') {
-               misc.checkNMToken(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
-            } else {
-               misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
-            }
+            misc.checkName(entry.particle.name, ec, entityMetaData, WFEID.NAMELIST_NAME_INVALID);
          }
 
          ec.setPos(entry.particle.postNameSpace);
@@ -425,10 +418,8 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
             ec.setPos(entry.particle.repeat);
 
-            if (listType === 'MIXED') {
+            if (isMixedType) {
                ec.report(WFEID.NAMELIST_MIXED_NAME_EXTRA_REPEAT, [ index.toString(), entry.particle.repeat.str ]);
-            } else if (listType !== 'ANY') {
-               ec.report(WFEID.NAMELIST_NAME_EXTRA_REPEAT, [ index.toString(), type, entry.particle.repeat.str ]);
             }
             ec.setPos(entry.particle.postRepeatSpace);
          }
@@ -436,16 +427,14 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
          if (entry.particle && entry.particle.open) {
             ec.setPos(entry.particle.open);
 
-            if (listType === 'MIXED') {
+            if (isMixedType) {
                ec.report(WFEID.NAMELIST_MIXED_INVALID_SUBPARTICLE, [ index.toString() ]);
-            } else if (listType === 'ENUMERATION' || listType === 'NOTATION') {
-               ec.report(WFEID.NAMELIST_INVALID_SUBPARTICLE, [ index.toString(), type ]);
             }
 
-            checkListWellFormed(entry.particle, ec, entityMetaData, type, listType, false);
+            checkListWellFormed(entry.particle, ec, entityMetaData);
          } else {
             ec.setPos(undefined);
-            ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString(), type ]);
+            ec.check(!entry.particle, WFEID.NAMELIST_NO_NAME, [ index.toString() ]);
          }
       }
 
@@ -457,23 +446,23 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
          }
 
          if (delimType === 'SEQUENCE' && entry.delimiter.str !== ',') {
-            ec.report(WFEID.NAMELIST_BAD_SEQUENCE, [ index.toString(), type, entry.delimiter.str]);
+            ec.report(WFEID.NAMELIST_BAD_SEQUENCE, [ index.toString(), entry.delimiter.str]);
          } else if (entry.delimiter.str !== '|') {
-            ec.report(WFEID.NAMELIST_BAD_CHOICE, [ index.toString(), type, entry.delimiter.str]);
+            ec.report(WFEID.NAMELIST_BAD_CHOICE, [ index.toString(), entry.delimiter.str]);
          }
       }
 
       if (!isLast) {
-         ec.check(!entry.delimiter, WFEID.NAMELIST_NO_DELIM, [ index.toString(), type ]);
+         ec.check(!entry.delimiter, WFEID.NAMELIST_NO_DELIM, [ index.toString() ]);
       } else {
-         ec.check(entry.delimiter, WFEID.NAMELIST_EXTRA_DELIM, [ index.toString(), type ]);
+         ec.check(entry.delimiter, WFEID.NAMELIST_EXTRA_DELIM, [ index.toString() ]);
       }
 
       ec.setPos(entry.postDelimiterSpace);
    }
 
    ec.setPos(pToken.close);
-   ec.check(!pToken.close, WFEID.NAMELIST_NO_CLOSE, [ type ]);
+   ec.check(!pToken.close, WFEID.NAMELIST_NO_CLOSE);
    ec.setPos(pToken.postCloseSpace);
 
    if (pToken.repeat) {
@@ -482,15 +471,13 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
    ec.setPos(pToken.repeat);
    const repeatStr = misc.textOrBlank(pToken.repeat);
-   if (listType === 'MIXED') {
+   if (isMixedType) {
       // 0 length is an "error", but we'll never know that because we identify MIXED by the first item
       if (pToken.names.length === 1) {
          ec.check(repeatStr !== '', WFEID.NAMELIST_MIXED_EXTRA_REPEAT, [ repeatStr ]);
       } else if (pToken.names.length > 1 && repeatStr !== '*') {
          ec.report(WFEID.NAMELIST_MIXED_INVALID_REPEAT, [ repeatStr ]);
       }
-   } else if (listType === 'ENUMERATION' || listType === 'NOTATION') {
-      ec.check(repeatStr !== '', WFEID.NAMELIST_EXTRA_REPEAT, [ repeatStr, 'xxx' ]);
    }
    ec.setPos(pToken.postRepeatSpace);
 }
@@ -523,15 +510,10 @@ function isXName(value: any): value is XName {
    return value && value.name;
 }
 
-function makeXTokenCompatible(pToken: NameListPToken, lType?: ListType): XNameList {
+function makeXTokenCompatible(pToken: NameListPToken): XNameList {
    const names = [];
    let listType: DefinitiveListType | void;
-   let repetition: RepeatType;
    
-   if (lType === 'ENUMERATION' || lType === 'NOTATION') {
-      listType = 'CHOICE';
-   }
-
    for (let index = 0; index < pToken.names.length; index++) {
       const particle = pToken.names[index].particle;
       const delimiter = pToken.names[index].delimiter;

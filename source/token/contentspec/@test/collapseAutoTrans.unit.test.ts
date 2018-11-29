@@ -17,7 +17,7 @@ describe('collapseAutoTrans()', () => {
       const source = new STokenSource(defaultExtractors, new EntityMetaData());
       source.addText(input);
       source.endText();
-      nameList.parse(source, 'ANY', (result) => {
+      nameList.parse(source, (result) => {
          const tokenList = nameList.makeXTokenCompatible(result || {} as NameListPToken);
          let graph = nameListToGraph(tokenList);
          cb(graph);

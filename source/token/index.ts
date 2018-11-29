@@ -20,7 +20,6 @@ import literalValue from './common/literalValue';
 
 import * as entityDeclaration from './entityDeclaration';
 export * from './processingInstruction';
-import * as xmlDeclaration from './xmlDeclaration';
 
 export * from './bridge/instruction';
 export * from './bridge/section';
@@ -56,14 +55,11 @@ const token = {
    notationDeclaration,
    space,
    text,
-   xmlDeclaration,
 
    unassigned,
 
    literalValue,
 };
-
-const parseXmlDeclaration = xmlDeclaration.parseXmlDeclaration;
 
 export {
    declaration,
@@ -81,13 +77,9 @@ export {
    notationDeclaration,
    space,
    text,
-   xmlDeclaration,
-   parseXmlDeclaration,
 
    unassigned,
-
    literalValue,
-
    CommentXToken,
 };
 

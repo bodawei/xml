@@ -6,7 +6,7 @@ import { defaultExtractors } from '../../../extractor/index';
 import { STokenSource } from '../../../sToken/index';
 import { makeSTokenMaker } from '../../../sToken/@test/helper';
 
-import unassigned from '../unassigned';
+import unassigned from '../../common/unassigned';
 import nameList, {
    ContentParticlePToken,
    NameListPToken,
@@ -54,7 +54,7 @@ describe('nameList (integration)', () => {
          source.addText('( one+ | two)* ');
          source.endText();
 
-         nameList.parse(source, 'ANY', (result) => {
+         nameList.parse(source, (result) => {
             expect(result).toEqual(nlPToken);
             done();
          });
@@ -65,7 +65,7 @@ describe('nameList (integration)', () => {
          source.addText('( one+ | %fred;');
          source.endText();
 
-         nameList.parse(source, 'ANY', (result) => {
+         nameList.parse(source, (result) => {
             nlPToken.names.pop();
             nlPToken.close = undefined;
             nlPToken.postCloseSpace = undefined;
@@ -82,7 +82,7 @@ describe('nameList (integration)', () => {
          source.addText('( one+ | ( ( two | three)+ , four)? | five)');
          source.endText();
 
-         nameList.parse(source, 'ANY', (result) => {
+         nameList.parse(source, (result) => {
             const listSubOne = result!.names[1].particle as NameListPToken;
             const listSubOneSubZero = listSubOne!.names[0].particle as NameListPToken;
             const listSubOneSubZeroSubZero = listSubOneSubZero.names[0].particle as NamePToken;

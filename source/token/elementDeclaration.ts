@@ -4,7 +4,7 @@ import { EntityMetaData } from '../basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
-import nameList, { NameListPToken, XNameList, isXName } from './common/nameList';
+import nameList, { NameListPToken, XNameList, isXName } from './contentspec/nameList';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedValue } from './common/unassigned';
 import { SToken, STokenSource } from '../sToken/index';
@@ -129,7 +129,7 @@ function parseContentSpec(source: STokenSource, pToken: ElementDeclarationPToken
             return;
          }
 
-         nameList.parse(source, 'ANY', (nameList?: NameListPToken) => {
+         nameList.parse(source, (nameList?: NameListPToken) => {
             pToken.children = nameList;
             source.extractNoParams('peekChar', (nextChar) => {
                if (nextChar && nextChar.str === '%') {
@@ -233,7 +233,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
    ec.check(!pToken.postNameSpace, WFEID.ELEMENTDECL_NAME_NO_SPACE, [ nameText ]);
 
    if (pToken.children) {
-      nameList.checkWellFormed(pToken.children, ec, entityMetaData, 'children', 'ANY', );
+      nameList.checkWellFormed(pToken.children, ec, entityMetaData);
    } else {
       const contentSpec: string = misc.textOrBlank(pToken.contentSpec);
       const upperContentSpec = contentSpec.toLocaleUpperCase();
@@ -266,7 +266,7 @@ function pTokenToXToken(pToken: ElementDeclarationPToken) {
 
    if (pToken.children) {
       contentSpec = 'CHILDREN';
-      children = nameList.makeXTokenCompatible(pToken.children, 'ANY');
+      children = nameList.makeXTokenCompatible(pToken.children);
    }
 
    return new ElementDeclaration(misc.textOrBlank(pToken.name),

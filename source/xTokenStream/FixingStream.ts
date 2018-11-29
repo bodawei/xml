@@ -4,7 +4,7 @@ import stream from 'readable-stream';
 
 import tokenNs from '../token';
 import { ElementDeclaration, isXName } from '../token/elementDeclaration';
-import nameList, { XName, XNameList } from '../token/common/nameList';
+import nameList, { XName, XNameList } from '../token/contentspec/nameList';
 
 const ATTR_TYPES = [ 'CDATA', 'ID', 'IDREF', 'IDREFS', 'ENTITY', 'ENTITIES', 'NMTOKEN', 'NMTOKENS', 'NOTATION' ];
 const DEFAULT_TYPES = [ '#FIXED', '#REQUIRED', '#IMPLIED' ];
