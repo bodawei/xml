@@ -74,11 +74,7 @@ function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData
 \**********************************************************************/
 
 function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
-   const use11Names = entityMetaData.isVersion1dot1 ||
-      (entityMetaData.isVersion1dot0 && entityMetaData.revision === 5);
-   const regEx = use11Names ? WHOLENMTOKEN_REGEX11 : WHOLENMTOKEN_REGEX10;
-
-   if (!nameTokenSToken || regEx.exec(nameTokenSToken.str)) {
+   if (!nameTokenSToken || util.isNmToken(nameTokenSToken.str, entityMetaData.version, entityMetaData.revision)) {
       return;
    }
 

@@ -152,12 +152,9 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
       case '%':
          // return the parameter entity reference
          parseParameterEntityReference(source, (reference: ParameterEntityReferencePToken | void) => {
-            if (!reference) { // this can't happen
-               return;
-            }
             deliverValue({
                type: UnassignedType.REFERENCE,
-               token: reference,
+               token: reference as ParameterEntityReferencePToken, // typeHack
             });
          });
          break;

@@ -823,6 +823,18 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       describe('state checking', () => {
 
+         fit('reports no error if encountered at the start of a file', () => {
+            metaData = new EntityMetaData(EntityKind.EXTERNAL, 1.0, 5);
+            (checker as any)._state = 'START';
+            const checkerPushSpy = spyOn(checker, 'push');
+            spyOn(pToken, 'checkWellFormed');
+
+            checker.write(metaData);
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(1)[0].id).toBeUndefined();
+         });
+
          it('reports an error if encountered not at the start of a file', () => {
             (checker as any)._state = 'IN_CONTENT';
             const checkerPushSpy = spyOn(checker, 'push');

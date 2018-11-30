@@ -165,6 +165,7 @@ describe('misc', () => {
       let emdV1R5: EntityMetaData;
       let emdV1R4: EntityMetaData;
       let emdV11R2: EntityMetaData;
+      let utilIsNMToken: jasmine.Spy;
 
       beforeEach(() => {
          ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
@@ -173,154 +174,28 @@ describe('misc', () => {
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
          emdV11R2 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
          spyOn(ec, 'report');
+         utilIsNMToken = spyOn(util, 'isNmToken');
       });
 
-      it('accepts an nmtoken that  is just plain letters', () => {
-         const name = 'good';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
+      it('accepts an empty Stoken', () => {
+         misc.checkNMToken(undefined as any, ec, emdV1R5, errorId);
 
          expect(ec.report).not.toHaveBeenCalled();
       });
 
-      it('accepts an nmtoken that has a hyphen, period or digit', () => {
-         const name = 'on.-8';
+      it('calls util.isNmToken()', () => {
+         misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
+         expect(util.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
-      it('accepts an nmtoken that has the allowable chars above ascii in it', () => {
-         const name = 'o\u00B7\u0310\u2040e';
+      it('reports an error if util.utilIsNMToken() returns false', () => {
+         utilIsNMToken.and.returnValue(false);
 
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with an astral character (e.g. an emoji)', () => {
-         const name = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789:_' +
-               '\u00CE\u01F8\u0371\u047F\u200C\u2080\u2CCC\u4001\uF901\uFDF1';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that has a uFDF1 in it', () => {
-         const name = 'o\uFDF1e';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('rejects an nmtoken with a $ in it', () => {
-         const name = 'o$e';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
+         misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
          expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('allows an nmtoken that starts with a digit', () => {
-         const name = '1ne';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with a hyphen', () => {
-         const name = '-ne';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with a period', () => {
-         const name = '.ne';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with a u00B7 (a namechar that is not a namestartchar)', () => {
-         const name = '\u00B7ne';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with a u0320 (a namechar that is not a namestartchar)', () => {
-         const name = '\u0320ne';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that starts with a u2040 (a namechar that is not a namestartchar)', () => {
-         const name = '\u2040';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('rejects an nmtoken that has u03F4 in version 1.0/4', () => {
-         const name = '\u03F4';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R4, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('accepts an nmtoken that has u03F4 in version 1.0/5', () => {
-         const name = '\u03F4';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken that has u03F4 in version 1.1', () => {
-         const name = '\u03F4';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV11R2, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('rejects an nmtoken in 1.0/4 that has characters that are bad in 1.0/4', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R4, errorId);
-
-         expect(ec.report).toHaveBeenCalledWith(
-            WellFormedError.ID.ELEMENT_NAME_INVALID, [ name ], makeSToken(name));
-      });
-
-      it('accepts an nmtoken in 1.0/5 that has characters that are bad in 1.0/4 but ok in version 1.0/5', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV1R5, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
-      });
-
-      it('accepts an nmtoken in 1.1 that has characters that are bad in 1.0 but ok in version 1.1', () => {
-         const name = 'f\u0eceb';
-
-         misc.checkNMToken(makeSToken(name), ec, emdV11R2, errorId);
-
-         expect(ec.report).not.toHaveBeenCalled();
+            errorId, [ 'foo' ], SToken.fromString('foo'));
       });
 
    });

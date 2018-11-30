@@ -62,7 +62,7 @@ class GeneralEntityReferencePToken {
 }
 
 /**********************************************************************\
- parseParameterEntityReference() extracts a parameter entity reference.
+ parseGeneralEntityReference() extracts a parameter entity reference.
 
  PARAM
  source: An STokenSource to read from

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Range, EntityLocation } from '../basic';
+import { Range } from 'basic';
 
 /**********************************************************************\
  A SToken (String token) represents a unit of text. The originalText
