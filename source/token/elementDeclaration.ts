@@ -1,13 +1,14 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { strOrBlank } from 'sToken';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
 import nameList, { NameListPToken, XNameList, isXName } from './contentspec/nameList';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedValue } from './common/unassigned';
-import { SToken, STokenSource } from '../sToken/index';
+import { SToken, STokenSource } from 'sToken';
 
 const ELEMENTDECL = 'ELEMENTDECL';
 const ELEMENTDECL_XTOKEN = 'ELEMENTDECL_XTOKEN';
@@ -218,7 +219,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
       return;
    }
 
-   const nameText = misc.textOrBlank(pToken.name);
+   const nameText = strOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
@@ -235,7 +236,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
    if (pToken.children) {
       nameList.checkWellFormed(pToken.children, ec, entityMetaData);
    } else {
-      const contentSpec: string = misc.textOrBlank(pToken.contentSpec);
+      const contentSpec: string = strOrBlank(pToken.contentSpec);
       const upperContentSpec = contentSpec.toLocaleUpperCase();
       ec.setPos(pToken.contentSpec);
 
@@ -261,7 +262,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ElementDeclarationPToken) {
-   let contentSpec: string = misc.textOrBlank(pToken.contentSpec);
+   let contentSpec: string = strOrBlank(pToken.contentSpec);
    let children: XNameList | void;
 
    if (pToken.children) {
@@ -269,7 +270,7 @@ function pTokenToXToken(pToken: ElementDeclarationPToken) {
       children = nameList.makeXTokenCompatible(pToken.children);
    }
 
-   return new ElementDeclaration(misc.textOrBlank(pToken.name),
+   return new ElementDeclaration(strOrBlank(pToken.name),
       contentSpec, children, pToken);
 }
 

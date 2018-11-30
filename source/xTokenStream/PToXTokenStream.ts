@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
-import { EntityMetaData } from '../basic';
+import { EntityMetaData } from 'basic';
 
 import {
    declaration,

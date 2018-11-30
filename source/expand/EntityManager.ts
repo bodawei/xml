@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 
-import { EntityLocation, EntityMetaData, EntityKind } from '../basic';
+import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from '../extractor';
 import { SToken, STokenSource } from '../sToken';
 import {

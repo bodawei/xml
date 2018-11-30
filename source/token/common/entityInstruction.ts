@@ -1,11 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
-import { WellFormedError, ErrorCollector } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import { InstructionStart } from '../bridge/instruction';
-import { checkWellFormedText, textOrBlank } from './misc';
 import literal from './literal';
 import { TEXT_PTOKEN, TextPToken } from '../text';
 
@@ -103,7 +100,7 @@ function parseEntityInstruction(source: STokenSource, instStart: InstructionStar
 
 function getNextParam(source: STokenSource, attrs: Array<EntityInstructionParam>, paramNames: Array<string>, deliverPToken: DeliverParams) {
    source.extract('peekWord', DECL_NAME_TERMINATORS, (sToken) => {
-      const word = textOrBlank(sToken).toLowerCase();
+      const word = strOrBlank(sToken).toLowerCase();
       if (!sToken || paramNames.indexOf(word) === -1) {
          deliverPToken(attrs);
          return;

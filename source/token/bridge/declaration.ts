@@ -2,11 +2,7 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from '../../error';
-import { SToken, STokenSource } from '../../sToken';
-
-import {
-   textOrBlank,
-} from '../common/misc';
+import { strOrBlank, SToken, STokenSource } from '../../sToken';
 import base, { STokenArray } from '../base';
 
 /**********************************************************************\
@@ -107,7 +103,7 @@ function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, entityMe
       ec.report(WFEID.DECL_NO_DECLTYPE);
    }
 
-   ec.check(pToken.declType && pToken.type === UNKNOWNDECL, WFEID.DECL_UNKNOWN, [ textOrBlank(pToken.declType) ]);
+   ec.check(pToken.declType && pToken.type === UNKNOWNDECL, WFEID.DECL_UNKNOWN, [ strOrBlank(pToken.declType) ]);
 
    return ec;
 }

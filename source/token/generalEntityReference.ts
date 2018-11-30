@@ -2,9 +2,7 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
-
-import { textOrBlank } from './common/misc';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 const GENERAL_ENTITY_REFERENCE_PTOKEN = 'GENERAL_ENTITY_REFERENCE_PTOKEN';
 const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
@@ -94,7 +92,7 @@ function parseGeneralEntityReference(source: STokenSource, open: SToken, deliver
 \**********************************************************************/
 
 function checkWellFormed(pToken: GeneralEntityReferencePToken, ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-   const entityName = textOrBlank(pToken.name);
+   const entityName = strOrBlank(pToken.name);
 
    ec.setPos(pToken.open);
    ec.setPos(pToken.openSpace);
@@ -115,7 +113,7 @@ function checkWellFormed(pToken: GeneralEntityReferencePToken, ec: ErrorCollecto
 \**********************************************************************/
 
 function pTokenToXToken(pToken: GeneralEntityReferencePToken) {
-   return new GeneralEntityReferenceXToken(textOrBlank(pToken.name), pToken);
+   return new GeneralEntityReferenceXToken(strOrBlank(pToken.name), pToken);
 }
 
 /**********************************************************************\

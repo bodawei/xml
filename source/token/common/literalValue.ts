@@ -72,9 +72,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
 
       function handleRef(refPToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | void) {
          parse(source, terminators, (rest) => {
-            if (refPToken) {
-               rest.unshift(refPToken);
-            }
+            rest.unshift(refPToken as GeneralEntityReferencePToken | ParameterEntityReferencePToken); // typeHack
             deliverPToken(currentValue.concat(rest));
          });
       }

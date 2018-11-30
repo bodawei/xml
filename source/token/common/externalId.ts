@@ -6,10 +6,8 @@ import { WellFormedError, ErrorCollector } from '../../error';
 import unassigned from './unassigned';
 
 import literal, { LiteralPToken } from './literal';
-import { textOrBlank } from './misc';
-import { STokenSource, SToken } from 'sToken';
+import { strOrBlank, STokenSource, SToken } from 'sToken';
 import { UnassignedArray } from './unassigned';
-import { TextPToken } from '../text';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -214,7 +212,7 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
    }
 
    ec.setPos(pTokenPart.idType);
-   const typeText = textOrBlank(pTokenPart.idType);
+   const typeText = strOrBlank(pTokenPart.idType);
    const capitalType = typeText.toLocaleUpperCase();
    ec.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [ typeText ]);
    ec.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [ capitalType, typeText ]);

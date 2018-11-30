@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'sToken';
+
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import { textOrBlank } from '../common/misc';
 
 /**********************************************************************\
  Defines a simple token that tracks the end of an entity expansion.
@@ -19,7 +20,7 @@ class ParameterEntityEndPToken {
    }
 
    toXToken() {
-      return new ParameterEntityEndXToken(textOrBlank(this.referencePToken.name), this);
+      return new ParameterEntityEndXToken(strOrBlank(this.referencePToken.name), this);
    }
 }
 

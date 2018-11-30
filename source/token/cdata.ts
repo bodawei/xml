@@ -2,7 +2,7 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import { SectionStart } from './bridge/section';
 import misc from './common/misc';
@@ -90,7 +90,7 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
 \**********************************************************************/
 
 function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData: EntityMetaData): void {
-   const typeText = misc.textOrBlank(pToken.sectionType);
+   const typeText = strOrBlank(pToken.sectionType);
 
    ec.setPos(pToken.open);
 
@@ -128,7 +128,7 @@ function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData
 \**********************************************************************/
 
 function pTokenToXToken(pToken: CdataPToken) {
-   const token = new CdataXToken(misc.textOrBlank(pToken.text), pToken);
+   const token = new CdataXToken(strOrBlank(pToken.text), pToken);
 
    return token;
 }

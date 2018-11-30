@@ -227,16 +227,11 @@ function checkWellFormedText(sToken: SToken | void, ec: ErrorCollector, entityMd
    }
 }
 
-function textOrBlank(sToken: SToken | void) {
-   return sToken ? sToken.str : '';
-}
-
 const misc = {
    checkName,
    checkNMToken,
    checkWellFormedNameRecommendation,
    checkWellFormedText,
-   textOrBlank,
 };
 
 export {
@@ -244,6 +239,5 @@ export {
    checkNMToken,
    checkWellFormedNameRecommendation,
    checkWellFormedText,
-   textOrBlank,
 };
 export default misc;

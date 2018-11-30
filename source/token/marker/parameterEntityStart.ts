@@ -1,7 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { strOrBlank } from 'sToken';
+
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import { textOrBlank } from '../common/misc';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.
@@ -19,7 +20,7 @@ class ParameterEntityStartPToken {
    }
 
    toXToken() {
-      return new ParameterEntityStartXToken(textOrBlank(this.referencePToken.name), this);
+      return new ParameterEntityStartXToken(strOrBlank(this.referencePToken.name), this);
    }
 }
 

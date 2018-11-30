@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
 const CHARREF_PTOKEN_TYPE = 'CHARREF_PTOKEN';

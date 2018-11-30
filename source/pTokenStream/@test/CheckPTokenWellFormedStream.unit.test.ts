@@ -823,10 +823,10 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       describe('state checking', () => {
 
-         fit('reports no error if encountered at the start of a file', () => {
+         it('reports no error if encountered at the start of a file', () => {
+            const checkerPushSpy = spyOn(checker, 'push');
             metaData = new EntityMetaData(EntityKind.EXTERNAL, 1.0, 5);
             (checker as any)._state = 'START';
-            const checkerPushSpy = spyOn(checker, 'push');
             spyOn(pToken, 'checkWellFormed');
 
             checker.write(metaData);

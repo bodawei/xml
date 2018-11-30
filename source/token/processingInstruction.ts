@@ -1,13 +1,12 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
-import { SToken, STokenSource, STokenArrayBuilder } from '../sToken/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import {
    checkWellFormedText,
    checkWellFormedNameRecommendation,
-   textOrBlank,
 } from './common/misc';
 import { InstructionStart } from './bridge/instruction';
 
@@ -100,7 +99,7 @@ function parseProcessingInstruction(source: STokenSource, instr: InstructionStar
 \**********************************************************************/
 
 function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   const targetName = textOrBlank(pToken.target);
+   const targetName = strOrBlank(pToken.target);
    const lcTarget = targetName.toLowerCase();
    const hasXml = lcTarget.indexOf('xml') !== -1;
 
@@ -128,8 +127,8 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ProcessingInstructionPToken) {
-   return new ProcessingInstructionXToken(textOrBlank(pToken.target),
-      textOrBlank(pToken.instruction), pToken);
+   return new ProcessingInstructionXToken(strOrBlank(pToken.target),
+      strOrBlank(pToken.instruction), pToken);
 }
 
 /**********************************************************************\

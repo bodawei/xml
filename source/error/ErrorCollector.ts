@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Offset } from '../basic/index';
+import { Offset } from 'basic';
 
-import { SToken } from '../sToken/index';
+import { SToken } from 'sToken';
 
 type Position = SToken | Offset | void;
 

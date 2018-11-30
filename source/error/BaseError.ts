@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Offset, StringBundle } from '../basic';
+import { Offset, StringBundle } from 'basic';
 import { SToken } from '../sToken';
 
 const ERROR_TYPE = 'ERROR_TYPE';

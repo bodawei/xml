@@ -1,13 +1,12 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { EntityLocation, EntityMetaData } from '../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
-import { SToken, STokenSource } from '../sToken/index';
+import { EntityLocation, EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import declaration from './bridge/declaration';
 import externalId, { ExternalId } from './common/externalId';
 import misc from './common/misc';
-import base from './base';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
 
 const NOTATIONDECL = 'NOTATIONDECL';
@@ -168,7 +167,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorColl
       return;
    }
 
-   const nameText: string = misc.textOrBlank(pToken.name);
+   const nameText: string = strOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
@@ -198,7 +197,7 @@ function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorColl
 \**********************************************************************/
 
 function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclaration {
-   return new NotationDeclaration(misc.textOrBlank(pToken.name),
+   return new NotationDeclaration(strOrBlank(pToken.name),
       externalId.makeEntityLocation(pToken.externalId), pToken);
 }
 

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Range } from '../basic';
+import { Range } from 'basic';
 import Segment from './Segment';
 
 type DoneSegment = {

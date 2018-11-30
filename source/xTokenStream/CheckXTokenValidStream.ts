@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, util } from '../basic';
+import { EntityMetaData, util } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 import {

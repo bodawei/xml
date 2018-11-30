@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { StringBundle } from '../basic';
+import { StringBundle } from 'basic';
 
 // @ts-ignore
 import messagesAndStrings from './derive/XmlWarning.json';

@@ -1,11 +1,8 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import {
-   textOrBlank,
-} from './common/misc';
 import misc from './common/misc';
 import base from './base';
-import { STokenSource } from 'sToken';
+import { strOrBlank, STokenSource } from 'sToken';
 import { ErrorCollector } from 'error';
 import { EntityMetaData } from 'basic';
 
@@ -82,7 +79,7 @@ function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, entityMetaD
 \**********************************************************************/
 
 function pTokenToXToken(pToken: CharDataPToken) {
-   return new CharData(textOrBlank(pToken.text), pToken);
+   return new CharData(strOrBlank(pToken.text), pToken);
 }
 
 export {

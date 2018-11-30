@@ -2,19 +2,17 @@
 
 import { EntityMetaData } from '../../basic/index';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import base from '../base';
 import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
 
-import { textOrBlank } from '../common/misc';
-import { StateId, Transition, State, NameToTransitionMap, StateIdToStateMap, Graph } from './nameListGraphTypes';
+import { Graph } from './nameListGraphTypes';
 import nameListGraph from './nameListGraph';
 import misc from '../common/misc';
 
 const NAMELIST_PTOKEN_TYPE = 'NAMELIST_PTOKEN_TYPE';
 const WFEID = WellFormedError.ID;
-const WARN = XmlWarning.ID;
 const PCDATA = '#PCDATA';
 
 type DeliverPToken = (pToken?: NameListPToken) => void;
@@ -401,7 +399,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
 
       if (isNamePToken(entry.particle)) {
          ec.setPos(entry.particle.name);
-         const namePTokenName = textOrBlank(entry.particle.name);
+         const namePTokenName = strOrBlank(entry.particle.name);
          const ucName = namePTokenName.toUpperCase();
 
          if (index === 0 && !isMixedType && ucName === PCDATA) {
@@ -470,7 +468,7 @@ function checkListWellFormed(pToken: NameListPToken, ec: ErrorCollector, entityM
    }
 
    ec.setPos(pToken.repeat);
-   const repeatStr = misc.textOrBlank(pToken.repeat);
+   const repeatStr = strOrBlank(pToken.repeat);
    if (isMixedType) {
       // 0 length is an "error", but we'll never know that because we identify MIXED by the first item
       if (pToken.names.length === 1) {
@@ -532,7 +530,7 @@ function makeXTokenCompatible(pToken: NameListPToken): XNameList {
 
          const name: XName = {
             name: particle.name.str,
-            repeat: REPEAT_LOOKUP_TABLE[misc.textOrBlank(particle.repeat)] || 'ONE',
+            repeat: REPEAT_LOOKUP_TABLE[strOrBlank(particle.repeat)] || 'ONE',
          };
 
          names.push(name);

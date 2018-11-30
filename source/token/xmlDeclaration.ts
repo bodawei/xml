@@ -2,10 +2,10 @@
 
 import { EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from './bridge/instruction';
-import { checkWellFormedText, textOrBlank } from './common/misc';
+import { checkWellFormedText } from './common/misc';
 import { sTokensFromPToken, EntityInstructionParam, parseEntityInstruction } from './common/entityInstruction';
 
 /**********************************************************************\
@@ -113,10 +113,10 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
    let foundStandalone = false;
 
    for (const param of params) {
-      const nameText = textOrBlank(param.name);
+      const nameText = strOrBlank(param.name);
       const lcName = nameText.toLowerCase();
       const value = param.value;
-      const valueText = textOrBlank(value);
+      const valueText = strOrBlank(value);
       const lcValue = valueText.toLowerCase();
 
       ec.setPos(param.name);
@@ -183,8 +183,8 @@ function pTokenToXToken(pToken: XmlDeclarationPToken) {
    let standalone: boolean = false;
 
    for (const param of pToken.params) {
-      const name = textOrBlank(param.name);
-      const value = textOrBlank(param.value);
+      const name = strOrBlank(param.name);
+      const value = strOrBlank(param.value);
 
       switch (name.toLowerCase()) {
          case 'version': 

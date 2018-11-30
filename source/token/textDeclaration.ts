@@ -2,10 +2,10 @@
 
 import { EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
-import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from './bridge/instruction';
-import { checkWellFormedText, textOrBlank } from './common/misc';
+import { checkWellFormedText } from './common/misc';
 import { EntityInstructionParam, parseEntityInstruction, sTokensFromPToken } from './common/entityInstruction';
 
 /**********************************************************************\
@@ -109,10 +109,10 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
    let foundEncoding = false;
 
    for (const param of params) {
-      const nameText = textOrBlank(param.name);
+      const nameText = strOrBlank(param.name);
       const lcName = nameText.toLowerCase();
       const value = param.value;
-      const valueText = textOrBlank(value);
+      const valueText = strOrBlank(value);
 
       ec.setPos(param.name);
       ec.check(nameText !== lcName, WFEID.TEXTDECL_PARAM_INVALID_CASE, [ lcName, nameText ]);
@@ -153,8 +153,8 @@ function pTokenToXToken(pToken: TextDeclarationPToken) {
    let encoding: string = DEFAULT_ENCODING;
 
    for (const param of pToken.params) {
-      const name = textOrBlank(param.name);
-      const value = textOrBlank(param.value);
+      const name = strOrBlank(param.name);
+      const value = strOrBlank(param.value);
 
       switch (name.toLowerCase()) {
          case 'version': 

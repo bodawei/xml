@@ -2,7 +2,7 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
-import { SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import text, { TextXToken, isTextPToken, TextPToken } from '../text';
 
@@ -129,7 +129,7 @@ function checkWellFormed(pAttributes: AttributesPToken, ec: ErrorCollector, enti
 
    for (let index = 0; index < pAttributes.length; index++) {
       const attr = pAttributes[index];
-      const nameText = misc.textOrBlank(attr.name);
+      const nameText = strOrBlank(attr.name);
 
       if (index === 0) {
          ec.setPos(preceedingSpace);
@@ -210,7 +210,7 @@ function makeTokenCompatible(pAttributes: AttributesPToken = []) {
       const attr = pAttributes[index];
       const value = literal.makeTokenCompatible(attr);
       const details: AttributeXToken = {
-         name: misc.textOrBlank(attr.name),
+         name: strOrBlank(attr.name),
          value: value || [],
       };
 
@@ -227,7 +227,7 @@ function makeOneTokenCompatible(attributes: AttributesPToken = []) {
       const attr = attributes[index];
       const value = literal.makeOneTokenCompatible(attr);
       const details: AttributeXToken = {
-         name: misc.textOrBlank(attr.name),
+         name: strOrBlank(attr.name),
          value: value ? [ new text.XToken(value) ] : [],
       };
       

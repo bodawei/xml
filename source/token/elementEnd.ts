@@ -1,11 +1,11 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
-import { WellFormedError, XmlWarning, ErrorCollector } from '../error';
+import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
+import { strOrBlank, STokenSource, SToken } from 'sToken';
 
 import misc from './common/misc';
 import base from './base';
-import { STokenSource, SToken } from 'sToken';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
@@ -104,7 +104,7 @@ function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMet
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ElementEndPToken) {
-   return new ElementEnd(misc.textOrBlank(pToken.name), pToken);
+   return new ElementEnd(strOrBlank(pToken.name), pToken);
 }
 
 export {

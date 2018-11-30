@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { WellFormedError, XmlWarning, ErrorCollector } from '../error';
+import { strOrBlank } from 'sToken';
 
 import base from './base';
 import unassigned, { UnassignedType } from './common/unassigned';
@@ -387,7 +388,7 @@ function checkWellFormed(pToken: EntityDeclarationPToken | ParameterEntityDeclar
       return;
    }
 
-   const enNameText = misc.textOrBlank(pToken.name);
+   const enNameText = strOrBlank(pToken.name);
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
@@ -440,10 +441,10 @@ function checkWellFormed(pToken: EntityDeclarationPToken | ParameterEntityDeclar
 function pTokenToXToken(pToken: EntityDeclarationPToken | ParameterEntityDeclarationPToken) {
    const entityClass = pToken.parameter ? ParameterEntityDeclaration : EntityDeclaration;
 
-   return new entityClass(misc.textOrBlank(pToken.name),
+   return new entityClass(strOrBlank(pToken.name),
       pToken.value,
       externalId.makeEntityLocation(pToken.externalId),
-      misc.textOrBlank(pToken.nDataName),
+      strOrBlank(pToken.nDataName),
       pToken);
 }
 

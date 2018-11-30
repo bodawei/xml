@@ -1,9 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData, EntityKind } from 'basic';
-import { SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import { textOrBlank } from '../common/misc';
 import { ProcessingInstructionPToken, parseProcessingInstruction } from '../processingInstruction';
 import { parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 import { parseXmlDeclaration, XmlDeclarationPToken } from '../xmlDeclaration';
@@ -48,7 +47,7 @@ function parseInstruction(source: STokenSource, openSToken: SToken, emd: EntityM
 
    source.extractNoParams('space', (sToken) => {
       start.targetSpace = sToken;
-      const target = textOrBlank(start.target);
+      const target = strOrBlank(start.target);
 
       if (target.toLocaleLowerCase() === 'xml') {
          if (emd.kind == EntityKind.DOCUMENT) {

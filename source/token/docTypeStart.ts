@@ -1,6 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, ErrorCollector } from '../error';
+import { WellFormedError, ErrorCollector } from 'error';
+import { strOrBlank } from 'sToken';
 
 import externalId from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/declaration';
@@ -119,7 +120,7 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
 \**********************************************************************/
 
 function pTokenToXToken(pToken: DocTypeStartPToken) {
-   return new DocTypeStart(misc.textOrBlank(pToken.name),
+   return new DocTypeStart(strOrBlank(pToken.name),
       externalId.makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
       !!pToken.startInternalSubset,
       pToken);

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { textOrBlank } from "../common/misc";
-import { GeneralEntityReferencePToken } from "../generalEntityReference";
+import { strOrBlank } from 'sToken';
+import { GeneralEntityReferencePToken } from '../generalEntityReference';
 
 /**********************************************************************\
  Defines a simple token that tracks the start of an entity expansion.
@@ -19,7 +19,7 @@ class GeneralEntityStartPToken {
    }
 
    toXToken() {
-      return new GeneralEntityStartXToken(textOrBlank(this.referencePToken.name), this);
+      return new GeneralEntityStartXToken(strOrBlank(this.referencePToken.name), this);
    }
 }
 

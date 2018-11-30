@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic/index';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
-import { SToken, STokenSource } from '../sToken/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 import unassigned, { UnassignedArray } from './common/unassigned';
 
 import declaration, { DeclarationPToken } from './bridge/declaration';
@@ -352,7 +352,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
 
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
-   const elNameText = misc.textOrBlank(pToken.elementName);
+   const elNameText = strOrBlank(pToken.elementName);
 
    ec.setPos(pToken.elementName);
    ec.check(!pToken.elementName, WFEID.ATTLISTDECL_NO_ELEMENT_NAME);
@@ -371,7 +371,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
    } = {};
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
-      const attName = misc.textOrBlank(attDef.name);
+      const attName = strOrBlank(attDef.name);
 
       ec.setPos(attDef.name);
       misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);         
@@ -389,7 +389,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       ec.check(!attDef.postNameSpace, WFEID.ATTLISTDECL_ATTR_NAME_NO_SPACE, [ attName, elNameText ]);
 
       ec.setPos(attDef.type);
-      const attType = misc.textOrBlank(attDef.type);
+      const attType = strOrBlank(attDef.type);
       const upperAttType = attType.toLocaleUpperCase();
       const knownType = ATTR_TYPES.indexOf(upperAttType) !== -1;
 
@@ -420,7 +420,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       }
 
       // No default type is not an error
-      const defType = misc.textOrBlank(attDef.defaultType);
+      const defType = strOrBlank(attDef.defaultType);
       const upperDefType = defType.toLocaleUpperCase();
 
       if (attDef.defaultType) {
@@ -486,15 +486,15 @@ class AttListXToken {
 }
 
 function pTokenToXToken(pToken: AttListPToken): AttListXToken {
-   const name = misc.textOrBlank(pToken.elementName);
+   const name = strOrBlank(pToken.elementName);
    const attrs: Array<AttDefXToken> = [];
 
    for (let index = 0; index < pToken.attDefs.length; index++) {
       const attDef = pToken.attDefs[index];
       const xTokenAttrDef: AttDefXToken = {
          name: attDef.name.str,
-         type: misc.textOrBlank(attDef.type),
-         defaultType: misc.textOrBlank(attDef.defaultType),
+         type: strOrBlank(attDef.type),
+         defaultType: strOrBlank(attDef.defaultType),
          value: [],
       };
 

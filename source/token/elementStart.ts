@@ -1,8 +1,8 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017=2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error/index';
-import { SToken, STokenSource } from '../sToken/index';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import attribute, { AttributeXToken } from './common/attribute';
 import misc from './common/misc';
@@ -180,7 +180,7 @@ function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: Er
 function pTokenToXToken(pToken: ElementStartPToken | ElementEmptyPToken) {
    const className = (pToken.type === ELEMENT_START) ? ElementStart : ElementEmpty;
 
-   return new className(misc.textOrBlank(pToken.name),
+   return new className(strOrBlank(pToken.name),
       attribute.makeTokenCompatible(pToken.attributes), pToken);
 }
 
