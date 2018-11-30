@@ -1025,6 +1025,48 @@ describe('NodeStream (unit)', () => {
             gatherResult(nodeStream, done);
          });
 
+         it('reports a warning if the parameter entity declaration is already defined', (done) => {
+            const declToken1 = new xToken.entityDeclaration.ParamXToken('foo', [], undefined, undefined);
+            const declToken2 = new xToken.entityDeclaration.ParamXToken('foo', [], undefined, undefined);
+            spyOn(entityManager, 'getParameterEntityToken').and.callFake((token: any) => {
+               if (token == declToken1) {
+                  return;
+               }
+
+               return declToken1;
+            });
+
+            nodeStream.write(declToken1);
+            nodeStream.write(declToken2);
+            nodeStream.end();
+
+            gatherResults(nodeStream, (tokens) => {
+               expect((tokens[1] as any).id).toEqual(XmlWarning.ID.ENTITYDECL_DUPLICATE);
+               done();
+            });
+         });
+
+         it('reports a warning if the general entity declaration is already defined', (done) => {
+            const declToken1 = new xToken.entityDeclaration.XToken('foo', [], undefined, undefined);
+            const declToken2 = new xToken.entityDeclaration.XToken('foo', [], undefined, undefined);
+            spyOn(entityManager, 'getEntityToken').and.callFake((token: any) => {
+               if (token == declToken1) {
+                  return;
+               }
+
+               return declToken1;
+            });
+
+            nodeStream.write(declToken1);
+            nodeStream.write(declToken2);
+            nodeStream.end();
+
+            gatherResults(nodeStream, (tokens) => {
+               expect((tokens[1] as any).id).toEqual(XmlWarning.ID.ENTITYDECL_DUPLICATE);
+               done();
+            });
+         });
+
       });
 
       describe('notation declaration processing', () => {

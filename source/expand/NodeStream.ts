@@ -827,8 +827,26 @@ class NodeStream extends stream.Transform {
 
    _addEntityDeclaration(edToken: EntityDeclaration, done: DoneSignal) {
       if (edToken instanceof entityDeclaration.ParamXToken) {
+         // §4.2 If the same entity is declared more than once, ... at user option,
+         // an XML processor may issue a warning if entities are declared multiple times.
+         if (this._entityManager.getParameterEntityToken(edToken.name)) {
+            const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+            this.push(warning);
+            done();
+            return;
+         }
+
          this._entityManager.addParameterEntityFromInternalSubset(edToken);
       } else {
+         // §4.2 If the same entity is declared more than once, ... at user option,
+         // an XML processor may issue a warning if entities are declared multiple times.
+         if (this._entityManager.getEntityToken(edToken.name)) {
+            const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+            this.push(warning);
+            done();
+            return;
+         }
+
          this._entityManager.addEntityFromInternalSubset(edToken);
       }
 

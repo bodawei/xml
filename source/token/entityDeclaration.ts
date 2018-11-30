@@ -134,6 +134,7 @@ class ParameterEntityDeclarationPToken extends EntityDeclarationPToken {
    deliverPToken: Callback to deliver the PTokens
 
  SYNTAX
+   § 4.2
    [70] EntityDecl  ::= GEDecl | PEDecl
    [71] GEDecl      ::= '<!ENTITY' S Name S EntityDef S? '>'
    [72] PEDecl      ::= '<!ENTITY' S '%' S Name S PEDef S? '>'
