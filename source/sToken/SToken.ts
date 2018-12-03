@@ -99,11 +99,7 @@ class SToken {
 
 function canFuseRanges(range1: Range, range2: Range) {
    const locationsSame = range1.location === range2.location;
-   let locationsEqual = false;
-
-   if (range1.location) {
-      locationsEqual = range1.location.equals(range2.location);
-   }
+   const locationsEqual = range1.location.equals(range2.location);
 
    if (locationsSame || locationsEqual) {
       return range1.getEndOffset().equals(range2.getStartOffset());

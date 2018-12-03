@@ -3,8 +3,8 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, EntityKind } from 'basic';
-import { defaultExtractors } from '../extractor';
-import { strOrBlank, SToken, STokenSource } from '../sToken';
+import { defaultExtractors } from 'extractor';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
    declaration,
    parseSection,
@@ -25,14 +25,14 @@ import {
    parseInstruction,
    parseParameterEntityReference,
    parseGeneralEntityReference,
-} from '../token';
+} from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { DocTypeEndPToken } from '../token/docTypeEnd';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
 
-class PTokenStream extends stream.Transform {
+class PTokenStream extends stream.Readable {
    private _sTokenSource: STokenSource;
    private _elementStack: Array<Token>;
    private _inContent: boolean;

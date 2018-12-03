@@ -7,6 +7,8 @@ declare module "readable-stream" {
          write(value: any): void;
          read(): any;
          end(): void;
+         pause(): void;
+         resume(): void;
       }
    }
    export default streamx;

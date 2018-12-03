@@ -11,7 +11,7 @@ describe('Offset', () => {
       it('accepts no parameters', () => {
          const offset = new Offset(undefined);
 
-         expect(offset.location).toBeUndefined();
+         expect(offset.location).toEqual(new EntityLocation());
          expect(offset.index).toEqual(0);
          expect(offset.row).toEqual(0);
          expect(offset.column).toEqual(0);

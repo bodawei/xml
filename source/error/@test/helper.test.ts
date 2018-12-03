@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset } from '../../basic/index';
+import { Offset, EntityLocation } from '../../basic/index';
 import { SToken } from '../../sToken';
 
 import { XmlWarning } from '../XmlWarning';
@@ -161,7 +161,7 @@ describe('error helper', () => {
                });
          });
 
-         it('reports a failure when the the positions do not match', () => {
+         it('reports a failure when the positions do not match', () => {
             const mock = new MockErrorCollector();
             mock.errors = [ {
                id: 'XMLDECL_NO_CLOSE',
@@ -175,7 +175,7 @@ describe('error helper', () => {
                   position: new Offset(undefined, 5, 6, 7),
                })).toEqual({
                   pass: false,
-                  message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"index":1,"row":2,"column":3}\n  Expected: {"index":5,"row":6,"column":7}',
+                  message: 'Positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":1,"row":2,"column":3}\n  Expected: {"location":{"systemId":""},"index":5,"row":6,"column":7}',
                });
          });
 
@@ -196,7 +196,7 @@ describe('error helper', () => {
                   lastPosition: new Offset(undefined, 99, 88, 11),
                })).toEqual({
                   pass: false,
-                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"index":99,"row":88,"column":77}\n  Expected: {"index":99,"row":88,"column":11}',
+                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":99,"row":88,"column":77}\n  Expected: {"location":{"systemId":""},"index":99,"row":88,"column":11}',
                });
          });
 
@@ -217,7 +217,7 @@ describe('error helper', () => {
                   lastPosition: undefined,
                })).toEqual({
                   pass: false,
-                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"index":1,"row":2,"column":3}\n  Expected: undefined',
+                  message: 'Last positions for XMLDECL_NO_CLOSE do not match:\n  Actual:   {"location":{"systemId":""},"index":1,"row":2,"column":3}\n  Expected: undefined',
                });
          });
 

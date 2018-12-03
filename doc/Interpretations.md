@@ -149,7 +149,7 @@ The validity of entity references and character references here are ambiguous, a
 
 This goes with the assumption that entity references are acceptable here.
 
-Note that §3.2.1 has a constraint that the parameter entities must be properly balanced.  Since a parameter entity may be formed from the expansion of other parameter entities, this considers this constraing to mean that each topmost entity in the content spec must ultimately be balanced, but any "sub-entities" need not be. 
+Note that §3.2.1 has a constraint that the parameter entities must be properly balanced.  Since a parameter entity may be formed from the expansion of other parameter entities, this considers this constraing to mean that each topmost entity in the content spec must ultimately be balanced, but any "sub-entities" need not be.
 
 ## Attribute-list declarations
 * When processing ATTLIST's, ordering is top-to-bottom when processing the DTD, with the inner subset being processed before the external subset.
@@ -230,8 +230,26 @@ Note that we also assume that this is OK, since generalEntity is never reference
 <foo>
 </foo>
 ```
-I'm puzzled, because a non-validating processor doesn't need to read pe's. 
+I'm puzzled, because a non-validating processor doesn't need to read pe's.
 It really is not clear to me what standalone means or what it is for. It seems to be that some non-validaing processor may do some (e.g. the second example here).
+
+## Entity Expansion
+- The way this is built, the EntityExpander tries to know as little as it can about the correctness of the stream of tokens it is given. It has to know a bit about whether it is in the internal subset while not-validating so it can appropriately ignore some declarations. Aside from that, however, it relies on CheckWellFormed and CheckValid processes to make sure the stream is actually correct.
+
+It is worth commenting on this table from 4.4.0
+
+| | Entity Type: Parameter | Entity Type: Internal General| Entity Type: External Parsed General| Entity Type: Unparsed| Character |
+|---|---|---|---|---|---|
+| Reference In Content| Not recognized<br>(Parser will not see this. However, EntityExpander will include these if present)	 | Included |	Included if validating<br>(otherwise reference left in place) |	Forbidden<br>(reference left in place) |	Included |
+| Reference in Attribute Value| Not recognized |	Included in literal |	Forbidden |	Forbidden |	Included |
+| Occurs as Attribute Value| Not recognized |	Forbidden |	Forbidden |	Notify |	Not recognized |
+| Reference in EntityValue | Included in literal | Bypassed |	Bypassed |	Error |	Included |
+| Reference in DTD | Included as PE| Forbidden| Forbidden| Forbidden| Forbidden|
+
+- Note that the "as Attribute Value" portion of this really involves no expansion, and so is only noted by the validator, since only it has knowledge about the types of attributes.
+   - it is hard to understand how a character reference would be recognized in an attriute value!
+
+
 
 # Terminology
 
@@ -286,7 +304,7 @@ First, one can still have an external subset (§2.9). The crucial thing is that 
 
 Second, one can also have externally declared entities, as long as they are never referenced in the document. So, in fact, these are not very interesting.
 
-Third, one can have an internally declared external entity that is referenced in the document. 
+Third, one can have an internally declared external entity that is referenced in the document.
 
 Fourth, and most head-hurtingly, your document entity may, in fact, be fully self-contained (have no external entities), but still not be standalone.  This is because if there are any markup declarations in any parameter entity values, then the document is considered to be not standalone.  §2.9 mentions that a non-validating processor is not required to process any parameter entity declarations, so they are, in fact, inaccessible to a strict one.
 
@@ -325,4 +343,5 @@ The second time is at the point of use. Those character references from the firs
 - Why does systemliteral call out that it doesn't need to be parsed?
 - "Well-Formedness Constraint: PEs in Internal Subset In the internal DTD subset, parameter-entity references can occur only where markup declarations can occur, not within markup declarations"  Does this apply to values in entity values?
    - if yes, then we're good.  so standalone is good.
-   - If no, then in standalone are these errors?  4.1 speaks of the necessity of a declaration for a reference, but it isn't clear if this is general or parameter entities. (by 4.1 it seems like it must mean general entities, but then not clear what happens if a parameter entity is not declared).  This whole section is entity reference, and it inclues PERefs, so I asusme this does mean either. so it must mean you can't put these in entity values in the internal subset.  This seems like a horrible restriction.  this is independent of validating or non-validating.  the internal subset is really crippled.  I don't know why we did this. Except the mental model that the external subset is for general purpose use, and can be overridden. 
+   - If no, then in standalone are these errors?  4.1 speaks of the necessity of a declaration for a reference, but it isn't clear if this is general or parameter entities. (by 4.1 it seems like it must mean general entities, but then not clear what happens if a parameter entity is not declared).  This whole section is entity reference, and it inclues PERefs, so I asusme this does mean either. so it must mean you can't put these in entity values in the internal subset.  This seems like a horrible restriction.  this is independent of validating or non-validating.  the internal subset is really crippled.  I don't know why we did this. Except the mental model that the external subset is for general purpose use, and can be overridden.
+- Why is an unparsed entity reference merely an "erorr" if in an entity value, but forbidden in an attribute value or content?

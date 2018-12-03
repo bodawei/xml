@@ -8,13 +8,13 @@ import EntityLocation from './EntityLocation';
 \**********************************************************************/
 
 class Offset {
-   public location: EntityLocation | void;
+   public location: EntityLocation;
    public index: number;
    public row: number;
    public column: number;
 
    constructor(location: EntityLocation|void, index: number = 0, row: number = 0, column: number = 0) {
-      this.location = location;
+      this.location = location || new EntityLocation();
       this.index = index;
       this.row = row;
       this.column = column;
@@ -25,21 +25,11 @@ class Offset {
    }
 
    equals(other: Offset|void) {
-      let locationsEqual = false;
-
       if (!other) {
          return false;
       }
 
-      if (!this.location && !other.location) {
-         locationsEqual = true;
-      } else if (!this.location) {
-         locationsEqual = false;
-      } else {
-         locationsEqual = this.location.equals(other.location);
-      }
-
-      return locationsEqual &&
+      return this.location.equals(other.location) &&
          this.index === other.index &&
          this.row === other.row &&
          this.column === other.column;

@@ -39,6 +39,12 @@ export * from './parameterEntityReference';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
+type PToken = {
+   type: string;
+};
+
+const ENTITY_DECLARATION_PTOKEN = entityDeclaration.PTYPE;
+
 const token = {
    declaration,
 
@@ -52,6 +58,7 @@ const token = {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
+   ENTITY_DECLARATION_PTOKEN,
    notationDeclaration,
    space,
    text,
@@ -74,6 +81,7 @@ export {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
+   ENTITY_DECLARATION_PTOKEN,
    notationDeclaration,
    space,
    text,
@@ -81,6 +89,7 @@ export {
    unassigned,
    literalValue,
    CommentXToken,
+   PToken,
 };
 
 export default token;

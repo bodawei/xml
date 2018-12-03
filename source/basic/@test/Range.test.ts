@@ -12,7 +12,7 @@ describe('Range', () => {
       it('accepts no parameters', () => {
          const range = new Range(undefined);
 
-         expect(range.location).toBeUndefined();
+         expect(range.location.systemId).toEqual('');
          expect(range.startIndex).toEqual(0);
          expect(range.startRow).toEqual(0);
          expect(range.startColumn).toEqual(0);

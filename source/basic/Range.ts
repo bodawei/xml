@@ -19,7 +19,7 @@ import Offset from './Offset';
 \**********************************************************************/
 
 class Range {
-   public location: EntityLocation | void;
+   public location: EntityLocation;
    public startIndex: number;
    public startRow: number;
    public startColumn: number;
@@ -42,7 +42,7 @@ class Range {
          return;
       }
 
-      this.location = location;
+      this.location = location || new EntityLocation();
       this.startIndex = index || 0;
       this.startRow = row || 0;
       this.startColumn = column || 0;
@@ -69,17 +69,7 @@ class Range {
    }
 
    equals(other: Range) {
-      let locationsEqual = false;
-
-      if (!this.location && !other.location) {
-         locationsEqual = true;
-      } else if (!this.location) {
-         locationsEqual = false;
-      } else {
-         locationsEqual = this.location.equals(other.location);
-      }
-
-      return locationsEqual &&
+      return this.location.equals(other.location) &&
          this.startIndex === other.startIndex &&
          this.startRow === other.startRow &&
          this.startColumn === other.startColumn &&

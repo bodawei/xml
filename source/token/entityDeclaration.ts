@@ -41,7 +41,7 @@ class EntityDeclaration extends base.XToken {
    public notationDataName: string | void;
    public isParameter: boolean;
    public value: ExpandedLiteralValuePToken | void;
-   
+
    constructor(name: string, value: ExpandedLiteralValuePToken | void, externalLoc?: EntityLocation | void, notationDataName?: string | void, pToken?: EntityDeclarationPToken | ParameterEntityDeclarationPToken) {
       super(ENTITYDECL_XTOKEN, pToken);
 

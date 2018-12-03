@@ -154,6 +154,9 @@ const PARSE_TEST_EXPECTED = {
       originalStr: '',
       ranges: [
          {
+            location: {
+               systemId: ''
+            },
             startIndex: 0,
             startRow: 0,
             startColumn: 0,
