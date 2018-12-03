@@ -212,6 +212,7 @@ function parseEntityValue(source: STokenSource, pToken: EntityDeclarationPToken,
       literal.parse(source, {
          pToken,
          peRef: true,
+         charRef: true,
       }, (appendedPToken) => {
          if (appendedPToken) {
             source.extractNoParams('space', (sToken) => {

@@ -16,6 +16,7 @@ import { ParameterEntityEndXToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStart';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from '../generalEntityReference';
 import { ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
+import { CharRefXToken, CharRefPToken } from '../charRef';
 
 type ParseOptions = {
    geRef?: boolean;
@@ -30,8 +31,8 @@ interface AttributePToken extends LiteralPToken {
    trailingSpace?: SToken;
 };
 
-type AttributeValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
-type AttributeValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
+type AttributeValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type AttributeValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 
 type AttributeXToken = {
    name: string;
@@ -230,7 +231,7 @@ function makeOneTokenCompatible(attributes: AttributesPToken = []) {
          name: strOrBlank(attr.name),
          value: value ? [ new text.XToken(value) ] : [],
       };
-      
+
       attrs.push(details);
    }
 

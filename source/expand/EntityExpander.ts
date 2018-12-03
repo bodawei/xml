@@ -18,6 +18,7 @@ import {
    PToken,
 } from 'token';
 import { EntityDeclarationPToken } from 'source/token/entityDeclaration';
+import * as charRef from 'source/token/charRef';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { EntityMetaData } from 'basic';
@@ -69,9 +70,20 @@ function dumpEntity(entityDecl: EntityDeclarationPToken, deliverToken: (value:PT
          if (text.text) {
             sTokenSource.addText(text.text.str, text.text.firstRange);
          }
-      } else {
-         // do nothing  We should only be finding parameter entity start/end and text (plus charrefs maybe)in these.
+      } else if (element.type === charRef.PTYPE) {
+         // §4.5 For an internal entity, the replacement text is the content of the entity,
+         // after replacement of character references and parameter-entity references.
+         // In our case here, we receive internal entities with character references already
+         // parsed out.  So, we treat these as ordinary text and append them just like we do
+         // text tokens.
+         const charRef = element as charRef.CharRefPToken;
+
+         if (charRef.digits) {
+            const charRefXToken = charRef.toXToken();
+            sTokenSource.addText(charRefXToken.char, charRef.digits.firstRange);
+         }
       }
+      // do nothing else  We should only be finding parameter entity start/end and text (plus charrefs maybe)in these.
    });
    sTokenSource.endText();
 

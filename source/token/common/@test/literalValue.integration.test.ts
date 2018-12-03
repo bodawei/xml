@@ -11,6 +11,7 @@ import literalValue from '../literalValue';
 import text from '../../text';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
+import { CharRefPToken } from 'source/token/charRef';
 
 describe('literalValue (integration)', () => {
    let emd: EntityMetaData;
@@ -36,12 +37,12 @@ describe('literalValue (integration)', () => {
          });
       });
 
-      it('parses PE and GE References when told to attend to them', (done) => {
+      it('parses PE and GE and char References when told to attend to them', (done) => {
          const pToken = {};
-         source.addText('one%peref;two&geref;&geref2;three"');
+         source.addText('one%peref;&#32;&geref;&geref2;three"');
          source.endText();
 
-         literalValue.parse(source, ['"', '%', '&'], (pToken) => {
+         literalValue.parse(source, ['"', '%', '&', '&#'], (pToken) => {
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual([
                new text.PToken({ text: makeSToken('one') }),
@@ -52,7 +53,14 @@ describe('literalValue (integration)', () => {
                   nameSpace: undefined,
                   close: makeSToken(';'),
                }),
-               new text.PToken({ text: makeSToken('two') }),
+               new CharRefPToken({
+                  open: makeSToken('&#'),
+                  postOpenSpace: undefined,
+                  postHexMarkerSpace: undefined,
+                  digits: makeSToken('32'),
+                  postDigitsSpace: undefined,
+                  close: makeSToken(';'),
+               }),
                new GeneralEntityReferencePToken({
                   open: makeSToken('&'),
                   openSpace: undefined,

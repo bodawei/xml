@@ -54,6 +54,7 @@ import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
 import { LiteralValueXToken } from '../token/common/literal';
 import { DocTypeStartXToken } from 'source/token/docTypeStart';
+import { CharRefXToken } from 'source/token/charRef';
 
 type XToken = { type: string };
 type PToken = {
@@ -61,12 +62,12 @@ type PToken = {
    unassigned?: UnassignedArray,
 };
 type DoneSignal = () => void;
-type EntityValueArray = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end 
+type EntityValueArray = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|ParameterEntityEndPToken|ParameterEntityStartPToken>; // same as literalValue, but with start and end
 type CommonAttributeXToken = {
    name: string,
    value: AttributeValueXToken,
 };
-type ExpandedLiteralValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
+type ExpandedLiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken|ParameterEntityStartXToken|ParameterEntityEndXToken>;
 type ExpansionsMap = { [key: number]: LiteralValueXToken|GeneralEntityReferenceXToken };
 
 enum ProcessMode {
@@ -124,7 +125,7 @@ class NodeStream extends stream.Transform {
          if (this.processMode === ProcessMode.NON_VALIDATING && isPeRef) {
             this.skipDeclarations = true;
          }
-         
+
          if (declarationSource) {
             if (isPeRef && (this.processMode === ProcessMode.STANDALONE || this.processMode === ProcessMode.NON_VALIDATING)) {
                // no need to expand in either of these cases.
@@ -411,7 +412,7 @@ class NodeStream extends stream.Transform {
       for (let index = 0; index < peRefContents.length; index++) {
          const item = peRefContents[index];
 
-         //  This is NOT sufficient. We could have literals in here. 
+         //  This is NOT sufficient. We could have literals in here.
          if (item.type === UnassignedType.WORD || item.type === UnassignedType.SPACE) {
             const sToken = item.token.text!;
 
@@ -602,7 +603,7 @@ class NodeStream extends stream.Transform {
                   const firstPToken = havePTokens[0]; // because we have expanded, we'll always have ptokens
                   const firstSToken = (firstPToken as any).pToken.text || (firstPToken as any).pToken.open;
                   const ec = new ErrorCollector(firstSToken, WellFormedError);
-                  
+
                   checkXmlLangWellFormed(attr.value, ec, new EntityMetaData()); // where is our emd?
 
                   for (const error of ec.errors) {

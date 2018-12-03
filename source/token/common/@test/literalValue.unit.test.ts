@@ -6,6 +6,7 @@ import { MockErrorCollector } from '../../../error/@test/helper';
 import { SToken } from '../../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
 
+import * as charRef from '../../charRef';
 import * as generalEntityReference from '../../generalEntityReference';
 import * as parameterEntityReference from '../../parameterEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
@@ -78,10 +79,12 @@ describe('literalValue (unit)', () => {
       describe('entity references', () => {
          let generalParseSpy: jasmine.Spy;
          let paramParseSpy: jasmine.Spy;
+         let charRefSpy: jasmine.Spy;
 
          beforeEach(() => {
             generalParseSpy = spyOn(generalEntityReference, 'parseGeneralEntityReference');
             paramParseSpy = spyOn(parameterEntityReference, 'parseParameterEntityReference');
+            charRefSpy = spyOn(charRef, 'parse');
          });
 
          it('calls out to parseParameterEntityReference() when encountering a % and asked to parse peRefs', () => {
@@ -92,7 +95,7 @@ describe('literalValue (unit)', () => {
 
             literalValue.parse(mockSource, [ '"', '%' ], callback);
             mockSource.respondInAsyncTime();
-   
+
             expect(paramParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
             expect(paramParseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
          });
@@ -106,12 +109,26 @@ describe('literalValue (unit)', () => {
 
             literalValue.parse(mockSource, [ '"', '&' ], callback);
             mockSource.respondInAsyncTime();
-   
+
             expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
             expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityLocation(), 0, 0, 0, 1, 0, 1)));
             expect(generalParseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
          });
 
+         it('calls out to charRef.parse() when encountering a &# and asked to parse charRefs', () => {
+            mockSource = new MockSTokenSource([
+               undefined,
+               MockSTokenSource.PEEK('&'),
+               ['&#', 'multi', [ '&', '&#' ]],
+            ]);
+
+            literalValue.parse(mockSource, [ '"', '&', '&#' ], callback);
+            mockSource.respondInAsyncTime();
+
+            expect(charRefSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(charRefSpy.calls.argsFor(0)[1]).toEqual(new SToken('&#', '&#', new Range(new EntityLocation(), 0, 0, 0, 2, 0, 2)));
+            expect(charRefSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         });
 
          it('handles a combination of text, pe and ge refs', () => {
             generalParseSpy.and.callFake((_1: any, _2: any, callback: (entityRef: any) => void) => {

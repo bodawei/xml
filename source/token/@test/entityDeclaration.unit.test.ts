@@ -126,6 +126,7 @@ describe('entityDeclaration (unit)', () => {
          expect(literalSpy.calls.argsFor(0)[1]).toEqual({
             pToken: entityDeclarationPToken,
             peRef: true,
+            charRef: true,
          });
          expect(literalSpy.calls.argsFor(0)[2] instanceof Function).toEqual(true);
       });
@@ -486,10 +487,10 @@ describe('entityDeclaration (unit)', () => {
                [ ';', 'match', ';' ],
                '>',
             ]);
-   
+
             entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
-   
+
             const pToken = callback.calls.argsFor(0)[0];
             const makeSToken = makeSTokenMaker();
             expect(pToken.unassigned).toEqual([ {
@@ -524,10 +525,10 @@ describe('entityDeclaration (unit)', () => {
                [ undefined, 'match', ';' ],
                '>',
             ]);
-   
+
             entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
-   
+
             const pToken = callback.calls.argsFor(0)[0];
             expect(pToken.unassigned).toEqual([ { name: 'entityValueOrId' } ])
          });
@@ -541,7 +542,7 @@ describe('entityDeclaration (unit)', () => {
                   nextPropName: 'system',
                });
             });
-   
+
             unCheck.and.callFake((_1: any, _2: any, _3: any, other: any) => {
                checkForPERefCallback = other;
             });
@@ -552,10 +553,10 @@ describe('entityDeclaration (unit)', () => {
                [ undefined, 'match', ';' ],
                '>',
             ]);
-   
+
             entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
-   
+
             const pToken = callback.calls.argsFor(0)[0];
             expect(pToken.externalId.unassigned).toEqual([ { type: 'literal' } ])
             expect(pToken.unassigned).toBe(pToken.externalId.unassigned)
@@ -585,13 +586,13 @@ describe('entityDeclaration (unit)', () => {
                undefined,
                '>',
             ]);
-   
+
             entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
-   
+
             expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nDataName' } ])
          });
-   
+
          it('returns an unassigned value with a PE Ref in the NDATA position', () => {
             literalSpy.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
             unCheck.and.callFake((pToken: any, prop: string, foundRef: Function, other: any) => {
@@ -613,13 +614,13 @@ describe('entityDeclaration (unit)', () => {
                ' ',
                '>',
             ]);
-   
+
             entityDeclaration.parse(mockSource, {} as any, callback);
             mockSource.respondInAsyncTime();
-   
+
             expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ { name: 'nData' } ])
          });
-   
+
       });
 
    });
@@ -644,7 +645,7 @@ describe('entityDeclaration (unit)', () => {
             unassigned: [],
             nextPropName: 'name',
          };
-         
+
          entityDeclaration.assignUnassigned(declPToken as any);
 
          expect(declPToken.unassigned).toBeUndefined();
@@ -657,7 +658,7 @@ describe('entityDeclaration (unit)', () => {
                type: 'reference',
             } ],
          };
-         
+
          entityDeclaration.assignUnassigned(declPToken as any);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
@@ -671,9 +672,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'name', [
                   { name: 'postDeclTypeSpace', type: 'space' },
@@ -699,9 +700,9 @@ describe('entityDeclaration (unit)', () => {
                expect(pToken).toEqual(declPToken);
                propName = name;
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(propName!).toEqual('postNameSpace'); // make sure we've evaluated above
          });
 
@@ -711,9 +712,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [
                   { name: 'postExternalIdSpace', type: 'space' },
@@ -730,9 +731,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'name',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(declPToken.extra).toEqual(unassignedValue);
          });
 
@@ -746,9 +747,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).not.toHaveBeenCalledWith(unassignedValue,
                declPToken, 'name', [
                   { name: 'postDeclTypeSpace', type: 'space' },
@@ -774,9 +775,9 @@ describe('entityDeclaration (unit)', () => {
                expect(pToken).toEqual(declPToken);
                propName = name;
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(propName!).toEqual('postNameSpace'); // make sure we've evaluated above
          });
 
@@ -786,9 +787,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [
                   { name: 'postExternalIdSpace', type: 'space' },
@@ -798,7 +799,7 @@ describe('entityDeclaration (unit)', () => {
                   { name: 'postNDataNameSpace', type: 'space' },
                ]);
          });
-   
+
          it('calls unassigned.assignToProps() if EntityValue IS the peref', () => {
             const unassignedValue = [ {
                type: 'literal',
@@ -807,9 +808,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'EntityValue', [
                   { name: 'postNameSpace', type: 'space' },
@@ -829,9 +830,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'EntityValue', [
                   { name: 'postNameSpace', type: 'space' },
@@ -848,9 +849,9 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'entityValueOrId',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).not.toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [
                   { name: 'postExternalIdSpace', type: 'space' },
@@ -860,7 +861,7 @@ describe('entityDeclaration (unit)', () => {
                   { name: 'postNDataNameSpace', type: 'space' },
                ]);
          });
-   
+
       });
 
       describe('unassigned inside externalId', () => {
@@ -874,13 +875,13 @@ describe('entityDeclaration (unit)', () => {
                   nextPropName: 'name',
                },
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(externalId.assignUnassigned).toHaveBeenCalledWith(
                declPToken.externalId, declPToken, 'postNameSpace');
          });
-   
+
          it('calls unassigned.assignToProps() if externalId has an unassigned value', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new entityDeclaration.PToken({
@@ -890,9 +891,9 @@ describe('entityDeclaration (unit)', () => {
                   nextPropName: 'name',
                },
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [
                   { name: 'postExternalIdSpace', type: 'space' },
@@ -902,7 +903,7 @@ describe('entityDeclaration (unit)', () => {
                   { name: 'postNDataNameSpace', type: 'space' },
                ]);
          });
-   
+
          it('removes any unassigned values in the externalId', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new entityDeclaration.PToken({
@@ -912,9 +913,9 @@ describe('entityDeclaration (unit)', () => {
                   nextPropName: 'name',
                },
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(declPToken.externalId.unassigned).toBeUndefined();
             expect(declPToken.externalId.extra).toBeUndefined();
             expect(declPToken.externalId.nextPropName).toBeUndefined();
@@ -930,12 +931,12 @@ describe('entityDeclaration (unit)', () => {
                unassigned: unassignedValue,
                nextPropName: 'nData',
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(externalId.assignUnassigned).not.toHaveBeenCalled();
          });
-   
+
          it('calls unassigned.assignToProps() only with the epilog values', () => {
             const unassignedValue = [ 'foo' ];
             const declPToken = new entityDeclaration.PToken({
@@ -945,9 +946,9 @@ describe('entityDeclaration (unit)', () => {
                   nextPropName: 'nData',
                },
             });
-            
+
             entityDeclaration.assignUnassigned(declPToken);
-   
+
             expect(unAssign.calls.count()).toEqual(1);
             expect(unassigned.assignToProps).toHaveBeenCalledWith(unassignedValue,
                declPToken, 'postExternalIdSpace', [

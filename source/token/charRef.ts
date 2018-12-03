@@ -31,6 +31,14 @@ class CharRefPToken {
 
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken() {
+      return pTokenToXToken(this);
+   }
 }
 
 class CharRefXToken {

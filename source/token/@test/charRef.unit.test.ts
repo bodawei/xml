@@ -89,7 +89,7 @@ describe('charRef (unit)', () => {
             postDigitsSpace: makeSToken(' '),
             close: makeSToken(';'),
          });
-   
+
          parse(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
@@ -116,7 +116,7 @@ describe('charRef (unit)', () => {
       it('reports an error if there is a space after the open', () => {
          charRefPToken.postOpenSpace = SToken.fromString(' ');
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_XTRA_POST_OPEN_SPACE,

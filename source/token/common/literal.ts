@@ -18,6 +18,7 @@ type ParseOptions = {
    pToken: any,
    peRef?: boolean,
    geRef?: boolean,
+   charRef?: boolean,
 };
 interface LiteralPToken {
    openQuote?: SToken,
@@ -62,6 +63,10 @@ function parse(source: STokenSource, options: ParseOptions, done: DeliverPToken)
 
       if (options.geRef) {
          terminators.push('&');
+      }
+
+      if (options.charRef) {
+         terminators.push('&#');
       }
 
       literalValue.parse(source, terminators, (valueArray) => {

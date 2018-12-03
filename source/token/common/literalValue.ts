@@ -8,6 +8,8 @@ import text, { TextPToken, TextXToken } from '../text';
 import misc from './misc';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
+import { CharRefPToken, CharRefXToken } from '../charRef';
+import * as charRef from '../charRef';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -16,9 +18,9 @@ import { parseParameterEntityReference, ParameterEntityReferencePToken, Paramete
    }
 // </typeHack>
 
-type Terminators = Array<'&'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken>;
-type LiteralValueXToken = Array<TextXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken>;
+type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
+type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken>;
+type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 /**********************************************************************\
@@ -70,9 +72,9 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
          return;
       }
 
-      function handleRef(refPToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | void) {
+      function handleRef(refPToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | CharRefPToken |void) {
          parse(source, terminators, (rest) => {
-            rest.unshift(refPToken as GeneralEntityReferencePToken | ParameterEntityReferencePToken); // typeHack
+            rest.unshift(refPToken as GeneralEntityReferencePToken | ParameterEntityReferencePToken | CharRefPToken); // typeHack
             deliverPToken(currentValue.concat(rest));
          });
       }
@@ -86,8 +88,12 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
             parseParameterEntityReference(source, handleRef);
             break;
          case '&':
-            source.extractNoParams('char', (opening) => {
-               parseGeneralEntityReference(source, opening!, handleRef); // typeHack
+            source.extract('multi', [ '&', '&#' ], (opening) => {
+               if (opening && opening.str === '&') {
+                  parseGeneralEntityReference(source, opening!, handleRef); // typeHack
+               } else {
+                  charRef.parse(source, opening!, handleRef);
+               }
             });
             break;
       }
