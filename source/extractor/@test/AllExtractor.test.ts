@@ -103,6 +103,116 @@ describe('AllExtractor', () => {
          });
       });
 
+      it('return trailing characters that almost look like a match', () => {
+         const extractor = new AllExtractor(1.0, [ '<', ']]>' ]);
+         const segment = new Segment('[&three;]]');
+         segment.index = 8;
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: ']]',
+            original: ']]',
+            segments: [ {
+               chars: 2,
+               rows: 0,
+               columns: 2,
+               segment: segment,
+            } ],
+         });
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
+      it('do not return characters that are a legal, but ambiguous match', () => {
+         const extractor = new AllExtractor(1.0, [ ']]', ']]>' ]);
+         const segment = new Segment('[&three;]]');
+         segment.index = 8;
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: '',
+            original: '',
+            segments: [ {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: segment,
+            } ],
+         });
+         expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
+      });
+
+      it('returns characters up to, but not including, an ambiguous match', () => {
+         const extractor = new AllExtractor(1.0, [ ']]', ']]>' ]);
+         const segment = new Segment('x]]');
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: 'x',
+            original: 'x',
+            segments: [ {
+               chars: 1,
+               rows: 0,
+               columns: 1,
+               segment: segment,
+            } ],
+         });
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
+      it('returns all characters when there are false matches', () => {
+         const extractor = new AllExtractor(1.0, [ ']]', ']]>' ]);
+         const segment = new Segment('[&three;]x]');
+         segment.index = 8;
+         extractor.process(segment);
+
+         expect(extractor.finish()).toEqual({
+            text: ']x]',
+            original: ']x]',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: segment,
+            } ],
+         });
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
+      it('returns all characters when there are many repeated false matches', () => {
+         const extractor = new AllExtractor(1.0, [ ']]', ']]>' ]);
+         const segment = new Segment('[&three;]x]');
+         segment.index = 8;
+         const segmentTwo = new Segment('1]2]3]4]5]');
+         segmentTwo.index = 10;
+         const segmentThree = new Segment('6]7]');
+         segmentThree.index = 4;
+         extractor.process(segment);
+         extractor.process(new Segment('1]2]3]4]5]'));
+         extractor.process(new Segment('6]7]'));
+
+         expect(extractor.finish()).toEqual({
+            text: ']x]1]2]3]4]5]6]7]',
+            original: ']x]1]2]3]4]5]6]7]',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: segment,
+            }, {
+               chars: 10,
+               rows: 0,
+               columns: 10,
+               segment: segmentTwo,
+            }, {
+               chars: 4,
+               rows: 0,
+               columns: 4,
+               segment: segmentThree,
+            } ],
+         });
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
    });
 
    describe('finish()', () => {

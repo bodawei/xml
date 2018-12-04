@@ -65,6 +65,7 @@ function dumpEntity(entityDecl: EntityDeclarationPToken, deliverToken: (value:PT
    // Can PE Refs turn up in external general entities?  how about external parameter entities?
    const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
    entityDecl.value.forEach((element: PToken) => {
+      // console.log(element);
       if (element.type === TEXT_PTOKEN) {
          const text = element as TextPToken;
          if (text.text) {

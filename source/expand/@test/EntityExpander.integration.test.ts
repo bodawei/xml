@@ -93,6 +93,7 @@ describe('EntityExpander (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
+         // console.log(JSON.stringify(results[index + 18 ], undefined, 5));
          expect(results[index + 2].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
          expect(results[index + 27].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
       }, done);
@@ -113,7 +114,6 @@ describe('EntityExpander (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
-         // console.log(JSON.stringify(results, undefined, 5));
          expect(results[index + 1].type).toEqual('ELEMENT_START');
          expect((results[index + 1] as any).name.str).toEqual('two');
       }, done);
