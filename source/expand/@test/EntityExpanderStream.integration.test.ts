@@ -3,17 +3,17 @@
 
 import { PTokenStream } from "pTokenStream";
 import { EntityMetaData } from "basic";
-import { EntityExpander } from "../EntityExpander";
+import { EntityExpanderStream } from "../EntityExpanderStream";
 import { gatherStream } from "./utils";
 import { GENERAL_ENTITY_START_PTOKEN, GENERAL_ENTITY_END_PTOKEN, PToken, PARAMETER_ENTITY_START_PTOKEN, PARAMETER_ENTITY_END_PTOKEN } from "token";
 
 describe('EntityExpander (integration)', () => {
    let pTokenStream: PTokenStream;
-   let entityExpander: EntityExpander;
+   let entityExpander: EntityExpanderStream;
 
    beforeEach(() => {
       pTokenStream = new PTokenStream(new EntityMetaData());
-      entityExpander = new EntityExpander(true);
+      entityExpander = new EntityExpanderStream(true);
 
       pTokenStream.pipe(entityExpander);
    });

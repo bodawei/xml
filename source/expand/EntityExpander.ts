@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
-import stream from 'readable-stream';
+import { Token } from 'basic';
 import {
    XMLDECL_PTOKEN,
    ENTITY_DECLARATION_PTOKEN,
@@ -23,7 +23,6 @@ import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { EntityMetaData } from 'basic';
 import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
-import { PTokenStream } from 'pTokenStream';
 
 type GeneralEntityInfo = {
    token: EntityDeclarationPToken;
@@ -44,64 +43,17 @@ type ParameterEntityMap = {
    [entityName: string]: ParameterEntityInfo;
 };
 
-type Done = () => void;
-
 enum ValidationMode {
    VALIDATING,
    NON_VALIDATING,
    STANDALONE,
 }
 
-// Now expand everything.  If it is internal, then we need to first expand the char references
-// feed the internal entity value through a processor which expands char refs
-// then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
-function dumpEntity(entityDecl: EntityDeclarationPToken, deliverToken: (value:PToken, done: Done) => void, allDone: Done): void {
-   if (entityDecl.externalId) {
-      allDone();
-      return;
-   }
-
-   // if this is external, then this will need to look it up and turn it into these.
-   // Can PE Refs turn up in external general entities?  how about external parameter entities?
-   const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
-   entityDecl.value.forEach((element: PToken) => {
-      // console.log(element);
-      if (element.type === TEXT_PTOKEN) {
-         const text = element as TextPToken;
-         if (text.text) {
-            sTokenSource.addText(text.text.str, text.text.firstRange);
-         }
-      } else if (element.type === charRef.PTYPE) {
-         // §4.5 For an internal entity, the replacement text is the content of the entity,
-         // after replacement of character references and parameter-entity references.
-         // In our case here, we receive internal entities with character references already
-         // parsed out.  So, we treat these as ordinary text and append them just like we do
-         // text tokens.
-         const charRef = element as charRef.CharRefPToken;
-
-         if (charRef.digits) {
-            const charRefXToken = charRef.toXToken();
-            sTokenSource.addText(charRefXToken.char, charRef.digits.firstRange);
-         }
-      }
-      // do nothing else  We should only be finding parameter entity start/end and text (plus charrefs maybe)in these.
-   });
-   sTokenSource.endText();
-
-   const pTokenStream = new PTokenStream(sTokenSource);
-
-   pTokenStream.on('data', (token: PToken) => {
-      if (token.type !== 'ENTITY_META_DATA') {
-         pTokenStream.pause();
-         deliverToken(token, () => {
-            pTokenStream.resume();
-         });
-      }
-   });
-   pTokenStream.on('end', () => {
-      allDone();
-   });
-}
+type ExpandToken = (token: Token, tokenProcessed: TokenProcessed) => void;
+type TokenProcessed = () => void;
+type ProcessSTokenSource = (sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
+type STokenSourceProcessed = () => void;
+type DeliverAToken = (token: Token) => boolean;
 
 /**********************************************************************\
  An EntityExpander transforms a series of PTokens and expands any
@@ -121,43 +73,38 @@ function dumpEntity(entityDecl: EntityDeclarationPToken, deliverToken: (value:PT
  a reasonable XML entity.
 \**********************************************************************/
 
-class EntityExpander extends stream.Transform {
+class EntityExpander {
    private paramEntitiesByName: ParameterEntityMap = {};
    private generalEntitiesByName: GeneralEntityMap = {};
    private validationMode: ValidationMode;
    // SOON: starting, dtd, content end
-   private dumpEntity = dumpEntity;
+   private deliverAToken: DeliverAToken;
+   private processSTokenStream: ProcessSTokenSource;
 
-   constructor(validating?: boolean) {
-      super({
-         objectMode: true,
-      });
-
+   constructor(validating: boolean, handoffToken: DeliverAToken, processSTokenStream: ProcessSTokenSource) {
       this.validationMode = validating ? ValidationMode.VALIDATING : ValidationMode.NON_VALIDATING;
+      this.deliverAToken = handoffToken;
+      this.processSTokenStream = processSTokenStream;
    }
 
-   _transform(pToken: PToken, encoding: string, done: Done) {
-      this.handleAll(pToken, done);
-   }
-
-   private handleAll(pToken: PToken, done: Done) {
+   public expandToken(pToken: Token, expanded: TokenProcessed) {
       switch (pToken.type) {
          // case XMLDECL_PTOKEN:
          //    this.handleXmlDeclaration(pToken as XmlDeclarationPToken);
          //    break;
          case ENTITY_DECLARATION_PTOKEN:
-            this.handleEntityDeclaration(pToken as EntityDeclarationPToken);
+            this.handleEntityDeclaration(pToken as EntityDeclarationPToken, expanded);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            this.handleGeneralEntityReference(pToken as GeneralEntityReferencePToken, done);
-            return;
+            this.processGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
+            break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            this.handleParameterEntityReference(pToken as ParameterEntityReferencePToken, done);
-            return;
+            this.processParameterEntityReference(pToken as ParameterEntityReferencePToken, expanded);
+            break;
+         default:
+            this.deliverAToken(pToken);
+            expanded();
       }
-
-      this.push(pToken);
-      done();
    }
 
    // private handleXmlDeclaration(pToken: XmlDeclarationPToken) {
@@ -168,9 +115,11 @@ class EntityExpander extends stream.Transform {
    //    }
    // }
 
-   private handleEntityDeclaration(pToken: EntityDeclarationPToken) {
+   private handleEntityDeclaration(pToken: EntityDeclarationPToken, expanded: TokenProcessed) {
       // If the declaration has no name, we won't be able to look it up
       if (!pToken.name) {
+         this.deliverAToken(pToken);
+         expanded();
          return;
       }
 
@@ -193,14 +142,15 @@ class EntityExpander extends stream.Transform {
          entityGroup = this.generalEntitiesByName;
       }
 
-      if (entityGroup[name]) {
-         return;
+      if (!entityGroup[name]) {
+         entityGroup[name] = info;
       }
 
-      entityGroup[name] = info;
+      this.deliverAToken(pToken);
+      expanded();
    }
 
-   private handleGeneralEntityReference(pToken: GeneralEntityReferencePToken, allDone: Done) {
+   private processGeneralEntityReference(pToken: GeneralEntityReferencePToken, referenceProcessed: TokenProcessed) {
       const info = pToken.name ? this.generalEntitiesByName[pToken.name.str] : undefined;
 
       // Can not expand a reference that has no name
@@ -209,19 +159,26 @@ class EntityExpander extends stream.Transform {
       // §4.4 Do not include if is external and we are not validating
       if (!pToken.name || !info || info.isUnparsed ||
          !info.isInternal && this.validationMode !== ValidationMode.VALIDATING) {
-            this.push(pToken);
-            allDone();
+            this.deliverAToken(pToken);
+            referenceProcessed();
             return;
       }
 
-      this.push(new GeneralEntityStartPToken(pToken));
+      this.deliverAToken(new GeneralEntityStartPToken(pToken));
 
-      this.dumpEntity(info.token, (token: PToken, done: Done) => this.handleAll(token, done), () => {
-         this.handleAll(new GeneralEntityEndPToken(pToken), allDone);
-      });
+      const entityProcessed = () => this.expandToken(new GeneralEntityEndPToken(pToken), referenceProcessed);
+
+      this.processEntity(info.token, this.processSTokenStream, (subToken: PToken, subProcessed: TokenProcessed) => {
+         if (subToken.type === 'ENTITY_META_DATA') {
+            subProcessed();
+            return;
+         }
+
+         this.expandToken(subToken, subProcessed);
+      }, entityProcessed);
    }
 
-   private handleParameterEntityReference(pToken: ParameterEntityReferencePToken, allDone: Done) {
+   private processParameterEntityReference(pToken: ParameterEntityReferencePToken, referenceProcessed: TokenProcessed) {
       const info = pToken.name ? this.paramEntitiesByName[pToken.name.str] : undefined;
 
       // Can not expand a reference that has no name
@@ -229,19 +186,69 @@ class EntityExpander extends stream.Transform {
       // §4.4 Do not include if is external and we are not validating
       if (!pToken.name ||
          !info || !info.isInternal && this.validationMode !== ValidationMode.VALIDATING) {
-         this.push(pToken);
-         allDone();
+         this.deliverAToken(pToken);
+         referenceProcessed();
          return;
       }
 
-      this.push(new ParameterEntityStartPToken(pToken));
+      this.deliverAToken(new ParameterEntityStartPToken(pToken));
 
-      this.dumpEntity(info.token, (token: PToken, done: Done) => this.handleAll(token, done), () => {
-         this.handleAll(new ParameterEntityEndPToken(pToken), allDone);
-      });
+      const entityProcessed = () => this.expandToken(new ParameterEntityEndPToken(pToken), referenceProcessed);
+
+      this.processEntity(info.token, this.processSTokenStream, (subToken: PToken, subProcessed: TokenProcessed) => {
+         if (subToken.type === 'ENTITY_META_DATA') {
+            subProcessed();
+            return;
+         }
+
+         this.expandToken(subToken, subProcessed);
+      }, entityProcessed);
    }
+
+   // Now expand everything.  If it is internal, then we need to first expand the char references
+   // feed the internal entity value through a processor which expands char refs
+   // then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
+   private processEntity(entityDecl: EntityDeclarationPToken, processSTokenStream: ProcessSTokenSource, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
+      if (entityDecl.externalId) {
+         entityProcessed();
+         return;
+      }
+
+      // if this is external, then this will need to look it up and turn it into these.
+      // Can PE Refs turn up in external general entities?  how about external parameter entities?
+      const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
+      entityDecl.value.forEach((element: PToken) => {
+         // console.log(element);
+         if (element.type === TEXT_PTOKEN) {
+            const text = element as TextPToken;
+            if (text.text) {
+               sTokenSource.addText(text.text.str, text.text.firstRange);
+            }
+         } else if (element.type === charRef.PTYPE) {
+            // §4.5 For an internal entity, the replacement text is the content of the entity,
+            // after replacement of character references and parameter-entity references.
+            // In our case here, we receive internal entities with character references already
+            // parsed out.  So, we treat these as ordinary text and append them just like we do
+            // text tokens.
+            const charRef = element as charRef.CharRefPToken;
+
+            if (charRef.digits) {
+               const charRefXToken = charRef.toXToken();
+               sTokenSource.addText(charRefXToken.char, charRef.digits.firstRange);
+            }
+         }
+         // do nothing else  We should only be finding parameter entity start/end and text (plus charrefs maybe)in these.
+      });
+      sTokenSource.endText();
+
+      processSTokenStream(sTokenSource, expandToken, entityProcessed);
+   }
+
 }
 
 export {
    EntityExpander,
+   ExpandToken,
+   STokenSourceProcessed,
+   TokenProcessed,
 };
