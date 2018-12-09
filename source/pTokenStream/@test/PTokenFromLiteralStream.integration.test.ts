@@ -14,27 +14,16 @@ type TokenArray = Array<Token>;
 
 describe('PTokenFromLiteralStream (integration)', () => {
 
-   function expectInputToProduceTypes(input: string | void, options: Object, types: Array<string> | string, done: () => void) {
+   function expectInputToProduceTypes(input: string | void, options: Object, types: Array<string>, done: () => void) {
       const results: TokenArray = [];
       const sTokenStream = new STokenSource(defaultExtractors, new EntityMetaData());
       const pTokenStream = new PTokenFromLiteralStream(sTokenStream, options);
 
       pTokenStream.on('data', (data: Token) => results.push(data));
       pTokenStream.on('end', () => {
-         let expecteds: Array<string>;
-         if (!Array.isArray(types)) {
-            expecteds = [ types ];
-         } else {
-            expecteds = types;
-         }
+         const resultTypes = results.map((result) => result.type);
 
-         expecteds.forEach((expected) => {
-            const actuals = results.filter((actual) => actual.type === expected);
-
-            expect(actuals[0]).toContainPTokenProps({
-               type: expected,
-            });
-         });
+         expect(resultTypes).toEqual(types);
          done();
       });
 
@@ -44,14 +33,27 @@ describe('PTokenFromLiteralStream (integration)', () => {
       }
    }
 
-   it('produces a single text token if given no types of references to look for', (done) => {
-      expectInputToProduceTypes('one %two; three <four>', {}, xToken.text.PTYPE, done);
+   it('produces a single text token if not told to look for perefs', (done) => {
+      expectInputToProduceTypes('one %two; three <four>', {}, [ xToken.text.PTYPE ], done);
    });
 
-   it('produces a mixture of text and parameter entity references if asked to', (done) => {
-      expectInputToProduceTypes('one %two; three <four>', { peRef: true }, [
+   it('produces a mixture of text and charRefs if asked to', (done) => {
+      expectInputToProduceTypes('one %two; &three &#x40; <four>', {}, [
+         xToken.text.PTYPE,
+         xToken.text.PTYPE,
+         xToken.text.PTYPE,
+         xToken.charRef.PTYPE,
+         xToken.text.PTYPE,
+      ], done);
+   });
+
+   it('produces a mixture of text, charrefs and parameter entity references if asked to', (done) => {
+      expectInputToProduceTypes('one %two; three &#65; <four>', { peRef: true }, [
          xToken.text.PTYPE,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
+         xToken.text.PTYPE,
+         xToken.charRef.PTYPE,
+         xToken.text.PTYPE,
       ], done);
    });
 

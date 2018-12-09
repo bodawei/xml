@@ -17,22 +17,26 @@ import {
 
    PToken,
 } from 'token';
-import { EntityDeclarationPToken } from 'source/token/entityDeclaration';
+import { EntityDeclarationPToken, ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { EntityMetaData } from 'basic';
 import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
+import { LiteralValuePToken } from 'source/token/common/literal';
+import { ExternalId } from 'source/token/common/externalId';
 
 type GeneralEntityInfo = {
    token: EntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
+   cache?: ExpandedLiteralValuePToken
 };
 
 type ParameterEntityInfo = {
    token: EntityDeclarationPToken;
    isInternal: boolean;
+   cache?: ExpandedLiteralValuePToken
 };
 
 type GeneralEntityMap = {
@@ -49,11 +53,18 @@ enum ValidationMode {
    STANDALONE,
 }
 
+type Done = () => void;
 type ExpandToken = (token: Token, tokenProcessed: TokenProcessed) => void;
 type TokenProcessed = () => void;
-type ProcessSTokenSource = (sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
+type ProcessBody = (sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
+type ProcessForEntityValue = (sTokenSource: STokenSource, done: (results: ExpandedLiteralValuePToken) => void) => void;
 type STokenSourceProcessed = () => void;
 type DeliverAToken = (token: Token) => boolean;
+type Processors = {
+   processBody: ProcessBody,
+   processForEntityValue: ProcessForEntityValue,
+   retrieveExternalEntity: (externalId: ExternalId, entityMetaData: EntityMetaData) => STokenSource,
+};
 
 /**********************************************************************\
  An EntityExpander transforms a series of PTokens and expands any
@@ -79,12 +90,12 @@ class EntityExpander {
    private validationMode: ValidationMode;
    // SOON: starting, dtd, content end
    private deliverAToken: DeliverAToken;
-   private processSTokenStream: ProcessSTokenSource;
+   private processors: Processors;
 
-   constructor(validating: boolean, handoffToken: DeliverAToken, processSTokenStream: ProcessSTokenSource) {
+   constructor(validating: boolean, handoffToken: DeliverAToken,  processors: Processors) {
       this.validationMode = validating ? ValidationMode.VALIDATING : ValidationMode.NON_VALIDATING;
       this.deliverAToken = handoffToken;
-      this.processSTokenStream = processSTokenStream;
+      this.processors = processors;
    }
 
    public expandToken(pToken: Token, expanded: TokenProcessed) {
@@ -116,38 +127,106 @@ class EntityExpander {
    // }
 
    private handleEntityDeclaration(pToken: EntityDeclarationPToken, expanded: TokenProcessed) {
-      // If the declaration has no name, we won't be able to look it up
-      if (!pToken.name) {
+      this.handleEntityValue(pToken.value || [], (newValue) => {
+         pToken.value = newValue;
+
+         // If the declaration has no name, we won't be able to look it up
+         if (pToken.name) {
+            let info: GeneralEntityInfo | ParameterEntityInfo;
+            let entityGroup: GeneralEntityMap | ParameterEntityMap;
+            const name = pToken.name.str;
+
+            if (pToken.parameter) {
+               info = {
+                  token: pToken,
+                  isInternal: !pToken.externalId,
+               };
+               entityGroup = this.paramEntitiesByName;
+            } else {
+               info = {
+                  token: pToken,
+                  isUnparsed: !!pToken.nDataName,
+                  isInternal: !pToken.externalId,
+               };
+               entityGroup = this.generalEntitiesByName;
+            }
+
+            if (!entityGroup[name]) {
+               entityGroup[name] = info;
+            }
+         }
+
          this.deliverAToken(pToken);
          expanded();
-         return;
-      }
+      });
+   }
 
-      let info: GeneralEntityInfo | ParameterEntityInfo;
-      let entityGroup: GeneralEntityMap | ParameterEntityMap;
-      const name = pToken.name.str;
+   private retrieveExternalParameterEntities(value: ExpandedLiteralValuePToken, done: Done) {
+      const missingParameterEntities: Array<ParameterEntityInfo> = [];
 
-      if (pToken.parameter) {
-         info = {
-            token: pToken,
-            isInternal: !pToken.externalId,
-         };
-         entityGroup = this.paramEntitiesByName;
+      for (let element of value) {
+         if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+            const peRef = element as ParameterEntityReferencePToken;
+            const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+
+            if (peInfo && !peInfo.isInternal && !peInfo.cache) {
+               missingParameterEntities.push(peInfo);
+            }
+         }
+      };
+
+      if (missingParameterEntities.length === 0) {
+         done();
       } else {
-         info = {
-            token: pToken,
-            isUnparsed: !!pToken.nDataName,
-            isInternal: !pToken.externalId,
+         const seeking: { [name: string] : boolean} = {};
+         let seekingCount = 0;
+
+         for (var info of missingParameterEntities) {
+            if (seeking[info.token.name.str]) {
+               continue;
+            }
+
+            seeking[info.token.name.str] = true;
+            seekingCount ++;
+
+            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId, new EntityMetaData());
+
+            this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
+               this.handleEntityValue(results, (newResult) => {
+                  info.cache = newResult;
+                  seekingCount --;
+
+                  if (seekingCount === 0) {
+                     done();
+                  }
+               });
+            });
+         }
+      }
+   }
+
+   private handleEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
+      this.retrieveExternalParameterEntities(value, () => {
+         let newValue: ExpandedLiteralValuePToken = [];
+
+         for (let element of value) {
+            if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+               const peRef = element as ParameterEntityReferencePToken;
+               const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+
+               if (peInfo) {
+                  newValue.push(new ParameterEntityStartPToken(peRef));
+                  newValue = newValue.concat(peInfo.cache || peInfo.token.value);
+                  newValue.push(new ParameterEntityEndPToken(peRef));
+                  continue;
+               }
+            }
+
+            newValue.push(element);
          };
-         entityGroup = this.generalEntitiesByName;
-      }
 
-      if (!entityGroup[name]) {
-         entityGroup[name] = info;
-      }
-
-      this.deliverAToken(pToken);
-      expanded();
+         valueProcessed(newValue);
+      });
    }
 
    private processGeneralEntityReference(pToken: GeneralEntityReferencePToken, referenceProcessed: TokenProcessed) {
@@ -168,7 +247,7 @@ class EntityExpander {
 
       const entityProcessed = () => this.expandToken(new GeneralEntityEndPToken(pToken), referenceProcessed);
 
-      this.processEntity(info.token, this.processSTokenStream, (subToken: PToken, subProcessed: TokenProcessed) => {
+      this.processEntity(info.token, this.processors.processBody, (subToken: PToken, subProcessed: TokenProcessed) => {
          if (subToken.type === 'ENTITY_META_DATA') {
             subProcessed();
             return;
@@ -195,7 +274,7 @@ class EntityExpander {
 
       const entityProcessed = () => this.expandToken(new ParameterEntityEndPToken(pToken), referenceProcessed);
 
-      this.processEntity(info.token, this.processSTokenStream, (subToken: PToken, subProcessed: TokenProcessed) => {
+      this.processEntity(info.token, this.processors.processBody, (subToken: PToken, subProcessed: TokenProcessed) => {
          if (subToken.type === 'ENTITY_META_DATA') {
             subProcessed();
             return;
@@ -208,16 +287,17 @@ class EntityExpander {
    // Now expand everything.  If it is internal, then we need to first expand the char references
    // feed the internal entity value through a processor which expands char refs
    // then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
-   private processEntity(entityDecl: EntityDeclarationPToken, processSTokenStream: ProcessSTokenSource, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
+   private processEntity(entityDecl: EntityDeclarationPToken, processBody: ProcessBody, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
       if (entityDecl.externalId) {
-         entityProcessed();
+         const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, new EntityMetaData());
+         processBody(sTokenSource, expandToken, entityProcessed);
          return;
       }
 
       // if this is external, then this will need to look it up and turn it into these.
       // Can PE Refs turn up in external general entities?  how about external parameter entities?
       const sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
-      entityDecl.value.forEach((element: PToken) => {
+      for (let element of entityDecl.value)  {
          // console.log(element);
          if (element.type === TEXT_PTOKEN) {
             const text = element as TextPToken;
@@ -238,10 +318,10 @@ class EntityExpander {
             }
          }
          // do nothing else  We should only be finding parameter entity start/end and text (plus charrefs maybe)in these.
-      });
+      };
       sTokenSource.endText();
 
-      processSTokenStream(sTokenSource, expandToken, entityProcessed);
+      processBody(sTokenSource, expandToken, entityProcessed);
    }
 
 }

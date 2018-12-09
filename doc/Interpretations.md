@@ -345,3 +345,21 @@ The second time is at the point of use. Those character references from the firs
    - if yes, then we're good.  so standalone is good.
    - If no, then in standalone are these errors?  4.1 speaks of the necessity of a declaration for a reference, but it isn't clear if this is general or parameter entities. (by 4.1 it seems like it must mean general entities, but then not clear what happens if a parameter entity is not declared).  This whole section is entity reference, and it inclues PERefs, so I asusme this does mean either. so it must mean you can't put these in entity values in the internal subset.  This seems like a horrible restriction.  this is independent of validating or non-validating.  the internal subset is really crippled.  I don't know why we did this. Except the mental model that the external subset is for general purpose use, and can be overridden.
 - Why is an unparsed entity reference merely an "erorr" if in an entity value, but forbidden in an attribute value or content?
+
+
+
+
+
+---
+Entities
+- an internal general entity value is parsed as: text, charref, peRef
+- an internal parameter entity value is parsed as: text, charref, peRef
+Expansion:
+- in all cases we expans the peRefs
+   - if they are internal, then we just replace the ref with their already expanded text (they have to be expanded because we've already processed them)
+   - If they are external, then we must parse them the same way we did internally.
+=> Can't have PERefs in external general entity values.  They'll never be expanded in a situation where they can be used.
+
+ordering of things is so weird. in 4.4.0 it says an unparsed entity reference should be an error.  yet, this is almost the same as an unparsed reference in content.  put another way, the parsed entity references are bypassed.  Which seems fine.  but you can't know if an entity reference is unparsed in an entity value until it is used, ot at least until the end of the dtd.
+   - So this isn't parse time.  Thsi is end of dtd time that you can know this.
+   - it could be at expansion time, but then you need to be very clear that you are indeed in the middle of expanding an entity and encounter this there.  So, bypassed is at parse time, and error is at end of dtd or expansion time.

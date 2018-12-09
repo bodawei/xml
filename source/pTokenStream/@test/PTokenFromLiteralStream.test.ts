@@ -1,79 +1,124 @@
 /* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
-import {
-   text,
-} from '../../token';
+import { Range, EntityLocation } from 'basic';
+import { SToken } from '../../sToken';
 import * as tokenStuff from '../../token';
 
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
+import { MockSTokenSource } from 'sToken-test';
 
 describe('PTokenFromLiteralStream (unit)', () => {
-   let sTokenSource: STokenSource;
-
-   beforeEach(() => {
-      sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
-   });
 
    describe('read()', () => {
 
       it('reports the end of stream if no next character is found', () => {
-         spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: () => void) => cb());
-         const pTokenStream = new PTokenFromLiteralStream(sTokenSource);
+         const mockSource = new MockSTokenSource([
+            [ undefined, 'peekChar' ],
+         ]);
+         const pTokenStream = new PTokenFromLiteralStream(mockSource);
          spyOn(pTokenStream, 'push');
 
          pTokenStream.read();
+         mockSource.respondInAsyncTime();
 
          expect(pTokenStream.push).toHaveBeenCalledWith(null);
       });
 
-      it('calls parseParameterEntityReference() if it is to be looking for entity references and finds a %', () => {
-         spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: '%' }));
-         const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
-         const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference');
+      describe ('whitebox api tests', () => {
+         it('calls parseParameterEntityReference() if it is to be looking for entity references and finds a %', () => {
+            const mockSource = new MockSTokenSource([
+               [ '%', 'peekChar' ],
+            ]);
+            const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+            const parseSpy = spyOn(tokenStuff, 'parseParameterEntityReference');
 
-         pTokenStream.read();
+            pTokenStream.read();
+            mockSource.respondInAsyncTime();
 
-         expect(parseSpy.calls.argsFor(0)[0]).toEqual(sTokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+            expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(parseSpy.calls.argsFor(0)[1]).toBeInstanceOf(Function);
+         });
+
+         it('calls text.parse with just & if not looking for perefs', () => {
+            const mockSource = new MockSTokenSource([
+               [ 'x', 'peekChar' ],
+            ]);
+            const pTokenStream = new PTokenFromLiteralStream(mockSource, { });
+            const parseSpy = spyOn(tokenStuff.text, 'parse');
+
+            pTokenStream.read();
+            mockSource.respondInAsyncTime();
+
+            expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '&' ]);
+            expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+
+            // Cheat slightly and make sure function is good
+            const pushSpy = spyOn(pTokenStream, 'push');
+            parseSpy.calls.argsFor(0)[2]('x');
+
+            expect(pushSpy).toHaveBeenCalledWith('x');
+         });
+
+         it('calls text.parse with all terminators if can look for peref', () => {
+            const mockSource = new MockSTokenSource([
+               [ 'x', 'peekChar' ],
+            ]);
+            const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+            const parseSpy = spyOn(tokenStuff.text, 'parse');
+
+            pTokenStream.read();
+            mockSource.respondInAsyncTime();
+
+            expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '&', '%' ]);
+            expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+
+            // Cheat slightly and make sure function is good
+            const pushSpy = spyOn(pTokenStream, 'push');
+            parseSpy.calls.argsFor(0)[2]('x');
+
+            expect(pushSpy).toHaveBeenCalledWith('x');
+         });
+
+         it('calls charRef.parse if &# is found', () => {
+            const mockSource = new MockSTokenSource([
+               [ '&', 'peekChar' ],
+               [ '&#', 'match', '&#' ],
+            ]);
+            const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+            const parseSpy = spyOn(tokenStuff.charRef, 'parse');
+
+            pTokenStream.read();
+            mockSource.respondInAsyncTime();
+
+            expect(parseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
+            expect(parseSpy.calls.argsFor(0)[1].str).toEqual('&#');
+            expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+
+            // Cheat slightly and make sure function is good
+            const pushSpy = spyOn(pTokenStream, 'push');
+            parseSpy.calls.argsFor(0)[2]('x');
+
+            expect(pushSpy).toHaveBeenCalledWith('x');
+         });
       });
 
-      it('does not parseParameterEntityReference() if it is not to be looking for entity references and finds a %', () => {
-         spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: '%' }));
-         const pTokenStream = new PTokenFromLiteralStream(sTokenSource);
-         spyOn(tokenStuff, 'parseParameterEntityReference');
-         spyOn(text, 'parse');
+      it('returns a text token if a & is encountered', () => {
+         const mockSource = new MockSTokenSource([
+            [ '&', 'peekChar' ],
+            [ undefined, 'match', '&#' ],
+            [ '&', 'char' ],
+         ]);
+         const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+         const pushSpy = spyOn(pTokenStream, 'push');
+         const sToken = new SToken('&', '&', new Range(new EntityLocation(), 1, 0, 1, 2, 0, 2));
 
          pTokenStream.read();
+         mockSource.respondInAsyncTime();
 
-         expect(tokenStuff.parseParameterEntityReference).not.toHaveBeenCalled();
-      });
-
-      it('calls text.parse with no terminators if not looking for any types', () => {
-         spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: '%' }));
-         const pTokenStream = new PTokenFromLiteralStream(sTokenSource);
-         const parseSpy = spyOn(text, 'parse');
-
-         pTokenStream.read();
-
-         expect(parseSpy.calls.argsFor(0)[0]).toEqual(sTokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual([]);
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
-      });
-
-      it('calls text.parse with a % terminator if looking for PE References', () => {
-         spyOn(sTokenSource, 'extractNoParams').and.callFake((_1: any, cb: (arg: any) => void) => cb({ str: 'x' }));
-         const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
-         const parseSpy = spyOn(text, 'parse');
-
-         pTokenStream.read();
-
-         expect(parseSpy.calls.argsFor(0)[0]).toEqual(sTokenSource);
-         expect(parseSpy.calls.argsFor(0)[1]).toEqual([ '%' ]);
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(pushSpy.calls.argsFor(0)[0]).toEqual(new tokenStuff.text.PToken({ text: sToken }));
       });
 
    });

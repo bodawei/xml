@@ -14,7 +14,7 @@ import {
    elementEnd,
    space,
    text,
-   
+
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
@@ -22,7 +22,7 @@ import {
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
-   
+
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
    GENERAL_ENTITY_END_XTOKEN,
@@ -428,7 +428,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case elementStart.XTYPE:
             case elementStart.EMPTY_XTYPE:
                const destState = currentState.trans[xToken.name];
-   
+
                if (!destState) {
                   this.pushValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT,
                      [ declInfo.token.name, xToken.name ], sToken);
@@ -614,7 +614,7 @@ class CheckXTokenValidStream extends stream.Transform {
       // to encourage a warning: For interoperability, writers of DTDs may choose to
       // provide ... at most one attribute definition for a given attribute name in
       // an attribute-list declaration, and at least one attribute definition in each
-      // attribute-list declaration. 
+      // attribute-list declaration.
 
       if (attrDefs) {
          // §3.3: For interoperability, writers of DTDs may choose to provide at most one
@@ -912,7 +912,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   [ elDecl.name, childNames[index] ], openSToken, undefined);
             }
          }
-      
+
          if (isMixed) {
             const childrenNames: MixedChildrenMap = {};
 
@@ -972,14 +972,14 @@ class CheckXTokenValidStream extends stream.Transform {
             };
          }
       }
-   }   
+   }
 
    /*
     * Does all checks that can only be done once we have the whole DTD processed
     */
    private validateDTD() {
       const oneDotZeroRev2OrHigher = this.emd.isVersion1dot1 || (this.emd.isVersion1dot0 && this.emd.revision > 1);
-      
+
       Object.keys(this.attrDefsByElementName).forEach((elementType: string) => {
          const attList = this.attrDefsByElementName[elementType];
          let idCount = 0;
@@ -1209,6 +1209,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
                // §3.3.1: Validity Constraint: Entity Name
                //    each Name must match the name of an unparsed entity declared in the DTD.
+               // (Also §4.4 row three of table)
                for (let index = 0; index < names.length; index++) {
                   const token = this.entityManager.getEntityToken(names[index])
 

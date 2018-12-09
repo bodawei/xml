@@ -1,10 +1,13 @@
 /* Copyright ® 2018 by David John Burrowes. All rights reserved. */
 
 import stream from 'readable-stream';
-import { Token } from 'basic';
+import { Token, EntityMetaData } from 'basic';
 import { EntityExpander, ExpandToken, STokenSourceProcessed, TokenProcessed } from './EntityExpander';
-import { PTokenStream } from 'pTokenStream';
+import { PTokenStream, PTokenFromLiteralStream } from 'pTokenStream';
 import { STokenSource } from 'sToken';
+import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
+import { defaultExtractors } from 'extractor';
+import { ExternalId } from 'source/token/common/externalId';
 
 function processSTokenSource(sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) {
    const pTokenStream = new PTokenStream(sTokenSource);
@@ -16,6 +19,22 @@ function processSTokenSource(sTokenSource: STokenSource, expandToken: ExpandToke
    pTokenStream.on('end', () => {
       done();
    });
+}
+
+function processForEntityValue(sTokenSource: STokenSource, done: (result: ExpandedLiteralValuePToken) => void) {
+   const pTokenStream = new PTokenFromLiteralStream(sTokenSource, { peRef: true });
+   const results: ExpandedLiteralValuePToken = []
+
+   pTokenStream.on('data', (token: Token) => {
+      results.push(token as any);
+   });
+   pTokenStream.on('end', () => {
+      done(results);
+   });
+}
+
+function retrieveExternalEntity(externalId: ExternalId, entityMetaData: EntityMetaData) {
+   return new STokenSource(defaultExtractors, entityMetaData);
 }
 
 /**********************************************************************\
@@ -31,7 +50,11 @@ class EntityExpanderStream extends stream.Transform {
          objectMode: true,
       });
 
-      this.entityExpander = new EntityExpander(validating, this.push.bind(this), processSTokenSource);
+      this.entityExpander = new EntityExpander(validating, this.push.bind(this), {
+         processBody: processSTokenSource,
+         processForEntityValue,
+         retrieveExternalEntity,
+      });
    }
 
    _transform(token: Token, encoding: string, done: TokenProcessed) {

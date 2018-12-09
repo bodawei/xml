@@ -5,9 +5,21 @@ import { PTokenStream } from "pTokenStream";
 import { EntityMetaData } from "basic";
 import { EntityExpanderStream } from "../EntityExpanderStream";
 import { gatherStream } from "./utils";
-import { GENERAL_ENTITY_START_PTOKEN, GENERAL_ENTITY_END_PTOKEN, PToken, PARAMETER_ENTITY_START_PTOKEN, PARAMETER_ENTITY_END_PTOKEN } from "token";
+import {
+   GENERAL_ENTITY_START_PTOKEN,
+   GENERAL_ENTITY_END_PTOKEN,
+   PARAMETER_ENTITY_START_PTOKEN,
+   PARAMETER_ENTITY_END_PTOKEN,
+   ENTITY_DECLARATION_PTOKEN,
+   PToken,
+   text,
+   ParameterEntityStartPToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityEndPToken,
+} from "token";
+import { SToken } from "sToken";
 
-describe('EntityExpander (integration)', () => {
+describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
    let entityExpander: EntityExpanderStream;
 
@@ -116,6 +128,50 @@ describe('EntityExpander (integration)', () => {
 
          expect(results[index + 1].type).toEqual('ELEMENT_START');
          expect((results[index + 1] as any).name.str).toEqual('two');
+      }, done);
+   });
+
+   it('replaces references to internal parameter entities with actual values', (done) => {
+      pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % internalPE1 "foo">
+            <!ENTITY % internalPE2 "(%internalPE1;)">
+            <!ENTITY internalGE "[%internalPE2;]">
+            <!ELEMENT one ANY>
+         ]>
+         <one>
+            &internalGE;
+         </one>`);
+      pTokenStream.endText();
+
+      gatherStream(entityExpander, (results) => {
+         const index = getIndex(results, ENTITY_DECLARATION_PTOKEN);
+         const expectedRef2 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            openSpace: undefined,
+            name: SToken.fromString('internalPE2'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+         const expectedRef1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            openSpace: undefined,
+            name: SToken.fromString('internalPE1'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+
+         expect((results[index + 4] as any).value).toEqualRangeless([
+            new text.PToken({ text: SToken.fromString('[') }),
+            new ParameterEntityStartPToken(expectedRef2),
+            new text.PToken({ text: SToken.fromString('(') }),
+            new ParameterEntityStartPToken(expectedRef1),
+            new text.PToken({ text: SToken.fromString('foo') }),
+            new ParameterEntityEndPToken(expectedRef1),
+            new text.PToken({ text: SToken.fromString(')') }),
+            new ParameterEntityEndPToken(expectedRef2),
+            new text.PToken({ text: SToken.fromString(']') }),
+         ]);
       }, done);
    });
 

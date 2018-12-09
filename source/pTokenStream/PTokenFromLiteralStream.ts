@@ -4,16 +4,23 @@ import stream from 'readable-stream';
 
 import { STokenSource } from '../sToken';
 import {
-   text, parseParameterEntityReference,
+   charRef,
+   parseParameterEntityReference,
+   text,
 } from '../token';
 
 type Options = {
    peRef?: boolean;
 };
 
+/*
+ * This is used to parse EntityValue and AttributeValue literals. As such, it only
+ * recognizes Text, CharRef, and (optionally) ParameterEntityReferences.
+ */
 class PTokenFromLiteralStream extends stream.Transform {
    private sTokenSource: STokenSource;
    private peRef: boolean;
+   private terminators: Array<string>;
 
    constructor(sTokenSource: STokenSource, options: Options = {}) {
       super({
@@ -22,6 +29,7 @@ class PTokenFromLiteralStream extends stream.Transform {
 
       this.sTokenSource = sTokenSource;
       this.peRef = !!options.peRef;
+      this.terminators = this.peRef ? [ '&', '%' ] : [ '&' ];
    }
 
    _read() {
@@ -33,14 +41,24 @@ class PTokenFromLiteralStream extends stream.Transform {
 
          if (this.peRef && sToken.str === '%') {
             parseParameterEntityReference(this.sTokenSource, (pToken) => this.push(pToken));
-         } else {
-            const terminators = [];
-            if (this.peRef) {
-               terminators.push('%');
+            return;
+         }
+
+         if (sToken.str !== '&') {
+            text.parse(this.sTokenSource, this.terminators, (pToken) => this.push(pToken));
+            return;
+         }
+
+         this.sTokenSource.extract('match', '&#', (sToken) => {
+            if (sToken) {
+               charRef.parse(this.sTokenSource, sToken, (pToken) => this.push(pToken));
+               return;
             }
 
-            text.parse(this.sTokenSource, terminators, (sToken) => this.push(sToken));
-         }
+            this.sTokenSource.extractNoParams('char', (sToken) => {
+               this.push(new text.PToken({ text: sToken! }));
+            });
+         });
       });
    }
 }

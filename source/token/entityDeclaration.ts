@@ -68,6 +68,8 @@ class EntityDeclarationPToken extends declaration.PToken {
    constructor(props?: Object) {
       /* istanbul ignore next */ // Istanbul is confused by transpilation
       super(ENTITYDECL, props);
+
+      // this.value = this.value || [];
    }
 
    getSTokenArray() {
@@ -467,4 +469,5 @@ export {
    EntityDeclarationPToken,
    ParameterEntityDeclaration,
    ParameterEntityDeclarationPToken,
+   ExpandedLiteralValuePToken,
 };

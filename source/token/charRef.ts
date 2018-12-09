@@ -177,4 +177,6 @@ export {
    checkWellFormed,
    pTokenToXToken,
    sTokensFromPToken,
+
+   CHARREF_PTOKEN_TYPE,
 };
