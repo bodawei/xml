@@ -16,8 +16,13 @@ import {
    ParameterEntityStartPToken,
    ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
+   GeneralEntityReferencePToken,
+   GeneralEntityStartPToken,
+   GeneralEntityEndPToken,
 } from "token";
 import { SToken } from "sToken";
+import { AttListPToken } from "source/token/attListDeclaration";
+import { CharRefPToken } from "source/token/charRef";
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -105,7 +110,6 @@ describe('EntityExpanderStream (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
-         // console.log(JSON.stringify(results[index + 18 ], undefined, 5));
          expect(results[index + 2].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
          expect(results[index + 27].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
       }, done);
@@ -172,6 +176,82 @@ describe('EntityExpanderStream (integration)', () => {
             new ParameterEntityEndPToken(expectedRef2),
             new text.PToken({ text: SToken.fromString(']') }),
          ]);
+      }, done);
+   });
+
+   it('replaces references in ATTLIST defaults', (done) => {
+      pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % internalPE "foo">
+            <!ENTITY internalGE "(%internalPE;)">
+            <!ELEMENT one ANY>
+            <!ATTLIST one anAttr CDATA "&#91;&internalGE;&#x5D;">
+         ]>
+         <one>
+         </one>`);
+      pTokenStream.endText();
+
+      gatherStream(entityExpander, (results) => {
+         const index = getIndex(results, 'ATTLISTDECL_PTOKEN_TYPE');
+         const expectedRef1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            openSpace: undefined,
+            name: SToken.fromString('internalPE'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+         const expectedRef2 = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            openSpace: undefined,
+            name: SToken.fromString('internalGE'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+         const expected = new AttListPToken({
+            open: SToken.fromString('<!'),
+            postOpenSpace: undefined,
+            declType: SToken.fromString('ATTLIST'),
+            postDeclTypeSpace: SToken.fromString(' '),
+            elementName: SToken.fromString('one'),
+            postElementNameSpace: SToken.fromString(' '),
+            attDefs: [{
+               name: SToken.fromString('anAttr'),
+               postNameSpace: SToken.fromString(' '),
+               type: SToken.fromString('CDATA'),
+               postTypeSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               closeQuote: SToken.fromString('"'),
+               value: [
+                  new CharRefPToken({
+                     open: SToken.fromString('&#'),
+                     postOpenSpace: undefined,
+                     postHexMarkerSpace: undefined,
+                     digits: SToken.fromString('91'),
+                     postDigitsSpace: undefined,
+                     close: SToken.fromString(';'),
+                  }),
+                  new GeneralEntityStartPToken(expectedRef2),
+                  new text.PToken({ text: SToken.fromString('(') }),
+                  new ParameterEntityStartPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new ParameterEntityEndPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString(')') }),
+                  new GeneralEntityEndPToken(expectedRef2),
+                  new CharRefPToken({
+                     open: SToken.fromString('&#'),
+                     postOpenSpace: undefined,
+                     hexMarker: SToken.fromString('x'),
+                     postHexMarkerSpace: undefined,
+                     digits: SToken.fromString('5D'),
+                     postDigitsSpace: undefined,
+                     close: SToken.fromString(';'),
+                  }),
+               ],
+            }],
+            close: SToken.fromString('>'),
+         });
+
+         expect((results[index] as any)).toEqualRangeless(expected);
       }, done);
    });
 

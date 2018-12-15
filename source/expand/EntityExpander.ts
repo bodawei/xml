@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
 import { Token } from 'basic';
-import {
+import token, {
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -25,6 +25,7 @@ import { EntityMetaData } from 'basic';
 import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
 import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
+import { AttListPToken } from 'source/token/attListDeclaration';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -103,6 +104,9 @@ class EntityExpander {
          // case XMLDECL_PTOKEN:
          //    this.handleXmlDeclaration(pToken as XmlDeclarationPToken);
          //    break;
+         case token.attListDeclaration.PTYPE:
+            this.processAttListDeclaration(pToken as AttListPToken, expanded);
+            break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             this.handleEntityDeclaration(pToken as GeneralEntityDeclarationPToken, expanded);
             break;
@@ -128,6 +132,40 @@ class EntityExpander {
    //       }
    //    }
    // }
+
+   private processAttListDeclaration(pToken: AttListPToken, expanded: TokenProcessed) {
+      let newDefault: LiteralValuePToken = [];
+
+      // Replace any general entity references in attribute defaults with their referenced values
+      for (let attDef of pToken.attDefs) {
+         const value = attDef.value || [];
+
+
+         for (let element of value) {
+            if (!(element instanceof GeneralEntityReferencePToken)) {
+               newDefault.push(element);
+               continue;
+            }
+
+            const info = element.name ? this.generalEntitiesByName[element.name.str] : undefined;
+
+            // Can not expand a reference that has no name
+            if (!info) {
+               newDefault.push(element);
+               continue;
+            }
+
+            newDefault.push(new GeneralEntityStartPToken(element as GeneralEntityReferencePToken));
+            newDefault = newDefault.concat(info.token.value);
+            newDefault.push(new GeneralEntityEndPToken(element as GeneralEntityReferencePToken));
+         }
+
+         attDef.value = newDefault;
+      }
+
+      this.deliverAToken(pToken);
+      expanded();
+   }
 
    private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expanded: TokenProcessed) {
       this.handleEntityValue((pToken as any).value || [], (newValue) => {
@@ -240,8 +278,8 @@ class EntityExpander {
       // Can not expand a reference that we have no declaration for
       // §4.4 unparsed entities may not be referenced in content
       // §4.4 Do not include if is external and we are not validating
-      if (!pToken.name || !info || info.isUnparsed ||
-         !info.isInternal && this.validationMode !== ValidationMode.VALIDATING) {
+      if (!info || info.isUnparsed ||
+         (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
             this.deliverAToken(pToken);
             referenceProcessed();
             return;
@@ -267,8 +305,7 @@ class EntityExpander {
       // Can not expand a reference that has no name
       // Can not expand a reference that we have no declaration for
       // §4.4 Do not include if is external and we are not validating
-      if (!pToken.name ||
-         !info || !info.isInternal && this.validationMode !== ValidationMode.VALIDATING) {
+      if (!info || (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
          this.deliverAToken(pToken);
          referenceProcessed();
          return;

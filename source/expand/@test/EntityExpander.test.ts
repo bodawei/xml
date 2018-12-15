@@ -17,6 +17,8 @@ import {
    text,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
+   GeneralEntityStartPToken,
+   GeneralEntityEndPToken,
 } from "token";
 import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, ParameterEntityDeclarationPToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
@@ -26,6 +28,7 @@ import { TextPToken, TEXT_PTOKEN } from "source/token/text";
 import { PTokenStream, PTokenFromLiteralStream } from "pTokenStream";
 import { ExternalId } from "source/token/common/externalId";
 import { defaultExtractors } from "extractor";
+import { AttListPToken } from "source/token/attListDeclaration";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
@@ -98,6 +101,103 @@ describe('EntityExpander (unit)', () => {
 
       processNextToken();
    }
+
+   describe('ATTLIST declaration', () => {
+
+      it('does not change the value if it contains no general entity references', (done) => {
+         const input = [
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[0] as any).attDefs[0].value).toEqual([ new text.PToken({ text: SToken.fromString('foo') }) ]);
+            done();
+         });
+      });
+
+      it('replaces general entity references with their values', (done) => {
+         const refToPe = new ParameterEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('pe'),
+         });
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('ge'),
+         });
+
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('pe') }),
+               ],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('ge'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('ge') }),
+                  refToPe
+               ],
+            }),
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                     refToGe,
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[2] as any).attDefs[0].value).toEqual([
+               new text.PToken({ text: SToken.fromString('foo') }),
+               new GeneralEntityStartPToken(refToGe),
+               new text.PToken({ text: SToken.fromString('ge') }),
+               new ParameterEntityStartPToken(refToPe),
+               new text.PToken({ text: SToken.fromString('pe') }),
+               new ParameterEntityEndPToken(refToPe),
+               new GeneralEntityEndPToken(refToGe),
+            ]);
+            done();
+         });
+      });
+
+      it('does not replace a reference if it has no name', (done) => {
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+         });
+
+         const input = [
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                     refToGe,
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[0] as any).attDefs[0].value).toEqual([
+               new text.PToken({ text: SToken.fromString('foo') }),
+               refToGe,
+            ]);
+            done();
+         });
+      });
+
+   });
 
    describe('entity declaration', () => {
 
@@ -405,6 +505,27 @@ describe('EntityExpander (unit)', () => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
             expect(results[2].type).toEqual('CHARDATA');
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('replaces an entity reference to an internal entity, even if that has an empty TextPToken', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('foo'),
+               value: [ new TextPToken() ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('foo'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });

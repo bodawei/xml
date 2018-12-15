@@ -34,7 +34,7 @@ type PTokenProps = {
 };
 
 class TextPToken extends base.PToken {
-   public text?: SToken;
+   public text?: SToken; // @@ this hsould not be optional.
 
    constructor(props?: PTokenProps) {
       super(TEXT, props);

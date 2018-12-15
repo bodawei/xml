@@ -10,6 +10,8 @@ import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGenera
 import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
 import { CharRefPToken, CharRefXToken } from '../charRef';
 import * as charRef from '../charRef';
+import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
+import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
@@ -19,8 +21,8 @@ import * as charRef from '../charRef';
 // </typeHack>
 
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken>;
-type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken>;
+type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken>;
+type LiteralValueXToken = Array<TextXToken|CharRefXToken|GeneralEntityReferenceXToken|ParameterEntityReferenceXToken|GeneralEntityStartXToken|GeneralEntityEndXToken>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 /**********************************************************************\
@@ -111,7 +113,7 @@ function checkWellFormed(pToken: LiteralValuePToken, ec: ErrorCollector, entityM
       if (isTextPToken(item)) {
          ec.setPos(item.text);
          misc.checkWellFormedText(item.text, ec, entityMetaData);
-      } else {
+      } else if (!(item instanceof GeneralEntityStartPToken || item instanceof GeneralEntityEndPToken)) {
          item.checkWellFormed(ec, entityMetaData);
       }
    }

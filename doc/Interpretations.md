@@ -363,3 +363,8 @@ Expansion:
 ordering of things is so weird. in 4.4.0 it says an unparsed entity reference should be an error.  yet, this is almost the same as an unparsed reference in content.  put another way, the parsed entity references are bypassed.  Which seems fine.  but you can't know if an entity reference is unparsed in an entity value until it is used, ot at least until the end of the dtd.
    - So this isn't parse time.  Thsi is end of dtd time that you can know this.
    - it could be at expansion time, but then you need to be very clear that you are indeed in the middle of expanding an entity and encounter this there.  So, bypassed is at parse time, and error is at end of dtd or expansion time.
+
+
+
+We allow some expansions which are not legal:
+- We will include external entities in an attribute value in EntityExpander.  (but checkWellFormed will complain)

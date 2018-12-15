@@ -190,6 +190,7 @@ function parseAttValue(source: STokenSource, pToken: AttListPToken, attDef: AttD
       literal.parse(source, {
          pToken: attDef,
          geRef: true,
+         charRef: true,
       }, done);
    });
 
@@ -449,6 +450,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
          ec.check(attDef.openQuote, WFEID.ATTLISTDECL_ATTR_EXTRA_VALUE, [ attName, elNameText ]);
       }
 
+      // @@@ need to check and complain if any entity refs are to external entities (general or parameter)
       literal.checkWellFormed(attDef, ec, entityMetaData, WFEID.NOUN_ATTRIBUTE);
    }
 
