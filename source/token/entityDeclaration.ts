@@ -1,23 +1,18 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, XmlWarning, ErrorCollector } from '../error';
-import { strOrBlank } from 'sToken';
-
-import base from './base';
-import unassigned, { UnassignedType } from './common/unassigned';
-import declaration, { DeclarationPToken } from './bridge/declaration';
-import misc from './common/misc';
-import externalId from './common/externalId';
-import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { EntityLocation, EntityMetaData } from 'basic';
-import { STokenSource } from 'sToken';
+import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
+
+import { DeclarationStart } from './bridge/declaration';
+import unassigned, { UnassignedType, UnassignedArray } from './common/unassigned';
+import misc from './common/misc';
+import externalId, { ExternalId } from './common/externalId';
+import literal, { LiteralValuePToken } from './common/literal';
 import { UnassignedValue } from './common/unassigned';
 import { TextPToken } from './text';
-import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
-import { GeneralEntityStartPToken } from './marker/generalEntityStart';
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
-import { GeneralEntityReferencePToken } from './generalEntityReference';
 import { ParameterEntityReferencePToken } from './parameterEntityReference';
 
 /**********************************************************************\
@@ -26,100 +21,155 @@ import { ParameterEntityReferencePToken } from './parameterEntityReference';
  declaration.
 \**********************************************************************/
 
-const ENTITYDECL = 'ENTITYDECL';
-const ENTITYDECL_XTOKEN = 'ENTITYDECL_XTOKEN';
-const PARAMETER_ENTITYDECL_XTOKEN = 'PARAMETER_ENTITYDECL_XTOKEN';
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
+const GENERAL_ENTITY_DECLARATION_PTOKEN = 'GENERAL_ENTITY_DECLARATION_PTOKEN';
+const PARAMETER_ENTITY_DECLARATION_PTOKEN = 'PARAMETER_ENTITY_DECLARATION_PTOKEN';
+const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
+const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 
-type ExpandedLiteralValuePToken = Array<TextPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
 
-class EntityDeclaration extends base.XToken {
-   public type: string;
+class GeneralEntityDeclarationXToken {
+   public type: string = GENERAL_ENTITY_DECLARATION_XTOKEN;
    public name: string;
    public externalLoc: EntityLocation | void;
    public notationDataName: string | void;
    public isParameter: boolean;
-   public value: ExpandedLiteralValuePToken | void;
+   public value: ExpandedLiteralValuePToken;
+   public pToken?: GeneralEntityDeclarationPToken;
 
-   constructor(name: string, value: ExpandedLiteralValuePToken | void, externalLoc?: EntityLocation | void, notationDataName?: string | void, pToken?: EntityDeclarationPToken | ParameterEntityDeclarationPToken) {
-      super(ENTITYDECL_XTOKEN, pToken);
-
+   constructor(name: string, value: ExpandedLiteralValuePToken, externalLoc?: EntityLocation | void, notationDataName?: string | void, pToken?: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) {
       this.name = name;
       this.value = value;
       this.externalLoc = externalLoc;
       this.notationDataName = notationDataName;
       this.isParameter = false;
-      this.type = ENTITYDECL_XTOKEN;
+      this.pToken = pToken;
    }
-
 }
 
-class ParameterEntityDeclaration extends EntityDeclaration {
-   constructor(name: string, value: ExpandedLiteralValuePToken | void, externalLoc?: EntityLocation | void, notationDataName?: string | void, pToken?: ParameterEntityDeclarationPToken) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(name, value, externalLoc, notationDataName, pToken);
+class ParameterEntityDeclarationXToken {
+   public type: string = PARAMETER_ENTITY_DECLARATION_XTOKEN;
+   public name: string;
+   public isParameter: boolean;
+   public externalLoc: EntityLocation | void;
+   public value: ExpandedLiteralValuePToken;
+   public pToken?: ParameterEntityDeclarationPToken;
+
+   constructor(name: string, value: ExpandedLiteralValuePToken, externalLoc?: EntityLocation | void, pToken?: ParameterEntityDeclarationPToken) {
+      this.name = name;
       this.isParameter = true;
-      this.type = PARAMETER_ENTITYDECL_XTOKEN
+      this.value = value;
+      this.externalLoc = externalLoc;
+      this.pToken = pToken;
    }
 }
 
-class EntityDeclarationPToken extends declaration.PToken {
-   constructor(props?: Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(ENTITYDECL, props);
+class GeneralEntityDeclarationPToken {
+   public type: string = GENERAL_ENTITY_DECLARATION_PTOKEN;
+   public open: SToken;
+   public openSpace?: SToken;
+   public declType?: SToken;
+   public declTypeSpace?: SToken;
+   public parameter?: SToken;
+   public postParameterSpace?: SToken;
+   public name?: SToken;
+   public postNameSpace?: SToken;
+   public externalId?: ExternalId;
+   public postExternalIdSpace?: SToken;
+   public value: LiteralValuePToken;
+   public postEntityValueSpace?: SToken;
+   public nData?: SToken;
+   public postNDataSpace?: SToken;
+   public nDataName?: SToken;
+   public postNDataNameSpace?: SToken;
+   public close?: SToken;
+   public unassigned?: UnassignedArray;
+   public extra?: UnassignedArray;
+   public nextPropName?: string;
 
-      // this.value = this.value || [];
+   constructor(props?: Object | DeclarationStart) {
+      if (props) {
+         Object.assign(this, props);
+         this.open = (props as any).open;
+         this.value = (props as any).value || [];
+      } else {
+         this.open = SToken.fromString('x');
+         this.value = [];
+      }
+      this.type = GENERAL_ENTITY_DECLARATION_PTOKEN;
    }
 
    getSTokenArray() {
-      const results = super.getSTokenArray();
+      // const results = super.getSTokenArray();
 
-      results.pushSTokens(this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread  // typeHack
-      results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.postEntityValueSpace,
-         this.postExternalIdSpace,
-         this.nData,
-         this.postNDataSpace,
-         this.nDataName,
-         this.postNDataNameSpace,
-         this.close);
+      // results.pushSTokens(this.name,
+      //    this.postNameSpace);
+      // results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread  // typeHack
+      // results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
+      // results.pushSTokens(this.postEntityValueSpace,
+      //    this.postExternalIdSpace,
+      //    this.nData,
+      //    this.postNDataSpace,
+      //    this.nDataName,
+      //    this.postNDataNameSpace,
+      //    this.close);
 
-      return results;
+      // return results;
    }
 }
 
-class ParameterEntityDeclarationPToken extends EntityDeclarationPToken {
-   constructor(props?: Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(props);
+class ParameterEntityDeclarationPToken {
+   public type: string = PARAMETER_ENTITY_DECLARATION_PTOKEN;
+   public open: SToken;
+   public openSpace?: SToken;
+   public declType?: SToken;
+   public declTypeSpace?: SToken;
+   public parameter?: SToken;
+   public postParameterSpace?: SToken;
+   public name?: SToken;
+   public postNameSpace?: SToken;
+   public externalId?: ExternalId;
+   public value: LiteralValuePToken;
+   public postEntityValueSpace?: SToken;
+   public postExternalIdSpace?: SToken;
+   public close?: SToken;
+   public unassigned?: UnassignedArray;
+   public extra?: UnassignedArray;
+   public nextPropName?: string;
+
+   constructor(props?: Object | DeclarationStart) {
+      if (props) {
+         Object.assign(this, props);
+         this.open = (props as any).open;
+         this.value = (props as any).value || [];
+      } else {
+         this.open = SToken.fromString('x');
+         this.value = [];
+      }
+      this.type = PARAMETER_ENTITY_DECLARATION_PTOKEN;
    }
 
    getSTokenArray() {
-      const hack = new base.PToken('x');
-      const results = hack.getSTokenArray();
+      // const hack = new base.PToken('x');
+      // const results = hack.getSTokenArray();
 
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.declType,
-         this.postDeclTypeSpace,
-         this.parameter,
-         this.postParameterSpace,
-         this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread // typeHack
-      results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.postEntityValueSpace,
-         this.postExternalIdSpace,
-         this.nData,
-         this.postNDataSpace,
-         this.nDataName,
-         this.postNDataNameSpace,
-         this.close);
+      // results.pushSTokens(this.open,
+      //    this.postOpenSpace,
+      //    this.declType,
+      //    this.postDeclTypeSpace,
+      //    this.parameter,
+      //    this.postParameterSpace,
+      //    this.name,
+      //    this.postNameSpace);
+      // results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread // typeHack
+      // results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
+      // results.pushSTokens(this.postEntityValueSpace,
+      //    this.postExternalIdSpace,
+      //    this.close);
 
-      return results;
+      // return results;
    }
 }
 
@@ -147,8 +197,8 @@ class ParameterEntityDeclarationPToken extends EntityDeclarationPToken {
                         "'" ([^%&'] | PEReference | Reference)* "'"
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: (pToken: EntityDeclarationPToken | ParameterEntityDeclarationPToken) => void) {
-   const pToken = new EntityDeclarationPToken(declarationPToken);
+function parse(source: STokenSource, declarationStart: DeclarationStart, deliverPToken: (pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) => void) {
+   const pToken = new GeneralEntityDeclarationPToken(declarationStart);
 
    source.extractNoParams('peekChar', (sToken) => {
       if (!sToken) {
@@ -167,7 +217,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
    });
 }
 
-function parseWordOrPERef(source: STokenSource, pToken: EntityDeclarationPToken, done: () => void) {
+function parseWordOrPERef(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'name', done, () => {
       // Consider "<!ENTITY % name". By strict syntax, tht can only be
       // a Parameter entity declaration.  However, because we want to allow
@@ -182,7 +232,7 @@ function parseWordOrPERef(source: STokenSource, pToken: EntityDeclarationPToken,
          if (pToken.parameter && semicolon) {
             unassigned.parseAllValues(source, false, (values) => {
                const entityRef = new ParameterEntityReferencePToken({
-                  open: pToken.parameter,
+                  open: pToken.parameter!,  // typeHack
                   openSpace: pToken.postParameterSpace,
                   name: pToken.name,
                   nameSpace: pToken.postNameSpace,
@@ -190,7 +240,7 @@ function parseWordOrPERef(source: STokenSource, pToken: EntityDeclarationPToken,
                });
                pToken.unassigned = values;
                pToken.nextPropName = 'parameter';
-               pToken.unassigned.unshift({
+               (pToken.unassigned as any).unshift({  // typeHack
                   type: 'reference',
                   token: entityRef,
                });
@@ -209,7 +259,7 @@ function parseWordOrPERef(source: STokenSource, pToken: EntityDeclarationPToken,
    unassigned.checkForPERef(source, callback);
 }
 
-function parseEntityValue(source: STokenSource, pToken: EntityDeclarationPToken, done: () => void) {
+function parseEntityValue(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
       literal.parse(source, {
          pToken,
@@ -231,7 +281,7 @@ function parseEntityValue(source: STokenSource, pToken: EntityDeclarationPToken,
    unassigned.checkForPERef(source, callback);
 }
 
-function parseExternalId(source: STokenSource, pToken: EntityDeclarationPToken, done: () => void) {
+function parseExternalId(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
       externalId.parse(source, [ '>' ], (externalId) => {
          pToken.externalId = externalId;
@@ -250,7 +300,7 @@ function parseExternalId(source: STokenSource, pToken: EntityDeclarationPToken, 
    unassigned.checkForPERef(source, callback);
 }
 
-function parseNData(source: STokenSource, pToken: EntityDeclarationPToken, done: () => void) {
+function parseNData(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'nData', done, () => {
       source.extract('peekWord', [ '>' ], (sToken) => {
          if (sToken && sToken.str.toLocaleUpperCase() === 'NDATA') {
@@ -268,7 +318,7 @@ function parseNData(source: STokenSource, pToken: EntityDeclarationPToken, done:
    unassigned.checkForPERef(source, callback);
 }
 
-function parseNDataName(source: STokenSource, pToken: EntityDeclarationPToken, done: () => void) {
+function parseNDataName(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'nDataName', done, () => {
       source.extractToObject('word', [ '>' ], pToken, 'nDataName');
       source.extractNoParams('space', (sToken) => {
@@ -280,7 +330,7 @@ function parseNDataName(source: STokenSource, pToken: EntityDeclarationPToken, d
    unassigned.checkForPERef(source, callback);
 }
 
-function parseClose(source: STokenSource, pToken: EntityDeclarationPToken, deliverPToken: (result: ParameterEntityDeclarationPToken) => void) {
+function parseClose(source: STokenSource, pToken: GeneralEntityDeclarationPToken, deliverPToken: (result: GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken) => void) {
    source.extract('match', '>', (sToken) => {
       const deliveredPToken = !pToken.parameter ? pToken : new ParameterEntityDeclarationPToken(pToken);
 
@@ -293,7 +343,7 @@ function parseClose(source: STokenSource, pToken: EntityDeclarationPToken, deliv
  assignUnassigned()
 \**********************************************************************/
 
-function assignUnassigned(pToken: EntityDeclarationPToken) {
+function assignUnassigned(pToken: GeneralEntityDeclarationPToken) {
    const unValues = pToken.unassigned || [];
 
    if (unValues.length === 0) {
@@ -331,15 +381,15 @@ function assignUnassigned(pToken: EntityDeclarationPToken) {
    let doEpilog = inEpilog.length > 0;
 
    if (inExternalId) {
-      externalId.assignUnassigned(pToken.externalId, pToken, 'postNameSpace');
+      externalId.assignUnassigned(pToken.externalId as ExternalId, pToken, 'postNameSpace'); // typeHack
       doEpilog = true;
    } else {
       if (inProlog) {
-         unassigned.assignToProps(pToken.unassigned, pToken, pToken.nextPropName, prolog);
+         unassigned.assignToProps(pToken.unassigned!, pToken, pToken.nextPropName, prolog); // typeHack
       }
 
-      if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned[0]) {
-         const nextNonSpaceThing = pToken.unassigned.find((value: UnassignedValue) => {
+      if ((inProlog || isEntityValueOrExternalId) && pToken.unassigned![0]) { // typeHack
+         const nextNonSpaceThing = (pToken.unassigned as any).find((value: UnassignedValue) => { // typeHack
             if ((value.type === 'space') ||
                value.type === 'entityStart' ||
                value.type === UnassignedType.ENTITY_END) {
@@ -350,7 +400,7 @@ function assignUnassigned(pToken: EntityDeclarationPToken) {
          });
 
          if (nextNonSpaceThing.type === 'literal') {
-            unassigned.assignToProps(pToken.unassigned, pToken, 'EntityValue', [
+            unassigned.assignToProps(pToken.unassigned!, pToken, 'EntityValue', [ // typeHack
                { name: 'postNameSpace', type: 'space' },
                { name: 'EntityValue', type: 'literal', flatten: true },
                { name: 'postEntityValueSpace', type: 'space' },
@@ -358,7 +408,7 @@ function assignUnassigned(pToken: EntityDeclarationPToken) {
          } else {
             pToken.externalId = {
                unassigned: pToken.unassigned,
-            };
+            } as ExternalId; // typeHack
             externalId.assignUnassigned(pToken.externalId, pToken, 'postNameSpace');
             doEpilog = true;
          }
@@ -366,7 +416,7 @@ function assignUnassigned(pToken: EntityDeclarationPToken) {
    }
 
    if (doEpilog) {
-      unassigned.assignToProps(pToken.unassigned, pToken, 'postExternalIdSpace', epilog);
+      unassigned.assignToProps(pToken.unassigned!, pToken, 'postExternalIdSpace', epilog); // typeHack
    }
 
    if (unValues.length !== 0) {
@@ -387,14 +437,14 @@ function assignUnassigned(pToken: EntityDeclarationPToken) {
  checkWellFormed() does normal validation.
 \**********************************************************************/
 
-function checkWellFormed(pToken: EntityDeclarationPToken | ParameterEntityDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
+function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    if (!pToken || pToken.unassigned) {
       return;
    }
 
    const enNameText = strOrBlank(pToken.name);
 
-   declaration.checkWellFormed(pToken, ec, entityMetaData);
+//   declaration.checkWellFormed((pToken as any), ec, entityMetaData); // TypeHack
 
    ec.setPos(pToken.parameter);
    if (pToken.parameter) {
@@ -413,7 +463,7 @@ function checkWellFormed(pToken: EntityDeclarationPToken | ParameterEntityDeclar
    if (pToken.externalId) {
       externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
 
-      if (pToken.nData) {
+      if (pToken instanceof GeneralEntityDeclarationPToken && pToken.nData) {
          ec.setPos(pToken.nData);
          ec.check(pToken.nData.str !== 'NDATA', WFEID.ENTITYDECL_NDATA_INVALID_CASE,
             [ enNameText, pToken.nData.str ]);
@@ -442,32 +492,36 @@ function checkWellFormed(pToken: EntityDeclarationPToken | ParameterEntityDeclar
  as every consumer will need to further process them.
 \**********************************************************************/
 
-function pTokenToXToken(pToken: EntityDeclarationPToken | ParameterEntityDeclarationPToken) {
-   const entityClass = pToken.parameter ? ParameterEntityDeclaration : EntityDeclaration;
-
-   return new entityClass(strOrBlank(pToken.name),
-      pToken.value,
-      externalId.makeEntityLocation(pToken.externalId),
-      strOrBlank(pToken.nDataName),
-      pToken);
+function pTokenToXToken(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken) {
+   if (pToken.parameter) {
+      return new ParameterEntityDeclarationXToken(strOrBlank(pToken.name),
+         pToken.value as any,
+         externalId.makeEntityLocation(pToken.externalId),
+         pToken as any);
+   } else {
+      return new GeneralEntityDeclarationXToken(strOrBlank(pToken.name),
+         pToken.value as any,
+         externalId.makeEntityLocation(pToken.externalId),
+         strOrBlank((pToken as GeneralEntityDeclarationPToken).nDataName),
+         pToken);
+   }
 }
 
 export {
-   ENTITYDECL as PTYPE,
-   ENTITYDECL_XTOKEN as XTYPE,
-   PARAMETER_ENTITYDECL_XTOKEN as PARAM_XTYPE,
-   EntityDeclarationPToken as PToken,
-   ParameterEntityDeclarationPToken as ParamPToken,
-   EntityDeclaration as XToken,
-   ParameterEntityDeclaration as ParamXToken,
+   parse as parseEntityDeclaration,
    parse,
    assignUnassigned,
    checkWellFormed,
    pTokenToXToken,
 
-   EntityDeclaration,
-   EntityDeclarationPToken,
-   ParameterEntityDeclaration,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_XTOKEN,
+   PARAMETER_ENTITY_DECLARATION_XTOKEN,
+
+   GeneralEntityDeclarationXToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationXToken,
    ParameterEntityDeclarationPToken,
    ExpandedLiteralValuePToken,
 };

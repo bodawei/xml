@@ -71,15 +71,16 @@ describe('PTokenStream (unit)', () => {
 
    });
 
-   it('calls attListDeclaration.parse()', (done) => {
-      const parseSpy = spyOn(attListDeclaration, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering an ATTLIST', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!ATTLIST something bar CDATA #REQUIRED>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('ATTLIST');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -145,28 +146,30 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls docTypeStart.parse()', (done) => {
-      const parseSpy = spyOn(docTypeStart, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!DOCTYPE theType>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('DOCTYPE');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
 
-   it('calls docTypeStart.parse() even when the declType is the wrong case', (done) => {
-      const parseSpy = spyOn(docTypeStart, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!docType theType>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('docType');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -182,28 +185,30 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls elementDeclaration.parse()', (done) => {
-      const parseSpy = spyOn(elementDeclaration, 'parse').and.callThrough();
-      pTokenStream.addText('<!ELEMENT something (one+)>');
+   it('calls parseDeclaration() when encountering an ELEMENT', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      pTokenStream.addText('<!ELEMENT something "foo">');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('ELEMENT');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
 
-   it('calls entityDeclaration.parse()', (done) => {
-      const parseSpy = spyOn(entityDeclaration, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering an ENTITY', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!ENTITY something "foo">');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('ENTITY');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -233,15 +238,16 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls notationDeclaration.parse()', (done) => {
-      const parseSpy = spyOn(notationDeclaration, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering a notation', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!NOTATION something>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
-         expect(parseSpy.calls.argsFor(0)[1].declType.str).toEqual('NOTATION');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });
@@ -315,15 +321,16 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls declaration.parse()', (done) => {
-      const parseSpy = spyOn(declaration, 'parse').and.callThrough();
+   it('calls parseDeclaration() when encountering an unknown declaration', (done) => {
+      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!FOO >');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
          expect(parseSpy.calls.argsFor(0)[0]).toBeInstanceOf(STokenSource);
          expect(parseSpy.calls.argsFor(0)[1].str).toEqual('<!');
-         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(Function);
+         expect(parseSpy.calls.argsFor(0)[2]).toBeInstanceOf(EntityMetaData);
+         expect(parseSpy.calls.argsFor(0)[3]).toBeInstanceOf(Function);
          done();
       });
    });

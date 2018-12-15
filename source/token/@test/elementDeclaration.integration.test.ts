@@ -7,7 +7,7 @@ import { defaultExtractors } from '../../extractor/index';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import declaration, { DeclarationPToken } from '../bridge/declaration';
+import declaration, { DeclarationPToken } from '../bridge/baseDeclaration';
 import elementDeclaration from '../elementDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 

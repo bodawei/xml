@@ -7,7 +7,7 @@ import {
    entityDeclaration,
    text,
 } from '../../token';
-import { EntityDeclaration, ParameterEntityDeclaration } from '../../token/entityDeclaration';
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from '../../token/entityDeclaration';
 
 import EntityManager from '../EntityManager';
 
@@ -42,14 +42,13 @@ describe('EntityManager (unit)', () => {
       }
    }
 
-   function pTokenToXToken(name: string, str: string = '', location?: EntityLocation, notationName?: string): EntityDeclaration {
-      return new entityDeclaration.XToken(name,
+   function pTokenToXToken(name: string, str: string = '', location?: EntityLocation, notationName?: string): GeneralEntityDeclarationXToken {
+      return new GeneralEntityDeclarationXToken(name,
          [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName);
    }
 
-   function makePEToken(name: string, str: string, location?: EntityLocation, notationName?: string): ParameterEntityDeclaration {
-      return new entityDeclaration.ParamXToken(name,
-         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName);
+   function makePEToken(name: string, str: string, location?: EntityLocation, notationName?: string): ParameterEntityDeclarationXToken {
+      return new ParameterEntityDeclarationXToken(name, [ new text.PToken({ text: SToken.fromString(str) }) ], location);
    }
 
    describe('construction', () => {

@@ -45,7 +45,7 @@ import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
-import { EntityDeclaration, ParameterEntityDeclarationPToken } from '../token/entityDeclaration'; // badRef
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken, PARAMETER_ENTITY_DECLARATION_XTOKEN } from '../token/entityDeclaration'; // badRef
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
@@ -161,7 +161,7 @@ class NodeStream extends stream.Transform {
                [ xToken.name ], startToken, startToken);
             this.push(error);
          }
-      } else if (xToken instanceof entityDeclaration.XToken && !this.skipDeclarations) {
+      } else if ((xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) && !this.skipDeclarations) {
          this._processEntityDeclaration(xToken, callback);
          return;
       } else if (xToken instanceof elementDeclaration.XToken && !this.skipDeclarations) {
@@ -255,7 +255,7 @@ class NodeStream extends stream.Transform {
     * Could we essentially do the above, and then post-process by unwraping the unassigned objects?
     */
    _expandThroughNextPERefInEntityValue(entityValueArray: EntityValueArray, deliverExpanded: (expanded: EntityValueArray, other?: EntityValueArray) => void) {
-      if (!entityValueArray) {
+      if (!entityValueArray || entityValueArray.length === 0) {
          deliverExpanded([]);
          return;
       }
@@ -304,7 +304,7 @@ class NodeStream extends stream.Transform {
             token: peRef,
          } ]);
       } else {
-         const expanded = this._entityValueToUnassignedArray(entityToken.value);
+         const expanded = this._entityValueToUnassignedArray((entityToken as any).value);
          expanded.unshift({
             type: UnassignedType.ENTITY_START,
             token: peRef,
@@ -360,7 +360,7 @@ class NodeStream extends stream.Transform {
       const entityToken = this._entityManager.getParameterEntityToken(itemName);
 
       // @@@ don't expand if it is in standalone
-      if (!entityToken || !entityToken.value) {
+      if (!entityToken) {
          deliverExpanded([ peRef ]);
       } else {
          const expanded: EntityValueArray = [ new ParameterEntityStartPToken(peRef) ]
@@ -751,8 +751,8 @@ class NodeStream extends stream.Transform {
     Entity Declaration processing
    \**********************************************************************/
 
-   _processEntityDeclaration(edToken: EntityDeclaration, done: DoneSignal) {
-      const isParameterEntity = edToken.type === entityDeclaration.PARAM_XTYPE;
+   _processEntityDeclaration(edToken: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken, done: DoneSignal) {
+      const isParameterEntity = edToken.type === PARAMETER_ENTITY_DECLARATION_XTOKEN;
       const isExternalEntity = edToken.externalLoc;
 
       // This is a bit hard to reason about.  The specification does say something
@@ -826,8 +826,8 @@ class NodeStream extends stream.Transform {
       });
    }
 
-   _addEntityDeclaration(edToken: EntityDeclaration, done: DoneSignal) {
-      if (edToken instanceof entityDeclaration.ParamXToken) {
+   _addEntityDeclaration(edToken: ParameterEntityDeclarationXToken | GeneralEntityDeclarationXToken, done: DoneSignal) {
+      if (edToken instanceof ParameterEntityDeclarationXToken) {
          // §4.2 If the same entity is declared more than once, ... at user option,
          // an XML processor may issue a warning if entities are declared multiple times.
          if (this._entityManager.getParameterEntityToken(edToken.name)) {

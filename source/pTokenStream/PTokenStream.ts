@@ -6,28 +6,22 @@ import { EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
-   declaration,
    parseSection,
 
-   attListDeclaration,
    charData,
    charRef,
    comment,
-   docTypeStart,
    docTypeEnd,
    elementStart,
    elementEnd,
-   elementDeclaration,
-   entityDeclaration,
-   notationDeclaration,
    space,
 
+   parseDeclaration,
    parseInstruction,
    parseParameterEntityReference,
    parseGeneralEntityReference,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { DocTypeEndPToken } from '../token/docTypeEnd';
 
 type Token = { type: string, text?: SToken };
 type DeliverPToken = (result: any) => void; // icky typeHack
@@ -198,41 +192,12 @@ class PTokenStream extends stream.Readable {
                comment.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<!':
-               declaration.parse(this._sTokenSource, markupStartSToken, (pToken) => {
-                  if (!pToken.declType) {
-                     deliverParse(pToken);
-                     return;
+               parseDeclaration(this._sTokenSource, markupStartSToken, this.emd, (pToken) => {
+                  if (pToken instanceof DocTypeStartPToken && pToken.startInternalSubset) {
+                     this.waitingForInternalClose = true;
                   }
 
-                  switch (pToken.declType.str.toLocaleUpperCase()) {
-                     case 'DOCTYPE':
-                        docTypeStart.parse(this._sTokenSource, pToken, (docTypeStart: DocTypeStartPToken) => {
-                           if (docTypeStart.startInternalSubset) {
-                              this.waitingForInternalClose = true;
-                              deliverParse(docTypeStart);
-                           } else {
-                              docTypeEnd.parse(this._sTokenSource, (endToken: DocTypeEndPToken) => {
-                                 deliverParse([ docTypeStart, endToken ]);
-                              });
-                           }
-                        });
-                        break;
-                     case 'ATTLIST':
-                        attListDeclaration.parse(this._sTokenSource, pToken, deliverParse);
-                        break;
-                     case 'ELEMENT':
-                        elementDeclaration.parse(this._sTokenSource, pToken, deliverParse);
-                        break;
-                     case 'ENTITY':
-                        entityDeclaration.parse(this._sTokenSource, pToken, deliverParse);
-                        break;
-                     case 'NOTATION':
-                        notationDeclaration.parse(this._sTokenSource, pToken, deliverParse);
-                        break;
-                     default:
-                        deliverParse(pToken);
-                        break;
-                  }
+                  deliverParse(pToken);
                });
                break;
             case '<![':

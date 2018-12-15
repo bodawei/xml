@@ -1,35 +1,41 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic';
-import { defaultExtractors } from '../../../extractor';
-import { STokenSource } from '../../../sToken';
-import { makeSTokenMaker } from '../../../sToken/@test/helper';
+import { EntityMetaData, EntityKind } from 'basic';
+import { defaultExtractors } from 'extractor';
+import { STokenSource, SToken } from 'sToken';
+import { GeneralEntityDeclarationPToken, text } from 'token';
 
-import declaration, { DeclarationPToken } from '../declaration';
+import { parseDeclaration } from '../declaration';
 
 describe('declaration (integration)', () => {
-   let declarationPToken: DeclarationPToken;
 
-   beforeEach(() => {
-      const sourceSToken = makeSTokenMaker();
-      declarationPToken = new declaration.PToken(undefined, {
-         postOpenSpace: sourceSToken(' '),
-         declType: sourceSToken('DOCTYPE'),
-         postDeclTypeSpace: sourceSToken(' '),
+   describe('parseDeclaration()', () => {
+      let emd: EntityMetaData;
+      let source: STokenSource;
+      let start: SToken;
+
+      beforeEach(() => {
+         emd = new EntityMetaData();
+         source = new STokenSource(defaultExtractors, emd);
+         start = SToken.fromString('<!');
       });
-      declarationPToken.open = sourceSToken('<!');
-   });
 
-   describe('parse()', () => {
-
-      it('produces a full pToken', (done) => {
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText(' DOCTYPE ');
+      it('parses an Entity declaration', (done) => {
+         source = new STokenSource(defaultExtractors, new EntityMetaData());
+         source.addText('ENTITY foo "theValue">');
          source.endText();
 
-         declaration.parse(source, declarationPToken.open, (pToken) => {
-            expect(pToken).toEqual(declarationPToken);
+         parseDeclaration(source, start, new EntityMetaData(EntityKind.DOCUMENT), (parsing) => {
+            expect(parsing).toEqualRangeless(new GeneralEntityDeclarationPToken({
+               open: start,
+               declType: SToken.fromString('ENTITY'),
+               declTypeSpace: SToken.fromString(' '),
+               name: SToken.fromString('foo'),
+               value: [ new text.PToken({ text: SToken.fromString('theValue') }) ],
+               close: SToken.fromString('>'),
+            }));
+
             done();
          });
       });

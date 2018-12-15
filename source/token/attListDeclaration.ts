@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import unassigned, { UnassignedArray } from './common/unassigned';
 
-import declaration, { DeclarationPToken } from './bridge/declaration';
+import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import literal, { LiteralValueXToken, LiteralValuePToken } from './common/literal';
 import { parseWordList, newWordListFromUndefined, WordListType, WordListPToken } from './common/wordList';
 import { AttributeValueXToken } from './common/attribute';
@@ -266,7 +266,7 @@ function assignUnassigned(attLiPToken: AttListPToken) {
             if (beforeLength !== unValues.length) {
                nextDef.enumeration = newEnum;
             }
-         }         
+         }
       }
 
       const remainingDescriptors = [
@@ -307,7 +307,7 @@ function adjustSpaces(attLiPToken: AttListPToken) {
    }
 
    if (prevDef.xtra) {
-      attLiPToken.postElementNameSpace = attLiPToken.postElementNameSpace ? 
+      attLiPToken.postElementNameSpace = attLiPToken.postElementNameSpace ?
          attLiPToken.postElementNameSpace.merge(prevDef.xtra) : prevDef.xtra;
       delete prevDef.xtra;
    }
@@ -336,7 +336,7 @@ function adjustSpaces(attLiPToken: AttListPToken) {
          }
 
          delete current.xtra;
-      }  
+      }
 
    }
 }
@@ -374,7 +374,7 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       const attName = strOrBlank(attDef.name);
 
       ec.setPos(attDef.name);
-      misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);         
+      misc.checkName(attDef.name, ec, entityMetaData, WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
       misc.checkWellFormedNameRecommendation(attDef.name, ec, entityMetaData, 'ATTRIBUTE',
          WARN.ATTRLISTDECL_ATTR_NAME_XMLCOLON_RESERVED,
          WARN.ATTRLISTDECL_ATTR_NAME_XML_RESERVED);

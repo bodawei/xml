@@ -12,6 +12,7 @@ import {
    CDATA_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
 } from '../../token';
 
 type Token = { type: string };
@@ -109,7 +110,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses an ENTITY', (done) => {
-      expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', 'ENTITYDECL', done);
+      expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', GENERAL_ENTITY_DECLARATION_PTOKEN, done);
    });
 
    it('parses an ELEMENT', (done) => {
@@ -144,7 +145,7 @@ describe('PTokenStream (integration)', () => {
          expect(results[3].type).toEqual('CHARDATA');
          expect(results[4].type).toEqual('ELEMENT_END');
          expect(results[5].type).toEqual('SPACE');
-         done();  
+         done();
       });
    });
 

@@ -4,7 +4,7 @@ import { EntityLocation, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import declaration from './bridge/declaration';
+import declaration from './bridge/baseDeclaration';
 import externalId, { ExternalId } from './common/externalId';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';

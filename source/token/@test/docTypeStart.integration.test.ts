@@ -9,7 +9,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import * as docTypeStart from '../docTypeStart';
 import text from '../text';
-import { DeclarationPToken } from '../bridge/declaration';
+import { DeclarationPToken } from '../bridge/baseDeclaration';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: docTypeStart.DocTypeStartPToken;

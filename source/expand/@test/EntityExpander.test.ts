@@ -12,13 +12,13 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
-   ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
 
    text,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
 } from "token";
-import { EntityDeclarationPToken, ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
+import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, ParameterEntityDeclarationPToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
 import { EntityExpander, ExpandToken } from "../EntityExpander";
 
@@ -103,7 +103,7 @@ describe('EntityExpander (unit)', () => {
 
       it('ignores the declaration if it has no name (whitebox)', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                value: [],
             }),
@@ -111,19 +111,19 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(1);
-            expect(results[0].type).toEqual(ENTITY_DECLARATION_PTOKEN);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             done();
          });
       });
 
       it('ignores a second declaration with the same name (whitebox)', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [],
@@ -132,15 +132,15 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(2);
-            expect(results[0].type).toEqual(ENTITY_DECLARATION_PTOKEN);
-            expect(results[1].type).toEqual(ENTITY_DECLARATION_PTOKEN);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             done();
          });
       });
 
       it('does not change the value if it contains no parameter entity references', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
@@ -166,7 +166,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
@@ -174,7 +174,7 @@ describe('EntityExpander (unit)', () => {
                   new text.PToken({ text: SToken.fromString('pe1') }),
                ],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
@@ -183,7 +183,7 @@ describe('EntityExpander (unit)', () => {
                   refToPe1
                ],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
@@ -230,7 +230,7 @@ describe('EntityExpander (unit)', () => {
          externalMap.publicFoo = 'external value %pe1;';
 
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
@@ -238,7 +238,7 @@ describe('EntityExpander (unit)', () => {
                   new text.PToken({ text: SToken.fromString('pe1') }),
                ],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
@@ -249,7 +249,7 @@ describe('EntityExpander (unit)', () => {
                },
                value: [],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
@@ -283,7 +283,7 @@ describe('EntityExpander (unit)', () => {
          });
 
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
@@ -291,7 +291,7 @@ describe('EntityExpander (unit)', () => {
                   new text.PToken({ text: SToken.fromString('pe1') }),
                ],
             }),
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
@@ -344,7 +344,7 @@ describe('EntityExpander (unit)', () => {
 
       it('does not replace the reference if that reference is an unparsed entity', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                nDataName: SToken.fromString('notation'),
@@ -365,7 +365,7 @@ describe('EntityExpander (unit)', () => {
       it('does not replace the reference if that reference is to an external entity and this is not validating', (done) => {
          externalMap.publicName = 'I will not be used';
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                externalId: {
@@ -389,7 +389,7 @@ describe('EntityExpander (unit)', () => {
 
       it('replaces an entity reference to an internal entity', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                value: [ new TextPToken({ text: SToken.fromString('test') }) ],
@@ -412,7 +412,7 @@ describe('EntityExpander (unit)', () => {
       it('replaces an entity reference to an external entity if validating', (done) => {
          externalMap.publicName = 'some value';
          const input = [
-            new EntityDeclarationPToken({
+            new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                externalId: {
@@ -472,7 +472,7 @@ describe('EntityExpander (unit)', () => {
 
      it('does not replace the reference if that reference is to an external entity and this is not validating', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('foo'),
@@ -493,7 +493,7 @@ describe('EntityExpander (unit)', () => {
 
       it('replaces the reference if it is an internal entity', (done) => {
          const input = [
-            new EntityDeclarationPToken({
+            new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('foo'),
@@ -516,7 +516,7 @@ describe('EntityExpander (unit)', () => {
       it('replaces the reference if it is an external entity and this is validating', (done) => {
          externalMap.publicName = '<!ENTITY bar "foo">';
          const input = [
-            new EntityDeclarationPToken({
+            new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('foo'),
@@ -536,7 +536,7 @@ describe('EntityExpander (unit)', () => {
             expect(results.length).toEqual(4);
 
             expect(results[1].type).toEqual(PARAMETER_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(ENTITY_DECLARATION_PTOKEN);
+            expect(results[2].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             expect(results[3].type).toEqual(PARAMETER_ENTITY_END_PTOKEN);
             done();
          });

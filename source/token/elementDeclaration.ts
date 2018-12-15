@@ -4,7 +4,7 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank } from 'sToken';
 
-import declaration, { DeclarationPToken } from './bridge/declaration';
+import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import nameList, { NameListPToken, XNameList, isXName } from './contentspec/nameList';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedValue } from './common/unassigned';

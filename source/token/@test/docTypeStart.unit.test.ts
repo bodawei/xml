@@ -8,7 +8,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from '../../error';
 
-import declaration from '../bridge/declaration';
+import declaration from '../bridge/baseDeclaration';
 import * as docTypeStart from '../docTypeStart';
 import externalId from '../common/externalId';
 import misc from '../common/misc';

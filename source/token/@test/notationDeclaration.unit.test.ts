@@ -8,7 +8,7 @@ import { SToken } from '../../sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 import { WellFormedError } from 'error';
 
-import declaration from '../bridge/declaration';
+import declaration from '../bridge/baseDeclaration';
 import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import externalId from '../common/externalId';
 import misc from '../common/misc';
@@ -149,7 +149,7 @@ describe('notationdeDlaration (unit)', () => {
 
          expect(callback.calls.argsFor(0)[0].unassigned).toEqual([ 7734 ]);
       });
-   
+
       it('sets up to let unassigned handle checking for a PE Reference', () => {
          const checkCallbackSpy = jasmine.createSpy();
          unassignedMakeCheckSpy.and.returnValue(checkCallbackSpy);
@@ -185,7 +185,7 @@ describe('notationdeDlaration (unit)', () => {
       it('deletes the unassigned property if it is empty', () => {
          notationPToken.unassigned = [];
          notationPToken.nextPropName = 'name';
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(notationPToken.unassigned).toBeUndefined();
@@ -196,7 +196,7 @@ describe('notationdeDlaration (unit)', () => {
          notationPToken.unassigned = [ {
             type: 'reference',
          } ];
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
@@ -207,7 +207,7 @@ describe('notationdeDlaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
@@ -233,7 +233,7 @@ describe('notationdeDlaration (unit)', () => {
             expect(container).toEqual(notationPToken);
             testName = propName;
          });
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(testName).toEqual('postNameSpace');
@@ -261,12 +261,12 @@ describe('notationdeDlaration (unit)', () => {
 
          expect(testName).toEqual('postNameSpace');
       });
-      
+
       it('adds an "extra" property if the unassigned values are not consumed', () => {
          notationPToken = new notationDeclaration.PToken({
             unassigned: [ 'foo' ],
          });
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(notationPToken.extra).toEqual([ 'foo' ]);
@@ -281,7 +281,7 @@ describe('notationdeDlaration (unit)', () => {
                nextPropName: 'idType',
             },
          });
-         
+
          notationDeclaration.assignUnassigned(notationPToken);
 
          expect(notationPToken).toEqual(new notationDeclaration.PToken({

@@ -12,7 +12,6 @@ import {
    docTypeStart,
    docTypeEnd,
    elementDeclaration,
-   entityDeclaration,
    elementEnd,
    elementStart,
    notationDeclaration,
@@ -24,6 +23,7 @@ import {
    XmlDeclarationXToken,
    GeneralEntityReferenceXToken,
    ParameterEntityReferenceXToken,
+   GeneralEntityDeclarationXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -148,7 +148,7 @@ describe('PToXTokenStream (integration)', () => {
       pToken.text = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
 
       expectInputToProduce('<!ENTITY entityName "value">', [
-         new entityDeclaration.XToken('entityName', [ pToken ], undefined, ''),
+         new GeneralEntityDeclarationXToken('entityName', [ pToken ], undefined, ''),
       ], done);
    });
 

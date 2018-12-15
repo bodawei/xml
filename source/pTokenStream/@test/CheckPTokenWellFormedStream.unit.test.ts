@@ -31,6 +31,7 @@ import {
 } from '../../token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN } from 'source/token/entityDeclaration';
 
 type Token = { type: string, [other: string]: any };
 type TokenArray = Array<Token>;
@@ -588,7 +589,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          };
          checker.write(metaData);
          checker.write(pToken);
-   
+
          const args = cwfSpy.calls.argsFor(0);
          expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
@@ -617,7 +618,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    it('calls entityDeclaration.checkWellFormed() when encountering an ENTITY declaation parsing', () => {
       const cwfSpy = spyOn(entityDeclaration, 'checkWellFormed');
       const pToken = {
-         type: entityDeclaration.PTYPE,
+         type: GENERAL_ENTITY_DECLARATION_PTOKEN,
          open: makeSToken('<'),
       };
       checker.write(metaData);

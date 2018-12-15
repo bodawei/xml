@@ -11,7 +11,7 @@ import * as tokenNs from '../../token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
-import { EntityDeclaration } from '../../token/entityDeclaration'; // hack
+import { GeneralEntityDeclarationXToken } from '../../token/entityDeclaration'; // hack
 import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
    GeneralEntityEndXToken,
@@ -76,7 +76,7 @@ describe('NodeStream (integration)', () => {
             XmlDeclarationXToken,
             tokenNs.docTypeStart.XToken,
             InternalSubsetStartXToken,
-            tokenNs.entityDeclaration.XToken,
+            tokenNs.GeneralEntityDeclarationXToken,
             InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
@@ -109,9 +109,9 @@ describe('NodeStream (integration)', () => {
             XmlDeclarationXToken,
             tokenNs.docTypeStart.XToken,
                InternalSubsetStartXToken,
-               tokenNs.entityDeclaration.ParamXToken,
+               tokenNs.ParameterEntityDeclarationXToken,
                ParameterEntityStartXToken,
-                  tokenNs.entityDeclaration.XToken,
+                  tokenNs.GeneralEntityDeclarationXToken,
                ParameterEntityEndXToken,
                InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
@@ -241,7 +241,7 @@ describe('NodeStream (integration)', () => {
       it('expands an parameter entity values in an EntityValue', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one ' +
             '[<!ENTITY % peOne "two"><!ENTITY child "one%peOne;">]>', (results) => {
-            const valueArray: any = (results[5] as EntityDeclaration).value; // typeHack
+            const valueArray: any = (results[5] as GeneralEntityDeclarationXToken).value; // typeHack
 
             expect((valueArray[0] as any).text.str).toEqual('one');
             expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
@@ -250,14 +250,14 @@ describe('NodeStream (integration)', () => {
             done();
          });
       });
-  
+
       it('expands an parameter entity inside a parameter entity inside the EntityValue', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
             '<!ENTITY % peTwo "inner">' +
             '<!ENTITY % peOne "(%peTwo;)">' +
             '<!ENTITY child "[%peOne;]">' +
          ']>', (results) => {
-            const valueArray: any = (results[6] as EntityDeclaration).value; // typeHack
+            const valueArray: any = (results[6] as GeneralEntityDeclarationXToken).value; // typeHack
 
             expect((valueArray as any)[0].text.str).toEqual('[');
             expect(valueArray[1]).toEqual(new ParameterEntityStartPToken((valueArray[1] as any).referencePToken));
@@ -271,7 +271,7 @@ describe('NodeStream (integration)', () => {
             done();
          });
       });
-  
+
       it('expands a parameter entity that makes up the entity declaration body', (done) => {
          expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
             '<!ENTITY % peTwo "inner">' +
@@ -279,7 +279,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % body \'child "[%peOne;]"\'>' +
             '<!ENTITY %body;>' +
          ']>', (results) => {
-            const entityDecl = results[7] as EntityDeclaration; // typeHack
+            const entityDecl = results[7] as GeneralEntityDeclarationXToken; // typeHack
             const values: any = entityDecl.value;
 
             expect(entityDecl.name).toEqual('child');
@@ -287,7 +287,7 @@ describe('NodeStream (integration)', () => {
             done();
          });
       });
-  
+
    });
 
    describe('NOTATION declaration processing', () => {

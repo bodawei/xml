@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-import declaration from './bridge/declaration';
+import declaration from './bridge/baseDeclaration';
 
 import attListDeclaration from './attListDeclaration';
 import * as charData from './charData';
@@ -19,8 +19,11 @@ import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 
 import * as entityDeclaration from './entityDeclaration';
+export * from './entityDeclaration';
+
 export * from './processingInstruction';
 
+export * from './bridge/declaration';
 export * from './bridge/instruction';
 export * from './bridge/section';
 
@@ -43,8 +46,6 @@ type PToken = {
    type: string;
 };
 
-const ENTITY_DECLARATION_PTOKEN = entityDeclaration.PTYPE;
-
 const token = {
    declaration,
 
@@ -58,7 +59,6 @@ const token = {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   ENTITY_DECLARATION_PTOKEN,
    notationDeclaration,
    space,
    text,
@@ -81,7 +81,6 @@ export {
    elementEnd,
    elementDeclaration,
    entityDeclaration,
-   ENTITY_DECLARATION_PTOKEN,
    notationDeclaration,
    space,
    text,

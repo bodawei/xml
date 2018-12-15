@@ -4,7 +4,7 @@ import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank } from 'sToken';
 
 import externalId from './common/externalId';
-import declaration, { DeclarationPToken } from './bridge/declaration';
+import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import misc from './common/misc';
 import base from './base';
 import { EntityLocation, EntityMetaData } from 'basic';

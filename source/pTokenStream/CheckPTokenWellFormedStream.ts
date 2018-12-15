@@ -33,6 +33,7 @@ import {
    ParameterEntityReferencePToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'source/token/entityDeclaration';
 
 enum CheckWellFormedState {
    START = 'START',
@@ -210,7 +211,8 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             elementDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
-         case entityDeclaration.PTYPE:
+            case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }

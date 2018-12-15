@@ -42,7 +42,7 @@ import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager';
-import { EntityDeclaration } from 'source/token/entityDeclaration';
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from 'source/token/entityDeclaration';
 
 type XToken = {
    type: string,
@@ -111,7 +111,7 @@ type IDMap = {
 type AttributeMap = { [name: string] : AttributeXToken };
 
 type EntityInfo = {
-   token: EntityDeclaration;
+   token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken;
    externallyDeclared: boolean; // §2.9
 }
 
@@ -521,7 +521,7 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (xToken instanceof attListDeclaration.XToken) {
          this.validateAttListDecl(xToken);
-      } else if (xToken instanceof EntityDeclaration) {
+      } else if (xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) {
          this.entityInfo[xToken.name] = {
             token: xToken,
             externallyDeclared: this.externalDeclarations,

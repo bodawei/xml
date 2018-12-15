@@ -1,160 +1,75 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from 'basic';
-import { WellFormedError } from 'error';
-import { MockErrorCollector } from '../../../error/@test/helper';
+import { EntityMetaData, EntityKind, EntityLocation, Range } from 'basic';
+import { WellFormedError, XmlWarning } from 'error';
+import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import declaration, { DeclarationPToken } from '../declaration';
+import * as token from '../../index';
+import { parseDeclaration, DeclarationStart } from '../declaration';
 
 describe('declaration (unit)', () => {
-   let declarationPToken: DeclarationPToken;
-   let emd: EntityMetaData;
+   let open: SToken;
 
    beforeEach(() => {
-      emd = new EntityMetaData();
-      const makeSToken = makeSTokenMaker();
-      declarationPToken = {
-         type: declaration.PTYPE,
-         open: makeSToken('<!'),
-         postOpenSpace: makeSToken(' '),
-         declType: makeSToken('DOCTYPE'),
-         postDeclTypeSpace: makeSToken(' '),
-      } as any;
+      open = SToken.fromString('<?');
    });
 
-   describe('PToken', () => {
-
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            const pToken = new declaration.PToken(undefined, declarationPToken);
-
-            expect(pToken.getSTokenArray()).toEqual([
-               pToken.open,
-               pToken.postOpenSpace,
-               pToken.declType,
-               pToken.postDeclTypeSpace,
-            ] as Array<SToken>);
-         });
-
-      });
-
-   });
-
-   describe('parse()', () => {
-      let mockSource: MockSTokenSource;
+   describe('parseDeclaration()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
       });
 
-      it('does an ordinary full parsing', () => {
-         mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ 'DOCTYPE', 'word', [ '>' ] ],
-            [ ' ', 'space' ],
-         ], 2, 0, 2);
+      describe('ENTITY', () => {
 
-         declaration.parse(mockSource, declarationPToken.open, callback);
-         mockSource.respondInAsyncTime();
+         it('seeks to parse an entity when the decl type is ENTITY', () => {
+            const parse = spyOn(token, 'parseEntityDeclaration');
+            const mockSource = new MockSTokenSource([
+               [ undefined, 'space' ],
+               [ 'ENTITY', 'word', [ '>' ] ],
+               [ ' ', 'space' ],
+            ]);
 
-         expect(callback).toContainPTokenProps(declarationPToken);
-      });
+            parseDeclaration(mockSource, open, new EntityMetaData(), callback);
+            mockSource.respondInAsyncTime();
 
-      it('copes with EOF', () => {
-         mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-         ]);
-         declarationPToken.postOpenSpace = undefined;
-         declarationPToken.declType = undefined;
-         declarationPToken.postDeclTypeSpace = undefined;
-
-         declaration.parse(mockSource, declarationPToken.open, callback);
-         mockSource.respondInAsyncTime();
-
-         expect(callback).toContainPTokenProps(declarationPToken);
-      });
-
-   });
-
-   describe('checkWellFormed()', () => {
-      let mockErrorCollector: MockErrorCollector;
-
-      beforeEach(() => {
-         mockErrorCollector = new MockErrorCollector();
-         delete declarationPToken.postOpenSpace;
-      });
-
-      it('returns an an error collector', () => {
-         const errors = declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
-
-         expect(errors).toEqual(mockErrorCollector);
-      });
-
-      it('reports an error if there is a space after the opening <!', () => {
-         const makeSToken = makeSTokenMaker();
-         declarationPToken.postOpenSpace = makeSToken(' ');
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER,
-            params: undefined,
-            position: declarationPToken.postOpenSpace,
+            const args = parse.calls.argsFor(0);
+            expect(args[0]).toEqual(mockSource);
+            expect(args[1]).toEqualRangeless({
+               open,
+               openSpace: undefined,
+               declType: SToken.fromString('ENTITY'),
+               declTypeSpace: SToken.fromString(' '),
+            });
+            expect(args[2]).toBeInstanceOf(Function);
          });
-      });
 
-      it('reports an error if there is no declaration type provided', () => {
-         delete declarationPToken.declType;
+         it('seeks to parse an entity when the decl type is Entity (wrong case)', () => {
+            const parse = spyOn(token, 'parseEntityDeclaration');
+            const mockSource = new MockSTokenSource([
+               [ ' ', 'space' ],
+               [ 'eNtiTy', 'word', [ '>' ] ],
+               [ ' ', 'space' ],
+            ]);
 
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
+            parseDeclaration(mockSource, open, new EntityMetaData(), callback);
+            mockSource.respondInAsyncTime();
 
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.DECL_NO_DECLTYPE,
-            params: undefined,
-            position: undefined,
-            lastPosition: declarationPToken.open,
+            const args = parse.calls.argsFor(0);
+            expect(args[0]).toEqual(mockSource);
+            expect(args[1]).toEqualRangeless({
+               open,
+               openSpace: SToken.fromString(' '),
+               declType: SToken.fromString('eNtiTy'),
+               declTypeSpace: SToken.fromString(' '),
+            });
+            expect(args[2]).toBeInstanceOf(Function);
          });
-      });
 
-      it('reports an error if the type is not capitalized', () => {
-         (declarationPToken as any).declType.str = 'docType';
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.DECL_DECLTYPE_INVALID_CASE,
-            params: [ 'DOCTYPE', 'docType' ],
-            position: declarationPToken.declType,
-         });
-      });
-
-      it('reports an error if the type is not a valid type', () => {
-         (declarationPToken as any).declType.str = 'BOGUSTYPE';
-
-         declaration.checkWellFormed(declarationPToken, mockErrorCollector, emd);
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.DECL_UNKNOWN,
-            params: [ 'BOGUSTYPE' ],
-            position: declarationPToken.declType,
-         });
-      });
-
-   });
-
-   describe('pTokenToXToken()', () => {
-
-      it('returns a token with the tokens found in the PToken', () => {
-         const token = declaration.pTokenToXToken(declarationPToken);
-
-         expect(token).toEqual(new declaration.XToken(declarationPToken));
       });
 
    });

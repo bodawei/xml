@@ -9,7 +9,7 @@ import { makeSTokenMaker } from '../../sToken/@test/helper';
 
 import helper from '../@test/helper';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
-import declaration from '../bridge/declaration';
+import declaration from '../bridge/baseDeclaration';
 import { WordListPToken, WordListType } from '../common/wordList';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';

@@ -7,7 +7,7 @@ import {
    entityDeclaration,
    text,
 } from '../token';
-import { EntityDeclaration } from '../token/entityDeclaration';
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from '../token/entityDeclaration';
 
 type EntityMap = {
    [name: string]: any,
@@ -29,15 +29,15 @@ class EntityManager {
    constructor() {
       this._entityMap = {};
 
-      const ltEntity = new entityDeclaration.XToken('lt',
+      const ltEntity = new GeneralEntityDeclarationXToken('lt',
          [ new text.PToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined);
-      const gtEntity = new entityDeclaration.XToken('gt',
+      const gtEntity = new GeneralEntityDeclarationXToken('gt',
          [ new text.PToken({ text: SToken.fromString('>') }) ], undefined, undefined);
-      const ampEntity = new entityDeclaration.XToken('amp',
+      const ampEntity = new GeneralEntityDeclarationXToken('amp',
          [ new text.PToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined);
-      const aposEntity = new entityDeclaration.XToken('apos',
+      const aposEntity = new GeneralEntityDeclarationXToken('apos',
          [ new text.PToken({ text: SToken.fromString('\'') }) ], undefined, undefined);
-      const quotEntity = new entityDeclaration.XToken('quot',
+      const quotEntity = new GeneralEntityDeclarationXToken('quot',
          [ new text.PToken({ text: SToken.fromString('"') }) ], undefined, undefined);
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
@@ -47,19 +47,19 @@ class EntityManager {
       this._internalAdd(quotEntity, DEFAULT_ENTITY, false);
    }
 
-   addEntityFromInternalSubset(entityDeclarationToken: EntityDeclaration) {
+   addEntityFromInternalSubset(entityDeclarationToken: GeneralEntityDeclarationXToken) {
       this._internalAdd(entityDeclarationToken, INTERNAL_SUBSET, false);
    }
 
-   addEntityFromExternalSubset(entityDeclarationToken: EntityDeclaration) {
+   addEntityFromExternalSubset(entityDeclarationToken: GeneralEntityDeclarationXToken) {
       this._internalAdd(entityDeclarationToken, EXTERNAL_SUBSET, false);
    }
 
-   addParameterEntityFromInternalSubset(entityDeclarationToken: EntityDeclaration) {
+   addParameterEntityFromInternalSubset(entityDeclarationToken: ParameterEntityDeclarationXToken) {
       this._internalAdd(entityDeclarationToken, INTERNAL_SUBSET, true);
    }
 
-   addParameterEntityFromExternalSubset(entityDeclarationToken: EntityDeclaration) {
+   addParameterEntityFromExternalSubset(entityDeclarationToken: ParameterEntityDeclarationXToken) {
       this._internalAdd(entityDeclarationToken, EXTERNAL_SUBSET, true);
    }
 
@@ -121,7 +121,7 @@ class EntityManager {
     information
    \**********************************************************************/
 
-   _internalAdd(token: EntityDeclaration, source: string, isParameter: boolean) {
+   _internalAdd(token: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken, source: string, isParameter: boolean) {
       if (!this._entityMap[token.name]) {
          this._entityMap[token.name] = new EntityEntry();
       }
@@ -198,8 +198,8 @@ class EntityManager {
 \**********************************************************************/
 
 class EntityEntry {
-   private _general: { [subset: string]: Array<EntityDeclaration> };
-   private _parameter: { [subset: string]: Array<EntityDeclaration> };
+   private _general: { [subset: string]: Array<GeneralEntityDeclarationXToken> };
+   private _parameter: { [subset: string]: Array<GeneralEntityDeclarationXToken> };
 
    constructor() {
       // These will be populated with INTERNAL, EXTERNAL or DEFAULT arrays as they are needed.
@@ -222,7 +222,7 @@ class EntityEntry {
       return collection ? collection[0] : undefined;
    }
 
-   addEntity(token: EntityDeclaration, isParameter: string, source: string) {
+   addEntity(token: GeneralEntityDeclarationXToken, isParameter: string, source: string) {
       const map = isParameter ? this._parameter : this._general;
 
       if (!map[source]) {

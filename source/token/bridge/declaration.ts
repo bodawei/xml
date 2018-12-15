@@ -1,63 +1,34 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-import { strOrBlank, SToken, STokenSource } from '../../sToken';
-import base, { STokenArray } from '../base';
+import { EntityMetaData, Token } from 'basic';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
+import {
+   docTypeStart,
+   docTypeEnd,
+   attListDeclaration,
+   elementDeclaration,
+   parseEntityDeclaration,
+   notationDeclaration,
 
-/**********************************************************************\
- The declaration namespace contains a "bridge" parser which will
- start parsing a declaration (<!) far enough to determine what kind
- of declaration this is, and then hands it off to the appropriate
- other parsers.
-\**********************************************************************/
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+} from 'token';
+import { DocTypeEndPToken } from '../docTypeEnd';
+import { DocTypeStartPToken } from '../docTypeStart';
+import { DeclarationPToken } from './baseDeclaration';
 
-const UNKNOWNDECL = 'UNKNOWNDECL';
-const UNKNOWNDECL_XTOKEN = 'UNKNOWNDECL_XTOKEN';
-const WFEID = WellFormedError.ID;
+type DeclarationStart = {
+   open: SToken,
+   openSpace?: SToken,
+   declType?: SToken,
+   declTypeSpace?: SToken,
+};
 
-class UnknownDeclaration {
-   public readonly type = UNKNOWNDECL_XTOKEN;
-   public pToken?: DeclarationPToken;
-
-   constructor(pToken?: DeclarationPToken) {
-      this.pToken = pToken;
-   }
-}
-
-class DeclarationPToken extends base.PToken {
-   public open: SToken;
-   public postOpenSpace?: SToken;
-   public declType?: SToken;
-   public postDeclTypeSpace?: SToken;
-   
-   constructor(type?: string, props?: any) {
-      super(type || UNKNOWNDECL, props);
-
-      if (props && 'open' in props) {
-         this.open = props.open;
-      } else {
-         this.open = SToken.fromString('');
-      }
-   }
-
-   getSTokenArray(): STokenArray {
-      const results: STokenArray = super.getSTokenArray();
-
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.declType,
-         this.postDeclTypeSpace);
-
-      return results;
-   }
-}
+type DeliverDeclaration = (declaration: DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken) => void;
 
 /**********************************************************************\
- parse() starts extracting a declaration (<!NAME...) and then hands
- off to a parser for 'NAME'.  If there is no handler for this name,
- then this will produce a parsing for a UNKNOWNDECL, which can be
- tokenized into a generally useless token.
+ parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
+ DOCTYPE declaration, given a '<!' token.
 
  PARAM
  source: A STokenSource to read from
@@ -65,66 +36,73 @@ class DeclarationPToken extends base.PToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   declaration ::= '<!' name S
+   §2.6 & §2.8
+      ????
+   Lax
+      ???
 \**********************************************************************/
 
-function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: DeclarationPToken) => void) {
-   const results = new DeclarationPToken();
-   results.open = openSToken;
+function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityMetaData, deliverPToken: DeliverDeclaration) {
+   const start: DeclarationStart = { open: openSToken };
+   start.open = openSToken;
 
-   source.extractToObjectNoParams('space', results, 'postOpenSpace');
-   source.extractToObject('word', [ '>' ], results, 'declType');
+   source.extractToObjectNoParams('space', start, 'openSpace');
+   source.extractToObject('word', [ '>' ], start, 'declType');
 
    source.extractNoParams('space', (sToken) => {
-      results.postDeclTypeSpace = sToken;
+      start.declTypeSpace = sToken;
 
-      deliverPToken(results);
+      switch (strOrBlank(start.declType).toUpperCase()) {
+         case 'ENTITY':
+            parseEntityDeclaration(source, start, deliverPToken);
+            return;
+      }
+
+
+      // Legacy support
+      const newResult = new DeclarationPToken(undefined, {
+         open: start.open,
+         postOpenSpace: start.openSpace,
+         declType: start.declType,
+         postDeclTypeSpace: start.declTypeSpace,
+      });
+
+      if (!newResult.declType) {
+         deliverPToken(newResult);
+         return;
+      }
+
+      switch (newResult.declType.str.toLocaleUpperCase()) {
+         case 'DOCTYPE':
+            docTypeStart.parse(source, newResult, (docTypeStart: DocTypeStartPToken) => {
+               if (docTypeStart.startInternalSubset) {
+                  deliverPToken(docTypeStart);
+               } else {
+                  docTypeEnd.parse(source, (endToken: DocTypeEndPToken) => {
+                     deliverPToken([ docTypeStart, endToken ]);
+                  });
+               }
+            });
+            break;
+         case 'ATTLIST':
+            attListDeclaration.parse(source, newResult, deliverPToken);
+            break;
+         case 'ELEMENT':
+            elementDeclaration.parse(source, newResult, deliverPToken);
+            break;
+         case 'NOTATION':
+            notationDeclaration.parse(source, newResult, deliverPToken);
+            break;
+         default:
+            deliverPToken(newResult);
+            break;
+      }
    });
+
 }
 
-/**********************************************************************\
- checkWellFormed() does check on validity
-\**********************************************************************/
+export {
+   DeclarationStart,
 
-function checkWellFormed(pToken: DeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   ec.setPos(pToken.open);
-
-
-   ec.setPos(pToken.postOpenSpace);
-   ec.check(pToken.postOpenSpace, WFEID.DECL_OPEN_XTRA_SPACE_AFTER);
-
-   ec.setPos(pToken.declType);
-
-   if (pToken.declType) {
-      const upperCase = pToken.declType.str.toLocaleUpperCase();
-      ec.check(pToken.declType.str !== upperCase,
-         WFEID.DECL_DECLTYPE_INVALID_CASE, [ upperCase, pToken.declType.str ]);
-   } else {
-      ec.report(WFEID.DECL_NO_DECLTYPE);
-   }
-
-   ec.check(pToken.declType && pToken.type === UNKNOWNDECL, WFEID.DECL_UNKNOWN, [ strOrBlank(pToken.declType) ]);
-
-   return ec;
-}
-
-/**********************************************************************\
- pTokenToXToken() converts a PToken into an XToken.
-\**********************************************************************/
-
-function pTokenToXToken(pToken: DeclarationPToken): UnknownDeclaration {
-   return new UnknownDeclaration(pToken);
-}
-
-const declaration = {
-   PTYPE: UNKNOWNDECL,
-   XTYPE: UNKNOWNDECL_XTOKEN,
-   XToken: UnknownDeclaration,
-   PToken: DeclarationPToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+   parseDeclaration,
 };
-
-export default declaration;
-export { DeclarationPToken };

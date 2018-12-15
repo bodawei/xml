@@ -40,7 +40,7 @@ import { ElementDeclaration } from '../../token/elementDeclaration';
 import { NotationDeclaration } from '../../token/notationDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-import { EntityDeclaration, ParameterEntityDeclaration } from 'source/token/entityDeclaration';
+import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from 'source/token/entityDeclaration';
 import { TextXToken } from 'source/token/text';
 
 function toHaveError(util: any) {
@@ -198,7 +198,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          expect(validator.read()).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ]));
          expect(validator.read()).toEqual(nTwo as any); // typeHack
       });
-   
+
    });
 
    describe('write()', () => {
@@ -283,7 +283,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ 'one', 'notPresent' ]);
             expectStream(validator, expected, done);
          });
-   
+
          it('reports a warning if an empty element tag is used for an element not declared to be empty', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'ANY', undefined);
             const emptyTag = new elementStart.EmptyToken('one', []);
@@ -874,13 +874,13 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
                spyOn(util, 'isName');
-   
+
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                gatherTokens(validator, () => {
                   expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
@@ -892,7 +892,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -903,12 +903,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('$badName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NOT_NAME,
                   [ '$badName', 'testEl', 'idRefAttr' ]);
                expectStream(validator, expected, done);
@@ -927,12 +927,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('goodName $badName         $anotherBadName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREFS_NOT_NAME,
                   [ '$badName, $anotherBadName', 'elName', 'idRefsAttr' ]);
                expectStream(validator, expected, done);
@@ -956,7 +956,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('goodName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(secondStartToken);
@@ -964,7 +964,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endElName);
                validator.write(endElName);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -986,7 +986,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('goodName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
@@ -994,7 +994,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endElName);
                validator.write(endElName);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -1016,13 +1016,13 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('first')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(secondStartToken);
                validator.write(endElName);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
                   [ 'first', 'testEl', 'idRefAttr' ]);
                expectStream(validator, expected, done);
@@ -1049,19 +1049,19 @@ describe('CheckXTokenValidStream (unit)', () => {
                }], new ElementStartPToken({
                   open: openSToken,
                }));
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(secondStartToken);
                validator.write(startToken);
                validator.write(endElName);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_IDREF_NO_ID,
                   [ 'second', 'testEl', 'idRefsAttr' ], openSToken, openSToken);
                expectStream(validator, expected, done);
             });
-  
+
          });
 
          describe('ENTITY attribute', () => {
@@ -1071,7 +1071,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             beforeEach(() => {
                fakeEntityManager.getEntityToken = () => {
-                  return new entityDeclaration.XToken('goodName', [], undefined, 'notation');
+                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, 'notation');
                };
 
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
@@ -1094,11 +1094,11 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
-            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {   
+            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
                spyOn(util, 'isName');
 
                validator.write(new EntityMetaData(undefined, 1.1, 2));
@@ -1106,7 +1106,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                gatherTokens(validator, () => {
                   expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
@@ -1120,12 +1120,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('$badName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NOT_NAME,
                   [ '$badName', 'testElement', 'entityAttr' ]);
                expectStream(validator, expected, done);
@@ -1144,12 +1144,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('goodName $badName      $anotherBadName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NOT_NAME,
                   [ '$badName, $anotherBadName', 'testElement', 'entitiesAttr' ]);
                expectStream(validator, expected, done);
@@ -1162,7 +1162,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_NO_ENTITY,
                   [ 'goodName', 'testElement', 'entityAttr' ]);
                expectStream(validator, expected, done);
@@ -1170,14 +1170,14 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an ENTITY value names a parsed entity', (done) => {
                fakeEntityManager.getEntityToken = () => {
-                  return new entityDeclaration.XToken('goodName', [], undefined, undefined);
+                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, undefined);
                };
 
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITY_PARSED_ENTITY,
                   [ 'goodName', 'testElement', 'entityAttr' ]);
                expectStream(validator, expected, done);
@@ -1202,7 +1202,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_NO_ENTITY,
                   [ 'one, two, three', 'testElement', 'entitiesAttr' ]);
                expectStream(validator, expected, done);
@@ -1210,7 +1210,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if an ENTITIES value names a parsed entity', (done) => {
                fakeEntityManager.getEntityToken = () => {
-                  return new entityDeclaration.XToken('goodName', [], undefined, undefined);
+                  return new GeneralEntityDeclarationXToken('goodName', [], undefined, undefined);
                };
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'entitiesAttr',
@@ -1229,12 +1229,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENTITIES_PARSED_ENTITY,
                   [ 'one, two, three', 'testElement', 'entitiesAttr' ]);
                expectStream(validator, expected, done);
             });
-   
+
          });
 
          describe('NMTOKEN attribute', () => {
@@ -1260,13 +1260,13 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
                spyOn(util, 'isNmToken');
-   
+
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                gatherTokens(validator, () => {
                   expect(util.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
@@ -1278,7 +1278,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -1289,12 +1289,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('$badName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKEN_NOT_NMTOKEN,
                   [ '$badName', 'testElement', 'nmTokenAttr' ]);
                expectStream(validator, expected, done);
@@ -1313,17 +1313,17 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('goodName $badName         $anotherBadName')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NMTOKENS_NOT_NMTOKEN,
                   [ '$badName, $anotherBadName', 'testElement', 'nmTokenAttr' ]);
                expectStream(validator, expected, done);
             });
-   
+
          });
 
          describe('NOTATION attribute', () => {
@@ -1359,7 +1359,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -1372,7 +1372,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
                   [ 'first', 'testElement',  'notationAttr', '' ]);
                expectStream(validator, expected, done);
@@ -1385,14 +1385,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('third')
                   ]
                }]);
-   
+
                validator.write(n1);
                validator.write(n2);
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_NOTATION_NOT_DECLARED,
                   [ 'third', 'testElement', 'notationAttr', 'first, second' ]);
                expectStream(validator, expected, done);
@@ -1427,7 +1427,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -1438,7 +1438,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
                   [ 'first', 'testElement',  'enumerationAttr', '' ]);
                expectStream(validator, expected, done);
@@ -1451,12 +1451,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('third')
                   ]
                }]);
-   
+
                validator.write(elDecl);
                validator.write(attListDecl);
                validator.write(startToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_ENUMERATION_NOT_DECLARED,
                   [ 'third', 'testElement', 'enumerationAttr', 'first, second' ]);
                expectStream(validator, expected, done);
@@ -1528,7 +1528,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             const aTwo = new attListDeclaration.XToken('one', [], new AttListPToken({
                open: openSToken,
             }));
-   
+
             validator.write(aOne);
             validator.write(aTwo);
             validator.end();
@@ -1540,7 +1540,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('does not blow up if the ATTLIST has no pToken', (done) => {
             const aOne = new attListDeclaration.XToken('one', []);
             const aTwo = new attListDeclaration.XToken('one', []);
-   
+
             validator.write(aOne);
             validator.write(aTwo);
             validator.end();
@@ -2564,7 +2564,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const expected = new WellFormedError(WellFormedError.ID.ELEMENTDECL_CONTENT_MODEL_NONDETERMINISTC,
                   [ 'b (/1/1,/2/1)' ], undefined);
-         
+
                validator.write(elDeclA);
                validator.write(elDeclB);
                validator.write(elDeclC);
@@ -2655,11 +2655,11 @@ describe('CheckXTokenValidStream (unit)', () => {
                   repeat: 'ONE',
                   listType: 'CHOICE'
                });
-   
+
                validator.write(elementDecl1);
                validator.write(elementDecl2);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
          });
@@ -2693,7 +2693,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('reports an error if the referenced entity is externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
@@ -2707,7 +2707,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('reports no error if the referenced entity is internally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new InternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
@@ -2720,16 +2720,16 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
-            validator.write(new EntityDeclaration('extDeclEntity1', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
             validator.write(new ParameterEntityStartXToken('someEntity2'));
             validator.write(new ParameterEntityStartXToken('someEntity3'));
             validator.write(new GeneralEntityStartXToken('someEntity4'));
-            validator.write(new EntityDeclaration('extDeclEntity2', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
             validator.write(new GeneralEntityEndXToken('someEntity4'));
             validator.write(new ParameterEntityEndXToken('someEntity3'));
             validator.write(new ParameterEntityEndXToken('someEntity2'));
-            validator.write(new EntityDeclaration('intDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new InternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', []));
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
@@ -2742,12 +2742,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
-            validator.write(new EntityDeclaration('extDeclEntity1', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
             validator.write(new ParameterEntityStartXToken('someEntity2'));
             validator.write(new ParameterEntityStartXToken('someEntity3'));
             validator.write(new GeneralEntityStartXToken('someEntity4'));
-            validator.write(new EntityDeclaration('extDeclEntity2', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
             validator.write(new GeneralEntityEndXToken('someEntity4'));
             validator.write(new ParameterEntityEndXToken('someEntity3'));
             validator.write(new ParameterEntityEndXToken('someEntity2'));
@@ -2767,7 +2767,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if in an attribute and is externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
@@ -2783,7 +2783,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is not reported as an error if in an attribute and is externally declared and standlone=no (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, false));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
@@ -2797,8 +2797,8 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if multiple in an attribute and all are externally declared and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity1', []));
-            validator.write(new EntityDeclaration('extDeclEntity2', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
@@ -2821,8 +2821,8 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if it is top-level externally  embedded in another and standlone=yes (§2.9)', (done) => {
             validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity1', []));
-            validator.write(new EntityDeclaration('extDeclEntity2', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
@@ -2843,9 +2843,9 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if it is top-level externally declared and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extParamEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extParamEntity', []));
             validator.write(new ExternalSubsetEndXToken());
-            validator.write(new EntityDeclaration('intGenEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('intGenEntity', []));
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
                value: [
@@ -2865,10 +2865,10 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error it is an embedded externally declared and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity1', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity1', []));
             validator.write(new InternalSubsetEndXToken());
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity2', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity2', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'testElAttr',
@@ -2896,7 +2896,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                defaultType: '#REQUIRED',
             }]));
             validator.write(new ExternalSubsetStartXToken());
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementStart('testEl', [{
                name: 'entityAttr',
@@ -2915,7 +2915,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
@@ -2939,9 +2939,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ParameterEntityStartXToken('someEntity'));
-            validator.write(new ParameterEntityDeclaration('extDeclParamEntity', []));
+            validator.write(new ParameterEntityDeclarationXToken('extDeclParamEntity', []));
             validator.write(new ParameterEntityEndXToken('someEntity'));
-            validator.write(new EntityDeclaration('intDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
                name: 'cdataAttr',
@@ -2965,9 +2965,9 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if parameter entity externally declared and referenced from attr and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
-            validator.write(new ParameterEntityDeclaration('extDeclParamEntity', []));
+            validator.write(new ParameterEntityDeclarationXToken('extDeclParamEntity', []));
             validator.write(new ExternalSubsetEndXToken());
-            validator.write(new EntityDeclaration('intDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new ElementStart('testEl', []));
             validator.write(new GeneralEntityStartXToken('intDeclEntity'));
@@ -2984,7 +2984,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if externally declared and used as an ENTITY attribute default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
@@ -3005,7 +3005,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if externally declared and used as an ENTITIES attribute default and standlone=yes (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
-            validator.write(new EntityDeclaration('extDeclEntity', []));
+            validator.write(new GeneralEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new ElementDeclaration('testEl', 'ANY'));
             validator.write(new attListDeclaration.XToken('testEl', [{
@@ -3026,7 +3026,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is reported as an error if it is a parameter entity reference to an external declaration (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new ExternalSubsetStartXToken()); // Really should be an expanded PERef
-            validator.write(new ParameterEntityDeclaration('extDeclEntity', []));
+            validator.write(new ParameterEntityDeclarationXToken('extDeclEntity', []));
             validator.write(new ExternalSubsetEndXToken());
             validator.write(new InternalSubsetStartXToken());
             validator.write(new ParameterEntityStartXToken('extDeclEntity'));
@@ -3042,7 +3042,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          it('is not reported as an error if it is a parameter entity reference to an external declaration (§2.9)', (done) => {
                validator.write(new XmlDeclarationXToken(1.0, undefined, true));
             validator.write(new InternalSubsetStartXToken());
-            validator.write(new ParameterEntityDeclaration('intDeclEntity', []));
+            validator.write(new ParameterEntityDeclarationXToken('intDeclEntity', []));
             validator.write(new ParameterEntityStartXToken('intDeclEntity'));
             validator.write(new ParameterEntityEndXToken('intDeclEntity'));
             validator.write(new InternalSubsetEndXToken());
@@ -3130,18 +3130,18 @@ describe('CheckXTokenValidStream (unit)', () => {
                      errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_CDATA, [ 'one', version.toString(), rev.toString() ]);
                   }
                }
-                     
+
                it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an ANY element in XML ${version}/${rev}`, (done) => {
                   const emd = new EntityMetaData(EntityKind.DOCUMENT, version, rev);
                   const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                   const startToken = new elementStart.XToken('one', []);
-      
+
                   validator.write(emd);
                   validator.write(elementDecl);
                   validator.write(startToken);
                   validator.write(token);
                   validator.end();
-      
+
                   if (causesError) {
                      expectStream(validator, errorToken, done);
                   } else {
@@ -3154,12 +3154,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new elementStart.XToken('one', []);
                const undeclaredToken = new elementStart.XToken('two', []);
-   
+
                validator.write(elementDecl);
                validator.write(startToken);
                validator.write(undeclaredToken);
                validator.end();
-   
+
                const errorToken = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT, [ 'one', 'two' ]);
 
                expectStream(validator, errorToken, done);
@@ -3168,12 +3168,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports an error if a completely unsupported bit of markup shows up', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new elementStart.XToken('one', []);
-   
+
                validator.write(elementDecl);
                validator.write(startToken);
                validator.write(elementDecl);
                validator.end();
-   
+
                const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
 
                expectStream(validator, errorToken, done);
@@ -3182,12 +3182,12 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports errors even when no ptoken is present', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new elementStart.XToken('one', []);
-   
+
                validator.write(elementDecl);
                validator.write(startToken);
                validator.write(elementDecl);
                validator.end();
-   
+
                const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
 
                expectStream(validator, errorToken, done);
@@ -3196,11 +3196,11 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no errors when passing char data through it', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const characters = new charData.XToken('one');
-   
+
                validator.write(elementDecl);
                validator.write(characters);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3212,48 +3212,48 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new elementStart.XToken('one', []);
                const elTwo = new elementStart.XToken('one', []);
-   
+
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(elTwo);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT, [ 'one' ]);
                expectStream(validator, expected, done);
             });
-   
+
             it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new elementStart.EmptyToken('one', []);
-   
+
                validator.write(elementDecl);
                validator.write(elStart);
                validator.end();
-   
+
                gatherTokens(validator, (tokens) => {
                   expect(tokens.length).toEqual(2);
                   done();
                });
             });
-   
+
             it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new elementStart.XToken('one', []);
                const elEnd = new elementEnd.XToken('one');
-   
+
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(elEnd);
                validator.end();
-   
+
                gatherTokens(validator, (tokens) => {
                   expect(tokens.length).toEqual(4);
                   done();
                });
             });
-   
+
          });
-   
+
          describe('MIXED', () => {
 
             it('reports an error if any element start appears in a PCDATA-only element', (done) => {
@@ -3267,12 +3267,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const elStart = new elementStart.XToken('one', []);
                const child = new elementStart.XToken('sub', []);
-   
+
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(child);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'sub' ]);
                expectStream(validator, expected, done);
             });
@@ -3307,7 +3307,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(childEnd);
                validator.write(thirdStart);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED, [ 'one', 'three' ]);
                expectStream(validator, expected, done);
             });
@@ -3330,7 +3330,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elStart);
                validator.write(commentToken);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
                expectStream(validator, expected, done);
             });
@@ -3352,7 +3352,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elStart);
                validator.write(pi);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
                expectStream(validator, expected, done);
             });
@@ -3374,7 +3374,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elStart);
                validator.write(commentToken);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3395,7 +3395,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elStart);
                validator.write(pi);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3416,7 +3416,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new charData.XToken(' '));
                validator.write(new elementEnd.XToken('one'));
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3436,7 +3436,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new GeneralEntityEndXToken('testEntityEnd'));
                validator.write(new elementEnd.XToken('one'));
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3454,7 +3454,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('one', []));
                validator.write(new GeneralEntityReferenceXToken('testEntiyReference'));
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
                expectStream(validator, expected, done);
             });
@@ -3522,17 +3522,17 @@ describe('CheckXTokenValidStream (unit)', () => {
                         repeat: 'ONE',
                      }],
                      repeat: 'ONE',
-                     listType: 'CHOICE',  
+                     listType: 'CHOICE',
                   });
                   const startToken = new elementStart.XToken('one', []);
-      
+
                   validator.write(emd);
                   validator.write(elementDecl2);
                   validator.write(elementDecl1);
                   validator.write(startToken);
                   validator.write(token);
                   validator.end();
-      
+
                   if (causesError) {
                      expectStream(validator, errorToken, done);
                   } else {
@@ -3556,7 +3556,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new charData.XToken(' '));
                validator.write(new elementStart.XToken('child', []));
                validator.end();
-   
+
                gatherTokens(validator, (tokens) => {
                   expect(tokens[3].type).toEqual(space.XTYPE);
                   done();
@@ -3567,12 +3567,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined);
                const elStart = new elementStart.XToken('one', []);
                const child = new elementStart.XToken('sub', []);
-   
+
                validator.write(elementDecl);
                validator.write(elStart);
                validator.write(child);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'one', 'sub' ]);
                expectStream(validator, expected, done);
             });
@@ -3612,12 +3612,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const elStart = new elementStart.XToken('one', []);
                const elEnd = new elementEnd.XToken('one');
-   
+
                validator.write(elementDecl1);
                validator.write(elStart);
                validator.write(elEnd);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ 'one', 'two, three' ]);
                expectStream(validator, expected, done);
             });
@@ -3659,14 +3659,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elStart = new elementStart.XToken('one', []);
                const elMiddle = new elementStart.EmptyToken('two', []);
                const elEnd = new elementEnd.XToken('one');
-   
+
                validator.write(elementDecl2);
                validator.write(elementDecl1);
                validator.write(elStart);
                validator.write(elMiddle);
                validator.write(elEnd);
                validator.end();
-   
+
                expectNoErrors(validator, done);
             });
 
@@ -3707,14 +3707,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                const elStart = new elementStart.XToken('one', []);
                const elMiddle = new elementStart.EmptyToken('four', []);
                const elEnd = new elementEnd.XToken('one');
-   
+
                validator.write(elementDecl2);
                validator.write(elementDecl1);
                validator.write(elStart);
                validator.write(elMiddle);
                validator.write(elEnd);
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.INVALID_ELEMENT_IN_CONTENT, [ 'one', 'four' ]);
                expectStream(validator, expected, done);
             });
@@ -3735,7 +3735,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new space.XToken('  '));
                validator.write(new elementEnd.XToken('extDeclaredElement'));
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,
                   [ 'extDeclaredElement' ]);
                expectStream(validator, expected, done);
@@ -3759,12 +3759,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new space.XToken('  '));
                validator.write(new elementEnd.XToken('extDeclaredElement'));
                validator.end();
-   
+
                const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,
                   [ 'extDeclaredElement' ]);
                gatherTokens(validator, (tokens) => {
                   let count = 0;
-         
+
                   for (const token of tokens) {
                      if (token.id === ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED) {
                         count++;

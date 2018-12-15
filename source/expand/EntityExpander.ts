@@ -3,7 +3,7 @@
 import { Token } from 'basic';
 import {
    XMLDECL_PTOKEN,
-   ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
 
@@ -17,7 +17,7 @@ import {
 
    PToken,
 } from 'token';
-import { EntityDeclarationPToken, ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
+import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, PARAMETER_ENTITY_DECLARATION_PTOKEN, ParameterEntityDeclarationPToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';
@@ -27,14 +27,14 @@ import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
 
 type GeneralEntityInfo = {
-   token: EntityDeclarationPToken;
+   token: GeneralEntityDeclarationPToken;
    isUnparsed: boolean;
    isInternal: boolean;
    cache?: ExpandedLiteralValuePToken
 };
 
 type ParameterEntityInfo = {
-   token: EntityDeclarationPToken;
+   token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
    cache?: ExpandedLiteralValuePToken
 };
@@ -103,8 +103,11 @@ class EntityExpander {
          // case XMLDECL_PTOKEN:
          //    this.handleXmlDeclaration(pToken as XmlDeclarationPToken);
          //    break;
-         case ENTITY_DECLARATION_PTOKEN:
-            this.handleEntityDeclaration(pToken as EntityDeclarationPToken, expanded);
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+            this.handleEntityDeclaration(pToken as GeneralEntityDeclarationPToken, expanded);
+            break;
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            this.handleEntityDeclaration(pToken as ParameterEntityDeclarationPToken, expanded);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             this.processGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
@@ -126,9 +129,9 @@ class EntityExpander {
    //    }
    // }
 
-   private handleEntityDeclaration(pToken: EntityDeclarationPToken, expanded: TokenProcessed) {
-      this.handleEntityValue(pToken.value || [], (newValue) => {
-         pToken.value = newValue;
+   private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expanded: TokenProcessed) {
+      this.handleEntityValue((pToken as any).value || [], (newValue) => {
+         (pToken as any).value = newValue;
 
          // If the declaration has no name, we won't be able to look it up
          if (pToken.name) {
@@ -145,7 +148,7 @@ class EntityExpander {
             } else {
                info = {
                   token: pToken,
-                  isUnparsed: !!pToken.nDataName,
+                  isUnparsed: !!(pToken as GeneralEntityDeclarationPToken).nDataName,
                   isInternal: !pToken.externalId,
                };
                entityGroup = this.generalEntitiesByName;
@@ -182,14 +185,15 @@ class EntityExpander {
          let seekingCount = 0;
 
          for (var info of missingParameterEntities) {
-            if (seeking[info.token.name.str]) {
+            if (seeking[info.token.name!.str]) { // typeHack
                continue;
             }
 
-            seeking[info.token.name.str] = true;
+            seeking[info.token.name!.str] = true; // typeHack
             seekingCount ++;
 
-            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId, new EntityMetaData());
+            // typeHack
+            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData());
 
             this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
                this.handleEntityValue(results, (newResult) => {
@@ -216,7 +220,7 @@ class EntityExpander {
 
                if (peInfo) {
                   newValue.push(new ParameterEntityStartPToken(peRef));
-                  newValue = newValue.concat(peInfo.cache || peInfo.token.value);
+                  newValue = newValue.concat(peInfo.cache || (peInfo.token as any).value);
                   newValue.push(new ParameterEntityEndPToken(peRef));
                   continue;
                }
@@ -287,7 +291,7 @@ class EntityExpander {
    // Now expand everything.  If it is internal, then we need to first expand the char references
    // feed the internal entity value through a processor which expands char refs
    // then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
-   private processEntity(entityDecl: EntityDeclarationPToken, processBody: ProcessBody, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
+   private processEntity(entityDecl: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, processBody: ProcessBody, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
       if (entityDecl.externalId) {
          const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, new EntityMetaData());
          processBody(sTokenSource, expandToken, entityProcessed);

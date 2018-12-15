@@ -7,7 +7,7 @@ import { MockErrorCollector } from '../../error/@test/helper';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
 
-import declaration from '../bridge/declaration';
+import declaration from '../bridge/baseDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
 import misc from '../common/misc';
 import nameList from '../contentspec/nameList';
@@ -279,7 +279,7 @@ describe('elementDeclaration (unit)', () => {
       it('deletes the unassigned property if it is empty', () => {
          elementPToken.unassigned = [];
          elementPToken.nextPropName = 'name';
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(elementPToken.unassigned).toBeUndefined();
@@ -291,7 +291,7 @@ describe('elementDeclaration (unit)', () => {
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({ open: SToken.fromString('%'), }),
          } ];
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).not.toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
@@ -320,7 +320,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
@@ -337,7 +337,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'contentSpec',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(unassigned.assignToProps).toHaveBeenCalledWith(
@@ -356,7 +356,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'midContentSpec',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children, [ 'foo' ]);
@@ -375,7 +375,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: unassignedValues,
             nextPropName: 'contentSpec',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(nameList.assignUnassigned).toHaveBeenCalledWith(elementPToken.children, unassignedValues);
@@ -386,7 +386,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect((elementPToken.extra as any)).toEqual([ 'foo' ]);
@@ -398,7 +398,7 @@ describe('elementDeclaration (unit)', () => {
             nextPropName: 'name',
          });
          unassignedAssignSpy.and.callFake(() => elementPToken.unassigned!.pop());
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(elementPToken.extra).toBeUndefined();
@@ -409,7 +409,7 @@ describe('elementDeclaration (unit)', () => {
             unassigned: [ 'foo' ],
             nextPropName: 'name',
          });
-         
+
          elementDeclaration.assignUnassigned(elementPToken);
 
          expect(elementPToken).toEqual(new elementDeclaration.PToken({
@@ -603,7 +603,7 @@ describe('elementDeclaration (unit)', () => {
       it('sets the content spec to "CHILDREN" if there are children', () => {
          const nameListMakeSpy = spyOn(nameList, 'makeXTokenCompatible');
          elementPToken.children = new nameList.PToken();
-         
+
          const token = elementDeclaration.pTokenToXToken(elementPToken);
 
          expect(token.contentSpecType).toEqual('CHILDREN');
@@ -612,7 +612,7 @@ describe('elementDeclaration (unit)', () => {
       it('uses nameList to populate the children portion if there are children', () => {
          const nameListMakeSpy = spyOn(nameList, 'makeXTokenCompatible');
          elementPToken.children = new nameList.PToken();
-         
+
          elementDeclaration.pTokenToXToken(elementPToken);
 
          expect(nameListMakeSpy).toHaveBeenCalledWith(elementPToken.children);

@@ -10,7 +10,7 @@ import {
    GENERAL_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
-   ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    PToken,
    text,
    ParameterEntityStartPToken,
@@ -145,7 +145,7 @@ describe('EntityExpanderStream (integration)', () => {
       pTokenStream.endText();
 
       gatherStream(entityExpander, (results) => {
-         const index = getIndex(results, ENTITY_DECLARATION_PTOKEN);
+         const index = getIndex(results, GENERAL_ENTITY_DECLARATION_PTOKEN);
          const expectedRef2 = new ParameterEntityReferencePToken({
             open: SToken.fromString('%'),
             openSpace: undefined,
@@ -161,7 +161,7 @@ describe('EntityExpanderStream (integration)', () => {
             close: SToken.fromString(';'),
          });
 
-         expect((results[index + 4] as any).value).toEqualRangeless([
+         expect((results[index] as any).value).toEqualRangeless([
             new text.PToken({ text: SToken.fromString('[') }),
             new ParameterEntityStartPToken(expectedRef2),
             new text.PToken({ text: SToken.fromString('(') }),

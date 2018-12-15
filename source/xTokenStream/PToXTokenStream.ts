@@ -26,6 +26,7 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from '../token';
+import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'source/token/entityDeclaration';
 
 class PToXTokenStream extends stream.Transform {
 
@@ -66,7 +67,8 @@ class PToXTokenStream extends stream.Transform {
          case elementDeclaration.PTYPE:
             this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
-         case entityDeclaration.PTYPE:
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             this.push(entityDeclaration.pTokenToXToken(pToken));
             break;
          case notationDeclaration.PTYPE:
