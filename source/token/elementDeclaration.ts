@@ -292,4 +292,6 @@ export {
    ElementDeclaration,
    XNameList,
    isXName,
+   assignUnassigned,
+   ELEMENTDECL as ELEMENT_DECLARATION_PTOKEN,
 };

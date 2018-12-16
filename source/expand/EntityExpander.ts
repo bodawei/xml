@@ -15,6 +15,9 @@ import token, {
    ParameterEntityEndPToken,
    XmlDeclarationPToken,
 
+   notationDeclaration,
+   unassigned,
+   text,
    PToken,
 } from 'token';
 import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, PARAMETER_ENTITY_DECLARATION_PTOKEN, ParameterEntityDeclarationPToken } from 'source/token/entityDeclaration';
@@ -27,6 +30,9 @@ import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
 import { AttListPToken } from 'source/token/attListDeclaration';
 import { ElementStartPToken, ElementEmptyPToken } from 'source/token/elementStart';
+import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned';
+import { NotationDeclarationPToken, NotationDeclaration } from 'source/token/notationDeclaration';
+import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -39,6 +45,7 @@ type ParameterEntityInfo = {
    token: ParameterEntityDeclarationPToken;
    isInternal: boolean;
    cache?: ExpandedLiteralValuePToken
+   unssignedCache?: UnassignedArray,
 };
 
 type GeneralEntityMap = {
@@ -114,6 +121,12 @@ class EntityExpander {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             this.handleEntityDeclaration(pToken as ParameterEntityDeclarationPToken, expanded);
             break;
+         case notationDeclaration.PTYPE:
+            this.handleNotationDeclaration(pToken as notationDeclaration.PToken, expanded);
+            break;
+         case ELEMENT_DECLARATION_PTOKEN:
+            this.handleElementDeclaration(pToken as ElementDeclarationPToken, expanded);
+            break;
          case token.elementStart.PTYPE:
          case token.elementStart.EMPTY_TYPE:
             this.processElementStart(pToken as ElementStartPToken, expanded);
@@ -182,7 +195,7 @@ class EntityExpander {
       }
 
       return newValue;
-}
+   }
 
    private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expanded: TokenProcessed) {
       this.handleEntityValue((pToken as any).value, (newValue) => {
@@ -214,6 +227,29 @@ class EntityExpander {
             }
          }
 
+         this.deliverAToken(pToken);
+         expanded();
+      });
+   }
+
+   private handleNotationDeclaration(pToken: NotationDeclarationPToken, expanded: TokenProcessed) {
+      this.prepareUnassigned(pToken.unassigned, false, (newUnassigned) => {
+         pToken.unassigned = newUnassigned;
+
+         if (pToken.externalId && pToken.unassigned) {
+            pToken.externalId.unassigned = pToken.unassigned;
+         }
+
+         notationDeclaration.assignUnassigned(pToken);
+         this.deliverAToken(pToken);
+         expanded();
+      });
+   }
+
+   private handleElementDeclaration(pToken: ElementDeclarationPToken, expanded: TokenProcessed) {
+      this.prepareUnassigned(pToken.unassigned, true, (newUnassigned) => {
+         pToken.unassigned = newUnassigned as any; // typeHack
+         assignUnassigned(pToken);
          this.deliverAToken(pToken);
          expanded();
       });
@@ -262,6 +298,106 @@ class EntityExpander {
             });
          }
       }
+   }
+
+   /*
+    * Given an unassignedArray, look for all the PE References in it that we don't have values for,
+    */
+   private retrieveExternalParameterEntitiesForUnassigned(value: UnassignedArray, isElementDecl: boolean, done: Done) {
+      const missingParameterEntities: Array<ParameterEntityInfo> = [];
+
+      for (let element of value) {
+         if (element.type === UnassignedType.REFERENCE) {
+            const peRef = element.token;
+            const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+
+            if (peInfo && !peInfo.unssignedCache) {
+               missingParameterEntities.push(peInfo);
+            }
+         }
+      };
+
+      if (missingParameterEntities.length === 0) {
+         done();
+      } else {
+         const seeking: { [name: string] : boolean} = {};
+         let seekingCount = 0;
+
+         for (var info of missingParameterEntities) {
+            if (seeking[info.token.name!.str]) { // typeHack
+               continue;
+            }
+
+            seeking[info.token.name!.str] = true; // typeHack
+            seekingCount ++;
+
+            let sTokenSource: STokenSource;
+            // typeHack
+            if (info.isInternal) {
+               sTokenSource = new STokenSource(defaultExtractors, new EntityMetaData());
+               // Should add ranges
+               info.token.value.forEach((element) => {
+                  switch (element.type) {
+                     case TEXT_PTOKEN:
+                        const textEl = element as TextPToken;
+                        if (textEl.text) {
+                           sTokenSource.addText(textEl.text.str);
+                        }
+                        break;
+                     case charRef.PTYPE:
+                        const charRefEl = element as charRef.CharRefPToken;
+                        const charRefXToken = charRefEl.toXToken();
+
+                        if (charRefEl.digits) {
+                           sTokenSource.addText(charRefXToken.char);
+                        }
+                        break;
+                     // ignore expanded entity refs
+                  }
+               });
+               sTokenSource.endText();
+            } else {
+               sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData());
+            }
+
+            unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
+               info.unssignedCache = results;
+               seekingCount --;
+
+               if (seekingCount === 0) {
+                  done();
+               }
+            });
+         }
+      }
+   }
+
+   private prepareUnassigned(value: UnassignedArray|void, isElementDecl: boolean, deliverExpandedUnassigned: (val: UnassignedArray|void) => void) {
+      if (!value) {
+         deliverExpandedUnassigned(value);
+         return;
+      }
+
+      this.retrieveExternalParameterEntitiesForUnassigned(value, isElementDecl, () => {
+         let newUnassigned: UnassignedArray = [];
+
+         for (let element of value) {
+            if (element.type === UnassignedType.REFERENCE) {
+               const peRef = element.token;
+               const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
+
+               if (peInfo && peInfo.unssignedCache) {
+                  newUnassigned = newUnassigned.concat(peInfo.unssignedCache);
+               } else {
+                  newUnassigned.push(element);
+               }
+            } else {
+               newUnassigned.push(element);
+            }
+         };
+
+         deliverExpandedUnassigned(newUnassigned);
+      });
    }
 
    private handleEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {

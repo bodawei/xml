@@ -16,6 +16,9 @@ import {
 
    elementStart,
    text,
+   charRef,
+   unassigned,
+   notationDeclaration,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
    GeneralEntityStartPToken,
@@ -30,6 +33,9 @@ import { PTokenStream, PTokenFromLiteralStream } from "pTokenStream";
 import { ExternalId } from "source/token/common/externalId";
 import { defaultExtractors } from "extractor";
 import { AttListPToken } from "source/token/attListDeclaration";
+import { NotationDeclarationPToken } from "source/token/notationDeclaration";
+import { UnassignedType } from "source/token/common/unassigned";
+import { CharRefPToken } from "source/token/charRef";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
@@ -406,6 +412,151 @@ describe('EntityExpander (unit)', () => {
             expect((results[1] as any).value).toEqual([
                refToPe1,
             ]);
+            done();
+         });
+      });
+
+   });
+
+   describe('notation declaration', () => {
+
+      it('passes a declaration with no unassigned values through without changes', (done) => {
+         const input = [
+            new NotationDeclarationPToken({
+               name: SToken.fromString('test'),
+               externalId: {
+               },
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(1);
+            expect(results[0]).toEqual(new NotationDeclarationPToken({
+               name: SToken.fromString('test'),
+               externalId: {
+               },
+            }));
+            done();
+         });
+      });
+
+      it('passes a declaration with an unassigned value through', (done) => {
+         const unassignedVals = [ unassigned.wordFromSToken(SToken.fromString('public')) ];
+         const input = [
+            new NotationDeclarationPToken({
+               name: SToken.fromString('test'),
+               unassigned: unassignedVals,
+               externalId: {
+                  nextParamName: 'idType',
+                  unassigned: unassignedVals,
+               },
+            }),
+         ];
+
+         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
+            expect(pToken.unassigned).toEqual([
+               unassigned.wordFromSToken(SToken.fromString('public')),
+            ]);
+         });
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(1);
+            done();
+         });
+      });
+
+      it('expands a parameter entity reference before assigning unassigned values', (done) => {
+         const refToPe1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            name: SToken.fromString('pe1'),
+         });
+
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: refToPe1,
+         } ];
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('80') }),
+                  new text.PToken({ text: SToken.fromString('UBLIC') }),
+               ],
+            }),
+            new NotationDeclarationPToken({
+               name: SToken.fromString('test'),
+               unassigned: unassignedVals,
+               externalId: {
+                  nextParamName: 'idType',
+                  unassigned: unassignedVals,
+               },
+            }),
+         ];
+
+         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
+            expect(pToken.unassigned).toEqualRangeless([
+               unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
+            ]);
+         });
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(2);
+            done();
+         });
+      });
+
+      it('expands a parameter entity reference that references another', (done) => {
+         const refToPe1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            name: SToken.fromString('pe1'),
+         });
+
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: refToPe1,
+         } ];
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe2'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('C') }),
+               ],
+            }),
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('80') }),
+                  new text.PToken({ text: SToken.fromString('UBLI') }),
+                  new ParameterEntityReferencePToken({
+                     open: SToken.fromString('%'),
+                     name: SToken.fromString('pe2'),
+                  }),
+               ],
+            }),
+            new NotationDeclarationPToken({
+               name: SToken.fromString('test'),
+               unassigned: unassignedVals,
+               externalId: {
+                  nextParamName: 'idType',
+                  unassigned: unassignedVals,
+               },
+            }),
+         ];
+
+         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
+            expect(pToken.unassigned).toEqualRangeless([
+               unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
+            ]);
+         });
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
             done();
          });
       });
