@@ -12,6 +12,9 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PToken,
+
+   elementStart,
+
    text,
    ParameterEntityStartPToken,
    ParameterEntityReferencePToken,
@@ -249,6 +252,103 @@ describe('EntityExpanderStream (integration)', () => {
                ],
             }],
             close: SToken.fromString('>'),
+         });
+
+         expect((results[index] as any)).toEqualRangeless(expected);
+      }, done);
+   });
+
+   it('replaces references in element attributes', (done) => {
+      pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY % internalPE "foo">
+            <!ENTITY internalGE "(%internalPE;)">
+            <!ELEMENT one EMPTY>
+            <!ATTLIST one
+               first CDATA #IMPLIED
+               second CDATA #IMPLIED
+            >
+         ]>
+         <one second="first &#45; &internalGE;" first="second &#45; &internalGE;"/>`);
+      pTokenStream.endText();
+
+      gatherStream(entityExpander, (results) => {
+         const index = getIndex(results, elementStart.EMPTY_TYPE);
+         const expectedRef1 = new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            openSpace: undefined,
+            name: SToken.fromString('internalPE'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+         const expectedRef2 = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            openSpace: undefined,
+            name: SToken.fromString('internalGE'),
+            nameSpace: undefined,
+            close: SToken.fromString(';'),
+         });
+         const expected = new elementStart.EmptyPToken({
+            open: SToken.fromString('<'),
+            postOpenSpace: undefined,
+            name: SToken.fromString('one'),
+            postNameSpace: SToken.fromString(' '),
+            attributes: [{
+               name: SToken.fromString('second'),
+               postNameSpace: undefined,
+               equal: SToken.fromString('='),
+               postEqualSpace: undefined,
+               openQuote: SToken.fromString('"'),
+               closeQuote: SToken.fromString('"'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('first ') }),
+                  new CharRefPToken({
+                     open: SToken.fromString('&#'),
+                     postOpenSpace: undefined,
+                     postHexMarkerSpace: undefined,
+                     digits: SToken.fromString('45'),
+                     postDigitsSpace: undefined,
+                     close: SToken.fromString(';'),
+                  }),
+                  new text.PToken({ text: SToken.fromString(' ') }),
+                  new GeneralEntityStartPToken(expectedRef2),
+                  new text.PToken({ text: SToken.fromString('(') }),
+                  new ParameterEntityStartPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new ParameterEntityEndPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString(')') }),
+                  new GeneralEntityEndPToken(expectedRef2),
+               ],
+               trailingSpace: SToken.fromString(' '),
+            }, {
+               name: SToken.fromString('first'),
+               postNameSpace: undefined,
+               equal: SToken.fromString('='),
+               postEqualSpace: undefined,
+               openQuote: SToken.fromString('"'),
+               closeQuote: SToken.fromString('"'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('second ') }),
+                  new CharRefPToken({
+                     open: SToken.fromString('&#'),
+                     postOpenSpace: undefined,
+                     postHexMarkerSpace: undefined,
+                     digits: SToken.fromString('45'),
+                     postDigitsSpace: undefined,
+                     close: SToken.fromString(';'),
+                  }),
+                  new text.PToken({ text: SToken.fromString(' ') }),
+                  new GeneralEntityStartPToken(expectedRef2),
+                  new text.PToken({ text: SToken.fromString('(') }),
+                  new ParameterEntityStartPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new ParameterEntityEndPToken(expectedRef1),
+                  new text.PToken({ text: SToken.fromString(')') }),
+                  new GeneralEntityEndPToken(expectedRef2),
+               ],
+               trailingSpace: undefined,
+            }],
+            close: SToken.fromString('/>'),
          });
 
          expect((results[index] as any)).toEqualRangeless(expected);

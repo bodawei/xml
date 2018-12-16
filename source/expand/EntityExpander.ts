@@ -26,6 +26,7 @@ import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
 import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
 import { AttListPToken } from 'source/token/attListDeclaration';
+import { ElementStartPToken, ElementEmptyPToken } from 'source/token/elementStart';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -113,6 +114,10 @@ class EntityExpander {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             this.handleEntityDeclaration(pToken as ParameterEntityDeclarationPToken, expanded);
             break;
+         case token.elementStart.PTYPE:
+         case token.elementStart.EMPTY_TYPE:
+            this.processElementStart(pToken as ElementStartPToken, expanded);
+            break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             this.processGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
             break;
@@ -134,41 +139,53 @@ class EntityExpander {
    // }
 
    private processAttListDeclaration(pToken: AttListPToken, expanded: TokenProcessed) {
-      let newDefault: LiteralValuePToken = [];
 
       // Replace any general entity references in attribute defaults with their referenced values
       for (let attDef of pToken.attDefs) {
-         const value = attDef.value || [];
-
-
-         for (let element of value) {
-            if (!(element instanceof GeneralEntityReferencePToken)) {
-               newDefault.push(element);
-               continue;
-            }
-
-            const info = element.name ? this.generalEntitiesByName[element.name.str] : undefined;
-
-            // Can not expand a reference that has no name
-            if (!info) {
-               newDefault.push(element);
-               continue;
-            }
-
-            newDefault.push(new GeneralEntityStartPToken(element as GeneralEntityReferencePToken));
-            newDefault = newDefault.concat(info.token.value);
-            newDefault.push(new GeneralEntityEndPToken(element as GeneralEntityReferencePToken));
-         }
-
-         attDef.value = newDefault;
+         attDef.value = this.processValue(attDef.value);
       }
 
       this.deliverAToken(pToken);
       expanded();
    }
 
+   private processElementStart(pToken: ElementStartPToken | ElementEmptyPToken, expanded: TokenProcessed) {
+      // Replace any general entity references in attribute defaults with their referenced values
+      for (let attribute of pToken.attributes) {
+         attribute.value = this.processValue(attribute.value);
+      }
+
+      this.deliverAToken(pToken);
+      expanded();
+   }
+
+   private processValue(value: LiteralValuePToken) {
+      let newValue: LiteralValuePToken = [];
+
+      for (let element of value) {
+         if (!(element instanceof GeneralEntityReferencePToken)) {
+            newValue.push(element);
+            continue;
+         }
+
+         const info = element.name ? this.generalEntitiesByName[element.name.str] : undefined;
+
+         // Can not expand a reference that has no name
+         if (!info || info.token.externalId ) {
+            newValue.push(element);
+            continue;
+         }
+
+         newValue.push(new GeneralEntityStartPToken(element as GeneralEntityReferencePToken));
+         newValue = newValue.concat(info.token.value);
+         newValue.push(new GeneralEntityEndPToken(element as GeneralEntityReferencePToken));
+      }
+
+      return newValue;
+}
+
    private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expanded: TokenProcessed) {
-      this.handleEntityValue((pToken as any).value || [], (newValue) => {
+      this.handleEntityValue((pToken as any).value, (newValue) => {
          (pToken as any).value = newValue;
 
          // If the declaration has no name, we won't be able to look it up

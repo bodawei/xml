@@ -14,6 +14,7 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
 
+   elementStart,
    text,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
@@ -404,6 +405,103 @@ describe('EntityExpander (unit)', () => {
          doExpand(true, input, (results) => {
             expect((results[1] as any).value).toEqual([
                refToPe1,
+            ]);
+            done();
+         });
+      });
+
+   });
+
+   describe('element start', () => {
+
+      it('does not change the value if it contains no general entity references', (done) => {
+         const input = [
+            new elementStart.PToken({
+               attributes: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[0] as any).attributes[0].value).toEqual([ new text.PToken({ text: SToken.fromString('foo') }) ]);
+            done();
+         });
+      });
+
+      it('replaces general entity references with their values', (done) => {
+         const refToPe = new ParameterEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('pe'),
+         });
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('ge'),
+         });
+
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('pe') }),
+               ],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('ge'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('ge') }),
+                  refToPe
+               ],
+            }),
+            new elementStart.PToken({
+               attributes: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                     refToGe,
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[2] as any).attributes[0].value).toEqual([
+               new text.PToken({ text: SToken.fromString('foo') }),
+               new GeneralEntityStartPToken(refToGe),
+               new text.PToken({ text: SToken.fromString('ge') }),
+               new ParameterEntityStartPToken(refToPe),
+               new text.PToken({ text: SToken.fromString('pe') }),
+               new ParameterEntityEndPToken(refToPe),
+               new GeneralEntityEndPToken(refToGe),
+            ]);
+            done();
+         });
+      });
+
+      it('does not replace a reference if it has no name', (done) => {
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+         });
+
+         const input = [
+            new elementStart.PToken({
+               attributes: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                     refToGe,
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[0] as any).attributes[0].value).toEqual([
+               new text.PToken({ text: SToken.fromString('foo') }),
+               refToGe,
             ]);
             done();
          });
