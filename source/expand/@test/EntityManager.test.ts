@@ -4,10 +4,10 @@
 import { EntityLocation } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import {
-   entityDeclaration,
    text,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
 } from '../../token';
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from '../../token/entityDeclaration';
 
 import EntityManager from '../EntityManager';
 

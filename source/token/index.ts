@@ -18,8 +18,8 @@ import * as notationDeclaration from './notationDeclaration';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 
-import * as entityDeclaration from './entityDeclaration';
-export * from './entityDeclaration';
+// import * as entityDeclaration from './entityDeclaration';
+// export * from './entityDeclaration';
 
 export * from './processingInstruction';
 
@@ -37,7 +37,10 @@ export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
 
 export * from './cdata';
+export * from './entityDeclaration';
+export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
+export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
@@ -58,7 +61,6 @@ const token = {
    elementStart,
    elementEnd,
    elementDeclaration,
-   entityDeclaration,
    notationDeclaration,
    space,
    text,
@@ -80,7 +82,6 @@ export {
    elementStart,
    elementEnd,
    elementDeclaration,
-   entityDeclaration,
    notationDeclaration,
    space,
    text,

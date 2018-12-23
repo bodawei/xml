@@ -5,11 +5,14 @@ import token, {
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
 
+   GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
+   ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
@@ -20,7 +23,7 @@ import token, {
    text,
    PToken,
 } from 'token';
-import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, PARAMETER_ENTITY_DECLARATION_PTOKEN, ParameterEntityDeclarationPToken } from 'source/token/entityDeclaration';
+import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
 import { STokenSource } from 'sToken';
 import { defaultExtractors } from 'extractor';

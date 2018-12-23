@@ -16,7 +16,6 @@ import {
    elementStart,
    elementEnd,
    elementDeclaration,
-   entityDeclaration,
    notationDeclaration,
    ProcessingInstructionXToken,
    space,
@@ -32,6 +31,8 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
    XmlDeclarationXToken,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
    GeneralEntityReferenceXToken,
 } from '../../token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
@@ -40,7 +41,6 @@ import { ElementDeclaration } from '../../token/elementDeclaration';
 import { NotationDeclaration } from '../../token/notationDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from 'source/token/entityDeclaration';
 import { TextXToken } from 'source/token/text';
 
 function toHaveError(util: any) {

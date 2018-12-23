@@ -14,7 +14,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   entityDeclaration,
    notationDeclaration,
    space,
    text,
@@ -25,8 +24,9 @@ import {
    XMLDECL_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from '../token';
-import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'source/token/entityDeclaration';
 
 class PToXTokenStream extends stream.Transform {
 
@@ -67,10 +67,6 @@ class PToXTokenStream extends stream.Transform {
          case elementDeclaration.PTYPE:
             this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
-         case GENERAL_ENTITY_DECLARATION_PTOKEN:
-         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
-            this.push(entityDeclaration.pTokenToXToken(pToken));
-            break;
          case notationDeclaration.PTYPE:
             this.push(notationDeclaration.pTokenToXToken(pToken));
             break;
@@ -81,7 +77,9 @@ class PToXTokenStream extends stream.Transform {
             this.push(text.makeXToken(pToken));
             break;
          case CDATA_PTOKEN:
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          case PROCESSING_INSTRUCTION_PTOKEN:
          case TEXTDECL_PTOKEN:

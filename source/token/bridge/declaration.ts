@@ -54,7 +54,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
 
       switch (strOrBlank(start.declType).toUpperCase()) {
          case 'ENTITY':
-            parseEntityDeclaration(source, start, deliverPToken);
+            parseEntityDeclaration(source, start, deliverPToken as any); //typehack
             return;
       }
 

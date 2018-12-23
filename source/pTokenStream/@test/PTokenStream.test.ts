@@ -5,18 +5,11 @@ import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import * as token from '../../token';
 import {
-   declaration,
-
-   attListDeclaration,
    charData,
    charRef,
    comment,
-   docTypeStart,
    elementEnd,
    elementStart,
-   elementDeclaration,
-   entityDeclaration,
-   notationDeclaration,
    space,
 } from '../../token';
 import * as tokenStuff from '../../token';

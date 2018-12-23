@@ -14,7 +14,6 @@ import {
    docTypeEnd,
    elementDeclaration,
    elementStart,
-   entityDeclaration,
    GENERAL_ENTITY_END_XTOKEN,
    GENERAL_ENTITY_START_XTOKEN,
    ParameterEntityEndPToken,
@@ -34,18 +33,21 @@ import {
    ParameterEntityStartXToken,
    XMLDECL_XTOKEN,
    XmlDeclarationXToken,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_XTOKEN,
+   PARAMETER_ENTITY_DECLARATION_XTOKEN,
+   GeneralEntityDeclarationXToken,
    GeneralEntityReferencePToken,
    GeneralEntityReferenceXToken,
    ParameterEntityReferenceXToken,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
-   GENERAL_ENTITY_REFERENCE_XTOKEN,
+   ParameterEntityDeclarationPToken,
+   ParameterEntityDeclarationXToken,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationPToken, ParameterEntityDeclarationXToken, PARAMETER_ENTITY_DECLARATION_XTOKEN } from '../token/entityDeclaration'; // badRef
 import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
@@ -801,13 +803,13 @@ class NodeStream extends stream.Transform {
       // @@ this should not happen in the internal subset
       this._expandPERefsInUnassignedValue(edToken.pToken, false, () => {
          if (edToken.pToken && edToken.pToken.unassigned) {
-            entityDeclaration.assignUnassigned(edToken.pToken as any); // typeHack
-            edToken = entityDeclaration.pTokenToXToken(edToken.pToken as any); // typeHack
+            (edToken.pToken as any).assignUnassigned(); // typeHack
+            edToken = edToken.pToken.toXToken(); // typeHack
          }
 
          // @@ this can only happen in the external subset
          this._expandPeRefsInEntityValue((edToken.value as EntityValueArray), (newValue) => {
-            edToken.value = newValue as any; // typeHack
+            (edToken as any).value = newValue; // typeHack
             this._addEntityDeclaration(edToken, done);
          });
       });

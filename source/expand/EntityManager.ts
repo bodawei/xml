@@ -4,10 +4,10 @@ import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from '../extractor';
 import { SToken, STokenSource } from '../sToken';
 import {
-   entityDeclaration,
    text,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
 } from '../token';
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from '../token/entityDeclaration';
 
 type EntityMap = {
    [name: string]: any,

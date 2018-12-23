@@ -18,6 +18,8 @@ import {
    elementDeclaration,
    attListDeclaration,
    notationDeclaration,
+   GeneralEntityDeclarationXToken,
+   ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    ParameterEntityEndXToken,
@@ -42,7 +44,6 @@ import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager';
-import { GeneralEntityDeclarationXToken, ParameterEntityDeclarationXToken } from 'source/token/entityDeclaration';
 
 type XToken = {
    type: string,

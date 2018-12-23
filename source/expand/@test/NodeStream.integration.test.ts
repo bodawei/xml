@@ -11,9 +11,9 @@ import * as tokenNs from '../../token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
-import { GeneralEntityDeclarationXToken } from '../../token/entityDeclaration'; // hack
 import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
+   GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    InternalSubsetStartXToken,

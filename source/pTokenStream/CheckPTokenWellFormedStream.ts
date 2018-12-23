@@ -15,10 +15,9 @@ import {
    comment,
    docTypeEnd,
    docTypeStart,
+   elementDeclaration,
    elementStart,
    elementEnd,
-   elementDeclaration,
-   entityDeclaration,
    notationDeclaration,
    space,
 
@@ -27,13 +26,14 @@ import {
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
    ProcessingInstructionPToken,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-import { GENERAL_ENTITY_DECLARATION_PTOKEN, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'source/token/entityDeclaration';
 
 enum CheckWellFormedState {
    START = 'START',
@@ -211,13 +211,13 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             elementDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
-            case GENERAL_ENTITY_DECLARATION_PTOKEN:
-            case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+         case GENERAL_ENTITY_DECLARATION_PTOKEN:
+         case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
-            entityDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
+            (pToken as any).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {

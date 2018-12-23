@@ -21,10 +21,12 @@ import {
    notationDeclaration,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
+   GeneralEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
+   ParameterEntityDeclarationPToken,
 } from "token";
-import { GeneralEntityDeclarationPToken, ExpandedLiteralValuePToken, ParameterEntityDeclarationPToken } from "source/token/entityDeclaration"; // @@@ TEMP
+import { ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
 import { EntityExpander, ExpandToken } from "../EntityExpander";
 

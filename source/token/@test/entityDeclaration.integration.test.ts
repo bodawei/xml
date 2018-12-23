@@ -7,8 +7,8 @@ import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
 
-import * as entityDeclaration from '../entityDeclaration';
-import { GeneralEntityDeclarationPToken } from '../entityDeclaration';
+import { parseEntityDeclaration } from '../entityDeclaration';
+import { GeneralEntityDeclarationPToken, GENERAL_ENTITY_DECLARATION_PTOKEN } from '../generalEntityDeclaration';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import text from '../text';
 import unassigned, { UnassignedType } from '../common/unassigned';
@@ -28,7 +28,7 @@ describe('entityDeclaration (integration)', () => {
       declarationPToken = new DeclarationPToken('xxx', {
          open: makeSToken('<!'),
          declType: makeSToken('ENTITY'),
-         postDeclTypeSpace: makeSToken('\t'),
+         declTypeSpace: makeSToken('\t'),
       });
       emd = new EntityMetaData();
       source = new STokenSource(defaultExtractors, emd);
@@ -40,8 +40,8 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName "frog%foo;">');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
-            expect(pToken.type).toEqual(entityDeclaration.GENERAL_ENTITY_DECLARATION_PTOKEN);
+         parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
+            expect(pToken.type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             expect((pToken as any).value[1].type).toEqual(PARAMETER_ENTITY_REFERENCE_PTOKEN);
             done();
          });
@@ -51,8 +51,8 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName %foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
-            expect(pToken.postNameSpace!.str).toEqual(' ');
+         parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
+            expect(pToken.nameSpace!.str).toEqual(' ');
             expect((pToken as any).unassigned[0].type).toEqual('reference');
             expect(pToken.close!.str).toEqual('>');
             done();
@@ -63,7 +63,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('% foo ;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
+         parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.parameter).toBeUndefined();
             expect((pToken as any).unassigned[0].type).toEqual('reference');
             expect(pToken.close!.str).toEqual('>');
@@ -75,7 +75,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('%foo "value">');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
+         parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect((pToken as any).parameter.str).toEqual('%');
             expect(pToken.unassigned).toBeUndefined();
             expect(pToken.close!.str).toEqual('>');
@@ -87,7 +87,7 @@ describe('entityDeclaration (integration)', () => {
          source.addText('aName SYSTEM %foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
+         parseEntityDeclaration(source, { open: SToken.fromString('<') } as DeclarationPToken, (pToken) => {
             expect(pToken.externalId!.idType!.str).toEqual('SYSTEM');
             expect((pToken as any).unassigned[0].type).toEqual('reference');
             expect(pToken.unassigned).toBe(pToken.externalId!.unassigned);
@@ -105,9 +105,9 @@ describe('entityDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         entityDeclaration.parse(source, {} as DeclarationPToken, (pToken) => {
+         parseEntityDeclaration(source, {} as DeclarationPToken, (pToken) => {
             // "expand" what should be there.
-            pToken.unassigned = [{
+            (pToken as any).unassigned = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, unassigned.wordFromSToken(SToken.fromString('entityName')),
@@ -124,18 +124,18 @@ describe('entityDeclaration (integration)', () => {
                }
             ] as any;
 
-            entityDeclaration.assignUnassigned(pToken as any); // typeHack
+            (pToken as any).assignUnassigned(); // typeHack
 
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
             expect(pToken).toEqual(new GeneralEntityDeclarationPToken({
-               postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
+               declTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                name: SToken.fromString('entityName'),
-               postNameSpace: SToken.fromString(' '),
+               nameSpace: SToken.fromString(' '),
                openQuote: SToken.fromString('"'),
                value: [ SToken.fromString('foo') ],
                closeQuote: SToken.fromString('"'),
-               postEntityValueSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
+               entityValueSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                close: makeSToken2('>'),
             }));
             done();
@@ -149,10 +149,10 @@ describe('entityDeclaration (integration)', () => {
       // it('reports errors in the declaration part (declaration.checkWellFormed())', (done) => {
       //    declarationPToken.postOpenSpace = declarationPToken.postDeclTypeSpace;
       //    source.addText('entityName "entityValue">');
-      //    entityDeclaration.parse(source, declarationPToken, (result) => {
+      //    parseEntityDeclaration(source, declarationPToken, (result) => {
       //       const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-      //       entityDeclaration.checkWellFormed(result, ec, emd);
+      //       result.checkWellFormed(ec, emd);
 
       //       expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_OPEN_XTRA_SPACE_AFTER);
       //       done();
@@ -162,10 +162,10 @@ describe('entityDeclaration (integration)', () => {
       it('reports errors in the literal value (literal.checkWellFormed())', (done) => {
          source.addText('entityName "entityValue');  // missing closing quote
          source.endText();
-         entityDeclaration.parse(source, declarationPToken, (result) => {
+         parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            entityDeclaration.checkWellFormed(result, ec, emd);
+            result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_CLOSE_QUOTE);
             done();
@@ -174,10 +174,10 @@ describe('entityDeclaration (integration)', () => {
 
       it('reports an error when name used an invalid char(check misc.checkName())', (done) => {
          source.addText('$foo "frog">');
-         entityDeclaration.parse(source, declarationPToken, (result) => {
+         parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            entityDeclaration.checkWellFormed(result, ec, emd);
+            result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_NAME_INVALID);
             done();
@@ -186,10 +186,10 @@ describe('entityDeclaration (integration)', () => {
 
       it('reports an error when name starts with "xml" (check misc.checkWellFormedNameRecommendation())', (done) => {
          source.addText('xmlFoo "frog">');
-         entityDeclaration.parse(source, declarationPToken, (result) => {
+         parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            entityDeclaration.checkWellFormed(result, ec, emd);
+            result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ENTITYDECL_NAME_XML_RESERVED);
             done();
@@ -198,10 +198,10 @@ describe('entityDeclaration (integration)', () => {
 
       it('reports an error when external ID has no value (externalId.checkWellFormed())', (done) => {
          source.addText('entityName SYSTEM >');
-         entityDeclaration.parse(source, declarationPToken, (result) => {
+         parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            entityDeclaration.checkWellFormed(result, ec, emd);
+            result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.LITERAL_NO_OPEN_QUOTE);
             done();
@@ -210,10 +210,10 @@ describe('entityDeclaration (integration)', () => {
 
       it('reports an error when NDATA value has a bad char (check misc.checkWellFormedText())', (done) => {
          source.addText('entityName SYSTEM "sys.xml" NDATA bad\u0000>');
-         entityDeclaration.parse(source, declarationPToken, (result) => {
+         parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);
 
-            entityDeclaration.checkWellFormed(result, ec, emd);
+            result.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();
@@ -225,10 +225,10 @@ describe('entityDeclaration (integration)', () => {
          source.addText('entityName %bar; "other">');
          source.endText();
 
-         entityDeclaration.parse(source, declarationPToken, (pToken) => {
+         parseEntityDeclaration(source, declarationPToken, (pToken) => {
             // "expand" what should be there.
             (pToken.unassigned as any).shift(); // get rid of the peref
-            pToken.unassigned = [{
+            (pToken as any).unassigned = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                }, {
@@ -243,10 +243,10 @@ describe('entityDeclaration (integration)', () => {
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
             ].concat(pToken.unassigned as any) as any;
-            entityDeclaration.assignUnassigned(pToken);
+            (pToken as any).assignUnassigned(); // typeHAck
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            entityDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ENTITYDECL_EXTRA_TEXT);
             done();
@@ -255,48 +255,48 @@ describe('entityDeclaration (integration)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
+   // describe('pTokenToXToken()', () => {
 
-      it('adds the EntityValue (literal.makeTokenCompatible())', (done) => {
-         source.addText('entityName "one" >');
-         entityDeclaration.parse(source, declarationPToken, (pToken) => {
-            const xToken: any = entityDeclaration.pTokenToXToken(pToken);
+   //    it('adds the EntityValue (literal.makeTokenCompatible())', (done) => {
+   //       source.addText('entityName "one" >');
+   //       parseEntityDeclaration(source, declarationPToken, (pToken) => {
+   //          const xToken: any = entityDeclaration.pTokenToXToken(pToken);
 
-            expect((xToken.value[0] as any).text.str).toEqual('one');
-            done();
-         });
-      });
+   //          expect((xToken.value[0] as any).text.str).toEqual('one');
+   //          done();
+   //       });
+   //    });
 
-      it('creates a token with the externalLoc set (externalId.makeEntityLocation())', (done) => {
-         source.addText('entityName SYSTEM "sys.xml" >');
-         entityDeclaration.parse(source, declarationPToken, (pToken) => {
-            const xToken = entityDeclaration.pTokenToXToken(pToken);
+   //    it('creates a token with the externalLoc set (externalId.makeEntityLocation())', (done) => {
+   //       source.addText('entityName SYSTEM "sys.xml" >');
+   //       parseEntityDeclaration(source, declarationPToken, (pToken) => {
+   //          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect(xToken.externalLoc).toEqual(new EntityLocation('sys.xml'));
-            done();
-         });
-      });
+   //          expect(xToken.externalLoc).toEqual(new EntityLocation('sys.xml'));
+   //          done();
+   //       });
+   //    });
 
-      it('adds the token to the SToken list (externalId.getStokens())', (done) => {
-         source.addText('entityName SYSTEM "sys.xml" >');
-         entityDeclaration.parse(source, declarationPToken, (pToken) => {
-            const xToken = entityDeclaration.pTokenToXToken(pToken);
+   //    it('adds the token to the SToken list (externalId.getStokens())', (done) => {
+   //       source.addText('entityName SYSTEM "sys.xml" >');
+   //       parseEntityDeclaration(source, declarationPToken, (pToken) => {
+   //          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect((xToken as any).pToken!.externalId!.system.value[0].text.str).toEqual('sys.xml'); // typeHack
-            done();
-         });
-      });
+   //          expect((xToken as any).pToken!.externalId!.system.value[0].text.str).toEqual('sys.xml'); // typeHack
+   //          done();
+   //       });
+   //    });
 
-      it('adds the token to the SToken list (literal.getSTokens())', (done) => {
-         source.addText('entityName "dukkha" >');
-         entityDeclaration.parse(source, declarationPToken, (pToken) => {
-            const xToken = entityDeclaration.pTokenToXToken(pToken);
+   //    it('adds the token to the SToken list (literal.getSTokens())', (done) => {
+   //       source.addText('entityName "dukkha" >');
+   //       parseEntityDeclaration(source, declarationPToken, (pToken) => {
+   //          const xToken = entityDeclaration.pTokenToXToken(pToken);
 
-            expect((xToken as any).pToken.value[0].text.str).toEqual('dukkha');
-            done();
-         });
-      });
+   //          expect((xToken as any).pToken.value[0].text.str).toEqual('dukkha');
+   //          done();
+   //       });
+   //    });
 
-   });
+   // });
 
 });
