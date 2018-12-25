@@ -18,7 +18,6 @@ import {
    elementDeclaration,
    elementStart,
    elementEnd,
-   notationDeclaration,
    space,
 
    CDATA_PTOKEN,
@@ -32,6 +31,8 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
+   NOTATION_DECLARATION_PTOKEN,
+   NotationDeclarationPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -233,12 +234,12 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             (pToken as ParameterEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
-         case notationDeclaration.PTYPE:
+         case NOTATION_DECLARATION_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.NOTATIONDECL_INVALID_CONTEXT);
             }
 
-            notationDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typeHack
+            (pToken as NotationDeclarationPToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case PROCESSING_INSTRUCTION_PTOKEN:
             if (this._state === CheckWellFormedState.START) {

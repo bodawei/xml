@@ -1,4 +1,4 @@
-## A.2 Other References
+### A.2 Other References
 
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
@@ -30,7 +30,8 @@ ISO (International Organization for Standardization). ISO 8879:1986(E). Informat
 **ISO/IEC 10744**
 ISO (International Organization for Standardization). ISO/IEC 10744-1992 (E). Information technology -- Hypermedia/Time-based Structuring Language (HyTime). [Geneva]: International Organization for Standardization, 1992. Extended Facilities Annexe. [Geneva]: International Organization for Standardization, 1996.
 
-> **1.0/2: Replaced:**
+> **1.0/2: Replaced with the next:**
+
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
 
@@ -48,8 +49,6 @@ James Clark. Comparison of SGML and XML. See http://www.w3.org/TR/NOTE-sgml-xml-
 
 **IANA-LANGCODES**
 (Internet Assigned Numbers Authority) Registry of Language Tags, ed. Keld Simonsen et al. (See http://www.isi.edu/in-notes/iana/assignments/languages/.)
-
-> **1.0/3: Modified:** Should now point at: http://www.iana.org/assignments/language-subtag-registry.
 
 **IETF RFC2141**
 IETF (Internet Engineering Task Force). RFC 2141: URN Syntax, ed. R. Moats. 1997. (See http://www.ietf.org/rfc/rfc2141.txt.)
@@ -87,7 +86,7 @@ ISO (International Organization for Standardization). ISO 8879:1986 TC2. Informa
 **XML Names**
 Tim Bray, Dave Hollander, and Andrew Layman, editors. Namespaces in XML. Textuality, Hewlett-Packard, and Microsoft. World Wide Web Consortium, 1999. (See http://www.w3.org/TR/REC-xml-names/.)
 
-> **1.0/3: Replaced**
+> **1.0/3: Replaced with the following**
 
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
@@ -131,7 +130,7 @@ ISO (International Organization for Standardization). ISO 8879:1986 TC2. Informa
 **XML Names**
 Tim Bray, Dave Hollander, and Andrew Layman, editors. Namespaces in XML. Textuality, Hewlett-Packard, and Microsoft. World Wide Web Consortium, 1999. (See http://www.w3.org/TR/REC-xml-names/.)
 
-> **1.0/4: Replaced**
+> **1.0/4: Replaced with the following**
 
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
@@ -175,7 +174,7 @@ ISO (International Organization for Standardization). ISO 8879:1986 TC2. Informa
 **XML Names**
 Tim Bray, Dave Hollander, and Andrew Layman, editors. Namespaces in XML. Textuality, Hewlett-Packard, and Microsoft. World Wide Web Consortium, 1999. (See http://www.w3.org/TR/REC-xml-names/.)
 
-> **1.0/5: Replaced**
+> **1.0/5: Replaced with the following**
 
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
@@ -219,12 +218,12 @@ ISO (International Organization for Standardization). ISO 8879:1986 TC2. Informa
 **XML Names**
 Tim Bray, Dave Hollander, and Andrew Layman, editors. Namespaces in XML. Textuality, Hewlett-Packard, and Microsoft. World Wide Web Consortium, 1999. (See http://www.w3.org/TR/xml-names/.)
 
-> **1.0/6: Add**
+> **1.0/6: Added**
 
 **CharMod-Norm**
 W3C Working Draft. Character Model for the World Wide Web 1.0: Normalization. François Yergeau, Martin J. Dürst, Richard Ishida, Addison Phillips, Misha Wolf, Tex Texin. (See http://www.w3.org/TR/charmod-norm/.)
 
-> **1.1/1: Replaced**
+> **1.1/1: Replaced with the following**
 
 **Aho/Ullman**
 Aho, Alfred V., Ravi Sethi, and Jeffrey D. Ullman. Compilers: Principles, Techniques, and Tools. Reading: Addison-Wesley, 1986, rpt. corr. 1988.
@@ -275,7 +274,7 @@ Tim Bray, Dave Hollander, and Andrew Layman, editors. Namespaces in XML. Textual
 
 
 
-### Appendix: Standards
+#### Appendix: Standards
 * 1.0/1: https://www.w3.org/TR/1998/REC-xml-19980210#null
    * Annotated: https://www.xml.com/axml/axml.html
 * 1.0/2: https://www.w3.org/TR/2000/REC-xml-20001006#null

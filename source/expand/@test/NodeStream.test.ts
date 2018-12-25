@@ -10,7 +10,6 @@ import * as langAttribute from '../../token/common/langAttribute';
 import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
 import { ElementDeclarationPToken } from '../../token/elementDeclaration'; // hack
-import { NotationDeclarationPToken } from  '../../token/notationDeclaration'; // hack
 
 import NodeStream from '../NodeStream';
 import EntityManager from '../EntityManager';
@@ -31,6 +30,8 @@ import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    GeneralEntityReferenceXToken,
+   NotationDeclarationPToken,
+   NotationDeclarationXToken,
    ParameterEntityDeclarationXToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferenceXToken,
@@ -78,7 +79,7 @@ describe('NodeStream (unit)', () => {
       });
 
       it('passes a notification delcaration through', () => {
-         const token = new xToken.notationDeclaration.XToken('fred', undefined);
+         const token = new NotationDeclarationXToken('fred', undefined);
 
          nodeStream.write(token);
 
@@ -1087,6 +1088,7 @@ describe('NodeStream (unit)', () => {
          it('processes through the unassigned values', (done) => {
             const unassignedVals = [ xToken.unassigned.wordFromSToken(SToken.fromString('public')) ];
             const pToken = new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                unassigned: unassignedVals,
                externalId: {
@@ -1094,8 +1096,8 @@ describe('NodeStream (unit)', () => {
                   unassigned: unassignedVals,
                },
             });
-            const declToken = xToken.notationDeclaration.pTokenToXToken(pToken);
-            spyOn(xToken.notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
+            const declToken = pToken.toXToken();
+            spyOn(pToken, 'assignUnassigned').and.callFake(() => {
                expect(pToken.unassigned).toEqual([
                   xToken.unassigned.wordFromSToken(SToken.fromString('public')),
                ]);
@@ -1109,11 +1111,12 @@ describe('NodeStream (unit)', () => {
          it('handles the lack of an externalId', (done) => {
             const unassignedVals = [ xToken.unassigned.spaceFromSToken(SToken.fromString('theName')) ];
             const pToken = new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
                unassigned: unassignedVals,
                nextPropName: 'name',
             });
-            const declToken = xToken.notationDeclaration.pTokenToXToken(pToken);
-            spyOn(xToken.notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
+            const declToken = pToken.toXToken();
+            spyOn(pToken, 'assignUnassigned').and.callFake(() => {
                expect(pToken.unassigned).toEqual([
                   xToken.unassigned.spaceFromSToken(SToken.fromString('theName')),
                ]);

@@ -17,7 +17,6 @@ import {
    GENERAL_ENTITY_END_XTOKEN,
    GENERAL_ENTITY_START_XTOKEN,
    ParameterEntityEndPToken,
-   notationDeclaration,
    text,
    unassigned,
    literalValue,
@@ -43,12 +42,12 @@ import {
    ParameterEntityReferencePToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityDeclarationXToken,
+   NotationDeclarationXToken,
 } from '../token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
-import { NotationDeclaration } from '../token/notationDeclaration'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 
@@ -169,7 +168,7 @@ class NodeStream extends stream.Transform {
       } else if (xToken instanceof elementDeclaration.XToken && !this.skipDeclarations) {
          this._processElementDeclaration(xToken, callback);
          return;
-      } else if (xToken instanceof notationDeclaration.XToken && !this.skipDeclarations) {
+      } else if (xToken instanceof NotationDeclarationXToken && !this.skipDeclarations) {
          this._processNotationDeclaration(xToken, callback);
          return;
       } else if (xToken instanceof attListDeclaration.XToken && !this.skipDeclarations) {
@@ -861,7 +860,7 @@ class NodeStream extends stream.Transform {
     Notation Declaration processing
    \**********************************************************************/
 
-   _processNotationDeclaration(ndToken: NotationDeclaration, done: DoneSignal) {
+   _processNotationDeclaration(ndToken: NotationDeclarationXToken, done: DoneSignal) {
       // @@ This is getting into 4.1 area, but there should be no unassigned values in the internal subset
       this._expandPERefsInUnassignedValue(ndToken.pToken, false, () => {
          if (ndToken.pToken && ndToken.pToken.unassigned) {
@@ -869,8 +868,8 @@ class NodeStream extends stream.Transform {
                ndToken.pToken.externalId.unassigned = ndToken.pToken.unassigned;
             }
 
-            notationDeclaration.assignUnassigned(ndToken.pToken);
-            ndToken = notationDeclaration.pTokenToXToken(ndToken.pToken);
+            ndToken.pToken.assignUnassigned();
+            ndToken = ndToken.pToken.toXToken();
          }
 
          this.push(ndToken);

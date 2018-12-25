@@ -18,7 +18,7 @@ import {
    text,
    charRef,
    unassigned,
-   notationDeclaration,
+   NotationDeclarationPToken,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
    ParameterEntityReferencePToken,
@@ -37,8 +37,7 @@ import { PTokenStream, PTokenFromLiteralStream } from "pTokenStream";
 import { ExternalId } from "source/token/common/externalId";
 import { defaultExtractors } from "extractor";
 import { AttListPToken } from "source/token/attListDeclaration";
-import { NotationDeclarationPToken } from "source/token/notationDeclaration";
-import { UnassignedType } from "source/token/common/unassigned";
+import { UnassignedType, UnassignedArray } from "source/token/common/unassigned";
 import { CharRefPToken } from "source/token/charRef";
 
 describe('EntityExpander (unit)', () => {
@@ -537,18 +536,19 @@ describe('EntityExpander (unit)', () => {
       it('passes a declaration with no unassigned values through without changes', (done) => {
          const input = [
             new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
-               externalId: {
-               },
+               externalId: {},
             }),
          ];
 
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(1);
             expect(results[0]).toEqual(new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
-               externalId: {
-               },
+               extra: [],
+               externalId: {},
             }));
             done();
          });
@@ -556,19 +556,21 @@ describe('EntityExpander (unit)', () => {
 
       it('passes a declaration with an unassigned value through', (done) => {
          const unassignedVals = [ unassigned.wordFromSToken(SToken.fromString('public')) ];
-         const input = [
-            new NotationDeclarationPToken({
-               name: SToken.fromString('test'),
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+            externalId: {
+               nextParamName: 'idType',
                unassigned: unassignedVals,
-               externalId: {
-                  nextParamName: 'idType',
-                  unassigned: unassignedVals,
-               },
-            }),
+            },
+         });
+         const input = [
+            notationDecl,
          ];
 
-         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
-            expect(pToken.unassigned).toEqual([
+         spyOn(notationDecl, 'assignUnassigned').and.callFake(() => {
+            expect(notationDecl.unassigned).toEqual([
                unassigned.wordFromSToken(SToken.fromString('public')),
             ]);
          });
@@ -584,11 +586,20 @@ describe('EntityExpander (unit)', () => {
             open: SToken.fromString('%'),
             name: SToken.fromString('pe1'),
          });
-
          const unassignedVals = [ {
             type: UnassignedType.REFERENCE,
             token: refToPe1,
          } ];
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+            externalId: {
+               nextParamName: 'idType',
+               unassigned: unassignedVals,
+            },
+         });
+
          const input = [
             new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
@@ -599,18 +610,11 @@ describe('EntityExpander (unit)', () => {
                   new text.PToken({ text: SToken.fromString('UBLIC') }),
                ],
             }),
-            new NotationDeclarationPToken({
-               name: SToken.fromString('test'),
-               unassigned: unassignedVals,
-               externalId: {
-                  nextParamName: 'idType',
-                  unassigned: unassignedVals,
-               },
-            }),
+            notationDecl,
          ];
 
-         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
-            expect(pToken.unassigned).toEqualRangeless([
+         spyOn(notationDecl, 'assignUnassigned').and.callFake(() => {
+            expect(notationDecl.unassigned).toEqualRangeless([
                unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
             ]);
          });
@@ -626,11 +630,19 @@ describe('EntityExpander (unit)', () => {
             open: SToken.fromString('%'),
             name: SToken.fromString('pe1'),
          });
-
-         const unassignedVals = [ {
+         const unassignedVals: UnassignedArray = [ {
             type: UnassignedType.REFERENCE,
             token: refToPe1,
          } ];
+         const notationDecl = new NotationDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('test'),
+            unassigned: unassignedVals,
+            externalId: {
+               nextParamName: 'idType',
+               unassigned: unassignedVals,
+            },
+         });
          const input = [
             new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
@@ -653,18 +665,11 @@ describe('EntityExpander (unit)', () => {
                   }),
                ],
             }),
-            new NotationDeclarationPToken({
-               name: SToken.fromString('test'),
-               unassigned: unassignedVals,
-               externalId: {
-                  nextParamName: 'idType',
-                  unassigned: unassignedVals,
-               },
-            }),
+            notationDecl,
          ];
 
-         spyOn(notationDeclaration, 'assignUnassigned').and.callFake((pToken: NotationDeclarationPToken) => {
-            expect(pToken.unassigned).toEqualRangeless([
+         spyOn(notationDecl, 'assignUnassigned').and.callFake(() => {
+            expect(notationDecl.unassigned).toEqualRangeless([
                unassigned.wordFromSToken(SToken.fromString('PUBLIC')),
             ]);
          });

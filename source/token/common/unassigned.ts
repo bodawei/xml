@@ -164,7 +164,7 @@ function extractValue(source: STokenSource, peekedChar: string, includeNameListC
          literal.parse(source, { pToken: container }, () => {
             const literal: UnassignedLiteral = {
                type: UnassignedType.LITERAL,
-               token: container,  
+               token: container,
             }
 
             deliverValue(literal);
@@ -423,14 +423,14 @@ class UnassignedValueCursor {
 function wordFromSToken(sToken: SToken): UnassignedWord {
    return {
       type: UnassignedType.WORD,
-      token: new TextPToken({ text: sToken }),  
+      token: new TextPToken({ text: sToken }),
    };
 }
 
 function spaceFromSToken(sToken: SToken): UnassignedSpace {
    return {
       type: UnassignedType.SPACE,
-      token: new TextPToken({ text: sToken }),  
+      token: new TextPToken({ text: sToken }),
    };
 }
 
@@ -445,6 +445,12 @@ function makeCheckCallback(pToken: UnassignedPToken, propName: string, foundUnas
 
       otherwise();
    };
+}
+
+function parsePERefOrOrdinary(source: STokenSource, pToken: UnassignedPToken, propName: string, foundUnassigned: (pToken: any) => void, otherwise: () => void) {
+   const callback = makeCheckCallback(pToken, propName, foundUnassigned, otherwise);
+
+   checkForPERef(source, callback);
 }
 
 function getSTokens(unassignedArray: UnassignedArray) {
@@ -491,6 +497,7 @@ const unassigned = {
    assignToProps,
    wordFromSToken,
    spaceFromSToken,
+   parsePERefOrOrdinary,
    makeCheckCallback,
    getSTokens,
    checkExtra,

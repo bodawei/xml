@@ -3,25 +3,23 @@
 import declaration from './bridge/baseDeclaration';
 
 import attListDeclaration from './attListDeclaration';
+import elementDeclaration from './elementDeclaration';
+
 import * as charData from './charData';
 import * as charRef from './charRef';
 import * as comment from './comment';
 import { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
-import elementDeclaration from './elementDeclaration';
 import * as elementStart from './elementStart';
 import * as elementEnd from './elementEnd';
 import * as space from './space';
 import text from './text';
-import * as notationDeclaration from './notationDeclaration';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 
-// import * as entityDeclaration from './entityDeclaration';
-// export * from './entityDeclaration';
-
 export * from './processingInstruction';
+export * from './entityDeclaration';
 
 export * from './bridge/declaration';
 export * from './bridge/instruction';
@@ -37,9 +35,9 @@ export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
 
 export * from './cdata';
-export * from './entityDeclaration';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
+export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
 export * from './textDeclaration';
@@ -61,7 +59,6 @@ const token = {
    elementStart,
    elementEnd,
    elementDeclaration,
-   notationDeclaration,
    space,
    text,
 
@@ -82,7 +79,6 @@ export {
    elementStart,
    elementEnd,
    elementDeclaration,
-   notationDeclaration,
    space,
    text,
 

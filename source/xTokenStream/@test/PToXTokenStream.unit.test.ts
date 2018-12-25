@@ -11,7 +11,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   notationDeclaration,
    space,
    text,
 
@@ -21,6 +20,7 @@ import {
    TextDeclarationPToken,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
+   NotationDeclarationPToken,
 } from '../../token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -143,13 +143,13 @@ describe('PToXTokenStream (unit)', () => {
    });
 
    it('calls notationDeclaration.pTokenToXToken()', () => {
-      spyOn(notationDeclaration, 'pTokenToXToken');
-      const pToken = { type: notationDeclaration.PTYPE };
+      const pToken = new NotationDeclarationPToken({ open: SToken.fromString('<') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(notationDeclaration.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls processingInstruction.toXToken()', () => {

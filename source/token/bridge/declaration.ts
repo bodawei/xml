@@ -8,9 +8,10 @@ import {
    attListDeclaration,
    elementDeclaration,
    parseEntityDeclaration,
-   notationDeclaration,
+   parseNotationDeclaration,
 
    GeneralEntityDeclarationPToken,
+   NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'token';
 import { DocTypeEndPToken } from '../docTypeEnd';
@@ -24,7 +25,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
@@ -55,6 +56,9 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
       switch (strOrBlank(start.declType).toUpperCase()) {
          case 'ENTITY':
             parseEntityDeclaration(source, start, deliverPToken as any); //typehack
+            return;
+         case 'NOTATION':
+            parseNotationDeclaration(source, start, deliverPToken);
             return;
       }
 
@@ -89,9 +93,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
             break;
          case 'ELEMENT':
             elementDeclaration.parse(source, newResult, deliverPToken);
-            break;
-         case 'NOTATION':
-            notationDeclaration.parse(source, newResult, deliverPToken);
             break;
          default:
             deliverPToken(newResult);

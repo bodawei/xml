@@ -13,6 +13,7 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
 } from '../../token';
 
 type Token = { type: string };
@@ -126,7 +127,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parse NOTATION declaration', (done) => {
-      expectInputToProduceTypes('<!NOTATION foo>', 'NOTATIONDECL', done);
+      expectInputToProduceTypes('<!NOTATION foo>', NOTATION_DECLARATION_PTOKEN, done);
    });
 
    it('parses a processing instruction', (done) => {

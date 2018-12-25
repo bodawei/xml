@@ -14,16 +14,16 @@ import {
    elementDeclaration,
    elementEnd,
    elementStart,
-   notationDeclaration,
-   ProcessingInstructionXToken,
    space,
    text,
 
    CdataXToken,
-   XmlDeclarationXToken,
    GeneralEntityReferenceXToken,
-   ParameterEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
+   NotationDeclarationXToken,
+   ParameterEntityReferenceXToken,
+   ProcessingInstructionXToken,
+   XmlDeclarationXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
 import { makeSTokenMaker } from '../../sToken/@test/helper';
@@ -166,7 +166,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('nokenizes a NOTATION declaration', (done) => {
       expectInputToProduce('<!NOTATION myNotation PUBLIC "pub.xml"     "sys.xml" >', [
-         new notationDeclaration.XToken('myNotation', new EntityLocation('sys.xml', 'pub.xml')),
+         new NotationDeclarationXToken('myNotation', new EntityLocation('sys.xml', 'pub.xml')),
       ], done);
    });
 

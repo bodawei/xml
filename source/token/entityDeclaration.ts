@@ -113,6 +113,7 @@ function parseWordOrPERef(source: STokenSource, pToken: GeneralEntityDeclaration
 
 function parseEntityValue(source: STokenSource, pToken: GeneralEntityDeclarationPToken, done: () => void) {
    const callback = unassigned.makeCheckCallback(pToken, 'entityValueOrId', done, () => {
+      // §4.5 defines that we should be parsing charRefs and pe refs here
       literal.parse(source, {
          pToken,
          peRef: true,

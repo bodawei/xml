@@ -16,7 +16,6 @@ import {
    elementStart,
    elementEnd,
    elementDeclaration,
-   notationDeclaration,
    ProcessingInstructionXToken,
    space,
    text,
@@ -30,6 +29,7 @@ import {
    InternalSubsetEndXToken,
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
+   NotationDeclarationXToken,
    XmlDeclarationXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
@@ -38,7 +38,6 @@ import {
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
 import { ElementDeclaration } from '../../token/elementDeclaration';
-import { NotationDeclaration } from '../../token/notationDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { TextXToken } from 'source/token/text';
@@ -187,16 +186,28 @@ describe('CheckXTokenValidStream (unit)', () => {
             [ 'docTypeName', 'elementName' ]));
       });
 
-      it('adds an error if the NOTATION name shows up more than once', () => {
-         const nOne = new notationDeclaration.XToken('one');
-         const nTwo = new notationDeclaration.XToken('one');
+      it('adds an error if the NOTATION name shows up more than once', (done) => {
+         const nOne = new NotationDeclarationXToken('one');
+         const nTwo = new NotationDeclarationXToken('one');
 
          validator.write(nOne);
          validator.write(nTwo);
+         validator.end();
 
-         expect(validator.read()).toEqual(nOne as any); // typeHack
-         expect(validator.read()).toEqual(new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ]));
-         expect(validator.read()).toEqual(nTwo as any); // typeHack
+         const expected = new ValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ 'one' ]);
+         expectStream(validator, expected, done);
+      });
+
+      it('adds no error if the NOTATION name shows up more than once and this is version 1.0/1', (done) => {
+         const nOne = new NotationDeclarationXToken('one');
+         const nTwo = new NotationDeclarationXToken('one');
+
+         validator.write(new EntityMetaData(undefined, 1.0, 1));
+         validator.write(nOne);
+         validator.write(nTwo);
+         validator.end();
+
+         expectNoErrors(validator, done);
       });
 
    });
@@ -1327,15 +1338,15 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          describe('NOTATION attribute', () => {
-            let n1: NotationDeclaration;
-            let n2: NotationDeclaration;
+            let n1: NotationDeclarationXToken;
+            let n2: NotationDeclarationXToken;
             let elDecl: ElementDeclaration;
             let attListDecl: AttListXToken;
             let startToken: ElementStart;
 
             beforeEach(() => {
-               n1 = new notationDeclaration.XToken('first');
-               n2 = new notationDeclaration.XToken('second');
+               n1 = new NotationDeclarationXToken('first');
+               n2 = new NotationDeclarationXToken('second');
                elDecl = new elementDeclaration.XToken('testElement', 'ANY', undefined);
                attListDecl = new attListDeclaration.XToken('testElement', [{
                   name: 'notationAttr',
@@ -2211,9 +2222,9 @@ describe('CheckXTokenValidStream (unit)', () => {
             function setupDuplicateNotationValues(emd: EntityMetaData) {
                const endOfDocType = new docTypeEnd.XToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
-               const notation1 = new notationDeclaration.XToken('first', undefined);
-               const notation2 = new notationDeclaration.XToken('second', undefined);
-               const notation3 = new notationDeclaration.XToken('third', undefined);
+               const notation1 = new NotationDeclarationXToken('first', undefined);
+               const notation2 = new NotationDeclarationXToken('second', undefined);
+               const notation3 = new NotationDeclarationXToken('third', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notationAttr',
                   type: 'NOTATION',
@@ -2234,7 +2245,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if a notation value has not been declared at ATTLIST declaration time', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
-               const notation = new notationDeclaration.XToken('first', undefined);
+               const notation = new NotationDeclarationXToken('first', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
                   type: 'NOTATION',
@@ -2321,8 +2332,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports an error if the default value for a NOTATION attribute does not match one of the defined values', (done) => {
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
-               const notation1 = new notationDeclaration.XToken('first');
-               const notation2 = new notationDeclaration.XToken('second');
+               const notation1 = new NotationDeclarationXToken('first');
+               const notation2 = new NotationDeclarationXToken('second');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'noteAttr',
                   type: 'NOTATION',

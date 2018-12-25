@@ -8,6 +8,7 @@ import unassigned from './unassigned';
 import literal, { LiteralPToken } from './literal';
 import { strOrBlank, STokenSource, SToken } from 'sToken';
 import { UnassignedArray } from './unassigned';
+import { EIDRM } from 'constants';
 
 /**********************************************************************\
  The externalId namespace has routines for processing external ID's
@@ -133,6 +134,20 @@ function parseSystem(source: STokenSource, allTerminators: Array<string>, extIdP
    });
 
    unassigned.checkForPERef(source, callback);
+}
+
+function assignUnassignedNew(unassigned: UnassignedArray, prevContainer: { [key: string]: any }, prevSpacePropName?: string) {
+   const eId: ExternalId = (prevContainer && prevContainer.externalId) ||  { type: EXTERNAL_ID };
+
+   eId.unassigned = unassigned;
+   assignUnassigned(eId, prevContainer, prevSpacePropName);
+   delete eId.unassigned;
+   delete eId.extra;
+   delete eId.type;
+
+   if (Object.keys(eId).length > 1) {
+      prevContainer.externalId = eId;
+   }
 }
 
 function assignUnassigned(externalId: ExternalId, prevContainer?: { [key: string]: any }, prevSpacePropName?: string) {
@@ -281,6 +296,7 @@ const externalId = {
    PTYPE: EXTERNAL_ID,
    parse,
    assignUnassigned,
+   assignUnassignedNew,
    getSTokens,
    checkWellFormed,
    makeEntityLocation,
@@ -288,6 +304,6 @@ const externalId = {
 
 export default externalId;
 
-export { 
+export {
    ExternalId,
 };

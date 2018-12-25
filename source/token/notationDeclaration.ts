@@ -2,67 +2,81 @@
 
 import { EntityLocation, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import declaration from './bridge/baseDeclaration';
 import externalId, { ExternalId } from './common/externalId';
 import misc from './common/misc';
 import unassigned, { UnassignedArray, UnassignedType, UnassignedValue } from './common/unassigned';
+import { DeclarationStart } from './bridge/declaration';
 
-const NOTATIONDECL = 'NOTATIONDECL';
-const NOTATIONDECL_XTOKEN = 'NOTATIONDECL_XTOKEN';
+const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';
+const NOTATION_DECLARATION_XTOKEN = 'NOTATION_DECLARATION_XTOKEN';
 const WARN = XmlWarning.ID;
 const WFEID = WellFormedError.ID;
 
-type DeclarationPToken = {
-
+type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
+type ProtoToken = DeclarationStart & {
+   type: string,
+   [key: string] : any,
 };
 
-type DeliverPToken = (pToken: NotationDeclarationPToken) => void;
-
 /**********************************************************************\
- The elementStart namespace contains the usual tools for processing
- an element start tag.
+ §4.7 Notation Declaration
+ Contains parsing, well formed checks and conversion routines for
+ Notation Declarations
 \**********************************************************************/
 
-class NotationDeclaration {
-   public readonly type = NOTATIONDECL_XTOKEN;
-   public name: string;
-   public externalId: EntityLocation | void;
+class NotationDeclarationXToken {
+   public readonly type: typeof NOTATION_DECLARATION_XTOKEN = NOTATION_DECLARATION_XTOKEN;
+   public readonly name: string;
+   public readonly externalId?: EntityLocation;
    public pToken?: NotationDeclarationPToken;
-   public nextPropName?: string;
-   public unassigned?: UnassignedArray;
 
-   constructor(name: string, externalId?: EntityLocation | void, pToken?: NotationDeclarationPToken) {
+   constructor(name: string, externalId?: EntityLocation, pToken?: NotationDeclarationPToken) {
       this.name = name;
       this.externalId = externalId;
       this.pToken = pToken;
    }
-
 }
 
-class NotationDeclarationPToken extends declaration.PToken {
-   public name?: SToken;
-   public postNameSpace?: SToken;
-   public externalId?: ExternalId;
-   public postExternalIdSpace?: SToken;
-   public close?: SToken;
+class NotationDeclarationPToken {
+   public readonly type: typeof NOTATION_DECLARATION_PTOKEN = NOTATION_DECLARATION_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly declType?: SToken;
+   public readonly declTypeSpace?: SToken;
+   public readonly name?: SToken;
+   public readonly nameSpace?: SToken;
+   public readonly externalId?: ExternalId;
+   public readonly externalIdSpace?: SToken;
+   public readonly close?: SToken;
+   public readonly unassigned: UnassignedArray;
+   public readonly nextPropName?: string;
+   public extra?: UnassignedArray;
 
-   constructor(props: NotationDeclarationPToken | Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(NOTATIONDECL, props);
+   constructor(props: NotationDeclarationPToken | DeclarationStart) {
+      this.unassigned = [];
+
+      Object.assign(this, props);
+
+      this.type = NOTATION_DECLARATION_PTOKEN;
+      this.open = props.open;
    }
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
+   assignUnassigned() {
+      return assignUnassigned(this);
+   }
 
-      results.pushSTokens(this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.postExternalIdSpace,
-         this.close);
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
 
-      return results;
+   toXToken() {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
@@ -78,40 +92,51 @@ class NotationDeclarationPToken extends declaration.PToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [82] NotationDecl ::=
-      '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
+   §4.7
+      [82] NotationDecl ::=
+         '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
+   Lax:
+      [82] NotationDecl ::=
+         '<! S? NOTATION' S? Name S? (ExternalID | PublicID) S? '>'
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: DeliverPToken): void {
-   const pToken = new NotationDeclarationPToken(declarationPToken as NotationDeclarationPToken); // typeHack
+function parseNotationDeclaration(source: STokenSource, declarationStart: DeclarationStart, deliverPToken: DeliverPToken): void {
+   const protoToken: ProtoToken = Object.assign({}, declarationStart) as ProtoToken;
 
-   const callback = unassigned.makeCheckCallback(pToken, 'name', (thePToken) => {
-      getClose(source, thePToken, undefined, deliverPToken);
+   unassigned.parsePERefOrOrdinary(source, protoToken, 'name', () => {
+      getClose(source, protoToken, deliverPToken);
    }, () => {
-      source.extractToObject('word', [ '>' ], pToken, 'name');
-      source.extractToObjectNoParams('space', pToken, 'postNameSpace');
+      source.extractToObject('word', [ '>' ], protoToken, 'name');
+      source.extractToObjectNoParams('space', protoToken, 'nameSpace');
 
       externalId.parse(source, [ '>' ], (externalId?: ExternalId) => {
-         pToken.externalId = externalId;
-         if (externalId && !externalId.unassigned) {
-            source.extractToObjectNoParams('space', pToken, 'postExternalIdSpace');
+         if (externalId) {
+            protoToken.externalId = externalId;
+            if (externalId.unassigned) {
+               protoToken.unassigned = externalId.unassigned;
+               protoToken.nextPropName = externalId.nextPropName;
+               delete externalId.unassigned;
+               delete externalId.nextPropName;
+            } else {
+               source.extractToObjectNoParams('space', protoToken, 'externalIdSpace');
+            }
          }
 
-         getClose(source, pToken, externalId, deliverPToken);
+         getClose(source, protoToken, deliverPToken);
       });
    });
-
-   unassigned.checkForPERef(source, callback);
 }
 
-function getClose(source: STokenSource, pToken: NotationDeclarationPToken, externalId: ExternalId | void, deliverPToken: DeliverPToken): void {
+function getClose(source: STokenSource, protoToken: ProtoToken, deliverPToken: DeliverPToken): void {
    source.extract('match', '>', (sToken) => {
-      pToken.close = sToken;
-      if (externalId) {
-         pToken.unassigned = externalId.unassigned;
+      protoToken.close = sToken;
+
+      if (!protoToken.unassigned || protoToken.unassigned.length === 0) {
+         protoToken.unassigned = [];
+         protoToken.extra = [];
       }
 
-      deliverPToken(pToken);
+      deliverPToken(new NotationDeclarationPToken(protoToken));
    });
 }
 
@@ -120,56 +145,44 @@ function getClose(source: STokenSource, pToken: NotationDeclarationPToken, exter
 \**********************************************************************/
 
 function assignUnassigned(notationPToken: NotationDeclarationPToken): void {
-   const unValues: UnassignedArray = notationPToken.unassigned || [];
-
-   if (unValues.length === 0) {
-      delete notationPToken.unassigned;
-      delete notationPToken.nextPropName;
-      return;
-   }
-
+   const unValues: UnassignedArray = notationPToken.unassigned.slice(0);
    const unexpandedRef = unValues.filter((item: UnassignedValue) => (item.type === UnassignedType.REFERENCE));
 
-   if (unexpandedRef.length !== 0) {
+   if (unValues.length === 0 || unexpandedRef.length !== 0) {
+      notationPToken.extra = unValues;
       return;
    }
 
    if (notationPToken.nextPropName === 'name') {
-      unassigned.assignToProps(notationPToken.unassigned, notationPToken, notationPToken.nextPropName, [
-         { name: 'postDeclTypeSpace', type: 'space' },
+      unassigned.assignToProps(unValues, notationPToken, notationPToken.nextPropName, [
+         { name: 'declTypeSpace', type: 'space' },
          { name: 'name', type: 'word' },
-         { name: 'postNameSpace', type: 'space' },
+         { name: 'nameSpace', type: 'space' },
       ]);
    }
 
-   notationPToken.externalId = notationPToken.externalId || {
-      unassigned: notationPToken.unassigned,
-   } as ExternalId; // typeHack
-   externalId.assignUnassigned(notationPToken.externalId, notationPToken, 'postNameSpace');
+   externalId.assignUnassignedNew(unValues, notationPToken, 'nameSpace');
 
-   if (unValues.length !== 0) {
-      notationPToken.extra = notationPToken.unassigned;
-   }
-
-   delete notationPToken.externalId.nextPropName;
-   delete notationPToken.externalId.unassigned;
-   delete notationPToken.externalId.extra;
-   delete notationPToken.nextPropName;
-   delete notationPToken.unassigned;
+   notationPToken.extra = unValues;
 }
 
 /**********************************************************************\
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   if (!pToken || pToken.unassigned) {
-      return;
-   }
-
+function checkWellFormed(pToken: NotationDeclarationPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    const nameText: string = strOrBlank(pToken.name);
+   const declType = strOrBlank(pToken.declType);
 
-   declaration.checkWellFormed(pToken, ec, entityMetaData);
+   ec.setPos(pToken.open);
+
+   ec.check(pToken.unassigned && !pToken.extra, WFEID.NOTATIONDECL_UNASSIGNED);
+
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.NOTATIONDECL_OPEN_XTRA_SPACE_AFTER);
+
+   ec.setPos(pToken.declType);
+   ec.check(declType !== 'NOTATION', WFEID.NOTATIONDECL_DECLTYPE_INVALID, [ declType ]);
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.NOTATIONDECL_NO_NAME);
@@ -178,14 +191,13 @@ function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorColl
       WARN.NOTATIONDECL_NAME_XMLDASH_RESERVED,
       WARN.NOTATIONDECL_NAME_XML_RESERVED);
 
-   ec.setPos(pToken.postNameSpace);
-   ec.check(!pToken.postNameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [ nameText ]);
+   ec.setPos(pToken.nameSpace);
+   ec.check(!pToken.nameSpace, WFEID.NOTATIONDECL_NAME_NO_SPACE, [ nameText ]);
 
-   ec.setPos(undefined);
    ec.check(!pToken.externalId, WFEID.NOTATIONDECL_NO_EXTERNALID);
    externalId.checkWellFormed(pToken.externalId, ec, entityMetaData);
 
-   ec.setPos(pToken.postExternalIdSpace);
+   ec.setPos(pToken.externalIdSpace);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.NOTATIONDECL_NO_CLOSE, [ nameText ]);
 
@@ -196,35 +208,38 @@ function checkWellFormed(pToken: NotationDeclarationPToken | void, ec: ErrorColl
  pTokenToXToken() converts a pToken into a token.
 \**********************************************************************/
 
-function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclaration {
-   return new NotationDeclaration(strOrBlank(pToken.name),
+function pTokenToXToken(pToken: NotationDeclarationPToken): NotationDeclarationXToken {
+   return new NotationDeclarationXToken(strOrBlank(pToken.name),
       externalId.makeEntityLocation(pToken.externalId), pToken);
 }
 
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: NotationDeclarationPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(pToken.open,
+      pToken.openSpace,
+      pToken.declType,
+      pToken.declTypeSpace,
+      pToken.name,
+      pToken.nameSpace,
+      externalId.getSTokens(pToken.externalId),
+      pToken.externalIdSpace,
+      unassigned.getSTokens(pToken.extra || []),
+      pToken.close);
+
+   return builder.sTokenArray;
+}
+
 export {
-   NOTATIONDECL as PTYPE,
-   NOTATIONDECL_XTOKEN as XTYPE,
-   NotationDeclaration as XToken,
-   NotationDeclarationPToken as PToken,
-   parse,
-   assignUnassigned,
-   checkWellFormed,
-   pTokenToXToken,
+   NOTATION_DECLARATION_PTOKEN,
+   NOTATION_DECLARATION_XTOKEN,
 
    NotationDeclarationPToken,
-   NotationDeclaration,
-};
+   NotationDeclarationXToken,
 
-export default {
-   PTYPE: NOTATIONDECL,
-   XTYPE: NOTATIONDECL_XTOKEN,
-   XToken: NotationDeclaration,
-   PToken: NotationDeclarationPToken,
-   parse,
-   assignUnassigned,
-   checkWellFormed,
-   pTokenToXToken,
-
-   NotationDeclarationPToken,
-   NotationDeclaration,
+   parseNotationDeclaration,
 };

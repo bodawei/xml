@@ -1,40 +1,31 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { EntityLocation, EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { defaultExtractors } from '../../extractor';
+import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
 
+import { DeclarationStart } from '../bridge/declaration';
+import externalId from '../common/externalId';
+import unassigned, { UnassignedType } from '../common/unassigned';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
+import { NotationDeclarationPToken, parseNotationDeclaration, NotationDeclarationXToken } from '../notationDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import externalId from '../common/externalId';
-import notationDeclaration, { NotationDeclarationPToken } from '../notationDeclaration';
 import text from '../text';
-import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper';
 
-type DeclarationPToken = {
-   open: SToken;
-   openSpace?: SToken;
-   declType?: SToken;
-   postDeclTypeSpace?: SToken;
-};
-
 describe('notationDeclaration (integration)', () => {
-   let declarationPToken: DeclarationPToken;
-   let expectedSToken: (param: string) => SToken;
+   let declarationStart: DeclarationStart;
 
    beforeEach(() => {
-      expectedSToken = makeSTokenMaker();
-      declarationPToken = {
-         open: expectedSToken('<!'),
+      declarationStart = {
+         open: SToken.fromString('<!'),
          openSpace: undefined,
-         declType: expectedSToken('NOTATION'),
-         postDeclTypeSpace: expectedSToken(' '),
+         declType: SToken.fromString('NOTATION'),
+         declTypeSpace: SToken.fromString(' '),
       };
    });
 
@@ -45,7 +36,7 @@ describe('notationDeclaration (integration)', () => {
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
             expect(parsing.externalId!.type).toEqual(externalId.PTYPE);
             done();
          });
@@ -56,22 +47,21 @@ describe('notationDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         notationDeclaration.parse(source, {}, (result) => {
-            const makeSToken = makeSTokenMaker();
-            const makeSToken1 = makeSTokenMaker(undefined, 5, 0, 5);
-            expect(result).toEqual(new notationDeclaration.PToken({
+         parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
+            expect(result).toEqualRangeless(new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
                unassigned: [ {
                   type: UnassignedType.REFERENCE,
                   token: new ParameterEntityReferencePToken({
-                     open:  makeSToken('%'),
+                     open:  SToken.fromString('%'),
                      openSpace: undefined,
-                     name:  makeSToken('foo'),
+                     name:  SToken.fromString('foo'),
                      nameSpace: undefined,
-                     close:  makeSToken(';'),
+                     close:  SToken.fromString(';'),
                   }),
                } ],
                nextPropName: 'name',
-               close: makeSToken1('>'),
+               close: SToken.fromString('>'),
             }));
             done();
          });
@@ -81,30 +71,28 @@ describe('notationDeclaration (integration)', () => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('notationName %foo;>');
          source.endText();
-         const makeSToken1 = makeSTokenMaker(undefined, 13, 0, 13);
          const unassignedValue = [ {
             type: UnassignedType.REFERENCE,
             token: new ParameterEntityReferencePToken({
-               open:  makeSToken1('%'),
+               open:  SToken.fromString('%'),
                openSpace: undefined,
-               name:  makeSToken1('foo'),
+               name:  SToken.fromString('foo'),
                nameSpace: undefined,
-               close:  makeSToken1(';'),
+               close:  SToken.fromString(';'),
             }),
           } ];
 
-         notationDeclaration.parse(source, {}, (result) => {
-            const makeSToken = makeSTokenMaker();
-            expect(result).toEqual(new notationDeclaration.PToken({
-               name: makeSToken('notationName'),
-               postNameSpace: makeSToken(' '),
+         parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
+            expect(result).toEqual(new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('notationName'),
+               nameSpace: SToken.fromString(' '),
                unassigned: unassignedValue,
+               nextPropName: 'idType',
                externalId: {
                   type: 'EXTERNAL_ID',
-                  unassigned: unassignedValue,
-                  nextPropName: 'idType',
                },
-               close: makeSToken1('>'),
+               close: SToken.fromString('>'),
             }));
             done();
          });
@@ -119,12 +107,12 @@ describe('notationDeclaration (integration)', () => {
          source.addText('%foo;>');
          source.endText();
 
-         notationDeclaration.parse(source, {}, (pToken) => {
+         parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (pToken) => {
             // "expand" what should be there.
-            pToken.unassigned = [{
+            (pToken as any).unassigned = [{
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
-               }, 
+               },
                unassigned.wordFromSToken(SToken.fromString('notationName')),
                unassigned.spaceFromSToken(SToken.fromString(' ')),
                unassigned.wordFromSToken(SToken.fromString('PUBLIC')), {
@@ -140,14 +128,15 @@ describe('notationDeclaration (integration)', () => {
                }
             ];
 
-            notationDeclaration.assignUnassigned(pToken);
+            pToken.assignUnassigned();
 
-            const makeSToken = makeSTokenMaker();
-            const makeSToken2 = makeSTokenMaker(undefined, 5, 0, 5);
-            expect(pToken).toEqual(new notationDeclaration.PToken({
-               postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
+            expect(pToken).toEqualRangeless(new NotationDeclarationPToken({
+               open: SToken.fromString('<!'),
+               declTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                name: SToken.fromString('notationName'),
-               postNameSpace: SToken.fromString(' '),
+               nameSpace: SToken.fromString(' '),
+               unassigned: (pToken as any).unassigned,
+               extra: [],
                externalId: {
                   idType: SToken.fromString('PUBLIC'),
                   public: {
@@ -157,7 +146,7 @@ describe('notationDeclaration (integration)', () => {
                   },
                   postPublicSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                },
-               close: makeSToken2('>'),
+               close: SToken.fromString('>'),
             }));
             done();
          });
@@ -167,31 +156,15 @@ describe('notationDeclaration (integration)', () => {
 
    describe('checkWellFormed()', () => {
 
-      it('asks the declaration module to look for problems in the declaration part', (done) => {
-         declarationPToken.openSpace = expectedSToken(' ');
-         const source = new STokenSource(defaultExtractors, new EntityMetaData());
-         source.addText(' foo SYSTEM "sys.dtd">');
-         source.endText();
-
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
-
-            notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
-
-            expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NO_NAME);
-            done();
-         });
-      });
-
       it('asks the externalId module to look for well formed problems', (done) => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('foo system "sys.dtd">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
             done();
@@ -202,10 +175,10 @@ describe('notationDeclaration (integration)', () => {
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText('$foo system "sys.dtd">');
          source.endText();
-         notationDeclaration.parse(source, declarationPToken, (result) => {
+         parseNotationDeclaration(source, declarationStart, (result) => {
             const ec = new ErrorCollector(result.open, WellFormedError);
 
-            notationDeclaration.checkWellFormed(result, ec, new EntityMetaData());
+            result.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_NAME_INVALID);
             done();
@@ -217,10 +190,10 @@ describe('notationDeclaration (integration)', () => {
          source.addText('xmlOne system "sys.dtd">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            notationDeclaration.checkWellFormed(parsing, ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.NOTATIONDECL_NAME_XML_RESERVED);
             done();
@@ -232,10 +205,10 @@ describe('notationDeclaration (integration)', () => {
          source.addText('name SYSTEM %bar; "other">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (pToken) => {
+         parseNotationDeclaration(source, declarationStart, (pToken) => {
             // "expand" what should be there.
             pToken.unassigned.shift(); // get rid of the peref
-            pToken.unassigned = [{
+            (pToken as any).unassigned = [{
                type: UnassignedType.ENTITY_START,
                token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
             }, {
@@ -249,12 +222,11 @@ describe('notationDeclaration (integration)', () => {
                   type: UnassignedType.ENTITY_END,
                   token: new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
-            ].concat(pToken.unassigned);
-            pToken.externalId!.unassigned = pToken.unassigned;
-            notationDeclaration.assignUnassigned(pToken);
+            ].concat(pToken.unassigned as any);
+            pToken.assignUnassigned();
             const ec = new ErrorCollector(SToken.fromString('dummy'), WellFormedError);
 
-            notationDeclaration.checkWellFormed(pToken, ec, new EntityMetaData());
+            pToken.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.NOTATIONDECL_EXTRA_TEXT);
             done();
@@ -270,11 +242,11 @@ describe('notationDeclaration (integration)', () => {
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const token = notationDeclaration.pTokenToXToken(parsing);
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
+            const token = parsing.toXToken();
 
-            token.pToken = {} as NotationDeclarationPToken; // typeHack
-            expect(token).toEqual(new notationDeclaration.XToken('foo', new EntityLocation('sys.dtd'), {} as NotationDeclarationPToken)); // typeHack
+            token.pToken = undefined;
+            expect(token).toEqual(new NotationDeclarationXToken('foo', new EntityLocation('sys.dtd'))); // typeHack
             done();
          });
       });
@@ -284,10 +256,10 @@ describe('notationDeclaration (integration)', () => {
          source.addText('foo SYSTEM "sys.dtd">');
          source.endText();
 
-         notationDeclaration.parse(source, declarationPToken, (parsing) => {
-            const token = notationDeclaration.pTokenToXToken(parsing);
+         parseNotationDeclaration(source, declarationStart, (parsing) => {
+            const token = parsing.toXToken();
 
-            expect(token.pToken!.open).toEqual(declarationPToken.open);
+            expect(token.pToken!.open).toEqual(declarationStart.open);
             done();
          });
       });

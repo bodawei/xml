@@ -2,10 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Offset, EntityKind } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-
-import { SToken } from '../../sToken';
-import { makeSToken } from '../../sToken/@test/helper';
+import { ErrorCollector, WellFormedError } from 'error';
+import { makeSToken } from 'sToken-test';
 import {
    declaration,
 
@@ -18,7 +16,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   notationDeclaration,
    ProcessingInstructionPToken,
    space,
    CdataPToken,
@@ -28,9 +25,9 @@ import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
 
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
-} from '../../token';
+   NotationDeclarationPToken,
+} from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
 import { ElementDeclarationPToken } from 'source/token/elementDeclaration';
@@ -703,27 +700,24 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    });
 
    it('calls notationDeclaration.checkWellFormed() when encountering a notation declaration', () => {
-      const cwfSpy = spyOn(notationDeclaration, 'checkWellFormed');
-      const pToken = {
-         type: notationDeclaration.PTYPE,
+      const pToken = new NotationDeclarationPToken({
          open: makeSToken('<!'),
-      };
+      });
+      const cwfSpy = spyOn(pToken, 'checkWellFormed');
       checker.write(metaData);
       checker.write(pToken);
 
       const args = cwfSpy.calls.argsFor(0);
-      expect(args[0]).toEqual(pToken);
-      expect(args[1]).toBeInstanceOf(ErrorCollector);
-      expect(args[2]).toEqual(metaData);
+      expect(args[0]).toBeInstanceOf(ErrorCollector);
+      expect(args[1]).toEqual(metaData);
    });
 
    it('reports an error if a NOTATION declaration is encountered not in the DTD', () => {
       (checker as any)._state = 'START';
       checker.write(metaData);
-      const pToken = {
-         type: notationDeclaration.PTYPE,
+      const pToken = new NotationDeclarationPToken({
          open: makeSToken('<!'),
-      };
+      });
 
       const checkerPushSpy = spyOn(checker, 'push');
       checker.write(pToken);

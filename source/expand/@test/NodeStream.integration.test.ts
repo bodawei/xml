@@ -11,13 +11,13 @@ import * as tokenNs from '../../token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
-import { NotationDeclaration } from  '../../token/notationDeclaration'; // hack
 import {
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
    InternalSubsetStartXToken,
    InternalSubsetEndXToken,
+   NotationDeclarationXToken,
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
    ParameterEntityEndXToken,
@@ -298,7 +298,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY % middle \'PUBLIC "%url;"\'>' +
             '<!NOTATION foo %middle;>' +
          ']>', (results) => {
-            const notationDecl = results[6] as NotationDeclaration; // typeHack
+            const notationDecl = results[6] as NotationDeclarationXToken; // typeHack
 
             expect(notationDecl.name).toEqual('foo');
             expect((notationDecl.externalId as any).publicId).toEqual('http://somewhere.com'); // typeHack

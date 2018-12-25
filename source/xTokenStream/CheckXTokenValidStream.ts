@@ -17,7 +17,6 @@ import {
 
    elementDeclaration,
    attListDeclaration,
-   notationDeclaration,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -36,6 +35,7 @@ import {
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    XMLDECL_XTOKEN,
+   NotationDeclarationXToken,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -514,12 +514,8 @@ class CheckXTokenValidStream extends stream.Transform {
          this.standalone = xToken.standalone;
       }
 
-      if (xToken instanceof notationDeclaration.XToken) {
-         if (this.notations[xToken.name]) {
-            this.pushValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ xToken.name ], pToken);
-         } else {
-            this.notations[xToken.name] = xToken;
-         }
+      if (xToken instanceof NotationDeclarationXToken) {
+         this.validateNotationDeclaration(xToken);
       } else if (xToken instanceof attListDeclaration.XToken) {
          this.validateAttListDecl(xToken);
       } else if (xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) {
@@ -604,6 +600,22 @@ class CheckXTokenValidStream extends stream.Transform {
       this.push(xToken);
 
       done();
+   }
+
+   private validateNotationDeclaration(notationDecl: NotationDeclarationXToken) {
+      if (this.notations[notationDecl.name]) {
+         // §4.7 Validity constraint: Unique Notation Name
+         // A given Name must not be declared in more than one notation declaration.
+         const pToken = notationDecl.pToken ? notationDecl.pToken.open : undefined;
+         const errorOnDuplicate = this.emd.isVersion1dot0 && this.emd.revision >= 2 || this.emd.isVersion1dot1;
+
+         if (errorOnDuplicate) {
+            this.pushValidityError(ValidityError.ID.NOTATION_NOT_UNIQUE, [ notationDecl.name ], pToken);
+         }
+         return;
+      }
+
+      this.notations[notationDecl.name] = notationDecl;
    }
 
    private validateAttListDecl(attListDecl: AttListXToken) {

@@ -1,4 +1,4 @@
-## A.1 Normative References
+### A.1 Normative References
 
 **IANA**
 
@@ -221,7 +221,7 @@ The Unicode Consortium. The Unicode Standard, Version 4.0. Reading, Mass.: Addis
 W3C. Extensible Markup Language (XML) 1.0 (Fourth Edition). Tim Bray, Jean Paoli, C.M. Sperberg-McQueen, Eve Maler, François Yergeau (editors) (See http://www.w3.org/TR/xml.)
 
 
-### Appendix: Standards
+#### Appendix: Standards
 * 1.0/1: https://www.w3.org/TR/1998/REC-xml-19980210#sec-existing-stds
    * Annotated: https://www.xml.com/axml/axml.html
 * 1.0/2: https://www.w3.org/TR/2000/REC-xml-20001006#sec-existing-stds

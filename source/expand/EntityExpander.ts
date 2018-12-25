@@ -5,6 +5,7 @@ import token, {
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
 
@@ -12,6 +13,8 @@ import token, {
    GeneralEntityReferencePToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
+   NotationDeclarationPToken,
+   NotationDeclarationXToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
@@ -19,7 +22,6 @@ import token, {
    XmlDeclarationPToken,
 
    attListDeclaration,
-   notationDeclaration,
    unassigned,
    text,
    PToken,
@@ -35,7 +37,6 @@ import { ExternalId } from 'source/token/common/externalId';
 import { AttListPToken } from 'source/token/attListDeclaration';
 import { ElementStartPToken, ElementEmptyPToken } from 'source/token/elementStart';
 import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned';
-import { NotationDeclarationPToken, NotationDeclaration } from 'source/token/notationDeclaration';
 import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
 
 type GeneralEntityInfo = {
@@ -147,8 +148,8 @@ class EntityExpander {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             this.handleEntityDeclaration(pToken as ParameterEntityDeclarationPToken, expanded);
             break;
-         case notationDeclaration.PTYPE:
-            this.handleNotationDeclaration(pToken as notationDeclaration.PToken, expanded);
+         case NOTATION_DECLARATION_PTOKEN:
+            this.handleNotationDeclaration(pToken as NotationDeclarationPToken, expanded);
             break;
          case token.elementStart.PTYPE:
          case token.elementStart.EMPTY_TYPE:
@@ -240,6 +241,7 @@ class EntityExpander {
                let entityGroup: GeneralEntityMap | ParameterEntityMap;
                const name = pToken.name.str;
 
+               // §4.2.1 defines internal-ness
                if (pToken.parameter) {
                   info = {
                      token: pToken,
@@ -280,13 +282,8 @@ class EntityExpander {
     */
    private handleNotationDeclaration(pToken: NotationDeclarationPToken, handled: TokenHandled) {
       this.expandUnassigned(pToken.unassigned, false, (newUnassigned) => {
-         pToken.unassigned = newUnassigned;
-
-         if (pToken.externalId && pToken.unassigned) {
-            pToken.externalId.unassigned = pToken.unassigned;
-         }
-
-         notationDeclaration.assignUnassigned(pToken);
+         (pToken as any).unassigned = newUnassigned; // typeHack
+         pToken.assignUnassigned();
          this.deliverAToken(pToken);
          handled();
       });
