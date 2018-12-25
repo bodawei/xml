@@ -36,6 +36,7 @@ import {
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    XMLDECL_XTOKEN,
    NotationDeclarationXToken,
+   ParameterEntityReferencePToken,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -44,6 +45,7 @@ import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager';
+import { UnassignedType } from 'source/token/common/unassigned';
 
 type XToken = {
    type: string,
@@ -137,6 +139,8 @@ function getAttributeValueText(attribute: any): string {
 
 class CheckXTokenValidStream extends stream.Transform {
    private entityManager: EntityManager;
+   private paramEntitiesSeen: { [name: string]: boolean} = {};
+   private generalEntitiesSeen: { [name: string]: boolean} = {};
    private entityInfo: EntityInfoMap = {};
    private docType: XToken | void;
    private notations: { [name: string]: XToken };
@@ -523,6 +527,7 @@ class CheckXTokenValidStream extends stream.Transform {
             token: xToken,
             externallyDeclared: this.externalDeclarations,
          };
+         this.checkEntityDeclaration(xToken);
       } else if (xToken instanceof GeneralEntityStartXToken) {
          if (this.isInvalidEntityReference(xToken)) {
             this.pushValidityError(ValidityError.ID.ENTITY_EXTERNAL_DECLARED,
@@ -600,6 +605,20 @@ class CheckXTokenValidStream extends stream.Transform {
       this.push(xToken);
 
       done();
+   }
+
+   private checkEntityDeclaration(xToken: GeneralEntityDeclarationXToken | ParameterEntityDeclarationXToken) {
+      const name = xToken.name;
+      const seen = xToken instanceof ParameterEntityDeclarationXToken ? this.paramEntitiesSeen : this.generalEntitiesSeen;
+
+      // §4.2 If the same entity is declared more than once, ... at user option,
+      // an XML processor may issue a warning if entities are declared multiple times.
+      if (seen[name]) {
+         const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ name ]);
+         this.push(warning);
+      }
+
+      seen[name] = true;
    }
 
    private validateNotationDeclaration(notationDecl: NotationDeclarationXToken) {
@@ -983,6 +1002,110 @@ class CheckXTokenValidStream extends stream.Transform {
                externallyDeclared: this.externalDeclarations, // §2.9
                graph
             };
+         }
+      }
+
+      this._examineUnassigned(elDecl); //
+   }
+
+   /*
+    * Examine the unassigned values, and address these concerns from
+    * §3.2.1 Validity Constraint: Proper Group/PE Nesting
+    *    Parameter-entity replacement text must be properly nested with
+    *    parenthetized groups. That is to say, if either of the opening
+    *    or closing parentheses in a choice, seq, or Mixed construct is
+    *    contained in the replacement text for a parameter entity, both
+    *    must be contained in the same replacement text.
+    *
+    * §3.2.1: Interoperability note:
+    *    For interoperability, if a parameter-entity reference appears in
+    *    a choice, seq, or Mixed construct, its replacement text should
+    *    not be empty, and neither the first nor last non-blank character
+    *    of the replacement text should be a connector (| or ,).
+    *
+    * In practice, that means this general algorithm: Examine the expanded
+    * unassigned values before they are assigned (when we still have access
+    * to the record of which entities were expanded).
+    *
+    * None of this can happen until we are actually within the contentSpec,
+    * which may have already been started, or not. Thereafter, keep track of
+    * the balance of parentheses and balance of entities. Once we have
+    * finished traversing a topmost entity expansion, check if the parentheses
+    * are unbalanced (if so, we have a validity constrant). Also check if
+    * we've seen any relevant text in the expanded entity, and whether
+    * the last "word" we saw was a connector.
+    *
+    * Report these conditions, reset and then continue, as this may happen
+    * multiple times in one set of unassigned values. Note that we allow for
+    * parentheses to be balanced across entities. A validation error will be
+    * reported, but it will still ultimately be assigned, later, correctly.
+    */
+   _examineUnassigned(edXToken: ElementDeclaration) {
+      if (!edXToken.pToken) {
+         return;
+      }
+
+      const pToken = edXToken.pToken;
+      const elName = edXToken.name;
+      const unassignedArray = pToken.unassigned || [];
+      let insideContentSpec = !!pToken.children;
+      let entityDepth = 0;
+      let parenDepth = 0;
+      let sawNonWhite = false;
+      let endedWithConnector = false;
+      let topEntityRef: ParameterEntityReferencePToken | void;
+
+      for (const entry of unassignedArray) {
+         switch (entry.type) {
+            case 'entityStart':
+               entityDepth++;
+               if (entityDepth === 1) {
+                  topEntityRef = entry.token;
+               }
+               break;
+            case UnassignedType.ENTITY_END:
+               entityDepth--;
+               break;
+            case 'word':
+               const content = entry.token.text && entry.token.text.str;
+               if (content === '(') {
+                  insideContentSpec = insideContentSpec && entityDepth > 0;
+                  parenDepth++;
+               } else if (content === ')') {
+                  parenDepth--;
+               }
+
+               endedWithConnector = (content === '|' || content === ',');
+               sawNonWhite = true;
+               break;
+            case 'literal':
+               sawNonWhite = true;
+               endedWithConnector = false;
+               break;
+         }
+
+         if (insideContentSpec && entityDepth === 0 && topEntityRef) {
+            if (parenDepth !== 0) {
+               const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+               this.push(error);
+            }
+
+            if (endedWithConnector) {
+               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+               this.push(warning);
+            }
+
+            if (!sawNonWhite) {
+               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+               this.push(warning);
+            }
+
+            sawNonWhite = false;
+            endedWithConnector = false;
+            topEntityRef = undefined;
          }
       }
    }

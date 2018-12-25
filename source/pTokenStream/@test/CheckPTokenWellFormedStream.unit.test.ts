@@ -630,6 +630,8 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       beforeEach(() => {
          pToken = new GeneralEntityReferencePToken({
             open: makeSToken('&'),
+            name: makeSToken('fred'),
+            close: makeSToken(';'),
          });
       });
 
@@ -650,7 +652,15 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             const checkerPushSpy = spyOn(checker, 'push');
             checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+         });
+
+         it('reports an error if there was no declaration', () => {
+            (checker as any)._state = 'IN_CONTENT';
+            const checkerPushSpy = spyOn(checker, 'push');
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_NO_DECLARATION);
          });
 
       });
@@ -684,7 +694,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             const checkerPushSpy = spyOn(checker, 'push');
             checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
+            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
          });
 
          it('reports no error if IN_DTD', () => {
@@ -692,7 +702,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             const checkerPushSpy = spyOn(checker, 'push');
             checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(0)[0]).toEqual(pToken);
+            expect(checkerPushSpy.calls.argsFor(1)[0]).toEqual(pToken);
          });
 
       });

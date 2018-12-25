@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
+// import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
 import { defaultExtractors } from '../extractor';
 import { PTokenStream } from '../pTokenStream';
 import { SToken, STokenSource } from 'sToken';
@@ -157,10 +157,10 @@ class NodeStream extends stream.Transform {
             // This has nothing to do with validating or not, interestingly.
             // however,  parameter entity reference will stop all further processing if this is non-validating
 
-            const startToken = xToken.pToken && xToken.pToken.open;
-            const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
-               [ xToken.name ], startToken, startToken);
-            this.push(error);
+            // const startToken = xToken.pToken && xToken.pToken.open;
+            // const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
+            //    [ xToken.name ], startToken, startToken);
+            // this.push(error);
          }
       } else if ((xToken instanceof GeneralEntityDeclarationXToken || xToken instanceof ParameterEntityDeclarationXToken) && !this.skipDeclarations) {
          this._processEntityDeclaration(xToken, callback);
@@ -456,7 +456,7 @@ class NodeStream extends stream.Transform {
    _processElementDeclaration(edXToken: ElementDeclaration, done: DoneSignal) {
       // @@ this should not happen in the internal subset
       this._expandPERefsInUnassignedValue(edXToken.pToken, true, () => {
-         this._examineUnassigned(edXToken);
+         // this._examineUnassigned(edXToken);
 
          if (edXToken.pToken && edXToken.pToken.unassigned) {
             elementDeclaration.assignUnassigned(edXToken.pToken);
@@ -500,80 +500,80 @@ class NodeStream extends stream.Transform {
     * parentheses to be balanced across entities. A validation error will be
     * reported, but it will still ultimately be assigned, later, correctly.
     */
-   _examineUnassigned(edXToken: ElementDeclaration) {
-      if (!edXToken.pToken) {
-         return;
-      }
+   // _examineUnassigned(edXToken: ElementDeclaration) {
+   //    if (!edXToken.pToken) {
+   //       return;
+   //    }
 
-      const pToken = edXToken.pToken;
-      const elName = edXToken.name;
-      const unassignedArray = pToken.unassigned || [];
-      let insideContentSpec = !!pToken.children;
-      let entityDepth = 0;
-      let parenDepth = 0;
-      let sawNonWhite = false;
-      let endedWithConnector = false;
-      let topEntityRef: ParameterEntityReferencePToken | void;
+   //    const pToken = edXToken.pToken;
+   //    const elName = edXToken.name;
+   //    const unassignedArray = pToken.unassigned || [];
+   //    let insideContentSpec = !!pToken.children;
+   //    let entityDepth = 0;
+   //    let parenDepth = 0;
+   //    let sawNonWhite = false;
+   //    let endedWithConnector = false;
+   //    let topEntityRef: ParameterEntityReferencePToken | void;
 
-      // @@ maybe don't do if it is a standalone
-      if (pToken.children && pToken.children.close) {
-         return;
-      }
+   //    // @@ maybe don't do if it is a standalone
+   //    if (pToken.children && pToken.children.close) {
+   //       return;
+   //    }
 
-      for (const entry of unassignedArray) {
-         switch (entry.type) {
-            case 'entityStart':
-               entityDepth++;
-               if (entityDepth === 1) {
-                  topEntityRef = entry.token;
-               }
-               break;
-            case UnassignedType.ENTITY_END:
-               entityDepth--;
-               break;
-            case 'word':
-               const content = entry.token.text && entry.token.text.str;
-               if (content === '(') {
-                  insideContentSpec = insideContentSpec && entityDepth > 0;
-                  parenDepth++;
-               } else if (content === ')') {
-                  parenDepth--;
-               }
+   //    for (const entry of unassignedArray) {
+   //       switch (entry.type) {
+   //          case 'entityStart':
+   //             entityDepth++;
+   //             if (entityDepth === 1) {
+   //                topEntityRef = entry.token;
+   //             }
+   //             break;
+   //          case UnassignedType.ENTITY_END:
+   //             entityDepth--;
+   //             break;
+   //          case 'word':
+   //             const content = entry.token.text && entry.token.text.str;
+   //             if (content === '(') {
+   //                insideContentSpec = insideContentSpec && entityDepth > 0;
+   //                parenDepth++;
+   //             } else if (content === ')') {
+   //                parenDepth--;
+   //             }
 
-               endedWithConnector = (content === '|' || content === ',');
-               sawNonWhite = true;
-               break;
-            case 'literal':
-               sawNonWhite = true;
-               endedWithConnector = false;
-               break;
-         }
+   //             endedWithConnector = (content === '|' || content === ',');
+   //             sawNonWhite = true;
+   //             break;
+   //          case 'literal':
+   //             sawNonWhite = true;
+   //             endedWithConnector = false;
+   //             break;
+   //       }
 
-         if (insideContentSpec && entityDepth === 0 && topEntityRef) {
-            if (parenDepth !== 0) {
-               const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
-                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
-               this.push(error);
-            }
+   //       if (insideContentSpec && entityDepth === 0 && topEntityRef) {
+   //          if (parenDepth !== 0) {
+   //             const error = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+   //                [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+   //             this.push(error);
+   //          }
 
-            if (endedWithConnector) {
-               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
-                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
-               this.push(warning);
-            }
+   //          if (endedWithConnector) {
+   //             const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+   //                [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+   //             this.push(warning);
+   //          }
 
-            if (!sawNonWhite) {
-               const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
-                  [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
-               this.push(warning);
-            }
+   //          if (!sawNonWhite) {
+   //             const warning = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+   //                [ elName, topEntityRef.name!.str ], topEntityRef.open, pToken.open); // typeHack
+   //             this.push(warning);
+   //          }
 
-            sawNonWhite = false;
-            endedWithConnector = false;
-            topEntityRef = undefined;
-         }
-      }
-   }
+   //          sawNonWhite = false;
+   //          endedWithConnector = false;
+   //          topEntityRef = undefined;
+   //       }
+   //    }
+   // }
 
    /**********************************************************************\
     Element Start processing
@@ -595,24 +595,24 @@ class NodeStream extends stream.Transform {
          // set of syntactic constraints. Note if this does not have expanded
          // references, we assume this check was done at initial check time
          //
-         for (const attr of startXToken.attributes) {
-            const lcName = attr.name.toLowerCase();
+         // for (const attr of startXToken.attributes) {
+         //    const lcName = attr.name.toLowerCase();
 
-            if (lcName === 'xml:lang') {
-               if (attr.value.some((item) => item.type === GENERAL_ENTITY_START_XTOKEN)) {
-                  const havePTokens = attr.value.filter((item) => !!item.pToken);
-                  const firstPToken = havePTokens[0]; // because we have expanded, we'll always have ptokens
-                  const firstSToken = (firstPToken as any).pToken.text || (firstPToken as any).pToken.open;
-                  const ec = new ErrorCollector(firstSToken, WellFormedError);
+         //    if (lcName === 'xml:lang') {
+         //       if (attr.value.some((item) => item.type === GENERAL_ENTITY_START_XTOKEN)) {
+         //          const havePTokens = attr.value.filter((item) => !!item.pToken);
+         //          const firstPToken = havePTokens[0]; // because we have expanded, we'll always have ptokens
+         //          const firstSToken = (firstPToken as any).pToken.text || (firstPToken as any).pToken.open;
+         //          const ec = new ErrorCollector(firstSToken, WellFormedError);
 
-                  checkXmlLangWellFormed(attr.value, ec, new EntityMetaData()); // where is our emd?
+         //          checkXmlLangWellFormed(attr.value, ec, new EntityMetaData()); // where is our emd?
 
-                  for (const error of ec.errors) {
-                     this.push(error);
-                  }
-               }
-            }
-         }
+         //          for (const error of ec.errors) {
+         //             this.push(error);
+         //          }
+         //       }
+         //    }
+         // }
 
          this.push(startXToken);
          done();
@@ -631,7 +631,7 @@ class NodeStream extends stream.Transform {
       for (const attr of attributeArray) {
          // eslint-disable-next-line no-loop-func
          this._expandAttributeValue(attr.value, (newValue) => {
-            self._scanValueForBadText(attr.name, newValue, openSToken);
+            // self._scanValueForBadText(attr.name, newValue, openSToken);
             attr.value = newValue;
             attrsRemaining--;
 
@@ -693,29 +693,29 @@ class NodeStream extends stream.Transform {
       attrExpanded(newValue);
    }
 
-   _scanValueForBadText(name: string, value: ExpandedLiteralValueXToken, sToken: SToken | void) {
-      let entityDepth = 0;
+   // _scanValueForBadText(name: string, value: ExpandedLiteralValueXToken, sToken: SToken | void) {
+   //    let entityDepth = 0;
 
-      // Well-formedness constraint: §3.1: No < in Attribute Values
-      //   The replacement text of any entity referred to directly or indirectly
-      //   in an attribute value must not contain a <.
-      for (const valuePart of value) {
-         if (valuePart.type === GENERAL_ENTITY_START_XTOKEN) {
-            entityDepth++;
-         } else if (valuePart.type === GENERAL_ENTITY_END_XTOKEN) {
-            entityDepth--;
-         } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
-            // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
-            const textValuePart: TextXToken = (valuePart as TextXToken); // typeHack
+   //    // Well-formedness constraint: §3.1: No < in Attribute Values
+   //    //   The replacement text of any entity referred to directly or indirectly
+   //    //   in an attribute value must not contain a <.
+   //    for (const valuePart of value) {
+   //       if (valuePart.type === GENERAL_ENTITY_START_XTOKEN) {
+   //          entityDepth++;
+   //       } else if (valuePart.type === GENERAL_ENTITY_END_XTOKEN) {
+   //          entityDepth--;
+   //       } else if (valuePart.type === text.XTYPE && entityDepth > 0) {
+   //          // Don't report on things at depth 0 because attribute.checkWellFormed() already did.
+   //          const textValuePart: TextXToken = (valuePart as TextXToken); // typeHack
 
-            if (textValuePart.text && textValuePart.text.indexOf('<') !== -1) {
-               const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
-                  [ name ], sToken, sToken);
-               this.push(error);
-            }
-         }
-      }
-   }
+   //          if (textValuePart.text && textValuePart.text.indexOf('<') !== -1) {
+   //             const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
+   //                [ name ], sToken, sToken);
+   //             this.push(error);
+   //          }
+   //       }
+   //    }
+   // }
 
    _expandReference(entityRef: GeneralEntityReferenceXToken, indexInAttr: number, referenceExpanded: (expanded: LiteralValueXToken | GeneralEntityReferenceXToken, index: number) => void) {
       const entityInfo = this._entityManager.getEntityInfo(entityRef.name);
@@ -728,12 +728,12 @@ class NodeStream extends stream.Transform {
       // Well-formedness Constraint: §3.1: No External Entity References
       //    Attribute values must not contain direct or indirect entity
       //    references to external entities.
-      if (!entityInfo.isInternal) {
-         const sToken = entityRef.pToken && entityRef.pToken.open;
-         const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
-            [ entityRef.name ], sToken, sToken);
-         this.push(error);
-      }
+      // if (!entityInfo.isInternal) {
+      //    const sToken = entityRef.pToken && entityRef.pToken.open;
+      //    const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+      //       [ entityRef.name ], sToken, sToken);
+      //    this.push(error);
+      // }
 
       const sTokenStream = entityInfo.getStream();
 
@@ -829,25 +829,25 @@ class NodeStream extends stream.Transform {
 
    _addEntityDeclaration(edToken: ParameterEntityDeclarationXToken | GeneralEntityDeclarationXToken, done: DoneSignal) {
       if (edToken instanceof ParameterEntityDeclarationXToken) {
-         // §4.2 If the same entity is declared more than once, ... at user option,
-         // an XML processor may issue a warning if entities are declared multiple times.
-         if (this._entityManager.getParameterEntityToken(edToken.name)) {
-            const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
-            this.push(warning);
-            done();
-            return;
-         }
+      //    // §4.2 If the same entity is declared more than once, ... at user option,
+      //    // an XML processor may issue a warning if entities are declared multiple times.
+      //    if (this._entityManager.getParameterEntityToken(edToken.name)) {
+      //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+      //       this.push(warning);
+      //       done();
+      //       return;
+      //    }
 
          this._entityManager.addParameterEntityFromInternalSubset(edToken);
       } else {
-         // §4.2 If the same entity is declared more than once, ... at user option,
-         // an XML processor may issue a warning if entities are declared multiple times.
-         if (this._entityManager.getEntityToken(edToken.name)) {
-            const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
-            this.push(warning);
-            done();
-            return;
-         }
+      //    // §4.2 If the same entity is declared more than once, ... at user option,
+      //    // an XML processor may issue a warning if entities are declared multiple times.
+      //    if (this._entityManager.getEntityToken(edToken.name)) {
+      //       const warning = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ edToken.name ]);
+      //       this.push(warning);
+      //       done();
+      //       return;
+      //    }
 
          this._entityManager.addEntityFromInternalSubset(edToken);
       }

@@ -222,17 +222,17 @@ describe('NodeStream (integration)', () => {
          });
       });
 
-      it('reports a warning if entities are not paremthesis-balanced (§3.2.1)', (done) => {
-         expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ENTITY % last ")">' +
-            '<!ELEMENT one ( one | %last;>' +
-         ']>', (results) => {
-            const error = results[5] as ValidityError;
+      // it('reports a warning if entities are not paremthesis-balanced (§3.2.1)', (done) => {
+      //    expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
+      //       '<!ENTITY % last ")">' +
+      //       '<!ELEMENT one ( one | %last;>' +
+      //    ']>', (results) => {
+      //       const error = results[5] as ValidityError;
 
-            expect(error.id).toEqual(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED);
-            done();
-         });
-      });
+      //       expect(error.id).toEqual(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED);
+      //       done();
+      //    });
+      // });
 
    });
 
@@ -374,17 +374,17 @@ describe('NodeStream (integration)', () => {
          });
       });
 
-      it('reports an error if an xml:lang attribute is bad', (done) => {
-         expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
-            '<!ENTITY child "99-US">' + // bad language code!
-         ']>' +
-         '<one xml:lang="&child;"/>', (results) => {
-            const element = results[7] as WellFormedError; // typeHack
+      // it('reports an error if an xml:lang attribute is bad', (done) => {
+      //    expectProcessing('<?xml version="1.0"?><!DOCTYPE one [' +
+      //       '<!ENTITY child "99-US">' + // bad language code!
+      //    ']>' +
+      //    '<one xml:lang="&child;"/>', (results) => {
+      //       const element = results[7] as WellFormedError; // typeHack
 
-            expect(element.id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
-            done();
-         });
-      });
+      //       expect(element.id).toEqual(WellFormedError.ID.ATTRIBUTE_LANG_BAD_CODE);
+      //       done();
+      //    });
+      // });
 
    });
 

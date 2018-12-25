@@ -34,13 +34,15 @@ import {
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityReferenceXToken,
+   GeneralEntityReferencePToken,
 } from '../../token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
-import { ElementDeclaration } from '../../token/elementDeclaration';
+import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
 import { TextXToken } from 'source/token/text';
+import { UnassignedType } from 'source/token/common/unassigned';
 
 function toHaveError(util: any) {
    return {
@@ -2507,6 +2509,34 @@ describe('CheckXTokenValidStream (unit)', () => {
 
       });
 
+      describe('ENTITY', () => {
+
+         it('reports a warning if multiple ENTITY declarations with the same name are given', (done) => {
+            const peDecl1 = new ParameterEntityDeclarationXToken('one', []);
+            const peDecl2 = new ParameterEntityDeclarationXToken('one', []);
+            const expected = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ 'one' ]);
+
+            validator.write(peDecl1);
+            validator.write(peDecl2);
+            validator.end();
+
+            expectStream(validator, expected, done);
+         });
+
+         it('reports a warning if multiple ENTITY declarations with the same name are given', (done) => {
+            const geDecl1 = new GeneralEntityDeclarationXToken('one', []);
+            const geDecl2 = new GeneralEntityDeclarationXToken('one', []);
+            const expected = new XmlWarning(XmlWarning.ID.ENTITYDECL_DUPLICATE, [ 'one' ]);
+
+            validator.write(geDecl1);
+            validator.write(geDecl2);
+            validator.end();
+
+            expectStream(validator, expected, done);
+         });
+
+      });
+
       describe('ELEMENT', () => {
 
          it('reports no errors if multiple ELEMENT declarations are provided', (done) => {
@@ -2695,6 +2725,264 @@ describe('CheckXTokenValidStream (unit)', () => {
             const expected = new XmlWarning(XmlWarning.ID.ELEMENT_CHILD_UNDECLARED,
                [ 'one', 'badChild' ]);
             expectStream(validator, expected, done);
+         });
+
+         describe('parameter entity validation', () => {
+
+            beforeEach(() => {
+               spyOn(elementDeclaration, 'assignUnassigned');
+            });
+
+            it('reports no warnings with a syntactically ok expansion', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new elementStart.PToken({ name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString('x') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new elementEnd.PToken({ name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const declToken = elementDeclaration.pTokenToXToken(pToken);
+
+               validator.write(declToken);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports a warning if the parameter entity expansion is empty', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const declToken = elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ 'test', 'testPE' ], (pToken as any).unassigned[0].token.open, pToken.open); // typeHack
+
+               validator.write(declToken);
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
+
+            it('reports a warning if the parameter entity expansion is only white space', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const declToken = elementDeclaration.pTokenToXToken(pToken);
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_EMPTY,
+                  [ 'test', 'testPE' ], (pToken as any).unassigned[0].token.open, pToken.open);
+
+               validator.write(declToken);
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error when there is a literal and whitespace in the unassigned', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'literal',
+                     token: {},
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const declToken = elementDeclaration.pTokenToXToken(pToken);
+
+               validator.write(declToken);
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports a warning if the parameter entity expansion ends with a |', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString('|') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ 'test', 'testPE' ], (pToken as any).unassigned[0].token.open, pToken.open);
+
+               validator.write(elementDeclaration.pTokenToXToken(pToken));
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
+
+            it('reports a warning if the parameter entity expansion ends with a ,', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString(',') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const expected = new XmlWarning(XmlWarning.ID.ELEMENTDECL_PEREF_TRAILING_CONNECTOR,
+                  [ 'test', 'testPE' ], (pToken as any).unassigned[0].token.open, pToken.open);
+
+               validator.write(elementDeclaration.pTokenToXToken(pToken));
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
+
+            it('reports a validation error if parentheses are not balanced in the top entity', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString('(') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+               const expected = new ValidityError(ValidityError.ID.ELEMENTDECL_PEREF_PARENS_UNBALANCED,
+                  [ 'test', 'testPE' ], (pToken as any).unassigned[0].token.open, pToken.open);  //typeHack
+
+               validator.write(elementDeclaration.pTokenToXToken(pToken));
+               validator.end();
+
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no validation nerror when parentheses are balanced at the top entity level', (done) => {
+               const pToken = new ElementDeclarationPToken({
+                  open: SToken.fromString('<!'),
+                  name: SToken.fromString('test'),
+                  children: {
+                     open: SToken.fromString('('),
+                     names: [],
+                  },
+                  unassigned: [{
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: UnassignedType.ENTITY_START,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString('(') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }, {
+                     // Note that the parenthesis is closed in another entity
+                     type: 'word',
+                     token: new text.PToken({ text: SToken.fromString(')') }),
+                  }, {
+                     type: 'space',
+                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                  }, {
+                     type: UnassignedType.ENTITY_END,
+                     token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
+                  }],
+               });
+
+               validator.write(elementDeclaration.pTokenToXToken(pToken));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
          });
 
       });

@@ -4,7 +4,7 @@ import stream from 'readable-stream';
 
 import { ENTITY_META_DATA, EntityMetaData, EntityKind } from 'basic';
 import { ErrorCollector, WellFormedError } from '../error';
-import { SToken } from '../sToken';
+import { SToken, strOrBlank } from '../sToken';
 
 import {
    declaration,
@@ -33,8 +33,12 @@ import {
    ParameterEntityReferencePToken,
    NOTATION_DECLARATION_PTOKEN,
    NotationDeclarationPToken,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
+
+const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
 enum CheckWellFormedState {
    START = 'START',
@@ -53,12 +57,23 @@ type Token = {
    closeInternalSubset?: SToken;
 };
 
+type EntitiesInfo = {
+   [name: string]: EntityInfo;
+}
+
+type EntityInfo = {
+   token: Token;
+   isInternal: boolean;
+}
+
 // This right now only validates the base document.
 class CheckPTokenWellFormedStream extends stream.Transform {
    private emd: EntityMetaData;
    private _state: CheckWellFormedState;
    private _elementNameStack: Array<string>;
    private _startDocType?: DocTypeStartPToken;
+   private generalEntityDecl: EntitiesInfo = {};
+   private paramEntityDecl: EntitiesInfo = {};
 
    constructor() {
       super({
@@ -184,6 +199,16 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ]);
             }
 
+            // Well-formedness Constraint: §3.1: No External Entity References
+            //    Attribute values must not contain direct or indirect entity
+            //    references to external entities.
+            // if (!entityInfo.isInternal) {
+            //    const sToken = entityRef.pToken && entityRef.pToken.open;
+            //    const error = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_REFERENCE,
+            //       [ entityRef.name ], sToken, sToken);
+            //    this.push(error);
+            // }
+
             elementStart.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case elementEnd.PTYPE:
@@ -219,12 +244,23 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
 
             (pToken as any).checkWellFormed(errorCollector, this.emd); // typeHack
+
+            const info = pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ? this.generalEntityDecl : this.paramEntityDecl;
+            const name = strOrBlank(pToken.name);
+
+            if (!info[name]) {
+               info[name] = {
+                  token: pToken,
+                  isInternal: true,
+               };
+            }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
+            this.checkDecl(pToken, this.generalEntityDecl);
             (pToken as GeneralEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
@@ -232,6 +268,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
 
+            this.checkDecl(pToken, this.paramEntityDecl);
             (pToken as ParameterEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case NOTATION_DECLARATION_PTOKEN:
@@ -260,6 +297,27 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       this.push(pToken);
    }
 
+   private checkDecl(pToken: Token, info: EntitiesInfo) {
+      const name = strOrBlank(pToken.name);
+
+      if (!info[name] && PROTECTED_ENTITIES.indexOf(name) === -1) {
+         // @@ this is not fully correct. Further, we keep doing this checking about validation mode
+         // and so on in various places. Might be good to wrap that all up in a state object.
+
+         // From 4.1 well formedness constraint: entity declared
+         // For a document without any DTD, an entity reference must be to one of amp, lt, gt, apos or quote
+         // For a document with only an internal DTD subset with no param entity references
+         //    (presumably even those in entity values, though that is irrelevant here) the name must must reference a declaration.
+         // For a document that is standalone = yes, name must again match a declaration
+         // This means one with a DTD, or an external DTD, or param references, it need not match a declaration (though validity will catch those)
+         // This has nothing to do with validating or not, interestingly.
+         // however,  parameter entity reference will stop all further processing if this is non-validating
+
+         const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
+            [ name ], pToken.open, pToken.open);
+         this.push(error);
+      }
+   }
 }
 
 export default CheckPTokenWellFormedStream;
