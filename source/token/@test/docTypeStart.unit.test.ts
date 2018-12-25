@@ -3,9 +3,9 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { MockErrorCollector } from '../../error/@test/helper';
+import { MockErrorCollector } from'error-test';
 import { SToken } from '../../sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from '../../error';
 
 import declaration from '../bridge/baseDeclaration';

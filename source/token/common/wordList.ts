@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../../basic/index';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import unassigned, { DescriptorArray, UnassignedArray } from '../common/unassigned';
@@ -226,16 +226,16 @@ function assignNames(wlPToken: WordListPToken, unValues: UnassignedArray) {
       mode = 'defaultNewWord';
       startProp = 'connectorSpace';
       descriptors.push({ name: 'connectorSpace', type: 'space' });
-   
+
       if (!wordEntry.connector) {
          // Will that match .*|.* ?
          descriptors.unshift({ name: 'connector', type: 'word', allowed: /\|/ });
          startProp = 'connector';
-   
+
          if (!wordEntry.wordSpace) {
             descriptors.unshift({ name: 'wordSpace', type: 'space'});
             startProp = 'wordSpace';
-      
+
             if (!wordEntry.word) {
                descriptors.unshift({ name: 'word', type: 'word', allowed: /[^\)\|]/ });
                startProp = 'word';
@@ -269,7 +269,7 @@ function assignListClose(wlPToken: WordListPToken, unValues: Array<any>) {
       } else {
          const lastEntry = words[words.length - 1];
          const lastSpace = lastEntry.connector ? 'connectorSpace' : 'wordSpace';
-   
+
          unassigned.assignToProps(unValues, lastEntry, lastSpace,
             [{ name: lastSpace, type: 'space' }]);
       }

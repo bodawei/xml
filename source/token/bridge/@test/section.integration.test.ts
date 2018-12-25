@@ -1,10 +1,10 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic';
+import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../../extractor';
-import { SToken, STokenSource } from '../../../sToken';
-import { makeSTokenMaker } from '../../../sToken/@test/helper';
+import { SToken, STokenSource } from 'sToken';
+import { makeSTokenMaker } from 'sToken-test';
 
 import { CdataPToken } from '../../cdata';
 import { parseSection } from '../section';

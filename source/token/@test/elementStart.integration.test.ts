@@ -5,7 +5,7 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 
 import * as elementStart from '../elementStart';
 import text from '../text';

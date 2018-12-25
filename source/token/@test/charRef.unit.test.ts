@@ -1,10 +1,10 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
-import { MockErrorCollector } from '../../error/@test/helper';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError, XmlWarning } from 'error';
 
 import {

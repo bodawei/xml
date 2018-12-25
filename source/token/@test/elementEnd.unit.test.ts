@@ -3,8 +3,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { MockErrorCollector } from'error-test';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError, XmlWarning } from '../../error';
 
 import misc from '../common/misc';

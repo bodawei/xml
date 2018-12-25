@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
-import { EntityMetaData } from 'basic';
+import { ENTITY_META_DATA } from 'basic';
 
 import {
    declaration,
@@ -85,7 +85,7 @@ class PToXTokenStream extends stream.Transform {
             this.push(pToken.toXToken());
             break;
          default:
-            if (pToken.type === EntityMetaData.TYPE) {
+            if (pToken.type === ENTITY_META_DATA) {
                this.push(pToken);
                break;
             }

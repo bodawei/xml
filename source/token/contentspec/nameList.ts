@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from '../../basic/index';
+import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
@@ -145,7 +145,7 @@ function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: 
 
       const particle: ContentParticlePToken = {};
       let wordDelims = [ ')', '%', '>', '?', '*', '+', '(' ];
-   
+
       switch (delimterType) {
          case 'CHOICE':
             wordDelims.unshift('|');
@@ -158,7 +158,7 @@ function parseNames(source: STokenSource, pToken: NameListPToken, delimterType: 
             wordDelims.unshift('|');
             break;
       }
-   
+
       pToken.names.push(particle);
 
       if (charSToken.str === '(') {
@@ -511,7 +511,7 @@ function isXName(value: any): value is XName {
 function makeXTokenCompatible(pToken: NameListPToken): XNameList {
    const names = [];
    let listType: DefinitiveListType | void;
-   
+
    for (let index = 0; index < pToken.names.length; index++) {
       const particle = pToken.names[index].particle;
       const delimiter = pToken.names[index].delimiter;

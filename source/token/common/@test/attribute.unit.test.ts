@@ -3,8 +3,8 @@
 
 import { EntityMetaData } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from '../../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource } from '../../../sToken/@test/helper';
+import { MockErrorCollector } from 'error-test';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
 
 import * as langAttribute from '../langAttribute';

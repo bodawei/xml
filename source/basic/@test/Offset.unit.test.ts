@@ -8,10 +8,9 @@ describe('Offset', () => {
 
    describe('construction', () => {
 
-      it('accepts no parameters', () => {
-         const offset = new Offset(undefined);
+      it('accepts no row/column parameters', () => {
+         const offset = new Offset(new EntityLocation());
 
-         expect(offset.location).toEqual(new EntityLocation());
          expect(offset.index).toEqual(0);
          expect(offset.row).toEqual(0);
          expect(offset.column).toEqual(0);
@@ -54,12 +53,6 @@ describe('Offset', () => {
          expect(offset1.equals(offset2)).toEqual(true);
       });
 
-      it('reports false when a nothing is passed', () => {
-         const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-
-         expect(offset1.equals(undefined)).toEqual(false);
-      });
-
       it('reports false when ranges do not match', () => {
          const offset1 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
          const offset2 = new Offset(new EntityLocation('s', 'p'), 1, 999, 3);
@@ -72,20 +65,6 @@ describe('Offset', () => {
          const offset2 = new Offset(new EntityLocation('s', 'p2'), 1, 2, 3);
 
          expect(offset1.equals(offset2)).toEqual(false);
-      });
-
-      it('reports false when only one location is undefined', () => {
-         const offset1 = new Offset(undefined, 1, 2, 3);
-         const offset2 = new Offset(new EntityLocation('s', 'p'), 1, 2, 3);
-
-         expect(offset1.equals(offset2)).toEqual(false);
-      });
-
-      it('reports true when both locations are undefined', () => {
-         const offset1 = new Offset(undefined, 1, 2, 3);
-         const offset2 = new Offset(undefined, 1, 2, 3);
-
-         expect(offset1.equals(offset2)).toEqual(true);
       });
 
    });

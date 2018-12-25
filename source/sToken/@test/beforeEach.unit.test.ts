@@ -10,7 +10,7 @@ describe('sToken beforeEach', () => {
    let range: Range;
 
    beforeEach(() => {
-      range = new Range(undefined);
+      range = new Range(new EntityLocation());
    });
 
    describe('toEqualSTokenText', () => {

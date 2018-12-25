@@ -83,7 +83,7 @@ describe('notationDeclaration (integration)', () => {
           } ];
 
          parseNotationDeclaration(source, { open: SToken.fromString('<!') }, (result) => {
-            expect(result).toEqual(new NotationDeclarationPToken({
+            expect(result).toEqualRangeless(new NotationDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('notationName'),
                nameSpace: SToken.fromString(' '),

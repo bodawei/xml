@@ -4,7 +4,7 @@
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 
 import * as docTypeEnd from '../docTypeEnd';
 

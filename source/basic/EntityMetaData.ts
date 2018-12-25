@@ -27,27 +27,21 @@ enum EntityKind {
    EXTERNALSUBSET = 'EXTERNALSUBSET',
 }
 
+const ENTITY_META_DATA = 'ENTITY_META_DATA';
+
 class EntityMetaData {
-   public static readonly TYPE = 'ENTITY_META_DATA';
-   public location: EntityLocation;
-   public readonly type = EntityMetaData.TYPE;
-   private _kind: EntityKind;
-   private _version: XmlVersion = 1.0;
-   private _revision: XmlRevision = 5;
+   private ver: XmlVersion = 1.0;
+   private rev: XmlRevision = 5;
+
+   public readonly kind: EntityKind;
+   public readonly location: EntityLocation;
+   public readonly type: typeof ENTITY_META_DATA = ENTITY_META_DATA;
 
    constructor(entityKind: EntityKind = EntityKind.DOCUMENT, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location: EntityLocation = new EntityLocation()) {
-      this._kind = entityKind;
-      this.version = xmlVersion;
-      this._setRevision(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : DEFAULT_1DOT1_REVISION));
+      this.kind = entityKind;
       this.location = location;
-   }
-
-   /**********************************************************************\
-    type: When setting the type, make sure it is a legal value.
-   \**********************************************************************/
-
-   get kind(): string {
-      return this._kind;
+      this.setVersion(xmlVersion);
+      this.setRev(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : DEFAULT_1DOT1_REVISION));
    }
 
    /**********************************************************************\
@@ -74,22 +68,22 @@ class EntityMetaData {
     changing.
    \**********************************************************************/
 
-   set version(newValue: XmlVersion) {
-      if (newValue === this._version) {
+   private setVersion(newValue: XmlVersion) {
+      if (newValue === this.ver) {
          return;
       }
 
       if (newValue === 1.0) {
-         this._version = 1.0;
-         this._setRevision(DEFAULT_1DOT0_REVISION);
+         this.ver = 1.0;
+         this.setRev(DEFAULT_1DOT0_REVISION);
       } else {
-         this._version = 1.1;
-         this._setRevision(DEFAULT_1DOT1_REVISION);
+         this.ver = 1.1;
+         this.setRev(DEFAULT_1DOT1_REVISION);
       }
    }
 
    get version(): XmlVersion {
-      return this._version;
+      return this.ver;
    }
 
    /**********************************************************************\
@@ -109,10 +103,10 @@ class EntityMetaData {
     version. So, if you need to change both, change version first.
    \**********************************************************************/
 
-   _setRevision(newValue: XmlRevision) {
+   setRev(newValue: XmlRevision) {
       if ((this.version === 1.0 && newValue > 0 && newValue <= LAST_1DOT0_REVISION) ||
          (this.version === 1.1 && newValue > 0 && newValue <= LAST_1DOT1_REVISION)) {
-         this._revision = newValue;
+         this.rev = newValue;
       } else {
          throw new Error('Version and revision do not match. Got "' +
             this.version + '" and "' + newValue + '".');
@@ -120,10 +114,13 @@ class EntityMetaData {
    }
 
    get revision(): XmlRevision {
-      return this._revision;
+      return this.rev;
    }
 
 }
 
-export default EntityMetaData;
-export { EntityKind };
+export {
+   ENTITY_META_DATA,
+   EntityKind,
+   EntityMetaData,
+};

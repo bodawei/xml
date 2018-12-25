@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind } from '../../../basic';
-import { ErrorCollector, WellFormedError } from '../../../error';
-import { makeSToken } from '../../../sToken/@test/helper';
+import { EntityMetaData, EntityKind } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
+import { makeSToken } from 'sToken-test';
 import { SToken } from 'sToken';
 
 import misc from '../misc';

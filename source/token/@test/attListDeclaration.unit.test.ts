@@ -1,10 +1,10 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic/index';
-import { MockErrorCollector } from '../../error/@test/helper';
+import { EntityMetaData, Range, EntityLocation } from 'basic';
+import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError, XmlWarning } from 'error';
 
 import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration';
@@ -1279,7 +1279,7 @@ describe('attListDeclaration (unit)', () => {
             value: [],
          });
          aldPToken.attDefs.push({
-            name: new SToken('att1', 'att1', new Range(undefined, 10, 0, 10, 15, 0, 15)),
+            name: new SToken('att1', 'att1', new Range(new EntityLocation(), 10, 0, 10, 15, 0, 15)),
             value: [],
          });
 
@@ -1632,7 +1632,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('reports an error if there is extra text after unassigned', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          aldPToken.extra = [
             unassigned.wordFromSToken(startSToken),
          ];

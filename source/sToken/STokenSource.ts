@@ -261,7 +261,7 @@ class STokenSource {
       }
 
       const ranges = [];
-      let currentRange = new Range(this._lastOffset);  // start off where we left off
+      let currentRange = new Range(this._lastOffset || new EntityLocation());  // start off where we left off
 
       // Just iterate through the segInfos, and accumulate the chars consumed
       for (let index = 0; index < segInfos.length; index++) {

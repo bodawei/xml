@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from 'basic';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { XmlWarning, WellFormedError } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
@@ -412,7 +412,7 @@ describe('notationdeDlaration (unit)', () => {
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          (notationPToken as any).extra = [
             unassigned.wordFromSToken(startSToken),
          ];

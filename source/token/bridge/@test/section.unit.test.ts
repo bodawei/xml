@@ -1,8 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { SToken } from '../../../sToken/index';
-import { MockSTokenSource } from '../../../sToken/@test/helper';
+import { SToken } from 'sToken';
+import { MockSTokenSource } from 'sToken-test';
 
 import * as cdata from '../../cdata';
 import { SectionStart, parseSection } from '../section';

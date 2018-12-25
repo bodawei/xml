@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, EntityKind } from 'basic';
+import { ENTITY_META_DATA, EntityMetaData, EntityKind } from 'basic';
 import { ErrorCollector, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 
@@ -83,7 +83,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case declaration.PTYPE:
             declaration.checkWellFormed(pToken as any, errorCollector, this.emd); // typehack
             break;
-         case EntityMetaData.TYPE:
+         case ENTITY_META_DATA:
             this.emd = pToken as EntityMetaData; // typehack
             break;
 

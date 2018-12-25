@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import EntityMetaData, { EntityKind } from '../EntityMetaData';
+import { EntityKind, EntityMetaData } from '../EntityMetaData';
 import EntityLocation from '../EntityLocation';
 
 describe('EntityMetaData', () => {
@@ -17,6 +17,11 @@ describe('EntityMetaData', () => {
       it('defaults to most conventional values when called with no params', () => {
          const pk = new EntityMetaData();
          expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+      });
+
+      it('fills in the right revision for 1.0 if none specified', () => {
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.0);
+         expect(pk.revision).toEqual(5);
       });
 
       it('fills in the right revision for 1.1 if none specified', () => {
@@ -91,38 +96,6 @@ describe('EntityMetaData', () => {
 
    });
 
-   describe('version', () => {
-
-      it('sets the specified version', () => {
-         const pk = new EntityMetaData();
-         pk.version = 1.1;
-
-         expect(pk.version).toEqual(1.1);
-      });
-
-      it('sets the specified version tp 1.0', () => {
-         const pk = new EntityMetaData();
-         pk.version = 1.0;
-
-         expect(pk.version).toEqual(1);
-      });
-
-      it('changes the revision to 2 when version 1.1 is set', () => {
-         const pk = new EntityMetaData();
-         pk.version = 1.1;
-
-         expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
-      });
-
-      it('changes the revision to 5 when version 1.0 is set', () => {
-         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
-         pk.version = 1.0;
-
-         expect(pk).toEqual(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
-      });
-
-   });
-
    describe('isVersion1dot0', () => {
 
       it('returns true when is 1.0', () => {
@@ -132,8 +105,7 @@ describe('EntityMetaData', () => {
       });
 
       it('returns false when is 1.1', () => {
-         const pk = new EntityMetaData();
-         pk.version = 1.1;
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1);
 
          expect(pk.isVersion1dot0).toEqual(false);
       });
@@ -149,8 +121,7 @@ describe('EntityMetaData', () => {
       });
 
       it('returns true when is 1.1', () => {
-         const pk = new EntityMetaData();
-         pk.version = 1.1;
+         const pk = new EntityMetaData(EntityKind.DOCUMENT, 1.1);
 
          expect(pk.isVersion1dot1).toEqual(true);
       });

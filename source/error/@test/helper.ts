@@ -1,7 +1,7 @@
 /* Copyright ® 2017 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { StringBundle } from '../../basic/index';
+import { StringBundle } from 'basic';
 import { SToken } from 'sToken';
 
 import { Position } from '../BaseError';

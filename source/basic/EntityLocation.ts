@@ -13,10 +13,10 @@ function getDirOf(path: string): string {
 }
 
 /**********************************************************************\
- EntityLocation corresponds to the ExternalId found on an entity,
- XML or Notation declaration in an XML document. It additionally can
- resolve this location information relative to another (e.g. the
- loading document)
+ EntityLocation corresponds to the ExternalId (§4.2.2) found on an
+ entity, DocType or Notation declaration in an XML document. It
+ additionally can resolve this location information relative to
+ another (e.g. the loading entity)
 \**********************************************************************/
 
 class EntityLocation {
@@ -49,8 +49,8 @@ class EntityLocation {
     identifiers.
 
     PARAM
-    systemId: The systemLiteral
-    publicId: The pubidLiteral
+    systemId: The systemLiteral (§2.3)
+    publicId: The pubidLiteral (§2.3)
    \**********************************************************************/
 
    constructor(systemId: string = '', publicId?: string) {
@@ -60,17 +60,14 @@ class EntityLocation {
 
    /**********************************************************************\
     setBaseLocation() takes another entity location and uses this to
-    compute the resolved System ID.  
+    compute the resolved System ID.
    \**********************************************************************/
 
    setBaseLocation(sourceLocation: EntityLocation) {
       this.base = new EntityLocation(sourceLocation.resolvedSystemId, sourceLocation.publicId);
    }
 
-   equals(other?: any): boolean {
-      if (!other || !(other instanceof EntityLocation)) {
-         return false;
-      }
+   equals(other: EntityLocation) {
       return this.systemId === other.systemId && this.publicId === other.publicId;
    }
 

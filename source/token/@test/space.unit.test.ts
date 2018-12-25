@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
+import { MockErrorCollector } from'error-test';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import * as space from '../space';
 import { SpacePToken } from '../space';

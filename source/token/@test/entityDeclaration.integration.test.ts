@@ -5,7 +5,7 @@ import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 
 import { parseEntityDeclaration } from '../entityDeclaration';
 import { GeneralEntityDeclarationPToken, GENERAL_ENTITY_DECLARATION_PTOKEN } from '../generalEntityDeclaration';

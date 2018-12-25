@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../../basic';
-import { MockErrorCollector } from '../../../error/@test/helper';
-import { SToken } from '../../../sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
-import { WellFormedError } from '../../../error';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { WellFormedError } from 'error';
+import { MockErrorCollector } from 'error-test';
+import { SToken } from 'sToken';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import text from '../../text';
 import unassigned from '../unassigned';
@@ -756,7 +756,7 @@ describe('externalId (unit)', () => {
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          pTokenPart.extra = [
             unassigned.wordFromSToken(startSToken),
          ];
@@ -770,7 +770,7 @@ describe('externalId (unit)', () => {
 
       it('reports no errors if extra is empty', () => {
          const startSToken = SToken.fromString('one');
-         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+         startSToken.ranges.push(new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          pTokenPart.extra = [];
 
          externalId.checkWellFormed(pTokenPart, mockErrorCollector, new EntityMetaData());

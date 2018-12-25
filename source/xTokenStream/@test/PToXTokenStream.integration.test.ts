@@ -26,7 +26,7 @@ import {
    XmlDeclarationXToken,
 } from '../../token';
 import { SToken } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 import { TextXToken} from '../../token/text'; // hack
 
 import PToXTokenStream from '../PToXTokenStream';

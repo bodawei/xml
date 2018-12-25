@@ -5,7 +5,7 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from '../../extractor';
 import { SToken, STokenSource } from '../../sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 
 import { CommentPToken, parse, checkWellFormed, PTYPE } from '../comment';
 

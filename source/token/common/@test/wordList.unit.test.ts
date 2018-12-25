@@ -1,10 +1,10 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic/index';
-import { MockErrorCollector } from '../../../error/@test/helper';
-import { SToken } from '../../../sToken/index';
-import { MockSTokenSource } from '../../../sToken/@test/helper';
+import { EntityMetaData } from 'basic';
+import { MockErrorCollector } from 'error-test';
+import { SToken } from 'sToken';
+import { MockSTokenSource } from 'sToken-test';
 import { parseWordList, WordListPToken, WordListType, ENUMERATION_PTOKEN } from '../wordList';
 import { WellFormedError } from '../../../error/index';
 
@@ -91,7 +91,7 @@ describe('wordList (unit)', () => {
             [ ')', 'match', ')' ],
             [ undefined, 'space' ],
          ]);
-   
+
          parseWordList(mockSource, WordListType.ENUMERATION, callback);
          mockSource.respondInAsyncTime();
 
@@ -221,7 +221,7 @@ describe('wordList (unit)', () => {
          const mockSource = new MockSTokenSource([
             [ undefined, 'match', '(' ],
          ]);
-   
+
          parseWordList(mockSource, WordListType.ENUMERATION, callback);
          mockSource.respondInAsyncTime();
 
@@ -236,7 +236,7 @@ describe('wordList (unit)', () => {
 
       beforeEach(() => {
          assignSpy = spyOn(unassigned, 'assignToProps').and.callFake((unValues: Array<any>) => {
-            unValues.pop(); 
+            unValues.pop();
          });
          unValues = [ {
             type: UnassignedType.WORD,

@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Offset, Range, EntityLocation } from '../../basic/index';
+import { Offset, Range, EntityLocation } from 'basic';
 import { SToken } from 'sToken';
 
 import ErrorCollector from '../ErrorCollector';

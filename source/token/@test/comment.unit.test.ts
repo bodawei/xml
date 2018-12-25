@@ -3,8 +3,8 @@
 
 import { EntityMetaData, Offset } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
-import { MockErrorCollector } from '../../error/@test/helper';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../sToken/@test/helper';
+import { MockErrorCollector } from'error-test';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import {
    CommentPToken,

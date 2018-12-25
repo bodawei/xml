@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { Range } from 'basic';
+import { EntityLocation, Range } from 'basic';
 
 /**********************************************************************\
  A SToken (String token) represents a unit of text. The originalText
@@ -34,7 +34,7 @@ class SToken {
    public ranges: Array<Range>;
 
    static fromString(str: string) {
-      return new SToken(str, str, new Range(undefined)); // typeHack (we should get rid of this)
+      return new SToken(str, str, new Range(new EntityLocation()));
    };
 
    constructor(str: string, originalStr: string, range: Range | Array<Range>) {
@@ -71,11 +71,7 @@ class SToken {
     * range in this and the first in the other are the same),
     * the two ranges will be combined.
     */
-   merge(other: any) {
-      if (!(other instanceof SToken)) {
-         throw new Error('Can only merge with another SToken.');
-      }
-
+   merge(other: SToken) {
       this.str += other.str;
       this.originalStr += other.originalStr;
 

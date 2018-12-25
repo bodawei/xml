@@ -41,8 +41,12 @@ describe('EntityLocation', () => {
 
    describe('.equals()', () => {
 
-      it('returns false if not passed anything', () => {
-         expect(new EntityLocation('y', 'x').equals()).toEqual(false);
+      it('returns false if it does not match another', () => {
+         expect(new EntityLocation('y', 'x').equals(new EntityLocation('y'))).toEqual(false);
+      });
+
+      it('returns true if it does match another', () => {
+         expect(new EntityLocation('y', 'x').equals(new EntityLocation('y', 'x'))).toEqual(true);
       });
 
    });

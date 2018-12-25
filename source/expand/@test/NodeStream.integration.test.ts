@@ -1,12 +1,12 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ENTITY_META_DATA, EntityLocation, EntityMetaData, Range } from 'basic';
 import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, STokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker, STokenMaker } from 'sToken-test';
 import * as tokenNs from '../../token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
@@ -47,7 +47,7 @@ describe('NodeStream (integration)', () => {
       let expectedIndex = 0;
 
       for (let actualIndex = 0; actualIndex < actual.length; actualIndex++) {
-         if (actual[actualIndex].type === EntityMetaData.TYPE ||
+         if (actual[actualIndex].type === ENTITY_META_DATA ||
             actual[actualIndex] instanceof tokenNs.space.XToken) {
             continue;
          }

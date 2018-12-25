@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, Range } from '../../../basic';
-import { WellFormedError } from '../../../error';
-import { MockErrorCollector } from '../../../error/@test/helper';
-import { SToken } from '../../../sToken';
-import { makeSTokenMaker, MockSTokenSource, STokenMaker } from '../../../sToken/@test/helper';
+import { EntityLocation, Range } from 'basic';
+import { WellFormedError } from 'error';
+import { MockErrorCollector } from 'error-test';
+import { SToken } from 'sToken';
+import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import * as paramReference from '../../parameterEntityReference';
@@ -763,7 +763,7 @@ describe('unassigned (unit)', () => {
             unassigned.assignToProps(unVals, pToken, 'two', descriptors);
 
             expect(pToken).toEqual({
-               two: SToken.fromString(' ').merge(space.token.text),
+               two: SToken.fromString(' ').merge(space.token.text as SToken),
             });
          });
 
@@ -1119,7 +1119,7 @@ describe('unassigned (unit)', () => {
       it('adds an error with the text of all the tokens in the provided array', () => {
          const mockErrorCollector = new MockErrorCollector();
          const startSToken = SToken.fromString('one');
-         startSToken.ranges.push(new Range(undefined, 0, 0, 0, 0, 0, 0));
+         startSToken.ranges.push(new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          const extra: any = [
             unassigned.wordFromSToken(startSToken),
             unassigned.spaceFromSToken(SToken.fromString(' ')),

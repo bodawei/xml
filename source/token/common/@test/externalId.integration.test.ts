@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../../basic';
-import { ErrorCollector, WellFormedError } from '../../../error';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
 import { defaultExtractors } from '../../../extractor';
-import { SToken, STokenSource } from '../../../sToken';
-import { makeSTokenMaker } from '../../../sToken/@test/helper';
+import { SToken, STokenSource } from 'sToken';
+import { makeSTokenMaker } from 'sToken-test';
 
 import helper from '../../@test/helper';
 import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
@@ -264,7 +264,7 @@ describe('externalId (integration)', () => {
                   type: UnassignedType.ENTITY_START,
                   token: new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('%'), })),
                },
-               unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation()))), 
+               unassigned.wordFromSToken(new SToken('SYSTEM', 'SYSTEM', new Range(new EntityLocation()))),
                unassigned.spaceFromSToken(new SToken(' ', ' ', new Range(new EntityLocation()))), {
                   type: UnassignedType.LITERAL,
                   token: {

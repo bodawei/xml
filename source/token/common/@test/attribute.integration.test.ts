@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData } from '../../../basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../../error';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from '../../../extractor';
-import { STokenSource, SToken } from '../../../sToken';
-import { makeSTokenMaker } from '../../../sToken/@test/helper';
+import { STokenSource, SToken } from 'sToken';
+import { makeSTokenMaker } from 'sToken-test';
 
 import text from '../../text';
 

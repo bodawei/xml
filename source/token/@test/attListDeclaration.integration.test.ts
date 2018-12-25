@@ -1,11 +1,11 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, Range } from '../../basic/index';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { defaultExtractors } from '../../extractor/index';
+import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
-import { makeSTokenMaker } from '../../sToken/@test/helper';
+import { makeSTokenMaker } from 'sToken-test';
 
 import helper from '../@test/helper';
 import attListDeclaration, { AttListPToken } from '../attListDeclaration';
@@ -319,7 +319,7 @@ describe('attListDeclaration (integration)', () => {
             expect(pToken).toEqual(new attListDeclaration.PToken({
                postDeclTypeSpace: new SToken(' ', ' ', [ helper.makeInsertedRange() ]),
                elementName: SToken.fromString('entityName'),
-               postElementNameSpace: new SToken('  ', '  ', [ new Range(undefined), helper.makeInsertedRange() ]),
+               postElementNameSpace: new SToken('  ', '  ', [ new Range(new EntityLocation()), helper.makeInsertedRange() ]),
                close: makeSToken2('>'),
             }));
             done();

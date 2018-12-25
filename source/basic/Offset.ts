@@ -13,8 +13,8 @@ class Offset {
    public row: number;
    public column: number;
 
-   constructor(location: EntityLocation|void, index: number = 0, row: number = 0, column: number = 0) {
-      this.location = location || new EntityLocation();
+   constructor(location: EntityLocation, index: number = 0, row: number = 0, column: number = 0) {
+      this.location = location;
       this.index = index;
       this.row = row;
       this.column = column;
@@ -24,11 +24,7 @@ class Offset {
       return new Offset(this.location, this.index, this.row, this.column);
    }
 
-   equals(other: Offset|void) {
-      if (!other) {
-         return false;
-      }
-
+   equals(other: Offset) {
       return this.location.equals(other.location) &&
          this.index === other.index &&
          this.row === other.row &&

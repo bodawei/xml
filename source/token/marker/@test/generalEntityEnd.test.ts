@@ -2,7 +2,7 @@
 
 /* eslint-env jasmine */
 
-import { SToken } from '../../../sToken/index';
+import { SToken } from 'sToken';
 
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../generalEntityEnd';

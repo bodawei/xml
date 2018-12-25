@@ -9,18 +9,6 @@ describe('Range', () => {
 
    describe('construction', () => {
 
-      it('accepts no parameters', () => {
-         const range = new Range(undefined);
-
-         expect(range.location.systemId).toEqual('');
-         expect(range.startIndex).toEqual(0);
-         expect(range.startRow).toEqual(0);
-         expect(range.startColumn).toEqual(0);
-         expect(range.endIndex).toEqual(0);
-         expect(range.endRow).toEqual(0);
-         expect(range.endColumn).toEqual(0);
-      });
-
       it('accepts all parameters', () => {
          const range = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
          const entityLocation: EntityLocation = (range.location as any); // typeHack
@@ -142,15 +130,15 @@ describe('Range', () => {
       });
 
       it('reports false when only one location is undefined', () => {
-         const range1 = new Range(undefined, 1, 2, 3, 4, 5, 6);
+         const range1 = new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6);
          const range2 = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
 
          expect(range1.equals(range2)).toEqual(false);
       });
 
       it('reports true when both locations are undefined', () => {
-         const range1 = new Range(undefined, 1, 2, 3, 4, 5, 6);
-         const range2 = new Range(undefined, 1, 2, 3, 4, 5, 6);
+         const range1 = new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6);
+         const range2 = new Range(new EntityLocation(), 1, 2, 3, 4, 5, 6);
 
          expect(range1.equals(range2)).toEqual(true);
       });

@@ -1,11 +1,11 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityLocation, EntityMetaData, Range } from '../../basic/index';
+import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { WellFormedError, XmlWarning } from 'error';
-import { MockErrorCollector } from '../../error/@test/helper';
+import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
-import { makeSTokenMaker, MockSTokenSource } from '../../sToken/@test/helper';
+import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import declaration from '../bridge/baseDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../elementDeclaration';
@@ -562,7 +562,7 @@ describe('elementDeclaration (unit)', () => {
 
       it('calls unassigned.checkExtra() with extras', () => {
          spyOn(unassigned, 'checkExtra');
-         const startSToken = new SToken('one', 'one', new Range(undefined, 0, 0, 0, 0, 0, 0));
+         const startSToken = new SToken('one', 'one', new Range(new EntityLocation(), 0, 0, 0, 0, 0, 0));
          elementPToken.extra = [
             unassigned.wordFromSToken(startSToken),
          ];
