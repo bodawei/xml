@@ -6,11 +6,11 @@ This Second Edition was encoded in the XMLspec DTD (which has documentation avai
 
 This Third Edition was encoded in a slightly modified version of the XMLspec DTD, v2.5. The XHTML versions were produced with a combination of the xmlspec.xsl, diffspec.xsl, and REC-xml-3e.xsl XSLT stylesheets.
 
-> **1.9/4**
+> **1.0/4**
 
 This Fourth Edition was encoded in a slightly modified version of the XMLspec DTD, v2.10. The XHTML versions were produced with a combination of the xmlspec.xsl, diffspec.xsl, and REC-xml.xsl XSLT stylesheets.
 
-> **1.9/5**
+> **1.0/5**
 
 This edition was encoded in a slightly modified version of the XMLspec DTD, v2.10. The XHTML versions were produced with a combination of the xmlspec.xsl, diffspec.xsl, and REC-xml.xsl XSLT stylesheets.
 

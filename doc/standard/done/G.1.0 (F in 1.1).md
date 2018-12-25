@@ -15,24 +15,24 @@ This specification was prepared and approved for publication by the W3C XML Work
 
 > **1.1/1: Replaced:** This specification was prepared and approved for publication by the W3C XML Working Group (WG). WG approval of this specification does not necessarily imply that all WG participants voted for its approval. The current and former members in the XML WG are:
 
-Jon Bosak, Sun (Chair)
-James Clark (Technical Lead)
-Tim Bray, Textuality and Netscape (XML Co-editor)
-Jean Paoli, Microsoft (XML Co-editor)
-C. M. Sperberg-McQueen, U. of Ill. (XML Co-editor)
-Dan Connolly, W3C (W3C Liaison)
-Paula Angerstein, Texcel
-Steve DeRose, INSO
-Dave Hollander, HP
-Eliot Kimber, ISOGEN
-Eve Maler, ArborText
-Tom Magliery, NCSA
-Murray Maloney, SoftQuad, Grif SA, Muzmo and Veo Systems
-MURATA Makoto (FAMILY Given), Fuji Xerox Information Systems
-Joel Nava, Adobe
-Conleth O'Connell, Vignette
-Peter Sharpe, SoftQuad
-John Tigue, DataChannel
+* Jon Bosak, Sun (Chair)
+* James Clark (Technical Lead)
+* Tim Bray, Textuality and Netscape (XML Co-editor)
+* Jean Paoli, Microsoft (XML Co-editor)
+* C. M. Sperberg-McQueen, U. of Ill. (XML Co-editor)
+* Dan Connolly, W3C (W3C Liaison)
+* Paula Angerstein, Texcel
+* Steve DeRose, INSO
+* Dave Hollander, HP
+* Eliot Kimber, ISOGEN
+* Eve Maler, ArborText
+* Tom Magliery, NCSA
+* Murray Maloney, SoftQuad, Grif SA, Muzmo and Veo Systems
+* MURATA Makoto (FAMILY Given), Fuji Xerox Information Systems
+* Joel Nava, Adobe
+* Conleth O'Connell, Vignette
+* Peter Sharpe, SoftQuad
+* John Tigue, DataChannel
 
 ### Appendix: Standards
 * 1.0/1: https://www.w3.org/TR/1998/REC-xml-19980210#sec-xml-wg

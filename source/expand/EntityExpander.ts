@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
-import { Token } from 'basic';
+import { Token, ENTITY_META_DATA } from 'basic';
 import token, {
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
@@ -25,6 +25,10 @@ import token, {
    unassigned,
    text,
    PToken,
+   InternalSubsetStartXToken,
+   InternalSubsetEndXToken,
+   ExternalSubsetEndXToken,
+   ExternalSubsetStartXToken,
 } from 'token';
 import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
@@ -38,6 +42,8 @@ import { AttListPToken } from 'source/token/attListDeclaration';
 import { ElementStartPToken, ElementEmptyPToken } from 'source/token/elementStart';
 import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned';
 import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
+import { DocTypeStartPToken } from 'source/token/docTypeStart';
+import { DocTypeEndPToken } from 'source/token/docTypeEnd';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -124,6 +130,7 @@ class EntityExpander {
    private seenParamEntityRef: boolean = false;
    private deliverAToken: DeliverAToken;
    private processors: Processors;
+   private docTypeStart?: DocTypeStartPToken;
 
    constructor(validating: boolean, handoffToken: DeliverAToken,  processors: Processors) {
       this.validationMode = validating ? ValidationMode.VALIDATING : ValidationMode.NON_VALIDATING;
@@ -135,6 +142,12 @@ class EntityExpander {
       switch (pToken.type) {
          case XMLDECL_PTOKEN:
             this.handleXmlDeclaration(pToken as XmlDeclarationPToken, expanded);
+            break;
+         case token.docTypeStart.PTYPE:
+            this.handleDocTypeStart(pToken as DocTypeStartPToken, expanded);
+            break;
+         case token.docTypeEnd.PTYPE:
+            this.handleDocTypeEnd(pToken as DocTypeEndPToken, expanded);
             break;
          case token.attListDeclaration.PTYPE:
             this.handleAttListDeclaration(pToken as AttListPToken, expanded);
@@ -182,6 +195,44 @@ class EntityExpander {
 
       this.deliverAToken(pToken);
       handled();
+   }
+
+   private handleDocTypeStart(pToken: DocTypeStartPToken, handled: TokenHandled) {
+      this.deliverAToken(pToken);
+
+      this.docTypeStart = pToken;
+
+      if (pToken.startInternalSubset) {
+         this.deliverAToken(new InternalSubsetStartXToken());
+      }
+
+      handled();
+   }
+
+   private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: TokenHandled) {
+      if (this.docTypeStart && this.docTypeStart.startInternalSubset) {
+         this.deliverAToken(new InternalSubsetEndXToken());
+      }
+
+      if (this.docTypeStart && this.docTypeStart.externalId) {
+         const sTokenSource = this.processors.retrieveExternalEntity(this.docTypeStart.externalId!, new EntityMetaData());
+
+         this.deliverAToken(new ExternalSubsetStartXToken());
+         this.processors.processBody(sTokenSource, (token: Token, done: TokenHandled) => {
+            if (token.type !== ENTITY_META_DATA) {
+               this.deliverAToken(token);
+            }
+
+            done();
+         }, () => {
+            this.deliverAToken(new ExternalSubsetEndXToken());
+            this.deliverAToken(pToken);
+            handled();
+         });
+      } else {
+         this.deliverAToken(pToken);
+         handled();
+      }
    }
 
    /*

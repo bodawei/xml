@@ -27,6 +27,11 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    XmlDeclarationPToken,
+   INTERNAL_SUBSET_START_XTOKEN,
+   INTERNAL_SUBSET_END_XTOKEN,
+   EXTERNAL_SUBSET_START_XTOKEN,
+   EXTERNAL_SUBSET_END_XTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
 } from "token";
 import { ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
@@ -39,6 +44,9 @@ import { defaultExtractors } from "extractor";
 import { AttListPToken } from "source/token/attListDeclaration";
 import { UnassignedType, UnassignedArray } from "source/token/common/unassigned";
 import { CharRefPToken } from "source/token/charRef";
+import { DocTypeStartPToken } from "source/token/docTypeStart";
+import { DocTypeEndPToken } from "source/token/docTypeEnd";
+import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
@@ -72,7 +80,7 @@ describe('EntityExpander (unit)', () => {
    function retrieveExternalEntity(externalId: ExternalId, entityMetaData: EntityMetaData) {
       const sTokenSource = new STokenSource(defaultExtractors, entityMetaData);
 
-      const str = externalMap[(externalId.public!.value[0] as any).text.str];
+      const str = externalMap[(externalId.system!.value[0] as any).text.str];
       sTokenSource.addText(str);
       sTokenSource.endText();
 
@@ -111,6 +119,107 @@ describe('EntityExpander (unit)', () => {
 
       processNextToken();
    }
+
+   describe('DOCTYPE declaration', () => {
+
+      it('adds no internal or external entity markers if there are none', (done) => {
+         const input = [
+            new DocTypeStartPToken({
+               name: SToken.fromString('root'),
+            }),
+            new DocTypeEndPToken({
+               close: SToken.fromString('>'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(2);
+            done();
+         });
+      });
+
+      it('adds an internal subset markers if there is an internal subset (even if empty)', (done) => {
+         const input = [
+            new DocTypeStartPToken({
+               name: SToken.fromString('root'),
+               startInternalSubset: SToken.fromString('['),
+            }),
+            new NotationDeclarationPToken({ open: SToken.fromString('<!') }),
+            new DocTypeEndPToken({
+               closeInternalSubset: SToken.fromString(']'),
+               close: SToken.fromString('>'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(5);
+            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_XTOKEN);
+            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_XTOKEN);
+            done();
+         });
+      });
+
+      it('adds an external subset markers if there is an externalId', (done) => {
+         externalMap.systemFoo = '<!ELEMENT one ANY>';
+         const input = [
+            new DocTypeStartPToken({
+               name: SToken.fromString('root'),
+               externalId: {
+                  system: {
+                     value: [
+                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                     ],
+                  }
+               },
+            }),
+            new DocTypeEndPToken({
+               close: SToken.fromString('>'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(5);
+            expect(results[1].type).toEqual(EXTERNAL_SUBSET_START_XTOKEN);
+            expect(results[2].type).toEqual(ELEMENT_DECLARATION_PTOKEN);
+            expect(results[3].type).toEqual(EXTERNAL_SUBSET_END_XTOKEN);
+            done();
+         });
+      });
+
+      it('adds an internal and external subset markers if both are there', (done) => {
+         externalMap.systemFoo = '<!ELEMENT one ANY>';
+         const input = [
+            new DocTypeStartPToken({
+               name: SToken.fromString('root'),
+               startInternalSubset: SToken.fromString('['),
+               externalId: {
+                  system: {
+                     value: [
+                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                     ],
+                  }
+               },
+            }),
+            new NotationDeclarationPToken({ open: SToken.fromString('<!') }),
+            new DocTypeEndPToken({
+               closeInternalSubset: SToken.fromString(']'),
+               close: SToken.fromString('>'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(8);
+            expect(results[1].type).toEqual(INTERNAL_SUBSET_START_XTOKEN);
+            expect(results[2].type).toEqual(NOTATION_DECLARATION_PTOKEN);
+            expect(results[3].type).toEqual(INTERNAL_SUBSET_END_XTOKEN);
+            expect(results[4].type).toEqual(EXTERNAL_SUBSET_START_XTOKEN);
+            expect(results[5].type).toEqual(ELEMENT_DECLARATION_PTOKEN);
+            expect(results[6].type).toEqual(EXTERNAL_SUBSET_END_XTOKEN);
+            done();
+         });
+      });
+
+   });
 
    describe('ATTLIST declaration', () => {
 
@@ -253,7 +362,7 @@ describe('EntityExpander (unit)', () => {
 
    });
 
-   describe('entity declaration', () => {
+   describe('ENTITY declaration', () => {
 
       it('ignores the declaration if it has no name (whitebox)', (done) => {
          const input = [
@@ -381,7 +490,7 @@ describe('EntityExpander (unit)', () => {
             open: SToken.fromString('%'),
             name: SToken.fromString('pe2'),
          });
-         externalMap.publicFoo = 'external value %pe1;';
+         externalMap.systemUrl = 'external value %pe1;';
 
          const input = [
             new GeneralEntityDeclarationPToken({
@@ -397,8 +506,8 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
                externalId: {
-                  public: {
-                     value: [ new text.PToken({ text: SToken.fromString('publicFoo') }), ],
+                  system: {
+                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
                value: [],
@@ -531,7 +640,7 @@ describe('EntityExpander (unit)', () => {
 
    });
 
-   describe('notation declaration', () => {
+   describe('NOTATION declaration', () => {
 
       it('passes a declaration with no unassigned values through without changes', (done) => {
          const input = [
@@ -894,7 +1003,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                externalId: {
-                  public: {
+                  system: {
                      value: [ new text.PToken({ text: SToken.fromString('publicName') }), ],
                   }
                },
@@ -956,14 +1065,14 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('replaces an entity reference to an external entity if validating', (done) => {
-         externalMap.publicName = 'some value';
+         externalMap.systemUrl = 'some value';
          const input = [
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
                externalId: {
-                  public: {
-                     value: [ new text.PToken({ text: SToken.fromString('publicName') }), ],
+                  system: {
+                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
             }),
@@ -1060,15 +1169,15 @@ describe('EntityExpander (unit)', () => {
       });
 
       it('replaces the reference if it is an external entity and this is validating', (done) => {
-         externalMap.publicName = '<!ENTITY bar "foo">';
+         externalMap.systemUrl = '<!ENTITY bar "foo">';
          const input = [
             new ParameterEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                parameter: SToken.fromString('%'),
                name: SToken.fromString('foo'),
                externalId: {
-                  public: {
-                     value: [ new text.PToken({ text: SToken.fromString('publicName') }), ],
+                  system: {
+                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
             }),

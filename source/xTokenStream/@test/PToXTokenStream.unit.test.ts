@@ -21,9 +21,15 @@ import {
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    NotationDeclarationPToken,
+   InternalSubsetStartXToken,
+   InternalSubsetEndXToken,
+   ExternalSubsetEndXToken,
+   ExternalSubsetStartXToken,
 } from '../../token';
 
 import PToXTokenStream from '../PToXTokenStream';
+import { EntityMetaData } from 'basic';
+import { WellFormedError } from 'error';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
@@ -202,12 +208,54 @@ describe('PToXTokenStream (unit)', () => {
       expect(text.makeXToken).toHaveBeenCalledWith(pToken);
    });
 
+   it('passes EntityMetaData through', () => {
+      tokenStream.write(new EntityMetaData());
+
+      const result = tokenStream.read();
+
+      expect(result).toEqual(new EntityMetaData());
+   });
+
+   it('passes InternalSubsetStart through', () => {
+      tokenStream.write(new InternalSubsetStartXToken());
+
+      const result = tokenStream.read();
+
+      expect(result).toEqual(new InternalSubsetStartXToken());
+   });
+
+   it('passes InternalSubsetEnd through', () => {
+      tokenStream.write(new InternalSubsetEndXToken());
+
+      const result = tokenStream.read();
+
+      expect(result).toEqual(new InternalSubsetEndXToken());
+   });
+
+   it('passes ExternalSubsetStart through', () => {
+      tokenStream.write(new ExternalSubsetStartXToken());
+
+      const result = tokenStream.read();
+
+      expect(result).toEqual(new ExternalSubsetStartXToken());
+   });
+
+   it('passes ExternalSubsetEnd through', () => {
+      tokenStream.write(new ExternalSubsetEndXToken());
+
+      const result = tokenStream.read();
+
+      expect(result).toEqual(new ExternalSubsetEndXToken());
+   });
+
    it('throws an error if asked to deal with an unknown pToken type', () => {
       tokenStream.write({ type: 'BOGUS' });
 
+      const error = tokenStream.read();
       const token = tokenStream.read();
 
-      expect(token.message).toEqual('Unknown PToken type "BOGUS" encountered.');
+      expect(error).toEqual(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [ `Unknown PToken type "BOGUS" encountered.` ]));
+      expect(token).toEqual({ type: 'BOGUS' });
    });
 
 });

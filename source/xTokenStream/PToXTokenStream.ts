@@ -1,8 +1,9 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
-import { ENTITY_META_DATA } from 'basic';
 
+import { ENTITY_META_DATA } from 'basic';
+import { WellFormedError } from 'error';
 import {
    declaration,
 
@@ -18,15 +19,19 @@ import {
    text,
 
    CDATA_PTOKEN,
+   EXTERNAL_SUBSET_START_XTOKEN,
+   EXTERNAL_SUBSET_END_XTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   INTERNAL_SUBSET_END_XTOKEN,
+   INTERNAL_SUBSET_START_XTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
-   NOTATION_DECLARATION_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
-} from '../token';
+} from 'token';
 
 class PToXTokenStream extends stream.Transform {
 
@@ -84,12 +89,16 @@ class PToXTokenStream extends stream.Transform {
          case XMLDECL_PTOKEN:
             this.push(pToken.toXToken());
             break;
+         case INTERNAL_SUBSET_START_XTOKEN:
+         case INTERNAL_SUBSET_END_XTOKEN:
+         case EXTERNAL_SUBSET_START_XTOKEN:
+         case EXTERNAL_SUBSET_END_XTOKEN:
+         case ENTITY_META_DATA:
+            this.push(pToken);
+            break;
          default:
-            if (pToken.type === ENTITY_META_DATA) {
-               this.push(pToken);
-               break;
-            }
-            this.push(new Error(`Unknown PToken type "${pToken.type}" encountered.`));
+            this.push(new WellFormedError(WellFormedError.ID.INTERNAL_ERROR, [ `Unknown PToken type "${pToken.type}" encountered.` ]));
+            this.push(pToken);
       }
 
       done();
