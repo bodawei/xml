@@ -8,12 +8,12 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
-   ParameterEntityReferencePToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
    PARAMETER_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
 
+   attListDeclaration,
    elementStart,
    text,
    charRef,
@@ -21,10 +21,12 @@ import {
    notationDeclaration,
    ParameterEntityStartPToken,
    ParameterEntityEndPToken,
+   ParameterEntityReferencePToken,
+   ParameterEntityDeclarationPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
-   ParameterEntityDeclarationPToken,
+   XmlDeclarationPToken,
 } from "token";
 import { ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
@@ -202,6 +204,50 @@ describe('EntityExpander (unit)', () => {
                new text.PToken({ text: SToken.fromString('foo') }),
                refToGe,
             ]);
+            done();
+         });
+      });
+
+      it('expands a parameter entity reference before assigning unassigned values', (done) => {
+         let didAssign = false;
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+            }),
+         } ];
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('attr1 CDATA') }),
+                  new text.PToken({ text: SToken.fromString(' #REQUIRED') }),
+               ],
+            }),
+            new AttListPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('elementName'),
+               unassigned: unassignedVals,
+            }),
+         ];
+
+         spyOn(attListDeclaration, 'assignUnassigned').and.callFake((pToken: AttListPToken) => {
+            didAssign = true;
+            expect(pToken.unassigned).toEqualRangeless([
+               unassigned.wordFromSToken(SToken.fromString('attr1')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('CDATA')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               unassigned.wordFromSToken(SToken.fromString('#REQUIRED')),
+            ]);
+         });
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(2);
+            expect(didAssign).toEqual(true);
             done();
          });
       });
@@ -414,6 +460,72 @@ describe('EntityExpander (unit)', () => {
             expect((results[1] as any).value).toEqual([
                refToPe1,
             ]);
+            done();
+         });
+      });
+
+      it('expands a parameter entity reference before assigning unassigned values', (done) => {
+         let didAssign = false;
+         const unassignedVals = [ {
+            type: UnassignedType.REFERENCE,
+            token: new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+            }),
+         } ];
+         const entityDecl = new GeneralEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            unassigned: unassignedVals,
+         });
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('and') }),
+               ],
+            }),
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe1'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('entity') }),
+                  new text.PToken({ text: SToken.fromString('name "super ') }),
+                  new ParameterEntityReferencePToken({
+                     open: SToken.fromString('%'),
+                     name: SToken.fromString('foo'),
+                  }),
+                  new text.PToken({ text: SToken.fromString(' duper"') }),
+               ],
+            }),
+            entityDecl,
+         ];
+
+         spyOn(entityDecl, 'assignUnassigned').and.callFake(() => {
+            didAssign = true;
+            expect(entityDecl.unassigned).toEqualRangeless([
+               unassigned.wordFromSToken(SToken.fromString('entityname')),
+               unassigned.spaceFromSToken(SToken.fromString(' ')),
+               {
+                  type: UnassignedType.LITERAL,
+                  token: {
+                     openQuote: SToken.fromString('"'),
+                     value: [
+                        new text.PToken({
+                           text: SToken.fromString('super and duper'),
+                        }),
+                     ],
+                     closeQuote: SToken.fromString('"'),
+                  },
+               }
+            ]);
+         });
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(didAssign).toEqual(true);
             done();
          });
       });
@@ -655,6 +767,63 @@ describe('EntityExpander (unit)', () => {
             expect((results[0] as any).attributes[0].value).toEqual([
                new text.PToken({ text: SToken.fromString('foo') }),
                refToGe,
+            ]);
+            done();
+         });
+      });
+
+      xit('replaces general entity references that reference others that have char refs that form markup', (done) => {
+         const refToPe = new ParameterEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('pe'),
+         });
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('ge'),
+         });
+
+         const input = [
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('pe'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('pe') }),
+               ],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('ge'),
+               value: [
+                  new CharRefPToken({
+                     open: SToken.fromString('&#'),
+                     digits: SToken.fromString('38'),
+                  }),
+                  new text.PToken({ text: SToken.fromString('pe;') }),
+               ],
+            }),
+            new elementStart.PToken({
+               attributes: [{
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                     refToGe,
+                  ]
+               }, {
+                  value: [
+                     new text.PToken({ text: SToken.fromString('foo') }),
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect((results[2] as any).attributes[0].value).toEqual([
+               new text.PToken({ text: SToken.fromString('foo') }),
+               new GeneralEntityStartPToken(refToGe),
+               new ParameterEntityStartPToken(refToPe),
+               new text.PToken({ text: SToken.fromString('pe') }),
+               new ParameterEntityEndPToken(refToPe),
+               new GeneralEntityEndPToken(refToGe),
             ]);
             done();
          });
@@ -910,6 +1079,238 @@ describe('EntityExpander (unit)', () => {
             expect(results[1].type).toEqual(PARAMETER_ENTITY_START_PTOKEN);
             expect(results[2].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             expect(results[3].type).toEqual(PARAMETER_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+   });
+
+   describe('standalone and non-validating processing', () => {
+
+      it('does not expand a general entity reference when non-validating, standalone="no" and entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('no'),
+               }],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new elementStart.PToken({
+               open: SToken.fromString('ElementStart'),
+               attributes: [],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('test'),
+            }),
+         ];
+
+         doExpand(false, input, (results) => {
+            expect(results.length).toEqual(5);
+            expect(results[4].type).toEqual(GENERAL_ENTITY_REFERENCE_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands a general entity reference when non-validating, standalone="yes" and entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('yes'),
+               }],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new elementStart.PToken({
+               open: SToken.fromString('ElementStart'),
+               attributes: [],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('test'),
+            }),
+         ];
+
+         doExpand(false, input, (results) => {
+            expect(results.length).toEqual(7);
+            expect(results[4].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands a general entity reference when validating when entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('no'),
+               }],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new elementStart.PToken({
+               open: SToken.fromString('ElementStart'),
+               attributes: [],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('test'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(7);
+            expect(results[4].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            done();
+         });
+      });
+
+      it('processes ATTLIST when non-validating, standalone="no" and entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('no'),
+               }],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new GeneralEntityReferencePToken({
+                        open: SToken.fromString('&'),
+                        name: SToken.fromString('test'),
+                     }),
+                  ],
+               }],
+            }),
+         ];
+
+         doExpand(false, input, (results) => {
+            expect(results.length).toEqual(4);
+            expect((results[3] as any).attDefs[0].value[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            done();
+         });
+      });
+
+      it('processes an ATTLIST when non-validating, standalone="yes" and entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('yes'),
+               }],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new GeneralEntityReferencePToken({
+                        open: SToken.fromString('&'),
+                        name: SToken.fromString('test'),
+                     }),
+                  ],
+               }],
+            }),
+         ];
+
+         doExpand(false, input, (results) => {
+            expect(results.length).toEqual(4);
+            expect((results[3] as any).attDefs[0].value[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands a general entity reference when validating when entity decl after pe ref', (done) => {
+         const input = [
+            new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               params: [{
+                  name: SToken.fromString('standalone'),
+                  value: SToken.fromString('no'),
+               }],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('test'),
+               value: [
+                  new text.PToken({ text: SToken.fromString('expanded!') }),
+               ],
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('foo'),
+            }),
+            new AttListPToken({
+               attDefs: [{
+                  value: [
+                     new GeneralEntityReferencePToken({
+                        open: SToken.fromString('&'),
+                        name: SToken.fromString('test'),
+                     }),
+                  ],
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(4);
+            expect((results[3] as any).attDefs[0].value[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
             done();
          });
       });

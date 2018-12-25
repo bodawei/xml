@@ -18,6 +18,7 @@ import token, {
    ParameterEntityEndPToken,
    XmlDeclarationPToken,
 
+   attListDeclaration,
    notationDeclaration,
    unassigned,
    text,
@@ -66,8 +67,8 @@ enum ValidationMode {
 }
 
 type Done = () => void;
-type ExpandToken = (token: Token, tokenProcessed: TokenProcessed) => void;
-type TokenProcessed = () => void;
+type ExpandToken = (token: Token, tokenProcessed: TokenHandled) => void;
+type TokenHandled = () => void;
 type ProcessBody = (sTokenSource: STokenSource, expandToken: ExpandToken, done: STokenSourceProcessed) => void;
 type ProcessForEntityValue = (sTokenSource: STokenSource, done: (results: ExpandedLiteralValuePToken) => void) => void;
 type STokenSourceProcessed = () => void;
@@ -79,28 +80,47 @@ type Processors = {
 };
 
 /**********************************************************************\
- An EntityExpander transforms a series of PTokens and expands any
- general or parameter entity reference tokens encountered directory, or
- found in any attribute values or in any entity values.
+ An EntityExpander transforms a series of PTokens by expanding any
+ general or parameter entity reference tokens encountered directly,
+ in attribute values, or in entity values.
 
  Expand here means that the entity reference is replaced by an entity
  start PToken, followed by the PTokens that are derived from the
  entity value, followed by an entity end PToken.
 
+ This behavior is specified across several sections of the standard,
+ including §2.8, §2.9, §4.1 and §5.1.
+
  This does minimal checking on the overall well-formedness or validity
- of the series of PTokens. This does attend to whether this is being
- done in the context of a validating, non-validating or standalone
- context, and as such it is sensitive to whether it is in the middle
- of the DTD or not, when it does any expansion.  Aside from that,
- this is not concerned whether the series of PTokens actually describe
- a reasonable XML entity.
+ of the series of PTokens. Indeed, this will readily expand things
+ that are not well-formed or not valid (e.g. this will expand
+ parameter entity references in markup declarations in the internal
+ subset), relying on other proceses to dect and flag these violations.
+
+ This does enforce a few constraints:
+ 1) From §5.1: When in non-validating mode, this will not load any
+    external entities, including the external subset.
+ 2) From §5.1: In non-validating/standalone=no mode, this will stop
+    "reading" any entity or attlist declarations encountered after
+    a parameter entity reference in the DTD.
+ 3) From §3.1: This does not expand references to external entities
+    in attribute values.
+ 4) From §2.9: This will not expand any parameter entities in the
+    internal DTD in non-validating or standalone mode.
+
+ Note: It is important to note that within-markup declarations may
+ not be fully expanded, especially when the validation mode is
+ NON-VALIDATING. Of course, any other entity reference (in the DTD,
+ in content, in an attribute or entity value) may not have been
+ expanded for one reason or another (e.g. there is no declaration,
+ or this is non-validating), but those are probably less surprising.
 \**********************************************************************/
 
 class EntityExpander {
    private paramEntitiesByName: ParameterEntityMap = {};
    private generalEntitiesByName: GeneralEntityMap = {};
    private validationMode: ValidationMode;
-   // SOON: starting, dtd, content end
+   private seenParamEntityRef: boolean = false;
    private deliverAToken: DeliverAToken;
    private processors: Processors;
 
@@ -110,13 +130,16 @@ class EntityExpander {
       this.processors = processors;
    }
 
-   public expandToken(pToken: Token, expanded: TokenProcessed) {
+   public expandToken(pToken: Token, expanded: TokenHandled) {
       switch (pToken.type) {
-         // case XMLDECL_PTOKEN:
-         //    this.handleXmlDeclaration(pToken as XmlDeclarationPToken);
-         //    break;
+         case XMLDECL_PTOKEN:
+            this.handleXmlDeclaration(pToken as XmlDeclarationPToken, expanded);
+            break;
          case token.attListDeclaration.PTYPE:
-            this.processAttListDeclaration(pToken as AttListPToken, expanded);
+            this.handleAttListDeclaration(pToken as AttListPToken, expanded);
+            break;
+         case ELEMENT_DECLARATION_PTOKEN:
+            this.handleElementDeclaration(pToken as ElementDeclarationPToken, expanded);
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
             this.handleEntityDeclaration(pToken as GeneralEntityDeclarationPToken, expanded);
@@ -127,18 +150,15 @@ class EntityExpander {
          case notationDeclaration.PTYPE:
             this.handleNotationDeclaration(pToken as notationDeclaration.PToken, expanded);
             break;
-         case ELEMENT_DECLARATION_PTOKEN:
-            this.handleElementDeclaration(pToken as ElementDeclarationPToken, expanded);
-            break;
          case token.elementStart.PTYPE:
          case token.elementStart.EMPTY_TYPE:
-            this.processElementStart(pToken as ElementStartPToken, expanded);
+            this.handleElementStart(pToken as ElementStartPToken, expanded);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
-            this.processGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
+            this.handleGeneralEntityReference(pToken as GeneralEntityReferencePToken, expanded);
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
-            this.processParameterEntityReference(pToken as ParameterEntityReferencePToken, expanded);
+            this.handleParameterEntityReference(pToken as ParameterEntityReferencePToken, expanded);
             break;
          default:
             this.deliverAToken(pToken);
@@ -146,36 +166,217 @@ class EntityExpander {
       }
    }
 
-   // private handleXmlDeclaration(pToken: XmlDeclarationPToken) {
-   //    for (const param of pToken.params) {
-   //       if (param.name.str.toLowerCase() === 'standalone' && this.validationMode === ValidationMode.NON_VALIDATING) {
-   //          this.validationMode = ValidationMode.STANDALONE;
-   //       }
-   //    }
-   // }
+   /*
+    * Determine whether this is a standalone document or not.
+    */
+   private handleXmlDeclaration(pToken: XmlDeclarationPToken, handled: TokenHandled) {
+      for (const param of pToken.params) {
+         const name = param.name.str.toLowerCase();
+         const value = param.value ? param.value.str.toLowerCase() : '';
 
-   private processAttListDeclaration(pToken: AttListPToken, expanded: TokenProcessed) {
-
-      // Replace any general entity references in attribute defaults with their referenced values
-      for (let attDef of pToken.attDefs) {
-         attDef.value = this.processValue(attDef.value);
+         if (name === 'standalone' && value === 'yes' && this.validationMode === ValidationMode.NON_VALIDATING) {
+            this.validationMode = ValidationMode.STANDALONE;
+         }
       }
 
       this.deliverAToken(pToken);
-      expanded();
+      handled();
    }
 
-   private processElementStart(pToken: ElementStartPToken | ElementEmptyPToken, expanded: TokenProcessed) {
-      // Replace any general entity references in attribute defaults with their referenced values
+   /*
+    * Expand any within-markup parameter entity references within the ATTLIST declaration itself,
+    *    (§2.8 Indicates that parameter entity references are allowed within markup declarations, though
+    *     this ignores that constraint)
+    * Expand any general entities in the attribute defaults. This follows from [10] in §2.3 and
+    * [60] in §3.3.2.  While not explicit, §3.1 pretty much indicates that no external entity
+    * references may be used here.
+    */
+   private handleAttListDeclaration(pToken: AttListPToken, handled: TokenHandled) {
+      this.expandUnassigned(pToken.unassigned, true, (newUnassigned) => {
+         pToken.unassigned = newUnassigned as any; // typeHack
+         attListDeclaration.assignUnassigned(pToken);
+
+         // Replace any general entity references in attribute defaults with their referenced values
+         for (let attDef of pToken.attDefs) {
+            attDef.value = this.expandAttValue(attDef.value);
+         }
+
+         this.deliverAToken(pToken);
+         handled();
+      });
+   }
+
+   /*
+    * Expand any within-markup parameter entity references within the ELEMENT declaration itself,
+    *    (§2.8 Indicates that parameter entity references are allowed within markup declarations, though
+    *     this ignores that constraint)
+    */
+   private handleElementDeclaration(pToken: ElementDeclarationPToken, handled: TokenHandled) {
+      this.expandUnassigned(pToken.unassigned, true, (newUnassigned) => {
+         pToken.unassigned = newUnassigned as any; // typeHack
+         assignUnassigned(pToken);
+         this.deliverAToken(pToken);
+         handled();
+      });
+   }
+
+   /*
+    * Expand any within-markup parameter entity references within the ELEMENT declaration itself,
+    *    (§2.8 Indicates that parameter entity references are allowed within markup declarations, though
+    *     this ignores that constraint)
+    */
+   private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, handled: TokenHandled) {
+      this.expandUnassigned(pToken.unassigned, true, (newUnassigned) => {
+         (pToken as any).unassigned = newUnassigned; // typeHack
+         pToken.assignUnassigned();
+
+         // §2.8, §4.4.5 and §4.5 all discuss parameter entities in an EntityValue.
+         this.expandEntityValue((pToken as any).value, (newValue) => { // typeHack
+            (pToken as any).value = newValue;
+
+            // If the declaration has no name, we won't be able to look it up
+            if (pToken.name) {
+               let info: GeneralEntityInfo | ParameterEntityInfo;
+               let entityGroup: GeneralEntityMap | ParameterEntityMap;
+               const name = pToken.name.str;
+
+               if (pToken.parameter) {
+                  info = {
+                     token: pToken,
+                     isInternal: !pToken.externalId,
+                  };
+                  entityGroup = this.paramEntitiesByName;
+               } else {
+                  info = {
+                     token: pToken,
+                     isUnparsed: !!(pToken as GeneralEntityDeclarationPToken).nDataName,
+                     isInternal: !pToken.externalId,
+                  };
+                  entityGroup = this.generalEntitiesByName;
+               }
+
+               // §5.1: Except when standalone="yes", [non-validating processors] must not process entity declarations or
+               // attribute-list declarations encountered after a reference to a parameter entity that is not read, since
+               // the entity may have contained overriding declarations
+               // Thus: only store information about this entity declaration if we haven't already seen one with
+               // the same name, and we havne't already seen a parameter entity reference in a non-validating mode
+               // Note, if not validating, we don't really need to store param entity decls, but we do anyway.
+               if ((!this.seenParamEntityRef || this.validationMode !== ValidationMode.NON_VALIDATING) &&
+                  !entityGroup[name]) {
+                  entityGroup[name] = info;
+               }
+            }
+
+            this.deliverAToken(pToken);
+            handled();
+         });
+      });
+   }
+
+   /*
+    * Expand any within-markup parameter entity references within the NOTATION declaration itself,
+    *    (§2.8 Indicates that parameter entity references are allowed within markup declarations, though
+    *     this ignores that constraint)
+    */
+   private handleNotationDeclaration(pToken: NotationDeclarationPToken, handled: TokenHandled) {
+      this.expandUnassigned(pToken.unassigned, false, (newUnassigned) => {
+         pToken.unassigned = newUnassigned;
+
+         if (pToken.externalId && pToken.unassigned) {
+            pToken.externalId.unassigned = pToken.unassigned;
+         }
+
+         notationDeclaration.assignUnassigned(pToken);
+         this.deliverAToken(pToken);
+         handled();
+      });
+   }
+
+   /*
+    * Expand any general entity references in attribute values.
+    */
+   private handleElementStart(pToken: ElementStartPToken | ElementEmptyPToken, handled: TokenHandled) {
       for (let attribute of pToken.attributes) {
-         attribute.value = this.processValue(attribute.value);
+         attribute.value = this.expandAttValue(attribute.value);
       }
 
       this.deliverAToken(pToken);
-      expanded();
+      handled();
    }
 
-   private processValue(value: LiteralValuePToken) {
+   /*
+    * Expand a general entity reference, unless it is unparsed, or it references an external parameter entity and
+    * this is doing non-validation
+    */
+   private handleGeneralEntityReference(pToken: GeneralEntityReferencePToken, handled: TokenHandled) {
+      const info = pToken.name ? this.generalEntitiesByName[pToken.name.str] : undefined;
+
+      // Can not expand a reference that has no name
+      // Can not expand a reference that we have no declaration for
+      // §4.4 unparsed entities may not be referenced in content
+      // §4.4 and §5.1 Do not include/expand if is external and we are not validating
+      if (!info || info.isUnparsed ||
+         (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
+            this.deliverAToken(pToken);
+            handled();
+            return;
+      }
+
+      this.deliverAToken(new GeneralEntityStartPToken(pToken));
+
+      const entityProcessed = () => this.expandToken(new GeneralEntityEndPToken(pToken), handled);
+
+      this.processEntity(info.token, (subToken: PToken, subHandled: TokenHandled) => {
+         if (subToken.type === 'ENTITY_META_DATA') {
+            subHandled();
+            return;
+         }
+
+         this.expandToken(subToken, subHandled);
+      }, entityProcessed);
+   }
+
+   /*
+    * Expand a parameter entity reference, unless it is unparsed, or it references an external parameter entity and
+    * this is doing non-validation
+    */
+   private handleParameterEntityReference(pToken: ParameterEntityReferencePToken, handled: TokenHandled) {
+      const info = pToken.name ? this.paramEntitiesByName[pToken.name.str] : undefined;
+
+      // Always set this.  But only relevant for standalone.
+      this.seenParamEntityRef = true;
+
+      // Can not expand a reference that has no name
+      // Can not expand a reference that we have no declaration for
+      // §2.9 don't expand parameter entity references when not validating
+      if (!info || this.validationMode !== ValidationMode.VALIDATING) {
+         this.deliverAToken(pToken);
+         handled();
+         return;
+      }
+
+      this.deliverAToken(new ParameterEntityStartPToken(pToken));
+
+      const entityProcessed = () => this.expandToken(new ParameterEntityEndPToken(pToken), handled);
+
+      this.processEntity(info.token, (subToken: PToken, subHandled: TokenHandled) => {
+         if (subToken.type === 'ENTITY_META_DATA') {
+            subHandled();
+            return;
+         }
+
+         this.expandToken(subToken, subHandled);
+      }, entityProcessed);
+   }
+
+   /*
+    * Expand general entity references in an attribute value (either on an element start or
+    * attlist declaration)
+    * §3.1: Well-formedness constraint: No External Entity References: Attribute values must
+    * not contain direct or indirect entity references to external entities.
+    * §4.4/§4.4.4: Forbidden: a reference to an external entity in an attribute value.
+    */
+   private expandAttValue(value: LiteralValuePToken) {
       let newValue: LiteralValuePToken = [];
 
       for (let element of value) {
@@ -186,75 +387,42 @@ class EntityExpander {
 
          const info = element.name ? this.generalEntitiesByName[element.name.str] : undefined;
 
-         // Can not expand a reference that has no name
-         if (!info || info.token.externalId ) {
+         // Can not expand a reference that has no name, or an external entity
+         if (!info || !info.isInternal ) {
             newValue.push(element);
             continue;
          }
 
-         newValue.push(new GeneralEntityStartPToken(element as GeneralEntityReferencePToken));
+         newValue.push(new GeneralEntityStartPToken(element));
+         // @@ this is not right.  Don't we actually need to parse this in case of char refs?
          newValue = newValue.concat(info.token.value);
-         newValue.push(new GeneralEntityEndPToken(element as GeneralEntityReferencePToken));
+         newValue.push(new GeneralEntityEndPToken(element));
       }
 
       return newValue;
    }
 
-   private handleEntityDeclaration(pToken: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expanded: TokenProcessed) {
-      this.handleEntityValue((pToken as any).value, (newValue) => {
-         (pToken as any).value = newValue;
+   private expandEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
+      this.retrieveExternalParameterEntities(value, () => {
+         let newValue: ExpandedLiteralValuePToken = [];
 
-         // If the declaration has no name, we won't be able to look it up
-         if (pToken.name) {
-            let info: GeneralEntityInfo | ParameterEntityInfo;
-            let entityGroup: GeneralEntityMap | ParameterEntityMap;
-            const name = pToken.name.str;
+         for (let element of value) {
+            if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
+               const peRef = element as ParameterEntityReferencePToken;
+               const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
 
-            if (pToken.parameter) {
-               info = {
-                  token: pToken,
-                  isInternal: !pToken.externalId,
-               };
-               entityGroup = this.paramEntitiesByName;
-            } else {
-               info = {
-                  token: pToken,
-                  isUnparsed: !!(pToken as GeneralEntityDeclarationPToken).nDataName,
-                  isInternal: !pToken.externalId,
-               };
-               entityGroup = this.generalEntitiesByName;
+               if (peInfo) {
+                  newValue.push(new ParameterEntityStartPToken(peRef));
+                  newValue = newValue.concat(peInfo.cache || (peInfo.token as any).value);
+                  newValue.push(new ParameterEntityEndPToken(peRef));
+                  continue;
+               }
             }
 
-            if (!entityGroup[name]) {
-               entityGroup[name] = info;
-            }
-         }
+            newValue.push(element);
+         };
 
-         this.deliverAToken(pToken);
-         expanded();
-      });
-   }
-
-   private handleNotationDeclaration(pToken: NotationDeclarationPToken, expanded: TokenProcessed) {
-      this.prepareUnassigned(pToken.unassigned, false, (newUnassigned) => {
-         pToken.unassigned = newUnassigned;
-
-         if (pToken.externalId && pToken.unassigned) {
-            pToken.externalId.unassigned = pToken.unassigned;
-         }
-
-         notationDeclaration.assignUnassigned(pToken);
-         this.deliverAToken(pToken);
-         expanded();
-      });
-   }
-
-   private handleElementDeclaration(pToken: ElementDeclarationPToken, expanded: TokenProcessed) {
-      this.prepareUnassigned(pToken.unassigned, true, (newUnassigned) => {
-         pToken.unassigned = newUnassigned as any; // typeHack
-         assignUnassigned(pToken);
-         this.deliverAToken(pToken);
-         expanded();
+         valueProcessed(newValue);
       });
    }
 
@@ -290,7 +458,7 @@ class EntityExpander {
             const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData());
 
             this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
-               this.handleEntityValue(results, (newResult) => {
+               this.expandEntityValue(results, (newResult) => {
                   info.cache = newResult;
                   seekingCount --;
 
@@ -375,7 +543,7 @@ class EntityExpander {
       }
    }
 
-   private prepareUnassigned(value: UnassignedArray|void, isElementDecl: boolean, deliverExpandedUnassigned: (val: UnassignedArray|void) => void) {
+   private expandUnassigned(value: UnassignedArray|void, isElementDecl: boolean, deliverExpandedUnassigned: (val: UnassignedArray|void) => void) {
       if (!value) {
          deliverExpandedUnassigned(value);
          return;
@@ -403,91 +571,13 @@ class EntityExpander {
       });
    }
 
-   private handleEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
-      this.retrieveExternalParameterEntities(value, () => {
-         let newValue: ExpandedLiteralValuePToken = [];
-
-         for (let element of value) {
-            if (element.type === PARAMETER_ENTITY_REFERENCE_PTOKEN) {
-               const peRef = element as ParameterEntityReferencePToken;
-               const peInfo = peRef.name ? this.paramEntitiesByName[peRef.name.str] : undefined;
-
-               if (peInfo) {
-                  newValue.push(new ParameterEntityStartPToken(peRef));
-                  newValue = newValue.concat(peInfo.cache || (peInfo.token as any).value);
-                  newValue.push(new ParameterEntityEndPToken(peRef));
-                  continue;
-               }
-            }
-
-            newValue.push(element);
-         };
-
-         valueProcessed(newValue);
-      });
-   }
-
-   private processGeneralEntityReference(pToken: GeneralEntityReferencePToken, referenceProcessed: TokenProcessed) {
-      const info = pToken.name ? this.generalEntitiesByName[pToken.name.str] : undefined;
-
-      // Can not expand a reference that has no name
-      // Can not expand a reference that we have no declaration for
-      // §4.4 unparsed entities may not be referenced in content
-      // §4.4 Do not include if is external and we are not validating
-      if (!info || info.isUnparsed ||
-         (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
-            this.deliverAToken(pToken);
-            referenceProcessed();
-            return;
-      }
-
-      this.deliverAToken(new GeneralEntityStartPToken(pToken));
-
-      const entityProcessed = () => this.expandToken(new GeneralEntityEndPToken(pToken), referenceProcessed);
-
-      this.processEntity(info.token, this.processors.processBody, (subToken: PToken, subProcessed: TokenProcessed) => {
-         if (subToken.type === 'ENTITY_META_DATA') {
-            subProcessed();
-            return;
-         }
-
-         this.expandToken(subToken, subProcessed);
-      }, entityProcessed);
-   }
-
-   private processParameterEntityReference(pToken: ParameterEntityReferencePToken, referenceProcessed: TokenProcessed) {
-      const info = pToken.name ? this.paramEntitiesByName[pToken.name.str] : undefined;
-
-      // Can not expand a reference that has no name
-      // Can not expand a reference that we have no declaration for
-      // §4.4 Do not include if is external and we are not validating
-      if (!info || (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
-         this.deliverAToken(pToken);
-         referenceProcessed();
-         return;
-      }
-
-      this.deliverAToken(new ParameterEntityStartPToken(pToken));
-
-      const entityProcessed = () => this.expandToken(new ParameterEntityEndPToken(pToken), referenceProcessed);
-
-      this.processEntity(info.token, this.processors.processBody, (subToken: PToken, subProcessed: TokenProcessed) => {
-         if (subToken.type === 'ENTITY_META_DATA') {
-            subProcessed();
-            return;
-         }
-
-         this.expandToken(subToken, subProcessed);
-      }, entityProcessed);
-   }
-
    // Now expand everything.  If it is internal, then we need to first expand the char references
    // feed the internal entity value through a processor which expands char refs
    // then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
-   private processEntity(entityDecl: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, processBody: ProcessBody, expandToken: ExpandToken, entityProcessed: TokenProcessed): void {
+   private processEntity(entityDecl: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expandToken: ExpandToken, entityProcessed: TokenHandled): void {
       if (entityDecl.externalId) {
          const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, new EntityMetaData());
-         processBody(sTokenSource, expandToken, entityProcessed);
+         this.processors.processBody(sTokenSource, expandToken, entityProcessed);
          return;
       }
 
@@ -518,7 +608,7 @@ class EntityExpander {
       };
       sTokenSource.endText();
 
-      processBody(sTokenSource, expandToken, entityProcessed);
+      this.processors.processBody(sTokenSource, expandToken, entityProcessed);
    }
 
 }
@@ -527,5 +617,5 @@ export {
    EntityExpander,
    ExpandToken,
    STokenSourceProcessed,
-   TokenProcessed,
+   TokenHandled as TokenProcessed,
 };

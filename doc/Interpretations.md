@@ -336,6 +336,10 @@ Internal entities are parsed twice. The first time replaces any character refere
    - Are PEReferences allowed here?
 The second time is at the point of use. Those character references from the first parse may form new markup, including other char references, which are all re-parsed and replaced at time of use.
 
+ordering of things is so weird. in 4.4.0 it says an unparsed entity reference should be an error.  yet, this is almost the same as an unparsed reference in content.  put another way, the parsed entity references are bypassed.  Which seems fine.  but you can't know if an entity reference is unparsed in an entity value until it is used, ot at least until the end of the dtd.
+   - So this isn't parse time.  Thsi is end of dtd time that you can know this.
+   - it could be at expansion time, but then you need to be very clear that you are indeed in the middle of expanding an entity and encounter this there.  So, bypassed is at parse time, and error is at end of dtd or expansion time.
+
 
 
 # QUESTIONS
@@ -350,21 +354,35 @@ The second time is at the point of use. Those character references from the firs
 
 
 
----
-Entities
-- an internal general entity value is parsed as: text, charref, peRef
-- an internal parameter entity value is parsed as: text, charref, peRef
-Expansion:
-- in all cases we expans the peRefs
-   - if they are internal, then we just replace the ref with their already expanded text (they have to be expanded because we've already processed them)
-   - If they are external, then we must parse them the same way we did internally.
-=> Can't have PERefs in external general entity values.  They'll never be expanded in a situation where they can be used.
 
-ordering of things is so weird. in 4.4.0 it says an unparsed entity reference should be an error.  yet, this is almost the same as an unparsed reference in content.  put another way, the parsed entity references are bypassed.  Which seems fine.  but you can't know if an entity reference is unparsed in an entity value until it is used, ot at least until the end of the dtd.
-   - So this isn't parse time.  Thsi is end of dtd time that you can know this.
-   - it could be at expansion time, but then you need to be very clear that you are indeed in the middle of expanding an entity and encounter this there.  So, bypassed is at parse time, and error is at end of dtd or expansion time.
+# Entities
+The treatment of parameter entities can get really complex.  The relevant details are covered in sections
+2.8, 2.9, 4.1 and 5.1 of the standard. Most of this is straightforward. In many ways, the most crucial line in the stanard for non-validating (and standalone) processing is from §2.9 "...non-validating processors are not required to read them [parameter entities]". This has the somewhat surprising result that (depending on how you interpret "read", we can't expand parameter entity references anywhere in this mode.  The most surprising thing is that you can have parameter entities in markup delcarations in the internal subset if that declaration has gotten in there by way of a parameter entity.
 
+Note: This is essentially an expansion of the "Entity Value x Entity Type: Parameter" cell in the table in §4.4.
 
+| In | Non-validating | Standalone | Validating |
+|--|--|--|--|
+| Internal DTD | **Ignored** §2.9 "...parameter entity (external or internal, ... because non-validating processors are not required to read them)" (indirectly §5.1 says the same)<br>Note: §5.1 Stops reading any ATTLIST or ENTITY declarationss after this |  **Ignored** <br>§2.9 implies nothing significant in here (e.g. used decls, comments, etc).<br>Note: §5.1 keeps reading ATTLIST and Entity decls | **OK** (§2.8/PE in Internal Subset)|
+| External DTD | **n/a** (§5.1 do not need to load external subset)  | **n/a** (§5.1 do not need to load external subset. by §2.9 nothing significant here) | **OK** (can reference internal or external from internal or external subset) |
+| Markup Declarations in internal subset | **Illegal** (§2.8/PE in Internal Subset) | **illegal** (§2.8/PE in Internal Subset) | **Illegal** (§2.8/PE in Internal Subset) |
+| Markup Declarations in external subset | **n/a**  §5.1 do not need to load external subset  | **n/a**  §5.1 do not need to load external subset (by §2.9 nothing significant here) | **OK** §2.8 in def for external subset|
+| Markup Declarations in the internal subset by way of a parameter entity (internal or external)  | **n/a**  §5.1 do not need to load external subset or external entity and §2.9 not required to read parameter entities.  | **n/a**  §5.1 do not need to load external subset or external entity (by §2.9 nothing significant here)) | **OK** §2.8 says that they can occur in external param entities, which by implication could then be expanded in internal subset)
+| Entity Value | **OK** if internal declaration (implicit in §2.8). Note: §2.9 implies we do not have to read these at all, in which case the answer would be "n/a".<br>**n/a** if external since by §5.1 do not load external | **OK** if internal declaration (implicit in §2.8 and §2.9). Note: §2.9 implies we do not have to read these at all, in which case the answer would be "n/a"<br>**n/a** if external since by §5.1 do not load external | **OK** (§2.8 allows) |
 
-We allow some expansions which are not legal:
-- We will include external entities in an attribute value in EntityExpander.  (but checkWellFormed will complain)
+Crucially: the definition of "read" is never given.
+
+It is worth seeing these outcomes:
+* internal General Parameter Entities only ever get expanded in attribute values and content
+* external general parameter entities only ever gets expanded in content (not clear why attribute values are excluded)
+* parameter entities either get expanded in the DTD, in entity values, or inside of markup declarations.
+   * Crucially and uniquely, the places those parameter entities get expanded may, all, be within a parameter entity.
+
+Another way to think of this:
+* a general entity has two kinds of "parsing" that it may be subjected to
+   * content: text, element start and end, general entity reference, char reference, comment, pi
+   * attribute: text, char ref, general entity reference
+* a parameter entity has three kinds of parsing
+   * dtd: notation, attlist, entity or element declaration, comment, pi, space
+   * markup declaration: space, words, literals, param entity ref
+   * entity value: text, char ref, parameter entity reference
