@@ -47,6 +47,8 @@ import { CharRefPToken } from "source/token/charRef";
 import { DocTypeStartPToken } from "source/token/docTypeStart";
 import { DocTypeEndPToken } from "source/token/docTypeEnd";
 import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
+import { isNullOrUndefined } from "util";
+import { CharDataPToken } from "source/token/charData";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
@@ -861,6 +863,40 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
+      xit('replaces predefined entity references with data', (done) => {
+         const refToGe = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('lt'),
+         });
+
+         const input = [
+            new elementStart.PToken({
+               attributes: [{
+                  value: [
+                     refToGe,
+                  ]
+               }],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            const attrValue = (results[0] as any).attributes[0].value;
+            console.log(JSON.stringify(attrValue, undefined, 5));
+            expect(attrValue.length).toEqual(3);
+            expect(attrValue[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(attrValue[1]).toEqualRangeless(new CharRefPToken({
+               open: SToken.fromString('&#'),
+               digits: SToken.fromString('38'),
+               close: SToken.fromString(';'),
+               postOpenSpace: undefined,
+         	   postHexMarkerSpace: undefined,
+         	   postDigitsSpace: undefined,
+            }));
+            expect(attrValue[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
       it('does not replace a reference if it has no name', (done) => {
          const refToGe = new GeneralEntityReferencePToken({
             open: SToken.fromString('&'),
@@ -1017,6 +1053,111 @@ describe('EntityExpander (unit)', () => {
          doExpand(false, input, (results) => {
             expect(results.length).toEqual(2);
             expect(results[1].type).toEqual(GENERAL_ENTITY_REFERENCE_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands an &lt; entity reference even if not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[1]).toEqualRangeless(new CharRefPToken({
+               open: SToken.fromString('&#'),
+               digits: SToken.fromString('60'),
+               close: SToken.fromString(';'),
+               postOpenSpace: undefined,
+         	   postHexMarkerSpace: undefined,
+         	   postDigitsSpace: undefined,
+            }));
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands an &amp; entity reference even if not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('amp'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[1]).toEqualRangeless(new CharRefPToken({
+               open: SToken.fromString('&#'),
+               digits: SToken.fromString('38'),
+               close: SToken.fromString(';'),
+               postOpenSpace: undefined,
+         	   postHexMarkerSpace: undefined,
+         	   postDigitsSpace: undefined,
+            }));
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands an &gt; entity reference even if not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('gt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[1]).toEqualRangeless(new CharDataPToken({
+               text: SToken.fromString('>'),
+            }));
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands an &apos; entity reference even if not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('apos'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[1]).toEqualRangeless(new CharDataPToken({
+               text: SToken.fromString('\''),
+            }));
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('expands an &apos; entity reference even if not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('quot'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results.length).toEqual(3);
+            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[1]).toEqualRangeless(new CharDataPToken({
+               text: SToken.fromString('"'),
+            }));
+            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });

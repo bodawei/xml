@@ -29,10 +29,11 @@ import token, {
    InternalSubsetEndXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
+   TEXTDECL_PTOKEN,
 } from 'token';
 import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
-import { STokenSource } from 'sToken';
+import { STokenSource, SToken, strOrBlank } from 'sToken';
 import { defaultExtractors } from 'extractor';
 import { EntityMetaData } from 'basic';
 import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
@@ -86,6 +87,52 @@ type Processors = {
    retrieveExternalEntity: (externalId: ExternalId, entityMetaData: EntityMetaData) => STokenSource,
 };
 
+// §4.6: This is our set of data to populate our "info" objects for the predefined entities.
+const PREDEFINED_ENTITIES = [{
+   name: 'lt',
+   value: [
+      new charRef.CharRefPToken({
+         open: SToken.fromString('&#'),
+         digits: SToken.fromString('38'),
+      }),
+      new TextPToken({ text: SToken.fromString('#60;') }),
+   ],
+}, {
+   name: 'amp',
+   value: [
+      new charRef.CharRefPToken({
+         open: SToken.fromString('&#'),
+         digits: SToken.fromString('38'),
+      }),
+      new TextPToken({ text: SToken.fromString('#38;') }),
+   ],
+}, {
+   name: 'gt',
+   value: [
+      new charRef.CharRefPToken({
+         open: SToken.fromString('&#'),
+         digits: SToken.fromString('62'),
+      }),
+   ],
+}, {
+   name: 'apos',
+   value: [
+      new charRef.CharRefPToken({
+         open: SToken.fromString('&#'),
+         digits: SToken.fromString('39'),
+      }),
+   ],
+}, {
+   name: 'quot',
+   value: [
+      new charRef.CharRefPToken({
+         open: SToken.fromString('&#'),
+         digits: SToken.fromString('34'),
+      }),
+   ],
+} ];
+
+
 /**********************************************************************\
  An EntityExpander transforms a series of PTokens by expanding any
  general or parameter entity reference tokens encountered directly,
@@ -126,6 +173,7 @@ type Processors = {
 class EntityExpander {
    private paramEntitiesByName: ParameterEntityMap = {};
    private generalEntitiesByName: GeneralEntityMap = {};
+   private predefinedEntitiesByName: GeneralEntityMap = {};
    private validationMode: ValidationMode;
    private seenParamEntityRef: boolean = false;
    private deliverAToken: DeliverAToken;
@@ -136,6 +184,17 @@ class EntityExpander {
       this.validationMode = validating ? ValidationMode.VALIDATING : ValidationMode.NON_VALIDATING;
       this.deliverAToken = handoffToken;
       this.processors = processors;
+
+      for (let details of PREDEFINED_ENTITIES) {
+         this.predefinedEntitiesByName[details.name] = {
+            token: new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               value: details.value,
+            }),
+            isInternal: true,
+            isUnparsed: false,
+         };
+      }
    }
 
    public expandToken(pToken: Token, expanded: TokenHandled) {
@@ -357,7 +416,7 @@ class EntityExpander {
     * this is doing non-validation
     */
    private handleGeneralEntityReference(pToken: GeneralEntityReferencePToken, handled: TokenHandled) {
-      const info = pToken.name ? this.generalEntitiesByName[pToken.name.str] : undefined;
+      const info = this.getGeneralEntityInfo(pToken);
 
       // Can not expand a reference that has no name
       // Can not expand a reference that we have no declaration for
@@ -382,6 +441,21 @@ class EntityExpander {
 
          this.expandToken(subToken, subHandled);
       }, entityProcessed);
+   }
+
+   /*
+    * §4.6 says "All XML processors must recognize these entities whether they
+    * are declared or not."
+    *
+    * Thus, when this expander seeks to look up an entity, if it isn't among the
+    * ones explicitly defined in this document, then this uses the set of
+    * predefined entities to provide them.
+    */
+   private getGeneralEntityInfo(pToken: GeneralEntityReferencePToken) {
+      const name = strOrBlank(pToken.name);
+      const info = this.generalEntitiesByName[name] || this.predefinedEntitiesByName[name];
+
+      return info;
    }
 
    /*
@@ -433,7 +507,7 @@ class EntityExpander {
             continue;
          }
 
-         const info = element.name ? this.generalEntitiesByName[element.name.str] : undefined;
+         const info = this.getGeneralEntityInfo(element);
 
          // Can not expand a reference that has no name, or an external entity
          if (!info || !info.isInternal ) {
