@@ -80,7 +80,7 @@ describe('Range', () => {
          const range = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
 
          const offset = range.getStartOffset();
-         range.startIndex = 999;
+         (range as any).startIndex = 999;
 
          expect(offset).toEqual(new Offset(new EntityLocation('s', 'p'), 1, 2, 3));
       });
@@ -99,7 +99,7 @@ describe('Range', () => {
          const range = new Range(new EntityLocation('s', 'p'), 1, 2, 3, 4, 5, 6);
 
          const offset = range.getEndOffset();
-         range.endIndex = 999;
+         (range as any).endIndex = 999;
 
          expect(offset).toEqual(new Offset(new EntityLocation('s', 'p'), 4, 5, 6));
       });

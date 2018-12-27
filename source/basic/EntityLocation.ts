@@ -20,9 +20,9 @@ function getDirOf(path: string): string {
 \**********************************************************************/
 
 class EntityLocation {
-   public systemId: string;
-   public publicId?: string;
    private base?: EntityLocation;
+   public readonly systemId: string;
+   public readonly publicId?: string;
 
    /*
     * Returns a resolved URL, which is relative to the location

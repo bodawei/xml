@@ -6,4 +6,4 @@ export { default as Offset } from './Offset';
 export { default as Range } from './Range';
 export * from './StringBundle';
 export * from './token';
-export { default as util } from './util';
+export * from './chars';

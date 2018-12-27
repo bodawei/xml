@@ -67,11 +67,3 @@ export {
    isNmToken,
    isSpace,
 };
-
-const util = {
-   isName,
-   isNmToken,
-   isSpace,
-};
-
-export default util;

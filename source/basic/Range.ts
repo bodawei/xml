@@ -20,12 +20,12 @@ import Offset from './Offset';
 
 class Range {
    public readonly location: EntityLocation;
-   public startIndex: number;
-   public startRow: number;
-   public startColumn: number;
-   public endIndex: number;
-   public endRow: number;
-   public endColumn: number;
+   public readonly startIndex: number;
+   public readonly startRow: number;
+   public readonly startColumn: number;
+   public readonly endIndex: number;
+   public readonly endRow: number;
+   public readonly endColumn: number;
 
    constructor(location: EntityLocation | Offset,
       index: number = 0, row: number = 0, column: number = 0,

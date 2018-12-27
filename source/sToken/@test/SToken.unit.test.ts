@@ -64,7 +64,7 @@ describe('SToken', () => {
 
          expect(clone).not.toBe(sToken1);
 
-         sToken1.ranges[0].startIndex = 1000;
+         (sToken1.ranges[0] as any).startIndex = 1000;
 
          expect(clone).toEqual(new SToken(' \n', ' \r\n', new Range(new EntityLocation(), 1, 2, 3)));
       });

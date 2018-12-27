@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { util, EntityMetaData } from 'basic';
+import { EntityMetaData, isName, isNmToken } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { SToken } from 'sToken';
 
@@ -61,7 +61,7 @@ const WHOLENMTOKEN_REGEX11 = /^[-\.A-Za-z0-9:_\u00B7\u00C0-\u00D6\u00F8-\u02FF\u
 \**********************************************************************/
 
 function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
-   if (!nameSToken || util.isName(nameSToken.str, entityMetaData.version, entityMetaData.revision)) {
+   if (!nameSToken || isName(nameSToken.str, entityMetaData.version, entityMetaData.revision)) {
       return;
    }
 
@@ -74,7 +74,7 @@ function checkName(nameSToken: SToken | void, ec: ErrorCollector, entityMetaData
 \**********************************************************************/
 
 function checkNMToken(nameTokenSToken: SToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData, errorCode: string) {
-   if (!nameTokenSToken || util.isNmToken(nameTokenSToken.str, entityMetaData.version, entityMetaData.revision)) {
+   if (!nameTokenSToken || isNmToken(nameTokenSToken.str, entityMetaData.version, entityMetaData.revision)) {
       return;
    }
 

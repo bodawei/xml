@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, util } from 'basic';
+import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 import {
@@ -490,7 +490,7 @@ class CheckXTokenValidStream extends stream.Transform {
           * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
           */
          if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
-            if (util.isSpace(xToken.text)) {
+            if (isSpace(xToken.text)) {
                xToken = new space.XToken(xToken.text, xToken.pToken);
             }
          }
@@ -748,7 +748,7 @@ class CheckXTokenValidStream extends stream.Transform {
          //    It doesn't make a lot of sense for an ID to have a default value, but the spec doesn't
          //    forbid this. We allow it, and follow the spirit of this validity constraint to
          //    require that value be a legitimate name
-         if (hasDefault && !util.isName(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isName(defaultText, this.emd.version, this.emd.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_ID_DEFAULT,
                [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
@@ -756,7 +756,7 @@ class CheckXTokenValidStream extends stream.Transform {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type IDREF or ENTITY must match the Name production;
-         if (hasDefault && !util.isName(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isName(defaultText, this.emd.version, this.emd.revision)) {
             const code = type === 'IDREF' ? ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT
                : ValidityError.ID.ATTLISTDECL_BAD_ENTITY_DEFAULT;
 
@@ -777,7 +777,7 @@ class CheckXTokenValidStream extends stream.Transform {
             const badNames = [];
 
             for (const name of names) {
-               if (!util.isName(name, this.emd.version, this.emd.revision)) {
+               if (!isName(name, this.emd.version, this.emd.revision)) {
                   badNames.push(name);
                }
 
@@ -798,7 +798,7 @@ class CheckXTokenValidStream extends stream.Transform {
          // §3.3.2 Validity constraint: Attribute Default Value Syntactically Correct
          //    The declared default value must meet the syntactic constraints of the declared attribute type.
          //    ...of type NMTOKEN must match the Nmtoken production;
-         if (hasDefault && !util.isNmToken(defaultText, this.emd.version, this.emd.revision)) {
+         if (hasDefault && !isNmToken(defaultText, this.emd.version, this.emd.revision)) {
             this.pushValidityError(ValidityError.ID.ATTLISTDECL_BAD_NMTOKEN_DEFAULT,
                [ attList.elementName, attDef.name, defaultText ], pToken.open);
          }
@@ -811,7 +811,7 @@ class CheckXTokenValidStream extends stream.Transform {
             const badNames = [];
 
             for (const name of names) {
-               if (!util.isNmToken(name, this.emd.version, this.emd.revision)) {
+               if (!isNmToken(name, this.emd.version, this.emd.revision)) {
                   badNames.push(name);
                }
             }
@@ -1263,7 +1263,7 @@ class CheckXTokenValidStream extends stream.Transform {
             } else if (attrDef.type === 'ID') {
                // §3.3.1: Validity constraint: ID
                //    Values of type ID must match the Name production.  ...
-               if (!util.isName(attrText, this.emd.version, this.emd.revision)) {
+               if (!isName(attrText, this.emd.version, this.emd.revision)) {
                   this.pushValidityError(ValidityError.ID.ELEMENTSTART_ID_NAME_INVALID,
                      [ attrText, elStart.name, attrName ], pTokenOpen);
                }
@@ -1298,7 +1298,7 @@ class CheckXTokenValidStream extends stream.Transform {
                //    values of type IDREFS must match Names...
                for (let index = 0; index < names.length; index++) {
                   const idRef = names[index];
-                  if (!util.isName(idRef, this.emd.version, this.emd.revision)) {
+                  if (!isName(idRef, this.emd.version, this.emd.revision)) {
                      badNames.push(idRef);
                   }
 
@@ -1328,7 +1328,7 @@ class CheckXTokenValidStream extends stream.Transform {
                //    Values of type ENTITY must match the Name production,
                //    values of type ENTITIES must match Names;
                for (let index = 0; index < names.length; index++) {
-                  if (!util.isName(names[index], this.emd.version, this.emd.revision)) {
+                  if (!isName(names[index], this.emd.version, this.emd.revision)) {
                      badNames.push(names[index]);
                   }
                }
@@ -1382,7 +1382,7 @@ class CheckXTokenValidStream extends stream.Transform {
                //    Values of type NMTOKEN must match the Nmtoken production;
                //    values of type NMTOKENS must match Nmtokens.
                for (let index = 0; index < names.length; index++) {
-                  if (!util.isNmToken(names[index], this.emd.version, this.emd.revision)) {
+                  if (!isNmToken(names[index], this.emd.version, this.emd.revision)) {
                      badNames.push(names[index]);
                   }
                }

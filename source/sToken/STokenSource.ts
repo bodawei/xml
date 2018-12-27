@@ -273,15 +273,14 @@ class STokenSource {
             // store the range if it actually has changed
             ranges.push(currentRange);
 
-            currentRange = segment.range.clone();
-            currentRange.endIndex = segment.range.startIndex;
-            currentRange.endRow = segment.range.startRow;
-            currentRange.endColumn = segment.range.startColumn;
+            currentRange = new Range(segment.range.location,
+               segment.range.startIndex, segment.range.startRow, segment.range.startColumn,
+               segment.range.startIndex, segment.range.startRow, segment.range.startColumn);
          }
 
-         currentRange.endIndex += info.chars;
-         currentRange.endRow += info.rows;
-         currentRange.endColumn += info.columns;
+         currentRange = new Range(currentRange.location,
+            currentRange.startIndex, currentRange.startRow, currentRange.startColumn,
+            currentRange.endIndex + info.chars, currentRange.endRow + info.rows, currentRange.endColumn + info.columns);
       }
 
       ranges.push(currentRange);

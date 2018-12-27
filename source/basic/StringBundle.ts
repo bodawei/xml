@@ -28,18 +28,25 @@ type LocaleMap = {
    [localeName: string]: Locale;
 }
 
+const BRACES = /\{([{}])\}/g;
+
+// If we find {{} (a { inside of {}'s) or {}}, remove the
+// escaping outer braces
+function unescapeBraces(message: string) {
+   // interestingly, this is usually much faster than 2 replaces.
+   return message.replace(BRACES, '$1');
+}
+
 class StringBundle {
    public preferredLocale: string;
-   private _locales: {
-      [localeName: string]: Locale;
-   };
+   private locales: LocaleMap;
 
    constructor(locales: LocaleMap) {
       if (!locales.base) {
          throw new Error('Strings must at least have a locale called "base", with an object value.');
       }
 
-      this._locales = locales;
+      this.locales = locales;
       this.preferredLocale = 'en-US';
    }
 
@@ -69,7 +76,8 @@ class StringBundle {
          }
 
          for (let index = 0; index < localeNames.length; index++) {
-            locale = this._locales[localeNames[index]];
+            locale = this.locales[localeNames[index]];
+
             if (locale) {
                const value = locale[key];
 
@@ -80,13 +88,13 @@ class StringBundle {
          }
       }
 
-      locale = this._locales[this.preferredLocale];
+      locale = this.locales[this.preferredLocale];
 
       if (locale && locale[key]) {
          return locale[key];
       }
 
-      return this._locales.base[key];
+      return this.locales.base[key];
    }
 
    /**********************************************************************\
@@ -100,7 +108,8 @@ class StringBundle {
     internationalized.
 
     Finally, you can use the strings {{} and {}} to escape a curly brace
-    that you might want to use.
+    that you might want to use (that is, surround the brace you want
+    with {}'s)
 
     PARAM
     key: The key to look up.
@@ -119,14 +128,7 @@ class StringBundle {
          return message ? unescapeBraces(message) : undefined;
       }
 
-      let paramsArray: Array<string>;
-
-
-      if (!Array.isArray(params)) {
-         paramsArray = [ params ];
-      } else {
-         paramsArray = params;
-      }
+      let paramsArray = Array.isArray(params) ? params: [ params ];
 
       for (let index = 0; index < paramsArray.length; index++) {
          // jsperf says this is faster than just doing the two replaces
@@ -155,7 +157,7 @@ class StringBundle {
    \**********************************************************************/
 
    addLocale(localeName: string, locale: Locale) {
-      this._locales[localeName] = locale;
+      this.locales[localeName] = locale;
    }
 
    /**********************************************************************\
@@ -169,21 +171,12 @@ class StringBundle {
    \**********************************************************************/
 
    removeLocale(localeName: string) {
-      const temp = this._locales[localeName];
-      delete this._locales[localeName];
+      const temp = this.locales[localeName];
+      delete this.locales[localeName];
 
       return temp;
    }
 }
-
-const BRACES = /\{([{}])\}/g;
-
-function unescapeBraces(message: string) {
-   // interestingly, this is usually much faster than 2 replaces.
-   return message.replace(BRACES, '$1');
-}
-
-export default StringBundle;
 
 export {
    StringBundle,

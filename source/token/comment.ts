@@ -1,7 +1,6 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
-
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, Offset } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
 import misc from './common/misc';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
@@ -33,7 +32,7 @@ class CommentXToken {
  * Note that the text property will be a set of STokens.
  * The user of this must just assume these are sequential chunks of text
  * that can be concatenated together.
- * 
+ *
  * In practice, at this time, double hyphens in the input will be stored
  * as separate STokens in the array.
  */
@@ -132,9 +131,9 @@ function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaDa
          let offset;
 
          if (range) {
-            offset = range.getEndOffset();
-            offset.index --;  // Adjust to the location of the hyphen
-            offset.column --;
+            const originsl = range.getEndOffset();
+            // Adjust to the location of the hyphen
+            offset = new Offset(originsl.location, originsl.index - 1, originsl.row, originsl.column - 1);
          }
 
          ec.report(WFEID.COMMENT_ENDS_WITH_HYPHEN, undefined, offset);

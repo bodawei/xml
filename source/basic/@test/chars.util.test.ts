@@ -1,6 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { isName, isNmToken, isSpace } from '../util';
+import { isName, isNmToken, isSpace } from '../chars';
 
 type Data = Array<{
    description: string,

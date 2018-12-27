@@ -1,11 +1,12 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import { EntityMetaData, EntityKind, util } from 'basic';
+import { EntityMetaData, EntityKind } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSToken } from 'sToken-test';
+import * as basic from 'basic';
 
 import misc from '../misc';
 
@@ -133,7 +134,7 @@ describe('misc', () => {
          errorId = WellFormedError.ID.ELEMENT_NAME_INVALID;
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
          spyOn(ec, 'report');
-         utilIsName = spyOn(util, 'isName');
+         utilIsName = spyOn(basic, 'isName');
       });
 
       it('accepts an empty Stoken', () => {
@@ -142,13 +143,13 @@ describe('misc', () => {
          expect(ec.report).not.toHaveBeenCalled();
       });
 
-      it('calls util.isName()', () => {
+      it('calls isName()', () => {
          misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
-         expect(util.isName).toHaveBeenCalledWith('foo', 1.0, 5);
+         expect(basic.isName).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
-      it('reports an error if util.isName() returns false', () => {
+      it('reports an error if isName() returns false', () => {
          utilIsName.and.returnValue(false);
 
          misc.checkName(SToken.fromString('foo'), ec, emdV1R5, errorId);
@@ -174,7 +175,7 @@ describe('misc', () => {
          emdV1R5 = new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5);
          emdV11R2 = new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2);
          spyOn(ec, 'report');
-         utilIsNMToken = spyOn(util, 'isNmToken');
+         utilIsNMToken = spyOn(basic, 'isNmToken');
       });
 
       it('accepts an empty Stoken', () => {
@@ -183,13 +184,13 @@ describe('misc', () => {
          expect(ec.report).not.toHaveBeenCalled();
       });
 
-      it('calls util.isNmToken()', () => {
+      it('calls isNmToken()', () => {
          misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);
 
-         expect(util.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
+         expect(basic.isNmToken).toHaveBeenCalledWith('foo', 1.0, 5);
       });
 
-      it('reports an error if util.utilIsNMToken() returns false', () => {
+      it('reports an error if utilIsNMToken() returns false', () => {
          utilIsNMToken.and.returnValue(false);
 
          misc.checkNMToken(SToken.fromString('foo'), ec, emdV1R5, errorId);

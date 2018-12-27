@@ -3,7 +3,8 @@
 
 import stream from 'readable-stream';
 
-import { EntityMetaData, EntityKind, util, EntityLocation } from 'basic';
+import { EntityMetaData, EntityKind } from 'basic';
+import * as basic from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
 import { SToken } from '../../sToken';
 import nameList, { XNameList } from '../../token/contentspec/nameList';
@@ -737,7 +738,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('$$BAD')
                   ]
                }]);
-               spyOn(util, 'isName').and.returnValue(false);
+               spyOn(basic, 'isName').and.returnValue(false);
 
                validator.write(elDecl1);
                validator.write(attListDecl1);
@@ -749,7 +750,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('it calls util.isName() with the entity meta data', (done) => {
+            it('it calls isName() with the entity meta data', (done) => {
                const elDecl1 = new elementDeclaration.XToken('one', 'ANY', undefined);
                const attListDecl1 = new attListDeclaration.XToken('one', [{
                   name: 'idAttr',
@@ -763,7 +764,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new text.XToken('$$BAD')
                   ]
                }]);
-               spyOn(util, 'isName');
+               spyOn(basic, 'isName');
 
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl1);
@@ -772,7 +773,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
+                  expect(basic.isName).toHaveBeenCalledWith('$$BAD', 1.1, 2);
                   done();
                });
             });
@@ -885,8 +886,8 @@ describe('CheckXTokenValidStream (unit)', () => {
                endElName = new elementEnd.XToken('testEl');
             });
 
-            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
-               spyOn(util, 'isName');
+            it('it calls isName() with the entity meta data (whitebox)', (done) => {
+               spyOn(basic, 'isName');
 
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl);
@@ -895,7 +896,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  expect(basic.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
             });
@@ -1111,8 +1112,8 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectNoErrors(validator, done);
             });
 
-            it('it calls util.isName() with the entity meta data (whitebox)', (done) => {
-               spyOn(util, 'isName');
+            it('it calls isName() with the entity meta data (whitebox)', (done) => {
+               spyOn(basic, 'isName');
 
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl);
@@ -1121,7 +1122,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  expect(basic.isName).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
             });
@@ -1272,7 +1273,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('it calls util.isNmToken() with the entity meta data (whitebox)', (done) => {
-               spyOn(util, 'isNmToken');
+               spyOn(basic, 'isNmToken');
 
                validator.write(new EntityMetaData(undefined, 1.1, 2));
                validator.write(elDecl);
@@ -1281,7 +1282,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
+                  expect(basic.isNmToken).toHaveBeenCalledWith('goodName', 1.1, 2);
                   done();
                });
             });
@@ -1812,8 +1813,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ID', () => {
 
-            it('calls util.isName() to validate name', (done) => {
-               spyOn(util, 'isName').and.returnValue(false);
+            it('calls isName() to validate name', (done) => {
+               spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'idAttr',
@@ -1829,7 +1830,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -1858,8 +1859,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('IDREF', () => {
 
-            it('calls util.isName() to validate name', (done) => {
-               spyOn(util, 'isName').and.returnValue(false);
+            it('calls isName() to validate name', (done) => {
+               spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'idRefAttr',
@@ -1875,7 +1876,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -1904,8 +1905,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('IDREFS', () => {
 
-            it('calls util.isName() to validate name', (done) => {
-               spyOn(util, 'isName').and.returnValue(false);
+            it('calls isName() to validate name', (done) => {
+               spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'idRefsAttr',
@@ -1921,7 +1922,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -1950,8 +1951,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ENTITY', () => {
 
-            it('calls util.isName() to validate name', (done) => {
-               spyOn(util, 'isName').and.returnValue(false);
+            it('calls isName() to validate name', (done) => {
+               spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'entityAttr',
@@ -1967,7 +1968,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -1996,8 +1997,8 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          describe('ENTITIES', () => {
 
-            it('calls util.isName() to validate name', (done) => {
-               spyOn(util, 'isName').and.returnValue(false);
+            it('calls isName() to validate name', (done) => {
+               spyOn(basic, 'isName').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'entitiesAttr',
@@ -2013,7 +2014,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isName).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isName).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -2062,7 +2063,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('NMTOKEN', () => {
 
             it('calls util.isNmToken() to validate name', (done) => {
-               spyOn(util, 'isNmToken').and.returnValue(false);
+               spyOn(basic, 'isNmToken').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'nmTokenAttr',
@@ -2078,7 +2079,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });
@@ -2107,7 +2108,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('NMTOKENS', () => {
 
             it('calls util.isNmToken() to validate name', (done) => {
-               spyOn(util, 'isNmToken').and.returnValue(false);
+               spyOn(basic, 'isNmToken').and.returnValue(false);
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY');
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'nmTokenAttr',
@@ -2123,7 +2124,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, () => {
-                  expect(util.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
+                  expect(basic.isNmToken).toHaveBeenCalledWith('$bad', 1, 5);
                   done();
                });
             });

@@ -8,10 +8,10 @@ import EntityLocation from './EntityLocation';
 \**********************************************************************/
 
 class Offset {
-   public location: EntityLocation;
-   public index: number;
-   public row: number;
-   public column: number;
+   public readonly location: EntityLocation;
+   public readonly index: number;
+   public readonly row: number;
+   public readonly column: number;
 
    constructor(location: EntityLocation, index: number = 0, row: number = 0, column: number = 0) {
       this.location = location;

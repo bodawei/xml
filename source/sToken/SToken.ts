@@ -62,7 +62,8 @@ class SToken {
 
    /*
     * This just mostly blindly combines the two STokens by
-    * catenating their strings and ranges.
+    * catenating their strings and ranges.  A copy of the
+    * parameter's data is appended to this one.
     *
     * It is up to the caller to make sure this makes sense.
     *
@@ -72,22 +73,31 @@ class SToken {
     * the two ranges will be combined.
     */
    merge(other: SToken) {
+      const otherRanges = other.ranges;
+
       this.str += other.str;
       this.originalStr += other.originalStr;
 
       if (this.lastRange && other.firstRange) {
          if (canFuseRanges(this.lastRange, other.firstRange)) {
             const lastRange = this.lastRange;
+            const firstRange = other.firstRange;
 
+            // Remove the last range of this and the first of the next
             this.ranges.pop();
+            otherRanges.shift();
 
-            other.firstRange.startIndex = lastRange.startIndex;
-            other.firstRange.startRow = lastRange.startRow;
-            other.firstRange.startColumn = lastRange.startColumn;
+            // Create a new one which is the union of the two
+            const newLastRange = new Range(lastRange.location,
+               lastRange.startIndex, lastRange.startRow, lastRange.startColumn,
+               firstRange.endIndex, firstRange.endRow, firstRange.endColumn);
+
+            // insert it in place of one of the originals.
+            otherRanges.unshift(newLastRange);
          }
       }
 
-      this.ranges = this.ranges.concat(other.ranges);
+      this.ranges = this.ranges.concat(otherRanges);
 
       return this;
    }
