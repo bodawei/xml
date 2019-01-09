@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import declaration from './bridge/baseDeclaration';
 
@@ -13,7 +13,6 @@ import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as elementStart from './elementStart';
 import * as elementEnd from './elementEnd';
-import * as space from './space';
 import text from './text';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
@@ -40,6 +39,7 @@ export * from './generalEntityReference';
 export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
+export * from './space';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
@@ -52,18 +52,16 @@ const token = {
 
    attListDeclaration,
    charData,
-   charRef,
+   // charRef,
    comment,
    docTypeStart,
    docTypeEnd,
    elementStart,
    elementEnd,
    elementDeclaration,
-   space,
    text,
 
    unassigned,
-
    literalValue,
 };
 
@@ -79,7 +77,6 @@ export {
    elementStart,
    elementEnd,
    elementDeclaration,
-   space,
    text,
 
    unassigned,
@@ -87,5 +84,3 @@ export {
    CommentXToken,
    PToken,
 };
-
-export default token;

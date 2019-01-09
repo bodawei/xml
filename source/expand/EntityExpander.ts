@@ -1,7 +1,11 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
 import { Token, ENTITY_META_DATA } from 'basic';
-import token, {
+import {
+   docTypeEnd,
+   docTypeStart,
+   elementStart,
+
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -14,7 +18,6 @@ import token, {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    NotationDeclarationPToken,
-   NotationDeclarationXToken,
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    ParameterEntityStartPToken,
@@ -23,13 +26,11 @@ import token, {
 
    attListDeclaration,
    unassigned,
-   text,
    PToken,
    InternalSubsetStartXToken,
    InternalSubsetEndXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
-   TEXTDECL_PTOKEN,
 } from 'token';
 import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
@@ -202,13 +203,13 @@ class EntityExpander {
          case XMLDECL_PTOKEN:
             this.handleXmlDeclaration(pToken as XmlDeclarationPToken, expanded);
             break;
-         case token.docTypeStart.PTYPE:
+         case docTypeStart.PTYPE:
             this.handleDocTypeStart(pToken as DocTypeStartPToken, expanded);
             break;
-         case token.docTypeEnd.PTYPE:
+         case docTypeEnd.PTYPE:
             this.handleDocTypeEnd(pToken as DocTypeEndPToken, expanded);
             break;
-         case token.attListDeclaration.PTYPE:
+         case attListDeclaration.PTYPE:
             this.handleAttListDeclaration(pToken as AttListPToken, expanded);
             break;
          case ELEMENT_DECLARATION_PTOKEN:
@@ -223,8 +224,8 @@ class EntityExpander {
          case NOTATION_DECLARATION_PTOKEN:
             this.handleNotationDeclaration(pToken as NotationDeclarationPToken, expanded);
             break;
-         case token.elementStart.PTYPE:
-         case token.elementStart.EMPTY_TYPE:
+         case elementStart.PTYPE:
+         case elementStart.EMPTY_TYPE:
             this.handleElementStart(pToken as ElementStartPToken, expanded);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:

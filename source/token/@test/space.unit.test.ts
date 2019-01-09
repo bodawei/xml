@@ -1,12 +1,11 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import * as space from '../space';
-import { SpacePToken } from '../space';
+import { SpacePToken, parseSpace } from '../space';
 
 describe('space (unit)', () => {
    let spacePToken: SpacePToken;
@@ -14,53 +13,48 @@ describe('space (unit)', () => {
 
    beforeEach(() => {
       makeSToken = makeSTokenMaker();
-      spacePToken = new space.PToken({
+      spacePToken = new SpacePToken({
          text: makeSToken(' '),
       });
    });
 
-   describe('PToken', () => {
+   describe('toStokenArray()', () => {
 
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            expect(spacePToken.getSTokenArray()).toEqual([
-               spacePToken.text,
-            ]);
-         });
-
+      it('returns all the STokens', () => {
+         expect(spacePToken.toSTokenArray()).toEqual([
+            spacePToken.text,
+         ]);
       });
 
    });
 
-   describe('parse()', () => {
+   describe('parseSpace()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
       });
 
-      it('does a simple parse', () => {
+      it('does a simple parseSpace', () => {
          const mockSource = new MockSTokenSource([
             [ ' ', 'space', undefined ],
          ]);
 
-         space.parse(mockSource, callback);
+         parseSpace(mockSource, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(spacePToken);
       });
 
       it('copes with EOF', () => {
-         spacePToken.text = undefined;
          const mockSource = new MockSTokenSource([
             [ undefined, 'space', undefined ],
          ]);
 
-         space.parse(mockSource, callback);
+         parseSpace(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainPTokenProps(spacePToken);
+         expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
       });
 
    });
@@ -75,7 +69,7 @@ describe('space (unit)', () => {
       });
 
       it('reports no errors when checking a good PToken', () => {
-         space.checkWellFormed(spacePToken, mockErrorCollector, emd);
+         spacePToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors.length).toEqual(0);
       });
@@ -85,17 +79,9 @@ describe('space (unit)', () => {
    describe('pTokenToXToken()', () => {
 
       it('returns space token with the whitespace', () => {
-         const token = space.pTokenToXToken(spacePToken);
+         const token = spacePToken.toXToken();
 
          expect(token.text).toEqual(' ');
-      });
-
-      it('returns the text as an empty string if nothing was found in the source', () => {
-         delete spacePToken.text;
-
-         const token = space.pTokenToXToken(spacePToken);
-
-         expect(token.text).toEqual('');
       });
 
    });

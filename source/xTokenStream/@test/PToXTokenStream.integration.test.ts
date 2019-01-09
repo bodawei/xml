@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
@@ -14,10 +14,10 @@ import {
    elementDeclaration,
    elementEnd,
    elementStart,
-   space,
    text,
 
    CdataXToken,
+   SpaceXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
    NotationDeclarationXToken,
@@ -178,7 +178,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes spaces', (done) => {
       expectInputToProduce('<?xml version="1.0"?>   <one></one>', [
-         new space.XToken('   '),
+         new SpaceXToken('   '),
       ], done);
    });
 

@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -15,7 +15,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   space,
    text,
 
    CDATA_PTOKEN,
@@ -29,6 +28,7 @@ import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
 } from 'token';
@@ -72,9 +72,6 @@ class PToXTokenStream extends stream.Transform {
          case elementDeclaration.PTYPE:
             this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
-         case space.PTYPE:
-            this.push(space.pTokenToXToken(pToken));
-            break;
          case text.PTYPE:
             this.push(text.makeXToken(pToken));
             break;
@@ -85,6 +82,7 @@ class PToXTokenStream extends stream.Transform {
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
          case PROCESSING_INSTRUCTION_PTOKEN:
+         case SPACE_PTOKEN:
          case TEXTDECL_PTOKEN:
          case XMLDECL_PTOKEN:
             this.push(pToken.toXToken());

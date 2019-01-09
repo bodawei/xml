@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2017-2019 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
 import { ENTITY_META_DATA, EntityLocation, EntityMetaData, Range } from 'basic';
@@ -12,6 +12,7 @@ import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
 import {
+   SpaceXToken,
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
    GeneralEntityStartXToken,
@@ -48,7 +49,7 @@ describe('NodeStream (integration)', () => {
 
       for (let actualIndex = 0; actualIndex < actual.length; actualIndex++) {
          if (actual[actualIndex].type === ENTITY_META_DATA ||
-            actual[actualIndex] instanceof tokenNs.space.XToken) {
+            actual[actualIndex] instanceof SpaceXToken) {
             continue;
          }
 

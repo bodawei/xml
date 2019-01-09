@@ -1,7 +1,7 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
-import tokenNs from '../../token';
+import * as tokenNs from 'token';
 import attListDecl, { AttListPToken } from '../../token/attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
 
@@ -54,16 +54,16 @@ describe('FixingStream (unit)', () => {
             defaultType: '#IMPLIED',
             value: [],
          }], dummyPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].type).toEqual('ID');
             done();
          });
       });
-   
+
       it('replaces an unknown type with CDATA', (done) => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
@@ -71,16 +71,16 @@ describe('FixingStream (unit)', () => {
             defaultType: '#IMPLIED',
             value: [],
          }], dummyPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].type).toEqual('CDATA');
             done();
          });
       });
-   
+
       it('replaces a missing type with CDATA', (done) => {
          const value = {
             name: 'one',
@@ -90,10 +90,10 @@ describe('FixingStream (unit)', () => {
          };
          delete value.type;
          const before = new tokenNs.attListDeclaration.XToken('elName', [value], dummyPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens) => {
             expect(tokens[0].attDefs[0].type).toEqual('CDATA');
             done();
@@ -107,16 +107,16 @@ describe('FixingStream (unit)', () => {
             type: 'ID',
             value: [],
          }], dummyPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].defaultType).toEqual('#REQUIRED');
             done();
          });
       });
-   
+
       it('replaces an unknown type with #IMPLIED', (done) => {
          const before = new tokenNs.attListDeclaration.XToken('elName', [{
             name: 'one',
@@ -124,10 +124,10 @@ describe('FixingStream (unit)', () => {
             type: 'ID',
             value: [],
          }], dummyPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].attDefs[0].defaultType).toEqual('#IMPLIED');
             done();
@@ -140,10 +140,10 @@ describe('FixingStream (unit)', () => {
 
       it('capitalizes the type if it is not capitalized', (done) => {
          const before = new tokenNs.elementDeclaration.XToken('elName', 'any', undefined, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpecType).toEqual('ANY');
             done();
@@ -152,10 +152,10 @@ describe('FixingStream (unit)', () => {
 
       it('changes a missing type to ANY', (done) => {
          const before = new tokenNs.elementDeclaration.XToken('elName', '', undefined, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpecType).toEqual('ANY');
             done();
@@ -164,10 +164,10 @@ describe('FixingStream (unit)', () => {
 
       it('changes a bad type to ANY', (done) => {
          const before = new tokenNs.elementDeclaration.XToken('elName', 'bogus', undefined, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpecType).toEqual('ANY');
             done();
@@ -180,10 +180,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].contentSpecType).toEqual('CHILDREN');
             done();
@@ -196,10 +196,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children).toBeUndefined();
             done();
@@ -212,10 +212,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children).toBeUndefined();
             done();
@@ -231,10 +231,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children.names[0]).toEqual({
                name: '#PCDATA',
@@ -256,10 +256,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children.names[0]).toEqual({
                name: '#PCDATA',
@@ -285,10 +285,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children.names[0]).toEqual({
                name: '#PCDATA',
@@ -313,10 +313,10 @@ describe('FixingStream (unit)', () => {
             listType: 'CHOICE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children.names.length).toEqual(2);
             done();
@@ -355,10 +355,10 @@ describe('FixingStream (unit)', () => {
             listType: 'SEQUENCE',
             repeat: 'ONE',
          }, dummyElPToken);
-   
+
          fs.write(before);
          fs.end();
-   
+
          gatherTokens(fs, (tokens: Array<XToken>) => {
             expect(tokens[0].children.names).toEqual([{
                name: '#PCDATA',

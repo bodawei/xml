@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import stream from 'readable-stream';
@@ -18,10 +18,12 @@ import {
    elementEnd,
    elementDeclaration,
    ProcessingInstructionXToken,
-   space,
    text,
 
+   SPACE_XTOKEN,
+
    CdataXToken,
+   SpaceXToken,
    ExternalSubsetStartXToken,
    ExternalSubsetEndXToken,
    GeneralEntityEndXToken,
@@ -3793,7 +3795,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ nonWhiteChars, 1.1, 2, true ],
                [ whiteChars, 1, 5, false ],
                [ whiteChars, 1.1, 2, false ],
-               [ new space.XToken('  '), 1.0, 1, false ],
+               [ new SpaceXToken('  '), 1.0, 1, false ],
                [ new GeneralEntityReferenceXToken('x'), 1.0, 1, false ],
                [ new GeneralEntityStartXToken('y'), 1.0, 1, false ],
                [ new GeneralEntityEndXToken('z'), 1.0, 1, false ],
@@ -3858,7 +3860,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                gatherTokens(validator, (tokens) => {
-                  expect(tokens[3].type).toEqual(space.XTYPE);
+                  expect(tokens[3].type).toEqual(SPACE_XTOKEN);
                   done();
                });
             });
@@ -4032,7 +4034,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }));
                validator.write(new ExternalSubsetEndXToken());
                validator.write(new ElementStart('extDeclaredElement', []));
-               validator.write(new space.XToken('  '));
+               validator.write(new SpaceXToken('  '));
                validator.write(new elementEnd.XToken('extDeclaredElement'));
                validator.end();
 
@@ -4054,9 +4056,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                }));
                validator.write(new ExternalSubsetEndXToken());
                validator.write(new ElementStart('extDeclaredElement', []));
-               validator.write(new space.XToken('  '));
-               validator.write(new space.XToken('  '));
-               validator.write(new space.XToken('  '));
+               validator.write(new SpaceXToken('  '));
+               validator.write(new SpaceXToken('  '));
+               validator.write(new SpaceXToken('  '));
                validator.write(new elementEnd.XToken('extDeclaredElement'));
                validator.end();
 

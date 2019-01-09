@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -12,11 +12,11 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
-   space,
    text,
 
    elementDeclaration,
    attListDeclaration,
+   SpaceXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -34,6 +34,7 @@ import {
    CDATA_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
+   SPACE_XTOKEN,
    XMLDECL_XTOKEN,
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
@@ -349,7 +350,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
-            case space.XTYPE:
+            case SPACE_XTOKEN:
                // These are all OK here
                break;
             case CDATA_XTOKEN:
@@ -450,7 +451,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
-            case space.XTYPE:
+            case SPACE_XTOKEN:
                // §2.9 Validity constraint: Standalone Document Declaration
                // The standalone document declaration must have the value "no" if any external markup
                // declarations contain declarations of:
@@ -491,7 +492,7 @@ class CheckXTokenValidStream extends stream.Transform {
           */
          if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
             if (isSpace(xToken.text)) {
-               xToken = new space.XToken(xToken.text, xToken.pToken);
+               xToken = new SpaceXToken(xToken.text, xToken.pToken);
             }
          }
 

@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import tokenNs from '../token';
+import * as tokenNs from 'token';
 import { ElementDeclaration, isXName } from '../token/elementDeclaration';
 import nameList, { XName, XNameList } from '../token/contentspec/nameList';
 

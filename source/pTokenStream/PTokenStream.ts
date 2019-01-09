@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -14,12 +14,12 @@ import {
    docTypeEnd,
    elementStart,
    elementEnd,
-   space,
 
    parseDeclaration,
+   parseGeneralEntityReference,
    parseInstruction,
    parseParameterEntityReference,
-   parseGeneralEntityReference,
+   parseSpace,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -110,8 +110,8 @@ class PTokenStream extends stream.Readable {
          this._parseContent(deliverParse);
 
       } else {
-         space.parse(this._sTokenSource, (pToken: Token) => {
-            if ((pToken as any).text) { // typeHack
+         parseSpace(this._sTokenSource, (pToken: any) => {
+            if (pToken) {
                deliverParse(pToken);
                return;
             }

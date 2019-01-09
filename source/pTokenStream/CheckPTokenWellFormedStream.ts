@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
@@ -18,23 +18,23 @@ import {
    elementDeclaration,
    elementStart,
    elementEnd,
-   space,
 
    CDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
+   SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
-   ProcessingInstructionPToken,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
    NOTATION_DECLARATION_PTOKEN,
+
+   GeneralEntityReferencePToken,
    NotationDeclarationPToken,
-   GeneralEntityDeclarationPToken,
-   ParameterEntityDeclarationPToken,
+   ParameterEntityReferencePToken,
+   ProcessingInstructionPToken,
+   SpacePToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -284,11 +284,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
             (pToken as ProcessingInstructionPToken).checkWellFormed(errorCollector, this.emd);
             break;
-         case space.PTYPE:
+         case SPACE_PTOKEN:
             if (this._state === CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.SPACE_INVALID_CONTEXT);
             }
-            space.checkWellFormed(pToken as any, errorCollector, this.emd);
+            (pToken as SpacePToken).checkWellFormed(errorCollector, this.emd);
             break;
       }
 

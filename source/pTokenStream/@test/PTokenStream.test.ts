@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
@@ -10,7 +10,6 @@ import {
    comment,
    elementEnd,
    elementStart,
-   space,
 } from '../../token';
 import * as tokenStuff from '../../token';
 import * as instruction from '../../token';
@@ -260,18 +259,18 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls space.parse()', (done) => {
-      spyOn(space, 'parse').and.callThrough();
+      spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('   x');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(space.parse).toHaveBeenCalled();
+         expect(tokenStuff.parseSpace).toHaveBeenCalled();
          done();
       });
    });
 
    it('does not call space.parse() if an element start has been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parse').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('<foo>   ');
       pTokenStream.endText();
 
@@ -282,7 +281,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('call space.parse() after the topmost element start and end have been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parse').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('<foo></foo>   ');
       pTokenStream.endText();
 
@@ -293,7 +292,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('call space.parse() after nameless start and end have been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parse').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('<></>   ');
       pTokenStream.endText();
 
@@ -304,7 +303,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('call space.parse() after a misbalaned end has been found (whitebox)', (done) => {
-      const parseSpy = spyOn(space, 'parse').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseSpace').and.callThrough();
       pTokenStream.addText('<foo></bar></foo>   ');
       pTokenStream.endText();
 

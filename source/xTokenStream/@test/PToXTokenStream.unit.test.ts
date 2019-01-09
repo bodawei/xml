@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { SToken } from 'sToken';
@@ -11,7 +11,6 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   space,
    text,
 
    CdataPToken,
@@ -30,6 +29,7 @@ import {
 import PToXTokenStream from '../PToXTokenStream';
 import { EntityMetaData } from 'basic';
 import { WellFormedError } from 'error';
+import { SpacePToken } from 'source/token/space';
 
 describe('PToXTokenStream (unit)', () => {
    let tokenStream: PToXTokenStream;
@@ -188,14 +188,14 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls space.pTokenToXToken()', () => {
-      spyOn(space, 'pTokenToXToken');
-      const pToken = { type: space.PTYPE };
+   it('calls spacePToken.toXToken()', () => {
+      const pToken = new SpacePToken({ text: SToken.fromString(' ') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(space.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalled();
    });
 
    it('calls text.pTokenToXToken()', () => {

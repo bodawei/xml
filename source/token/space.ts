@@ -1,11 +1,10 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import base from './base';
-import { strOrBlank, STokenSource } from 'sToken';
+import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 import { EntityMetaData } from 'basic';
 import { ErrorCollector } from 'error';
 
-const SPACE = 'SPACE';
+const SPACE_PTOKEN = 'SPACE_PTOKEN';
 const SPACE_XTOKEN = 'SPACE_XTOKEN';
 
 /**********************************************************************\
@@ -13,51 +12,58 @@ const SPACE_XTOKEN = 'SPACE_XTOKEN';
  comments
 \**********************************************************************/
 
-class Space extends base.XToken {
-   public text: string;
+class SpaceXToken {
+   public readonly type: typeof SPACE_XTOKEN = SPACE_XTOKEN;
+   public readonly text: string;
+   public pToken?: SpacePToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text: string, pToken?: SpacePToken) {
-      super(SPACE_XTOKEN, pToken);
-
       this.text = text;
+      this.pToken = pToken;
    }
-
 }
 
-class SpacePToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: Object) {
-      super(SPACE, props);
+class SpacePToken {
+   public readonly type: typeof SPACE_PTOKEN = SPACE_PTOKEN;
+   public readonly text: SToken;
+
+   constructor(props: { text: SToken }) {
+      this.text = props.text;
    }
 
-   getSTokenArray() {
-      /* istanbul ignore next */ // Istanbul is confused by node transpilation
-      const results = super.getSTokenArray();
+   checkWellFormed(ec: ErrorCollector, emd: EntityMetaData) {
+      checkWellFormed(this, ec, emd);
+   }
 
-      results.pushSTokens(this.text);
+   toXToken() {
+      return pTokenToXToken(this);
+   }
 
-      return results;
+   toSTokenArray(): Array<SToken> {
+      return sTokensFromPToken(this);
    }
 }
 
 /**********************************************************************\
- parse() extracts a space.
+ parse() extracts a space, or undefined if no spaces.
 
  PARAM
  source: A STokenSource to read from
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [15] Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
+   §2.3
+      [3] S ::= (#x20 | #x9 | #xD | #xA)+
 \**********************************************************************/
 
-function parse(source: STokenSource, deliverPToken: (result: SpacePToken) => void) {
-   const pToken = new SpacePToken();
+function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|void) => void) {
+   source.extractNoParams('space', (sToken) => {
+      if (!sToken) {
+         deliverPToken(undefined);
+         return;
+      }
 
-   source.extract('space', undefined, (sToken) => {
-      pToken.text = sToken;
-      deliverPToken(pToken);
+      deliverPToken(new SpacePToken({ text: sToken }));
    });
 }
 
@@ -75,18 +81,26 @@ function checkWellFormed(pToken: SpacePToken, ec: ErrorCollector, emd: EntityMet
 \**********************************************************************/
 
 function pTokenToXToken(pToken: SpacePToken) {
-   return new Space(strOrBlank(pToken.text), pToken);
+   return new SpaceXToken(strOrBlank(pToken.text), pToken);
+}
+
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: SpacePToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(pToken.text);
+
+   return builder.sTokenArray;
 }
 
 export {
-   SPACE as PTYPE,
-   SPACE_XTOKEN as XTYPE,
-   Space as XToken,
-   SpacePToken as PToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-
-   Space,
+   SPACE_PTOKEN,
+   SPACE_XTOKEN,
    SpacePToken,
+   SpaceXToken,
+
+   parseSpace,
 };

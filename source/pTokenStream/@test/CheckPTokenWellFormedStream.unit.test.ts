@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Offset, EntityKind } from 'basic';
@@ -17,16 +17,15 @@ import {
    elementStart,
    elementDeclaration,
    ProcessingInstructionPToken,
-   space,
    CdataPToken,
 
-   XmlDeclarationPToken,
-   TextDeclarationPToken,
-   GeneralEntityReferencePToken,
-   ParameterEntityReferencePToken,
-
    GeneralEntityDeclarationPToken,
+   GeneralEntityReferencePToken,
    NotationDeclarationPToken,
+   ParameterEntityReferencePToken,
+   SpacePToken,
+   TextDeclarationPToken,
+   XmlDeclarationPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -772,21 +771,19 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken: Token;
 
       beforeEach(() => {
-         pToken = {
-            type: space.PTYPE,
+         pToken = new SpacePToken({
             text: makeSToken(' '),
-         };
+         });
       });
 
-      it('calls space.checkWellFormed() when encountering a space parsing', () => {
-         const cwfSpy = spyOn(space, 'checkWellFormed');
+      it('calls spacePToken.checkWellFormed() when encountering a space parsing', () => {
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          (checker as any)._state = CheckWellFormedState.IN_CONTENT;
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

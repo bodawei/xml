@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
@@ -135,17 +135,17 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses a space at document start', (done) => {
-      expectInputToProduceTypes('\t\n ', 'SPACE', done);
+      expectInputToProduceTypes('\t\n ', 'SPACE_PTOKEN', done);
    });
 
    it('parses no spaces in element content', (done) => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
          expect(results.length).toEqual(6);
-         expect(results[1].type).toEqual('SPACE');
+         expect(results[1].type).toEqual('SPACE_PTOKEN');
          expect(results[2].type).toEqual('ELEMENT_START');
          expect(results[3].type).toEqual('CHARDATA');
          expect(results[4].type).toEqual('ELEMENT_END');
-         expect(results[5].type).toEqual('SPACE');
+         expect(results[5].type).toEqual('SPACE_PTOKEN');
          done();
       });
    });

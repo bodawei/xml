@@ -1,11 +1,11 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
-import { defaultExtractors } from '../../extractor';
-import { SToken, STokenSource } from '../../sToken';
+import { defaultExtractors } from 'extractor';
+import { SToken, STokenSource } from 'sToken';
 
-import * as space from '../space';
+import { parseSpace } from '../space';
 
 describe('space (integration)', () => {
 
@@ -13,14 +13,14 @@ describe('space (integration)', () => {
 
       it('does a simple parse', (done) => {
          const pToken = {
-            type: 'SPACE',
+            type: 'SPACE_PTOKEN',
             text: new SToken(' \t\n\n', ' \t\n\r\n', new Range(new EntityLocation(), 0, 0, 0, 5, 2, 0)),
          };
          const source = new STokenSource(defaultExtractors, new EntityMetaData());
          source.addText(' \t\n\r\n');
          source.endText();
 
-         space.parse(source, (result) => {
+         parseSpace(source, (result) => {
             expect(result).toContainPTokenProps(pToken);
             done();
          });
