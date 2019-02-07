@@ -6,7 +6,6 @@ import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 import {
-   charData,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -32,6 +31,7 @@ import {
    INTERNAL_SUBSET_END_XTOKEN,
 
    CDATA_XTOKEN,
+   CHARDATA_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
@@ -346,7 +346,7 @@ class CheckXTokenValidStream extends stream.Transform {
                }
                break;
             case elementEnd.XTYPE:
-            case charData.XTYPE:
+            case CHARDATA_XTOKEN:
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
@@ -375,7 +375,7 @@ class CheckXTokenValidStream extends stream.Transform {
                      [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
-            case charData.XTYPE:
+            case CHARDATA_XTOKEN:
             case CDATA_XTOKEN: // wanna revisit this given the decision in ANY?
             case elementEnd.XTYPE:
             case GENERAL_ENTITY_START_XTOKEN:
@@ -461,7 +461,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
                }
                break;
-            case charData.XTYPE:
+            case CHARDATA_XTOKEN:
                // Depending on charData that is only space already being converted to spaces
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
                break;
@@ -490,7 +490,7 @@ class CheckXTokenValidStream extends stream.Transform {
           *    separated by white space (characters matching the nonterminal S)
           * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
           */
-         if (xToken.type === charData.XTYPE && context && context.declInfo.type === 'CHILDREN') {
+         if (xToken.type === CHARDATA_XTOKEN && context && context.declInfo.type === 'CHILDREN') {
             if (isSpace(xToken.text)) {
                xToken = new SpaceXToken(xToken.text, xToken.pToken);
             }

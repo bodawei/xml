@@ -8,7 +8,6 @@ import {
    declaration,
 
    attListDeclaration,
-   charData,
    charRef,
    comment,
    docTypeEnd,
@@ -17,8 +16,9 @@ import {
    elementStart,
    elementDeclaration,
    ProcessingInstructionPToken,
-   CdataPToken,
 
+   CdataPToken,
+   CharDataPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
@@ -132,24 +132,22 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    });
 
    describe('charData', () => {
-      let pToken: Token;
+      let pToken: CharDataPToken;
 
       beforeEach(() => {
-         pToken = {
-            type: charData.PTYPE,
+         pToken = new CharDataPToken({
             text: makeSToken('good'),
-         };
+         });
       });
 
       it('calls charData.checkWellFormed() when encountering a CHARDATA', () => {
-         const cwfSpy = spyOn(charData, 'checkWellFormed');
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(metaData);
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

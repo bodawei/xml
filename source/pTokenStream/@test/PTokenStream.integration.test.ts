@@ -10,6 +10,7 @@ import PTokenStream from '../PTokenStream';
 import {
    PROCESSING_INSTRUCTION_PTOKEN,
    CDATA_PTOKEN,
+   CHARDATA_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
@@ -72,7 +73,7 @@ describe('PTokenStream (integration)', () => {
          source.addText('blah<elementName>');
          source.endText();
 
-         expectInputToProduceTypes(undefined, 'CHARDATA', done);
+         expectInputToProduceTypes(undefined, CHARDATA_PTOKEN, done);
       });
 
    });
@@ -82,7 +83,7 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses character data up to a <', (done) => {
-      expectInputToProduceTypes('blah<elementName>', 'CHARDATA', done);
+      expectInputToProduceTypes('blah<elementName>', CHARDATA_PTOKEN, done);
    });
 
    it('parses a comment', (done) => {
@@ -143,7 +144,7 @@ describe('PTokenStream (integration)', () => {
          expect(results.length).toEqual(6);
          expect(results[1].type).toEqual('SPACE_PTOKEN');
          expect(results[2].type).toEqual('ELEMENT_START');
-         expect(results[3].type).toEqual('CHARDATA');
+         expect(results[3].type).toEqual(CHARDATA_PTOKEN);
          expect(results[4].type).toEqual('ELEMENT_END');
          expect(results[5].type).toEqual('SPACE_PTOKEN');
          done();

@@ -16,7 +16,6 @@ import {
    attListDeclaration,
    elementStart,
    text,
-   charRef,
    unassigned,
    NotationDeclarationPToken,
    ParameterEntityStartPToken,
@@ -27,6 +26,8 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
    XmlDeclarationPToken,
+
+   CHARDATA_PTOKEN,
    INTERNAL_SUBSET_START_XTOKEN,
    INTERNAL_SUBSET_END_XTOKEN,
    EXTERNAL_SUBSET_START_XTOKEN,
@@ -1178,7 +1179,7 @@ describe('EntityExpander (unit)', () => {
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(4);
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual('CHARDATA');
+            expect(results[2].type).toEqual(CHARDATA_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1226,7 +1227,7 @@ describe('EntityExpander (unit)', () => {
          doExpand(true, input, (results) => {
             expect(results.length).toEqual(4);
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual('CHARDATA');
+            expect(results[2].type).toEqual(CHARDATA_PTOKEN);
             expect((results[2] as any).text.str).toEqual('some value');
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();

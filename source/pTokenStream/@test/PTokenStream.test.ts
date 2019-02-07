@@ -5,7 +5,6 @@ import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import * as token from '../../token';
 import {
-   charData,
    charRef,
    comment,
    elementEnd,
@@ -91,7 +90,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls charData.parse()', (done) => {
-      const parseSpy = spyOn(charData, 'parse').and.callThrough();
+      const parseSpy = spyOn(token, 'parseCharData').and.callThrough();
       pTokenStream.addText('asdf</foo>');
       pTokenStream.endText();
 
@@ -104,7 +103,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls charData.parse() in the internal subset', (done) => {
-      const parseSpy = spyOn(charData, 'parse').and.callThrough();
+      const parseSpy = spyOn(token, 'parseCharData').and.callThrough();
       pTokenStream.addText('<!DOCTYPE foo [ asdf</foo>');
       pTokenStream.endText();
 

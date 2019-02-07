@@ -7,8 +7,7 @@ import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import misc from '../common/misc';
-import * as charData from '../charData';
-import { CharDataPToken } from '../charData';
+import { CharDataPToken, CharDataXToken, parseCharData } from '../charData';
 
 describe('charData', () => {
    let charDataPToken: CharDataPToken;
@@ -32,7 +31,7 @@ describe('charData', () => {
             [ 'test text', 'all', [ '<', '&', ']]>' ] ],
          ]);
 
-         charData.parse(mockSource, [], callback);
+         parseCharData(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charDataPToken);
@@ -43,7 +42,7 @@ describe('charData', () => {
             [ 'test text', 'all', [ '<', '&', ']]>', '$' ] ],
          ]);
 
-         charData.parse(mockSource, [ '$' ], callback);
+         parseCharData(mockSource, [ '$' ], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charDataPToken);
@@ -54,12 +53,10 @@ describe('charData', () => {
             undefined,
          ]);
 
-         charData.parse(mockSource, [], callback);
+         parseCharData(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainPTokenProps({
-            text: undefined,
-         });
+         expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
       });
 
       it('returns a PToken that can provide the STokens', () => {
@@ -67,10 +64,10 @@ describe('charData', () => {
             'test text',
          ]);
 
-         charData.parse(mockSource, [], callback);
+         parseCharData(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)[0].getSTokenArray()).toEqual([
+         expect(callback.calls.argsFor(0)[0].toSTokenArray()).toEqual([
             charDataPToken.text,
          ]);
       });
@@ -88,7 +85,7 @@ describe('charData', () => {
       it('asks the checks the text is well formed', () => {
          const emd = new EntityMetaData();
 
-         charData.checkWellFormed(charDataPToken, mockErrorCollector, emd);
+         charDataPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(misc.checkWellFormedText).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, emd);
       });
@@ -98,9 +95,9 @@ describe('charData', () => {
    describe('pTokenToXToken()', () => {
 
       it('returns a token with the expected fields defined', () => {
-         const token = charData.pTokenToXToken(charDataPToken);
+         const token = charDataPToken.toXToken();
 
-         expect(token).toEqual(new charData.XToken('test text', charDataPToken));
+         expect(token).toEqual(new CharDataXToken('test text', charDataPToken));
       });
 
    });

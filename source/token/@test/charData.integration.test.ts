@@ -7,7 +7,8 @@ import { defaultExtractors } from '../../extractor';
 import { STokenSource } from '../../sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import * as charData from '../charData';
+import { CharDataPToken, CharDataXToken, parseCharData } from '../charData';
+// import * as charData from '../charData';
 
 describe('charData (integration)', () => {
    let emd: EntityMetaData;
@@ -21,12 +22,12 @@ describe('charData (integration)', () => {
    describe('parse()', () => {
       it('parses up to a <', (done) => {
          const expectedSToken = makeSTokenMaker();
-         const expected = new charData.PToken({
+         const expected = new CharDataPToken({
             text: expectedSToken('some text'),
          });
          source.addText('some text<foo>');
 
-         charData.parse(source, [], (result) => {
+         parseCharData(source, [], (result) => {
             expect(result).toEqual(expected);
             done();
          });
@@ -34,12 +35,12 @@ describe('charData (integration)', () => {
 
       it('parses up to a the specified terminator', (done) => {
          const expectedSToken = makeSTokenMaker();
-         const expected = new charData.PToken({
+         const expected = new CharDataPToken({
             text: expectedSToken('some textfoo'),
          });
          source.addText('some textfoo#>');
 
-         charData.parse(source, [ '#' ], (result) => {
+         parseCharData(source, [ '#' ], (result) => {
             expect(result).toEqual(expected);
             done();
          });
@@ -52,10 +53,11 @@ describe('charData (integration)', () => {
          source.addText('bad\u0000&');
          source.endText();
 
-         charData.parse(source, [], (pToken) => {
-            const ec = new ErrorCollector(pToken.open, WellFormedError);
+         parseCharData(source, [], (result) => {
+            const pToken = result as CharDataPToken;
+            const ec = new ErrorCollector(pToken!.text, WellFormedError);
 
-            charData.checkWellFormed(pToken, ec, emd);
+            pToken!.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

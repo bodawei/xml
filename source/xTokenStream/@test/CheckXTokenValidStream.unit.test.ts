@@ -10,7 +10,6 @@ import { SToken } from '../../sToken';
 import nameList, { XNameList } from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
-   charData,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -23,6 +22,7 @@ import {
    SPACE_XTOKEN,
 
    CdataXToken,
+   CharDataXToken,
    SpaceXToken,
    ExternalSubsetStartXToken,
    ExternalSubsetEndXToken,
@@ -3497,7 +3497,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             it('reports no errors when passing char data through it', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
-               const characters = new charData.XToken('one');
+               const characters = new CharDataXToken('one');
 
                validator.write(elementDecl);
                validator.write(characters);
@@ -3713,9 +3713,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
-               validator.write(new charData.XToken('test charData'));
+               validator.write(new CharDataXToken('test charData'));
                validator.write(new CdataXToken('test CDATA'));
-               validator.write(new charData.XToken(' '));
+               validator.write(new CharDataXToken(' '));
                validator.write(new elementEnd.XToken('one'));
                validator.end();
 
@@ -3767,8 +3767,8 @@ describe('CheckXTokenValidStream (unit)', () => {
             const commentToken = new comment.CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
-            const nonWhiteChars = new charData.XToken('one');
-            const whiteChars = new charData.XToken(' \t\n');
+            const nonWhiteChars = new CharDataXToken('one');
+            const whiteChars = new CharDataXToken(' \t\n');
 
             const data: Array<[any, 1|1.1, 1|2|3|4|5|6, boolean]> = [
                [ commentToken, 1, 1, true ],
@@ -3855,7 +3855,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                validator.write(elementDecl);
                validator.write(new elementStart.XToken('one', []));
-               validator.write(new charData.XToken(' '));
+               validator.write(new CharDataXToken(' '));
                validator.write(new elementStart.XToken('child', []));
                validator.end();
 

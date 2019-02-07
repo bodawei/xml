@@ -5,7 +5,6 @@ import declaration from './bridge/baseDeclaration';
 import attListDeclaration from './attListDeclaration';
 import elementDeclaration from './elementDeclaration';
 
-import * as charData from './charData';
 import * as charRef from './charRef';
 import * as comment from './comment';
 import { CommentXToken } from './comment';
@@ -34,6 +33,7 @@ export * from './marker/parameterEntityEnd';
 export * from './marker/parameterEntityStart';
 
 export * from './cdata';
+export * from './charData';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
 export * from './notationDeclaration';
@@ -47,29 +47,10 @@ type PToken = {
    type: string;
 };
 
-const token = {
-   declaration,
-
-   attListDeclaration,
-   charData,
-   // charRef,
-   comment,
-   docTypeStart,
-   docTypeEnd,
-   elementStart,
-   elementEnd,
-   elementDeclaration,
-   text,
-
-   unassigned,
-   literalValue,
-};
-
 export {
    declaration,
 
    attListDeclaration,
-   charData,
    charRef,
    comment,
    docTypeStart,

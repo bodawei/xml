@@ -11,7 +11,6 @@ import {
 
    attListDeclaration,
    charRef,
-   charData,
    comment,
    docTypeEnd,
    docTypeStart,
@@ -20,6 +19,7 @@ import {
    elementEnd,
 
    CDATA_PTOKEN,
+   CHARDATA_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
@@ -116,12 +116,12 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             (pToken as any).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
-         case charData.PTYPE:
+         case CHARDATA_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.CHARDATA_INVALID_DOC_CONTEXT);
             }
 
-            charData.checkWellFormed(pToken as any, errorCollector, this.emd);
+            (pToken as any).checkWellFormed(errorCollector, this.emd);
             break;
          case charRef.PTYPE:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {

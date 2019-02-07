@@ -6,6 +6,7 @@ import { EntityMetaData } from "basic";
 import { EntityExpanderStream } from "../EntityExpanderStream";
 import { gatherStream } from "./utils";
 import {
+   CHARDATA_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
@@ -70,7 +71,7 @@ describe('EntityExpanderStream (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
-         expect(results[index + 1].type).toEqual('CHARDATA');
+         expect(results[index + 1].type).toEqual(CHARDATA_PTOKEN);
          expect(results[index + 2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
       }, done);
    });
@@ -88,7 +89,7 @@ describe('EntityExpanderStream (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, PARAMETER_ENTITY_START_PTOKEN);
 
-         expect(results[index + 1].type).toEqual('CHARDATA');
+         expect(results[index + 1].type).toEqual(CHARDATA_PTOKEN);
          expect(results[index + 2].type).toEqual(PARAMETER_ENTITY_END_PTOKEN);
       }, done);
    });

@@ -6,7 +6,6 @@ import {
    declaration,
 
    attListDeclaration,
-   charData,
    comment,
    elementEnd,
    elementStart,
@@ -14,6 +13,7 @@ import {
    text,
 
    CdataPToken,
+   CharDataPToken,
    ProcessingInstructionPToken,
    XmlDeclarationPToken,
    TextDeclarationPToken,
@@ -68,14 +68,14 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls charData.pTokenToXToken()', () => {
-      spyOn(charData, 'pTokenToXToken');
-      const pToken = { type: charData.PTYPE };
+   it('calls charData.toXToken()', () => {
+      const pToken = new CharDataPToken({ text: SToken.fromString('x') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(charData.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls comment.pTokenToXToken()', () => {

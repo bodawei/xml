@@ -7,7 +7,6 @@ import {
    declaration,
 
    attListDeclaration,
-   charData,
    comment,
    docTypeStart,
    docTypeEnd,
@@ -17,6 +16,7 @@ import {
    text,
 
    CdataXToken,
+   CharDataXToken,
    SpaceXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
@@ -95,7 +95,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes a charData', (done) => {
-      expectInputToProduce('some$ text ', new charData.XToken('some$ text '), done);
+      expectInputToProduce('some$ text ', new CharDataXToken('some$ text '), done);
    });
 
    it('tokenizes a comment', (done) => {

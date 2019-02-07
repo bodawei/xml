@@ -6,9 +6,9 @@ import { EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
+   parseCharData,
    parseSection,
 
-   charData,
    charRef,
    comment,
    docTypeEnd,
@@ -140,7 +140,7 @@ class PTokenStream extends stream.Readable {
                   this._parseClose(deliverParse);
                   this.waitingForInternalClose = false;
                } else {
-                  charData.parse(this._sTokenSource, [], (charPToken: Token) => {
+                  parseCharData(this._sTokenSource, [], (charPToken) => {
                      if (charPToken && charPToken.text) {
                         deliverParse(charPToken);
                      } else {
@@ -161,7 +161,7 @@ class PTokenStream extends stream.Readable {
                   terminators = [ '%' ];
                }
 
-               charData.parse(this._sTokenSource, terminators, (result: Token) => {
+               parseCharData(this._sTokenSource, terminators, (result) => {
                   deliverParse(result);
                });
                break;

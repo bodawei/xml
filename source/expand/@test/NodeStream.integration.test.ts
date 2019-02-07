@@ -12,6 +12,7 @@ import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
 import {
+   CharDataXToken,
    SpaceXToken,
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -83,11 +84,11 @@ describe('NodeStream (integration)', () => {
             tokenNs.elementStart.XToken,
             GeneralEntityStartXToken,
             GeneralEntityStartXToken,
-            tokenNs.charData.XToken,
+            CharDataXToken,
             GeneralEntityEndXToken,
-            tokenNs.charData.XToken,
+            CharDataXToken,
             GeneralEntityStartXToken,
-            tokenNs.charData.XToken,
+            CharDataXToken,
             GeneralEntityEndXToken,
             GeneralEntityEndXToken,
             tokenNs.elementEnd.XToken,
@@ -117,11 +118,11 @@ describe('NodeStream (integration)', () => {
                InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
             tokenNs.elementStart.XToken,
-               tokenNs.charData.XToken,
+               CharDataXToken,
                GeneralEntityStartXToken,
-                  tokenNs.charData.XToken,
+                  CharDataXToken,
                GeneralEntityEndXToken,
-               tokenNs.charData.XToken,
+               CharDataXToken,
             tokenNs.elementEnd.XToken,
          ]);
          /* eslint-enable indent */

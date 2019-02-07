@@ -1,12 +1,12 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
+
+import { EntityMetaData } from 'basic';
+import { ErrorCollector } from 'error';
+import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 import misc from './common/misc';
-import base from './base';
-import { strOrBlank, STokenSource } from 'sToken';
-import { ErrorCollector } from 'error';
-import { EntityMetaData } from 'basic';
 
-const CHARDATA = 'CHARDATA';
+const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
 const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
 
 /**********************************************************************\
@@ -14,30 +14,36 @@ const CHARDATA_XTOKEN = 'CHARDATA_XTOKEN';
  a run of CharData
 \**********************************************************************/
 
-class CharData extends base.XToken {
-   public text: string;
+class CharDataXToken {
+   public readonly type: typeof CHARDATA_XTOKEN = CHARDATA_XTOKEN;
+   public readonly text: string;
+   public readonly pToken?: CharDataPToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(text: string, pToken?: CharDataPToken) {
-      super(CHARDATA_XTOKEN, pToken);
-
       this.text = text;
+      this.pToken = pToken;
    }
 
 }
 
-class CharDataPToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: Object) {
-      super(CHARDATA, props);
+class CharDataPToken {
+   public readonly type: typeof CHARDATA_PTOKEN = CHARDATA_PTOKEN;
+   public readonly text: SToken;
+
+   constructor(props: { text: SToken }) {
+      this.text = props.text;
    }
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
 
-      results.pushSTokens(this.text);
+   toXToken() {
+      return pTokenToXToken(this);
+   }
 
-      return results;
+   toSTokenArray(): Array<SToken> {
+      return sTokensFromPToken(this);
    }
 }
 
@@ -54,14 +60,16 @@ class CharDataPToken extends base.PToken {
    [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
-function parse(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken) => void) {
+function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|void) => void) {
    let terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
 
-   const pToken = new CharDataPToken();
-
    source.extract('all', terminators, (sToken) => {
-      pToken.text = sToken;
-      deliverPToken(pToken);
+      if (!sToken) {
+         deliverPToken(undefined);
+         return;
+      }
+
+      deliverPToken(new CharDataPToken({ text: sToken }));
    });
 }
 
@@ -79,17 +87,27 @@ function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, entityMetaD
 \**********************************************************************/
 
 function pTokenToXToken(pToken: CharDataPToken) {
-   return new CharData(strOrBlank(pToken.text), pToken);
+   return new CharDataXToken(strOrBlank(pToken.text), pToken);
+}
+
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: CharDataPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(pToken.text);
+
+   return builder.sTokenArray;
 }
 
 export {
-   CHARDATA as PTYPE,
-   CHARDATA_XTOKEN as XTYPE,
-   CharData as XToken,
-   CharDataPToken as PToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+   CHARDATA_PTOKEN,
+   CHARDATA_XTOKEN,
 
    CharDataPToken,
+   CharDataXToken,
+
+   parseCharData,
 };

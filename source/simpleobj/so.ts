@@ -1,13 +1,13 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import stream from 'readable-stream';
 
 import {
-   charData,
    elementStart,
    elementEnd,
 
    CdataXToken,
+   CharDataXToken,
 } from '../token';
 
 type Token = { type: string };
@@ -70,7 +70,7 @@ class SimpleObj extends stream.Transform {
          // if (this._stack.length < 50) {
          //    console.log('POP  ', padding2 + '/' + xToken.name)
          // }
-      } else if (xToken instanceof charData.XToken) {
+      } else if (xToken instanceof CharDataXToken) {
          // console.log('TEXT ', xToken.text)
          leaf.addContent(xToken.text);
       } else if (xToken instanceof CdataXToken) {
