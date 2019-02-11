@@ -20,6 +20,7 @@ class DigitExtractor extends Extractor {
       super(version);
 
       this.base = base;
+      this.foundDigit = false;
    }
 
    process(segment: Segment) {
@@ -36,10 +37,12 @@ class DigitExtractor extends Extractor {
        * won't go wandering off before it starts finding digits.
        */
       regex.lastIndex = 0;
-      this.foundDigit = regex.test(segment.text[segment.index]);
+      const foundDigit = regex.test(segment.text[segment.index]);
 
-      if (!this.foundDigit) {
-         this.state = Extractor.STATE.FAILURE;
+      if (foundDigit) {
+         this.foundDigit = foundDigit;
+      } else {
+         this.state = this.foundDigit ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
          return;
       }
 

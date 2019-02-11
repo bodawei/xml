@@ -7,7 +7,6 @@ The second possible case occurs when the XML entity is accompanied by encoding i
 * If an XML entity is in a file, the Byte-Order Mark and encoding declaration are used (if present) to determine the character encoding.
 
 
-
 ### Appendix: Standards
 * 1.0/2: https://www.w3.org/TR/2000/REC-xml-20001006#sec-guessing-with-ext-info
 * 1.0/3: https://www.w3.org/TR/2004/REC-xml-20040204/#sec-guessing-with-ext-info

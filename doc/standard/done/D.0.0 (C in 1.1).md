@@ -1,6 +1,6 @@
 ## D. Expansion of Entity and Character References (Non-Normative)
 
-> 1.0/1: Moves to "C" of course
+> **1.0/1:** Moves to "C" of course
 
 This appendix contains some examples illustrating the sequence of entity- and character-reference recognition and expansion, as specified in "4.4 XML Processor Treatment of Entities and References".
 
@@ -20,9 +20,9 @@ numerically (&#38;#38;) or with a general entity
 (&amp;amp;).</p>
 ```
 
-A reference in the document to "&example;" will cause the text to be reparsed, at which time the start- and end-tags of the "p" element will be recognized and the three references will be recognized and expanded, resulting in a "p" element with the following content (all data, no delimiters or markup):
+A reference in the document to "`&example;`" will cause the text to be reparsed, at which time the start- and end-tags of the "p" element will be recognized and the three references will be recognized and expanded, resulting in a "p" element with the following content (all data, no delimiters or markup):
 
-> **1.0/2: Replaced:** A reference in the document to "&example;" will cause the text to be reparsed, at which time the start- and end-tags of the p element will be recognized and the three references will be recognized and expanded, resulting in a p element with the following content (all data, no delimiters or markup):
+> **1.0/2: Replaced:** A reference in the document to "`&example;`" will cause the text to be reparsed, at which time the start- and end-tags of the p element will be recognized and the three references will be recognized and expanded, resulting in a p element with the following content (all data, no delimiters or markup):
 
 
 ```
@@ -52,16 +52,16 @@ This produces the following:
 
 * in line 8, the reference to the general entity "tricky" is recognized, and it is expanded, so the full content of the "test" element is the self-describing (and ungrammatical) string This sample shows a error-prone method.
 
-> 1.0/2 Replaced: * in line 8, the reference to the general entity "tricky" is recognized, and it is expanded, so the full content of the test element is the self-describing (and ungrammatical) string This sample shows a error-prone method
+> **1.0/2 Replaced:** * in line 8, the reference to the general entity "tricky" is recognized, and it is expanded, so the full content of the test element is the self-describing (and ungrammatical) string This sample shows a error-prone method
 
-> 1.0/5: Adds the following (not in 1.1/1, but back in 1.1/3):
+> **1.0/5: Adds the following:** (not in 1.1/1, but back in 1.1/3):
 
 In the following example
 
 ```
-<!DOCTYPE foo [ 
-<!ENTITY x "&lt;"> 
-]> 
+<!DOCTYPE foo [
+<!ENTITY x "&lt;">
+]>
 <foo attr="&x;"/>
 ```
 

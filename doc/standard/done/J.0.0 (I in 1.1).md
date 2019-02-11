@@ -22,7 +22,7 @@ The first two suggestions are directly derived from the rules given for identifi
 
 1. Names which are nonsensical, unpronounceable, hard to read, or easily confusable with other names should not be employed.
 
-> **1.1/1**
+> **1.1/1:** Replaces all the above with:
 
 The following suggestions define what is believed to be best practice in the construction of XML names used as element names, attribute names, processing instruction targets, entity names, notation names, and the values of attributes of type ID, and are intended as guidance for document authors and schema designers. All references to Unicode are understood with respect to a particular version of the Unicode Standard greater than or equal to 3.0; which version should be used is left to the discretion of the document author or schema designer.
 
@@ -40,7 +40,7 @@ The first two suggestions are directly derived from the rules given for identifi
 
 1. The interlinear annotation characters ([#xFFF9-#xFFFB) should not be used in names.
 
-> **1.1/2** Adds the missing ]
+> **1.1/2:** Adds the missing ]
 
 1. Variation selector characters should not be used in names.
 

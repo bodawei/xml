@@ -196,6 +196,8 @@ Spec is a little inconsistent about these:
 ```
 - while the spec doesn't say, the command line xml processor on the mac does interpret the general entity references in an attribute default (as a part of ATTLIST declarations) at the pont of declaration.  Taht is, unlike entity values, we don't wait to process those values until they are used.  Which means an ATTLIST must follow any entity it wishes to reference.
 
+- §4.6 says that "If the entities `lt` or `amp` are declared, they must be declared as internal entities whose replacement text is...".  In all the handling for §2.9 and §5, it seems that if a declaration isn't referenced, it doesn't matter if it is invalid.  This processor takes the same stance with the predefined entities.  If they are not correctly declared, but are not referenced, this will ignore those declarations.
+
 ## Parameter Entities
 - Can appear in an entity value literal
 - Can't appear in any other literal

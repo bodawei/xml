@@ -170,6 +170,45 @@ describe('DigitExtractor', () => {
          });
       });
 
+      it('returns all digits and ranges across multiple segments, when digits end on a segment boundary', () => {
+         extractor.process(new Segment('123', segmentRange));
+         extractor.process(new Segment('9876'));
+         extractor.process(new Segment('x'));
+
+         expect(extractor.finish()).toEqual({
+            text: '1239876',
+            original: '1239876',
+            segments: [ {
+               chars: 3,
+               rows: 0,
+               columns: 3,
+               segment: {
+                  range: segmentRange,
+               },
+            }, {
+               chars: 4,
+               rows: 0,
+               columns: 4,
+               segment: {
+                  range: undefined,
+               },
+            }, {
+               chars: 0,
+               rows: 0,
+               columns: 0,
+               segment: new Segment('x'),
+            } ],
+         });
+      });
+
+      it('sets state to success, when digits end on a segment boundary', () => {
+         extractor.process(new Segment('123', segmentRange));
+         extractor.process(new Segment('9876'));
+         extractor.process(new Segment('x'));
+
+         expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
+      });
+
       it('returns a partially used segument', () => {
          const segment = new Segment('123xyz', segmentRange);
          extractor.process(segment);

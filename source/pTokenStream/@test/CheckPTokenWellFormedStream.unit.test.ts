@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Offset, EntityKind } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { makeSToken } from 'sToken-test';
 import {
    declaration,
@@ -26,10 +26,13 @@ import {
    SpacePToken,
    TextDeclarationPToken,
    XmlDeclarationPToken,
+   GeneralEntityStartPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
 import { ElementDeclarationPToken } from 'source/token/elementDeclaration';
+import { SToken } from 'sToken';
+import { gatherStream } from 'source/expand/@test/utils';
 
 type Token = { type: string, [other: string]: any };
 type TokenArray = Array<Token>;
@@ -621,7 +624,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       expect(args[1]).toEqual(metaData);
    });
 
-   describe('entity reference', () => {
+   describe('general entity reference', () => {
       let pToken: GeneralEntityReferencePToken;
 
       beforeEach(() => {
@@ -661,6 +664,77 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          });
 
       });
+
+   });
+
+   describe('general entity start', () => {
+      let pToken: GeneralEntityStartPToken;
+      let declaration: GeneralEntityDeclarationPToken;
+      let refPToken: GeneralEntityReferencePToken;
+
+      function expectStream(validator: CheckPTokenWellFormedStream, expected: any, done: () => void) {
+         gatherStream(validator, (tokens) => {
+            let arrayExpected = [];
+
+            if (!Array.isArray(expected)) {
+               arrayExpected = [ expected ];
+            }
+
+            for (const expectedVal of arrayExpected) {
+               (expect(tokens) as any).toHaveError(expectedVal); // typeHack
+            }
+         }, done);
+      }
+
+      function expectNoErrors(validator: CheckPTokenWellFormedStream, done: () => void) {
+         gatherStream(validator, (tokens) => {
+            (expect(tokens) as any).toBeErrorFree(); // typeHack
+         }, done);
+      }
+
+      beforeEach(() => {
+         declaration = new GeneralEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('lt'),
+            externalId: {},
+         });
+         refPToken = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('lt'),
+            close: SToken.fromString(';'),
+         });
+         pToken = new GeneralEntityStartPToken(refPToken);
+      });
+
+      // it('calls GeneralEntityReferencePToken.checkWellFormed() when encountering an entity start', () => {
+      //    const cwfSpy = spyOn(refPToken, 'checkWellFormed');
+      //    checker.write(metaData);
+      //    checker.write(pToken);
+
+      //    const args = cwfSpy.calls.argsFor(0);
+      //    expect(args[0]).toBeInstanceOf(ErrorCollector);
+      //    expect(args[1]).toEqual(metaData);
+      // });
+
+      // describe('state checking', () => {
+
+      //    it('reports an error if not IN_CONTENT', () => {
+      //       (checker as any)._state = 'IN_DTD';
+      //       const checkerPushSpy = spyOn(checker, 'push');
+      //       checker.write(pToken);
+
+      //       expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+      //    });
+
+      //    it('reports an error if there was no declaration', () => {
+      //       (checker as any)._state = 'IN_CONTENT';
+      //       const checkerPushSpy = spyOn(checker, 'push');
+      //       checker.write(pToken);
+
+      //       expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+      //    });
+
+      // });
 
    });
 

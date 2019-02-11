@@ -3,7 +3,7 @@
 import stream from 'readable-stream';
 
 import { ENTITY_META_DATA, EntityMetaData, EntityKind } from 'basic';
-import { ErrorCollector, WellFormedError } from '../error';
+import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
 import { SToken, strOrBlank } from '../sToken';
 
 import {
@@ -35,10 +35,11 @@ import {
    ParameterEntityReferencePToken,
    ProcessingInstructionPToken,
    SpacePToken,
+
+   GENERAL_ENTITY_START_PTOKEN,
+   GeneralEntityStartPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
-
-const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
 enum CheckWellFormedState {
    START = 'START',
@@ -65,6 +66,8 @@ type EntityInfo = {
    token: Token;
    isInternal: boolean;
 }
+
+const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
 // This right now only validates the base document.
 class CheckPTokenWellFormedStream extends stream.Transform {
@@ -255,12 +258,21 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                };
             }
             break;
+         case GENERAL_ENTITY_START_PTOKEN:
+            // if (this._state !== CheckWellFormedState.IN_CONTENT) {
+            //    errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+            // }
+            const genEntityRef = (pToken as GeneralEntityStartPToken).referencePToken;
+
+            this.checkGeneralEntityDeclaration(genEntityRef);
+            // genEntityRef.checkWellFormed(errorCollector, this.emd);
+            break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
-            this.checkDecl(pToken, this.generalEntityDecl);
+            this.checkGeneralEntityDeclaration(pToken as GeneralEntityReferencePToken);
             (pToken as GeneralEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
@@ -295,6 +307,10 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       errorCollector.getErrors().forEach(error => this.push(error));
 
       this.push(pToken);
+   }
+
+   private checkGeneralEntityDeclaration(pToken: GeneralEntityReferencePToken) {
+      this.checkDecl(pToken, this.generalEntityDecl);
    }
 
    private checkDecl(pToken: Token, info: EntitiesInfo) {

@@ -82,6 +82,11 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: DeliverP
       source.extractToObjectNoParams('space', pToken, 'postDigitsSpace');
 
       source.extract('match', ';', (closeSToken) => {
+         if (pToken.digits) {
+            pToken.charCode = hexMarker ? parseInt(pToken.digits.str, 16) : parseInt(pToken.digits.str, 10);
+         } else {
+            pToken.charCode = 0;
+         }
          pToken.close = closeSToken;
 
          deliverPToken(pToken);

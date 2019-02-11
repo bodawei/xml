@@ -60,6 +60,7 @@ describe('literalValue (integration)', () => {
                   digits: makeSToken('32'),
                   postDigitsSpace: undefined,
                   close: makeSToken(';'),
+                  charCode: 32,
                }),
                new GeneralEntityReferencePToken({
                   open: makeSToken('&'),

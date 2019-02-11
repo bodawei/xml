@@ -44,12 +44,13 @@ import { ExternalId } from "source/token/common/externalId";
 import { defaultExtractors } from "extractor";
 import { AttListPToken } from "source/token/attListDeclaration";
 import { UnassignedType, UnassignedArray } from "source/token/common/unassigned";
-import { CharRefPToken } from "source/token/charRef";
+import { CharRefPToken, CHARREF_PTOKEN_TYPE } from "source/token/charRef";
 import { DocTypeStartPToken } from "source/token/docTypeStart";
 import { DocTypeEndPToken } from "source/token/docTypeEnd";
 import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
 import { isNullOrUndefined } from "util";
 import { CharDataPToken } from "source/token/charData";
+import { XmlWarning, WellFormedError } from "error";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
@@ -1067,9 +1068,9 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results.length).toEqual(3);
-            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[1]).toEqualRangeless(new CharRefPToken({
+            expect(results.length).toEqual(4);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2]).toEqualRangeless(new CharRefPToken({
                open: SToken.fromString('&#'),
                digits: SToken.fromString('60'),
                close: SToken.fromString(';'),
@@ -1077,7 +1078,21 @@ describe('EntityExpander (unit)', () => {
          	   postHexMarkerSpace: undefined,
          	   postDigitsSpace: undefined,
             }));
-            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('reports a warning if "lt" is not declared (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[0]).toEqual(new XmlWarning(XmlWarning.ID.PREDEFINED_UNDECLARED, [ 'lt' ], input[0].open, input[0].open));
             done();
          });
       });
@@ -1091,9 +1106,9 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results.length).toEqual(3);
-            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[1]).toEqualRangeless(new CharRefPToken({
+            expect(results.length).toEqual(4);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2]).toEqualRangeless(new CharRefPToken({
                open: SToken.fromString('&#'),
                digits: SToken.fromString('38'),
                close: SToken.fromString(';'),
@@ -1101,7 +1116,7 @@ describe('EntityExpander (unit)', () => {
          	   postHexMarkerSpace: undefined,
          	   postDigitsSpace: undefined,
             }));
-            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });
@@ -1115,12 +1130,12 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results.length).toEqual(3);
-            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[1]).toEqualRangeless(new CharDataPToken({
+            expect(results.length).toEqual(4);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2]).toEqualRangeless(new CharDataPToken({
                text: SToken.fromString('>'),
             }));
-            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });
@@ -1134,12 +1149,12 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results.length).toEqual(3);
-            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[1]).toEqualRangeless(new CharDataPToken({
+            expect(results.length).toEqual(4);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2]).toEqualRangeless(new CharDataPToken({
                text: SToken.fromString('\''),
             }));
-            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });
@@ -1153,12 +1168,344 @@ describe('EntityExpander (unit)', () => {
          ];
 
          doExpand(true, input, (results) => {
-            expect(results.length).toEqual(3);
-            expect(results[0].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[1]).toEqualRangeless(new CharDataPToken({
+            expect(results.length).toEqual(4);
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2]).toEqualRangeless(new CharDataPToken({
                text: SToken.fromString('"'),
             }));
-            expect(results[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('reports an error if "lt" is externally declared (§4.6)', (done) => {
+         externalMap.systemFoo = '&#38;#60;';
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               externalId: {
+                  system: {
+                     value: [
+                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                     ],
+                  }
+               },
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_EXTERNAL, [ 'lt' ], input[0].open, input[0].open));
+            done();
+         });
+      });
+
+      it('allows "lt" to be declared as a &#38;#60; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#60;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('reports an error if "lt" has extra stuff after the initial declaration (§4.6)', (done) => {
+         externalMap.systemFoo = '&#38;#60;';
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#60;frisbee') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[3]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'lt' ], input[0].open, input[0].open));
+            done();
+         });
+      });
+
+      it('allows "lt" to be declared as a &#x26;#x3c; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), hexMarker: SToken.fromString('x'), digits: SToken.fromString('26'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#x3c;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "lt" to be declared as a &#x26;&#35;&#120;&#51;&#99;&#59; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), hexMarker: SToken.fromString('x'), digits: SToken.fromString('26'), charCode: 38 }),
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('35'), charCode: 35 }),
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('120'), charCode: 120 }),
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('51'), charCode: 51 }),
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('99'), charCode: 99 }),
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('59'), charCode: 59 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('does not allow "lt" to be declared as a &#60; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('lt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('60'), charCode: 60 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('lt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'lt' ], input[0].open, input[0].open));
+            done();
+         });
+      });
+
+      it('allows "amp" to be declared as a &#x26;#x3c; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('amp'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#38;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('amp'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('does not allow "amp" to be declared as a &#38; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('amp'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('amp'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[2]).toEqual(new WellFormedError(WellFormedError.ID.PREDEFINED_INVALD, [ 'amp' ], input[0].open, input[0].open));
+            done();
+         });
+      });
+
+      it('allows "gt" to be declared as a &#38;#62; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('gt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#62;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('gt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "gt" to be declared as a &#62; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('gt'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('62'), charCode: 62 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('gt'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARDATA_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "apos" to be declared as a &#38;#39; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('apos'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#39;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('apos'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "apos" to be declared as a &#39; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('apos'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('39'), charCode: 39 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('apos'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARDATA_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "quot" to be declared as a &#38;#34; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('quot'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
+                  new text.PToken({ text: SToken.fromString('#34;') }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('quot'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('allows "quot" to be declared as a &#34; (§4.6)', (done) => {
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('quot'),
+               value: [
+                  new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('34'), charCode: 34 }),
+               ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('quot'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
+            expect(results[2].type).toEqual(CHARDATA_PTOKEN);
+            expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
       });

@@ -27,6 +27,7 @@ describe('charRef (unit)', () => {
          open: openSToken,
          digits: makeSToken('1234'),
          close: makeSToken(';'),
+         charCode: 1234,
       });
    });
 
@@ -63,6 +64,7 @@ describe('charRef (unit)', () => {
             [ ';', 'match', ';' ],
          ]);
          charRefPToken.digits = new SToken('1f2', '1f2', new Range(new EntityLocation(), 1, 0, 1, 4, 0, 4));
+         charRefPToken.charCode = 498;
 
          parse(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();

@@ -31,6 +31,8 @@ import {
    InternalSubsetEndXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
+   CharDataPToken,
+   CHARDATA_PTOKEN,
 } from 'token';
 import { ExpandedLiteralValuePToken } from 'source/token/entityDeclaration';
 import * as charRef from 'source/token/charRef';
@@ -46,6 +48,7 @@ import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned'
 import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
 import { DocTypeStartPToken } from 'source/token/docTypeStart';
 import { DocTypeEndPToken } from 'source/token/docTypeEnd';
+import { XmlWarning, WellFormedError } from 'error';
 
 type GeneralEntityInfo = {
    token: GeneralEntityDeclarationPToken;
@@ -133,6 +136,45 @@ const PREDEFINED_ENTITIES = [{
    ],
 } ];
 
+type PredefinedMatches = {
+   [name: string]: { charCode: number } | { charCode: number, str: string },
+}
+
+const PREDEFINED_MATCHES: PredefinedMatches = {
+   /*
+    * It is worth noting that amp and lt can not be declared as "<" or "&#60; (for example).
+    * The reasons are not super clear. The problem is that the latter will be expanded before
+    * is used, so is essentially the same as "<". That, in turn, is bad because of §4.3.2
+    * which points out that you can not start a tag in one entity and finish it in another,
+    * yet this construction means the tag is starting in this entity.  Declaring the entity
+    * as &#38;#60; means that what is in the entity is ultimately &#60;, which means it is not
+    * yet the start of anything.
+    */
+   amp: {
+      charCode: 38,
+   },
+   lt: {
+      charCode: 60,
+   },
+   gt: {
+      charCode: 62,
+      str: '>',
+   },
+   apos: {
+      charCode: 39,
+      str: '\'',
+   },
+   quot: {
+      charCode: 34,
+      str: '"',
+   },
+};
+
+function isPredefined(pToken: GeneralEntityReferencePToken): boolean {
+   const name = strOrBlank(pToken.name);
+
+   return [ 'amp', 'lt', 'gt', 'apos', 'quot' ].indexOf(name) !== -1;
+}
 
 /**********************************************************************\
  An EntityExpander transforms a series of PTokens by expanding any
@@ -238,6 +280,32 @@ class EntityExpander {
             this.deliverAToken(pToken);
             expanded();
       }
+   }
+
+   private warn(code: string, params: Array<string>, start: SToken) {
+      const warning = new XmlWarning(code, params, start, start);
+
+      this.deliverAToken(warning);
+   }
+
+   private error(code: string, params: Array<string>, start: SToken) {
+      const errorObj = new WellFormedError(code, params, start, start);
+
+      this.deliverAToken(errorObj);
+   }
+
+   matchReplacementText(pToken: GeneralEntityReferencePToken, token: charRef.CharRefPToken|CharDataPToken) {
+      const name = strOrBlank(pToken.name);
+      const allowed = PREDEFINED_MATCHES[name];
+      let matches = false;
+
+      if (token.type === charRef.CHARREF_PTOKEN_TYPE) {
+         matches = (token as charRef.CharRefPToken).charCode === allowed.charCode;
+      } else if (token.type === CHARDATA_PTOKEN) {
+         matches = (token as CharDataPToken).text.str === (allowed as any).str; // typeHack
+      }
+
+      return matches;
    }
 
    /*
@@ -368,6 +436,38 @@ class EntityExpander {
                   entityGroup = this.generalEntitiesByName;
                }
 
+      // This is a bit hard to reason about.  The specification does say something
+      // definitive, but doesn't do it in a place you would expect, so you must
+      // examine several places:
+      // §2.9 An external markup declaration is defined as a markup declaration
+      // occurring in the external subset or in a parameter entity (external
+      // or internal, the latter being included because non-validating
+      // processors are not required to read them).]
+      // SUMMARY: A non-validating processor it nos obligated to read any parameter
+      // entity ("read" is never defined precisely).
+      // §4.1
+      // Note that non-validating processors are not obligated to read and process
+      // entity declarations occurring in parameter entities or in the external subset;
+      // SUMMARY: This section only speaks of nor reading entity declarations in
+      // PE declarations. But this whole section is only about entities, so this
+      // doesn't seem to contradict 2.9
+      // §5.1 Non-validating processors are required to check only the
+      // document entity, including the entire internal DTD subset,
+      // for well-formedness. While they are not required to check the
+      // document for validity, they are required to process all the declarations
+      // they read in the internal DTD subset and in any parameter entity that
+      // they read, up to the first reference to a parameter entity that they
+      // do not read; that is to say, they must use the information in those
+      // declarations to normalize attribute values, include the replacement
+      // text of internal entities, and supply default attribute values
+      // §5.2 [non-validating processors] need not read any part of the
+      // document other than the document entity.
+      // SUMMARY: In conjunction with 2.9, this does say that a processor
+      // need not read any parameter entities. And of course this also
+      // says a non-validating processor need not read any external entities.
+
+
+
                // §5.1: Except when standalone="yes", [non-validating processors] must not process entity declarations or
                // attribute-list declarations encountered after a reference to a parameter entity that is not read, since
                // the entity may have contained overriding declarations
@@ -418,6 +518,8 @@ class EntityExpander {
     */
    private handleGeneralEntityReference(pToken: GeneralEntityReferencePToken, handled: TokenHandled) {
       const info = this.getGeneralEntityInfo(pToken);
+      const isPredefinedRef = isPredefined(pToken);
+      let count = 0;
 
       // Can not expand a reference that has no name
       // Can not expand a reference that we have no declaration for
@@ -440,21 +542,60 @@ class EntityExpander {
             return;
          }
 
+         /*
+          * §4.6 Stipulates several details about checking predefined entities, which
+          * we do here. Note that expansion of those entities happens elsewhere in
+          * this codebase.
+          * 1) If the entities `lt` or `amp` are declared, they must be declared as
+          *    internal entities whose replacement text is a character reference to
+          *    the respective character
+          * 2) If the entities `gt`, `apos`, or `quot` are declared, they must be
+          *    declared as internal entities whose replacement text is the single
+          *    character being escaped (or a character reference ...)
+          * This validates that the entities are declared as a character or a
+          * character reference.
+          */
+         if (isPredefinedRef) {
+            const matches = this.matchReplacementText(pToken, subToken as any); // typeHack
+
+            if (!matches || count > 0) {
+               this.error(WellFormedError.ID.PREDEFINED_INVALD, [ strOrBlank(pToken.name) ], pToken.open);
+            }
+
+            count ++;
+         }
+
          this.expandToken(subToken, subHandled);
       }, entityProcessed);
    }
 
-   /*
-    * §4.6 says "All XML processors must recognize these entities whether they
-    * are declared or not."
-    *
-    * Thus, when this expander seeks to look up an entity, if it isn't among the
-    * ones explicitly defined in this document, then this uses the set of
-    * predefined entities to provide them.
-    */
    private getGeneralEntityInfo(pToken: GeneralEntityReferencePToken) {
       const name = strOrBlank(pToken.name);
-      const info = this.generalEntitiesByName[name] || this.predefinedEntitiesByName[name];
+      const isPredefinedRef = isPredefined(pToken);
+      let info = this.generalEntitiesByName[name];
+
+      /*
+       * §4.6 Stipulates several details about checking predefined entities, which
+       * we do here. Note that expansion of those entities happens elsewhere in
+       * this codebase.
+       * 1) For interoperability, valid XML documents should declare these entities,
+       *    like any others, before using them.
+       * 2) If the entities `lt` or `amp` are declared, they must be declared as
+       *    internal entities whose replacement text is a character reference to
+       *    the respective character
+       * 3) If the entities `gt`, `apos`, or `quot` are declared, they must be
+       *    declared as internal entities whose replacement text is the single
+       *    character being escaped (or a character reference ...)
+       * This treats the interoperability as a warning. If the entity is not
+       * declared we substitute in a valid substitute.  If it is declared, we
+       * check that it is indeed internal.
+       */
+      if (!info && isPredefinedRef) {
+         this.warn(XmlWarning.ID.PREDEFINED_UNDECLARED, [ name ], pToken.open);
+         info = this.predefinedEntitiesByName[name];
+      } else if (isPredefinedRef && info && info.token.externalId) {
+         this.error(WellFormedError.ID.PREDEFINED_EXTERNAL, [ name ], pToken.open);
+      }
 
       return info;
    }
@@ -518,6 +659,7 @@ class EntityExpander {
 
          newValue.push(new GeneralEntityStartPToken(element));
          // @@ this is not right.  Don't we actually need to parse this in case of char refs?
+         // Also need to do 4.6 (see above for handling this in the body)
          newValue = newValue.concat(info.token.value);
          newValue.push(new GeneralEntityEndPToken(element));
       }
