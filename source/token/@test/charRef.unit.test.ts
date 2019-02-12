@@ -1,4 +1,4 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
@@ -9,10 +9,7 @@ import { WellFormedError, XmlWarning } from 'error';
 
 import {
    CharRefPToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-   sTokensFromPToken,
+   parseCharRef,
 } from '../charRef';
 
 describe('charRef (unit)', () => {
@@ -48,7 +45,7 @@ describe('charRef (unit)', () => {
             [ ';', 'match', ';' ],
          ]);
 
-         parse(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charRefPToken);
@@ -63,10 +60,10 @@ describe('charRef (unit)', () => {
             [ undefined, 'space' ],
             [ ';', 'match', ';' ],
          ]);
-         charRefPToken.digits = new SToken('1f2', '1f2', new Range(new EntityLocation(), 1, 0, 1, 4, 0, 4));
-         charRefPToken.charCode = 498;
+         (charRefPToken as any).digits = new SToken('1f2', '1f2', new Range(new EntityLocation(), 1, 0, 1, 4, 0, 4));
+         (charRefPToken as any).charCode = 498;
 
-         parse(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charRefPToken);
@@ -84,15 +81,15 @@ describe('charRef (unit)', () => {
          const makeSToken = makeSTokenMaker();
          charRefPToken = new CharRefPToken({
             open: openSToken,
-            postOpenSpace: makeSToken(' '),
+            openSpace: makeSToken(' '),
             hexMarker: makeSToken('x'),
-            postHexMarkerSpace: makeSToken(' '),
+            hexMarkerSpace: makeSToken(' '),
             digits: makeSToken('1f2'),
-            postDigitsSpace: makeSToken(' '),
+            digitsSpace: makeSToken(' '),
             close: makeSToken(';'),
          });
 
-         parse(mockSource, openSToken, callback);
+         parseCharRef(mockSource, openSToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charRefPToken);
@@ -109,29 +106,23 @@ describe('charRef (unit)', () => {
          emd = new EntityMetaData();
       });
 
-      it('reports no errors if no pToken provided', () => {
-         checkWellFormed(undefined, mockErrorCollector, emd);
-
-         expect(mockErrorCollector.errors.length).toEqual(0);
-      });
-
       it('reports an error if there is a space after the open', () => {
-         charRefPToken.postOpenSpace = SToken.fromString(' ');
+         (charRefPToken as any).openSpace = SToken.fromString(' ');
 
          charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_XTRA_POST_OPEN_SPACE,
             params: undefined,
-            position: charRefPToken.postOpenSpace,
+            position: charRefPToken.openSpace,
             lastPosition: undefined,
          });
       });
 
       it('reports an error if the "x" is capitalized', () => {
-         charRefPToken.hexMarker = SToken.fromString('X');
+         (charRefPToken as any).hexMarker = SToken.fromString('X');
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_INVALID_HEX_CASE,
@@ -142,22 +133,22 @@ describe('charRef (unit)', () => {
       });
 
       it('reports an error when there is a space after the "x"', () => {
-         charRefPToken.postHexMarkerSpace = SToken.fromString(' ');
+         (charRefPToken as any).hexMarkerSpace = SToken.fromString(' ');
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_XTRA_POST_HEX_SPACE,
             params: undefined,
-            position: charRefPToken.postHexMarkerSpace,
+            position: charRefPToken.hexMarkerSpace,
             lastPosition: undefined,
          });
       });
 
       it('reports an error if there are no digits', () => {
-         charRefPToken.digits = undefined;
+         (charRefPToken as any).digits = undefined;
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_NO_DIGITS,
@@ -168,22 +159,22 @@ describe('charRef (unit)', () => {
       });
 
       it('reports an error when there is a space after the digits', () => {
-         charRefPToken.postDigitsSpace = SToken.fromString(' ');
+         (charRefPToken as any).digitsSpace = SToken.fromString(' ');
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_XTRA_POST_DIGITS_SPACE,
             params: undefined,
-            position: charRefPToken.postDigitsSpace,
+            position: charRefPToken.digitsSpace,
             lastPosition: undefined,
          });
       });
 
       it('reports an error when there is no close', () => {
-         charRefPToken.close = undefined;
+         (charRefPToken as any).close = undefined;
 
-         checkWellFormed(charRefPToken, mockErrorCollector, emd);
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.CHARREF_NO_CLOSE,
@@ -198,7 +189,7 @@ describe('charRef (unit)', () => {
    describe('pTokenToXToken()', () => {
 
       it('creates an XToken', () => {
-         const xToken = pTokenToXToken(charRefPToken);
+         const xToken = charRefPToken.toXToken();
 
          expect(xToken).toEqualProps({
             type: 'CHARREF_XTOKEN',
@@ -208,9 +199,9 @@ describe('charRef (unit)', () => {
       });
 
       it('creates an XToken when there are no digits', () => {
-         delete charRefPToken.digits;
+         delete (charRefPToken as any).digits;
 
-         const xToken = pTokenToXToken(charRefPToken);
+         const xToken = charRefPToken.toXToken();
 
          expect(xToken).toEqualProps({
             type: 'CHARREF_XTOKEN',
@@ -220,10 +211,10 @@ describe('charRef (unit)', () => {
       });
 
       it('creates an XToken when the digits are hex', () => {
-         charRefPToken.hexMarker = SToken.fromString('X');
-         charRefPToken.digits = SToken.fromString('41'); // A in hex, ) in decimal
+         (charRefPToken as any).hexMarker = SToken.fromString('X');
+         (charRefPToken as any).digits = SToken.fromString('41'); // A in hex, ) in decimal
 
-         const xToken = pTokenToXToken(charRefPToken);
+         const xToken = charRefPToken.toXToken();
 
          expect(xToken).toEqualProps({
             type: 'CHARREF_XTOKEN',
@@ -236,20 +227,20 @@ describe('charRef (unit)', () => {
    describe('sTokensFromPToken()', () => {
 
       it('returns all tokens', () => {
-         charRefPToken.postOpenSpace = SToken.fromString(' ');
-         charRefPToken.hexMarker = SToken.fromString(' ');
-         charRefPToken.postHexMarkerSpace = SToken.fromString(' ');
-         charRefPToken.postDigitsSpace = SToken.fromString(' ');
+         (charRefPToken as any).openSpace = SToken.fromString(' ');
+         (charRefPToken as any).hexMarker = SToken.fromString(' ');
+         (charRefPToken as any).hexMarkerSpace = SToken.fromString(' ');
+         (charRefPToken as any).digitsSpace = SToken.fromString(' ');
 
-         const sTokens = sTokensFromPToken(charRefPToken);
+         const sTokens = charRefPToken.toSTokenArray();
 
          expect(sTokens).toEqual([
             charRefPToken.open,
-            charRefPToken.postOpenSpace,
+            charRefPToken.openSpace,
             charRefPToken.hexMarker,
-            charRefPToken.postHexMarkerSpace,
+            charRefPToken.hexMarkerSpace,
             charRefPToken.digits,
-            charRefPToken.postDigitsSpace,
+            charRefPToken.digitsSpace,
             charRefPToken.close,
          ] as Array<SToken>); // typeHack
       });

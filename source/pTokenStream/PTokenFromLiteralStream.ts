@@ -4,7 +4,7 @@ import stream from 'readable-stream';
 
 import { STokenSource } from '../sToken';
 import {
-   charRef,
+   parseCharRef,
    parseParameterEntityReference,
    text,
 } from '../token';
@@ -51,7 +51,7 @@ class PTokenFromLiteralStream extends stream.Transform {
 
          this.sTokenSource.extract('match', '&#', (sToken) => {
             if (sToken) {
-               charRef.parse(this.sTokenSource, sToken, (pToken) => this.push(pToken));
+               parseCharRef(this.sTokenSource, sToken, (pToken) => this.push(pToken));
                return;
             }
 

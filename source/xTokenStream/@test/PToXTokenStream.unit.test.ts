@@ -14,6 +14,7 @@ import {
 
    CdataPToken,
    CharDataPToken,
+   CharRefPToken,
    ProcessingInstructionPToken,
    XmlDeclarationPToken,
    TextDeclarationPToken,
@@ -70,6 +71,16 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls charData.toXToken()', () => {
       const pToken = new CharDataPToken({ text: SToken.fromString('x') });
+      spyOn(pToken, 'toXToken');
+
+      tokenStream.write(pToken);
+      tokenStream.read();
+
+      expect(pToken.toXToken).toHaveBeenCalledWith();
+   });
+
+   it('calls charRef.toXToken()', () => {
+      const pToken = new CharRefPToken({ open: SToken.fromString('&#') });
       spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);

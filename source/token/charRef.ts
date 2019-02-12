@@ -1,32 +1,28 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
-const CHARREF_PTOKEN_TYPE = 'CHARREF_PTOKEN';
-const CHARREF_XTOKEN_TYPE = 'CHARREF_XTOKEN';
+const CHARREF_PTOKEN = 'CHARREF_PTOKEN';
+const CHARREF_XTOKEN = 'CHARREF_XTOKEN';
 const WFEID = WellFormedError.ID;
 
 type DeliverPToken = (pToken?: CharRefPToken) => void;
+type PreToken = { open: SToken, [ other: string ]: any };
 
 class CharRefPToken {
-   public readonly type: string = CHARREF_PTOKEN_TYPE;
-   public open: SToken;
-   public postOpenSpace?: SToken;
-   public hexMarker?: SToken;
-   public postHexMarkerSpace?: SToken;
-   public digits?: SToken;
-   public postDigitsSpace?: SToken;
-   public close?: SToken;
-   public charCode?: number;
+   public readonly type: typeof CHARREF_PTOKEN = CHARREF_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly hexMarker?: SToken;
+   public readonly hexMarkerSpace?: SToken;
+   public readonly digits?: SToken;
+   public readonly digitsSpace?: SToken;
+   public readonly close?: SToken;
+   public readonly charCode?: number;
 
-   constructor(basePToken: CharRefPToken | { open: SToken, [ other: string ]: any } | SToken) {
-      if (basePToken instanceof SToken) {
-         this.open = basePToken;
-         return;
-      }
-
+   constructor(basePToken: CharRefPToken | PreToken) {
       Object.assign(this, basePToken);
 
       this.open = basePToken.open; // Make sure type system knows we always assign open
@@ -39,10 +35,14 @@ class CharRefPToken {
    toXToken() {
       return pTokenToXToken(this);
    }
+
+   toSTokenArray() {
+      return sTokensFromPToken(this);
+   }
 }
 
 class CharRefXToken {
-   public readonly type: string = CHARREF_XTOKEN_TYPE;
+   public readonly type: typeof CHARREF_XTOKEN = CHARREF_XTOKEN;
    public readonly char: string;
    public readonly pToken?: CharRefPToken;
 
@@ -68,18 +68,18 @@ class CharRefXToken {
                      '&#' S? [xX] S? [0-9a-fA-F]+ S? ';'
 \**********************************************************************/
 
-function parse(source: STokenSource, openSToken: SToken, deliverPToken: DeliverPToken): void {
-   const pToken = new CharRefPToken(openSToken);
+function parseCharRef(source: STokenSource, openSToken: SToken, deliverPToken: DeliverPToken): void {
+   const pToken: PreToken = { open: openSToken };
 
-   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
+   source.extractToObjectNoParams('space', pToken, 'openSpace');
    source.extract('multi', ['x', 'X'], (hexMarker) => {
       if (hexMarker) {
          pToken.hexMarker = hexMarker;
       }
 
-      source.extractToObjectNoParams('space', pToken, 'postHexMarkerSpace');
+      source.extractToObjectNoParams('space', pToken, 'hexMarkerSpace');
       source.extractToObject('digit', hexMarker ? 16 : 10, pToken, 'digits');
-      source.extractToObjectNoParams('space', pToken, 'postDigitsSpace');
+      source.extractToObjectNoParams('space', pToken, 'digitsSpace');
 
       source.extract('match', ';', (closeSToken) => {
          if (pToken.digits) {
@@ -89,7 +89,7 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: DeliverP
          }
          pToken.close = closeSToken;
 
-         deliverPToken(pToken);
+         deliverPToken(new CharRefPToken(pToken));
       });
    });
 }
@@ -98,28 +98,24 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: DeliverP
  checkWellFormed()
 \**********************************************************************/
 
-function checkWellFormed(pToken: CharRefPToken | void, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   if (!pToken) {
-      return;
-   }
-
+function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.open);
 
-   ec.setPos(pToken.postOpenSpace);
-   ec.check(pToken.postOpenSpace, WFEID.CHARREF_XTRA_POST_OPEN_SPACE);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.CHARREF_XTRA_POST_OPEN_SPACE);
 
    ec.setPos(pToken.hexMarker);
    ec.check(pToken.hexMarker && pToken.hexMarker.str !== pToken.hexMarker.str.toLowerCase(),
       WFEID.CHARREF_INVALID_HEX_CASE);
 
-   ec.setPos(pToken.postHexMarkerSpace);
-   ec.check(pToken.postHexMarkerSpace, WFEID.CHARREF_XTRA_POST_HEX_SPACE);
+   ec.setPos(pToken.hexMarkerSpace);
+   ec.check(pToken.hexMarkerSpace, WFEID.CHARREF_XTRA_POST_HEX_SPACE);
 
    ec.setPos(pToken.digits);
    ec.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
 
-   ec.setPos(pToken.postDigitsSpace);
-   ec.check(pToken.postDigitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);
+   ec.setPos(pToken.digitsSpace);
+   ec.check(pToken.digitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.CHARREF_NO_CLOSE);
@@ -158,11 +154,11 @@ function sTokensFromPToken(pToken: CharRefPToken): Array<SToken> {
 
    builder.add(
       pToken.open,
-      pToken.postOpenSpace,
+      pToken.openSpace,
       pToken.hexMarker,
-      pToken.postHexMarkerSpace,
+      pToken.hexMarkerSpace,
       pToken.digits,
-      pToken.postDigitsSpace,
+      pToken.digitsSpace,
       pToken.close);
 
       return builder.sTokenArray;
@@ -173,15 +169,10 @@ function sTokensFromPToken(pToken: CharRefPToken): Array<SToken> {
 \**********************************************************************/
 
 export {
-   CHARREF_PTOKEN_TYPE as PTYPE,
-   CHARREF_XTOKEN_TYPE as XTYPE,
+   CHARREF_PTOKEN,
+   CHARREF_XTOKEN,
    CharRefPToken,
    CharRefXToken,
 
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-   sTokensFromPToken,
-
-   CHARREF_PTOKEN_TYPE,
+   parseCharRef,
 };

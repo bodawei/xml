@@ -5,7 +5,6 @@ import declaration from './bridge/baseDeclaration';
 import attListDeclaration from './attListDeclaration';
 import elementDeclaration from './elementDeclaration';
 
-import * as charRef from './charRef';
 import * as comment from './comment';
 import { CommentXToken } from './comment';
 import * as docTypeStart from './docTypeStart';
@@ -34,6 +33,7 @@ export * from './marker/parameterEntityStart';
 
 export * from './cdata';
 export * from './charData';
+export * from './charRef';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
 export * from './notationDeclaration';
@@ -51,7 +51,6 @@ export {
    declaration,
 
    attListDeclaration,
-   charRef,
    comment,
    docTypeStart,
    docTypeEnd,

@@ -55,10 +55,10 @@ describe('literalValue (integration)', () => {
                }),
                new CharRefPToken({
                   open: makeSToken('&#'),
-                  postOpenSpace: undefined,
-                  postHexMarkerSpace: undefined,
+                  openSpace: undefined,
+                  hexMarkerSpace: undefined,
                   digits: makeSToken('32'),
-                  postDigitsSpace: undefined,
+                  digitsSpace: undefined,
                   close: makeSToken(';'),
                   charCode: 32,
                }),

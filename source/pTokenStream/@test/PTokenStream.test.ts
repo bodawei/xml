@@ -5,7 +5,6 @@ import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from '../../sToken';
 import * as token from '../../token';
 import {
-   charRef,
    comment,
    elementEnd,
    elementStart,
@@ -77,7 +76,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls charRef.parse()', (done) => {
-      const parseSpy = spyOn(charRef, 'parse').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseCharRef').and.callThrough();
       pTokenStream.addText('&#foo;');
       pTokenStream.endText();
 

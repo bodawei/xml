@@ -84,7 +84,7 @@ describe('literalValue (unit)', () => {
          beforeEach(() => {
             generalParseSpy = spyOn(generalEntityReference, 'parseGeneralEntityReference');
             paramParseSpy = spyOn(parameterEntityReference, 'parseParameterEntityReference');
-            charRefSpy = spyOn(charRef, 'parse');
+            charRefSpy = spyOn(charRef, 'parseCharRef');
          });
 
          it('calls out to parseParameterEntityReference() when encountering a % and asked to parse peRefs', () => {

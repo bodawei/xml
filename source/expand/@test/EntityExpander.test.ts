@@ -44,7 +44,7 @@ import { ExternalId } from "source/token/common/externalId";
 import { defaultExtractors } from "extractor";
 import { AttListPToken } from "source/token/attListDeclaration";
 import { UnassignedType, UnassignedArray } from "source/token/common/unassigned";
-import { CharRefPToken, CHARREF_PTOKEN_TYPE } from "source/token/charRef";
+import { CharRefPToken, CHARREF_PTOKEN } from "source/token/charRef";
 import { DocTypeStartPToken } from "source/token/docTypeStart";
 import { DocTypeEndPToken } from "source/token/docTypeEnd";
 import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
@@ -890,9 +890,9 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('&#'),
                digits: SToken.fromString('38'),
                close: SToken.fromString(';'),
-               postOpenSpace: undefined,
-         	   postHexMarkerSpace: undefined,
-         	   postDigitsSpace: undefined,
+               openSpace: undefined,
+         	   hexMarkerSpace: undefined,
+         	   digitsSpace: undefined,
             }));
             expect(attrValue[2].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
@@ -1074,9 +1074,9 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('&#'),
                digits: SToken.fromString('60'),
                close: SToken.fromString(';'),
-               postOpenSpace: undefined,
-         	   postHexMarkerSpace: undefined,
-         	   postDigitsSpace: undefined,
+               openSpace: undefined,
+         	   hexMarkerSpace: undefined,
+         	   digitsSpace: undefined,
             }));
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
@@ -1112,9 +1112,9 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('&#'),
                digits: SToken.fromString('38'),
                close: SToken.fromString(';'),
-               postOpenSpace: undefined,
-         	   postHexMarkerSpace: undefined,
-         	   postDigitsSpace: undefined,
+               openSpace: undefined,
+         	   hexMarkerSpace: undefined,
+         	   digitsSpace: undefined,
             }));
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
@@ -1222,7 +1222,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1269,7 +1269,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1297,7 +1297,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1342,7 +1342,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1387,7 +1387,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1434,7 +1434,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });
@@ -1481,7 +1481,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect(results[1].type).toEqual(GENERAL_ENTITY_START_PTOKEN);
-            expect(results[2].type).toEqual(CHARREF_PTOKEN_TYPE);
+            expect(results[2].type).toEqual(CHARREF_PTOKEN);
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
          });

@@ -6,6 +6,7 @@ import {
    docTypeStart,
    elementStart,
 
+   CHARREF_PTOKEN,
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -299,7 +300,7 @@ class EntityExpander {
       const allowed = PREDEFINED_MATCHES[name];
       let matches = false;
 
-      if (token.type === charRef.CHARREF_PTOKEN_TYPE) {
+      if (token.type === charRef.CHARREF_PTOKEN) {
          matches = (token as charRef.CharRefPToken).charCode === allowed.charCode;
       } else if (token.type === CHARDATA_PTOKEN) {
          matches = (token as CharDataPToken).text.str === (allowed as any).str; // typeHack
@@ -780,7 +781,7 @@ class EntityExpander {
                            sTokenSource.addText(textEl.text.str);
                         }
                         break;
-                     case charRef.PTYPE:
+                     case CHARREF_PTOKEN:
                         const charRefEl = element as charRef.CharRefPToken;
                         const charRefXToken = charRefEl.toXToken();
 
@@ -856,7 +857,7 @@ class EntityExpander {
             if (text.text) {
                sTokenSource.addText(text.text.str, text.text.firstRange);
             }
-         } else if (element.type === charRef.PTYPE) {
+         } else if (element.type === CHARREF_PTOKEN) {
             // §4.5 For an internal entity, the replacement text is the content of the entity,
             // after replacement of character references and parameter-entity references.
             // In our case here, we receive internal entities with character references already

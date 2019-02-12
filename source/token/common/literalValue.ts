@@ -8,8 +8,7 @@ import text, { TextPToken, TextXToken } from '../text';
 import misc from './misc';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
-import { CharRefPToken, CharRefXToken } from '../charRef';
-import * as charRef from '../charRef';
+import { CharRefPToken, CharRefXToken, parseCharRef } from '../charRef';
 import { GeneralEntityStartPToken, GeneralEntityStartXToken } from '../marker/generalEntityStart';
 import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/generalEntityEnd';
 
@@ -94,7 +93,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
                if (opening && opening.str === '&') {
                   parseGeneralEntityReference(source, opening!, handleRef); // typeHack
                } else {
-                  charRef.parse(source, opening!, handleRef);
+                  parseCharRef(source, opening!, handleRef);
                }
             });
             break;

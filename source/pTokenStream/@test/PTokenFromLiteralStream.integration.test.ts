@@ -42,7 +42,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          xToken.text.PTYPE,
          xToken.text.PTYPE,
          xToken.text.PTYPE,
-         xToken.charRef.PTYPE,
+         xToken.CHARREF_PTOKEN,
          xToken.text.PTYPE,
       ], done);
    });
@@ -52,7 +52,7 @@ describe('PTokenFromLiteralStream (integration)', () => {
          xToken.text.PTYPE,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
          xToken.text.PTYPE,
-         xToken.charRef.PTYPE,
+         xToken.CHARREF_PTOKEN,
          xToken.text.PTYPE,
       ], done);
    });

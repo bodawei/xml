@@ -88,7 +88,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ '&#', 'match', '&#' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff.charRef, 'parse');
+            const parseSpy = spyOn(tokenStuff, 'parseCharRef');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();

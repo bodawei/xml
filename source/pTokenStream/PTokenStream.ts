@@ -9,12 +9,12 @@ import {
    parseCharData,
    parseSection,
 
-   charRef,
    comment,
    docTypeEnd,
    elementStart,
    elementEnd,
 
+   parseCharRef,
    parseDeclaration,
    parseGeneralEntityReference,
    parseInstruction,
@@ -177,7 +177,7 @@ class PTokenStream extends stream.Readable {
                parseGeneralEntityReference(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '&#':
-               charRef.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               parseCharRef(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<':
                elementStart.parse(this._sTokenSource, markupStartSToken, deliverParse);
