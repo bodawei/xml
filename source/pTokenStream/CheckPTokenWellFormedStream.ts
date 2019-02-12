@@ -191,6 +191,8 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case elementStart.EMPTY_TYPE:
             const nameText = pToken.name ? pToken.name.str : '';
             if (pToken.type === elementStart.PTYPE) {
+               // Make sure you eventually validate that the first one matches the doctyp
+
                this._elementNameStack.push(nameText);
             }
 
@@ -229,6 +231,10 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT, [ endNameText ]);
             } else if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ endNameText ]);
+            } else {
+               if (this._elementNameStack.length === 0) {
+                  this._state = CheckWellFormedState.AFTER_CONTENT;
+               }
             }
 
             elementEnd.checkWellFormed(pToken as any, errorCollector, this.emd);

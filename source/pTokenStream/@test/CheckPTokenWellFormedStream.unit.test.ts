@@ -436,6 +436,14 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
          });
 
+         it('reports an error if after content', () => {
+            (checker as any)._state = 'AFTER_CONTENT';
+            const checkerPushSpy = spyOn(checker, 'push');
+            checker.write(pToken);
+
+            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT);
+         });
+
          it('reports no error if in content', () => {
             (checker as any)._state = CheckWellFormedState.IN_CONTENT;
             const checkerPushSpy = spyOn(checker, 'push');

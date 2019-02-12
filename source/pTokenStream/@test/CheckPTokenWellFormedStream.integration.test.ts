@@ -105,6 +105,15 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
          ), done);
    });
 
+   it('reports an error when the element start is after the end', (done) => {
+      expectInputToProduce('<?xml version="1.0"?><one></one><two>',
+         new WellFormedError(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT,
+            [ 'two' ],
+            new Offset(new EntityLocation(), 32, 0, 32),
+            new Offset(new EntityLocation(), 32, 0, 32)
+         ), done);
+   });
+
    it('reports an error when the empty element has the wrong syntax', (done) => {
       expectInputToProduce('<?xml version="1.0"?>< spaceBeforeBad/>',
          new WellFormedError('ELEMENT_XTRA_LEADING_SPACE',
