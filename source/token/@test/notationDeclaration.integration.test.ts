@@ -13,9 +13,9 @@ import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { NotationDeclarationPToken, parseNotationDeclaration, NotationDeclarationXToken } from '../notationDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-import text from '../text';
 
 import helper from './helper';
+import { TextPToken } from '../text';
 
 describe('notationDeclaration (integration)', () => {
    let declarationStart: DeclarationStart;
@@ -215,7 +215,7 @@ describe('notationDeclaration (integration)', () => {
                   type: UnassignedType.LITERAL,
                   token: {
                      openQuote: SToken.fromString('"'),
-                     value: [ new text.PToken({ text: SToken.fromString('sys.dtd') }) ],
+                     value: [ new TextPToken({ text: SToken.fromString('sys.dtd') }) ],
                      closeQuote: SToken.fromString('"'),
                   },
                }, {

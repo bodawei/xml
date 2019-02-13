@@ -6,7 +6,7 @@ import {
    EntityLocation,
    EntityMetaData,
  } from 'basic';
-import { WellFormedError } from '../../error';
+import { WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 
 import CheckPTokenWellFormedStream from '../CheckPTokenWellFormedStream';

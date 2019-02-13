@@ -2,14 +2,14 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource, SToken } from '../../sToken';
+import { ErrorCollector, WellFormedError } from 'error';
+import { defaultExtractors } from 'extractor';
+import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import * as docTypeStart from '../docTypeStart';
-import text from '../text';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
+import { TextPToken } from '../text';
 
 describe('docTypeStart (integration)', () => {
    let docTypeStartPToken: docTypeStart.DocTypeStartPToken;
@@ -26,7 +26,7 @@ describe('docTypeStart (integration)', () => {
             postIdTypeSpace: makeSToken(' '),
             system: {
                openQuote: makeSToken('"'),
-               value: [ new text.PToken({ text: makeSToken('sys.dtd') }) ],
+               value: [ new TextPToken({ text: makeSToken('sys.dtd') }) ],
                closeQuote: makeSToken('"'),
             },
          },

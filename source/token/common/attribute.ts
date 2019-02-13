@@ -4,7 +4,7 @@ import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning,  } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
-import text, { TextXToken, isTextPToken, TextPToken } from '../text';
+import { TextXToken, isTextPToken, TextPToken } from '../text';
 
 import { checkXmlLangWellFormed } from './langAttribute';
 import misc from './misc';
@@ -229,7 +229,7 @@ function makeOneTokenCompatible(attributes: AttributesPToken = []) {
       const value = literal.makeOneTokenCompatible(attr);
       const details: AttributeXToken = {
          name: strOrBlank(attr.name),
-         value: value ? [ new text.XToken(value) ] : [],
+         value: value ? [ new TextXToken(value) ] : [],
       };
 
       attrs.push(details);

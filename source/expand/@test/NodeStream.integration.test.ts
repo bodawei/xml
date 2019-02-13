@@ -25,6 +25,8 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartXToken,
    XmlDeclarationXToken,
+   TextPToken,
+   TextXToken,
 } from '../../token';
 
 import EntityManager from '../EntityManager';
@@ -177,15 +179,15 @@ describe('NodeStream (integration)', () => {
                type: 'CDATA',
                defaultType: '',
                value: [
-                  new tokenNs.text.XToken('#', new tokenNs.text.PToken({
+                  new TextXToken('#', new TextPToken({
                      text: new SToken('#', '#', new Range(new EntityLocation(), 156, 4, 152, 157, 4, 153)),
                   })),
                   new GeneralEntityStartXToken('test'),
-                  new tokenNs.text.XToken('foo#', new tokenNs.text.PToken({
+                  new TextXToken('foo#', new TextPToken({
                      text: new SToken('foo#', 'foo#', new Range(new EntityLocation(), 0, 0, 0, 4, 0, 4)),
                   })),
                   new GeneralEntityEndXToken('test'),
-                  new tokenNs.text.XToken('bar#', new tokenNs.text.PToken({
+                  new TextXToken('bar#', new TextPToken({
                      text: new SToken('bar#', 'bar#', new Range(new EntityLocation(), 163, 4, 159, 167, 4, 163)),
                   })),
                ],
@@ -326,7 +328,7 @@ describe('NodeStream (integration)', () => {
 
             expect(element.attributes[0].value).toEqual([
                new GeneralEntityStartXToken('child'),
-               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+               new TextXToken('(child)', new TextPToken({
                   text: makeSToken('(child)'),
                })),
                new GeneralEntityEndXToken('child'),
@@ -348,25 +350,25 @@ describe('NodeStream (integration)', () => {
 
             expect(element.attributes[1].value).toEqual([
                new GeneralEntityStartXToken('parent'),
-               new tokenNs.text.XToken('pre', new tokenNs.text.PToken({
+               new TextXToken('pre', new TextPToken({
                   text: new SToken('pre', 'pre', new Range(new EntityLocation(),
                      0, 0, 0, 3, 0, 3)),
                })),
                new GeneralEntityStartXToken('child'),
-               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+               new TextXToken('(child)', new TextPToken({
                   text: childStoken,
                })),
                new GeneralEntityEndXToken('child'),
-               new tokenNs.text.XToken('mid', new tokenNs.text.PToken({
+               new TextXToken('mid', new TextPToken({
                   text: new SToken('mid', 'mid', new Range(new EntityLocation(),
                      10, 0, 10, 13, 0, 13)),
                })),
                new GeneralEntityStartXToken('child'),
-               new tokenNs.text.XToken('(child)', new tokenNs.text.PToken({
+               new TextXToken('(child)', new TextPToken({
                   text: childStoken,
                })),
                new GeneralEntityEndXToken('child'),
-               new tokenNs.text.XToken('post', new tokenNs.text.PToken({
+               new TextXToken('post', new TextPToken({
                   text: new SToken('post', 'post', new Range(new EntityLocation(),
                      20, 0, 20, 24, 0, 24)),
                })),

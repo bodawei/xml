@@ -10,10 +10,10 @@ import * as charRef from '../../charRef';
 import * as generalEntityReference from '../../generalEntityReference';
 import * as parameterEntityReference from '../../parameterEntityReference';
 import { GeneralEntityReferencePToken } from '../../generalEntityReference';
-import text from '../../text';
 
 import misc from '../misc';
 import literalValue, { LiteralValuePToken } from '../literalValue';
+import { TextPToken, TextXToken } from 'source/token/text';
 
 describe('literalValue (unit)', () => {
 
@@ -37,7 +37,7 @@ describe('literalValue (unit)', () => {
          literalValue.parse(mockSource, [ '"' ], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ new text.PToken({ text: expectedSToken('blah') }) ]);
+         expect(value).toEqual([ new TextPToken({ text: expectedSToken('blah') }) ]);
       });
 
       it('returns an empty array result if there is an EOF', () => {
@@ -61,7 +61,7 @@ describe('literalValue (unit)', () => {
          literalValue.parse(mockSource, [ '"' ], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ new text.PToken({ text: expectedSToken('some text') }) ]);
+         expect(value).toEqual([ new TextPToken({ text: expectedSToken('some text') }) ]);
       });
 
       it('returns an empty array result if there is no text before the close quote', () => {
@@ -155,13 +155,13 @@ describe('literalValue (unit)', () => {
             const makeSToken = makeSTokenMaker();
             const makeSToken2 = makeSTokenMaker(undefined, 4, 0, 4);
             expect(value).toEqual([
-               new text.PToken({ text: makeSToken('one') }),
+               new TextPToken({ text: makeSToken('one') }),
                {} as GeneralEntityReferencePToken,
-               new text.PToken({ text: makeSToken2('two') }),
+               new TextPToken({ text: makeSToken2('two') }),
                {} as GeneralEntityReferencePToken,
-               new text.PToken({ text: makeSToken2('three') }),
+               new TextPToken({ text: makeSToken2('three') }),
                {} as GeneralEntityReferencePToken,
-               new text.PToken({ text: makeSToken2('four') }),
+               new TextPToken({ text: makeSToken2('four') }),
             ]);
          });
 
@@ -180,7 +180,7 @@ describe('literalValue (unit)', () => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
 
-         valuePToken = [ new text.PToken({ text: SToken.fromString('xxx') }) ];
+         valuePToken = [ new TextPToken({ text: SToken.fromString('xxx') }) ];
 
          miscCheckWellFormedSpy = spyOn(misc, 'checkWellFormedText');
       });
@@ -215,23 +215,16 @@ describe('literalValue (unit)', () => {
    describe('makeTokenXCompatible()', () => {
 
       it('returns a Text token from the PToken result', () => {
-         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }) ];
+         const pToken = [ new TextPToken({ text: SToken.fromString('blah') }) ];
          const result = literalValue.makeXTokenCompatible(pToken);
 
-         expect(result).toEqual([ new text.XToken('blah', pToken[0]) ]);
-      });
-
-      it('copes with the text PToken not having a text value', () => {
-         const pToken = [ new text.PToken() ];
-         const result = literalValue.makeXTokenCompatible(pToken);
-
-         expect(result).toEqual([ ]);
+         expect(result).toEqual([ new TextXToken('blah', pToken[0]) ]);
       });
 
       it('calls reference.toXToken for each reference in the pToken value', () => {
          const geReference = new GeneralEntityReferencePToken({ open: SToken.fromString('&') });
          const refSpy = spyOn(geReference, 'toXToken');
-         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }), geReference ];
+         const pToken = [ new TextPToken({ text: SToken.fromString('blah') }), geReference ];
          literalValue.makeXTokenCompatible(pToken);
 
          expect(refSpy.calls.count()).toEqual(1);
@@ -249,7 +242,7 @@ describe('literalValue (unit)', () => {
    describe('getSTokens()', () => {
 
       it('does a basic population', () => {
-         const pToken = [ new text.PToken({ text: SToken.fromString('blah') }) ];
+         const pToken = [ new TextPToken({ text: SToken.fromString('blah') }) ];
          const results = literalValue.getSTokens(pToken);
 
          expect(results).toEqual([ SToken.fromString('blah') ]);
@@ -257,7 +250,7 @@ describe('literalValue (unit)', () => {
 
       it('adds STokens from any entity references', () => {
          const pToken = [
-            new text.PToken({ text: SToken.fromString('blah') }),
+            new TextPToken({ text: SToken.fromString('blah') }),
             new GeneralEntityReferencePToken({
                open: SToken.fromString('&'),
                name: SToken.fromString('theName'),
@@ -272,21 +265,5 @@ describe('literalValue (unit)', () => {
          ]);
       });
 
-      it('copes if text is missing its text', () => {
-         const pToken = [
-            new text.PToken(),
-            new GeneralEntityReferencePToken({
-               open: SToken.fromString('&'),
-               name: SToken.fromString('theName'),
-            }),
-         ];
-
-         const results = literalValue.getSTokens(pToken);
-
-         expect(results).toEqual([
-            SToken.fromString('&'),
-            SToken.fromString('theName'),
-         ]);
-      });
    });
 });

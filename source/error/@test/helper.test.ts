@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Offset, EntityLocation } from 'basic';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 
 import { XmlWarning } from '../XmlWarning';
 

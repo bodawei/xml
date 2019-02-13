@@ -4,8 +4,8 @@
 import stream from 'readable-stream';
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
-import { ErrorCollector, ValidityError, WellFormedError, XmlWarning } from '../../error';
-import { SToken, STokenSource } from '../../sToken';
+import { ErrorCollector, ValidityError, WellFormedError, XmlWarning } from 'error';
+import { SToken, STokenSource } from 'sToken';
 import * as langAttribute from '../../token/common/langAttribute';
 import { UnassignedType } from '../../token/common/unassigned';
 import { AttListPToken, AttDefXToken } from '../../token/attListDeclaration'; // hack
@@ -28,7 +28,6 @@ import {
    XmlDeclarationXToken,
    GeneralEntityDeclarationXToken,
    GeneralEntityDeclarationPToken,
-   GeneralEntityReferencePToken,
    GeneralEntityReferenceXToken,
    NotationDeclarationPToken,
    NotationDeclarationXToken,
@@ -36,6 +35,8 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferenceXToken,
    ParameterEntityReferencePToken,
+   TextPToken,
+   TextXToken,
 } from '../../token';
 import * as xToken from '../../token';
 
@@ -293,10 +294,10 @@ describe('NodeStream (unit)', () => {
          //             token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString('x') }),
+         //             token: new TextPToken({ text: SToken.fromString('x') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
@@ -327,10 +328,10 @@ describe('NodeStream (unit)', () => {
          //             token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString('x') }),
+         //             token: new TextPToken({ text: SToken.fromString('x') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
@@ -391,7 +392,7 @@ describe('NodeStream (unit)', () => {
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -427,7 +428,7 @@ describe('NodeStream (unit)', () => {
          //             token: {},
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -458,10 +459,10 @@ describe('NodeStream (unit)', () => {
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString('|') }),
+         //             token: new TextPToken({ text: SToken.fromString('|') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -494,10 +495,10 @@ describe('NodeStream (unit)', () => {
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(',') }),
+         //             token: new TextPToken({ text: SToken.fromString(',') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -530,10 +531,10 @@ describe('NodeStream (unit)', () => {
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString('(') }),
+         //             token: new TextPToken({ text: SToken.fromString('(') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -569,20 +570,20 @@ describe('NodeStream (unit)', () => {
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString('(') }),
+         //             token: new TextPToken({ text: SToken.fromString('(') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
          //          }, {
          //             // Note that the parenthesis is closed in another entity
          //             type: 'word',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(')') }),
+         //             token: new TextPToken({ text: SToken.fromString(')') }),
          //          }, {
          //             type: 'space',
-         //             token: new xToken.text.PToken({ text: SToken.fromString(' ') }),
+         //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
          //             token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -975,7 +976,7 @@ describe('NodeStream (unit)', () => {
                   xToken.unassigned.wordFromSToken(SToken.fromString('SYSTEM')),
                   // third was expanded ealier in place.
                   new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: refToThird.name! })),
-                  new xToken.text.PToken({ text: SToken.fromString('"http://somewhere.com"') }),
+                  new TextPToken({ text: SToken.fromString('"http://somewhere.com"') }),
                   new ParameterEntityEndPToken(new ParameterEntityReferencePToken({ open: refToThird.name! })),
                ],
             });
@@ -1173,10 +1174,10 @@ describe('NodeStream (unit)', () => {
                getStream() {}
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ new xToken.text.PToken() ]);
+               cb([ new TextPToken({ text: SToken.fromString('') }) ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new TextXToken('one') ];
             });
             const def1: AttDefXToken = {
                name: 'foo',
@@ -1192,7 +1193,7 @@ describe('NodeStream (unit)', () => {
                defaultType: 'test',
                value: [
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             };
@@ -1213,10 +1214,10 @@ describe('NodeStream (unit)', () => {
       //          getStream() {}
       //       });
       //       spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-      //          cb([ new xToken.text.PToken() ]);
+      //          cb([ new TextPToken() ]);
       //       });
       //       spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-      //          return [ new xToken.text.XToken('o<ne') ];
+      //          return [ new TextXToken('o<ne') ];
       //       });
       //       const def: AttDefXToken = {
       //          name: 'elName',
@@ -1272,17 +1273,17 @@ describe('NodeStream (unit)', () => {
          it('passes attributes through that are only text', (done) => {
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'foo',
-               value: [ new xToken.text.XToken('one') ],
+               value: [ new TextXToken('one') ],
             }, {
                name: 'two',
-               value: [ new xToken.text.XToken('foo') ],
+               value: [ new TextXToken('foo') ],
             }]);
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'foo',
-               value: [ new xToken.text.XToken('one') ],
+               value: [ new TextXToken('one') ],
             }, {
                name: 'two',
-               value: [ new xToken.text.XToken('foo') ],
+               value: [ new TextXToken('foo') ],
             }]);
 
             nodeStream.write(elementStart);
@@ -1301,10 +1302,10 @@ describe('NodeStream (unit)', () => {
                getStream() {}
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ new xToken.text.PToken() ]);
+               cb([ new TextPToken({ text: SToken.fromString('') }) ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new TextXToken('one') ];
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'foo',
@@ -1316,7 +1317,7 @@ describe('NodeStream (unit)', () => {
                name: 'foo',
                value: [
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             }]);
@@ -1332,10 +1333,10 @@ describe('NodeStream (unit)', () => {
          it('passes an general entity that can not be parsed through unchanged', (done) => {
             spyOn(entityManager, 'getEntityInfo').and.returnValue(undefined);
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ new xToken.text.PToken() ]);
+               cb([ new TextPToken({ text: SToken.fromString('') }) ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new TextXToken('one') ];
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'foo',
@@ -1361,10 +1362,10 @@ describe('NodeStream (unit)', () => {
          //       getStream() {}
          //    });
          //    spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-         //       cb([ new xToken.text.PToken() ]);
+         //       cb([ new TextPToken() ]);
          //    });
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-         //       return [ new xToken.text.XToken('one', new xToken.text.PToken()) ];
+         //       return [ new TextXToken('one', new TextPToken()) ];
          //    });
          //    const elementStart = new xToken.elementStart.XToken('one', [{
          //       name: 'xml:lang',
@@ -1379,7 +1380,7 @@ describe('NodeStream (unit)', () => {
          //       const args = checkSpy.calls.argsFor(0);
          //       expect(args[0]).toEqual([
          //          new GeneralEntityStartXToken('refName'),
-         //          new xToken.text.XToken('one', new xToken.text.PToken()),
+         //          new TextXToken('one', new TextPToken()),
          //          new GeneralEntityEndXToken('refName'),
          //       ]);
          //       expect(args[1]).toBeInstanceOf(ErrorCollector);
@@ -1393,7 +1394,7 @@ describe('NodeStream (unit)', () => {
          //    const elementStart = new xToken.elementStart.XToken('one', [{
          //       name: 'xml:lang',
          //       value: [
-         //          new xToken.text.XToken('one'),
+         //          new TextXToken('one'),
          //       ],
          //    }]);
 
@@ -1420,7 +1421,7 @@ describe('NodeStream (unit)', () => {
                asyncCallback = cb;
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible')
-               .and.returnValue([ new xToken.text.XToken('one') ]);
+               .and.returnValue([ new TextXToken('one') ]);
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'foo',
                value: [
@@ -1431,14 +1432,14 @@ describe('NodeStream (unit)', () => {
                name: 'foo',
                value: [
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             }]);
 
             nodeStream.write(elementStart);
 
-            asyncCallback([ new xToken.text.PToken() ]);
+            asyncCallback([ new TextPToken({ text: SToken.fromString('') }) ]);
 
             gatherResult(nodeStream, (results) => {
                expect(results).toEqual(expected);
@@ -1454,10 +1455,10 @@ describe('NodeStream (unit)', () => {
                getStream() {}
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ new xToken.text.PToken() ]);
+               cb([ new TextPToken({ text: SToken.fromString('') }) ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new TextXToken('one') ];
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'firstAttribute',
@@ -1474,14 +1475,14 @@ describe('NodeStream (unit)', () => {
                name: 'firstAttribute',
                value: [
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             }, {
                name: 'secondAttribute',
                value: [
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
                ],
             }]);
@@ -1502,27 +1503,27 @@ describe('NodeStream (unit)', () => {
                getStream() {}
             });
             spyOn(xToken.literalValue, 'parse').and.callFake((_1: any, _2: any, cb: (x: any) => void) => {
-               cb([ new xToken.text.PToken() ]);
+               cb([ new TextPToken({ text: SToken.fromString('') }) ]);
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
-               return [ new xToken.text.XToken('one') ];
+               return [ new TextXToken('one') ];
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'firstAttribute',
                value: [
-                  new xToken.text.XToken('some text'),
+                  new TextXToken('some text'),
                   new GeneralEntityReferenceXToken('refName'),
-                  new xToken.text.XToken('more text'),
+                  new TextXToken('more text'),
                ],
             }]);
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'firstAttribute',
                value: [
-                  new xToken.text.XToken('some text'),
+                  new TextXToken('some text'),
                   new GeneralEntityStartXToken('refName'),
-                  new xToken.text.XToken('one'),
+                  new TextXToken('one'),
                   new GeneralEntityEndXToken('refName'),
-                  new xToken.text.XToken('more text'),
+                  new TextXToken('more text'),
                ],
             }]);
 
@@ -1549,34 +1550,34 @@ describe('NodeStream (unit)', () => {
                callCount ++;
                if (callCount === 1) {
                   return [
-                     new xToken.text.XToken('pre '),
+                     new TextXToken('pre '),
                      new GeneralEntityReferenceXToken('child'),
-                     new xToken.text.XToken(' post'),
+                     new TextXToken(' post'),
                   ];
                } else {
-                  return [ new xToken.text.XToken('inner') ];
+                  return [ new TextXToken('inner') ];
                }
             });
             const elementStart = new xToken.elementStart.XToken('one', [{
                name: 'testAttribute',
                value: [
-                  new xToken.text.XToken('some text'),
+                  new TextXToken('some text'),
                   new GeneralEntityReferenceXToken('parent'),
-                  new xToken.text.XToken('more text'),
+                  new TextXToken('more text'),
                ],
             }]);
             const expected = new xToken.elementStart.XToken('one', [{
                name: 'testAttribute',
                value: [
-                  new xToken.text.XToken('some text'),
+                  new TextXToken('some text'),
                   new GeneralEntityStartXToken('parent'),
-                  new xToken.text.XToken('pre '),
+                  new TextXToken('pre '),
                   new GeneralEntityStartXToken('child'),
-                  new xToken.text.XToken('inner'),
+                  new TextXToken('inner'),
                   new GeneralEntityEndXToken('child'),
-                  new xToken.text.XToken(' post'),
+                  new TextXToken(' post'),
                   new GeneralEntityEndXToken('parent'),
-                  new xToken.text.XToken('more text'),
+                  new TextXToken('more text'),
                ],
             }]);
 
@@ -1603,20 +1604,20 @@ describe('NodeStream (unit)', () => {
          //       callCount ++;
          //       if (callCount === 1) {
          //          return [
-         //             new xToken.text.XToken('pre '),
+         //             new TextXToken('pre '),
          //             new GeneralEntityReferenceXToken('child'),
-         //             new xToken.text.XToken(' post'),
+         //             new TextXToken(' post'),
          //          ];
          //       } else {
-         //          return [ new xToken.text.XToken('inn<er') ];
+         //          return [ new TextXToken('inn<er') ];
          //       }
          //    });
          //    const elementStart = new xToken.elementStart.XToken('one', [{
          //       name: 'testAttribute',
          //       value: [
-         //          new xToken.text.XToken('some text'),
+         //          new TextXToken('some text'),
          //          new GeneralEntityReferenceXToken('parent'),
-         //          new xToken.text.XToken('more text'),
+         //          new TextXToken('more text'),
          //       ],
          //    }]);
          //    const expected = new WellFormedError(WellFormedError.ID.ATTRIBUTE_INVALID_VALUE,
@@ -1643,7 +1644,7 @@ describe('NodeStream (unit)', () => {
          //       asyncCallback = cb;
          //    });
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible')
-         //       .and.returnValue([ new xToken.text.XToken('one') ]);
+         //       .and.returnValue([ new TextXToken('one') ]);
          //    const elementStart = new xToken.elementStart.XToken('one', [{
          //       name: 'foo',
          //       value: [
@@ -1656,7 +1657,7 @@ describe('NodeStream (unit)', () => {
          //    nodeStream.write(elementStart);
          //    nodeStream.end();
 
-         //    asyncCallback([ new xToken.text.PToken() ]);
+         //    asyncCallback([ new TextPToken() ]);
 
          //    gatherResults(nodeStream, (results) => {
          //       expect((results[0] as any).message).toEqual(expected.message);
@@ -1676,7 +1677,7 @@ describe('NodeStream (unit)', () => {
          //       asyncCallback = cb;
          //    });
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible')
-         //       .and.returnValue([ new xToken.text.XToken('one') ]);
+         //       .and.returnValue([ new TextXToken('one') ]);
          //    const elementStart = new xToken.elementStart.XToken('one', [{
          //       name: 'foo',
          //       value: [
@@ -1690,7 +1691,7 @@ describe('NodeStream (unit)', () => {
          //    nodeStream.write(elementStart);
          //    nodeStream.end();
 
-         //    asyncCallback([ new xToken.text.PToken() ]);
+         //    asyncCallback([ new TextPToken() ]);
 
          //    gatherResults(nodeStream, (results) => {
          //       expect(results[0]).toEqual(expected);

@@ -11,7 +11,8 @@ import {
    docTypeStart,
    elementStart,
    elementEnd,
-   text,
+
+   isTextXToken,
 
    elementDeclaration,
    attListDeclaration,
@@ -38,6 +39,7 @@ import {
    XMLDECL_XTOKEN,
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
+   TextXToken,
 } from '../token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -130,7 +132,7 @@ function getAttributeValueText(attribute: any): string {
    let newValue = '';
 
    rawValue.forEach((value: any) => { // typeHack
-      if (text.isTextXToken(value)) {
+      if (isTextXToken(value)) {
          newValue += value.text;
       }
    });
@@ -210,27 +212,31 @@ class CheckXTokenValidStream extends stream.Transform {
       for (let index = 0; index < attribute.value.length; index++) {
          const piece = attribute.value[index];
 
-         if (!text.isTextXToken(piece)) {
+         if (!isTextXToken(piece)) {
             newValue.push(piece)
             continue;
          }
 
-         const newPiece = new text.XToken(piece.text, piece.pToken);
-         newValue.push(newPiece);
 
-         const cDataText = newPiece.text.replace(/[ \r\n\t]/g, ' ');
+         let str = piece.text;
+         const cDataText = str.replace(/[ \r\n\t]/g, ' ');
 
          if (isCData) {
-            newPiece.text = cDataText;
+            str = cDataText;
          } else {
-            newPiece.text = newPiece.text.replace(/[ \r\n\t]+/g, ' ');
+            str = str.replace(/[ \r\n\t]+/g, ' ');
 
             if (prevHadTrailingSpace) {
-               newPiece.text = newPiece.text.replace(/^ /, '');
+               str = str.replace(/^ /, '');
             }
 
+            prevHadTrailingSpace = str[str.length - 1] === ' ';
+         }
+
+         const newPiece = new TextXToken(str, piece.pToken as any); // typeHack
+         newValue.push(newPiece);
+         if (!isCData) {
             prevPiece = newPiece;
-            prevHadTrailingSpace = newPiece.text[newPiece.text.length - 1] === ' ';
          }
 
          if (cDataText !== newPiece.text) {

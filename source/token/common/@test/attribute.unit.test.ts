@@ -8,11 +8,11 @@ import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { SToken } from 'sToken';
 
 import * as langAttribute from '../langAttribute';
-import text from '../../text';
 import attribute from '../attribute';
 import misc from '../misc';
 import literal from '../literal';
 import { GeneralEntityReferencePToken } from 'source/token/generalEntityReference';
+import { TextPToken } from 'source/token/text';
 
 describe('attribute (unit)', () => {
    let attributesPChunk: any;
@@ -339,9 +339,9 @@ describe('attribute (unit)', () => {
          });
 
          attributesPChunk[1].value = [
-            new text.PToken({ text: SToken.fromString('foo') }),
+            new TextPToken({ text: SToken.fromString('foo') }),
             new GeneralEntityReferencePToken({ open: SToken.fromString('&') }),
-            new text.PToken({ text: SToken.fromString('t<o') }),
+            new TextPToken({ text: SToken.fromString('t<o') }),
          ];
 
          attribute.checkWellFormed(attributesPChunk, mockErrorCollector, emd,

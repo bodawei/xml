@@ -2,8 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { defaultExtractors } from 'extractor';
+import { STokenSource } from 'sToken';
 
 import PTokenStream from '../PTokenStream';
 

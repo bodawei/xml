@@ -2,7 +2,8 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
-import { PTokenStream } from '../../pTokenStream';
+import { SToken } from 'sToken';
+import { makeSTokenMaker } from 'sToken-test';
 import {
    declaration,
 
@@ -13,7 +14,6 @@ import {
    elementDeclaration,
    elementEnd,
    elementStart,
-   text,
 
    CdataXToken,
    CharDataXToken,
@@ -24,11 +24,13 @@ import {
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
    XmlDeclarationXToken,
-} from '../../token';
-import { SToken } from '../../sToken';
-import { makeSTokenMaker } from 'sToken-test';
-import { TextXToken} from '../../token/text'; // hack
+   TextXToken,
+   TextPToken,
 
+   TEXT_PTOKEN,
+} from 'token';
+
+import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 
 type Token = { type: string, pToken?: any };
@@ -144,8 +146,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes an ENTITY declaration', (done) => {
-      const pToken = new text.PToken();
-      pToken.text = new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26));
+      const pToken = new TextPToken({ text: new SToken('value', 'value', new Range(new EntityLocation(), 21, 0, 21, 26, 0, 26)) });
 
       expectInputToProduce('<!ENTITY entityName "value">', [
          new GeneralEntityDeclarationXToken('entityName', [ pToken ], undefined, ''),
@@ -185,10 +186,7 @@ describe('PToXTokenStream (integration)', () => {
    it('tokenizes text', (done) => {
       const results: TokenArray = [];
       const sTokenMaker = makeSTokenMaker();
-      tokenStream.write({
-         type: text.PTYPE,
-         text: sTokenMaker('foo'),
-      });
+      tokenStream.write(new TextPToken({ text: sTokenMaker('foo') }));
       tokenStream.end();
       tokenStream.on('data', (xToken: Token) => results.push(xToken));
 

@@ -15,7 +15,6 @@ import {
 
    attListDeclaration,
    elementStart,
-   text,
    unassigned,
    NotationDeclarationPToken,
    ParameterEntityStartPToken,
@@ -171,7 +170,7 @@ describe('EntityExpander (unit)', () => {
                externalId: {
                   system: {
                      value: [
-                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                        new TextPToken({ text: SToken.fromString('systemFoo') }),
                      ],
                   }
                },
@@ -199,7 +198,7 @@ describe('EntityExpander (unit)', () => {
                externalId: {
                   system: {
                      value: [
-                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                        new TextPToken({ text: SToken.fromString('systemFoo') }),
                      ],
                   }
                },
@@ -232,14 +231,14 @@ describe('EntityExpander (unit)', () => {
             new AttListPToken({
                attDefs: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                   ]
                }],
             }),
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).attDefs[0].value).toEqual([ new text.PToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).attDefs[0].value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
             done();
          });
       });
@@ -260,21 +259,21 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe') }),
+                  new TextPToken({ text: SToken.fromString('pe') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('ge'),
                value: [
-                  new text.PToken({ text: SToken.fromString('ge') }),
+                  new TextPToken({ text: SToken.fromString('ge') }),
                   refToPe
                ],
             }),
             new AttListPToken({
                attDefs: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
                }],
@@ -283,11 +282,11 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[2] as any).attDefs[0].value).toEqual([
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                new GeneralEntityStartPToken(refToGe),
-               new text.PToken({ text: SToken.fromString('ge') }),
+               new TextPToken({ text: SToken.fromString('ge') }),
                new ParameterEntityStartPToken(refToPe),
-               new text.PToken({ text: SToken.fromString('pe') }),
+               new TextPToken({ text: SToken.fromString('pe') }),
                new ParameterEntityEndPToken(refToPe),
                new GeneralEntityEndPToken(refToGe),
             ]);
@@ -304,7 +303,7 @@ describe('EntityExpander (unit)', () => {
             new AttListPToken({
                attDefs: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
                }],
@@ -313,7 +312,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[0] as any).attDefs[0].value).toEqual([
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                refToGe,
             ]);
             done();
@@ -335,8 +334,8 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
                value: [
-                  new text.PToken({ text: SToken.fromString('attr1 CDATA') }),
-                  new text.PToken({ text: SToken.fromString(' #REQUIRED') }),
+                  new TextPToken({ text: SToken.fromString('attr1 CDATA') }),
+                  new TextPToken({ text: SToken.fromString(' #REQUIRED') }),
                ],
             }),
             new AttListPToken({
@@ -411,13 +410,13 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                ],
             }),
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).value).toEqual([ new text.PToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
             done();
          });
       });
@@ -438,7 +437,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe1') }),
+                  new TextPToken({ text: SToken.fromString('pe1') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
@@ -446,7 +445,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe2') }),
+                  new TextPToken({ text: SToken.fromString('pe2') }),
                   refToPe1
                ],
             }),
@@ -455,7 +454,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('test'),
                value: [
                   refToPe1,
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                   refToPe2,
                ],
             }),
@@ -464,13 +463,13 @@ describe('EntityExpander (unit)', () => {
          doExpand(true, input, (results) => {
             expect((results[2] as any).value).toEqual([
                new ParameterEntityStartPToken(refToPe1),
-               new text.PToken({ text: SToken.fromString('pe1') }),
+               new TextPToken({ text: SToken.fromString('pe1') }),
                new ParameterEntityEndPToken(refToPe1),
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                new ParameterEntityStartPToken(refToPe2),
-               new text.PToken({ text: SToken.fromString('pe2') }),
+               new TextPToken({ text: SToken.fromString('pe2') }),
                new ParameterEntityStartPToken(refToPe1),
-               new text.PToken({ text: SToken.fromString('pe1') }),
+               new TextPToken({ text: SToken.fromString('pe1') }),
                new ParameterEntityEndPToken(refToPe1),
                new ParameterEntityEndPToken(refToPe2),
             ]);
@@ -502,7 +501,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe1') }),
+                  new TextPToken({ text: SToken.fromString('pe1') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
@@ -511,7 +510,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('pe2'),
                externalId: {
                   system: {
-                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
                value: [],
@@ -521,7 +520,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('test'),
                value: [
                   refToPe1,
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                   refToPe2,
                ],
             }),
@@ -530,13 +529,13 @@ describe('EntityExpander (unit)', () => {
          doExpand(true, input, (results) => {
             expect((results[2] as any).value).toEqualRangeless([
                new ParameterEntityStartPToken(refToPe1),
-               new text.PToken({ text: SToken.fromString('pe1') }),
+               new TextPToken({ text: SToken.fromString('pe1') }),
                new ParameterEntityEndPToken(refToPe1),
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                new ParameterEntityStartPToken(refToPe2),
-               new text.PToken({ text: SToken.fromString('external value ') }),
+               new TextPToken({ text: SToken.fromString('external value ') }),
                new ParameterEntityStartPToken(secondRefToPe1),
-               new text.PToken({ text: SToken.fromString('pe1') }),
+               new TextPToken({ text: SToken.fromString('pe1') }),
                new ParameterEntityEndPToken(secondRefToPe1),
                new ParameterEntityEndPToken(refToPe2),
             ]);
@@ -555,7 +554,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe1') }),
+                  new TextPToken({ text: SToken.fromString('pe1') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
@@ -595,7 +594,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('foo'),
                value: [
-                  new text.PToken({ text: SToken.fromString('and') }),
+                  new TextPToken({ text: SToken.fromString('and') }),
                ],
             }),
             new ParameterEntityDeclarationPToken({
@@ -603,13 +602,13 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe1'),
                value: [
-                  new text.PToken({ text: SToken.fromString('entity') }),
-                  new text.PToken({ text: SToken.fromString('name "super ') }),
+                  new TextPToken({ text: SToken.fromString('entity') }),
+                  new TextPToken({ text: SToken.fromString('name "super ') }),
                   new ParameterEntityReferencePToken({
                      open: SToken.fromString('%'),
                      name: SToken.fromString('foo'),
                   }),
-                  new text.PToken({ text: SToken.fromString(' duper"') }),
+                  new TextPToken({ text: SToken.fromString(' duper"') }),
                ],
             }),
             entityDecl,
@@ -625,7 +624,7 @@ describe('EntityExpander (unit)', () => {
                   token: {
                      openQuote: SToken.fromString('"'),
                      value: [
-                        new text.PToken({
+                        new TextPToken({
                            text: SToken.fromString('super and duper'),
                         }),
                      ],
@@ -720,7 +719,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('pe1'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('80') }),
-                  new text.PToken({ text: SToken.fromString('UBLIC') }),
+                  new TextPToken({ text: SToken.fromString('UBLIC') }),
                ],
             }),
             notationDecl,
@@ -762,7 +761,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe2'),
                value: [
-                  new text.PToken({ text: SToken.fromString('C') }),
+                  new TextPToken({ text: SToken.fromString('C') }),
                ],
             }),
             new ParameterEntityDeclarationPToken({
@@ -771,7 +770,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('pe1'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('80') }),
-                  new text.PToken({ text: SToken.fromString('UBLI') }),
+                  new TextPToken({ text: SToken.fromString('UBLI') }),
                   new ParameterEntityReferencePToken({
                      open: SToken.fromString('%'),
                      name: SToken.fromString('pe2'),
@@ -802,14 +801,14 @@ describe('EntityExpander (unit)', () => {
             new elementStart.PToken({
                attributes: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                   ]
                }],
             }),
          ];
 
          doExpand(true, input, (results) => {
-            expect((results[0] as any).attributes[0].value).toEqual([ new text.PToken({ text: SToken.fromString('foo') }) ]);
+            expect((results[0] as any).attributes[0].value).toEqual([ new TextPToken({ text: SToken.fromString('foo') }) ]);
             done();
          });
       });
@@ -830,21 +829,21 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe') }),
+                  new TextPToken({ text: SToken.fromString('pe') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('ge'),
                value: [
-                  new text.PToken({ text: SToken.fromString('ge') }),
+                  new TextPToken({ text: SToken.fromString('ge') }),
                   refToPe
                ],
             }),
             new elementStart.PToken({
                attributes: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
                }],
@@ -853,11 +852,11 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[2] as any).attributes[0].value).toEqual([
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                new GeneralEntityStartPToken(refToGe),
-               new text.PToken({ text: SToken.fromString('ge') }),
+               new TextPToken({ text: SToken.fromString('ge') }),
                new ParameterEntityStartPToken(refToPe),
-               new text.PToken({ text: SToken.fromString('pe') }),
+               new TextPToken({ text: SToken.fromString('pe') }),
                new ParameterEntityEndPToken(refToPe),
                new GeneralEntityEndPToken(refToGe),
             ]);
@@ -908,7 +907,7 @@ describe('EntityExpander (unit)', () => {
             new elementStart.PToken({
                attributes: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
                }],
@@ -917,7 +916,7 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[0] as any).attributes[0].value).toEqual([
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                refToGe,
             ]);
             done();
@@ -940,7 +939,7 @@ describe('EntityExpander (unit)', () => {
                parameter: SToken.fromString('%'),
                name: SToken.fromString('pe'),
                value: [
-                  new text.PToken({ text: SToken.fromString('pe') }),
+                  new TextPToken({ text: SToken.fromString('pe') }),
                ],
             }),
             new GeneralEntityDeclarationPToken({
@@ -951,18 +950,18 @@ describe('EntityExpander (unit)', () => {
                      open: SToken.fromString('&#'),
                      digits: SToken.fromString('38'),
                   }),
-                  new text.PToken({ text: SToken.fromString('pe;') }),
+                  new TextPToken({ text: SToken.fromString('pe;') }),
                ],
             }),
             new elementStart.PToken({
                attributes: [{
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                      refToGe,
                   ]
                }, {
                   value: [
-                     new text.PToken({ text: SToken.fromString('foo') }),
+                     new TextPToken({ text: SToken.fromString('foo') }),
                   ]
                }],
             }),
@@ -970,10 +969,10 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[2] as any).attributes[0].value).toEqual([
-               new text.PToken({ text: SToken.fromString('foo') }),
+               new TextPToken({ text: SToken.fromString('foo') }),
                new GeneralEntityStartPToken(refToGe),
                new ParameterEntityStartPToken(refToPe),
-               new text.PToken({ text: SToken.fromString('pe') }),
+               new TextPToken({ text: SToken.fromString('pe') }),
                new ParameterEntityEndPToken(refToPe),
                new GeneralEntityEndPToken(refToGe),
             ]);
@@ -1042,7 +1041,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new text.PToken({ text: SToken.fromString('publicName') }), ],
+                     value: [ new TextPToken({ text: SToken.fromString('publicName') }), ],
                   }
                },
             }),
@@ -1187,7 +1186,7 @@ describe('EntityExpander (unit)', () => {
                externalId: {
                   system: {
                      value: [
-                        new text.PToken({ text: SToken.fromString('systemFoo') }),
+                        new TextPToken({ text: SToken.fromString('systemFoo') }),
                      ],
                   }
                },
@@ -1211,7 +1210,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('lt'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#60;') }),
+                  new TextPToken({ text: SToken.fromString('#60;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1236,7 +1235,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('lt'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#60;frisbee') }),
+                  new TextPToken({ text: SToken.fromString('#60;frisbee') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1258,7 +1257,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('lt'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), hexMarker: SToken.fromString('x'), digits: SToken.fromString('26'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#x3c;') }),
+                  new TextPToken({ text: SToken.fromString('#x3c;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1331,7 +1330,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('amp'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#38;') }),
+                  new TextPToken({ text: SToken.fromString('#38;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1376,7 +1375,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('gt'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#62;') }),
+                  new TextPToken({ text: SToken.fromString('#62;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1423,7 +1422,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('apos'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#39;') }),
+                  new TextPToken({ text: SToken.fromString('#39;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1470,7 +1469,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('quot'),
                value: [
                   new CharRefPToken({ open: SToken.fromString('&#'), digits: SToken.fromString('38'), charCode: 38 }),
-                  new text.PToken({ text: SToken.fromString('#34;') }),
+                  new TextPToken({ text: SToken.fromString('#34;') }),
                ],
             }),
             new GeneralEntityReferencePToken({
@@ -1537,7 +1536,7 @@ describe('EntityExpander (unit)', () => {
             new GeneralEntityDeclarationPToken({
                open: SToken.fromString('<!'),
                name: SToken.fromString('foo'),
-               value: [ new TextPToken() ],
+               value: [ new TextPToken({ text: SToken.fromString('') }) ],
             }),
             new GeneralEntityReferencePToken({
                open: SToken.fromString('&'),
@@ -1561,7 +1560,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
             }),
@@ -1666,7 +1665,7 @@ describe('EntityExpander (unit)', () => {
                name: SToken.fromString('foo'),
                externalId: {
                   system: {
-                     value: [ new text.PToken({ text: SToken.fromString('systemUrl') }), ],
+                     value: [ new TextPToken({ text: SToken.fromString('systemUrl') }), ],
                   }
                },
             }),
@@ -1707,7 +1706,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new elementStart.PToken({
@@ -1744,7 +1743,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new elementStart.PToken({
@@ -1781,7 +1780,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new elementStart.PToken({
@@ -1814,7 +1813,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new ParameterEntityReferencePToken({
@@ -1853,7 +1852,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new ParameterEntityReferencePToken({
@@ -1892,7 +1891,7 @@ describe('EntityExpander (unit)', () => {
                open: SToken.fromString('<!'),
                name: SToken.fromString('test'),
                value: [
-                  new text.PToken({ text: SToken.fromString('expanded!') }),
+                  new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
             new ParameterEntityReferencePToken({

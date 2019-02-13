@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2018 by David John Burrowes. All rights reserved. */
 
 import { EntityLocation, EntityMetaData, EntityKind } from 'basic';
-import { defaultExtractors } from '../extractor';
-import { SToken, STokenSource } from '../sToken';
+import { defaultExtractors } from 'extractor';
+import { SToken, STokenSource } from 'sToken';
 import {
-   text,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
-} from '../token';
+   TextPToken,
+} from 'token';
 
 type EntityMap = {
    [name: string]: any,
@@ -30,15 +30,15 @@ class EntityManager {
       this._entityMap = {};
 
       const ltEntity = new GeneralEntityDeclarationXToken('lt',
-         [ new text.PToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined);
+         [ new TextPToken({ text: SToken.fromString('&#60;') }) ], undefined, undefined);
       const gtEntity = new GeneralEntityDeclarationXToken('gt',
-         [ new text.PToken({ text: SToken.fromString('>') }) ], undefined, undefined);
+         [ new TextPToken({ text: SToken.fromString('>') }) ], undefined, undefined);
       const ampEntity = new GeneralEntityDeclarationXToken('amp',
-         [ new text.PToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined);
+         [ new TextPToken({ text: SToken.fromString('&#38;') }) ], undefined, undefined);
       const aposEntity = new GeneralEntityDeclarationXToken('apos',
-         [ new text.PToken({ text: SToken.fromString('\'') }) ], undefined, undefined);
+         [ new TextPToken({ text: SToken.fromString('\'') }) ], undefined, undefined);
       const quotEntity = new GeneralEntityDeclarationXToken('quot',
-         [ new text.PToken({ text: SToken.fromString('"') }) ], undefined, undefined);
+         [ new TextPToken({ text: SToken.fromString('"') }) ], undefined, undefined);
 
       this._internalAdd(ltEntity, DEFAULT_ENTITY, false);
       this._internalAdd(gtEntity, DEFAULT_ENTITY, false);

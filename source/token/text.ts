@@ -1,9 +1,11 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import base from './base';
-import { SToken, STokenSource } from '../sToken/';
+import { EntityMetaData } from 'basic';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken, STokenSource, strOrBlank, STokenArrayBuilder } from 'sToken';
 
-type DeliverPToken = (token: TextPToken) => void;
+type DeliverPToken = (token: TextPToken|void) => void;
 
 /**********************************************************************\
  The text namespace provides the Text XToken type.  This is used
@@ -14,43 +16,40 @@ type DeliverPToken = (token: TextPToken) => void;
  processed in some other way).
 \**********************************************************************/
 
-const TEXT = 'TEXT';
+const TEXT_PTOKEN = 'TEXT_PTOKEN';
 const TEXT_XTOKEN = 'TEXT_XTOKEN';
 
-class TextXToken extends base.XToken {
-   public type = TEXT_XTOKEN;
-   public text: string;
+class TextXToken {
+   public readonly type: typeof TEXT_XTOKEN = TEXT_XTOKEN;
+   public readonly text: string;
+   public pToken?: TextPToken;
 
    constructor(text: string, pToken?: TextPToken) {
-      super(TEXT_XTOKEN, pToken as TextPToken);
-
       this.text = text;
+      this.pToken = pToken;
    }
 
 }
 
-type PTokenProps = {
-   text: SToken,
-};
+class TextPToken {
+   public readonly type: typeof TEXT_PTOKEN = TEXT_PTOKEN;
+   public readonly text: SToken;
 
-class TextPToken extends base.PToken {
-   public text?: SToken; // @@ this hsould not be optional.
-
-   constructor(props?: PTokenProps) {
-      super(TEXT, props);
+   constructor(props: TextPToken | { text: SToken }) {
+      this.text = props.text;
    }
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
+   toXToken() {
+      return pTokenToXToken(this);
+   }
 
-      results.pushSTokens(this.text);
-
-      return results;
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
 function isTextPToken(item: any): item is TextPToken {
-   return item.type === TEXT;
+   return item.type === TEXT_PTOKEN;
 }
 
 function isTextXToken(item: any): item is TextXToken {
@@ -67,32 +66,39 @@ function isTextXToken(item: any): item is TextXToken {
  deliverPToken: Callback to deliver the PToken
 \**********************************************************************/
 
-function parse(source: STokenSource, terminators: Array<string>, deliverPToken: DeliverPToken) {
-   const pToken = new TextPToken();
-
+function parseText(source: STokenSource, terminators: Array<string>, deliverPToken: DeliverPToken) {
    source.extract('all', terminators, (sToken) => {
-      pToken.text = sToken;
-      deliverPToken(pToken);
+      deliverPToken(sToken ? new TextPToken({ text: sToken }) : undefined);
    });
 }
 
-function makeXToken(pToken: TextPToken) {
-   return new TextXToken(pToken.text ? pToken.text.str : '', pToken);
+/**********************************************************************\
+ pTokenToXToken
+\**********************************************************************/
+
+function pTokenToXToken(pToken: TextPToken) {
+   return new TextXToken(strOrBlank(pToken.text), pToken);
 }
 
-const text = {
-   PTYPE: TEXT,
-   XTYPE: TEXT_XTOKEN,
-   PToken: TextPToken,
-   XToken: TextXToken,
-   parse,
-   makeXToken,
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the component STokens
+\**********************************************************************/
 
-   isTextXToken,
-   isTextPToken,
+function sTokensFromPToken(pToken: TextPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(pToken.text);
+
+   return builder.sTokenArray;
+}
+
+export {
+   TEXT_PTOKEN,
+   TEXT_XTOKEN,
    TextPToken,
    TextXToken,
-};
 
-export default text;
-export { TEXT as PTYPE, TEXT as TEXT_PTOKEN, TextPToken, TextXToken, isTextPToken, isTextXToken };
+   parseText,
+   isTextPToken,
+   isTextXToken
+};

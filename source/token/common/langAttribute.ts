@@ -5,7 +5,7 @@ import { SToken } from "sToken";
 
 import { AttributeValuePToken, AttributeValueXToken } from '../common/attribute';
 import { GENERAL_ENTITY_REFERENCE_PTOKEN, GENERAL_ENTITY_REFERENCE_XTOKEN } from "../generalEntityReference";
-import { PTYPE, isTextPToken, isTextXToken } from "../text";
+import { isTextPToken, isTextXToken } from "../text";
 
 const WFID = WellFormedError.ID;
 const ONE_DOT_ZERO_REV1_REGEX = /^[a-z][a-z](?:-[a-z]+)*$|^[xi](?:-[a-z]+)+$/i;
@@ -32,7 +32,7 @@ function firstSToken(value: AttributeValue): SToken | void {
    }
 
    let pToken;
-   
+
    for (const element of value) {
       if (pToken) {
          continue;
@@ -162,7 +162,7 @@ function checkXmlLangWellFormed(value: AttributeValue, ec: ErrorCollector, emd: 
       check1dot0rev1(value, attrValue, ec);
       return;
    }
-   
+
    if (attrValue === '' && (
       emd.isVersion1dot0 && emd.revision >= 3 || emd.isVersion1dot1)) {
       return;

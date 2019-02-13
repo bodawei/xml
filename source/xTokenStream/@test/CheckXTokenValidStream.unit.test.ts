@@ -6,7 +6,7 @@ import stream from 'readable-stream';
 import { EntityMetaData, EntityKind } from 'basic';
 import * as basic from 'basic';
 import { ValidityError, WellFormedError, ERROR_TYPE, XmlWarning } from 'error';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 import nameList, { XNameList } from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
@@ -17,7 +17,6 @@ import {
    elementEnd,
    elementDeclaration,
    ProcessingInstructionXToken,
-   text,
 
    SPACE_XTOKEN,
 
@@ -44,7 +43,7 @@ import { ElementStart, ElementStartPToken } from '../../token/elementStart';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
 
 import CheckXTokenValidStream from '../CheckXTokenValidStream';
-import { TextXToken } from 'source/token/text';
+import { TextXToken, TextPToken } from 'source/token/text';
 import { UnassignedType } from 'source/token/common/unassigned';
 
 function toHaveError(util: any) {
@@ -369,7 +368,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'textAttr',
                   value: [
-                     new text.XToken('  this\tis\nfun. \t\n but a\rcan not actually happen  ')
+                     new TextXToken('  this\tis\nfun. \t\n but a\rcan not actually happen  ')
                   ]
                }]);
 
@@ -396,9 +395,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'idRefs',
                   value: [
-                     new text.XToken('   one\ttwo'),
-                     new text.XToken('\nthree '),
-                     new text.XToken('four ')
+                     new TextXToken('   one\ttwo'),
+                     new TextXToken('\nthree '),
+                     new TextXToken('four ')
                   ]
                }]);
 
@@ -410,9 +409,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                gatherTokens(validator, (tokens) => {
                   expect(tokens[2].attributes[0].value)
                      .toEqual([
-                        new text.XToken('one two'),
-                        new text.XToken(' three '),
-                        new text.XToken('four'),
+                        new TextXToken('one two'),
+                        new TextXToken(' three '),
+                        new TextXToken('four'),
                      ]);
                      done();
                });
@@ -432,9 +431,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('testEl', [{
                   name: 'idRefs',
                   value: [
-                     new text.XToken('   one\ttwo'),
-                     new text.XToken('\nthree '),
-                     new text.XToken('four ')
+                     new TextXToken('   one\ttwo'),
+                     new TextXToken('\nthree '),
+                     new TextXToken('four ')
                   ]
                }]));
                validator.end();
@@ -459,9 +458,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('testEl', [{
                   name: 'idRefs',
                   value: [
-                     new text.XToken('   one\ttwo'),
-                     new text.XToken('\nthree '),
-                     new text.XToken('four '),
+                     new TextXToken('   one\ttwo'),
+                     new TextXToken('\nthree '),
+                     new TextXToken('four '),
                   ]
                }]));
                validator.end();
@@ -480,7 +479,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'undefinedAttribute',
                   value: [
-                     new text.XToken('   one\ttwo \nthree four')
+                     new TextXToken('   one\ttwo \nthree four')
                   ]
                }]);
 
@@ -501,7 +500,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'undefinedAttribute',
                   value: [
-                     new text.XToken('   one\ttwo \nthree four')
+                     new TextXToken('   one\ttwo \nthree four')
                   ]
                }]);
 
@@ -525,7 +524,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', []);
@@ -547,7 +546,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
@@ -572,7 +571,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
@@ -597,12 +596,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'textAttr',
-                  value: [ new text.XToken('original') ]
+                  value: [ new TextXToken('original') ]
                }]);
 
                validator.write(elDecl1);
@@ -622,12 +621,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('oneTwo') ],
+                  value: [ new TextXToken('oneTwo') ],
                   defaultType: '#FIXED',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'textAttr',
-                  value: [ new text.XToken('oneT') ]
+                  value: [ new TextXToken('oneT') ]
                }]);
 
                validator.write(elDecl1);
@@ -645,12 +644,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('oneTwo') ],
+                  value: [ new TextXToken('oneTwo') ],
                   defaultType: '#FIXED',
                }]);
                const startToken1 = new elementStart.XToken('testEl', [{
                   name: 'textAttr',
-                  value: [ new text.XToken('oneTwo') ]
+                  value: [ new TextXToken('oneTwo') ]
                }]);
 
                validator.write(elDecl1);
@@ -666,7 +665,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('oneTwo') ],
+                  value: [ new TextXToken('oneTwo') ],
                   defaultType: '#FIXED',
                }]);
                const startToken1 = new elementStart.XToken('testEl', []);
@@ -684,7 +683,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', []);
@@ -707,7 +706,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const attListDecl1 = new attListDeclaration.XToken('testEl', [{
                   name: 'textAttr',
                   type: 'CDATA',
-                  value: [ new text.XToken('the default value') ],
+                  value: [ new TextXToken('the default value') ],
                   defaultType: '',
                }]);
                const startToken1 = new elementStart.XToken('testEl', []);
@@ -737,7 +736,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('one', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('$$BAD')
+                     new TextXToken('$$BAD')
                   ]
                }]);
                spyOn(basic, 'isName').and.returnValue(false);
@@ -763,7 +762,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('one', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('$$BAD')
+                     new TextXToken('$$BAD')
                   ]
                }]);
                spyOn(basic, 'isName');
@@ -798,13 +797,13 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('one', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('test')
+                     new TextXToken('test')
                   ]
                }]);
                const startToken2 = new elementStart.XToken('two', [{
                   name: 'id',
                   value: [
-                     new text.XToken('test')
+                     new TextXToken('test')
                   ]
                }]);
 
@@ -839,14 +838,14 @@ describe('CheckXTokenValidStream (unit)', () => {
                const startToken1 = new elementStart.XToken('one', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('test')
+                     new TextXToken('test')
                   ]
                }]);
                const startToken2 = new elementStart.XToken('two', [{
                   name: 'id',
                   value: [
                      new GeneralEntityStartXToken('ref'),
-                     new text.XToken('test'),
+                     new TextXToken('test'),
                      new GeneralEntityEndXToken('ref'),
                   ]
                }]);
@@ -882,7 +881,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testEl', [{
                   name: 'idRefAttr',
                   value: [
-                     new text.XToken('goodName')
+                     new TextXToken('goodName')
                   ]
                }]);
                endElName = new elementEnd.XToken('testEl');
@@ -916,7 +915,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testEl', [{
                   name: 'idRefAttr',
                   value: [
-                     new text.XToken('$badName')
+                     new TextXToken('$badName')
                   ]
                }]);
 
@@ -940,7 +939,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('elName', [{
                   name: 'idRefsAttr',
                   value: [
-                     new text.XToken('goodName $badName         $anotherBadName')
+                     new TextXToken('goodName $badName         $anotherBadName')
                   ]
                }]);
 
@@ -969,7 +968,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('goodName')
+                     new TextXToken('goodName')
                   ]
                }]);
 
@@ -999,7 +998,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idAttr',
                   value: [
-                     new text.XToken('goodName')
+                     new TextXToken('goodName')
                   ]
                }]);
 
@@ -1029,7 +1028,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idRefAttr',
                   value: [
-                     new text.XToken('first')
+                     new TextXToken('first')
                   ]
                }]);
 
@@ -1060,7 +1059,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                const secondStartToken = new elementStart.XToken('testEl', [{
                   name: 'idRefsAttr',
                   value: [
-                     new text.XToken('goodName second third')
+                     new TextXToken('goodName second third')
                   ]
                }], new ElementStartPToken({
                   open: openSToken,
@@ -1100,7 +1099,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'entityAttr',
                   value: [
-                     new text.XToken('goodName')
+                     new TextXToken('goodName')
                   ]
                }]);
             });
@@ -1133,7 +1132,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'entityAttr',
                   value: [
-                     new text.XToken('$badName')
+                     new TextXToken('$badName')
                   ]
                }]);
 
@@ -1157,7 +1156,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'entitiesAttr',
                   value: [
-                     new text.XToken('goodName $badName      $anotherBadName')
+                     new TextXToken('goodName $badName      $anotherBadName')
                   ]
                }]);
 
@@ -1210,7 +1209,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'entitiesAttr',
                   value: [
-                     new text.XToken('one two   three')
+                     new TextXToken('one two   three')
                   ]
                }]);
 
@@ -1237,7 +1236,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'entitiesAttr',
                   value: [
-                     new text.XToken('one two   three')
+                     new TextXToken('one two   three')
                   ]
                }]);
 
@@ -1269,7 +1268,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'nmTokenAttr',
                   value: [
-                     new text.XToken('goodName')
+                     new TextXToken('goodName')
                   ]
                }]);
             });
@@ -1302,7 +1301,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'nmTokenAttr',
                   value: [
-                     new text.XToken('$badName')
+                     new TextXToken('$badName')
                   ]
                }]);
 
@@ -1326,7 +1325,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'nmTokenAttr',
                   value: [
-                     new text.XToken('goodName $badName         $anotherBadName')
+                     new TextXToken('goodName $badName         $anotherBadName')
                   ]
                }]);
 
@@ -1363,7 +1362,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'notationAttr',
                   value: [
-                     new text.XToken('first')
+                     new TextXToken('first')
                   ]
                }]);
             });
@@ -1398,7 +1397,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'notationAttr',
                   value: [
-                     new text.XToken('third')
+                     new TextXToken('third')
                   ]
                }]);
 
@@ -1433,7 +1432,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'enumerationAttr',
                   value: [
-                     new text.XToken('first')
+                     new TextXToken('first')
                   ]
                }]);
             });
@@ -1464,7 +1463,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                startToken = new elementStart.XToken('testElement', [{
                   name: 'enumerationAttr',
                   value: [
-                     new text.XToken('third')
+                     new TextXToken('third')
                   ]
                }]);
 
@@ -1823,7 +1822,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ID',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -1844,7 +1843,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ID',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -1869,7 +1868,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -1890,7 +1889,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'IDREF',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -1915,7 +1914,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'IDREFS',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $bad2'),
+                     new TextXToken('$bad good $bad2'),
                   ],
                }]);
 
@@ -1936,7 +1935,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'IDREFS',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $bad2'),
+                     new TextXToken('$bad good $bad2'),
                   ],
                }]);
 
@@ -1961,7 +1960,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENTITY',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -1982,7 +1981,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENTITY',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -2007,7 +2006,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $bad2'),
+                     new TextXToken('$bad good $bad2'),
                   ],
                }]);
 
@@ -2028,7 +2027,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $bad2'),
+                     new TextXToken('$bad good $bad2'),
                   ],
                }]);
 
@@ -2048,7 +2047,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENTITIES',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('all awesome good'),
+                     new TextXToken('all awesome good'),
                   ],
                }]);
 
@@ -2072,7 +2071,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NMTOKEN',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -2092,7 +2091,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NMTOKEN',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad'),
+                     new TextXToken('$bad'),
                   ],
                }]);
 
@@ -2117,7 +2116,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $alsoBad'),
+                     new TextXToken('$bad good $alsoBad'),
                   ],
                }]);
 
@@ -2137,7 +2136,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('$bad good $alsoBad'),
+                     new TextXToken('$bad good $alsoBad'),
                   ],
                }]);
 
@@ -2157,7 +2156,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NMTOKENS',
                   defaultType: '#REQUIRED',
                   value: [
-                     new text.XToken('all awesome good'),
+                     new TextXToken('all awesome good'),
                   ],
                }]);
 
@@ -2344,7 +2343,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'NOTATION',
                   enumeration: ['first', 'second'],
                   value: [
-                     new text.XToken('third'),
+                     new TextXToken('third'),
                   ],
                   defaultType: '',
                }]);
@@ -2431,7 +2430,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   type: 'ENUMERATION',
                   enumeration: ['first', 'second'],
                   value: [
-                     new text.XToken('third'),
+                     new TextXToken('third'),
                   ],
                   defaultType: '',
                }]);
@@ -2749,10 +2748,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new elementStart.PToken({ name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString('x') }),
+                     token: new TextPToken({ text: SToken.fromString('x') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new elementEnd.PToken({ name: SToken.fromString('testPE') }),
@@ -2805,7 +2804,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -2837,7 +2836,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: {},
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -2864,10 +2863,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString('|') }),
+                     token: new TextPToken({ text: SToken.fromString('|') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -2895,10 +2894,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString(',') }),
+                     token: new TextPToken({ text: SToken.fromString(',') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -2926,10 +2925,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString('(') }),
+                     token: new TextPToken({ text: SToken.fromString('(') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
@@ -2960,20 +2959,20 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString('(') }),
+                     token: new TextPToken({ text: SToken.fromString('(') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),
                   }, {
                      // Note that the parenthesis is closed in another entity
                      type: 'word',
-                     token: new text.PToken({ text: SToken.fromString(')') }),
+                     token: new TextPToken({ text: SToken.fromString(')') }),
                   }, {
                      type: 'space',
-                     token: new text.PToken({ text: SToken.fromString(' ') }),
+                     token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
                      token: new GeneralEntityReferencePToken({ open: SToken.fromString('&'), name: SToken.fromString('testPE') }),

@@ -8,10 +8,10 @@ import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import literalValue from '../literalValue';
-import text from '../../text';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
 import { CharRefPToken } from 'source/token/charRef';
+import { TextXToken, TextPToken } from 'source/token/text';
 
 describe('literalValue (integration)', () => {
    let emd: EntityMetaData;
@@ -31,7 +31,7 @@ describe('literalValue (integration)', () => {
          literalValue.parse(source, ['"'], (pToken) => {
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual([
-               new text.PToken({ text: makeSToken('one%peref;two&geref;&geref2;three') }),
+               new TextPToken({ text: makeSToken('one%peref;two&geref;&geref2;three') }),
             ]);
             done();
          });
@@ -45,7 +45,7 @@ describe('literalValue (integration)', () => {
          literalValue.parse(source, ['"', '%', '&', '&#'], (pToken) => {
             const makeSToken = makeSTokenMaker();
             expect(pToken).toEqual([
-               new text.PToken({ text: makeSToken('one') }),
+               new TextPToken({ text: makeSToken('one') }),
                new ParameterEntityReferencePToken({
                   open: makeSToken('%'),
                   openSpace: undefined,
@@ -76,7 +76,7 @@ describe('literalValue (integration)', () => {
                   nameSpace: undefined,
                   close: makeSToken(';'),
                }),
-               new text.PToken({ text: makeSToken('three') }),
+               new TextPToken({ text: makeSToken('three') }),
             ]);
             done();
          });
@@ -122,7 +122,7 @@ describe('literalValue (integration)', () => {
          literalValue.parse(source, ['"', '&'], (pToken) => {
             const results = literalValue.makeXTokenCompatible(pToken);
             const makeSToken = makeSTokenMaker();
-            const pToken1 = new text.PToken({ text: makeSToken('one') });
+            const pToken1 = new TextPToken({ text: makeSToken('one') });
             const pTokenRef = new GeneralEntityReferencePToken({
                open: makeSToken('&'),
                openSpace: undefined,
@@ -130,12 +130,12 @@ describe('literalValue (integration)', () => {
                nameSpace: undefined,
                close: makeSToken(';'),
             });
-            const pToken2 = new text.PToken({ text: makeSToken('two') });
+            const pToken2 = new TextPToken({ text: makeSToken('two') });
 
             expect(results).toEqual([
-               new text.XToken('one', pToken1),
+               new TextXToken('one', pToken1),
                new GeneralEntityReferenceXToken('ref', pTokenRef),
-               new text.XToken('two', pToken2),
+               new TextXToken('two', pToken2),
             ]);
             done();
          });

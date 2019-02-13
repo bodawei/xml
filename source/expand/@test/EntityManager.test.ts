@@ -2,12 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityLocation } from 'basic';
-import { SToken, STokenSource } from '../../sToken';
+import { SToken, STokenSource } from 'sToken';
 import {
-   text,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
-} from '../../token';
+   TextPToken,
+} from 'token';
 
 import EntityManager from '../EntityManager';
 
@@ -44,11 +44,11 @@ describe('EntityManager (unit)', () => {
 
    function pTokenToXToken(name: string, str: string = '', location?: EntityLocation, notationName?: string): GeneralEntityDeclarationXToken {
       return new GeneralEntityDeclarationXToken(name,
-         [ new text.PToken({ text: SToken.fromString(str) }) ], location, notationName);
+         [ new TextPToken({ text: SToken.fromString(str) }) ], location, notationName);
    }
 
    function makePEToken(name: string, str: string, location?: EntityLocation, notationName?: string): ParameterEntityDeclarationXToken {
-      return new ParameterEntityDeclarationXToken(name, [ new text.PToken({ text: SToken.fromString(str) }) ], location);
+      return new ParameterEntityDeclarationXToken(name, [ new TextPToken({ text: SToken.fromString(str) }) ], location);
    }
 
    describe('construction', () => {

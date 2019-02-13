@@ -3,9 +3,9 @@
 
 import { EntityMetaData, Range } from 'basic';
 import { MockErrorCollector } from'error-test';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
-import { WellFormedError, XmlWarning } from '../../error';
+import { WellFormedError, XmlWarning } from 'error';
 
 import declaration from '../bridge/baseDeclaration';
 import { parseEntityDeclaration } from '../entityDeclaration';

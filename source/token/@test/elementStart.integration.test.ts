@@ -2,14 +2,14 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { defaultExtractors } from 'extractor';
+import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import * as elementStart from '../elementStart';
-import text from '../text';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
+import { TextPToken, TextXToken } from '../text';
 
 describe('elementStart (integration)', () => {
    let elementStartPToken: elementStart.ElementStartPToken;
@@ -50,7 +50,7 @@ describe('elementStart (integration)', () => {
                   equal: makeSToken('='),
                   postEqualSpace: makeSToken('\t\t'),
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('value1') }) ],
+                  value: [ new TextPToken({ text: makeSToken('value1') }) ],
                   closeQuote: makeSToken('"'),
                   trailingSpace: makeSToken(' '),
                }, {
@@ -59,7 +59,7 @@ describe('elementStart (integration)', () => {
                   equal: makeSToken('='),
                   postEqualSpace: undefined,
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('value two') }) ],
+                  value: [ new TextPToken({ text: makeSToken('value two') }) ],
                   closeQuote: makeSToken('"'),
                   trailingSpace: undefined,
                } ],
@@ -88,7 +88,7 @@ describe('elementStart (integration)', () => {
                   postEqualSpace: undefined,
                   openQuote: makeSToken('"'),
                   value: [
-                     new text.PToken({ text: makeSToken('value1') }),
+                     new TextPToken({ text: makeSToken('value1') }),
                      new GeneralEntityReferencePToken({
                         open: makeSToken('&'),
                         openSpace: undefined,
@@ -167,10 +167,10 @@ describe('elementStart (integration)', () => {
 
             expect(token).toEqual(new elementStart.XToken('aName', [ {
                name: 'attr1',
-               value: [ new text.XToken('value1') ],
+               value: [ new TextXToken('value1') ],
             }, {
                name: 'attr2',
-               value: [ new text.XToken('value two') ],
+               value: [ new TextXToken('value two') ],
             } ]));
             done();
          });

@@ -4,7 +4,7 @@
 import stream from 'readable-stream';
 
 import { EntityLocation, EntityMetaData, Offset } from 'basic';
-import { ValidityError, WellFormedError } from '../../error';
+import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { EntityExpandingStream } from '../../expand';
 
@@ -139,7 +139,7 @@ describe('CheckXTokenValidStream (integration)', () => {
       it('reports an error when the an IDREF is not a valid name', (done) => {
          const error = new ValidityError(ValidityError.ID.ATTLISTDECL_BAD_IDREF_DEFAULT, [ 'root', 'reference', '$good' ],
             new Offset(new EntityLocation(), 118, 3, 115));
-   
+
          parser.addText(`<?xml version="1.0"?><!DOCTYPE root [
             <!ENTITY bad "$">
             <!ELEMENT root ANY >
@@ -150,9 +150,9 @@ describe('CheckXTokenValidStream (integration)', () => {
             <root>
             </root>`);
          parser.endText();
-   
+
          expectStream(validator, error, done);
       });
-   
+
    });
 });

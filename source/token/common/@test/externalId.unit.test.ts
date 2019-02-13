@@ -7,12 +7,12 @@ import { MockErrorCollector } from 'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
-import text from '../../text';
 import unassigned from '../unassigned';
 
 import externalId from '../externalId';
 import literal from '../literal';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
+import { TextPToken } from 'source/token/text';
 
 describe('externalId (unit)', () => {
 
@@ -453,7 +453,7 @@ describe('externalId (unit)', () => {
          const externalIdToken: any = {
             nextPropName: 'postIdTypeSpace',
             unassigned: [
-               new text.PToken({ text: SToken.fromString('hi') }),
+               new TextPToken({ text: SToken.fromString('hi') }),
             ],
          };
          unProps.and.callFake((unArray: Array<any>) => {
@@ -597,13 +597,13 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
             postPublicSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -791,7 +791,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -809,13 +809,13 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
             postPublicSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -833,7 +833,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             system: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('sys.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('sys.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };
@@ -851,7 +851,7 @@ describe('externalId (unit)', () => {
             postIdTypeSpace: expectedSToken(' '),
             public: {
                openQuote: expectedSToken('"'),
-               value: [ new text.PToken({ text: expectedSToken('pub.xml') }) ],
+               value: [ new TextPToken({ text: expectedSToken('pub.xml') }) ],
                closeQuote: expectedSToken('"'),
             },
          };

@@ -10,12 +10,12 @@ import {
    elementEnd,
    elementStart,
    elementDeclaration,
-   text,
 
    CdataPToken,
    CharDataPToken,
    CharRefPToken,
    ProcessingInstructionPToken,
+   TextPToken,
    XmlDeclarationPToken,
    TextDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -25,7 +25,7 @@ import {
    InternalSubsetEndXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
-} from '../../token';
+} from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
 import { EntityMetaData } from 'basic';
@@ -209,14 +209,14 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalled();
    });
 
-   it('calls text.pTokenToXToken()', () => {
-      spyOn(text, 'makeXToken');
-      const pToken = { type: text.PTYPE };
+   it('calls text.toXToken()', () => {
+      const pToken = new TextPToken({ text: SToken.fromString('x') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(text.makeXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('passes EntityMetaData through', () => {

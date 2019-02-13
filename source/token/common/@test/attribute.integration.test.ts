@@ -3,13 +3,12 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { defaultExtractors } from '../../../extractor';
+import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import text from '../../text';
-
 import attribute from '../attribute';
+import { TextPToken, TextXToken } from '../../text';
 
 describe('attribute (integration)', () => {
    let emd: EntityMetaData;
@@ -27,7 +26,7 @@ describe('attribute (integration)', () => {
          equal: makeSToken('='),
          postEqualSpace: undefined,
          openQuote: makeSToken('"'),
-         value: [ new text.PToken({ text: makeSToken('1') }) ],
+         value: [ new TextPToken({ text: makeSToken('1') }) ],
          closeQuote: makeSToken('"'),
          trailingSpace: makeSToken('  '),
       }, {
@@ -36,7 +35,7 @@ describe('attribute (integration)', () => {
          equal: makeSToken('='),
          postEqualSpace: makeSToken(' '),
          openQuote: makeSToken('"'),
-         value: [ new text.PToken({ text: makeSToken('two') }) ],
+         value: [ new TextPToken({ text: makeSToken('two') }) ],
          closeQuote: makeSToken('"'),
          trailingSpace: makeSToken(' '),
       } ];
@@ -56,7 +55,7 @@ describe('attribute (integration)', () => {
                equal: makeSToken('='),
                postEqualSpace: undefined,
                openQuote: makeSToken('"'),
-               value: [ new text.PToken({ text: makeSToken('1') }) ],
+               value: [ new TextPToken({ text: makeSToken('1') }) ],
                closeQuote: makeSToken('"'),
                trailingSpace: makeSToken('  '),
             }, {
@@ -65,7 +64,7 @@ describe('attribute (integration)', () => {
                equal: makeSToken('='),
                postEqualSpace: makeSToken(' '),
                openQuote: makeSToken('"'),
-               value: [ new text.PToken({ text: makeSToken('two') }) ],
+               value: [ new TextPToken({ text: makeSToken('two') }) ],
                closeQuote: makeSToken('"'),
                trailingSpace: makeSToken(' '),
             }, {
@@ -178,10 +177,10 @@ describe('attribute (integration)', () => {
 
          expect(attrs).toEqual([ {
             name: 'one',
-            value: [ new text.XToken('1') ],
+            value: [ new TextXToken('1') ],
          }, {
             name: 'two',
-            value: [ new text.XToken('two') ],
+            value: [ new TextXToken('two') ],
          } ]);
       });
    });

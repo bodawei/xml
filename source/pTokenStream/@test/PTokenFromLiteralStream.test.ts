@@ -2,11 +2,12 @@
 /* eslint-env jasmine */
 
 import { Range, EntityLocation } from 'basic';
-import { SToken } from '../../sToken';
-import * as tokenStuff from '../../token';
-
-import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
+import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
+
+import * as tokenStuff from '../../token';
+import { TextPToken } from '../../token';
+import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 describe('PTokenFromLiteralStream (unit)', () => {
 
@@ -45,7 +46,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { });
-            const parseSpy = spyOn(tokenStuff.text, 'parse');
+            const parseSpy = spyOn(tokenStuff, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -66,7 +67,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
                [ 'x', 'peekChar' ],
             ]);
             const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
-            const parseSpy = spyOn(tokenStuff.text, 'parse');
+            const parseSpy = spyOn(tokenStuff, 'parseText');
 
             pTokenStream.read();
             mockSource.respondInAsyncTime();
@@ -118,7 +119,7 @@ describe('PTokenFromLiteralStream (unit)', () => {
          pTokenStream.read();
          mockSource.respondInAsyncTime();
 
-         expect(pushSpy.calls.argsFor(0)[0]).toEqual(new tokenStuff.text.PToken({ text: sToken }));
+         expect(pushSpy.calls.argsFor(0)[0]).toEqual(new TextPToken({ text: sToken }));
       });
 
    });

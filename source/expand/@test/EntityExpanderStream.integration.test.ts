@@ -3,8 +3,7 @@
 
 import { PTokenStream } from "pTokenStream";
 import { EntityMetaData } from "basic";
-import { EntityExpanderStream } from "../EntityExpanderStream";
-import { gatherStream } from "./utils";
+import { SToken } from "sToken";
 import {
    CHARDATA_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
@@ -15,8 +14,8 @@ import {
    PToken,
 
    elementStart,
+   TextPToken,
 
-   text,
    ParameterEntityStartPToken,
    ParameterEntityReferencePToken,
    ParameterEntityEndPToken,
@@ -24,7 +23,8 @@ import {
    GeneralEntityStartPToken,
    GeneralEntityEndPToken,
 } from "token";
-import { SToken } from "sToken";
+import { EntityExpanderStream } from "../EntityExpanderStream";
+import { gatherStream } from "./utils";
 import { AttListPToken } from "source/token/attListDeclaration";
 import { CharRefPToken } from "source/token/charRef";
 
@@ -170,15 +170,15 @@ describe('EntityExpanderStream (integration)', () => {
          });
 
          expect((results[index] as any).value).toEqualRangeless([
-            new text.PToken({ text: SToken.fromString('[') }),
+            new TextPToken({ text: SToken.fromString('[') }),
             new ParameterEntityStartPToken(expectedRef2),
-            new text.PToken({ text: SToken.fromString('(') }),
+            new TextPToken({ text: SToken.fromString('(') }),
             new ParameterEntityStartPToken(expectedRef1),
-            new text.PToken({ text: SToken.fromString('foo') }),
+            new TextPToken({ text: SToken.fromString('foo') }),
             new ParameterEntityEndPToken(expectedRef1),
-            new text.PToken({ text: SToken.fromString(')') }),
+            new TextPToken({ text: SToken.fromString(')') }),
             new ParameterEntityEndPToken(expectedRef2),
-            new text.PToken({ text: SToken.fromString(']') }),
+            new TextPToken({ text: SToken.fromString(']') }),
          ]);
       }, done);
    });
@@ -236,11 +236,11 @@ describe('EntityExpanderStream (integration)', () => {
                      charCode: 91,
                   }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new text.PToken({ text: SToken.fromString('(') }),
+                  new TextPToken({ text: SToken.fromString('(') }),
                   new ParameterEntityStartPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                   new ParameterEntityEndPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString(')') }),
+                  new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                   new CharRefPToken({
                      open: SToken.fromString('&#'),
@@ -304,7 +304,7 @@ describe('EntityExpanderStream (integration)', () => {
                openQuote: SToken.fromString('"'),
                closeQuote: SToken.fromString('"'),
                value: [
-                  new text.PToken({ text: SToken.fromString('first ') }),
+                  new TextPToken({ text: SToken.fromString('first ') }),
                   new CharRefPToken({
                      open: SToken.fromString('&#'),
                      openSpace: undefined,
@@ -314,13 +314,13 @@ describe('EntityExpanderStream (integration)', () => {
                      close: SToken.fromString(';'),
                      charCode: 45,
                   }),
-                  new text.PToken({ text: SToken.fromString(' ') }),
+                  new TextPToken({ text: SToken.fromString(' ') }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new text.PToken({ text: SToken.fromString('(') }),
+                  new TextPToken({ text: SToken.fromString('(') }),
                   new ParameterEntityStartPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                   new ParameterEntityEndPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString(')') }),
+                  new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                ],
                trailingSpace: SToken.fromString(' '),
@@ -332,7 +332,7 @@ describe('EntityExpanderStream (integration)', () => {
                openQuote: SToken.fromString('"'),
                closeQuote: SToken.fromString('"'),
                value: [
-                  new text.PToken({ text: SToken.fromString('second ') }),
+                  new TextPToken({ text: SToken.fromString('second ') }),
                   new CharRefPToken({
                      open: SToken.fromString('&#'),
                      openSpace: undefined,
@@ -342,13 +342,13 @@ describe('EntityExpanderStream (integration)', () => {
                      close: SToken.fromString(';'),
                      charCode: 45,
                   }),
-                  new text.PToken({ text: SToken.fromString(' ') }),
+                  new TextPToken({ text: SToken.fromString(' ') }),
                   new GeneralEntityStartPToken(expectedRef2),
-                  new text.PToken({ text: SToken.fromString('(') }),
+                  new TextPToken({ text: SToken.fromString('(') }),
                   new ParameterEntityStartPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString('foo') }),
+                  new TextPToken({ text: SToken.fromString('foo') }),
                   new ParameterEntityEndPToken(expectedRef1),
-                  new text.PToken({ text: SToken.fromString(')') }),
+                  new TextPToken({ text: SToken.fromString(')') }),
                   new GeneralEntityEndPToken(expectedRef2),
                ],
                trailingSpace: undefined,

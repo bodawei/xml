@@ -9,12 +9,12 @@ import { makeSTokenMaker } from 'sToken-test';
 
 import helper from '../../@test/helper';
 import { ParameterEntityEndPToken } from '../../marker/parameterEntityEnd';
-import text from '../../text';
 import unassigned, { UnassignedType } from '../unassigned';
 
 import externalId from '../externalId';
 import { ParameterEntityStartPToken } from 'source/token/marker/parameterEntityStart';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
+import { TextPToken } from 'source/token/text';
 
 describe('externalId (integration)', () => {
 
@@ -38,13 +38,13 @@ describe('externalId (integration)', () => {
                postIdTypeSpace: makeSToken(' '),
                public: {
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('pub.xml') }) ],
+                  value: [ new TextPToken({ text: makeSToken('pub.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: makeSToken('\t'),
                system: {
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('sys.xml') }) ],
+                  value: [ new TextPToken({ text: makeSToken('sys.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
             });
@@ -63,7 +63,7 @@ describe('externalId (integration)', () => {
                postIdTypeSpace: makeSToken(' '),
                public: {
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('pub.xml') }) ],
+                  value: [ new TextPToken({ text: makeSToken('pub.xml') }) ],
                   closeQuote: makeSToken('"'),
                },
                postPublicSpace: undefined,
@@ -110,7 +110,7 @@ describe('externalId (integration)', () => {
                type: UnassignedType.LITERAL,
                token: {
                   openQuote: SToken.fromString('"'),
-                  value: [ new text.PToken({ text: SToken.fromString('pub.xml') }) ],
+                  value: [ new TextPToken({ text: SToken.fromString('pub.xml') }) ],
                   closeQuote: SToken.fromString('"'),
                }
             });
@@ -140,13 +140,13 @@ describe('externalId (integration)', () => {
                postIdTypeSpace,
                public: {
                   openQuote: SToken.fromString('"'),
-                  value: [ new text.PToken({ text: SToken.fromString('pub.xml') }) ],
+                  value: [ new TextPToken({ text: SToken.fromString('pub.xml') }) ],
                   closeQuote: SToken.fromString('"'),
                },
                postPublicSpace,
                system: {
                   openQuote: makeSToken2('"'),
-                  value: [ new text.PToken({ text: makeSToken2('sys.xml') }) ],
+                  value: [ new TextPToken({ text: makeSToken2('sys.xml') }) ],
                   closeQuote: makeSToken2('"'),
                },
             });
@@ -269,7 +269,7 @@ describe('externalId (integration)', () => {
                   type: UnassignedType.LITERAL,
                   token: {
                      openQuote: new SToken('"', '"', new Range(new EntityLocation())),
-                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
+                     value: [ new TextPToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
                      closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
                   }
                }, {

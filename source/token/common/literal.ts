@@ -1,15 +1,15 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-import { SToken, STokenSource } from '../../sToken';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken, STokenSource } from 'sToken';
 
-import text from '../text';
 import literalValue, {
    LiteralValuePToken,
    Terminators as LiteralValueTerminators,
    LiteralValueXToken,
 } from './literalValue';
+import { isTextXToken } from '../text';
 
 const WFEID = WellFormedError.ID;
 
@@ -113,7 +113,7 @@ function makeOneTokenCompatible(pToken: LiteralPToken): string | void {
    } else {
       const firstItem = result[0];
 
-      if (text.isTextXToken(firstItem)) {
+      if (isTextXToken(firstItem)) {
          return firstItem.text;
       }
    }

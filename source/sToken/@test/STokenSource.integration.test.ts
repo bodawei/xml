@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityKind, EntityLocation, EntityMetaData, Range } from 'basic';
-import { defaultExtractors } from '../../extractor';
+import { defaultExtractors } from 'extractor';
 
 import SToken from '../SToken';
 import STokenSource from '../STokenSource';

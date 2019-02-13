@@ -2,12 +2,12 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData} from 'basic';
-import { defaultExtractors } from '../../extractor';
-import { STokenSource } from '../../sToken';
+import { defaultExtractors } from 'extractor';
+import { STokenSource } from 'sToken';
 import * as xToken from '../../token';
 
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN } from '../../token';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from '../../token';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;
@@ -34,26 +34,26 @@ describe('PTokenFromLiteralStream (integration)', () => {
    }
 
    it('produces a single text token if not told to look for perefs', (done) => {
-      expectInputToProduceTypes('one %two; three <four>', {}, [ xToken.text.PTYPE ], done);
+      expectInputToProduceTypes('one %two; three <four>', {}, [ TEXT_PTOKEN ], done);
    });
 
    it('produces a mixture of text and charRefs if asked to', (done) => {
       expectInputToProduceTypes('one %two; &three &#x40; <four>', {}, [
-         xToken.text.PTYPE,
-         xToken.text.PTYPE,
-         xToken.text.PTYPE,
+         TEXT_PTOKEN,
+         TEXT_PTOKEN,
+         TEXT_PTOKEN,
          xToken.CHARREF_PTOKEN,
-         xToken.text.PTYPE,
+         TEXT_PTOKEN,
       ], done);
    });
 
    it('produces a mixture of text, charrefs and parameter entity references if asked to', (done) => {
       expectInputToProduceTypes('one %two; three &#65; <four>', { peRef: true }, [
-         xToken.text.PTYPE,
+         TEXT_PTOKEN,
          PARAMETER_ENTITY_REFERENCE_PTOKEN,
-         xToken.text.PTYPE,
+         TEXT_PTOKEN,
          xToken.CHARREF_PTOKEN,
-         xToken.text.PTYPE,
+         TEXT_PTOKEN,
       ], done);
    });
 

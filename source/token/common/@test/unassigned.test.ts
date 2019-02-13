@@ -9,11 +9,11 @@ import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
 import * as paramReference from '../../parameterEntityReference';
-import text from '../../text';
 import literal from '../literal';
 import unassigned, { UnassignedType, UnassignedValue, UnassignedArray } from '../unassigned';
 
 import helper from '../../@test/helper';
+import { TextPToken } from 'source/token/text';
 
 describe('unassigned (unit)', () => {
 
@@ -485,37 +485,6 @@ describe('unassigned (unit)', () => {
          });
       });
 
-      it('allows for an SToken having no text when the value is "allowed"', () => {
-         const pToken = {};
-         const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
-         const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
-         const word2 = unassigned.wordFromSToken(SToken.fromString('BAR'));
-         delete word2.token.text;
-         const unVals = [ word1, space, word2 ];
-         const descriptors = [ {
-            name: 'one',
-            type: UnassignedType.WORD,
-         }, {
-            name: 'two',
-            type: UnassignedType.SPACE,
-         }, {
-            name: 'three',
-            type: UnassignedType.WORD,
-            allowed: /one|bar/,
-         }, {
-            name: 'four',
-            type: UnassignedType.WORD,
-         } ];
-
-         unassigned.assignToProps(unVals, pToken, undefined, descriptors);
-
-         expect(pToken).toEqual({
-            one: word1.token.text,
-            two: space.token.text,
-            four: undefined,
-         });
-      });
-
       it('skips descriptor if there is no matching unassigned item', () => {
          const pToken = {};
          const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
@@ -927,35 +896,6 @@ describe('unassigned (unit)', () => {
          expect(unVals.length).toEqual(2);
       });
 
-      it('copes with tokens missing actual text', () => {
-         const pToken = {};
-         const space = unassigned.spaceFromSToken(SToken.fromString('\t'));
-         const word1 = unassigned.wordFromSToken(SToken.fromString('foo'));
-         const word2 = unassigned.wordFromSToken(SToken.fromString('bar'));
-         delete space.token.text;
-         delete word1.token.text;
-         delete word2.token.text;
-         const unVals = [ word1, space, word2 ];
-         const descriptors = [ {
-            name: 'one',
-            type: UnassignedType.WORD,
-         }, {
-            name: 'two',
-            type: UnassignedType.SPACE,
-         }, {
-            name: 'three',
-            type: UnassignedType.WORD,
-         } ];
-
-         unassigned.assignToProps(unVals, pToken, 'one', descriptors);
-
-         expect(pToken).toEqual({
-            one: undefined,
-            two: undefined,
-            three: undefined,
-         });
-      });
-
    });
 
    describe('spaceFromSToken()', () => {
@@ -963,7 +903,7 @@ describe('unassigned (unit)', () => {
       it('makes an annotated text PToken with whatever it was given', () => {
          const expected: any = {
             type: UnassignedType.SPACE,
-            token: new text.PToken({ text: SToken.fromString('hi') } as any),
+            token: new TextPToken({ text: SToken.fromString('hi') } as any),
          };
 
          const result = unassigned.spaceFromSToken(SToken.fromString('hi'));
@@ -978,7 +918,7 @@ describe('unassigned (unit)', () => {
       it('makes an annotated text PToken with whatever it was given', () => {
          const expected: any = {
             type: UnassignedType.WORD,
-            token: new text.PToken({ text: SToken.fromString('hi') } as any),
+            token: new TextPToken({ text: SToken.fromString('hi') } as any),
          };
 
          const result = unassigned.wordFromSToken(SToken.fromString('hi'));
@@ -1057,16 +997,6 @@ describe('unassigned (unit)', () => {
          ]);
       });
 
-      it('skips a word with no actual text in it (type workaround)', () => {
-         const badWord = unassigned.wordFromSToken(SToken.fromString('foo'));
-         delete badWord.token.text;
-         const result = unassigned.getSTokens([
-            badWord,
-         ]);
-
-         expect(result).toEqual([]);
-      });
-
       it('returns STokens for a space', () => {
          const result = unassigned.getSTokens([
             unassigned.spaceFromSToken(SToken.fromString(' ')),
@@ -1099,7 +1029,7 @@ describe('unassigned (unit)', () => {
             type: UnassignedType.LITERAL,
             token: {
                openQuote: SToken.fromString('"'),
-               value: [ new text.PToken({ text: SToken.fromString('froo') }) ],
+               value: [ new TextPToken({ text: SToken.fromString('froo') }) ],
                closeQuote: SToken.fromString('"'),
             },
          }]);

@@ -4,7 +4,7 @@
 
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { WellFormedError } from '../../error';
+import { WellFormedError } from 'error';
 
 import * as docTypeEnd from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';

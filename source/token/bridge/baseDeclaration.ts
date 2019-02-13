@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from '../../error';
-import { strOrBlank, SToken, STokenSource } from '../../sToken';
+import { ErrorCollector, WellFormedError } from 'error';
+import { strOrBlank, SToken, STokenSource } from 'sToken';
 import base, { STokenArray } from '../base';
 
 /**********************************************************************\

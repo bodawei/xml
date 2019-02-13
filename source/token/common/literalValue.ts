@@ -2,9 +2,9 @@
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector } from 'error';
-import { SToken, STokenSource } from '../../sToken';
+import { SToken, STokenSource } from 'sToken';
 
-import text, { TextPToken, TextXToken } from '../text';
+import { TextPToken, TextXToken, isTextPToken } from '../text';
 import misc from './misc';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken, parseGeneralEntityReference } from '../generalEntityReference';
 import { parseParameterEntityReference, ParameterEntityReferencePToken, ParameterEntityReferenceXToken } from '../parameterEntityReference';
@@ -14,9 +14,9 @@ import { GeneralEntityEndPToken, GeneralEntityEndXToken } from '../marker/genera
 
 // <typeHack>
    // type EntityReferencePToken = { type: string };
-   function isTextPToken(item: any): item is TextPToken {
-      return item.type === text.PTYPE;
-   }
+   // function isTextPToken(item: any): item is TextPToken {
+   //    return item.type === TEXT_PTOKEN;
+   // }
 // </typeHack>
 
 type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
@@ -64,7 +64,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
       let currentValue: LiteralValuePToken = [];
 
       if (container.sToken) {
-         currentValue = [ new text.PToken({ text: container.sToken }) ];
+         currentValue = [ new TextPToken({ text: container.sToken }) ];
       }
 
       // End of file.
@@ -130,7 +130,7 @@ function makeXTokenCompatible(pToken: LiteralValuePToken): LiteralValueXToken {
 
       if (isTextPToken(item)) {
          if (item.text) {
-            value.push(new text.XToken(item.text.str, item));
+            value.push(new TextXToken(item.text.str, item));
          }
       } else {
          value.push(item.toXToken());

@@ -4,9 +4,10 @@
 import { EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
-import { GeneralEntityDeclarationPToken, text } from 'token';
+import { GeneralEntityDeclarationPToken } from 'token';
 
 import { parseDeclaration } from '../declaration';
+import { TextPToken } from 'source/token/text';
 
 describe('declaration (integration)', () => {
 
@@ -32,7 +33,7 @@ describe('declaration (integration)', () => {
                declType: SToken.fromString('ENTITY'),
                declTypeSpace: SToken.fromString(' '),
                name: SToken.fromString('foo'),
-               value: [ new text.PToken({ text: SToken.fromString('theValue') }) ],
+               value: [ new TextPToken({ text: SToken.fromString('theValue') }) ],
                close: SToken.fromString('>'),
             }));
 

@@ -8,11 +8,11 @@ import { MockSTokenSource } from 'sToken-test';
 import { parseWordList, WordListPToken, WordListType, ENUMERATION_PTOKEN } from '../wordList';
 import { WellFormedError } from '../../../error/index';
 
-import text from '../../text';
 import unassigned, { UnassignedType, UnassignedArray } from '../../common/unassigned';
 
 import misc from '../../common/misc';
 import { ParameterEntityReferencePToken } from 'source/token/parameterEntityReference';
+import { TextPToken } from '../../text';
 
 describe('wordList (unit)', () => {
    let wlPToken: WordListPToken;
@@ -240,7 +240,7 @@ describe('wordList (unit)', () => {
          });
          unValues = [ {
             type: UnassignedType.WORD,
-            token: new text.PToken({ text: SToken.fromString('foo') })
+            token: new TextPToken({ text: SToken.fromString('foo') })
          } ];
       });
 
@@ -386,7 +386,7 @@ describe('wordList (unit)', () => {
          // insert a second item which, in this mocked case, will loop around to a default new word
          unValues.push({
             type: UnassignedType.WORD,
-            token: new text.PToken({ text: SToken.fromString('foo') })
+            token: new TextPToken({ text: SToken.fromString('foo') })
          });
 
          wlPToken.newWithUnassigned(unValues);
@@ -408,7 +408,7 @@ describe('wordList (unit)', () => {
          // insert a second item which, in this mocked case, will loop around to a default new word
          unValues.push({
             type: UnassignedType.WORD,
-            token: new text.PToken({ text: SToken.fromString('foo') })
+            token: new TextPToken({ text: SToken.fromString('foo') })
          });
 
          wlPToken.newWithUnassigned(unValues);

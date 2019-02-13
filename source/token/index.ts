@@ -11,7 +11,6 @@ import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
 import * as elementStart from './elementStart';
 import * as elementEnd from './elementEnd';
-import text from './text';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 
@@ -40,6 +39,7 @@ export * from './notationDeclaration';
 export * from './parameterEntityDeclaration';
 export * from './parameterEntityReference';
 export * from './space';
+export * from './text';
 export * from './textDeclaration';
 export * from './xmlDeclaration';
 
@@ -57,7 +57,6 @@ export {
    elementStart,
    elementEnd,
    elementDeclaration,
-   text,
 
    unassigned,
    literalValue,

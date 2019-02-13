@@ -6,7 +6,8 @@ import { STokenSource } from '../sToken';
 import {
    parseCharRef,
    parseParameterEntityReference,
-   text,
+   parseText,
+   TextPToken,
 } from '../token';
 
 type Options = {
@@ -45,7 +46,11 @@ class PTokenFromLiteralStream extends stream.Transform {
          }
 
          if (sToken.str !== '&') {
-            text.parse(this.sTokenSource, this.terminators, (pToken) => this.push(pToken));
+            parseText(this.sTokenSource, this.terminators, (pToken) => {
+               if (pToken) {
+                  this.push(pToken);
+               }
+            });
             return;
          }
 
@@ -56,7 +61,7 @@ class PTokenFromLiteralStream extends stream.Transform {
             }
 
             this.sTokenSource.extractNoParams('char', (sToken) => {
-               this.push(new text.PToken({ text: sToken! }));
+               this.push(new TextPToken({ text: sToken! }));
             });
          });
       });

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
-import { SToken, STokenSource } from '../../sToken';
+import { SToken, STokenSource } from 'sToken';
 import * as token from '../../token';
 import {
    comment,

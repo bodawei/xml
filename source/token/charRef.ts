@@ -144,7 +144,6 @@ function pTokenToXToken(pToken: CharRefPToken): CharRefXToken {
    return new CharRefXToken(character, pToken);
 }
 
-
 /**********************************************************************\
  sTokensFromPToken() Returns the ordered array of the component STokens
 \**********************************************************************/

@@ -4,9 +4,9 @@
 
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { WellFormedError } from '../../error';
+import { WellFormedError } from 'error';
 
 import declaration from '../bridge/baseDeclaration';
 import * as docTypeStart from '../docTypeStart';

@@ -2,21 +2,21 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../../error';
-import { defaultExtractors } from '../../extractor';
-import { SToken, STokenSource } from '../../sToken';
+import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
+import { defaultExtractors } from 'extractor';
+import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
 import { parseEntityDeclaration } from '../entityDeclaration';
 import { GeneralEntityDeclarationPToken, GENERAL_ENTITY_DECLARATION_PTOKEN } from '../generalEntityDeclaration';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import text from '../text';
 import unassigned, { UnassignedType } from '../common/unassigned';
 
 import helper from './helper';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { TextPToken } from '../text';
 
 describe('entityDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
@@ -235,7 +235,7 @@ describe('entityDeclaration (integration)', () => {
                   type: UnassignedType.LITERAL,
                   token: {
                      openQuote: new SToken('"', '"', new Range(new EntityLocation())),
-                     value: [ new text.PToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
+                     value: [ new TextPToken({ text: new SToken('entityValue', 'entityValue', new Range(new EntityLocation())) }) ],
                      closeQuote: new SToken('"', '"', new Range(new EntityLocation())),
                   }
                }, {

@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, Offset, Range, StringBundle } from 'basic';
-import { SToken } from '../../sToken';
+import { SToken } from 'sToken';
 
 import { BaseError, MessageCache } from '../BaseError';
 

@@ -2,13 +2,13 @@
 /* eslint-env jasmine */
 
 import { EntityMetaData } from 'basic';
-import { defaultExtractors } from '../../../extractor';
+import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
 
 import { ParameterEntityReferencePToken } from '../../parameterEntityReference';
-import text from '../../text';
 import unassigned from '../unassigned';
+import { TextPToken } from '../../text';
 
 describe('unassigned (integration)', () => {
    let emd: EntityMetaData;
@@ -53,7 +53,7 @@ describe('unassigned (integration)', () => {
                type: 'literal',
                token: {
                   openQuote: makeSToken('"'),
-                  value: [ new text.PToken({ text: makeSToken('double') }) ],
+                  value: [ new TextPToken({ text: makeSToken('double') }) ],
                   closeQuote: makeSToken('"'),
                }
             },
@@ -62,7 +62,7 @@ describe('unassigned (integration)', () => {
                type: 'literal',
                token: {
                   openQuote: makeSToken('\''),
-                  value: [ new text.PToken({ text: makeSToken('single') }) ],
+                  value: [ new TextPToken({ text: makeSToken('single') }) ],
                   closeQuote: makeSToken('\''),
                },
             }, {

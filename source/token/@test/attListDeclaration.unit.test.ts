@@ -9,11 +9,11 @@ import { WellFormedError, XmlWarning } from 'error';
 
 import attListDeclaration, { AttListPToken, AttDefPToken } from '../attListDeclaration';
 import declaration from '../bridge/baseDeclaration';
-import text from '../text';
 import unassigned, { UnassignedArray } from '../common/unassigned';
 import literal from '../common/literal';
 import * as wordList from '../common/wordList';
 import misc from '../common/misc';
+import { TextPToken, TextXToken } from '../text';
 
 const { WordListPToken, WordListType } = wordList;
 type LiteralOptions = {
@@ -239,7 +239,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('parses an attribute list with a literal even with #REQUIRED', () => {
          literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
-            options.pToken.value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
+            options.pToken.value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
             done();
          });
          const mockSource = new MockSTokenSource([
@@ -257,7 +257,7 @@ describe('attListDeclaration (unit)', () => {
          ]);
          const makeSToken = makeSTokenMaker(undefined, 33, 0, 33);
          aldPToken.close = makeSToken('>');
-         aldPToken.attDefs[0].value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
+         aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
@@ -267,7 +267,7 @@ describe('attListDeclaration (unit)', () => {
 
       it('parses an attribute list with a literal with no defaultType at all', () => {
          literalParseSpy.and.callFake((_1: any, options: LiteralOptions, done: () => void) => {
-            options.pToken.value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
+            options.pToken.value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
             done();
          });
          const mockSource = new MockSTokenSource([
@@ -285,7 +285,7 @@ describe('attListDeclaration (unit)', () => {
          aldPToken.close = makeSToken('>');
          delete aldPToken.attDefs[0].defaultType;
          delete aldPToken.attDefs[0].postDefaultTypeSpace;
-         aldPToken.attDefs[0].value = [ new text.PToken({ text: SToken.fromString('dummyValue') }) ];
+         aldPToken.attDefs[0].value = [ new TextPToken({ text: SToken.fromString('dummyValue') }) ];
 
          attListDeclaration.parse(mockSource, new declaration.PToken(), callback);
          mockSource.respondInAsyncTime();
@@ -1671,13 +1671,12 @@ describe('attListDeclaration (unit)', () => {
       });
 
       it('creates an XToken with the provided attributes', () => {
-         const textValue = new text.PToken();
          aldPToken.attDefs.push({
             name: SToken.fromString('attr2'),
             type: SToken.fromString('bogus'),
             defaultType: SToken.fromString('#FIXED'),
             openQuote: SToken.fromString('"'),
-            value: [ new text.PToken({ text: SToken.fromString('x') }) ],
+            value: [ new TextPToken({ text: SToken.fromString('x') }) ],
             closeQuote: SToken.fromString('"'),
          });
          const xToken = attListDeclaration.pTokenToXToken(aldPToken);
@@ -1694,7 +1693,7 @@ describe('attListDeclaration (unit)', () => {
                name: 'attr2',
                type: 'bogus',
                defaultType: '#FIXED',
-               value: [ text.makeXToken(new text.PToken({ text: SToken.fromString('x') })) ],
+               value: [ new TextXToken('x', new TextPToken({ text: SToken.fromString('x') })) ],
             }],
             pToken: aldPToken,
          });

@@ -14,10 +14,7 @@ import {
    docTypeEnd,
    elementDeclaration,
    elementStart,
-   GENERAL_ENTITY_END_XTOKEN,
-   GENERAL_ENTITY_START_XTOKEN,
    ParameterEntityEndPToken,
-   text,
    unassigned,
    literalValue,
 
@@ -30,6 +27,7 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartPToken,
    ParameterEntityStartXToken,
+   TEXT_PTOKEN,
    XMLDECL_XTOKEN,
    XmlDeclarationXToken,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
@@ -49,7 +47,6 @@ import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
 import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
-import { checkXmlLangWellFormed } from '../token/common/langAttribute';
 
 import EntityManager from './EntityManager';
 import { UnassignedArray, UnassignedType } from '../token/common/unassigned';
@@ -324,7 +321,7 @@ class NodeStream extends stream.Transform {
 
       for (const val of entityValue) {
          switch (val.type) {
-            case text.PTYPE:
+            case TEXT_PTOKEN:
                result.push({
                   type: UnassignedType.WORD, // could be space!
                   token: val as TextPToken, // typeHack

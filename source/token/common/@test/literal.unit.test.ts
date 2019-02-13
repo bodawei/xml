@@ -9,7 +9,7 @@ import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 
 import literal, { LiteralPToken } from '../literal';
 import literalValue, { LiteralValuePToken } from '../literalValue';
-import text, { TextPToken } from '../../text';
+import { TextPToken, TextXToken } from '../../text';
 import { GeneralEntityReferencePToken, GeneralEntityReferenceXToken } from 'source/token/generalEntityReference';
 
 type LiteralValueCallback = (value: LiteralValuePToken) => void;
@@ -22,7 +22,7 @@ describe('literal (unit)', () => {
       literalPToken = {
          type: 'foo',
          openQuote: expectedSToken('"'),
-         value: [ new text.PToken({ text: expectedSToken('xxx') }) ],
+         value: [ new TextPToken({ text: expectedSToken('xxx') }) ],
          closeQuote: expectedSToken('"'),
       };
    });
@@ -35,8 +35,7 @@ describe('literal (unit)', () => {
 
       beforeEach(() => {
          litCallback = jasmine.createSpy('callbackSpy');
-         textPToken = new text.PToken();
-         textPToken.text = SToken.fromString('test');
+         textPToken = new TextPToken({ text: SToken.fromString('test') });
          valueParseSpy = spyOn(literalValue, 'parse')
          valueParseSpy.and.callFake((_1: any, _2: any, callback: LiteralValueCallback) => callback([ textPToken ]));
       });
@@ -239,7 +238,7 @@ describe('literal (unit)', () => {
       });
 
       it('returns the string from the PToken result', () => {
-         litValMakeCompatSpy.and.returnValue([ new text.XToken('xxx', new text.PToken()) ])
+         litValMakeCompatSpy.and.returnValue([ new TextXToken('xxx', new TextPToken({ text: SToken.fromString('xxx') })) ])
          const result = literal.makeOneTokenCompatible(literalPToken);
 
          expect(result).toEqual('xxx');

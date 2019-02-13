@@ -5,7 +5,7 @@
 import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
-import { WellFormedError, XmlWarning } from '../../error';
+import { WellFormedError, XmlWarning } from 'error';
 
 import misc from '../common/misc';
 import * as elementEnd from '../elementEnd';
