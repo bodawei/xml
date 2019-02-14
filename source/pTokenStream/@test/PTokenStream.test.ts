@@ -3,14 +3,13 @@
 
 import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from 'sToken';
-import * as token from '../../token';
+import * as token from 'token';
 import {
-   comment,
    elementEnd,
    elementStart,
-} from '../../token';
-import * as tokenStuff from '../../token';
-import * as instruction from '../../token';
+} from 'token';
+import * as tokenStuff from 'token';
+import * as instruction from 'token';
 
 import PTokenStream from '../PTokenStream';
 
@@ -115,12 +114,12 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls comment.parse()', (done) => {
-      spyOn(comment, 'parse').and.callThrough();
+      spyOn(tokenStuff, 'parseComment').and.callThrough();
       pTokenStream.addText('<!--asdf-->');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(comment.parse).toHaveBeenCalled();
+         expect(tokenStuff.parseComment).toHaveBeenCalled();
          done();
       });
    });

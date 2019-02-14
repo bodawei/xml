@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import * as tokenNs from 'token';
+import { CommentXToken } from 'token';
 import attListDecl, { AttListPToken } from '../../token/attListDeclaration';
 import elementDeclaration, { ElementDeclarationPToken } from '../../token/elementDeclaration';
 
@@ -34,7 +35,7 @@ describe('FixingStream (unit)', () => {
    }
 
    it('passes a comment through', (done) => {
-      const before = new tokenNs.comment.CommentXToken('elName');
+      const before = new CommentXToken('elName');
 
       fs.write(before);
       fs.end();

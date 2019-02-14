@@ -8,7 +8,6 @@ import {
    declaration,
 
    attListDeclaration,
-   comment,
    docTypeStart,
    docTypeEnd,
    elementDeclaration,
@@ -17,6 +16,7 @@ import {
 
    CdataXToken,
    CharDataXToken,
+   CommentXToken,
    SpaceXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
@@ -26,8 +26,6 @@ import {
    XmlDeclarationXToken,
    TextXToken,
    TextPToken,
-
-   TEXT_PTOKEN,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
@@ -101,7 +99,7 @@ describe('PToXTokenStream (integration)', () => {
    });
 
    it('tokenizes a comment', (done) => {
-      expectInputToProduce('<!--foo-->', new comment.CommentXToken('foo'), done);
+      expectInputToProduce('<!--foo-->', new CommentXToken('foo'), done);
    });
 
    it('tokenizes a DOCTYPE start and end', (done) => {

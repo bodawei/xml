@@ -10,7 +10,6 @@ import { SToken } from 'sToken';
 import nameList, { XNameList } from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
-   comment,
    docTypeEnd,
    docTypeStart,
    elementStart,
@@ -22,6 +21,7 @@ import {
 
    CdataXToken,
    CharDataXToken,
+   CommentXToken,
    SpaceXToken,
    ExternalSubsetStartXToken,
    ExternalSubsetEndXToken,
@@ -37,7 +37,7 @@ import {
    ParameterEntityDeclarationXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityReferencePToken,
-} from '../../token';
+} from 'token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementStart, ElementStartPToken } from '../../token/elementStart';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
@@ -3376,7 +3376,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
       describe('content', () => {
          describe('ANY', () => {
-            const commentToken = new comment.CommentXToken('testComment');
+            const commentToken = new CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
             const elementStartToken = new elementStart.XToken('one', []);
@@ -3623,7 +3623,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
-               const commentToken = new comment.CommentXToken('stuff');
+               const commentToken = new CommentXToken('stuff');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.0, 1));
@@ -3667,7 +3667,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   repeat: 'ONE',
                   listType: 'CHOICE'
                });
-               const commentToken = new comment.CommentXToken('stuff');
+               const commentToken = new CommentXToken('stuff');
                const elStart = new elementStart.XToken('one', []);
 
                validator.write(new EntityMetaData(undefined, 1.0, 3));
@@ -3763,7 +3763,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          describe('CHILDREN', () => {
-            const commentToken = new comment.CommentXToken('testComment');
+            const commentToken = new CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
             const nonWhiteChars = new CharDataXToken('one');

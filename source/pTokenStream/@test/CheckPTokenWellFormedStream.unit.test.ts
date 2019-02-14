@@ -8,7 +8,6 @@ import {
    declaration,
 
    attListDeclaration,
-   comment,
    docTypeEnd,
    docTypeStart,
    elementEnd,
@@ -18,6 +17,7 @@ import {
 
    CdataPToken,
    CharDataPToken,
+   CommentPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
@@ -224,21 +224,20 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken: Token;
 
       beforeEach(() => {
-         pToken = {
-            type: comment.PTYPE,
+         pToken = new CommentPToken({
+            open: makeSToken('<!--'),
             text: makeSToken('good'),
             close: makeSToken('-->'),
-         };
+         });
       });
 
       it('calls comment.checkWellFormed() when encountering a COMMENT', () => {
-         const cwfSpy = spyOn(comment, 'checkWellFormed');
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

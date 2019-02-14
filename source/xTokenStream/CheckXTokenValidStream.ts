@@ -6,7 +6,6 @@ import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
 import { SToken } from '../sToken';
 import {
-   comment,
    docTypeEnd,
    docTypeStart,
    elementStart,
@@ -33,6 +32,7 @@ import {
 
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
+   COMMENT_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
@@ -339,7 +339,7 @@ class CheckXTokenValidStream extends stream.Transform {
          const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
          let error;
 
-         if (allowed && (xToken.type === CDATA_XTOKEN || xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === comment.XTYPE)) {
+         if (allowed && (xToken.type === CDATA_XTOKEN || xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === COMMENT_XTOKEN)) {
             return;
          }
 
@@ -365,7 +365,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case PROCESSING_INSTRUCTION_XTOKEN:
                this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
                break;
-            case comment.XTYPE:
+            case COMMENT_XTOKEN:
                this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
                break;
             default:
@@ -388,7 +388,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case GENERAL_ENTITY_END_XTOKEN:
                // These are all OK here
                break;
-            case comment.XTYPE:
+            case COMMENT_XTOKEN:
             case PROCESSING_INSTRUCTION_XTOKEN:
                const expandedMixedAllowance = this.emd.isVersion1dot0 && this.emd.revision >= 3 || this.emd.isVersion1dot1;
 
@@ -431,7 +431,7 @@ class CheckXTokenValidStream extends stream.Transform {
          const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
          let error;
 
-         if (allowed && (xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === comment.XTYPE)) {
+         if (allowed && (xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === COMMENT_XTOKEN)) {
             return;
          }
          const currentState = declInfo.graph.states[context.stateId];
@@ -474,7 +474,7 @@ class CheckXTokenValidStream extends stream.Transform {
             case PROCESSING_INSTRUCTION_XTOKEN:
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
                break;
-            case comment.XTYPE:
+            case COMMENT_XTOKEN:
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
                break;
             default:

@@ -37,8 +37,8 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
    TextXToken,
-} from '../../token';
-import * as xToken from '../../token';
+} from 'token';
+import * as xToken from 'token';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;

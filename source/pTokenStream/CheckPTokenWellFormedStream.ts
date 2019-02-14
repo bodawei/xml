@@ -10,7 +10,6 @@ import {
    declaration,
 
    attListDeclaration,
-   comment,
    docTypeEnd,
    docTypeStart,
    elementDeclaration,
@@ -20,6 +19,7 @@ import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
    CHARREF_PTOKEN,
+   COMMENT_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
@@ -133,11 +133,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
             break;
-         case comment.PTYPE:
+         case COMMENT_PTOKEN:
             if (this._state === CheckWellFormedState.START) {
                errorCollector.report(WellFormedError.ID.COMMENT_INVALID_CONTEXT);
             }
-            comment.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
+            (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
             break;
          case XMLDECL_PTOKEN:
             // §2.8

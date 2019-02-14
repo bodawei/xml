@@ -5,8 +5,8 @@ import { Range, EntityLocation } from 'basic';
 import { SToken } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
-import * as tokenStuff from '../../token';
-import { TextPToken } from '../../token';
+import * as tokenStuff from 'token';
+import { TextPToken } from 'token';
 import PTokenFromLiteralStream from '../PTokenFromLiteralStream';
 
 describe('PTokenFromLiteralStream (unit)', () => {

@@ -2,7 +2,7 @@
 
 import stream from 'readable-stream';
 
-import { comment, CommentXToken } from '../token';
+import { COMMENT_XTOKEN, CommentXToken } from '../token';
 
 const HEX_REGEX = /^x([A-Fa-f0-9]+);(.*)$/;
 const DEC_REGEX = /^([0-9]+);(.*)$/;
@@ -25,7 +25,7 @@ class CommentFixingStream extends stream.Transform {
    }
 
    _transform(token: any, encoding: string, callback:() => void) {
-      if (token.type === comment.XTYPE && token.text.indexOf('&#') !== -1) {
+      if (token.type === COMMENT_XTOKEN && token.text.indexOf('&#') !== -1) {
          token = replaceCharRefsInComment(token);
       }
 

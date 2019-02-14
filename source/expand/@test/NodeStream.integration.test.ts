@@ -7,7 +7,7 @@ import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
-import * as tokenNs from '../../token';
+import * as tokenNs from 'token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
@@ -27,7 +27,7 @@ import {
    XmlDeclarationXToken,
    TextPToken,
    TextXToken,
-} from '../../token';
+} from 'token';
 
 import EntityManager from '../EntityManager';
 import NodeStream from '../NodeStream';

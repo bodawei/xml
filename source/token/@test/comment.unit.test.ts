@@ -9,11 +9,7 @@ import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'sToken-test';
 import {
    CommentPToken,
    CommentXToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-   sTokensFromPToken,
-   PTYPE
+   parseComment,
 } from '../comment';
 import misc from '../common/misc';
 
@@ -23,12 +19,11 @@ describe('comment (unit)', () => {
 
    beforeEach(() => {
       expectedSToken = makeSTokenMaker();
-      commentPToken = {
-         type: PTYPE,
+      commentPToken = new CommentPToken({
          open: expectedSToken('<!--'),
          text: [ expectedSToken('commentText') ],
          close: expectedSToken('-->'),
-      };
+      });
    });
 
    describe('PToken', () => {
@@ -37,7 +32,7 @@ describe('comment (unit)', () => {
 
          it('returns all the STokens', () => {
             const pToken = new CommentPToken(commentPToken);
-            const result = sTokensFromPToken(pToken);
+            const result = pToken.toSTokenArray();
             const expected = [
                pToken.open,
                pToken.text[0],
@@ -51,7 +46,7 @@ describe('comment (unit)', () => {
 
    });
 
-   describe('parse()', () => {
+   describe('parseComment()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
@@ -64,7 +59,7 @@ describe('comment (unit)', () => {
             [ '-->', 'match', '-->' ],
          ], 4, 0, 4);
 
-         parse(mockSource, commentPToken.open, callback);
+         parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
@@ -72,8 +67,7 @@ describe('comment (unit)', () => {
 
       it('parses a comment with the illegal "--" in it', () => {
          const expectedSToken = makeSTokenMaker();
-         commentPToken = {
-            type: PTYPE,
+         commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
             text: [
                expectedSToken('part1'),
@@ -81,7 +75,7 @@ describe('comment (unit)', () => {
                expectedSToken('part2'),
             ],
             close: expectedSToken('-->'),
-         };
+         });
          const mockSource = new MockSTokenSource([
             [ 'part1', 'all', [ '--' ] ],
             [ undefined, 'match', '-->' ],
@@ -90,22 +84,22 @@ describe('comment (unit)', () => {
             [ '-->', 'match', '-->' ],
          ], 4, 0, 4);
 
-         parse(mockSource, commentPToken.open, callback);
+         parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
       });
 
       it('copes with EOF', () => {
-         commentPToken.text = [];
-         commentPToken.close = undefined;
+         commentPToken.text.pop();
+         (commentPToken as any).close = undefined;
          const mockSource = new MockSTokenSource([
             [ undefined, 'all', [ '--' ] ],
             [ undefined, 'match', '-->' ],
             [ undefined, 'match', '--' ],
          ]);
 
-         parse(mockSource, commentPToken.open, callback);
+         parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
@@ -113,21 +107,20 @@ describe('comment (unit)', () => {
 
       it('copes with EOF after the first chunk of text', () => {
          const expectedSToken = makeSTokenMaker();
-         commentPToken = {
-            type: PTYPE,
+         commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
             text: [
                expectedSToken('part1'),
             ],
             close: undefined,
-         };
+         });
          const mockSource = new MockSTokenSource([
             'part1',
             [ undefined, 'match', '-->' ],
             [ undefined, 'match', '--' ],
          ], 4, 0, 4);
 
-         parse(mockSource, commentPToken.open, callback);
+         parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
@@ -135,15 +128,14 @@ describe('comment (unit)', () => {
 
       it('copes with EOF after the first chunk of text and --', () => {
          const expectedSToken = makeSTokenMaker();
-         commentPToken = {
-            type: PTYPE,
+         commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
             text: [
                expectedSToken('part1'),
                expectedSToken('--'),
             ],
             close: undefined,
-         };
+         });
          const mockSource = new MockSTokenSource([
             [ 'part1', 'all', [ '--' ] ],
             [ undefined, 'match', '-->' ],
@@ -153,7 +145,7 @@ describe('comment (unit)', () => {
             [ undefined, 'match', '--' ],
          ], 4, 0, 4);
 
-         parse(mockSource, commentPToken.open, callback);
+         parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
@@ -172,11 +164,10 @@ describe('comment (unit)', () => {
       });
 
       it('asks the misc.checkWellFormedText() to validate the text', () => {
-         commentPToken.text = [
-            commentPToken.open,  // just need another token here
-            expectedSToken('commentText'),
-         ];
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.text.pop();
+         commentPToken.text.push(commentPToken.open);  // just need another token here
+         commentPToken.text.push(expectedSToken('commentText'));
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(misc.checkWellFormedText)
             .toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, emd);
@@ -188,7 +179,7 @@ describe('comment (unit)', () => {
          commentPToken.text[0].str += '-';
          commentPToken.text[0].originalStr += '-';
 
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
@@ -202,7 +193,7 @@ describe('comment (unit)', () => {
          commentPToken.text[0].originalStr += '-';
          commentPToken.text[0].ranges = [];
 
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_ENDS_WITH_HYPHEN,
@@ -215,7 +206,7 @@ describe('comment (unit)', () => {
          commentPToken.text.push(expectedSToken('--'));
          commentPToken.text.push(expectedSToken(' illegal'));
 
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_DOUBLE_HYPHEN,
@@ -225,9 +216,9 @@ describe('comment (unit)', () => {
       });
 
       it('reports an error when there was no closing', () => {
-         delete commentPToken.close;
+         delete (commentPToken as any).close;
 
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,
@@ -237,25 +228,11 @@ describe('comment (unit)', () => {
          });
       });
 
-      it('reports an error when there was no text and no closing', () => {
-         delete commentPToken.text;
-         delete commentPToken.close;
-
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
-
-         expect(mockErrorCollector).toReportError({
-            id: WellFormedError.ID.COMMENT_NO_CLOSE,
-            params: undefined,
-            position: undefined,
-            lastPosition: commentPToken.open,
-         });
-      });
-
       it('reports an error when there was an empty text and no closing', () => {
-         commentPToken.text = [];
-         delete commentPToken.close;
+         commentPToken.text.pop();
+         delete (commentPToken as any).close;
 
-         checkWellFormed(commentPToken, mockErrorCollector, emd);
+         commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.COMMENT_NO_CLOSE,
@@ -267,32 +244,24 @@ describe('comment (unit)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
+   describe('toXToken()', () => {
 
       it('returns comment with the text of the comment', () => {
-         const token = pTokenToXToken(commentPToken);
+         const token = commentPToken.toXToken();
 
          expect(token.text).toEqual('commentText');
       });
 
-      it('returns the text as an empty string when nothing was found in the source', () => {
-         delete commentPToken.text;
-
-         const token = pTokenToXToken(commentPToken);
-
-         expect(token.text).toEqual('');
-      });
-
       it('returns the text as an empty string when no text values present', () => {
-         commentPToken.text = [];
+         commentPToken.text.pop();
 
-         const token = pTokenToXToken(commentPToken);
+         const token = commentPToken.toXToken();
 
          expect(token.text).toEqual('');
       });
 
       it('returns a comment token with all the expected values', () => {
-         const token = pTokenToXToken(commentPToken);
+         const token = commentPToken.toXToken();
 
          expect(token).toEqual(new CommentXToken('commentText', commentPToken));
       });
@@ -306,7 +275,7 @@ describe('comment (unit)', () => {
             ],
             close: expectedSToken('-->'),
          });
-         const token = pTokenToXToken(pToken);
+         const token = pToken.toXToken();
 
          expect(token).toEqual(new CommentXToken('part1--', pToken));
       });

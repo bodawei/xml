@@ -4,13 +4,14 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData } from 'basic';
-import { PTokenStream } from '../../pTokenStream';
-import * as tokens from '../../token';
+import * as tokens from 'token';
 import {
    CharDataXToken,
+   CommentXToken,
    XmlDeclarationXToken
-} from '../../token';
+} from 'token';
 
+import { PTokenStream } from '../../pTokenStream';
 import PToXTokenStream from '../PToXTokenStream';
 import CommentFixingStream from '../CommentFixingStream';
 
@@ -86,7 +87,7 @@ describe('CommentFixingStream (integration)', () => {
 
          gatherTokens(cf, (results) => {
             expect(results[1] instanceof XmlDeclarationXToken).toEqual(true);
-            expect(results[2] instanceof tokens.comment.CommentXToken).toEqual(true);
+            expect(results[2] instanceof CommentXToken).toEqual(true);
             expect(results[3] instanceof tokens.elementStart.XToken).toEqual(true);
             expect(results[4] instanceof CharDataXToken).toEqual(true);
             expect(results[5] instanceof tokens.elementEnd.XToken).toEqual(true);

@@ -1,9 +1,9 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData, Offset } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
+import { SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 import misc from './common/misc';
-import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
 const COMMENT_PTOKEN = 'COMMENT_PTOKEN';
 const COMMENT_XTOKEN = 'COMMENT_XTOKEN';
@@ -19,13 +19,12 @@ type DeliverPToken = (pToken: CommentPToken) => void;
 class CommentXToken {
    public readonly type: typeof COMMENT_XTOKEN = COMMENT_XTOKEN;
    public readonly text: string;
-   public readonly pToken?: CommentPToken;
+   public pToken?: CommentPToken;
 
    constructor(text: string, pToken?: CommentPToken) {
       this.text = text;
       this.pToken = pToken;
    }
-
 }
 
 /*
@@ -38,24 +37,31 @@ class CommentXToken {
  */
 class CommentPToken {
    public readonly type: typeof COMMENT_PTOKEN = COMMENT_PTOKEN;
-   public open: SToken;
-   public text: Array<SToken> = [];
-   public close?: SToken;
+   public readonly open: SToken;
+   public readonly text: Array<SToken> = [];
+   public readonly close?: SToken;
 
-   constructor(param: CommentPToken | {open: SToken} | SToken) {
-      if (param instanceof SToken) {
-         this.open = param;
-         return;
-      }
-
-      this.open = param.open;
-
+   constructor(param: CommentPToken | {open: SToken}) {
       Object.keys(param).forEach((key) => {
          if (key === 'type') {
             return;
          }
          (this as any)[key] = (param as any)[key];
       });
+
+      this.open = param.open;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken() {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
@@ -74,13 +80,16 @@ class CommentPToken {
          Lax: Comment ::= '<!--' Char* '-->'
 \**********************************************************************/
 
-function parse(source: STokenSource, commentOpen: SToken, deliverPToken: DeliverPToken) {
-   const pToken = new CommentPToken(commentOpen);
+function parseComment(source: STokenSource, commentOpen: SToken, deliverPToken: DeliverPToken) {
+   const pToken = {
+      open: commentOpen,
+      text: [],
+   };
 
    extractCommentContent(source, pToken, deliverPToken);
 }
 
-function extractCommentContent(source: STokenSource, pToken: CommentPToken, deliverPToken: DeliverPToken) {
+function extractCommentContent(source: STokenSource, pToken: { open: SToken, [key: string]: any }, deliverPToken: DeliverPToken) {
    source.extract('all', [ '--' ], (textSToken) => {
       if (textSToken) {
          pToken.text.push(textSToken);
@@ -90,13 +99,13 @@ function extractCommentContent(source: STokenSource, pToken: CommentPToken, deli
          pToken.close = sToken;
 
          if (sToken) {
-            deliverPToken(pToken);
+            deliverPToken(new CommentPToken(pToken));
             return;
          }
 
          source.extract('match', '--', (dashToken) => {
             if (!dashToken) {
-               deliverPToken(pToken);
+               deliverPToken(new CommentPToken(pToken));
             } else {
                pToken.text.push(dashToken);
                extractCommentContent(source, pToken, deliverPToken);
@@ -149,7 +158,7 @@ function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaDa
 \**********************************************************************/
 
 function pTokenToXToken(pToken: CommentPToken) {
-   const texts = pToken.text || [];
+   const texts = pToken.text;
    const combinedTexts = texts.map((item) => item.str);
 
    return new CommentXToken(combinedTexts.join(''), pToken);
@@ -170,13 +179,10 @@ function sTokensFromPToken(pToken: CommentPToken): ReadonlyArray<SToken> {
 }
 
 export {
-   COMMENT_PTOKEN as PTYPE,
-   COMMENT_XTOKEN as XTYPE,
+   COMMENT_PTOKEN,
+   COMMENT_XTOKEN,
    CommentPToken,
    CommentXToken,
 
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-   sTokensFromPToken,
+   parseComment,
 };

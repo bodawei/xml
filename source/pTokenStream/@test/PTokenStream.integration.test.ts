@@ -15,7 +15,7 @@ import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
-} from '../../token';
+} from 'token';
 
 type Token = { type: string };
 type TokenArray = Array<Token>;

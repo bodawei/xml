@@ -7,7 +7,7 @@ import { defaultExtractors } from 'extractor';
 import { SToken, STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import { CommentPToken, parse, checkWellFormed, PTYPE } from '../comment';
+import { CommentPToken, parseComment } from '../comment';
 
 describe('comment (integration)', () => {
    let commentPToken: CommentPToken;
@@ -21,7 +21,7 @@ describe('comment (integration)', () => {
          text: [ expectedSToken('my comment') ],
          close: expectedSToken('-->'),
       });
-      commentPToken.open = expectedSToken('<!--');
+      (commentPToken as any).open = expectedSToken('<!--');
    });
 
    describe('parse()', () => {
@@ -31,7 +31,7 @@ describe('comment (integration)', () => {
          source.addText('my comment-->');
          source.endText();
 
-         parse(source, commentPToken.open, (parsing) => {
+         parseComment(source, commentPToken.open, (parsing) => {
             expect(parsing).toEqual(commentPToken);
             done();
          });
@@ -41,7 +41,6 @@ describe('comment (integration)', () => {
          const source = new STokenSource(defaultExtractors, emd);
          const expectedSToken = makeSTokenMaker();
          const pToken = new CommentPToken({
-            type: PTYPE,
             open: commentPToken.open,
             text: [
                expectedSToken('my '),
@@ -54,7 +53,7 @@ describe('comment (integration)', () => {
          source.addText('my --comment--');
          source.endText();
 
-         parse(source, pToken.open, (parsing) => {
+         parseComment(source, pToken.open, (parsing) => {
             expect(parsing).toEqual(pToken);
             done();
          });
@@ -69,10 +68,10 @@ describe('comment (integration)', () => {
          source.addText('x\u0000y-->');
          source.endText();
 
-         parse(source, commentPToken.open, (parsing) => {
+         parseComment(source, commentPToken.open, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            checkWellFormed(parsing, ec, emd);
+            parsing.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.CHARDATA_INVALID_CHAR);
             done();

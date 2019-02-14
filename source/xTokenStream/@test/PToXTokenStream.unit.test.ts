@@ -6,7 +6,6 @@ import {
    declaration,
 
    attListDeclaration,
-   comment,
    elementEnd,
    elementStart,
    elementDeclaration,
@@ -25,6 +24,7 @@ import {
    InternalSubsetEndXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
+   CommentPToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -90,13 +90,13 @@ describe('PToXTokenStream (unit)', () => {
    });
 
    it('calls comment.pTokenToXToken()', () => {
-      spyOn(comment, 'pTokenToXToken');
-      const pToken = { type: comment.PTYPE };
+      const pToken = new CommentPToken({ open: SToken.fromString('<!--') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(comment.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls elementStart.pTokenToXToken()', () => {
