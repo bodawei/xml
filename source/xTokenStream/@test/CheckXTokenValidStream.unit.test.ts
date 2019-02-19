@@ -40,6 +40,7 @@ import {
    ParameterEntityDeclarationXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityReferencePToken,
+   CharRefXToken,
 } from 'token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
@@ -77,7 +78,33 @@ function toHaveError(util: any) {
 function toBeErrorFree() {
    return {
       compare: (actual: any) => {
-         let error: XmlWarning | ValidityError | void;
+         let error: ValidityError | WellFormedError | void;
+         let message: string;
+
+         actual.forEach((token: any) => {
+            if (token instanceof ValidityError || token instanceof WellFormedError) {
+               error = token;
+            }
+         });
+
+         if (!error!) {
+            message = `Expected to find one or more XmlErrors.`;
+         } else {
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}.`; // typeHack
+         }
+
+         return {
+            pass: !error!,
+            message: message,
+         };
+      },
+   };
+}
+
+function toBeErrorAndWarningFree() {
+   return {
+      compare: (actual: any) => {
+         let error: XmlWarning | ValidityError | WellFormedError | void;
          let message: string;
 
          actual.forEach((token: any) => {
@@ -104,6 +131,7 @@ beforeEach(() => {
    jasmine.addMatchers({
       toHaveError,
       toBeErrorFree,
+      toBeErrorAndWarningFree,
    });
 });
 
@@ -140,6 +168,13 @@ describe('CheckXTokenValidStream (unit)', () => {
          for (const expectedVal of arrayExpected) {
             (expect(tokens) as any).toHaveError(expectedVal); // typeHack
          }
+         done();
+      });
+   }
+
+   function expectNoErrorsOrWarnings(validator: CheckXTokenValidStream, done: () => void) {
+      gatherTokens(validator, (tokens) => {
+         (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
          done();
       });
    }
@@ -213,7 +248,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          validator.write(nTwo);
          validator.end();
 
-         expectNoErrors(validator, done);
+         expectNoErrorsOrWarnings(validator, done);
       });
 
    });
@@ -244,7 +279,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(startToken);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports an error if an attribute in the token was not declared in the corresponding ATTLIST', (done) => {
@@ -271,7 +306,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(startToken);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('allows for there not being an ATTLIST', (done) => {
@@ -283,7 +318,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(startToken);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('allows for an empty pToken', (done) => {
@@ -354,7 +389,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(startToken);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          describe('normalization', () => {
@@ -467,7 +502,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                }]));
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('treats an unknown attribute as CDATA', (done) => {
@@ -659,7 +694,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports no error if a #FIXED attribute is not specified on the start attribute', (done) => {
@@ -677,7 +712,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an attribute default must be added, and the declration was external (§2.9)', (done) => {
@@ -721,7 +756,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken1);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
          });
 
@@ -910,7 +945,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an IDREF value is not a name', (done) => {
@@ -982,7 +1017,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endElName);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports no error if an IDREF references an ID named after the IDREF is found', (done) => {
@@ -1012,7 +1047,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endElName);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an IDREF references an ID that is never found', (done) => {
@@ -1112,7 +1147,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
@@ -1296,7 +1331,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if a the attribute value is not an Nmtoken', (done) => {
@@ -1377,7 +1412,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error when the enumeration is empty so any notation value is illegal', (done) => {
@@ -1445,7 +1480,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(startToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports no error when an the enumeration is empty', (done) => {
@@ -1574,7 +1609,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(attDecl);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports a warning if the related ELEMENT declaration is not present', (done) => {
@@ -1601,7 +1636,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(attListDecl);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports no errors if an ID attribute is well defined', (done) => {
@@ -1617,7 +1652,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(attListDecl);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports an error if an attribute is of type ID but does not have value #IMPLIED or #REQUIRED', (done) => {
@@ -1680,7 +1715,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports no error on an enumeration declaration with just preserve', (done) => {
@@ -1697,7 +1732,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error the xml:space type is not an enumeration', (done) => {
@@ -2057,7 +2092,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
          });
@@ -2166,7 +2201,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(attListDecl);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
          });
@@ -2273,7 +2308,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if a 1.0/1 ATTLISTs NOTATION declaration has duplicate names', (done) => {
                setupDuplicateNotationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if a 1.0/3 ATTLISTs NOTATION declaration has duplicate names', (done) => {
@@ -2295,7 +2330,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if an 1.0/1 ATTLIST has more than one NOTATION attribute', (done) => {
                setup(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an 1.0/>1 ATTLIST has more than one NOTATION attribute', (done) => {
@@ -2317,7 +2352,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if an 1.0/1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
                setupEmptyElement(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if an 1.0/>1 ATTLIST has more a NOTATION attribute on an EMPTY element type', (done) => {
@@ -2386,7 +2421,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if a 1.0/1 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
                setupDuplicateEnumerationValues(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if a 1.0/3 ATTLISTs ENUMERATION declaration has duplicate nmTokens', (done) => {
@@ -2422,7 +2457,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(endOfDocType);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if the default value for a enumeration attribute does not match one of the defined values', (done) => {
@@ -2551,7 +2586,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl2);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports no errors if the element has no pToken', (done) => {
@@ -2562,7 +2597,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(elDecl2);
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports an error if there is more than one ELEMENT declaration for the same element type', (done) => {
@@ -2639,7 +2674,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elDecl);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if content spec has a duplicate name', (done) => {
@@ -2705,7 +2740,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elementDecl2);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
          });
 
@@ -2764,7 +2799,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(declToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports a warning if the parameter entity expansion is empty', (done) => {
@@ -2849,7 +2884,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(declToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports a warning if the parameter entity expansion ends with a |', (done) => {
@@ -2984,7 +3019,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elementDeclaration.pTokenToXToken(pToken));
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
          });
@@ -3016,7 +3051,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports no error if the referenced entity is internally declared after multiple param entity expansions and standlone=yes (§2.9)', (done) => {
@@ -3038,7 +3073,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new GeneralEntityStartXToken('extDeclEntity'));
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('reports an error if the referenced entity is externally declared in parameter entity expansion and standlone=yes (§2.9)', (done) => {
@@ -3094,7 +3129,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             }]))
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
 
          it('is reported as an error if multiple in an attribute and all are externally declared and standlone=yes (§2.9)', (done) => {
@@ -3351,7 +3386,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.write(new InternalSubsetEndXToken());
             validator.end();
 
-            expectNoErrors(validator, done);
+            expectNoErrorsOrWarnings(validator, done);
          });
       });
 
@@ -3377,7 +3412,8 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       describe('content', () => {
-         describe('ANY', () => {
+
+         describe('ANY content', () => {
             const commentToken = new CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
@@ -3434,7 +3470,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   }
                }
 
-               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an ANY element in XML ${version}/${rev}`, (done) => {
+               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an ANY element in XML ${version}/${rev} (§3.0.0)`, (done) => {
                   const emd = new EntityMetaData(EntityKind.DOCUMENT, version, rev);
                   const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                   const startToken = new ElementStartXToken('one', []);
@@ -3448,12 +3484,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                   if (causesError) {
                      expectStream(validator, errorToken, done);
                   } else {
-                     expectNoErrors(validator, done);
+                     expectNoErrorsOrWarnings(validator, done);
                   }
                });
             });
 
-            it('reports an error if an element is used that was not declared', (done) => {
+            it('reports an error if an element is used that was not declared (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new ElementStartXToken('one', []);
                const undeclaredToken = new ElementStartXToken('two', []);
@@ -3464,11 +3500,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                const errorToken = new ValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT, [ 'one', 'two' ]);
-
                expectStream(validator, errorToken, done);
             });
 
-            it('reports an error if a completely unsupported bit of markup shows up', (done) => {
+            it('reports an error if a completely unsupported bit of markup shows up (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
                const startToken = new ElementStartXToken('one', []);
 
@@ -3478,7 +3513,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
-
                expectStream(validator, errorToken, done);
             });
 
@@ -3492,19 +3526,22 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.end();
 
                const errorToken = new ValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ 'one' ]);
-
                expectStream(validator, errorToken, done);
             });
 
-            it('reports no errors when passing char data through it', (done) => {
+            it('reports no errors when passing char data through it for 1.0/5 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'ANY');
+               const startToken = new ElementStartXToken('one', []);
                const characters = new CharDataXToken('one');
+               const charRef = new CharRefXToken('o');
 
                validator.write(elementDecl);
+               validator.write(startToken);
                validator.write(characters);
+               validator.write(charRef);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error when passing char data through it for 1.0/1 (§3.0.0)', (done) => {
@@ -3525,9 +3562,9 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          });
 
-         describe('EMPTY', () => {
+         describe('EMPTY content', () => {
 
-            it('reports an error if anything appears in an element declared to be EMPTY', (done) => {
+            it('reports an error if an element appears in an element declared to be EMPTY (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new ElementStartXToken('one', []);
                const elTwo = new ElementStartXToken('one', []);
@@ -3555,7 +3592,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports an error if space appears in an element declared to be EMPTY in 1.0/5 (§3.0.0)', (done) => {
+            it('reports an error if space appears in an element declared to be EMPTY (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new ElementStartXToken('one', []);
                const space = new SpaceXToken('  ');
@@ -3569,26 +3606,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports no error if space appears in an element declared to be EMPTY in 1.0/1 (§3.0.0)', (done) => {
-               const emd = new EntityMetaData(EntityKind.DOCUMENT, 1, 1);
-               const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
-               const elStart = new ElementStartXToken('one', []);
-               const space = new SpaceXToken('  ');
-
-               validator.write(emd);
-               validator.write(elementDecl);
-               validator.write(elStart);
-               validator.write(space);
-               validator.end();
-
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens.length).toEqual(5);
-                  expect(tokens[2].id).toEqual(XmlWarning.ID.ELEMENT_WITH_EMPTY_DECL);
-                  done();
-               });
-            });
-
-            it('reports no error if only an empty tag appears in an EMPTY element', (done) => {
+            it('reports no error if an empty element is used for an EMPTY element', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new ElementEmptyXToken('one', []);
 
@@ -3596,13 +3614,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elStart);
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens.length).toEqual(2);
-                  done();
-               });
+               expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
+            it('reports no error if only a start and end tag are used an EMPTY element (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new ElementStartXToken('one', []);
                const elEnd = new ElementEndXToken('one');
@@ -3612,10 +3627,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elEnd);
                validator.end();
 
-               gatherTokens(validator, (tokens) => {
-                  expect(tokens.length).toEqual(4);
-                  done();
-               });
+               expectNoErrors(validator, done);
             });
 
             it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
@@ -3632,7 +3644,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          });
 
-         describe('MIXED', () => {
+         describe('MIXED content', () => {
 
             it('reports an error if any element start appears in a PCDATA-only element', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
@@ -3690,7 +3702,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports an error if there is a comment found in mixed content in an old version', (done) => {
+            it('reports an error if there is a comment found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3713,7 +3725,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports an error if there is a processing instruction found in mixed content in an old version', (done) => {
+            it('reports an error if there is a processing instruction found in mixed content  in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3735,7 +3747,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports no error if there is a comment found in mixed content in newer version', (done) => {
+            it('reports no error if there is a comment found in mixed content in 1.0/3 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3753,10 +3765,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(commentToken);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports no error if there is a processing instruction found in mixed content in an newer version', (done) => {
+            it('reports no error if there is a processing instruction found in mixed content in 1.1/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3774,10 +3786,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(pi);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports no error if all the character data types are found in mixed content', (done) => {
+            it('reports no error if element, chardata, and charRef are found in mixed content in 1.0/1 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3787,18 +3799,42 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
 
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
                validator.write(new CharDataXToken('test charData'));
+               validator.write(new CharRefXToken('x'));
+               validator.write(new CharDataXToken(' '));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrorsOrWarnings(validator, done);
+            });
+
+            it('reports no error if element, chardata, charRef, and CData are found in mixed content in 1.0/5 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new CharDataXToken('test charData'));
+               validator.write(new CharRefXToken('x'));
                validator.write(new CdataXToken('test CDATA'));
                validator.write(new CharDataXToken(' '));
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports no error if entity start and end pseudo markers are found in the stream', (done) => {
+            it('reports no error if entity start and end markers are found in 1.0/5 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3815,10 +3851,10 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ElementEndXToken('one'));
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
-            it('reports an error other markup is found in mixed content', (done) => {
+            it('reports an error other markup is found in mixed content (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{
                      name: '#PCDATA',
@@ -3830,7 +3866,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
                validator.write(elementDecl);
                validator.write(new ElementStartXToken('one', []));
-               validator.write(new GeneralEntityReferenceXToken('testEntiyReference'));
+               validator.write(new elementDeclaration.XToken('two', 'ANY'));
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
@@ -3839,7 +3875,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          });
 
-         describe('CHILDREN', () => {
+         describe('ELEMENT content', () => {
             const commentToken = new CommentXToken('testComment');
             const piToken = new ProcessingInstructionXToken('test', 'pi');
             const cDataToken = new CdataXToken('testCData');
@@ -3871,10 +3907,13 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ nonWhiteChars, 1.1, 2, true ],
                [ whiteChars, 1, 5, false ],
                [ whiteChars, 1.1, 2, false ],
-               [ new SpaceXToken('  '), 1.0, 1, false ],
-               [ new GeneralEntityReferenceXToken('x'), 1.0, 1, false ],
-               [ new GeneralEntityStartXToken('y'), 1.0, 1, false ],
-               [ new GeneralEntityEndXToken('z'), 1.0, 1, false ],
+               [ new SpaceXToken('  '), 1.0, 2, false ],
+               [ new GeneralEntityReferenceXToken('x'), 1.0, 1, true ],
+               [ new GeneralEntityReferenceXToken('x'), 1.0, 3, false ],
+               [ new GeneralEntityStartXToken('y'), 1.0, 1, true ],
+               [ new GeneralEntityStartXToken('y'), 1.0, 3, false ],
+               [ new GeneralEntityEndXToken('z'), 1.0, 1, true ],
+               [ new GeneralEntityEndXToken('z'), 1.0, 3, false ],
             ];
             data.forEach(([token, version, rev, causesError]) => {
                let errorToken: ValidityError;
@@ -3884,14 +3923,12 @@ describe('CheckXTokenValidStream (unit)', () => {
                      errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, [ 'one', version.toString(), rev.toString() ]);
                   } else if (token === piToken) {
                      errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, [ 'one', version.toString(), rev.toString() ]);
-                  } else if (token === cDataToken) {
-                     errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [ 'one', version.toString(), rev.toString() ]);
-                  } else if (token === nonWhiteChars) {
+                  } else {
                      errorToken = new ValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, [ 'one', version.toString(), rev.toString() ]);
                   }
                }
 
-               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an element in XML ${version}/${rev}`, (done) => {
+               it(`${ causesError ? 'reports an error' : 'accepts'} if a ${token.type} token appears in an element in XML ${version}/${rev} (§3.0.0)`, (done) => {
                   const emd = new EntityMetaData(EntityKind.DOCUMENT, version, rev);
                   const elementDecl2 = new elementDeclaration.XToken('two', 'ANY');
                   const elementDecl1 = new elementDeclaration.XToken('one', 'CHILDREN', {
@@ -3914,9 +3951,235 @@ describe('CheckXTokenValidStream (unit)', () => {
                   if (causesError) {
                      expectStream(validator, errorToken, done);
                   } else {
-                     expectNoErrors(validator, done);
+                     expectNoErrorsOrWarnings(validator, done);
                   }
                });
+            });
+
+            it('reports an error if there is S before the first child in version 1.0/1 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new SpaceXToken(' '));
+               validator.write(new ElementStartXToken('child', []));
+               validator.write(new ElementEndXToken('child'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, []);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if there is S before the last child in version 1.0/1 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new ElementStartXToken('child', []));
+               validator.write(new ElementEndXToken('child'));
+               validator.write(new SpaceXToken(' '));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, []);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports an error if there is S before the first child in version 1.0/2 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new SpaceXToken(' '));
+               validator.write(new ElementStartXToken('child', []));
+               validator.write(new ElementEndXToken('child'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no error if there is S before the last child in version 1.0/2 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new ElementStartXToken('child', []));
+               validator.write(new ElementEndXToken('child'));
+               validator.write(new SpaceXToken(' '));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no errors if a comment is found between children in 1.0/4 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new CommentXToken('zowie'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a comment is found in an expanded entity in 1.0/4 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new GeneralEntityStartXToken('ge'));
+               validator.write(new CommentXToken('zowie'));
+               validator.write(new GeneralEntityEndXToken('ge'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, [ 'one', '1', '4' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a comment is found in an expanded entity in 1.0/5 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new GeneralEntityStartXToken('ge'));
+               validator.write(new CommentXToken('zowie'));
+               validator.write(new GeneralEntityEndXToken('ge'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports no errors if a PI is found between children in 1.0/4 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new ProcessingInstructionXToken('zowie', 'data'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
+            });
+
+            it('reports an error if a PI is found in an expanded entity in 1.0/4 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 4));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new GeneralEntityStartXToken('ge'));
+               validator.write(new ProcessingInstructionXToken('zowie', 'data'));
+               validator.write(new GeneralEntityEndXToken('ge'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.CHILDREN_XTRA_PI, [ 'one', '1', '4' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a PI is found in an expanded entity in 1.0/5 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: 'child',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ZEROPLUS',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(new elementDeclaration.XToken('child', 'ANY'));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new GeneralEntityStartXToken('ge'));
+               validator.write(new ProcessingInstructionXToken('zowie', 'data'));
+               validator.write(new GeneralEntityEndXToken('ge'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrors(validator, done);
             });
 
             it('converts chardata that is just whitespace into space tokens', (done) => {
@@ -3941,7 +4204,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
             });
 
-            it('copes with an XToken with no namelist', (done) => {
+            it('reports an error if an element declaration is of type CHILDREN but has no content spec', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', undefined);
                const elStart = new ElementStartXToken('one', []);
                const child = new ElementStartXToken('sub', []);
@@ -4045,7 +4308,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(elEnd);
                validator.end();
 
-               expectNoErrors(validator, done);
+               expectNoErrorsOrWarnings(validator, done);
             });
 
             it('reports an error if one tries to make an illegal transition in the graph', (done) => {
@@ -4119,40 +4382,6 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectStream(validator, expected, done);
             });
 
-            it('reports only one error if an element with element content has many spaces in it and is externally declared and standalone=yes (§2.9)', (done) => {
-               validator.write(new XmlDeclarationXToken(1.0, undefined, true));
-               validator.write(new ExternalSubsetStartXToken());
-               validator.write(new ElementDeclaration('extDeclaredElement', 'CHILDREN', {
-                  names: [{
-                     name: 'child',
-                     repeat: 'ONE',
-                  }],
-                  listType: 'CHOICE',
-                  repeat: 'ONE',
-               }));
-               validator.write(new ExternalSubsetEndXToken());
-               validator.write(new ElementStartXToken('extDeclaredElement', []));
-               validator.write(new SpaceXToken('  '));
-               validator.write(new SpaceXToken('  '));
-               validator.write(new SpaceXToken('  '));
-               validator.write(new ElementEndXToken('extDeclaredElement'));
-               validator.end();
-
-               const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,
-                  [ 'extDeclaredElement' ]);
-               gatherTokens(validator, (tokens) => {
-                  let count = 0;
-
-                  for (const token of tokens) {
-                     if (token.id === ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED) {
-                        count++;
-                     }
-                  }
-
-                  expect(count).toEqual(1);
-                  done();
-               });
-            });
          });
       });
    });

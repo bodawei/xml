@@ -125,15 +125,15 @@ function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorC
     * successors. The target name "xml" is forbidden as it introduces the
     * XML declaration.
     *
-    * §3.0.0 (all versions except 1.0/6)
-    * ...names of the element types and attributes, ...except that names
-    * beginning with a match to (('X'|'x')('M'|'m')('L'|'l')) are
-    * reserved for standardization in this or future versions of this
-    * specification.
-    *
-    * Version: 1.0/6
-    * ...except that names beginning with "xml:" are reserved for standardization
-    * in this or future specifications from the XML Core Working Group or its successors.
+    * §3.0.0 (ELEMENT names)
+    *    Most versions:
+    *       ...names of the element types and attributes, ...except that names
+    *       beginning with a match to (('X'|'x')('M'|'m')('L'|'l')) are
+    *       reserved for standardization in this or future versions of this
+    *       specification.
+    *    Version: 1.0/6
+    *       ...except that names beginning with "xml:" are reserved for standardization
+    *       in this or future specifications from the XML Core Working Group or its successors.
     *
     * Interpretation:
     *    In all but 1.0/6, /^[Xx][Mm][Ll]/ is reserved, but not an error

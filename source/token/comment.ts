@@ -27,18 +27,14 @@ class CommentXToken {
    }
 }
 
-/*
- * Note that the text property will be a set of STokens.
- * The user of this must just assume these are sequential chunks of text
- * that can be concatenated together.
- *
- * In practice, at this time, double hyphens in the input will be stored
- * as separate STokens in the array.
- */
+/**********************************************************************\
+ In practice, at this time, double hyphens in the input will be stored
+ as separate STokens in the array.
+\**********************************************************************/
 class CommentPToken {
    public readonly type: typeof COMMENT_PTOKEN = COMMENT_PTOKEN;
    public readonly open: SToken;
-   public readonly text: Array<SToken> = [];
+   public readonly text: ReadonlyArray<SToken> = [];
    public readonly close?: SToken;
 
    constructor(param: CommentPToken | {open: SToken}) {
@@ -66,7 +62,7 @@ class CommentPToken {
 }
 
 /**********************************************************************\
- parse() extracts a comment.
+ parseComment() extracts a comment.
  Note that while comments are theoretically entirely opaque, a couple
  details should be pointed out:
    Version 1.0/2 and beyond (§2.5) says PE refs are not allowed
@@ -78,6 +74,8 @@ class CommentPToken {
    §2.5
       [15]    Comment ::= '<!--' ((Char - '-') | ('-' (Char - '-')))* '-->'
          Lax: Comment ::= '<!--' Char* '-->'
+   Lax:
+      @@@@
 \**********************************************************************/
 
 function parseComment(source: STokenSource, commentOpen: SToken, deliverPToken: DeliverPToken) {
@@ -172,7 +170,7 @@ function sTokensFromPToken(pToken: CommentPToken): ReadonlyArray<SToken> {
    const builder = new STokenArrayBuilder();
 
    builder.add(pToken.open);
-   builder.add(pToken.text);
+   builder.add(pToken.text.slice(0));
    builder.add(pToken.close);
 
    return builder.sTokenArray;

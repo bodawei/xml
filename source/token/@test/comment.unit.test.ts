@@ -91,7 +91,7 @@ describe('comment (unit)', () => {
       });
 
       it('copes with EOF', () => {
-         commentPToken.text.pop();
+         (commentPToken.text as any).pop();
          (commentPToken as any).close = undefined;
          const mockSource = new MockSTokenSource([
             [ undefined, 'all', [ '--' ] ],
@@ -164,9 +164,9 @@ describe('comment (unit)', () => {
       });
 
       it('asks the misc.checkWellFormedText() to validate the text', () => {
-         commentPToken.text.pop();
-         commentPToken.text.push(commentPToken.open);  // just need another token here
-         commentPToken.text.push(expectedSToken('commentText'));
+         (commentPToken.text as any).pop();
+         (commentPToken.text as any).push(commentPToken.open);  // just need another token here
+         (commentPToken.text as any).push(expectedSToken('commentText'));
          commentPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(misc.checkWellFormedText)
@@ -203,8 +203,8 @@ describe('comment (unit)', () => {
       });
 
       it('reports an error there is a "--" in the comment text', () => {
-         commentPToken.text.push(expectedSToken('--'));
-         commentPToken.text.push(expectedSToken(' illegal'));
+         (commentPToken.text as any).push(expectedSToken('--'));
+         (commentPToken.text as any).push(expectedSToken(' illegal'));
 
          commentPToken.checkWellFormed(mockErrorCollector, emd);
 
@@ -229,7 +229,7 @@ describe('comment (unit)', () => {
       });
 
       it('reports an error when there was an empty text and no closing', () => {
-         commentPToken.text.pop();
+         (commentPToken.text as any).pop();
          delete (commentPToken as any).close;
 
          commentPToken.checkWellFormed(mockErrorCollector, emd);
@@ -253,7 +253,7 @@ describe('comment (unit)', () => {
       });
 
       it('returns the text as an empty string when no text values present', () => {
-         commentPToken.text.pop();
+         (commentPToken.text as any).pop();
 
          const token = commentPToken.toXToken();
 

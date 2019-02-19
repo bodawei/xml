@@ -32,12 +32,19 @@ describe('misc', () => {
          expect(ec.reportError).not.toHaveBeenCalled();
       });
 
-      it('reports no errors if the name does not start with "xml"', () => {
+      it('reports no errors if the name does not start with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
 
          expect(ec.reportError).not.toHaveBeenCalled();
       });
+
+      it('reports a warning if the name starts with "xml" (§3.0.0)', () => {
+         misc.checkWellFormedNameRecommendation(makeSToken('xmlblah'), ec,
+            new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
+
+            expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xmlblah' ]);
+         });
 
       it('reports no errors if this is an xml:lang attriute', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:lang'), ec,
@@ -60,7 +67,7 @@ describe('misc', () => {
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'XML:LANG' ]);
       });
 
-      it('reports no error if the version is 1.0/6, and the name starts with "xml"', () => {
+      it('reports no warning if the version is 1.0/6, and the element name starts with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
          expect(ec.reportError).not.toHaveBeenCalled();
@@ -79,7 +86,7 @@ describe('misc', () => {
          expect(ec.reportError).toHaveBeenCalledWith(WARN1, XmlWarning, [ 'xml:Foo' ]);
       });
 
-      it('reports no warning if the version is 1.0/6, and the attribute name starts with "xml"', () => {
+      it('reports no warning if the version is 1.0/6, and the element name starts with "xml" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xmlFoo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 6), 'ELEMENT', WARN1, WARN2);
 
@@ -114,7 +121,7 @@ describe('misc', () => {
          expect(ec.reportError).toHaveBeenCalledWith(WARN2, XmlWarning, [ 'xml-Foo' ]);
       });
 
-      it('reports a warning if the version is 1.0/5, and the element/attr name starts with "xml:"', () => {
+      it('reports a warning if the version is 1.0/5, and the element name starts with "xml:" (§3.0.0)', () => {
          misc.checkWellFormedNameRecommendation(makeSToken('xml:Foo'), ec,
             new EntityMetaData(EntityKind.DOCUMENT, 1, 5), 'ELEMENT', WARN1, WARN2);
 

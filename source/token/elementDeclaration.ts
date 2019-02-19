@@ -23,8 +23,6 @@ type DeliverCB = (ptoken: ElementDeclarationPToken) => void;
  an element declarations.
 \**********************************************************************/
 
-type ContentSpecType = 'EMPTY' | 'ANY' | 'CHILDREN';
-
 class ElementDeclaration {
    public readonly type = ELEMENTDECL_XTOKEN;
    public name: string;
@@ -262,7 +260,7 @@ function checkWellFormed(pToken: ElementDeclarationPToken | void, ec: ErrorColle
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ElementDeclarationPToken) {
-   let contentSpec: string = strOrBlank(pToken.contentSpec);
+   let contentSpec: string = strOrBlank(pToken.contentSpec);   // We will introduce garbage here
    let children: XNameList | void;
 
    if (pToken.children) {
@@ -271,7 +269,7 @@ function pTokenToXToken(pToken: ElementDeclarationPToken) {
    }
 
    return new ElementDeclaration(strOrBlank(pToken.name),
-      contentSpec, children, pToken);
+   contentSpec, children, pToken);
 }
 
 const elementDeclaration = {

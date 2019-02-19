@@ -106,50 +106,85 @@ Further by the time one is actually doing validation, the References must have b
 
 So, anything other than `CharData | element | CDSect | PI | Comment` are certainly not allowed in any element content.
 
-However, not all of those are allowed in the four different content types specified in an ELEMENT declaration (ANY, EMPTY, Mixed, children). The spec is surprisingly imprecise about about these.  The text below captures the assumptions this project is making about these.
+However, not all of those are allowed in the four different content types specified in an ELEMENT declaration (ANY, EMPTY, Mixed, children). The spec is surprisingly imprecise about about these, by which I mean that the constraints for each content type is spelled out in words, not syntax. Further, as the XML spec was revised, some of the changes in wording may well be different from what the reader of an earlier version would have interpreted. The text below captures the assumptions this project is making about these.
 
 ### EMPTY content
-In section 3.0 of the spec which says that none of those values are allowed in an empty element (not even entity references that expand to nothing!).
+In section 3.0.0 says that an elment with EMPTY contenttype may have no content. While 1.0/3+ clarifies to say
+"this means not even...". This processor does interpert 1.0/1 to mean none of the above `content` values may be found (which happens to match subsequent versions). So, anything, even whitespace, or an entity reference that expands to nothing (`<!ENTITY foo "">  <isEmpty>&foo;</isEmpty>`), or a CDATA with nothing in it (`<isEmpty><![CDATA[]]></isEmpty>`), is considered an error.
 
-Section 3.1 does say that (for interoperability), if you have an element declared as EMPTY, then you should use an empty tag. But using a start tag immediately by an end tag is acceptable. This project reports a warning if a start and empty tag are used.
 
-This project assumes that even whitespace between the start and end tag are invalid (because that would constitute CharData).
+Section 3.1 does say that (for interoperability), if you have an element declared as EMPTY, then you should use an empty tag. But using a start tag immediately by an end tag is acceptable. This project reports a warning if a start and empty tag are used (ELEMENT_WITH_EMPTY_DECL).
 
 ### Mixed content
-It was only with versions 1.0/3 and beyond that text was put into section 3.0.0 that
-said that comments and processing instructions were allowed within an element with Mixed content.
+What is considerd "Mixed" content varies across versions:
 
-It seems reasonable to allow comments and processing instructions in these contexts.  On the other hand, there's no evidence that these are allowed in elements with EMPTY content. Thus, I am interpreting this as a change in the spec and they are not allowed in 1.0/1 and 1.0/2 versions.
+* Before 1.0/3 only CharData and elements in the content model
+* In 1.0/3 and 1.1/1 entity references, comments, and PI's were added (entity references should expand to the same subset)
+* Beyond those, CDATA sections were added.
 
-It is worth noting that in 1.0/4 and beyond, there is an added mention of allowing CDATA sections in mixed content. However, given the definition of "character data" and given that even from the start the body of a CDATA section appears to have been considered to be character data, I'm interpreting this to be a clarification and not a change.
+As with all these content types, it is ambiguous if the things enumerated in later versions were allowed implicitly by earlier versions. Since this processor takes a pedantic stance, and since the way things are worded in 1.0/1 legitimately can be interpreted to mean these were not allowed, those types are not allowed with documents in those earlier versions.
+
+Note also that CharRef's are never mentioned at all.  This assumes that they count as CharData, but there's no support one way or the other for that notion.  It is being assumed because by the "current" version (1.0/5), that's certainly expected.
 
 Of course, if an element appears in the Mixed content that is not the same type as one any of the types listed in the ELEMENT declaration, it is also treated as an error
 
-### ANY content
-The definition of what is allowed if an element has "ANY" content varies considerably across versions. Going just by the words, we know we can only pick from `element | CharData | Reference | CDSect | PI | Comment`.
-* Version 1.0/1&2 only speak of child elements
-* 1.0/3 and 1.1/1 allow (after entity replacement) character data and declared child elements.
-* Other versions allow (after entity replacement) character data, CData sections, PI's and comments.
+to summarize:
 
-From this parser's standpoint, this means:
-* CharData, Space, EntityReferences, EntityStart and EntityEnd (as well as XMLErrors) are acceptable in all versions.
+* 1.0/1-2: `mixedContent = (element | CharData | CharRef)*`
+* 1.0/3 & 1.1/1: `mixedContent = (element | CharData | Reference | PI | Comment)*`
+* 1.0/4-5 & 1.1/2: `mixedContent = (element | CharData | Reference | CDSect | PI | Comment)*`
+
+In all cases, elements must match one of the types in the element declaration)
+
+### ANY content
+The definition of what is allowed if an element has "ANY" content varies considerably across versions.
+
+* Version 1.0/1-2 only speak of child elements
+* 1.0/3 and 1.1/1 allow (after entity replacement) CharData and declared child elements.
+* Other versions allow (after entity replacement) CharData, CData sections, PI's, comments and declared elements.
+
+While it is certainly reasonable to assume that any `content` is allowed in any version, this processor takes a pedantic view:
+
+* Only declarad child elements are allowed in all versions.
+   * This is driven by in 1.0/1, #3 calls out character data explicitly (Mixed), it isn't in #2 (elment content), and it isn't in #4 (ANY). While you might have legitimately assumed ANY meant any content at all, you would also have thought Mixed was the same as ANY except for the constraint of which elements were allowed, but they were described differently.  Which do you honor?  This goes with themore constrained view.
+* CharData, EntityReferences, EntityStart and EntityEnd, as well as declared elements are allowed in 1.3 and beyond.
+   * Obviously, references will be an error if they can't ultimately be expanded, but they won't be flagged as a violation of the ANY content validity rules.
+   * This assumes CharRefs count as CharData here
 * CData, Comments and PI's are allowed in 1.0/4-5 and 1.1/2
 
-Obviously, References will be an error if they can't ultimately be expanded, but they won't be flagged as a violation of the ANY content validity rules.
+to summarize:
 
-### CHILDREN content
+* 1.0/1-2: `anyContent = element*`
+* 1.0/3 & 1.1/1: `anyContent = (element | CharData | Reference)*`
+* 1.0/4-5 & 1.1/2: `anyContent = (element | CharData | Reference | CDSect | PI | Comment)*`
+
+In all cases, elements must match a declared element
+
+### ELEMENT content
 Like everything else here, there's differences across different versions of the XML Specification.
-Like the others, it is unclear if the changes are clarifications or changes (if so, they are relxaxations). Like the others, this assumes these are changes.
+Like the others, it is unclear if the changes are clarifications or changes (if so, they are relaxations). Like the others, this assumes these are changes.
 
 * Version 1.0/1 only allow elements that match the grammar and whitespace.
 * Version 1.0/2 only allow elements that match the grammar and whitespace (allowing whitespace before first child element and after the last), and explicitly disallows CData sections.
-* All other versions allow elements that match the grammer, whitespace, comments and PI's.
+* All other versions allow elements that match the grammer, and whitespace, comments and PI's between elements (and before the first and after the last child). CData is explicitly disallowed if it contains only whitespace. Similarly, charrefs that are whitespace are not allowed.  However, entity references whose replacement text is whitespace (not charrefs of whitespace) are allowed.
 
-The validity of entity references and character references here are ambiguous, as they are not mentioned in 1.0/1 or 2. They are mentioned in 1.0/3 and beyond, but only enough to say that if the if the replacement text is whitespace, it's OK (but it isn't ok if the replacement text is char refs that expand to whitespace).
+Note: While the spec says that an EntityReference must expand to whitespace, it probably meant to say that PI and Comment were allowed to.  Thus, a bit out of it's pedantic character, this processor allows an expanded entity rererence to be space, comment or processing instruction in 1.0/5-6 and 1.1/2-3. The callout to CData sections is interesting in that it could be taken to mean CData might be allowed in some other capacity, but this thinks that that makes no sense under any circumstances, and so completely disallows CData sections.
 
-This goes with the assumption that entity references are acceptable here.
+Note that §3.2.1 has a constraint that the parameter entities must be properly balanced.  Since a parameter entity may be formed from the expansion of other parameter entities, this considers this constraint to mean that each topmost entity in the content spec must ultimately be balanced, but any "sub-entities" need not be.
 
-Note that §3.2.1 has a constraint that the parameter entities must be properly balanced.  Since a parameter entity may be formed from the expansion of other parameter entities, this considers this constraing to mean that each topmost entity in the content spec must ultimately be balanced, but any "sub-entities" need not be.
+Note also: The text between child elements should be S, not CharData. however, the parser will not recognize that without the validation system which is the first layer that knows about the content type of an element. Thus earlier layers will return those characters as CharData, and only when it comes out of the validator will it be Space!
+
+to summarize:
+
+* 1.0/1: `elementContent = (element, ((element | S)*, element)?)?`
+* 1.0/2: `elementContent = (element | S)*`
+* 1.0/3-4 & 1.1/1: `elementContent = (element | S | EntityRef | PI | Comment)*`
+* 1.0/5 & 1.1/2: `elementContent = (element | S | EntityRef | PI | Comment)*`
+
+In all cases, elements must match the regular expression.
+
+* In everyting but 1.0/5 and 1.1/2, When an EntityRef is allowed, it must replacement text that is S.
+* In 1.0/5 and 1.1/2, When an EntityRef is allowed, it can expand to S, PI and/or Comment
 
 ## Attribute-list declarations
 * When processing ATTLIST's, ordering is top-to-bottom when processing the DTD, with the inner subset being processed before the external subset.
@@ -388,3 +423,7 @@ Another way to think of this:
    * dtd: notation, attlist, entity or element declaration, comment, pi, space
    * markup declaration: space, words, literals, param entity ref
    * entity value: text, char ref, parameter entity reference
+
+
+# Misc
+Note that §2.4 in 1.0/1 said that you could have a & or < in the literal text of an internal entity declaration. This seems beyond reasonable, as & is explicitly diallowed in an entity value (because it introduces a reference).  interestingly, < is not disallowed, but it will always be interpreted as an error or as markup in the end.

@@ -223,7 +223,8 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             const endNameText = strOrBlank(pToken.name);
             const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
 
-            // 3.0: Well-Formedness Constraint: Element Type Match
+            // §3.0.0: Well-Formedness Constraint: Element Type Match
+            //    The Name in an element's end-tag must match the element type in the start-tag.
             if (lastElement === endNameText) {
                this._elementNameStack.pop();
             } else {

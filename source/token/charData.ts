@@ -57,7 +57,8 @@ class CharDataPToken {
  deliverPToken: Callback to deliver the PToken
 
  SYNTAX
-   [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
+   §2.4:
+      [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
 function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|void) => void) {

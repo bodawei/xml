@@ -44,6 +44,7 @@ import {
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
+   CHARREF_XTOKEN,
 } from 'token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -80,33 +81,35 @@ type MixedChildrenMap = {
    [xName: string]: true;
 };
 
-type AnyDeclInfo = {
-   type: 'ANY',
+type AnyContentDeclInfo = {
+   type: 'ANY_CONTENT',
    token: ElementDeclaration,
 }
 
-type EmptyDeclInfo = {
-   type: 'EMPTY',
+type EmptyContentDeclInfo = {
+   type: 'EMPTY_CONTENT',
    token: ElementDeclaration,
 }
 
-type MixedDeclInfo = {
-   type: 'MIXED',
+type MixedContentDeclInfo = {
+   type: 'MIXED_CONTENT',
    token: ElementDeclaration,
    children: MixedChildrenMap,
 }
 
-type ChildrenDeclInfo = {
-   type: 'CHILDREN',
+type ElementContentDeclInfo = {
+   type: 'ELEMENT_CONTENT',
    externallyDeclared: boolean, // §2.9
    token: ElementDeclaration,
    graph: Graph,
 }
 
-type ElementDeclInfo = AnyDeclInfo | EmptyDeclInfo | MixedDeclInfo | ChildrenDeclInfo;
+type ElementDeclInfo = AnyContentDeclInfo | EmptyContentDeclInfo | MixedContentDeclInfo | ElementContentDeclInfo;
 type ContentContext = {
    declInfo: ElementDeclInfo;
-   flaggedSpace: boolean,
+   atElementContentStart: boolean;  // consider extracting these into a sub-object
+   lastElementContentValue: string;
+   elementContentEntityRefStack: Array<string>;
    stateId: number;
 }
 
@@ -322,38 +325,32 @@ class CheckXTokenValidStream extends stream.Transform {
       }
       let declInfo = context.declInfo;
 
-      if (declInfo.type === 'EMPTY') {
+      if (declInfo.type === 'EMPTY_CONTENT') {
          // §3.0.0 Validity Constraint: Element Valid
          //     1.0/1-2: 1. The declaration matches EMPTY and the element has no content.
          //     Other: The declaration matches EMPTY and the element has no content (not
          //        even entity references, comments, PIs or white space).
-         //  [Note: The definition of "content" in 1.0 included references, CDSect, comments, pi)
+         //  [Note: we will never get here if an ElementEmpty was enccountered)
          if (!(xToken instanceof ElementEndXToken)) {
-            if (xToken.type !== SPACE_XTOKEN ||
-               (xToken.type === SPACE_XTOKEN && (this.emd.isVersion1dot1 ||
-               (this.emd.isVersion1dot0 && this.emd.revision > 2)))) {
-               this.pushValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-                  [ declInfo.token.name ], sToken);
+            this.pushValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
+               [ declInfo.token.name ], sToken);
             }
-         }
-      } else if (declInfo.type === 'ANY') {
+      } else if (declInfo.type === 'ANY_CONTENT') {
          // §3.0.0 Validity Constraint: Element Valid
          //  1.0/1-2: 4. The declaration matches ANY, and the types of any child
          //       elements have been declared.
          //  1.0/3&1.1/1: 4. The declaration matches ANY, and the content (after
          //       replacing any entity references with their replacement text) consists
          //       of character data and child elements whose types have been declared.
-         //  Other: The declaration matches ANY, and the content (after replacing any
+         //  Other: (tolerant) The declaration matches ANY, and the content (after replacing any
          //       entity references with their replacement text) consists of character
          //       data , CDATA sections, comments, PIs and child elements whose types
          //       have been declared.
-         const allowed = (this.emd.isVersion1dot0 && this.emd.revision > 3) || (this.emd.isVersion1dot1 && this.emd.revision > 1);
-         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
-         let error;
-
-         if (allowed && (xToken.type === CDATA_XTOKEN || xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === COMMENT_XTOKEN)) {
-            return;
-         }
+         const isRestrictiveVersion = (this.emd.isVersion1dot0 && this.emd.revision < 3);
+         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision > 3)
+            || (this.emd.isVersion1dot1 && this.emd.revision > 1);
+         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(),
+            this.emd.revision.toString() ];
 
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
@@ -366,27 +363,51 @@ class CheckXTokenValidStream extends stream.Transform {
             case ELEMENT_END_XTOKEN:
                // always ok
                break;
+            case COMMENT_XTOKEN:
+               if (!isTolerantVersion) {
+                     this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
+               }
+               break;
+            case CDATA_XTOKEN:
+               if (!isTolerantVersion) {
+                  this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
+               }
+               break;
+            case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
-            case SPACE_XTOKEN:
-               // These are all OK here
-               break;
-            case CDATA_XTOKEN:
-               this.pushValidityError(ValidityError.ID.ANY_XTRA_CDATA, notAllowedParams, sToken);
+               if (isRestrictiveVersion) {
+                  this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ declInfo.token.name ], sToken);
+               }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
-               this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
-               break;
-            case COMMENT_XTOKEN:
-               this.pushValidityError(ValidityError.ID.ANY_XTRA_COMMENT, notAllowedParams, sToken);
+               if (!isTolerantVersion) {
+                  this.pushValidityError(ValidityError.ID.ANY_XTRA_PI, notAllowedParams, sToken);
+               }
                break;
             default:
                this.pushValidityError(ValidityError.ID.ANY_XTRA_MARKUP, [ declInfo.token.name ], sToken);
                break;
          }
-      } else if (declInfo.type === 'MIXED') {
+      } else if (declInfo.type === 'MIXED_CONTENT') {
+         // §3.0.0 Validity Constraint: Element Valid
+         //  1.0/1-2: 3. The declaration matches Mixed and the content consists of
+         //       character data and child elements whose types match names in the
+         //       content model.
+         //  1.0/3 & 1.1/1: 3. The declaration matches Mixed and the content (after
+         //       replacing any entity references with their replacement text) consists
+         //       of character data, comments, PIs and child elements whose types match
+         //       names in the content model.
+         //  Other: 3. The declaration matches Mixed, and the content (after
+         //       replacing any entity references with their replacement text) consists
+         //       of character data (including CDATA sections), comments, PIs and child
+         //       elements whose types match names in the content model.
+         const isRestrictiveVersion = (this.emd.isVersion1dot0 && this.emd.revision < 3);
+         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision > 3)
+            || (this.emd.isVersion1dot1 && this.emd.revision > 1);
+
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
@@ -395,18 +416,23 @@ class CheckXTokenValidStream extends stream.Transform {
                      [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
+            case CHARREF_XTOKEN:
             case CHARDATA_XTOKEN:
-            case CDATA_XTOKEN: // wanna revisit this given the decision in ANY?
             case ELEMENT_END_XTOKEN:
-            case GENERAL_ENTITY_START_XTOKEN:
-            case GENERAL_ENTITY_END_XTOKEN:
-               // These are all OK here
+               // always ok
+               break;
+            case CDATA_XTOKEN:
+               if (!isTolerantVersion) {
+                  this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
+                     [ declInfo.token.name ], sToken);
+               }
                break;
             case COMMENT_XTOKEN:
+            case GENERAL_ENTITY_REFERENCE_XTOKEN:
+            case GENERAL_ENTITY_START_XTOKEN:
+            case GENERAL_ENTITY_END_XTOKEN:
             case PROCESSING_INSTRUCTION_XTOKEN:
-               const expandedMixedAllowance = this.emd.isVersion1dot0 && this.emd.revision >= 3 || this.emd.isVersion1dot1;
-
-               if (!expandedMixedAllowance) {
+               if (isRestrictiveVersion) {
                   this.pushValidityError(ValidityError.ID.MIXED_XTRA_MARKUP,
                      [ declInfo.token.name ], sToken);
                }
@@ -416,7 +442,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   [ declInfo.token.name ], sToken);
                break;
          }
-      } else { // 'CHILDREN'
+      } else { // 'ELEMENT_CONTENT'
          // §3.0.0 Validity Constraint: Element Valid
          //  1.0/1: 2. The declaration matches children and the sequence of child elements
          //       belongs to the language generated by the regular expression in the content
@@ -430,8 +456,8 @@ class CheckXTokenValidStream extends stream.Transform {
          //       section containing only white space does not match the nonterminal S,
          //       and hence cannot appear in these positions
          //  Other. The declaration matches children and the sequence of child elements
-         //       belongs to the language generated by the regular expression in the
-         //       content model, with optional white space, comments and PIs (i.e. markup
+         //       belongs to the language generated by the regular expression in the content
+         //       model, with optional white space, comments and PIs (i.e. markup
          //       matching production [27] Misc) between the start-tag and the first child
          //       element, between child elements, or between the last child element and
          //       the end-tag. Note that a CDATA section containing only white space or a
@@ -441,13 +467,18 @@ class CheckXTokenValidStream extends stream.Transform {
          //       a literal value consisting of character references expanding to white
          //       space does match S, since its replacement text is the white space
          //       resulting from expansion of the character references.
-         const allowed = (this.emd.isVersion1dot0 && this.emd.revision >= 3) || this.emd.isVersion1dot1;
-         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(), this.emd.revision.toString() ];
-         let error;
+         //  This implementation assumes that the intent was to allow comments and PI's
+         //  along with S in the replacement text of entities, so allows this in 1.0/5 and 1.1/2
+         const isNoSpaceAtEndsVersion = (this.emd.isVersion1dot0 && this.emd.revision === 1);
+         const isSpaceAtEndsVersion = (this.emd.isVersion1dot0 && this.emd.revision === 2);
+         const isOnlySInEntityVersion = (this.emd.isVersion1dot0 && (this.emd.revision > 2 && this.emd.revision < 5))
+            || (this.emd.isVersion1dot1 && this.emd.revision === 1);
+         const isTolerantVersion = (this.emd.isVersion1dot0 && this.emd.revision >= 5)
+            || (this.emd.isVersion1dot1 && this.emd.revision >= 2);
 
-         if (allowed && (xToken.type === PROCESSING_INSTRUCTION_XTOKEN || xToken.type === COMMENT_XTOKEN)) {
-            return;
-         }
+         const notAllowedParams = [ declInfo.token.name, this.emd.version.toString(),
+            this.emd.revision.toString() ];
+
          const currentState = declInfo.graph.states[context.stateId];
 
          switch (xToken.type) {
@@ -467,33 +498,60 @@ class CheckXTokenValidStream extends stream.Transform {
                   this.pushValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ declInfo.token.name,
                      Object.keys(currentState.trans).join(', ') ], sToken);
                }
+
+               if (isNoSpaceAtEndsVersion && context.lastElementContentValue === SPACE_XTOKEN) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
+               }
                break;
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
-            case SPACE_XTOKEN:
-               // §2.9 Validity constraint: Standalone Document Declaration
-               // The standalone document declaration must have the value "no" if any external markup
-               // declarations contain declarations of:
-               // - element types with element content, if white space occurs directly within any instance of those types
-               if (this.standalone && !context.flaggedSpace) {
-                  context.flaggedSpace = true;
-                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
+               if (isNoSpaceAtEndsVersion || isSpaceAtEndsVersion) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+               }
+
+               if (xToken.type === GENERAL_ENTITY_START_XTOKEN) {
+                  context.elementContentEntityRefStack.push(xToken.name);
+               } else if (xToken.type === GENERAL_ENTITY_END_XTOKEN) {
+                  context.elementContentEntityRefStack.pop(); // might be nice to validate that it matches
                }
                break;
-            case CHARDATA_XTOKEN:
-               // Depending on charData that is only space already being converted to spaces
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
+            case SPACE_XTOKEN:
+               // §2.9 Validity constraint: Standalone Document Declaration
+               //    The standalone document declaration must have the value "no" if any external markup
+               //    declarations contain declarations of:
+               //       - element types with element content, if white space occurs directly within any instance of those types
+               // Note: This is because in this circumstance, something parsing this as non-validated will not know
+               // whether those spaces are content or throwaway S.
+
+               if (this.standalone && declInfo.externallyDeclared) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
+               }
+
+               if (isNoSpaceAtEndsVersion && context.atElementContentStart) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
+               }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
+               const piInEntity = context.elementContentEntityRefStack.length > 0;
+               if ((!isOnlySInEntityVersion || (isOnlySInEntityVersion && piInEntity)) && !isTolerantVersion) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_PI, notAllowedParams, sToken);
+               }
                break;
             case COMMENT_XTOKEN:
-               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
+               const inEntity = context.elementContentEntityRefStack.length > 0;
+               if ((!isOnlySInEntityVersion || (isOnlySInEntityVersion && inEntity)) && !isTolerantVersion) {
+                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_COMMENT, notAllowedParams, sToken);
+               }
                break;
             default:
                this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_CONTENT, notAllowedParams, sToken);
                break;
+         }
+
+         // Keep track of the last thing we saw here, except for entity start and end markers, which are not "real".
+         if (xToken.type === GENERAL_ENTITY_START_XTOKEN || xToken.type === GENERAL_ENTITY_END_XTOKEN) {
+            context.lastElementContentValue = xToken.type;
          }
       }
    }
@@ -502,7 +560,7 @@ class CheckXTokenValidStream extends stream.Transform {
       const pToken = (xToken.pToken || {}).open;
       const context = this.currentContext;
 
-      if (!(xToken.type === ERROR_TYPE)) {
+      if (xToken.type !== ERROR_TYPE) {
          /*
           * §3.2.1
           *    An element type has **element content** when elements of that type
@@ -510,7 +568,7 @@ class CheckXTokenValidStream extends stream.Transform {
           *    separated by white space (characters matching the nonterminal S)
           * Because of this we convert any CHARDATA types which contain only whitespace here into spaces
           */
-         if (xToken.type === CHARDATA_XTOKEN && context && context.declInfo.type === 'CHILDREN') {
+         if (xToken.type === CHARDATA_XTOKEN && context && context.declInfo.type === 'ELEMENT_CONTENT') {
             if (isSpace(xToken.text)) {
                xToken = new SpaceXToken(xToken.text, xToken.pToken);
             }
@@ -593,17 +651,21 @@ class CheckXTokenValidStream extends stream.Transform {
             if (this.elementDeclarations[xToken.name]) {
                this.currentContext = {
                   declInfo: this.elementDeclarations[xToken.name],
-                  flaggedSpace: false,
                   stateId: 0,
+                  atElementContentStart: true,
+                  lastElementContentValue: '',
+                  elementContentEntityRefStack: [],
                };
             } else {
                this.currentContext = {
                   declInfo: {
                      token: new ElementDeclaration(xToken.name, 'ANY', undefined),
-                     type: 'ANY',
+                     type: 'ANY_CONTENT',
                   },
-                  flaggedSpace: false,
                   stateId: 0,
+                  atElementContentStart: true,
+                  lastElementContentValue: '',
+                  elementContentEntityRefStack: [],
                };
             }
          }
@@ -934,12 +996,12 @@ class CheckXTokenValidStream extends stream.Transform {
       if (elDecl.contentSpecType === 'EMPTY') {
          this.elementDeclarations[elDecl.name] = {
             token: elDecl,
-            type: elDecl.contentSpecType,
+            type: 'EMPTY_CONTENT',
          };
       } else if (elDecl.contentSpecType === 'ANY') {
          this.elementDeclarations[elDecl.name] = {
             token: elDecl,
-            type: elDecl.contentSpecType,
+            type: 'ANY_CONTENT',
          };
       } else {
          const children: XNameList = elDecl.children || {
@@ -971,7 +1033,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
-               type: 'MIXED',
+               type: 'MIXED_CONTENT',
                children: childrenNames,
             };
 
@@ -1019,7 +1081,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
             this.elementDeclarations[elDecl.name] = {
                token: elDecl,
-               type: 'CHILDREN',
+               type: 'ELEMENT_CONTENT',
                externallyDeclared: this.externalDeclarations, // §2.9
                graph
             };
@@ -1172,7 +1234,7 @@ class CheckXTokenValidStream extends stream.Transform {
                if (oneDotZeroRev2OrHigher) {
                   const elementDecl = this.elementDeclarations[elementType];
 
-                  if (elementDecl && elementDecl.type === 'EMPTY') {
+                  if (elementDecl && elementDecl.type === 'EMPTY_CONTENT') {
                      this.pushValidityError(ValidityError.ID.ATTLISTDECL_EMPTY_NOTATION,
                            [ elementType, attrDef.name ], undefined);
                   }
@@ -1471,7 +1533,7 @@ class CheckXTokenValidStream extends stream.Transform {
       // Interoperability: §3.1: For interoperability, the empty-element tag should be
       //    used, and should only be used, for elements which are declared EMPTY.
       const tokenIsEmptyType = elStart instanceof ElementEmptyXToken;
-      const declarationIsEmpty = elementDecl.type === 'EMPTY';
+      const declarationIsEmpty = elementDecl.type === 'EMPTY_CONTENT';
       let warningId;
 
       if (tokenIsEmptyType && !declarationIsEmpty) {
