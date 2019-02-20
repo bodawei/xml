@@ -4,10 +4,10 @@ import stream from 'readable-stream';
 
 import {
    elementStart,
-   elementEnd,
 
    CdataXToken,
    CharDataXToken,
+   ElementEndXToken,
 } from '../token';
 
 type Token = { type: string };
@@ -61,7 +61,7 @@ class SimpleObj extends stream.Transform {
          //    console.log('PUSH ', padding + '\\' + xToken.name)
          // }
          this._stack.push(el);
-      } else if (xToken instanceof elementEnd.XToken) {
+      } else if (xToken instanceof ElementEndXToken) {
          this._stack.pop();
          // let padding2 = '';
          // for (var index = 0; index < this._stack.length; index++) {

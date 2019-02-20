@@ -9,13 +9,13 @@ import {
    docTypeEnd,
    docTypeStart,
    elementStart,
-   elementEnd,
 
    isTextXToken,
 
    elementDeclaration,
    attListDeclaration,
    SpaceXToken,
+   ElementEndXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -33,6 +33,7 @@ import {
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
    COMMENT_XTOKEN,
+   ELEMENT_END_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
@@ -320,9 +321,18 @@ class CheckXTokenValidStream extends stream.Transform {
       let declInfo = context.declInfo;
 
       if (declInfo.type === 'EMPTY') {
-         if (!(xToken instanceof elementEnd.XToken)) {
-            this.pushValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
-               [ declInfo.token.name ], sToken);
+         // §3.0.0 Validity Constraint: Element Valid
+         //     1.0/1-2: 1. The declaration matches EMPTY and the element has no content.
+         //     Other: The declaration matches EMPTY and the element has no content (not
+         //        even entity references, comments, PIs or white space).
+         //  [Note: The definition of "content" in 1.0 included references, CDSect, comments, pi)
+         if (!(xToken instanceof ElementEndXToken)) {
+            if (xToken.type !== SPACE_XTOKEN ||
+               (xToken.type === SPACE_XTOKEN && (this.emd.isVersion1dot1 ||
+               (this.emd.isVersion1dot0 && this.emd.revision > 2)))) {
+               this.pushValidityError(ValidityError.ID.CONTENT_IN_EMPTY_ELEMENT,
+                  [ declInfo.token.name ], sToken);
+            }
          }
       } else if (declInfo.type === 'ANY') {
          // §3.0.0 Validity Constraint: Element Valid
@@ -351,7 +361,9 @@ class CheckXTokenValidStream extends stream.Transform {
                      [ declInfo.token.name, xToken.name ], sToken);
                }
                break;
-            case elementEnd.XTYPE:
+            case ELEMENT_END_XTOKEN:
+               // always ok
+               break;
             case CHARDATA_XTOKEN:
             case GENERAL_ENTITY_REFERENCE_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
@@ -383,7 +395,7 @@ class CheckXTokenValidStream extends stream.Transform {
                break;
             case CHARDATA_XTOKEN:
             case CDATA_XTOKEN: // wanna revisit this given the decision in ANY?
-            case elementEnd.XTYPE:
+            case ELEMENT_END_XTOKEN:
             case GENERAL_ENTITY_START_XTOKEN:
             case GENERAL_ENTITY_END_XTOKEN:
                // These are all OK here
@@ -448,7 +460,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   context.stateId = destState.stateId;
                }
                break;
-            case elementEnd.XTYPE:
+            case ELEMENT_END_XTOKEN:
                if (currentState.done !== true) {
                   this.pushValidityError(ValidityError.ID.CHILDREN_UNEXPECTED_END, [ declInfo.token.name,
                      Object.keys(currentState.trans).join(', ') ], sToken);
@@ -595,7 +607,7 @@ class CheckXTokenValidStream extends stream.Transform {
          }
 
          this.validateElementStart(xToken);
-      } else if (xToken instanceof elementEnd.XToken) {
+      } else if (xToken instanceof ElementEndXToken) {
          this.currentContext = this.contentStack.pop();
 
          if (this.contentStack.length === 0) {

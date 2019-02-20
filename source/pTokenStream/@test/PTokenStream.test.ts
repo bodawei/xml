@@ -5,7 +5,6 @@ import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from 'sToken';
 import * as token from 'token';
 import {
-   elementEnd,
    elementStart,
 } from 'token';
 import * as tokenStuff from 'token';
@@ -163,13 +162,13 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls elementEnd.parse()', (done) => {
-      spyOn(elementEnd, 'parse').and.callThrough();
+   it('calls parseElementEnd()', (done) => {
+      spyOn(tokenStuff, 'parseElementEnd').and.callThrough();
       pTokenStream.addText('</foo>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(elementEnd.parse).toHaveBeenCalled();
+         expect(tokenStuff.parseElementEnd).toHaveBeenCalled();
          done();
       });
    });

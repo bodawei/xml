@@ -1,55 +1,59 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
 import { WellFormedError, XmlWarning, ErrorCollector } from 'error';
-import { strOrBlank, STokenSource, SToken } from 'sToken';
+import { strOrBlank, STokenSource, SToken, STokenArrayBuilder } from 'sToken';
 
 import misc from './common/misc';
-import base from './base';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
-const ELEMENT_END = 'ELEMENT_END';
+const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 
-/**********************************************************************\
- The elementStart namespace contains the usual tools for processing
- an element start tag.
-\**********************************************************************/
+type PreToken = { open: SToken, [ other: string ]: any };
 
-class ElementEnd extends base.XToken {
-   public name: string;
+class ElementEndPToken {
+   public readonly type: typeof ELEMENT_END_PTOKEN = ELEMENT_END_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly name?: SToken;
+   public readonly nameSpace?: SToken;
+   public readonly close?: SToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
+   constructor(basePToken: ElementEndPToken | PreToken) {
+      Object.assign(this, basePToken);
+
+      this.open = basePToken.open; // Make sure type system knows we always assign open
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken() {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray() {
+      return sTokensFromPToken(this);
+   }
+}
+
+class ElementEndXToken {
+   public readonly type: typeof ELEMENT_END_XTOKEN = ELEMENT_END_XTOKEN;
+   public readonly name: string;
+   public pToken?: ElementEndPToken;
+
    constructor(name: string, pToken?: ElementEndPToken) {
-      super(ELEMENT_END_XTOKEN, pToken);
-
       this.name = name;
+      this.pToken = pToken;
    }
 
-}
-
-class ElementEndPToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: Object) {
-      super(ELEMENT_END, props);
-   }
-
-   getSTokenArray() {
-      const results = super.getSTokenArray();
-
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.name,
-         this.postNameSpace,
-         this.close);
-
-      return results;
-   }
 }
 
 /**********************************************************************\
- parse() extracts the pieces of an element end tag.
+ parseElementEnd() extracts the pieces of an element end tag.
 
  This assumes that the "</" has already been processed and has been
  passed as an argument to this
@@ -63,18 +67,18 @@ class ElementEndPToken extends base.PToken {
    [42] ETag ::= '</' Name S? '>'
 \**********************************************************************/
 
-function parse(source: STokenSource, open: SToken, deliverPToken: (result: ElementEndPToken) => void) {
-   const pToken = new ElementEndPToken({
+function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (result: ElementEndPToken) => void) {
+   const pToken: PreToken = {
       open,
-   });
+   };
 
-   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
+   source.extractToObjectNoParams('space', pToken, 'openSpace');
    source.extractToObject('word', [ '>' ], pToken, 'name');
-   source.extractToObjectNoParams('space', pToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', pToken, 'nameSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
-      deliverPToken(pToken);
+      deliverPToken(new ElementEndPToken(pToken));
    });
 }
 
@@ -83,8 +87,8 @@ function parse(source: STokenSource, open: SToken, deliverPToken: (result: Eleme
 \**********************************************************************/
 
 function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   ec.setPos(pToken.postOpenSpace);
-   ec.check(pToken.postOpenSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
@@ -93,7 +97,7 @@ function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMet
       WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
       WARN.ELEMENT_NAME_XML_RESERVED);
 
-   ec.setPos(pToken.postNameSpace);
+   ec.setPos(pToken.nameSpace);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);
@@ -104,17 +108,31 @@ function checkWellFormed(pToken: ElementEndPToken, ec: ErrorCollector, entityMet
 \**********************************************************************/
 
 function pTokenToXToken(pToken: ElementEndPToken) {
-   return new ElementEnd(strOrBlank(pToken.name), pToken);
+   return new ElementEndXToken(strOrBlank(pToken.name), pToken);
+}
+
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the component STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: ElementEndPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(
+      pToken.open,
+      pToken.openSpace,
+      pToken.name,
+      pToken.nameSpace,
+      pToken.close);
+
+      return builder.sTokenArray;
 }
 
 export {
-   ELEMENT_END as PTYPE,
-   ELEMENT_END_XTOKEN as XTYPE,
-   ElementEnd as XToken,
-   ElementEndPToken as PToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
-
+   ELEMENT_END_PTOKEN,
+   ELEMENT_END_XTOKEN,
    ElementEndPToken,
+   ElementEndXToken,
+
+   parseElementEnd,
 };

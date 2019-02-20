@@ -27,6 +27,7 @@ import {
    XmlDeclarationPToken,
    GeneralEntityStartPToken,
    CharRefPToken,
+   ElementEndPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -468,11 +469,11 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let cwfSpy: jasmine.Spy;
 
       beforeEach(() => {
-         cwfSpy = spyOn(elementEnd, 'checkWellFormed');
-         pToken = {
-            type: elementEnd.PTYPE,
+         pToken = new ElementEndPToken({
             open: makeSToken('</'),
-         };
+            close: makeSToken('>'),
+         });
+         cwfSpy = spyOn(pToken, 'checkWellFormed');
       });
 
       it('calls elementEnd.checkWellFormed() when encountering an end tag start', () => {
@@ -480,9 +481,8 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {
@@ -568,8 +568,9 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             it('reports no error if an empty element is found between start and end', () => {
                checker.write({
                   type: elementStart.EMPTY_TYPE,
-                  open: makeSToken('<'),
+                  open: makeSToken('</'),
                   name: makeSToken('two'),
+                  close: makeSToken('>'),
                });
                const checkerPushSpy = spyOn(checker, 'push');
                pToken.name = makeSToken('one');

@@ -13,7 +13,6 @@ import {
    docTypeEnd,
    docTypeStart,
    elementStart,
-   elementEnd,
    elementDeclaration,
    ProcessingInstructionXToken,
 
@@ -22,6 +21,8 @@ import {
    CdataXToken,
    CharDataXToken,
    CommentXToken,
+   ElementEndPToken,
+   ElementEndXToken,
    SpaceXToken,
    ExternalSubsetStartXToken,
    ExternalSubsetEndXToken,
@@ -884,7 +885,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      new TextXToken('goodName')
                   ]
                }]);
-               endElName = new elementEnd.XToken('testEl');
+               endElName = new ElementEndXToken('testEl');
             });
 
             it('it calls isName() with the entity meta data (whitebox)', (done) => {
@@ -2754,7 +2755,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                      token: new TextPToken({ text: SToken.fromString(' ') }),
                   }, {
                      type: UnassignedType.ENTITY_END,
-                     token: new elementEnd.PToken({ name: SToken.fromString('testPE') }),
+                     token: new ElementEndPToken({ open: SToken.fromString('<'), name: SToken.fromString('testPE') }),
                   }],
                });
                const declToken = elementDeclaration.pTokenToXToken(pToken);
@@ -3540,7 +3541,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             it('reports no error if only a start and end tag are used an EMPTY element', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
                const elStart = new elementStart.XToken('one', []);
-               const elEnd = new elementEnd.XToken('one');
+               const elEnd = new ElementEndXToken('one');
 
                validator.write(elementDecl);
                validator.write(elStart);
@@ -3595,9 +3596,9 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE'
                });
                const elStart = new elementStart.XToken('one', []);
-               const elEnd = new elementEnd.XToken('one');
+               const elEnd = new ElementEndXToken('one');
                const child = new elementStart.XToken('two', []);
-               const childEnd = new elementEnd.XToken('two');
+               const childEnd = new ElementEndXToken('two');
                const thirdStart = new elementStart.XToken('three', []);
 
                validator.write(elementDecl);
@@ -3715,7 +3716,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new CharDataXToken('test charData'));
                validator.write(new CdataXToken('test CDATA'));
                validator.write(new CharDataXToken(' '));
-               validator.write(new elementEnd.XToken('one'));
+               validator.write(new ElementEndXToken('one'));
                validator.end();
 
                expectNoErrors(validator, done);
@@ -3735,7 +3736,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new elementStart.XToken('one', []));
                validator.write(new GeneralEntityStartXToken('testEntityStart'));
                validator.write(new GeneralEntityEndXToken('testEntityEnd'));
-               validator.write(new elementEnd.XToken('one'));
+               validator.write(new ElementEndXToken('one'));
                validator.end();
 
                expectNoErrors(validator, done);
@@ -3912,7 +3913,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                   listType: 'CHOICE',
                });
                const elStart = new elementStart.XToken('one', []);
-               const elEnd = new elementEnd.XToken('one');
+               const elEnd = new ElementEndXToken('one');
 
                validator.write(elementDecl1);
                validator.write(elStart);
@@ -3959,7 +3960,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const elStart = new elementStart.XToken('one', []);
                const elMiddle = new elementStart.EmptyToken('two', []);
-               const elEnd = new elementEnd.XToken('one');
+               const elEnd = new ElementEndXToken('one');
 
                validator.write(elementDecl2);
                validator.write(elementDecl1);
@@ -4007,7 +4008,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                });
                const elStart = new elementStart.XToken('one', []);
                const elMiddle = new elementStart.EmptyToken('four', []);
-               const elEnd = new elementEnd.XToken('one');
+               const elEnd = new ElementEndXToken('one');
 
                validator.write(elementDecl2);
                validator.write(elementDecl1);
@@ -4034,7 +4035,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new ExternalSubsetEndXToken());
                validator.write(new ElementStart('extDeclaredElement', []));
                validator.write(new SpaceXToken('  '));
-               validator.write(new elementEnd.XToken('extDeclaredElement'));
+               validator.write(new ElementEndXToken('extDeclaredElement'));
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,
@@ -4058,7 +4059,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                validator.write(new SpaceXToken('  '));
                validator.write(new SpaceXToken('  '));
                validator.write(new SpaceXToken('  '));
-               validator.write(new elementEnd.XToken('extDeclaredElement'));
+               validator.write(new ElementEndXToken('extDeclaredElement'));
                validator.end();
 
                const expected = new ValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED,

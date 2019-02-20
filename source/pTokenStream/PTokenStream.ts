@@ -6,16 +6,18 @@ import { EntityMetaData, EntityKind } from 'basic';
 import { defaultExtractors } from 'extractor';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
+   ELEMENT_END_PTOKEN,
+
    parseCharData,
    parseSection,
 
    docTypeEnd,
    elementStart,
-   elementEnd,
 
    parseCharRef,
    parseComment,
    parseDeclaration,
+   parseElementEnd,
    parseGeneralEntityReference,
    parseInstruction,
    parseParameterEntityReference,
@@ -87,7 +89,7 @@ class PTokenStream extends stream.Readable {
             if (result.type === elementStart.PTYPE) {
                this._inContent = true;
                this._elementStack.push(result);
-            } else if (result.type === elementEnd.PTYPE) {
+            } else if (result.type === ELEMENT_END_PTOKEN) {
                const name = resultName;
                const topToken = this._elementStack[this._elementStack.length - 1];
                const topSToken = (topToken as any || {}).name; // typeHack
@@ -183,7 +185,7 @@ class PTokenStream extends stream.Readable {
                elementStart.parse(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '</':
-               elementEnd.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
                parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);

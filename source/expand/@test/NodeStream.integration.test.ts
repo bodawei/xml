@@ -13,6 +13,7 @@ import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
 import {
    CharDataXToken,
+   ElementEndXToken,
    SpaceXToken,
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -93,7 +94,7 @@ describe('NodeStream (integration)', () => {
             CharDataXToken,
             GeneralEntityEndXToken,
             GeneralEntityEndXToken,
-            tokenNs.elementEnd.XToken,
+            ElementEndXToken,
          ]);
          done();
       });
@@ -125,7 +126,7 @@ describe('NodeStream (integration)', () => {
                   CharDataXToken,
                GeneralEntityEndXToken,
                CharDataXToken,
-            tokenNs.elementEnd.XToken,
+            ElementEndXToken,
          ]);
          /* eslint-enable indent */
          done();

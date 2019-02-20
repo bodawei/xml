@@ -30,6 +30,7 @@ export * from './cdata';
 export * from './charData';
 export * from './charRef';
 export * from './comment';
+export * from './elementEnd';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
 export * from './notationDeclaration';

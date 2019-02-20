@@ -13,6 +13,7 @@ import {
    CdataPToken,
    CharDataPToken,
    CharRefPToken,
+   ElementEndPToken,
    ProcessingInstructionPToken,
    TextPToken,
    XmlDeclarationPToken,
@@ -119,14 +120,14 @@ describe('PToXTokenStream (unit)', () => {
       expect(elementStart.pTokenToXToken).toHaveBeenCalledWith(pToken);
    });
 
-   it('calls elementEnd.pTokenToXToken()', () => {
-      spyOn(elementEnd, 'pTokenToXToken');
-      const pToken = { type: elementEnd.PTYPE };
+   it('calls elementEnd.toXToken()', () => {
+      const pToken = new ElementEndPToken({ open: SToken.fromString('<') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementEnd.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls elementDeclaration.pTokenToXToken()', () => {

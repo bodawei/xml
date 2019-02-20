@@ -20,6 +20,7 @@ import {
    CHARDATA_PTOKEN,
    CHARREF_PTOKEN,
    COMMENT_PTOKEN,
+   ELEMENT_END_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
@@ -216,8 +217,8 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             elementStart.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
-         case elementEnd.PTYPE:
-            const endNameText = pToken.name ? pToken.name.str : '';
+         case ELEMENT_END_PTOKEN:
+            const endNameText = strOrBlank(pToken.name);
             const lastElement = this._elementNameStack[this._elementNameStack.length - 1];
 
             // 3.0: Well-Formedness Constraint: Element Type Match
@@ -237,7 +238,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                }
             }
 
-            elementEnd.checkWellFormed(pToken as any, errorCollector, this.emd);
+            (pToken as any).checkWellFormed(errorCollector, this.emd);
             break;
          case elementDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {

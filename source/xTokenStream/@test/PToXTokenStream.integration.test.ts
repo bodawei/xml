@@ -11,7 +11,6 @@ import {
    docTypeStart,
    docTypeEnd,
    elementDeclaration,
-   elementEnd,
    elementStart,
 
    CdataXToken,
@@ -26,6 +25,7 @@ import {
    XmlDeclarationXToken,
    TextXToken,
    TextPToken,
+   ElementEndXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
@@ -123,7 +123,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes an element end', (done) => {
       expectInputToProduce('</elementName>', [
-         new elementEnd.XToken('elementName'),
+         new ElementEndXToken('elementName'),
       ], done);
    });
 

@@ -300,7 +300,7 @@ describe('NodeStream (unit)', () => {
          //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
-         //             token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
+         //             token: new ElementEndPToken({ name: SToken.fromString('testPE') }),
          //          }],
          //       });
          //       const declToken = xToken.elementDeclaration.pTokenToXToken(pToken);
@@ -334,7 +334,7 @@ describe('NodeStream (unit)', () => {
          //             token: new TextPToken({ text: SToken.fromString(' ') }),
          //          }, {
          //             type: UnassignedType.ENTITY_END,
-         //             token: new xToken.elementEnd.PToken({ name: SToken.fromString('testPE') }),
+         //             token: new ElementEndPToken({ name: SToken.fromString('testPE') }),
          //          }],
          //       });
          //       const declToken = xToken.elementDeclaration.pTokenToXToken(pToken);

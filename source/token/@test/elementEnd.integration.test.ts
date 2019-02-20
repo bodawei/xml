@@ -4,23 +4,24 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { defaultExtractors } from 'extractor';
-import { STokenSource } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import * as elementEnd from '../elementEnd';
+import { ElementEndPToken, parseElementEnd } from '../elementEnd';
 
-describe('elementEnd', () => {
-   let elementEndPToken: elementEnd.ElementEndPToken;
+describe('elementEnd (integration)', () => {
+   let elementEndPToken: ElementEndPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      elementEndPToken = new elementEnd.ElementEndPToken({
-         postOpenSpace: undefined,
+      elementEndPToken = new ElementEndPToken({
+         open: SToken.fromString('<'),
+         openSpace: undefined,
          name: makeSToken('elemName'),
-         postNameSpace: makeSToken(' '),
+         nameSpace: makeSToken(' '),
          close: makeSToken('>'),
       });
-      elementEndPToken.open = makeSToken('</');
+      (elementEndPToken as any).open = makeSToken('</');
    });
 
    describe('parse()', () => {
@@ -30,8 +31,8 @@ describe('elementEnd', () => {
          source.addText('elemName >');
          source.endText();
 
-         elementEnd.parse(source, elementEndPToken.open, (parsing) => {
-            expect(parsing).toEqual(new elementEnd.PToken(elementEndPToken));
+         parseElementEnd(source, elementEndPToken.open, (parsing) => {
+            expect(parsing).toEqual(new ElementEndPToken(elementEndPToken));
             done();
          });
       });
@@ -50,10 +51,10 @@ describe('elementEnd', () => {
       it('reports an error with "xml" in name (check misc.checkWellFormedNameRecommendation)', (done) => {
          source.addText('xmlElementName>');
          source.endText();
-         elementEnd.parse(source, elementEndPToken.open, (pToken) => {
+         parseElementEnd(source, elementEndPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
-            elementEnd.checkWellFormed(pToken, ec, emd);
+            pToken.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
             done();
@@ -63,10 +64,10 @@ describe('elementEnd', () => {
       it('reports an error when name starts with "$" (check misc.checkName)', (done) => {
          source.addText('$elementName>');
          source.endText();
-         elementEnd.parse(source, elementEndPToken.open, (pToken) => {
+         parseElementEnd(source, elementEndPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken.open, WellFormedError);
 
-            elementEnd.checkWellFormed(pToken, ec, emd);
+            pToken.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
             done();
