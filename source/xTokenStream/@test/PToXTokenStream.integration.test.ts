@@ -11,7 +11,6 @@ import {
    docTypeStart,
    docTypeEnd,
    elementDeclaration,
-   elementStart,
 
    CdataXToken,
    CharDataXToken,
@@ -26,6 +25,8 @@ import {
    TextXToken,
    TextPToken,
    ElementEndXToken,
+   ElementStartXToken,
+   ElementEmptyXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
@@ -111,13 +112,13 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes an element start', (done) => {
       expectInputToProduce('<elementName>', [
-         new elementStart.XToken('elementName', []),
+         new ElementStartXToken('elementName', []),
       ], done);
    });
 
    it('tokenizes an empty element', (done) => {
       expectInputToProduce('<elementName/>', [
-         new elementStart.EmptyToken('elementName', []),
+         new ElementEmptyXToken('elementName', []),
       ], done);
    });
 

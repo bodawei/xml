@@ -12,16 +12,17 @@ import {
    parseSection,
 
    docTypeEnd,
-   elementStart,
 
    parseCharRef,
    parseComment,
    parseDeclaration,
    parseElementEnd,
+   parseElementStart,
    parseGeneralEntityReference,
    parseInstruction,
    parseParameterEntityReference,
    parseSpace,
+   ELEMENT_START_PTOKEN,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -86,7 +87,7 @@ class PTokenStream extends stream.Readable {
             const resultSToken = (result as any).name; // typeHack
             const resultName = strOrBlank(resultSToken);
 
-            if (result.type === elementStart.PTYPE) {
+            if (result.type === ELEMENT_START_PTOKEN) {
                this._inContent = true;
                this._elementStack.push(result);
             } else if (result.type === ELEMENT_END_PTOKEN) {
@@ -182,7 +183,7 @@ class PTokenStream extends stream.Readable {
                parseCharRef(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<':
-               elementStart.parse(this._sTokenSource, markupStartSToken, deliverParse);
+               parseElementStart(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '</':
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);

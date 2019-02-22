@@ -9,54 +9,63 @@ import { WellFormedError, XmlWarning } from 'error';
 
 import attribute from '../common/attribute';
 import misc from '../common/misc';
-import * as elementStart from '../elementStart';
+import { ELEMENT_EMPTY_PTOKEN, ElementEmptyPToken, ElementEmptyXToken, ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
+import { SToken } from 'sToken';
 
 describe('elementStart (unit)', () => {
-   let elementStartPToken: elementStart.PToken;
-   let elementStartPTokenWithLeading: elementStart.PToken;
+   let elementStartPToken: ElementStartPToken;
+   let elementEmptyPToken: ElementEmptyPToken;
+   let elementStartPTokenWithLeading: ElementStartPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      elementStartPTokenWithLeading = new elementStart.PToken({
+      elementStartPTokenWithLeading = new ElementStartPToken({
          open: makeSToken('<'),
-         postOpenSpace: makeSToken(' '),
+         openSpace: makeSToken(' '),
          name: makeSToken('elemName'),
-         postNameSpace: makeSToken(' '),
-         attributes: [],
+         nameSpace: makeSToken(' '),
          close: makeSToken('>'),
       });
       const makeSToken2 = makeSTokenMaker();
-      elementStartPToken = new elementStart.PToken({
+      elementStartPToken = new ElementStartPToken({
          open: makeSToken2('<'),
-         postOpenSpace: undefined,
+         openSpace: undefined,
          name: makeSToken2('elemName'),
-         postNameSpace: makeSToken2(' '),
-         attributes: [],
+         nameSpace: makeSToken2(' '),
          close: makeSToken2('>'),
+      });
+
+      elementEmptyPToken = new ElementEmptyPToken({
+         open: SToken.fromString('<'),
+         openSpace: undefined,
+         name: SToken.fromString('elemName'),
+         nameSpace: SToken.fromString(' '),
+         attributes: [],
+         close: SToken.fromString('>'),
       });
    });
 
-   describe('PToken', () => {
+   describe('ElementStartPToken', () => {
 
-      describe('getSTokenStream()', () => {
+      describe('toSTokenArray()', () => {
 
          it('returns all the STokens', () => {
-            expect(elementStartPTokenWithLeading.getSTokenArray()).toEqual([
+            expect(elementStartPTokenWithLeading.toSTokenArray()).toEqual([
                elementStartPTokenWithLeading.open,
-               elementStartPTokenWithLeading.postOpenSpace,
+               elementStartPTokenWithLeading.openSpace,
                elementStartPTokenWithLeading.name,
-               elementStartPTokenWithLeading.postNameSpace,
+               elementStartPTokenWithLeading.nameSpace,
                elementStartPTokenWithLeading.close,
-            ]);
+            ] as any);
          });
 
       });
 
       it('asks the attribute to provide the STokens', () => {
          spyOn(attribute, 'getSTokens');
-         elementStartPToken.attributes = [ {} ];
+         (elementStartPToken as any).attributes = [ {} ];
 
-         elementStartPToken.getSTokenArray();
+         elementStartPToken.toSTokenArray();
 
          expect(attribute.getSTokens).toHaveBeenCalledWith(elementStartPToken.attributes);
       });
@@ -68,25 +77,25 @@ describe('elementStart (unit)', () => {
       describe('getSTokenStream()', () => {
 
          it('returns all the STokens', () => {
-            const pToken = new elementStart.EmptyPToken(elementStartPTokenWithLeading);
+            const pToken = new ElementEmptyPToken(elementStartPTokenWithLeading);
 
-            expect(pToken.getSTokenArray()).toEqual([
+            expect(pToken.toSTokenArray()).toEqual([
                elementStartPTokenWithLeading.open,
-               elementStartPTokenWithLeading.postOpenSpace,
+               elementStartPTokenWithLeading.openSpace,
                elementStartPTokenWithLeading.name,
-               elementStartPTokenWithLeading.postNameSpace,
+               elementStartPTokenWithLeading.nameSpace,
                elementStartPTokenWithLeading.close,
-            ]);
+            ] as any);
          });
 
       });
 
       it('asks the attribute to provide the STokens', () => {
-         const pToken = new elementStart.EmptyPToken(elementStartPTokenWithLeading);
+         const pToken = new ElementEmptyPToken(elementStartPTokenWithLeading);
          spyOn(attribute, 'getSTokens');
-         pToken.attributes = [ {} ];
+         (pToken as any).attributes = [ {} ];
 
-         pToken.getSTokenArray();
+         pToken.toSTokenArray();
 
          expect(attribute.getSTokens).toHaveBeenCalledWith(pToken.attributes);
       });
@@ -114,7 +123,7 @@ describe('elementStart (unit)', () => {
             [ '>', 'match', '>' ],
          ], 1, 0, 1);
 
-         elementStart.parse(mockSource, elementStartPToken.open, callback);
+         parseElementStart(mockSource, elementStartPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          const args = attrParse.calls.argsFor(0);
@@ -134,15 +143,13 @@ describe('elementStart (unit)', () => {
             [ undefined, 'match', '>' ],
             [ '/>', 'match', '/>' ],
          ], 1, 0, 1);
-         const elementEmptyPToken = elementStartPToken;
-         elementEmptyPToken.type = 'ELEMENT_EMPTY';
          const makeSToken = makeSTokenMaker(undefined, 10, 0, 10);
-         elementEmptyPToken.close = makeSToken('/>');
+         (elementEmptyPToken as any).close = makeSToken('/>');
 
-         elementStart.parse(mockSource, elementStartPToken.open, callback);
+         parseElementStart(mockSource, elementStartPToken.open, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback).toContainPTokenProps(elementEmptyPToken);
+         expect(callback).toEqualRangeless(elementEmptyPToken);
       });
 
       it('returns simple values', () => {
@@ -153,7 +160,7 @@ describe('elementStart (unit)', () => {
             '>',
          ], 1, 0, 1);
 
-         elementStart.parse(mockSource, elementStartPTokenWithLeading.open, callback);
+         parseElementStart(mockSource, elementStartPTokenWithLeading.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(elementStartPTokenWithLeading);
@@ -167,11 +174,11 @@ describe('elementStart (unit)', () => {
             undefined,
             undefined,
          ], 1, 0, 1);
-         elementStartPToken.postOpenSpace = undefined;
-         elementStartPToken.name = undefined;
-         elementStartPToken.postNameSpace = undefined;
-         elementStartPToken.close = undefined;
-         elementStart.parse(mockSource, elementStartPToken.open, callback);
+         (elementStartPToken as any).openSpace = undefined;
+         (elementStartPToken as any).name = undefined;
+         (elementStartPToken as any).nameSpace = undefined;
+         (elementStartPToken as any).close = undefined;
+         parseElementStart(mockSource, elementStartPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(elementStartPToken);
@@ -194,14 +201,14 @@ describe('elementStart (unit)', () => {
       });
 
       it('asks the misc module to look for errors in the name', () => {
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(misc.checkName).toHaveBeenCalledWith(elementStartPToken.name,
             mockErrorCollector, emd, WellFormedError.ID.ELEMENT_NAME_INVALID);
       });
 
       it('asks the misc module to look for warning problems in the name', () => {
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(misc.checkWellFormedNameRecommendation).toHaveBeenCalledWith(elementStartPToken.name,
             mockErrorCollector, emd, 'ELEMENT', XmlWarning.ID.ELEMENT_NAME_XMLCOLON_RESERVED,
@@ -210,35 +217,35 @@ describe('elementStart (unit)', () => {
 
       it('calls attribute.checkWellFormed', () => {
          const emd = new EntityMetaData();
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          const args = cwf.calls.argsFor(0);
          expect(args[0]).toEqual(elementStartPToken.attributes);
          expect(args[1]).toEqual(mockErrorCollector);
          expect(args[2]).toEqual(emd);
-         expect(args[3]).toEqual(elementStartPToken.postNameSpace);
+         expect(args[3]).toEqual(elementStartPToken.nameSpace);
       });
 
       it('reports no errors if everything is in order', () => {
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('reports an error if there is a space after the opening "<"', () => {
-         elementStart.checkWellFormed(elementStartPTokenWithLeading, mockErrorCollector, emd);
+         elementStartPTokenWithLeading.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_XTRA_LEADING_SPACE,
             params: undefined,
-            position: elementStartPTokenWithLeading.postOpenSpace,
+            position: elementStartPTokenWithLeading.openSpace,
          });
       });
 
       it('reports an error if there is no elment name', () => {
-         elementStartPToken.name = undefined;
+         (elementStartPToken as any).name = undefined;
 
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_NAME,
@@ -248,20 +255,20 @@ describe('elementStart (unit)', () => {
       });
 
       it('reports whether there is a close', () => {
-         elementStartPToken.close = undefined;
+         (elementStartPToken as any).close = undefined;
 
-         elementStart.checkWellFormed(elementStartPToken, mockErrorCollector, emd);
+         elementStartPToken.checkWellFormed(mockErrorCollector, emd);
 
          expect(mockErrorCollector).toReportError({
             id: WellFormedError.ID.ELEMENT_NO_CLOSE,
             params: undefined,
-            lastPosition: elementStartPToken.postNameSpace,
+            lastPosition: elementStartPToken.nameSpace,
          });
       });
 
    });
 
-   describe('pTokenToXToken()', () => {
+   describe('toXToken()', () => {
       let mtc: jasmine.Spy;
 
       beforeEach(() => {
@@ -269,9 +276,9 @@ describe('elementStart (unit)', () => {
       });
 
       it('asks the attribute to provide the attributes', () => {
-         elementStartPToken.attributes = [ {} ];
+         (elementStartPToken as any).attributes = [ {} ];
 
-         elementStart.pTokenToXToken(elementStartPToken);
+         elementStartPToken.toXToken();
 
          expect(attribute.makeTokenCompatible).toHaveBeenCalledWith(elementStartPToken.attributes);
       });
@@ -279,28 +286,35 @@ describe('elementStart (unit)', () => {
       it('returns a token with the expected fields defined', () => {
          mtc.and.returnValue([ { attributes: true } ]);
 
-         const token = elementStart.pTokenToXToken(elementStartPTokenWithLeading);
+         const token = elementStartPTokenWithLeading.toXToken();
 
-         expect(token).toEqual(new elementStart.XToken('elemName',
+         expect(token).toEqual(new ElementStartXToken('elemName',
             [ { attributes: true } ] as any,
             elementStartPTokenWithLeading));
       });
 
       it('returns an empty elment XToken if an empty element was provided', () => {
          mtc.and.returnValue([ { attributes: true } ]);
-         elementStartPToken.type = elementStart.EMPTY_TYPE;
+         const elementEmptyPToken = new ElementEmptyPToken({
+            open: SToken.fromString('<'),
+            openSpace: undefined,
+            name: SToken.fromString('elemName'),
+            nameSpace: SToken.fromString(' '),
+            attributes: [],
+            close: SToken.fromString('>'),
+         });
 
-         const token = elementStart.pTokenToXToken(elementStartPToken);
+         const token = elementEmptyPToken.toXToken();
 
-         expect(token).toEqual(new elementStart.EmptyToken('elemName',
+         expect(token).toEqual(new ElementEmptyXToken('elemName',
             [ { attributes: true } ] as any,
-            elementStartPToken));
+            elementEmptyPToken));
       });
 
       it('returns a token with an empty string if no name was found', () => {
-         elementStartPToken.name = undefined;
+         (elementStartPToken as any).name = undefined;
 
-         const token = elementStart.pTokenToXToken(elementStartPToken);
+         const token = elementStartPToken.toXToken();
 
          expect(token.name).toEqual('');
       });

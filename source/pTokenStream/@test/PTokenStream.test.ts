@@ -3,12 +3,7 @@
 
 import { EntityLocation, EntityMetaData, Range, EntityKind } from 'basic';
 import { SToken, STokenSource } from 'sToken';
-import * as token from 'token';
-import {
-   elementStart,
-} from 'token';
 import * as tokenStuff from 'token';
-import * as instruction from 'token';
 
 import PTokenStream from '../PTokenStream';
 
@@ -60,7 +55,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering an ATTLIST', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!ATTLIST something bar CDATA #REQUIRED>');
       pTokenStream.endText();
 
@@ -87,7 +82,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls charData.parse()', (done) => {
-      const parseSpy = spyOn(token, 'parseCharData').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseCharData').and.callThrough();
       pTokenStream.addText('asdf</foo>');
       pTokenStream.endText();
 
@@ -100,7 +95,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls charData.parse() in the internal subset', (done) => {
-      const parseSpy = spyOn(token, 'parseCharData').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseCharData').and.callThrough();
       pTokenStream.addText('<!DOCTYPE foo [ asdf</foo>');
       pTokenStream.endText();
 
@@ -123,19 +118,19 @@ describe('PTokenStream (unit)', () => {
       });
    });
 
-   it('calls elementStart.parse()', (done) => {
-      spyOn(elementStart, 'parse').and.callThrough();
+   it('calls parseElementStart()', (done) => {
+      spyOn(tokenStuff, 'parseElementStart').and.callThrough();
       pTokenStream.addText('<foo>');
       pTokenStream.endText();
 
       gatherPTokens(pTokenStream, () => {
-         expect(elementStart.parse).toHaveBeenCalled();
+         expect(tokenStuff.parseElementStart).toHaveBeenCalled();
          done();
       });
    });
 
    it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!DOCTYPE theType>');
       pTokenStream.endText();
 
@@ -149,7 +144,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering a DOCTYPE', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!docType theType>');
       pTokenStream.endText();
 
@@ -174,7 +169,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering an ELEMENT', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!ELEMENT something "foo">');
       pTokenStream.endText();
 
@@ -188,7 +183,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering an ENTITY', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!ENTITY something "foo">');
       pTokenStream.endText();
 
@@ -227,7 +222,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering a notation', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!NOTATION something>');
       pTokenStream.endText();
 
@@ -241,7 +236,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseInstruction()', (done) => {
-      const parseSpy = spyOn(instruction, 'parseInstruction').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseInstruction').and.callThrough();
       pTokenStream.addText('<?something foo?>');
       pTokenStream.endText();
 
@@ -310,7 +305,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseDeclaration() when encountering an unknown declaration', (done) => {
-      const parseSpy = spyOn(token, 'parseDeclaration').and.callThrough();
+      const parseSpy = spyOn(tokenStuff, 'parseDeclaration').and.callThrough();
       pTokenStream.addText('<!FOO >');
       pTokenStream.endText();
 
@@ -335,7 +330,7 @@ describe('PTokenStream (unit)', () => {
    });
 
    it('calls parseSection()', (done) => {
-      const parseSpy = spyOn(token, 'parseSection').and.callThrough();;
+      const parseSpy = spyOn(tokenStuff, 'parseSection').and.callThrough();;
       pTokenStream.addText('<![FOO [');
       pTokenStream.endText();
 

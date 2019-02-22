@@ -3,12 +3,11 @@
 import stream from 'readable-stream';
 
 import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
-import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from '../error';
-import { SToken } from '../sToken';
+import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
+import { SToken } from 'sToken';
 import {
    docTypeEnd,
    docTypeStart,
-   elementStart,
 
    isTextXToken,
 
@@ -16,6 +15,7 @@ import {
    attListDeclaration,
    SpaceXToken,
    ElementEndXToken,
+   ElementStartXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -33,19 +33,22 @@ import {
    CDATA_XTOKEN,
    CHARDATA_XTOKEN,
    COMMENT_XTOKEN,
+   ELEMENT_EMPTY_XTOKEN,
    ELEMENT_END_XTOKEN,
+   ELEMENT_START_XTOKEN,
    PROCESSING_INSTRUCTION_XTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    SPACE_XTOKEN,
    XMLDECL_XTOKEN,
+
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
-} from '../token';
+   ElementEmptyXToken,
+} from 'token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
 import { ElementDeclaration, isXName, XNameList } from '../token/elementDeclaration';
-import { ElementStart } from '../token/elementStart';
 import nameList, { XName } from '../token/contentspec/nameList';
 import { Graph } from '../token/contentspec/nameListGraphTypes';
 import EntityManager from '../expand/EntityManager';
@@ -110,7 +113,7 @@ type ContentContext = {
 
 type IDMap = {
    [idValue: string]: {
-      token: ElementStart,
+      token: ElementStartXToken | ElementEmptyXToken,
       attrName: string,
    }
 };
@@ -354,8 +357,8 @@ class CheckXTokenValidStream extends stream.Transform {
          }
 
          switch (xToken.type) {
-            case elementStart.XTYPE:
-            case elementStart.EMPTY_XTYPE:
+            case ELEMENT_START_XTOKEN:
+            case ELEMENT_EMPTY_XTOKEN:
                if (!this.elementDeclarations[xToken.name]) {
                   this.pushValidityError(ValidityError.ID.ANY_UNDECLARED_ELEMENT,
                      [ declInfo.token.name, xToken.name ], sToken);
@@ -386,8 +389,8 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (declInfo.type === 'MIXED') {
          switch (xToken.type) {
-            case elementStart.XTYPE:
-            case elementStart.EMPTY_XTYPE:
+            case ELEMENT_START_XTOKEN:
+            case ELEMENT_EMPTY_XTOKEN:
                if (!declInfo.children[xToken.name]) {
                   this.pushValidityError(ValidityError.ID.UNDECLARED_ELEMENT_IN_MIXED,
                      [ declInfo.token.name, xToken.name ], sToken);
@@ -449,8 +452,8 @@ class CheckXTokenValidStream extends stream.Transform {
          const currentState = declInfo.graph.states[context.stateId];
 
          switch (xToken.type) {
-            case elementStart.XTYPE:
-            case elementStart.EMPTY_XTYPE:
+            case ELEMENT_START_XTOKEN:
+            case ELEMENT_EMPTY_XTOKEN:
                const destState = currentState.trans[xToken.name];
 
                if (!destState) {
@@ -574,7 +577,7 @@ class CheckXTokenValidStream extends stream.Transform {
          this.validateElementDecl(xToken);
       } else if (xToken instanceof docTypeStart.XToken) {
          this.docType = xToken;
-      } else if (xToken instanceof elementStart.XToken || xToken instanceof elementStart.EmptyToken) {
+      } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
          if (!this._seenRoot) {
             if (this.docType && xToken.name !== this.docType.name) {
                this.pushValidityError(ValidityError.ID.MISMATCH_ROOT_ELEMENT_TYPE, [ this.docType.name, xToken.name ],
@@ -583,7 +586,7 @@ class CheckXTokenValidStream extends stream.Transform {
             this._seenRoot = true;
          }
 
-         if (xToken instanceof elementStart.XToken) {
+         if (xToken instanceof ElementStartXToken) {
             if (this.currentContext) {
                this.contentStack.push(this.currentContext);
             }
@@ -1193,7 +1196,7 @@ class CheckXTokenValidStream extends stream.Transform {
       });
    }
 
-   private validateElementStart(elStart: ElementStart) {
+   private validateElementStart(elStart: ElementStartXToken | ElementEmptyXToken) {
       const elemAttrDef = this.attrDefsByElementName[elStart.name];
       const elementDecl = this.elementDeclarations[elStart.name];
       const attributes = elStart.attributes;
@@ -1258,7 +1261,7 @@ class CheckXTokenValidStream extends stream.Transform {
                   }
 
                   attributesByName[attDefName] = newAttribute;
-                  attributes.push(newAttribute);
+                  (attributes as any).push(newAttribute); //typeHack
                } else if (!attribute.value || attribute.value.length === 0) {
                   attribute.value = attDef.value;
                }
@@ -1468,7 +1471,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
       // Interoperability: §3.1: For interoperability, the empty-element tag should be
       //    used, and should only be used, for elements which are declared EMPTY.
-      const tokenIsEmptyType = elStart instanceof elementStart.EmptyToken;
+      const tokenIsEmptyType = elStart instanceof ElementEmptyXToken;
       const declarationIsEmpty = elementDecl.type === 'EMPTY';
       let warningId;
 

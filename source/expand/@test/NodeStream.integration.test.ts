@@ -9,11 +9,11 @@ import { SToken } from 'sToken';
 import { makeSTokenMaker, STokenMaker } from 'sToken-test';
 import * as tokenNs from 'token';
 import { AttListXToken } from '../../token/attListDeclaration'; // hack
-import { ElementStart } from '../../token/elementStart'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
 import {
    CharDataXToken,
    ElementEndXToken,
+   ElementStartXToken,
    SpaceXToken,
    GeneralEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -84,7 +84,7 @@ describe('NodeStream (integration)', () => {
             tokenNs.GeneralEntityDeclarationXToken,
             InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
-            tokenNs.elementStart.XToken,
+            ElementStartXToken,
             GeneralEntityStartXToken,
             GeneralEntityStartXToken,
             CharDataXToken,
@@ -120,7 +120,7 @@ describe('NodeStream (integration)', () => {
                ParameterEntityEndXToken,
                InternalSubsetEndXToken,
             tokenNs.docTypeEnd.XToken,
-            tokenNs.elementStart.XToken,
+            ElementStartXToken,
                CharDataXToken,
                GeneralEntityStartXToken,
                   CharDataXToken,
@@ -325,7 +325,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY child "(child)">' +
          ']>' +
          '<one child="&child;"/>', (results) => {
-            const element = results[7] as ElementStart; // typeHack
+            const element = results[7] as ElementStartXToken; // typeHack
 
             expect(element.attributes[0].value).toEqual([
                new GeneralEntityStartXToken('child'),
@@ -347,7 +347,7 @@ describe('NodeStream (integration)', () => {
             '<!ENTITY parent "pre&child;mid&child;post">' +
          ']>' +
          '<one child="&child;" parent="&parent;"/>', (results) => {
-            const element = results[8] as ElementStart; // typeHack
+            const element = results[8] as ElementStartXToken; // typeHack
 
             expect(element.attributes[1].value).toEqual([
                new GeneralEntityStartXToken('parent'),

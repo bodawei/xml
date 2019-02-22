@@ -10,8 +10,6 @@ import {
    attListDeclaration,
    docTypeEnd,
    docTypeStart,
-   elementEnd,
-   elementStart,
    elementDeclaration,
    ProcessingInstructionPToken,
 
@@ -28,6 +26,9 @@ import {
    GeneralEntityStartPToken,
    CharRefPToken,
    ElementEndPToken,
+   ElementStartPToken,
+   ELEMENT_EMPTY_PTOKEN,
+   ElementEmptyPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -375,11 +376,10 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let cwfSpy: jasmine.Spy;
 
       beforeEach(() => {
-         cwfSpy = spyOn(elementStart, 'checkWellFormed');
-         pToken = {
-            type: elementStart.PTYPE,
+         pToken = new ElementStartPToken({
             open: makeSToken('<'),
-         };
+         });
+         cwfSpy = spyOn(pToken, 'checkWellFormed');
       });
 
       it('calls elementStart.checkWellFormed() when encountering an element start', () => {
@@ -387,20 +387,18 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       it('calls elementStart.checkWellFormed() when encountering an empty element', () => {
-         pToken.type = elementStart.EMPTY_TYPE;
+         pToken.type = ELEMENT_EMPTY_PTOKEN;
          checker.write(metaData);
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {
@@ -489,10 +487,9 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
          beforeEach(() => {
             checker.write(metaData);
-            checker.write({
-               type: elementStart.PTYPE,
+            checker.write(new ElementStartPToken({
                open: makeSToken('<'),
-            });
+            }));
          });
 
          it('reports an error if in the DTD', () => {
@@ -532,11 +529,10 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
             beforeEach(() => {
                (checker as any)._state = 'PROLOG_PREDOCTYPE';
-               checker.write({
-                  type: elementStart.PTYPE,
+               checker.write(new ElementStartPToken({
                   open: makeSToken('<'),
                   name: makeSToken('one'),
-               });
+               }));
             });
 
             it('reports an error if trying to close an element that was not opened', () => {
@@ -551,11 +547,10 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             });
 
             it('reports no error if child is closed and then parent closed', () => {
-               checker.write({
-                  type: elementStart.PTYPE,
+               checker.write(new ElementStartPToken({
                   open: makeSToken('<'),
                   name: makeSToken('two'),
-               });
+               }));
                pToken.name = makeSToken('two');
                checker.write(pToken);
                const checkerPushSpy = spyOn(checker, 'push');
@@ -566,12 +561,11 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             });
 
             it('reports no error if an empty element is found between start and end', () => {
-               checker.write({
-                  type: elementStart.EMPTY_TYPE,
+               checker.write(new ElementEmptyPToken({
                   open: makeSToken('</'),
                   name: makeSToken('two'),
                   close: makeSToken('>'),
-               });
+               }));
                const checkerPushSpy = spyOn(checker, 'push');
                pToken.name = makeSToken('one');
                checker.write(pToken);

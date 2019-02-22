@@ -1,34 +1,33 @@
-/* Copyright ® 2017=2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-201 by 柏大衛. All rights reserved. */
 
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
-import { strOrBlank, SToken, STokenSource } from 'sToken';
+import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
-import attribute, { AttributeXToken } from './common/attribute';
+import attribute, { AttributePToken, AttributeXToken } from './common/attribute';
 import misc from './common/misc';
-import base from './base';
 
 const WFEID = WellFormedError.ID;
 const WARN = XmlWarning.ID;
-const ELEMENT_START = 'ELEMENT_START';
-const ELEMENT_EMPTY = 'ELEMENT_EMPTY';
+const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
+const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
 const ELEMENT_START_XTOKEN = 'ELEMENT_START_XTOKEN';
 const ELEMENT_EMPTY_XTOKEN = 'ELEMENT_EMPTY_XTOKEN';
 
-type DeliverElementStartPToken = (pToken?: ElementStartPToken) => void;
+type DeliverElementStartPToken = (pToken?: ElementStartPToken|ElementEmptyPToken) => void;
+type ProtoToken = { open: SToken, [ any: string]: any };
 
 /**********************************************************************\
  The elementStart namespace contains the usual tools for processing
  an element start tag.
 \**********************************************************************/
 
-class ElementStart {
-   public readonly type: string = ELEMENT_START_XTOKEN;
-   public name: string;
-   public attributes: Array<AttributeXToken>;
+class ElementStartXToken {
+   public readonly type: typeof ELEMENT_START_XTOKEN = ELEMENT_START_XTOKEN;
+   public readonly name: string;
+   public readonly attributes: ReadonlyArray<AttributeXToken>;
    public pToken?: ElementStartPToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementStartPToken) {
       this.name = name;
       this.attributes = attributes;
@@ -37,13 +36,12 @@ class ElementStart {
 
 }
 
-class ElementEmpty {
-   public readonly type: string = ELEMENT_EMPTY_XTOKEN;
-   public name: string;
-   public attributes: Array<AttributeXToken>;
+class ElementEmptyXToken {
+   public readonly type: typeof ELEMENT_EMPTY_XTOKEN = ELEMENT_EMPTY_XTOKEN;
+   public readonly name: string;
+   public readonly attributes: ReadonlyArray<AttributeXToken>;
    public pToken?: ElementEmptyPToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(name: string, attributes: Array<AttributeXToken>, pToken?: ElementEmptyPToken) {
       this.name = name;
       this.attributes = attributes;
@@ -52,47 +50,63 @@ class ElementEmpty {
 
 }
 
-class ElementStartPToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: { [ any: string]: any }) {
-      super(ELEMENT_START, props);
+class ElementStartPToken {
+   public readonly type: typeof ELEMENT_START_PTOKEN = ELEMENT_START_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly name?: SToken;
+   public readonly nameSpace?: SToken;
+   public readonly attributes: Array<AttributePToken>;
+   public readonly close?: SToken;
+
+   constructor(basePToken: ElementStartPToken | ProtoToken) {
+      this.attributes = [];
+      Object.assign(this, basePToken);
+
+      this.type = ELEMENT_START_PTOKEN;
+      this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   getSTokenArray() {
-      /* istanbul ignore next */ // Istanbul is confused by node transpilation
-      const results = super.getSTokenArray();
-      const sTokens = attribute.getSTokens(this.attributes);
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
 
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, sTokens); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.close);
+   toXToken() {
+      return pTokenToXTokenStart(this);
+   }
 
-      return results;
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
-class ElementEmptyPToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: { [ any: string]: any }) {
-      super(ELEMENT_EMPTY, props);
+class ElementEmptyPToken {
+   public readonly type: typeof ELEMENT_EMPTY_PTOKEN = ELEMENT_EMPTY_PTOKEN;
+   public readonly open: SToken;
+   public readonly openSpace?: SToken;
+   public readonly name?: SToken;
+   public readonly nameSpace?: SToken;
+   public readonly attributes: Array<AttributePToken>;
+   public readonly close?: SToken;
+
+   constructor(basePToken: ElementStartPToken | ProtoToken) {
+      this.attributes = [];
+      Object.assign(this, basePToken);
+
+      this.type = ELEMENT_EMPTY_PTOKEN;
+      this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   getSTokenArray() {
-      /* istanbul ignore next */ // Istanbul is confused by node transpilation
-      const results = super.getSTokenArray();
-      const sTokens = attribute.getSTokens(this.attributes);
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
 
-      results.pushSTokens(this.open,
-         this.postOpenSpace,
-         this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, sTokens); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.close);
+   toXToken() {
+      return pTokenToXTokenEmpty(this);
+   }
 
-      return results;
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
@@ -114,35 +128,35 @@ class ElementEmptyPToken extends base.PToken {
    [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'
 \**********************************************************************/
 
-function parse(source: STokenSource, open: SToken, deliverPToken: DeliverElementStartPToken) {
-   const pToken = new ElementStartPToken({
+function parseElementStart(source: STokenSource, open: SToken, deliverPToken: DeliverElementStartPToken) {
+   const protoToken: ProtoToken = {
       open,
-   });
+   };
 
-   source.extractToObjectNoParams('space', pToken, 'postOpenSpace');
-   source.extractToObject('word', [ '>', '/>' ], pToken, 'name');
-   source.extractToObjectNoParams('space', pToken, 'postNameSpace');
+   source.extractToObjectNoParams('space', protoToken, 'openSpace');
+   source.extractToObject('word', [ '>', '/>' ], protoToken, 'name');
+   source.extractToObjectNoParams('space', protoToken, 'nameSpace');
 
    attribute.parse(source, {
       geRef: true,
       terminators: [ '>', '/>' ],
    }, (attributes) => {
-      pToken.attributes = attributes;
+      protoToken.attributes = attributes;
 
       source.extract('match', '>', (sToken) => {
          if (sToken) {
-            pToken.close = sToken;
-            deliverPToken(pToken);
+            protoToken.close = sToken;
+            deliverPToken(new ElementStartPToken(protoToken));
             return;
          }
 
          source.extract('match', '/>', (sToken) => {
-            pToken.close = sToken;
+            protoToken.close = sToken;
 
             if (sToken) {
-               deliverPToken(new ElementEmptyPToken(pToken));
+               deliverPToken(new ElementEmptyPToken(protoToken));
             } else {
-               deliverPToken(pToken);
+               deliverPToken(new ElementStartPToken(protoToken));
             }
          });
       });
@@ -154,8 +168,8 @@ function parse(source: STokenSource, open: SToken, deliverPToken: DeliverElement
 \**********************************************************************/
 
 function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   ec.setPos(pToken.postOpenSpace);
-   ec.check(pToken.postOpenSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
+   ec.setPos(pToken.openSpace);
+   ec.check(pToken.openSpace, WFEID.ELEMENT_XTRA_LEADING_SPACE);
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.ELEMENT_NO_NAME);
@@ -164,10 +178,10 @@ function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: Er
       WARN.ELEMENT_NAME_XMLCOLON_RESERVED,
       WARN.ELEMENT_NAME_XML_RESERVED);
 
-   ec.setPos(pToken.postNameSpace);
+   ec.setPos(pToken.nameSpace);
 
    const attribs = pToken.attributes || [];
-   attribute.checkWellFormed(attribs, ec, entityMetaData, pToken.postNameSpace, WFEID.NOUN_ATTRIBUTE);
+   attribute.checkWellFormed(attribs, ec, entityMetaData, pToken.nameSpace, WFEID.NOUN_ATTRIBUTE);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.ELEMENT_NO_CLOSE);
@@ -177,28 +191,45 @@ function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: Er
  pTokenToXToken() converts a PToken into an XToken.
 \**********************************************************************/
 
-function pTokenToXToken(pToken: ElementStartPToken | ElementEmptyPToken) {
-   const className = (pToken.type === ELEMENT_START) ? ElementStart : ElementEmpty;
-
-   return new className(strOrBlank(pToken.name),
+function pTokenToXTokenEmpty(pToken: ElementEmptyPToken) {
+   return new ElementEmptyXToken(strOrBlank(pToken.name),
       attribute.makeTokenCompatible(pToken.attributes), pToken);
 }
 
-export {
-   ELEMENT_START as PTYPE,
-   ELEMENT_START_XTOKEN as XTYPE,
-   ElementStart as XToken,
-   ElementStartPToken as PToken,
-   ELEMENT_EMPTY as EMPTY_TYPE,
-   ELEMENT_EMPTY_XTOKEN as EMPTY_XTYPE,
-   ElementEmpty as EmptyToken,
-   ElementEmptyPToken as EmptyPToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+function pTokenToXTokenStart(pToken: ElementStartPToken) {
+   return new ElementStartXToken(strOrBlank(pToken.name),
+      attribute.makeTokenCompatible(pToken.attributes), pToken);
+}
 
-   ElementEmpty,
-   ElementStart,
-   ElementStartPToken,
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the component STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: ElementStartPToken | ElementEmptyPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+   const sTokens = attribute.getSTokens(pToken.attributes);
+
+   builder.add(
+      pToken.open,
+      pToken.openSpace,
+      pToken.name,
+      pToken.nameSpace,
+      sTokens,
+      pToken.close);
+
+      return builder.sTokenArray;
+}
+
+export {
+   ELEMENT_EMPTY_PTOKEN,
+   ELEMENT_EMPTY_XTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_START_XTOKEN,
+
    ElementEmptyPToken,
+   ElementEmptyXToken,
+   ElementStartPToken,
+   ElementStartXToken,
+
+   parseElementStart,
 };

@@ -6,6 +6,8 @@ import { EntityMetaData } from "basic";
 import { SToken } from "sToken";
 import {
    CHARDATA_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
    GENERAL_ENTITY_END_PTOKEN,
    PARAMETER_ENTITY_START_PTOKEN,
@@ -13,7 +15,7 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    PToken,
 
-   elementStart,
+   ElementEmptyPToken,
    TextPToken,
 
    ParameterEntityStartPToken,
@@ -134,7 +136,7 @@ describe('EntityExpanderStream (integration)', () => {
       gatherStream(entityExpander, (results) => {
          const index = getIndex(results, GENERAL_ENTITY_START_PTOKEN);
 
-         expect(results[index + 1].type).toEqual('ELEMENT_START');
+         expect(results[index + 1].type).toEqual(ELEMENT_START_PTOKEN);
          expect((results[index + 1] as any).name.str).toEqual('two');
       }, done);
    });
@@ -276,7 +278,7 @@ describe('EntityExpanderStream (integration)', () => {
       pTokenStream.endText();
 
       gatherStream(entityExpander, (results) => {
-         const index = getIndex(results, elementStart.EMPTY_TYPE);
+         const index = getIndex(results, ELEMENT_EMPTY_PTOKEN);
          const expectedRef1 = new ParameterEntityReferencePToken({
             open: SToken.fromString('%'),
             openSpace: undefined,
@@ -291,11 +293,11 @@ describe('EntityExpanderStream (integration)', () => {
             nameSpace: undefined,
             close: SToken.fromString(';'),
          });
-         const expected = new elementStart.EmptyPToken({
+         const expected = new ElementEmptyPToken({
             open: SToken.fromString('<'),
-            postOpenSpace: undefined,
+            openSpace: undefined,
             name: SToken.fromString('one'),
-            postNameSpace: SToken.fromString(' '),
+            nameSpace: SToken.fromString(' '),
             attributes: [{
                name: SToken.fromString('second'),
                postNameSpace: undefined,

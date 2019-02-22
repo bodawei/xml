@@ -13,8 +13,6 @@ import {
    docTypeEnd,
    docTypeStart,
    elementDeclaration,
-   elementStart,
-   elementEnd,
 
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
@@ -39,6 +37,8 @@ import {
 
    GENERAL_ENTITY_START_PTOKEN,
    GeneralEntityStartPToken,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -188,10 +188,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                docTypeEnd.checkWellFormed(pToken as any, undefined as any, errorCollector, this.emd);
             }
             break;
-         case elementStart.PTYPE:
-         case elementStart.EMPTY_TYPE:
-            const nameText = pToken.name ? pToken.name.str : '';
-            if (pToken.type === elementStart.PTYPE) {
+         case ELEMENT_START_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
+            const nameText = strOrBlank(pToken.name);
+
+            if (pToken.type === ELEMENT_START_PTOKEN) {
                // Make sure you eventually validate that the first one matches the doctyp
 
                this._elementNameStack.push(nameText);
@@ -215,7 +216,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             //    this.push(error);
             // }
 
-            elementStart.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
+            (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
             break;
          case ELEMENT_END_PTOKEN:
             const endNameText = strOrBlank(pToken.name);

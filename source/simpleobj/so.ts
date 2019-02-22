@@ -3,11 +3,10 @@
 import stream from 'readable-stream';
 
 import {
-   elementStart,
-
    CdataXToken,
    CharDataXToken,
    ElementEndXToken,
+   ElementStartXToken,
 } from '../token';
 
 type Token = { type: string };
@@ -46,7 +45,7 @@ class SimpleObj extends stream.Transform {
          leaf = this._stack[this._stack.length - 1];
       }
 
-      if (xToken instanceof elementStart.XToken) {
+      if (xToken instanceof ElementStartXToken) {
          const el = new Node(xToken.name);
          if (!this._root) {
             this._root = el;

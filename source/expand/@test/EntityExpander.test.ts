@@ -14,7 +14,7 @@ import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
 
    attListDeclaration,
-   elementStart,
+   ElementStartPToken,
    unassigned,
    NotationDeclarationPToken,
    ParameterEntityStartPToken,
@@ -798,7 +798,8 @@ describe('EntityExpander (unit)', () => {
 
       it('does not change the value if it contains no general entity references', (done) => {
          const input = [
-            new elementStart.PToken({
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
                attributes: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
@@ -840,7 +841,8 @@ describe('EntityExpander (unit)', () => {
                   refToPe
                ],
             }),
-            new elementStart.PToken({
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
                attributes: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
@@ -871,7 +873,8 @@ describe('EntityExpander (unit)', () => {
          });
 
          const input = [
-            new elementStart.PToken({
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
                attributes: [{
                   value: [
                      refToGe,
@@ -904,7 +907,8 @@ describe('EntityExpander (unit)', () => {
          });
 
          const input = [
-            new elementStart.PToken({
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
                attributes: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
@@ -953,7 +957,8 @@ describe('EntityExpander (unit)', () => {
                   new TextPToken({ text: SToken.fromString('pe;') }),
                ],
             }),
-            new elementStart.PToken({
+            new ElementStartPToken({
+               open: SToken.fromString('<'),
                attributes: [{
                   value: [
                      new TextPToken({ text: SToken.fromString('foo') }),
@@ -1709,7 +1714,7 @@ describe('EntityExpander (unit)', () => {
                   new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
-            new elementStart.PToken({
+            new ElementStartPToken({
                open: SToken.fromString('ElementStart'),
                attributes: [],
             }),
@@ -1746,7 +1751,7 @@ describe('EntityExpander (unit)', () => {
                   new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
-            new elementStart.PToken({
+            new ElementStartPToken({
                open: SToken.fromString('ElementStart'),
                attributes: [],
             }),
@@ -1783,7 +1788,7 @@ describe('EntityExpander (unit)', () => {
                   new TextPToken({ text: SToken.fromString('expanded!') }),
                ],
             }),
-            new elementStart.PToken({
+            new ElementStartPToken({
                open: SToken.fromString('ElementStart'),
                attributes: [],
             }),

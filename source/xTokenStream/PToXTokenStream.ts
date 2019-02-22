@@ -10,14 +10,15 @@ import {
    attListDeclaration,
    docTypeStart,
    docTypeEnd,
-   elementStart,
    elementDeclaration,
 
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
    CHARREF_PTOKEN,
    COMMENT_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
    ELEMENT_END_PTOKEN,
+   ELEMENT_START_PTOKEN,
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -57,10 +58,6 @@ class PToXTokenStream extends stream.Transform {
          case docTypeEnd.PTYPE:
             this.push(docTypeEnd.pTokenToXToken(pToken));
             break;
-         case elementStart.PTYPE:
-         case elementStart.EMPTY_TYPE:
-            this.push(elementStart.pTokenToXToken(pToken));
-            break;
          case elementDeclaration.PTYPE:
             this.push(elementDeclaration.pTokenToXToken(pToken));
             break;
@@ -68,7 +65,9 @@ class PToXTokenStream extends stream.Transform {
          case CHARDATA_PTOKEN:
          case CHARREF_PTOKEN:
          case COMMENT_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
          case ELEMENT_END_PTOKEN:
+         case ELEMENT_START_PTOKEN:
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
          case NOTATION_DECLARATION_PTOKEN:

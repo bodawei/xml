@@ -7,8 +7,6 @@ import elementDeclaration from './elementDeclaration';
 
 import * as docTypeStart from './docTypeStart';
 import * as docTypeEnd from './docTypeEnd';
-import * as elementStart from './elementStart';
-import * as elementEnd from './elementEnd';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 export * from './entityDeclaration';
@@ -31,6 +29,7 @@ export * from './charData';
 export * from './charRef';
 export * from './comment';
 export * from './elementEnd';
+export * from './elementStart';
 export * from './generalEntityDeclaration';
 export * from './generalEntityReference';
 export * from './notationDeclaration';
@@ -53,8 +52,6 @@ export {
    attListDeclaration,
    docTypeStart,
    docTypeEnd,
-   elementStart,
-   elementEnd,
    elementDeclaration,
 
    unassigned,

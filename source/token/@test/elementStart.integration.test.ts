@@ -7,12 +7,12 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import * as elementStart from '../elementStart';
+import { ElementStartPToken, ElementStartXToken, parseElementStart } from '../elementStart';
 import { GeneralEntityReferencePToken } from '../generalEntityReference';
 import { TextPToken, TextXToken } from '../text';
 
 describe('elementStart (integration)', () => {
-   let elementStartPToken: elementStart.ElementStartPToken;
+   let elementStartPToken: ElementStartPToken;
    let emd: EntityMetaData;
    let source: STokenSource;
 
@@ -20,11 +20,11 @@ describe('elementStart (integration)', () => {
       emd = new EntityMetaData();
       source = new STokenSource(defaultExtractors, emd);
       const makeSToken = makeSTokenMaker();
-      elementStartPToken = new elementStart.ElementStartPToken({
+      elementStartPToken = new ElementStartPToken({
          open: makeSToken('<'),
-         postOpenSpace: undefined,
+         openSpace: undefined,
          name: makeSToken('elemName'),
-         postNameSpace: makeSToken(' '),
+         nameSpace: makeSToken(' '),
          attributes: [],
          close: makeSToken('>'),
       });
@@ -37,13 +37,12 @@ describe('elementStart (integration)', () => {
          source.addText(' aName attr1 =\t\t"value1" attr2="value two">');
          source.endText();
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            expect(pToken).toEqual(new elementStart.PToken({
-               type: 'ELEMENT_START',
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
+            expect(pToken).toEqual(new ElementStartPToken({
                open: elementStartPToken.open,
-               postOpenSpace: makeSToken(' '),
+               openSpace: makeSToken(' '),
                name: makeSToken('aName'),
-               postNameSpace: makeSToken(' '),
+               nameSpace: makeSToken(' '),
                attributes: [ {
                   name: makeSToken('attr1'),
                   postNameSpace: makeSToken(' '),
@@ -74,13 +73,12 @@ describe('elementStart (integration)', () => {
          source.addText('aName attr1="value1&other;">');
          source.endText();
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            expect(pToken).toEqual(new elementStart.PToken({
-               type: 'ELEMENT_START',
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
+            expect(pToken).toEqual(new ElementStartPToken({
                open: elementStartPToken.open,
-               postOpenSpace: undefined,
+               openSpace: undefined,
                name: makeSToken('aName'),
-               postNameSpace: makeSToken(' '),
+               nameSpace: makeSToken(' '),
                attributes: [ {
                   name: makeSToken('attr1'),
                   postNameSpace: undefined,
@@ -114,10 +112,10 @@ describe('elementStart (integration)', () => {
          source.addText('xmlElementName>');
          source.endText();
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken!, ec, emd);
+            pToken!.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(XmlWarning.ID.ELEMENT_NAME_XML_RESERVED);
             done();
@@ -128,10 +126,10 @@ describe('elementStart (integration)', () => {
          source.addText('$elementName>');
          source.endText();
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken!, ec, emd);
+            pToken!.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ELEMENT_NAME_INVALID);
             done();
@@ -141,10 +139,10 @@ describe('elementStart (integration)', () => {
       it('reports an error when an attribute is malformed (check attribute.checkWellFormed())', (done) => {
          source.addText('foo blah "value">');
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
             const ec = new ErrorCollector(pToken!.open, WellFormedError);
 
-            elementStart.checkWellFormed(pToken!, ec, emd);
+            pToken!.checkWellFormed(ec, emd);
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.ATTRIBUTE_NO_EQUAL);
             done();
@@ -159,13 +157,13 @@ describe('elementStart (integration)', () => {
          source.addText(' aName attr1="value1" attr2="value two">');
          source.endText();
 
-         elementStart.parse(source, elementStartPToken.open, (pToken) => {
-            const token = elementStart.pTokenToXToken(pToken!);
+         parseElementStart(source, elementStartPToken.open, (pToken) => {
+            const token = pToken!.toXToken();
             token.pToken = undefined;
             (token.attributes[0].value[0] as any).pToken = undefined;
             (token.attributes[1].value[0] as any).pToken = undefined;
 
-            expect(token).toEqual(new elementStart.XToken('aName', [ {
+            expect(token).toEqual(new ElementStartXToken('aName', [ {
                name: 'attr1',
                value: [ new TextXToken('value1') ],
             }, {

@@ -4,9 +4,9 @@ import { Token, ENTITY_META_DATA } from 'basic';
 import {
    docTypeEnd,
    docTypeStart,
-   elementStart,
 
    CHARREF_PTOKEN,
+   ELEMENT_START_PTOKEN,
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -44,7 +44,7 @@ import { TEXT_PTOKEN, TextPToken } from 'source/token/text';
 import { LiteralValuePToken } from 'source/token/common/literal';
 import { ExternalId } from 'source/token/common/externalId';
 import { AttListPToken } from 'source/token/attListDeclaration';
-import { ElementStartPToken, ElementEmptyPToken } from 'source/token/elementStart';
+import { ElementStartPToken, ElementEmptyPToken, ELEMENT_EMPTY_PTOKEN } from 'source/token/elementStart';
 import { UnassignedArray, UnassignedType } from 'source/token/common/unassigned';
 import { ElementDeclarationPToken, ELEMENT_DECLARATION_PTOKEN, assignUnassigned } from 'source/token/elementDeclaration';
 import { DocTypeStartPToken } from 'source/token/docTypeStart';
@@ -267,8 +267,8 @@ class EntityExpander {
          case NOTATION_DECLARATION_PTOKEN:
             this.handleNotationDeclaration(pToken as NotationDeclarationPToken, expanded);
             break;
-         case elementStart.PTYPE:
-         case elementStart.EMPTY_TYPE:
+         case ELEMENT_START_PTOKEN:
+         case ELEMENT_EMPTY_PTOKEN:
             this.handleElementStart(pToken as ElementStartPToken, expanded);
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:

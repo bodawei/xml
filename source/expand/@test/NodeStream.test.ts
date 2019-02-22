@@ -16,6 +16,7 @@ import EntityManager from '../EntityManager';
 import { DocTypeStartXToken } from 'source/token/docTypeStart';
 import { DocTypeEndXToken } from 'source/token/docTypeEnd';
 import {
+   ElementStartXToken,
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
    GeneralEntityEndXToken,
@@ -72,7 +73,7 @@ describe('NodeStream (unit)', () => {
       });
 
       it('passes tokens through', () => {
-         const token = new xToken.elementStart.XToken('fred', []);
+         const token = new ElementStartXToken('fred', []);
 
          nodeStream.write(token);
 
@@ -291,7 +292,7 @@ describe('NodeStream (unit)', () => {
          //          },
          //          unassigned: [{
          //             type: UnassignedType.ENTITY_START,
-         //             token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
+         //             token: new ElementStartPToken({ name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
          //             token: new TextPToken({ text: SToken.fromString('x') }),
@@ -325,7 +326,7 @@ describe('NodeStream (unit)', () => {
          //          },
          //          unassigned: [{
          //             type: UnassignedType.ENTITY_START,
-         //             token: new xToken.elementStart.PToken({ name: SToken.fromString('testPE') }),
+         //             token: new ElementStartPToken({ name: SToken.fromString('testPE') }),
          //          }, {
          //             type: 'word',
          //             token: new TextPToken({ text: SToken.fromString('x') }),
@@ -1241,8 +1242,8 @@ describe('NodeStream (unit)', () => {
       describe('element processing', () => {
 
          it('processes an element with no attributes without problems', (done) => {
-            const elementStart = new xToken.elementStart.XToken('one', []);
-            const expected = new xToken.elementStart.XToken('one', []);
+            const elementStart = new ElementStartXToken('one', []);
+            const expected = new ElementStartXToken('one', []);
 
             nodeStream.write(elementStart);
 
@@ -1253,11 +1254,11 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes attributes through with no content', (done) => {
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'foo',
                value: [],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'foo',
                value: [],
             }]);
@@ -1271,14 +1272,14 @@ describe('NodeStream (unit)', () => {
          });
 
          it('passes attributes through that are only text', (done) => {
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'foo',
                value: [ new TextXToken('one') ],
             }, {
                name: 'two',
                value: [ new TextXToken('foo') ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'foo',
                value: [ new TextXToken('one') ],
             }, {
@@ -1307,13 +1308,13 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [ new TextXToken('one') ];
             });
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'foo',
                value: [
                   new GeneralEntityReferenceXToken('refName'),
                ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'foo',
                value: [
                   new GeneralEntityStartXToken('refName'),
@@ -1338,7 +1339,7 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [ new TextXToken('one') ];
             });
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'foo',
                value: [
                   new GeneralEntityReferenceXToken('refName'),
@@ -1367,7 +1368,7 @@ describe('NodeStream (unit)', () => {
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
          //       return [ new TextXToken('one', new TextPToken()) ];
          //    });
-         //    const elementStart = new xToken.elementStart.XToken('one', [{
+         //    const elementStart = new ElementStartXToken('one', [{
          //       name: 'xml:lang',
          //       value: [
          //          new GeneralEntityReferenceXToken('refName'),
@@ -1391,7 +1392,7 @@ describe('NodeStream (unit)', () => {
 
          // it('does not call checkXmlLangWellFormed if there are no expanded refs', (done) => {
          //    const checkSpy = spyOn(langAttribute, 'checkXmlLangWellFormed');
-         //    const elementStart = new xToken.elementStart.XToken('one', [{
+         //    const elementStart = new ElementStartXToken('one', [{
          //       name: 'xml:lang',
          //       value: [
          //          new TextXToken('one'),
@@ -1422,13 +1423,13 @@ describe('NodeStream (unit)', () => {
             });
             spyOn(xToken.literalValue, 'makeXTokenCompatible')
                .and.returnValue([ new TextXToken('one') ]);
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'foo',
                value: [
                   new GeneralEntityReferenceXToken('refName'),
                ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'foo',
                value: [
                   new GeneralEntityStartXToken('refName'),
@@ -1460,7 +1461,7 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [ new TextXToken('one') ];
             });
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'firstAttribute',
                value: [
                   new GeneralEntityReferenceXToken('refName'),
@@ -1471,7 +1472,7 @@ describe('NodeStream (unit)', () => {
                   new GeneralEntityReferenceXToken('refName'),
                ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'firstAttribute',
                value: [
                   new GeneralEntityStartXToken('refName'),
@@ -1508,7 +1509,7 @@ describe('NodeStream (unit)', () => {
             spyOn(xToken.literalValue, 'makeXTokenCompatible').and.callFake(() => {
                return [ new TextXToken('one') ];
             });
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'firstAttribute',
                value: [
                   new TextXToken('some text'),
@@ -1516,7 +1517,7 @@ describe('NodeStream (unit)', () => {
                   new TextXToken('more text'),
                ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'firstAttribute',
                value: [
                   new TextXToken('some text'),
@@ -1558,7 +1559,7 @@ describe('NodeStream (unit)', () => {
                   return [ new TextXToken('inner') ];
                }
             });
-            const elementStart = new xToken.elementStart.XToken('one', [{
+            const elementStart = new ElementStartXToken('one', [{
                name: 'testAttribute',
                value: [
                   new TextXToken('some text'),
@@ -1566,7 +1567,7 @@ describe('NodeStream (unit)', () => {
                   new TextXToken('more text'),
                ],
             }]);
-            const expected = new xToken.elementStart.XToken('one', [{
+            const expected = new ElementStartXToken('one', [{
                name: 'testAttribute',
                value: [
                   new TextXToken('some text'),
@@ -1612,7 +1613,7 @@ describe('NodeStream (unit)', () => {
          //          return [ new TextXToken('inn<er') ];
          //       }
          //    });
-         //    const elementStart = new xToken.elementStart.XToken('one', [{
+         //    const elementStart = new ElementStartXToken('one', [{
          //       name: 'testAttribute',
          //       value: [
          //          new TextXToken('some text'),
@@ -1645,7 +1646,7 @@ describe('NodeStream (unit)', () => {
          //    });
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible')
          //       .and.returnValue([ new TextXToken('one') ]);
-         //    const elementStart = new xToken.elementStart.XToken('one', [{
+         //    const elementStart = new ElementStartXToken('one', [{
          //       name: 'foo',
          //       value: [
          //          new GeneralEntityReferenceXToken('refName', new GeneralEntityReferencePToken({ open: SToken.fromString('&') })),
@@ -1678,7 +1679,7 @@ describe('NodeStream (unit)', () => {
          //    });
          //    spyOn(xToken.literalValue, 'makeXTokenCompatible')
          //       .and.returnValue([ new TextXToken('one') ]);
-         //    const elementStart = new xToken.elementStart.XToken('one', [{
+         //    const elementStart = new ElementStartXToken('one', [{
          //       name: 'foo',
          //       value: [
          //          new GeneralEntityReferenceXToken('refName'),

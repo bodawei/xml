@@ -9,11 +9,15 @@ import { PTokenStream } from '../pTokenStream';
 import { SToken, STokenSource } from 'sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
+   ELEMENT_EMPTY_XTOKEN,
+   ELEMENT_START_XTOKEN,
+   TEXT_PTOKEN,
+   XMLDECL_XTOKEN,
+
    attListDeclaration,
    docTypeStart,
    docTypeEnd,
    elementDeclaration,
-   elementStart,
    ParameterEntityEndPToken,
    unassigned,
    literalValue,
@@ -27,9 +31,11 @@ import {
    ParameterEntityEndXToken,
    ParameterEntityStartPToken,
    ParameterEntityStartXToken,
-   TEXT_PTOKEN,
-   XMLDECL_XTOKEN,
+
+   ElementEmptyXToken,
+   ElementStartXToken,
    XmlDeclarationXToken,
+
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_REFERENCE_XTOKEN,
    PARAMETER_ENTITY_DECLARATION_XTOKEN,
@@ -45,7 +51,6 @@ import {
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
-import { ElementStart, ElementEmpty } from '../token/elementStart'; // badRef
 import { TextPToken, TextXToken } from '../token/text'; // badRef
 
 import EntityManager from './EntityManager';
@@ -171,8 +176,8 @@ class NodeStream extends stream.Transform {
       } else if (xToken instanceof attListDeclaration.XToken && !this.skipDeclarations) {
          this._processAttListDeclaration(xToken, callback);
          return;
-      } else if (xToken.type === elementStart.XTYPE || xToken.type === elementStart.EMPTY_XTYPE) {
-         this._processElementStart((xToken as ElementStart), callback);
+      } else if (xToken.type === ELEMENT_START_XTOKEN || xToken.type === ELEMENT_EMPTY_XTOKEN) {
+         this._processElementStart((xToken as ElementStartXToken), callback);
          return;
       } else if (xToken.type === docTypeEnd.XTYPE) {
          if (this.docTypeStart && this.docTypeStart.hasInternalSubset) {
@@ -576,7 +581,7 @@ class NodeStream extends stream.Transform {
     Element Start processing
    \**********************************************************************/
 
-   _processElementStart(startXToken: ElementStart | ElementEmpty, done: DoneSignal) {
+   _processElementStart(startXToken: ElementStartXToken | ElementEmptyXToken, done: DoneSignal) {
       if (!startXToken.attributes || startXToken.attributes.length === 0) {
          this.push(startXToken);
          done();
@@ -616,7 +621,7 @@ class NodeStream extends stream.Transform {
       });
    }
 
-   _expandAttributeValues(attributeArray: Array<CommonAttributeXToken>, openSToken: SToken | void, done: DoneSignal) {
+   _expandAttributeValues(attributeArray: ReadonlyArray<CommonAttributeXToken>, openSToken: SToken | void, done: DoneSignal) {
       let attrsRemaining = attributeArray.length;
       const self = this;
 

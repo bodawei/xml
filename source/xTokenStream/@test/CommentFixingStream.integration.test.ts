@@ -9,7 +9,8 @@ import {
    CharDataXToken,
    CommentXToken,
    XmlDeclarationXToken,
-   ElementEndXToken
+   ElementEndXToken,
+   ElementStartXToken
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
@@ -89,7 +90,7 @@ describe('CommentFixingStream (integration)', () => {
          gatherTokens(cf, (results) => {
             expect(results[1] instanceof XmlDeclarationXToken).toEqual(true);
             expect(results[2] instanceof CommentXToken).toEqual(true);
-            expect(results[3] instanceof tokens.elementStart.XToken).toEqual(true);
+            expect(results[3] instanceof ElementStartXToken).toEqual(true);
             expect(results[4] instanceof CharDataXToken).toEqual(true);
             expect(results[5] instanceof ElementEndXToken).toEqual(true);
             done();

@@ -12,10 +12,12 @@ import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
    ELEMENT_END_PTOKEN,
+   ELEMENT_START_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
 } from 'token';
 
 type Token = { type: string };
@@ -101,11 +103,11 @@ describe('PTokenStream (integration)', () => {
    });
 
    it('parses an element start', (done) => {
-      expectInputToProduceTypes('<elementName\t>', 'ELEMENT_START', done);
+      expectInputToProduceTypes('<elementName\t>', ELEMENT_START_PTOKEN, done);
    });
 
    it('parses an empty element', (done) => {
-      expectInputToProduceTypes('<elementName/>', 'ELEMENT_EMPTY', done);
+      expectInputToProduceTypes('<elementName/>', ELEMENT_EMPTY_PTOKEN, done);
    });
 
    it('parses an element end', (done) => {
@@ -144,7 +146,7 @@ describe('PTokenStream (integration)', () => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
          expect(results.length).toEqual(6);
          expect(results[1].type).toEqual('SPACE_PTOKEN');
-         expect(results[2].type).toEqual('ELEMENT_START');
+         expect(results[2].type).toEqual(ELEMENT_START_PTOKEN);
          expect(results[3].type).toEqual(CHARDATA_PTOKEN);
          expect(results[4].type).toEqual(ELEMENT_END_PTOKEN);
          expect(results[5].type).toEqual('SPACE_PTOKEN');

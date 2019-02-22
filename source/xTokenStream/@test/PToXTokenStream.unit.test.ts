@@ -6,8 +6,6 @@ import {
    declaration,
 
    attListDeclaration,
-   elementEnd,
-   elementStart,
    elementDeclaration,
 
    CdataPToken,
@@ -26,6 +24,8 @@ import {
    ExternalSubsetEndXToken,
    ExternalSubsetStartXToken,
    CommentPToken,
+   ElementStartPToken,
+   ElementEmptyPToken,
 } from 'token';
 
 import PToXTokenStream from '../PToXTokenStream';
@@ -100,24 +100,24 @@ describe('PToXTokenStream (unit)', () => {
       expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls elementStart.pTokenToXToken()', () => {
-      spyOn(elementStart, 'pTokenToXToken');
-      const pToken = { type: elementStart.PTYPE };
+   it('calls ElementStartPToken.toXToken()', () => {
+      const pToken = new ElementStartPToken({ open: SToken.fromString('<') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementStart.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
-   it('calls elementStart.pTokenToXToken() with an empty element', () => {
-      spyOn(elementStart, 'pTokenToXToken');
-      const pToken = { type: elementStart.EMPTY_TYPE };
+   it('calls pToken.toXToken() with an empty element', () => {
+      const pToken = new ElementEmptyPToken({ open: SToken.fromString('<') });
+      spyOn(pToken, 'toXToken');
 
       tokenStream.write(pToken);
       tokenStream.read();
 
-      expect(elementStart.pTokenToXToken).toHaveBeenCalledWith(pToken);
+      expect(pToken.toXToken).toHaveBeenCalledWith();
    });
 
    it('calls elementEnd.toXToken()', () => {
