@@ -6,16 +6,16 @@ import { EntityMetaData, isSpace, isName, isNmToken } from 'basic';
 import { ValidityError, ERROR_TYPE, XmlWarning, WellFormedError } from 'error';
 import { SToken } from 'sToken';
 import {
-   docTypeEnd,
-   docTypeStart,
-
    isTextXToken,
 
    elementDeclaration,
    attListDeclaration,
-   SpaceXToken,
+   DocTypeEndXToken,
+   DocTypeStartXToken,
+   ElementEmptyXToken,
    ElementEndXToken,
    ElementStartXToken,
+   SpaceXToken,
    GeneralEntityDeclarationXToken,
    ParameterEntityDeclarationXToken,
    GeneralEntityEndXToken,
@@ -44,7 +44,6 @@ import {
    NotationDeclarationXToken,
    ParameterEntityReferencePToken,
    TextXToken,
-   ElementEmptyXToken,
 } from 'token';
 import { AttListXToken, AttDefXToken, AttDefPToken, AttListPToken } from '../token/attListDeclaration';
 import { AttributeXToken, AttributeValueXToken } from '../token/common/attribute';
@@ -575,7 +574,7 @@ class CheckXTokenValidStream extends stream.Transform {
          }
       } else if (xToken instanceof elementDeclaration.XToken) {
          this.validateElementDecl(xToken);
-      } else if (xToken instanceof docTypeStart.XToken) {
+      } else if (xToken instanceof DocTypeStartXToken) {
          this.docType = xToken;
       } else if (xToken instanceof ElementStartXToken || xToken instanceof ElementEmptyXToken) {
          if (!this._seenRoot) {
@@ -616,7 +615,7 @@ class CheckXTokenValidStream extends stream.Transform {
          if (this.contentStack.length === 0) {
             this.validateDocumentEnd();
          }
-      } else if (xToken instanceof docTypeEnd.XToken) {
+      } else if (xToken instanceof DocTypeEndXToken) {
          this.validateDTD();
       }
 

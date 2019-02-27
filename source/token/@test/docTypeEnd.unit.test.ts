@@ -2,45 +2,31 @@
 
 /* eslint-env jasmine */
 
+import { EntityMetaData } from 'basic';
 import { MockErrorCollector } from'error-test';
+import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';
 
-import * as docTypeEnd from '../docTypeEnd';
+import { DocTypeEndPToken, DocTypeEndXToken, parseDocTypeEnd } from '../docTypeEnd';
 import { DocTypeStartPToken } from '../docTypeStart';
-import { EntityMetaData } from 'basic';
 
 describe('docTypeEnd (unit)', () => {
-   let docTypeEndPToken: docTypeEnd.DocTypeEndPToken;
+   let startPToken: DocTypeStartPToken;
+   let docTypeEndPToken: DocTypeEndPToken;
 
    beforeEach(() => {
+      startPToken = new DocTypeStartPToken({ open: SToken.fromString('<!'), openSubset: true });
       const makeSToken = makeSTokenMaker();
-      docTypeEndPToken = {
-         type: 'DOCTYPE_END',
-         closeInternalSubset: makeSToken(']'),
-         postCloseInternalSubsetSpace: undefined,
+      docTypeEndPToken = new DocTypeEndPToken({
+         docTypeStartPToken: startPToken,
+         closeSubset: makeSToken(']'),
+         closeSubsetSpace: undefined,
          close: makeSToken('>'),
-      } as any;
-   });
-
-   describe('PToken', () => {
-
-      describe('getSTokenStream()', () => {
-
-         it('returns all the STokens', () => {
-            const pToken = new docTypeEnd.PToken(docTypeEndPToken);
-
-            expect(pToken.getSTokenArray()).toEqual([
-               pToken.closeInternalSubset,
-               pToken.close,
-            ]);
-         });
-
       });
-
    });
 
-   describe('parse()', () => {
+   describe('parseDocTypeEnd()', () => {
       let callback: jasmine.Spy;
 
       beforeEach(() => {
@@ -54,7 +40,7 @@ describe('docTypeEnd (unit)', () => {
             [ '>', 'match', '>' ],
          ]);
 
-         docTypeEnd.parse(mockSource, callback);
+         parseDocTypeEnd(mockSource, startPToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeEndPToken);
@@ -67,10 +53,10 @@ describe('docTypeEnd (unit)', () => {
             '>',
          ]);
          const makeSToken = makeSTokenMaker(undefined, 1, 0, 1);
-         docTypeEndPToken.postCloseInternalSubsetSpace = makeSToken('\t');
-         docTypeEndPToken.close = makeSToken('>');
+         (docTypeEndPToken as any).closeSubsetSpace = makeSToken('\t');
+         (docTypeEndPToken as any).close = makeSToken('>');
 
-         docTypeEnd.parse(mockSource, callback);
+         parseDocTypeEnd(mockSource, startPToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeEndPToken);
@@ -82,11 +68,11 @@ describe('docTypeEnd (unit)', () => {
             undefined,
             undefined,
          ]);
-         docTypeEndPToken.closeInternalSubset = undefined;
-         docTypeEndPToken.postCloseInternalSubsetSpace = undefined;
-         docTypeEndPToken.close = undefined;
+         (docTypeEndPToken as any).closeSubset = undefined;
+         (docTypeEndPToken as any).closeSubsetSpace = undefined;
+         (docTypeEndPToken as any).close = undefined;
 
-         docTypeEnd.parse(mockSource, callback);
+         parseDocTypeEnd(mockSource, startPToken, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(docTypeEndPToken);
@@ -107,64 +93,70 @@ describe('docTypeEnd (unit)', () => {
          } as any;
       });
 
-      it('returns an an error collector', () => {
-         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
-
-         expect(errors).toEqual(mockErrorCollector);
-      });
-
       it('returns no errors if no problems ', () => {
-         const errors = docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
-         expect(errors.report).not.toHaveBeenCalled();
+         expect(mockErrorCollector.report).not.toHaveBeenCalled();
       });
 
       it('reports an error if there is no close', () => {
-         docTypeEndPToken.close = undefined;
+         (docTypeEndPToken as any).close = undefined;
 
-         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_NO_CLOSE,
             params: undefined,
-            position: docTypeEndPToken.postCloseInternalSubsetSpace,
+            position: docTypeEndPToken.closeSubsetSpace,
          });
       });
 
       it('reports an error if there is a "]", but there was no opening "["', () => {
-         delete docTypeStartPToken.startInternalSubset;
+         delete (docTypeStartPToken as any).startInternalSubset;
 
-         docTypeEnd.checkWellFormed(docTypeEndPToken, docTypeStartPToken, mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
-            position: docTypeEndPToken.postCloseInternalSubsetSpace,
+            position: docTypeEndPToken.closeSubsetSpace,
          });
       });
 
       it('reports an error if there is a "]", but there was no start token', () => {
-         docTypeEnd.checkWellFormed(docTypeEndPToken, undefined as any, mockErrorCollector, new EntityMetaData());
+         docTypeEndPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector).not.toReportError({
             id: WellFormedError.ID.DOCTYPE_INVALID_SUBSET_CLOSE,
             params: undefined,
-            position: docTypeEndPToken.postCloseInternalSubsetSpace,
+            position: docTypeEndPToken.closeSubsetSpace,
          });
       });
 
    });
 
-   describe('pTokenToXToken()', () => {
+   describe('toXToken()', () => {
 
       it('returns a token given a good parsing', () => {
          const makeSToken = makeSTokenMaker(undefined, 1, 0, 1);
 
-         docTypeEndPToken.postCloseInternalSubsetSpace = makeSToken('\t');
+         (docTypeEndPToken as any).closeSubsetSpace = makeSToken('\t');
 
-         const token = docTypeEnd.pTokenToXToken(docTypeEndPToken);
+         const token = docTypeEndPToken.toXToken();
 
-         expect(token).toEqual(new docTypeEnd.XToken(docTypeEndPToken));
+         expect(token).toEqual(new DocTypeEndXToken(docTypeEndPToken));
+      });
+
+   });
+
+   describe('toStokenArray()', () => {
+
+      it('returns the Stokens', () => {
+
+            expect(docTypeEndPToken.toSTokenArray()).toEqual([
+               docTypeEndPToken.closeSubset,
+               docTypeEndPToken.close,
+            ] as any);
       });
 
    });

@@ -10,8 +10,6 @@ import { SToken } from 'sToken';
 import nameList, { XNameList } from '../../token/contentspec/nameList';
 import {
    attListDeclaration,
-   docTypeEnd,
-   docTypeStart,
    elementDeclaration,
    ProcessingInstructionXToken,
 
@@ -20,6 +18,8 @@ import {
    CdataXToken,
    CharDataXToken,
    CommentXToken,
+   DocTypeEndXToken,
+   DocTypeStartXToken,
    ElementEmptyXToken,
    ElementEndPToken,
    ElementEndXToken,
@@ -161,7 +161,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       it('resumes passing through when encountering an elementStart after docTypeStart', () => {
-         const dtStart = new docTypeStart.XToken('foo', undefined as any, false);
+         const dtStart = new DocTypeStartXToken('foo', undefined as any, false);
          const elStart = new ElementStartXToken('foo', []);
 
          validator.write(dtStart);
@@ -172,7 +172,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       it('resumes passing through if end of stream reached', () => {
-         const dtStart = new docTypeStart.XToken('foo', undefined as any, false);
+         const dtStart = new DocTypeStartXToken('foo', undefined as any, false);
 
          validator.write(dtStart);
          validator.end();
@@ -181,7 +181,7 @@ describe('CheckXTokenValidStream (unit)', () => {
       });
 
       it('adds an error if the DOCTYPE name and the element start name do not match', () => {
-         const dtStart = new docTypeStart.XToken('docTypeName', undefined as any, false);
+         const dtStart = new DocTypeStartXToken('docTypeName', undefined as any, false);
          const elStart = new ElementStartXToken('elementName', []);
 
          validator.write(dtStart);
@@ -1525,7 +1525,7 @@ describe('CheckXTokenValidStream (unit)', () => {
 
          it('reports a warning if a start tag is used for an element declared to be empty', (done) => {
             const elementDecl = new elementDeclaration.XToken('one', 'EMPTY', undefined);
-            const elStart = new elementStart.XToken('one', []);
+            const elStart = new ElementStartXToken('one', []);
 
             validator.write(elementDecl);
             validator.write(elStart);
@@ -1637,7 +1637,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports an error if an ATTLIST for an element type has more than one attribute of type ID', (done) => {
-            const endOfDocType = new docTypeEnd.XToken();
+            const endOfDocType = new DocTypeEndXToken();
             const attListDecl = new attListDeclaration.XToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
@@ -2174,7 +2174,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('NOTATION', () => {
 
             function setup(emd: EntityMetaData) {
-               const endOfDocType = new docTypeEnd.XToken();
+               const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
@@ -2203,7 +2203,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             };
 
             function setupEmptyElement(emd: EntityMetaData) {
-               const endOfDocType = new docTypeEnd.XToken();
+               const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'EMPTY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'notation1',
@@ -2226,7 +2226,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             };
 
             function setupDuplicateNotationValues(emd: EntityMetaData) {
-               const endOfDocType = new docTypeEnd.XToken();
+               const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const notation1 = new NotationDeclarationXToken('first', undefined);
                const notation2 = new NotationDeclarationXToken('second', undefined);
@@ -2366,7 +2366,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          describe('ENUMERATION', () => {
 
             function setupDuplicateEnumerationValues(emd: EntityMetaData) {
-               const endOfDocType = new docTypeEnd.XToken();
+               const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'enumerationAttr',
@@ -2406,7 +2406,7 @@ describe('CheckXTokenValidStream (unit)', () => {
             });
 
             it('reports no error if a 1.0/3 ATTLISTs ENUMERATION declaration has no duplicate nmTokens', (done) => {
-               const endOfDocType = new docTypeEnd.XToken();
+               const endOfDocType = new DocTypeEndXToken();
                const elDecl = new elementDeclaration.XToken('elementType', 'ANY', undefined);
                const attListDecl = new attListDeclaration.XToken('elementType', [{
                   name: 'enumerationAttr',
@@ -2449,7 +2449,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('ignores attribute declarations after the first encountered', (done) => {
-            const endOfDocType = new docTypeEnd.XToken();
+            const endOfDocType = new DocTypeEndXToken();
             const attListDecl1 = new attListDeclaration.XToken('elementType', [{
                name: 'idAttr',
                type: 'ID',
@@ -2482,7 +2482,7 @@ describe('CheckXTokenValidStream (unit)', () => {
          });
 
          it('reports a warning if more than one attribute definition is provided for an attribute', (done) => {
-            const endOfDocType = new docTypeEnd.XToken();
+            const endOfDocType = new DocTypeEndXToken();
             const attListDecl1 = new attListDeclaration.XToken('elementType', [{
                name: 'idAttr',
                type: 'ID',

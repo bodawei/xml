@@ -11,11 +11,10 @@ import {
    parseCharData,
    parseSection,
 
-   docTypeEnd,
-
    parseCharRef,
    parseComment,
    parseDeclaration,
+   parseDocTypeEnd,
    parseElementEnd,
    parseElementStart,
    parseGeneralEntityReference,
@@ -37,6 +36,7 @@ class PTokenStream extends stream.Readable {
    private _parsing: boolean = false;
    private emd: EntityMetaData;
    private waitingForInternalClose: boolean = false;
+   private startDocType?: DocTypeStartPToken;
 
    constructor(metaDataOrTokenSource: STokenSource | EntityMetaData) {
       super({
@@ -196,8 +196,9 @@ class PTokenStream extends stream.Readable {
                break;
             case '<!':
                parseDeclaration(this._sTokenSource, markupStartSToken, this.emd, (pToken) => {
-                  if (pToken instanceof DocTypeStartPToken && pToken.startInternalSubset) {
+                  if (pToken instanceof DocTypeStartPToken && pToken.openSubset) {
                      this.waitingForInternalClose = true;
+                     this.startDocType = pToken;
                   }
 
                   deliverParse(pToken);
@@ -211,7 +212,7 @@ class PTokenStream extends stream.Readable {
    }
 
    _parseClose(deliverParse: DeliverPToken) {
-      docTypeEnd.parse(this._sTokenSource, deliverParse);
+      parseDocTypeEnd(this._sTokenSource, this.startDocType!, deliverParse);
    }
 
 }

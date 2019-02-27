@@ -3,42 +3,43 @@
 import stream from 'readable-stream';
 
 import { ENTITY_META_DATA, EntityMetaData, EntityKind } from 'basic';
-import { ErrorCollector, WellFormedError, XmlWarning } from '../error';
-import { SToken, strOrBlank } from '../sToken';
+import { ErrorCollector, WellFormedError } from 'error';
+import { SToken, strOrBlank } from 'sToken';
 
 import {
    declaration,
 
    attListDeclaration,
-   docTypeEnd,
-   docTypeStart,
    elementDeclaration,
+
+   GENERAL_ENTITY_START_PTOKEN,
 
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
    CHARREF_PTOKEN,
    COMMENT_PTOKEN,
+   DOCTYPE_END_PTOKEN,
+   DOCTYPE_START_PTOKEN,
+   ELEMENT_START_PTOKEN,
+   ELEMENT_EMPTY_PTOKEN,
    ELEMENT_END_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
    SPACE_PTOKEN,
    TEXTDECL_PTOKEN,
    XMLDECL_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
-   GENERAL_ENTITY_REFERENCE_PTOKEN,
-   PARAMETER_ENTITY_DECLARATION_PTOKEN,
-   PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   NOTATION_DECLARATION_PTOKEN,
 
    GeneralEntityReferencePToken,
-   NotationDeclarationPToken,
+   GeneralEntityStartPToken,
    ParameterEntityReferencePToken,
+
+   NotationDeclarationPToken,
    ProcessingInstructionPToken,
    SpacePToken,
-
-   GENERAL_ENTITY_START_PTOKEN,
-   GeneralEntityStartPToken,
-   ELEMENT_START_PTOKEN,
-   ELEMENT_EMPTY_PTOKEN,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -56,7 +57,7 @@ type Token = {
    open?: SToken,
    text?: SToken,
    name?: SToken,
-   closeInternalSubset?: SToken;
+   closeSubset?: SToken;
 };
 
 type EntitiesInfo = {
@@ -95,7 +96,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
    _checkForErrors(pToken: Token) {
       const startContext = pToken.open || pToken.text ||
-         (this._startDocType ? this._startDocType.open : pToken.closeInternalSubset);
+         (this._startDocType ? this._startDocType.open : pToken.closeSubset); // eh?  And what if there is no close?
       let errorCollector = new ErrorCollector(startContext as SToken, WellFormedError); //typehack
 
       switch (pToken.type) {
@@ -158,10 +159,10 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
             (pToken as any).checkWellFormed(errorCollector, this.emd);
             break;
-         case docTypeStart.PTYPE:
+         case DOCTYPE_START_PTOKEN:
             switch (this._state) {
                case CheckWellFormedState.PROLOG_PREDOCTYPE:
-                  if ((pToken as DocTypeStartPToken).startInternalSubset) {
+                  if ((pToken as DocTypeStartPToken).openSubset) {
                      this._state = CheckWellFormedState.IN_DTD;
                   }
                   break;
@@ -170,9 +171,9 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                   errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
             }
             this._startDocType = pToken as DocTypeStartPToken; // typeHack
-            docTypeStart.checkWellFormed(pToken as any, errorCollector, this.emd);
+            this._startDocType.checkWellFormed(errorCollector, this.emd);
             break;
-         case docTypeEnd.PTYPE:
+         case DOCTYPE_END_PTOKEN:
             if (this._state !== CheckWellFormedState.PROLOG_PREDOCTYPE && this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
             } else {
@@ -181,11 +182,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
 
             if (this._startDocType) {
                const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
-               docTypeEnd.checkWellFormed(pToken as any, this._startDocType, specialErrorCollector, this.emd);
+               (pToken as any).checkWellFormed(specialErrorCollector, this.emd);
                delete this._startDocType;
                specialErrorCollector.getErrors().forEach(error => this.push(error));
             } else {
-               docTypeEnd.checkWellFormed(pToken as any, undefined as any, errorCollector, this.emd);
+               (pToken as any).checkWellFormed(errorCollector, this.emd);
             }
             break;
          case ELEMENT_START_PTOKEN:

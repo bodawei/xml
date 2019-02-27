@@ -8,25 +8,25 @@ import {
    declaration,
 
    attListDeclaration,
-   docTypeStart,
-   docTypeEnd,
    elementDeclaration,
 
    CdataXToken,
    CharDataXToken,
    CommentXToken,
-   SpaceXToken,
+   DocTypeEndXToken,
+   DocTypeStartXToken,
+   ElementEndXToken,
+   ElementStartXToken,
+   ElementEmptyXToken,
    GeneralEntityReferenceXToken,
    GeneralEntityDeclarationXToken,
    NotationDeclarationXToken,
    ParameterEntityReferenceXToken,
    ProcessingInstructionXToken,
-   XmlDeclarationXToken,
+   SpaceXToken,
    TextXToken,
    TextPToken,
-   ElementEndXToken,
-   ElementStartXToken,
-   ElementEmptyXToken,
+   XmlDeclarationXToken,
 } from 'token';
 
 import { PTokenStream } from '../../pTokenStream';
@@ -105,8 +105,8 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes a DOCTYPE start and end', (done) => {
       expectInputToProduce('<!DOCTYPE one>', [
-         new docTypeStart.XToken('one', undefined as any, false),
-         new docTypeEnd.XToken(),
+         new DocTypeStartXToken('one', undefined as any, false),
+         new DocTypeEndXToken(),
       ], done);
    });
 

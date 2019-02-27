@@ -3,19 +3,19 @@
 import { EntityMetaData, Token } from 'basic';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 import {
-   docTypeStart,
-   docTypeEnd,
    attListDeclaration,
    elementDeclaration,
+   parseDocTypeEnd,
+   parseDocTypeStart,
    parseEntityDeclaration,
    parseNotationDeclaration,
 
+   DocTypeEndPToken,
+   DocTypeStartPToken,
    GeneralEntityDeclarationPToken,
    NotationDeclarationPToken,
    ParameterEntityDeclarationPToken,
 } from 'token';
-import { DocTypeEndPToken } from '../docTypeEnd';
-import { DocTypeStartPToken } from '../docTypeStart';
 import { DeclarationPToken } from './baseDeclaration';
 
 type DeclarationStart = {
@@ -25,7 +25,7 @@ type DeclarationStart = {
    declTypeSpace?: SToken,
 };
 
-type DeliverDeclaration = (declaration: DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
+type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<Token>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
@@ -78,11 +78,11 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, emd: EntityM
 
       switch (newResult.declType.str.toLocaleUpperCase()) {
          case 'DOCTYPE':
-            docTypeStart.parse(source, newResult, (docTypeStart: DocTypeStartPToken) => {
-               if (docTypeStart.startInternalSubset) {
+            parseDocTypeStart(source, newResult, (docTypeStart: DocTypeStartPToken) => {
+               if (docTypeStart.openSubset) {
                   deliverPToken(docTypeStart);
                } else {
-                  docTypeEnd.parse(source, (endToken: DocTypeEndPToken) => {
+                  parseDocTypeEnd(source, docTypeStart, (endToken: DocTypeEndPToken) => {
                      deliverPToken([ docTypeStart, endToken ]);
                   });
                }

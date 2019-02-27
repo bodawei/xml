@@ -2,7 +2,6 @@
 /* eslint-env jasmine */
 
 import { ENTITY_META_DATA, EntityLocation, EntityMetaData, Range } from 'basic';
-import { ValidityError, WellFormedError } from 'error';
 import { PTokenStream } from '../../pTokenStream';
 import { PToXTokenStream } from '../../xTokenStream';
 import { SToken } from 'sToken';
@@ -12,6 +11,8 @@ import { AttListXToken } from '../../token/attListDeclaration'; // hack
 import { ElementDeclaration } from '../../token/elementDeclaration'; // hack
 import {
    CharDataXToken,
+   DocTypeEndXToken,
+   DocTypeStartXToken,
    ElementEndXToken,
    ElementStartXToken,
    SpaceXToken,
@@ -79,11 +80,11 @@ describe('NodeStream (integration)', () => {
          '[<!ENTITY child "&quot;grandchild&quot;">]><one>&child;</one>', (results) => {
          matchTokenTypes(results, [
             XmlDeclarationXToken,
-            tokenNs.docTypeStart.XToken,
+            DocTypeStartXToken,
             InternalSubsetStartXToken,
             tokenNs.GeneralEntityDeclarationXToken,
             InternalSubsetEndXToken,
-            tokenNs.docTypeEnd.XToken,
+            DocTypeEndXToken,
             ElementStartXToken,
             GeneralEntityStartXToken,
             GeneralEntityStartXToken,
@@ -112,14 +113,14 @@ describe('NodeStream (integration)', () => {
          /* eslint-disable indent */
          matchTokenTypes(results, [
             XmlDeclarationXToken,
-            tokenNs.docTypeStart.XToken,
+            DocTypeStartXToken,
                InternalSubsetStartXToken,
                tokenNs.ParameterEntityDeclarationXToken,
                ParameterEntityStartXToken,
                   tokenNs.GeneralEntityDeclarationXToken,
                ParameterEntityEndXToken,
                InternalSubsetEndXToken,
-            tokenNs.docTypeEnd.XToken,
+            DocTypeEndXToken,
             ElementStartXToken,
                CharDataXToken,
                GeneralEntityStartXToken,

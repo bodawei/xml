@@ -25,6 +25,7 @@ class CharRefPToken {
    constructor(basePToken: CharRefPToken | PreToken) {
       Object.assign(this, basePToken);
 
+      this.type = CHARREF_PTOKEN;
       this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 

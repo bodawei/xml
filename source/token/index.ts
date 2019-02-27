@@ -5,8 +5,6 @@ import declaration from './bridge/baseDeclaration';
 import attListDeclaration from './attListDeclaration';
 import elementDeclaration from './elementDeclaration';
 
-import * as docTypeStart from './docTypeStart';
-import * as docTypeEnd from './docTypeEnd';
 import unassigned from './common/unassigned';
 import literalValue from './common/literalValue';
 export * from './entityDeclaration';
@@ -28,6 +26,8 @@ export * from './cdata';
 export * from './charData';
 export * from './charRef';
 export * from './comment';
+export * from './docTypeEnd';
+export * from './docTypeStart';
 export * from './elementEnd';
 export * from './elementStart';
 export * from './generalEntityDeclaration';
@@ -50,8 +50,6 @@ export {
    declaration,
 
    attListDeclaration,
-   docTypeStart,
-   docTypeEnd,
    elementDeclaration,
 
    unassigned,

@@ -2,10 +2,9 @@
 
 import { Token, ENTITY_META_DATA } from 'basic';
 import {
-   docTypeEnd,
-   docTypeStart,
-
    CHARREF_PTOKEN,
+   DOCTYPE_END_PTOKEN,
+   DOCTYPE_START_PTOKEN,
    ELEMENT_START_PTOKEN,
    XMLDECL_PTOKEN,
    GENERAL_ENTITY_DECLARATION_PTOKEN,
@@ -246,10 +245,10 @@ class EntityExpander {
          case XMLDECL_PTOKEN:
             this.handleXmlDeclaration(pToken as XmlDeclarationPToken, expanded);
             break;
-         case docTypeStart.PTYPE:
+         case DOCTYPE_START_PTOKEN:
             this.handleDocTypeStart(pToken as DocTypeStartPToken, expanded);
             break;
-         case docTypeEnd.PTYPE:
+         case DOCTYPE_END_PTOKEN:
             this.handleDocTypeEnd(pToken as DocTypeEndPToken, expanded);
             break;
          case attListDeclaration.PTYPE:
@@ -331,7 +330,7 @@ class EntityExpander {
 
       this.docTypeStart = pToken;
 
-      if (pToken.startInternalSubset) {
+      if (pToken.openSubset) {
          this.deliverAToken(new InternalSubsetStartXToken());
       }
 
@@ -339,7 +338,7 @@ class EntityExpander {
    }
 
    private handleDocTypeEnd(pToken: DocTypeEndPToken, handled: TokenHandled) {
-      if (this.docTypeStart && this.docTypeStart.startInternalSubset) {
+      if (this.docTypeStart && this.docTypeStart.openSubset) {
          this.deliverAToken(new InternalSubsetEndXToken());
       }
 

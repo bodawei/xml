@@ -8,14 +8,16 @@ import { STokenSource } from 'sToken';
 import PTokenStream from '../PTokenStream';
 
 import {
-   PROCESSING_INSTRUCTION_PTOKEN,
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
+   DOCTYPE_END_PTOKEN,
+   DOCTYPE_START_PTOKEN,
    ELEMENT_END_PTOKEN,
    ELEMENT_START_PTOKEN,
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
-   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
    NOTATION_DECLARATION_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
 } from 'token';
@@ -99,7 +101,7 @@ describe('PTokenStream (integration)', () => {
 
    it('parse start and end without an internal subset', (done) => {
       expectInputToProduceTypes('<!DOCTYPE goodName SYSTEM "sys.xml">',
-         [ 'DOCTYPE_START', 'DOCTYPE_END' ], done);
+         [ DOCTYPE_START_PTOKEN, DOCTYPE_END_PTOKEN ], done);
    });
 
    it('parses an element start', (done) => {

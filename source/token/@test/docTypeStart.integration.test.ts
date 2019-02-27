@@ -7,19 +7,19 @@ import { defaultExtractors } from 'extractor';
 import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import * as docTypeStart from '../docTypeStart';
+import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import { DeclarationPToken } from '../bridge/baseDeclaration';
 import { TextPToken } from '../text';
 
 describe('docTypeStart (integration)', () => {
-   let docTypeStartPToken: docTypeStart.DocTypeStartPToken;
+   let docTypeStartPToken: DocTypeStartPToken;
 
    beforeEach(() => {
       const makeSToken = makeSTokenMaker();
-      docTypeStartPToken = new docTypeStart.DocTypeStartPToken({
-         type: 'DOCTYPE_START',
+      docTypeStartPToken = new DocTypeStartPToken({
+         open: SToken.fromString('<!'),
          name: makeSToken('rootElement'),
-         postNameSpace: makeSToken(' '),
+         nameSpace: makeSToken(' '),
          externalId: {
             type: 'EXTERNAL_ID',
             idType: makeSToken('SYSTEM'),
@@ -30,8 +30,8 @@ describe('docTypeStart (integration)', () => {
                closeQuote: makeSToken('"'),
             },
          },
-         postExternalIdSpace: makeSToken(' '),
-         startInternalSubset: makeSToken('['),
+         externalIdSpace: makeSToken(' '),
+         openSubset: makeSToken('['),
       });
    });
 
@@ -42,7 +42,7 @@ describe('docTypeStart (integration)', () => {
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
-         docTypeStart.parse(source, {} as any, (parsing) => {
+         parseDocTypeStart(source, { open: SToken.fromString('<!'), } as any, (parsing) => {
             expect(parsing).toContainPTokenProps(docTypeStartPToken);
             done();
          });
@@ -67,10 +67,10 @@ describe('docTypeStart (integration)', () => {
          source.endText();
          delete declaration.declType;
 
-         docTypeStart.parse(source, declaration, (parsing) => {
+         parseDocTypeStart(source, declaration, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            docTypeStart.checkWellFormed(parsing, ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.DECL_NO_DECLTYPE);
             done();
@@ -82,10 +82,10 @@ describe('docTypeStart (integration)', () => {
          source.addText('rootElement system "sys.dtd" [');
          source.endText();
 
-         docTypeStart.parse(source, declaration, (parsing) => {
+         parseDocTypeStart(source, declaration, (parsing) => {
             const ec = new ErrorCollector(SToken.fromString('x'), WellFormedError);
 
-            docTypeStart.checkWellFormed(parsing, ec, new EntityMetaData());
+            parsing.checkWellFormed(ec, new EntityMetaData());
 
             expect(ec.getErrors()[0].id).toEqual(WellFormedError.ID.EXTERNALID_INVALID_CASE);
             done();
@@ -94,7 +94,7 @@ describe('docTypeStart (integration)', () => {
 
    });
 
-   describe('pTokenToXToken()', () => {
+   describe('toXToken()', () => {
       let declaration: DeclarationPToken;
 
       beforeEach(() => {
@@ -110,8 +110,8 @@ describe('docTypeStart (integration)', () => {
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
-         docTypeStart.parse(source, declaration, (pToken) => {
-            const token = docTypeStart.pTokenToXToken(pToken);
+         parseDocTypeStart(source, declaration, (pToken) => {
+            const token = pToken.toXToken();
 
             expect(token.name).toEqual('rootElement');
             expect(token.externalLoc).toEqual(new EntityLocation('sys.dtd'));

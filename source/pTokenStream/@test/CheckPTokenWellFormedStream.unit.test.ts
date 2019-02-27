@@ -8,14 +8,14 @@ import {
    declaration,
 
    attListDeclaration,
-   docTypeEnd,
-   docTypeStart,
    elementDeclaration,
    ProcessingInstructionPToken,
 
    CdataPToken,
    CharDataPToken,
    CommentPToken,
+   DocTypeEndPToken,
+   DocTypeStartPToken,
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
    NotationDeclarationPToken,
@@ -283,20 +283,18 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken: Token;
 
       beforeEach(() => {
-         pToken = {
-            type: docTypeStart.PTYPE,
+         pToken = new DocTypeStartPToken({
             open: makeSToken('<'),
-         };
+         });
       });
 
       it('calls docTypeStart.checkWellFormed() when encountering an DOCTYPE start parsing', () => {
-         const cwfSpy = spyOn(docTypeStart, 'checkWellFormed');
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[1]).toBeInstanceOf(ErrorCollector);
-         expect(args[2]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {
@@ -311,7 +309,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
          it('leaves state in PREDOCTYPE if not starting internal subset', () => {
             (checker as any)._state = 'PROLOG_PREDOCTYPE';
-            pToken.startInternalSubset = false;
+            pToken.openSubset = false;
             checker.write(pToken);
 
             expect((checker as any)._state).toEqual('PROLOG_PREDOCTYPE');
@@ -319,7 +317,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
          it('changes state to IN_DTD if in PREDOCTYPE and starting internal subset', () => {
             (checker as any)._state = 'PROLOG_PREDOCTYPE';
-            pToken.startInternalSubset = true;
+            pToken.openSubset = true;
             checker.write(pToken);
 
             expect((checker as any)._state).toEqual('IN_DTD');
@@ -333,20 +331,19 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       let pToken: Token;
 
       beforeEach(() => {
-         pToken = {
-            type: docTypeEnd.PTYPE,
-            closeInternalSubset: makeSToken(']'),
-         };
+         pToken = new DocTypeEndPToken({
+            docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+            closeSubset: makeSToken(']'),
+         });
       });
 
       it('calls docTypeEnd.checkWellFormed() when encountering a doctype end parsing', () => {
-         const cwfSpy = spyOn(docTypeEnd, 'checkWellFormed');
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
-         expect(args[0]).toEqual(pToken);
-         expect(args[2]).toBeInstanceOf(ErrorCollector);
-         expect(args[3]).toEqual(metaData);
+         expect(args[0]).toBeInstanceOf(ErrorCollector);
+         expect(args[1]).toEqual(metaData);
       });
 
       describe('state checking', () => {

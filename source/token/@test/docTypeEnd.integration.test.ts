@@ -3,22 +3,25 @@
 
 import { EntityMetaData } from 'basic';
 import { defaultExtractors } from 'extractor';
-import { STokenSource } from 'sToken';
+import { STokenSource, SToken } from 'sToken';
 import { makeSTokenMaker } from 'sToken-test';
 
-import * as docTypeEnd from '../docTypeEnd';
+import { DocTypeStartPToken } from '../docTypeStart';
+import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
 
 describe('docTypeEnd (integration)', () => {
-   let docTypeEndPToken: docTypeEnd.DocTypeEndPToken;
+   let docTypeEndPToken: DocTypeEndPToken;
+   let startToken: DocTypeStartPToken;
 
    beforeEach(() => {
+      startToken = new DocTypeStartPToken({ open: SToken.fromString('<!'), });
       const makeSToken = makeSTokenMaker();
-      docTypeEndPToken = {
-         type: 'DOCTYPE_END',
-         closeInternalSubset: makeSToken(']'),
-         postCloseInternalSubsetSpace: makeSToken('\t'),
+      docTypeEndPToken = new DocTypeEndPToken({
+         docTypeStartPToken: startToken,
+         closeSubset: makeSToken(']'),
+         closeSubsetSpace: makeSToken('\t'),
          close: makeSToken('>'),
-      } as any;
+      });
    });
 
    describe('parse()', () => {
@@ -28,8 +31,8 @@ describe('docTypeEnd (integration)', () => {
          source.addText(']\t>');
          source.endText();
 
-         docTypeEnd.parse(source, (parsing) => {
-            expect(Object.assign({}, parsing)).toEqual(docTypeEndPToken);
+         parseDocTypeEnd(source, startToken, (parsing) => {
+            expect(parsing).toEqual(docTypeEndPToken);
             done();
          });
       });

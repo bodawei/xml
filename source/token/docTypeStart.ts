@@ -1,17 +1,15 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { EntityLocation, EntityMetaData } from 'basic';
 import { WellFormedError, ErrorCollector } from 'error';
-import { strOrBlank } from 'sToken';
+import { strOrBlank, STokenArrayBuilder, SToken, STokenSource } from 'sToken';
 
-import externalId from './common/externalId';
+import externalId, { ExternalId } from './common/externalId';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 import misc from './common/misc';
-import base from './base';
-import { EntityLocation, EntityMetaData } from 'basic';
-import { STokenSource } from 'sToken';
 
 const WFEID = WellFormedError.ID;
-const DOCTYPE_START = 'DOCTYPE_START';
+const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
 const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
 
 /**********************************************************************\
@@ -31,43 +29,58 @@ const DOCTYPE_START_XTOKEN = 'DOCTYPE_START_XTOKEN';
  be in the case that there is no internal subset.
 \**********************************************************************/
 
-class DocTypeStart extends base.XToken {
-   public name: string;
-   public externalLoc: EntityLocation | void;
-   public hasInternalSubset: boolean;
+type PreToken = { open: SToken, [ other: string ]: any };
+
+class DocTypeStartXToken {
+   public readonly type: typeof DOCTYPE_START_XTOKEN = DOCTYPE_START_XTOKEN;
+   public readonly name: string;
+   public readonly externalLoc: EntityLocation | void;
+   public readonly hasInternalSubset: boolean;
+   public pToken?: DocTypeStartPToken;
 
    constructor(name: string, externalLocation: EntityLocation | void, hasInternalSubset: boolean, pToken?: DocTypeStartPToken) {
-      super(DOCTYPE_START_XTOKEN, pToken);
-
       this.name = name;
       this.externalLoc = externalLocation;
       this.hasInternalSubset = hasInternalSubset;
+      this.pToken = pToken;
    }
 
 }
 
-class DocTypeStartPToken extends declaration.PToken {
-   constructor(props?: Object) {
-      /* istanbul ignore next */ // Istanbul is confused by transpilation
-      super(DOCTYPE_START, props);
+class DocTypeStartPToken {
+   public readonly type: typeof DOCTYPE_START_PTOKEN = DOCTYPE_START_PTOKEN;
+   public readonly open: SToken;
+   public readonly postOpenSpace?: SToken;
+   public readonly declType?: SToken;
+   public readonly postDeclTypeSpace?: SToken;
+   public readonly name?: SToken;
+   public readonly nameSpace?: SToken;
+   public readonly externalId?: ExternalId;
+   public readonly externalIdSpace?: SToken;
+   public readonly openSubset?: SToken;
+
+   constructor(basePToken: DocTypeStartPToken|PreToken) {
+      Object.assign(this, basePToken);
+
+      this.type = DOCTYPE_START_PTOKEN;
+      this.open = basePToken.open; // Make sure type system knows we always assign open
    }
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
 
-      results.pushSTokens(this.name,
-         this.postNameSpace);
-      results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-      results.pushSTokens(this.postExternalIdSpace,
-         this.postPublicSpace,
-         this.startInternalSubset);
+   toXToken() {
+      return pTokenToXToken(this);
+   }
 
-      return results;
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
 /**********************************************************************\
- parse() extracts the pieces of a doctypedecl up to the start of
+ parseDocTypeStart() extracts the pieces of a doctypedecl up to the start of
  an internal subset start.
 
  This assumes that the "<!DOCTYPE S" has already been processed,
@@ -83,20 +96,20 @@ class DocTypeStartPToken extends declaration.PToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: (result: DocTypeStartPToken) => void) {
-   const pToken = new DocTypeStartPToken(declarationPToken);
+function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: (result: DocTypeStartPToken) => void) {
+   const pToken: PreToken = Object.assign({}, declarationPToken) as any; // typeHack
 
    source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
-   source.extractToObject('space', undefined, pToken, 'postNameSpace');
+   source.extractToObject('space', undefined, pToken, 'nameSpace');
 
    externalId.parse(source, [ '[', '>' ], (externalId: any) => { // typeHack
       pToken.externalId = externalId;
 
-      source.extractToObject('space', undefined, pToken, 'postExternalIdSpace');
+      source.extractToObject('space', undefined, pToken, 'externalIdSpace');
 
       source.extract('match', '[', (sToken) => {
-         pToken.startInternalSubset = sToken;
-         deliverPToken(pToken);
+         pToken.openSubset = sToken;
+         deliverPToken(new DocTypeStartPToken(pToken));
       });
    });
 }
@@ -106,7 +119,7 @@ function parse(source: STokenSource, declarationPToken: DeclarationPToken, deliv
 \**********************************************************************/
 
 function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
-   declaration.checkWellFormed(pToken, ec, entityMetaData);
+   declaration.checkWellFormed(pToken as any, ec, entityMetaData); // typeHack
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.DOCTYPE_NO_NAME);
@@ -120,21 +133,40 @@ function checkWellFormed(pToken: DocTypeStartPToken, ec: ErrorCollector, entityM
 \**********************************************************************/
 
 function pTokenToXToken(pToken: DocTypeStartPToken) {
-   return new DocTypeStart(strOrBlank(pToken.name),
+   return new DocTypeStartXToken(strOrBlank(pToken.name),
       externalId.makeEntityLocation(pToken.externalId) as EntityLocation, // typeHack
-      !!pToken.startInternalSubset,
+      !!pToken.openSubset,
       pToken);
 }
 
-export {
-   DOCTYPE_START as PTYPE,
-   DOCTYPE_START_XTOKEN as XTYPE,
-   DocTypeStart as XToken,
-   DocTypeStartPToken as PToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the component STokens
+\**********************************************************************/
 
-   DocTypeStart as DocTypeStartXToken,
+function sTokensFromPToken(pToken: DocTypeStartPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+   const externalTokens = externalId.getSTokens(pToken.externalId);
+
+   builder.add(
+      pToken.open,
+      pToken.postOpenSpace,
+      pToken.declType,
+      pToken.postDeclTypeSpace,
+      pToken.name,
+      pToken.nameSpace,
+      externalTokens,
+      pToken.externalIdSpace,
+      pToken.openSubset,
+   );
+
+   return builder.sTokenArray;
+}
+
+export {
+   DOCTYPE_START_PTOKEN,
+   DOCTYPE_START_XTOKEN,
+   DocTypeStartXToken,
    DocTypeStartPToken,
+
+   parseDocTypeStart,
 };

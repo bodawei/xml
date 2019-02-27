@@ -4,19 +4,19 @@ import stream from 'readable-stream';
 
 import { EntityMetaData } from 'basic';
 // import { ErrorCollector, XmlWarning, ValidityError, WellFormedError } from 'error';
-import { defaultExtractors } from '../extractor';
+import { defaultExtractors } from 'extractor';
 import { PTokenStream } from '../pTokenStream';
 import { SToken, STokenSource } from 'sToken';
 import { PToXTokenStream } from '../xTokenStream';
 import {
+   DOCTYPE_END_XTOKEN,
+   DOCTYPE_START_XTOKEN,
    ELEMENT_EMPTY_XTOKEN,
    ELEMENT_START_XTOKEN,
    TEXT_PTOKEN,
    XMLDECL_XTOKEN,
 
    attListDeclaration,
-   docTypeStart,
-   docTypeEnd,
    elementDeclaration,
    ParameterEntityEndPToken,
    unassigned,
@@ -47,7 +47,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityDeclarationXToken,
    NotationDeclarationXToken,
-} from '../token';
+} from 'token';
 import { AttributeValueXToken } from '../token/common/attribute'; // badRef
 import { AttListXToken } from '../token/attListDeclaration'; // badRef
 import { ElementDeclaration } from '../token/elementDeclaration'; // badRef
@@ -179,7 +179,7 @@ class NodeStream extends stream.Transform {
       } else if (xToken.type === ELEMENT_START_XTOKEN || xToken.type === ELEMENT_EMPTY_XTOKEN) {
          this._processElementStart((xToken as ElementStartXToken), callback);
          return;
-      } else if (xToken.type === docTypeEnd.XTYPE) {
+      } else if (xToken.type === DOCTYPE_END_XTOKEN) {
          if (this.docTypeStart && this.docTypeStart.hasInternalSubset) {
             this.push(new InternalSubsetEndXToken());
          }
@@ -196,7 +196,7 @@ class NodeStream extends stream.Transform {
 
       this.push(xToken);
 
-      if (xToken.type === docTypeStart.XTYPE) {
+      if (xToken.type === DOCTYPE_START_XTOKEN) {
          this.docTypeStart = xToken as DocTypeStartXToken; // typeHack
 
          if (this.docTypeStart.hasInternalSubset) {

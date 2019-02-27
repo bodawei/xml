@@ -128,9 +128,11 @@ describe('EntityExpander (unit)', () => {
       it('adds no internal or external entity markers if there are none', (done) => {
          const input = [
             new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('root'),
             }),
             new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
                close: SToken.fromString('>'),
             }),
          ];
@@ -145,11 +147,13 @@ describe('EntityExpander (unit)', () => {
          const input = [
             new DocTypeStartPToken({
                name: SToken.fromString('root'),
-               startInternalSubset: SToken.fromString('['),
+               open: SToken.fromString('<!'),
+               openSubset: SToken.fromString('['),
             }),
             new NotationDeclarationPToken({ open: SToken.fromString('<!') }),
             new DocTypeEndPToken({
-               closeInternalSubset: SToken.fromString(']'),
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+               closeSubset: SToken.fromString(']'),
                close: SToken.fromString('>'),
             }),
          ];
@@ -166,6 +170,7 @@ describe('EntityExpander (unit)', () => {
          externalMap.systemFoo = '<!ELEMENT one ANY>';
          const input = [
             new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('root'),
                externalId: {
                   system: {
@@ -176,6 +181,7 @@ describe('EntityExpander (unit)', () => {
                },
             }),
             new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
                close: SToken.fromString('>'),
             }),
          ];
@@ -193,8 +199,9 @@ describe('EntityExpander (unit)', () => {
          externalMap.systemFoo = '<!ELEMENT one ANY>';
          const input = [
             new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
                name: SToken.fromString('root'),
-               startInternalSubset: SToken.fromString('['),
+               openSubset: SToken.fromString('['),
                externalId: {
                   system: {
                      value: [
@@ -205,7 +212,8 @@ describe('EntityExpander (unit)', () => {
             }),
             new NotationDeclarationPToken({ open: SToken.fromString('<!') }),
             new DocTypeEndPToken({
-               closeInternalSubset: SToken.fromString(']'),
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+               closeSubset: SToken.fromString(']'),
                close: SToken.fromString('>'),
             }),
          ];

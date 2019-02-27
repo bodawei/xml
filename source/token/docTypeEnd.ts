@@ -1,10 +1,9 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2019 by 柏大衛. All rights reserved. */
 
-import { WellFormedError, ErrorCollector } from '../error';
-
-import base from './base';
-import { STokenSource } from 'sToken';
 import { EntityMetaData } from 'basic';
+import { WellFormedError, ErrorCollector } from 'error';
+import { STokenSource, STokenArrayBuilder, SToken } from 'sToken';
+
 import { DocTypeStartPToken } from './docTypeStart';
 
 /**********************************************************************\
@@ -15,34 +14,49 @@ import { DocTypeStartPToken } from './docTypeStart';
 \**********************************************************************/
 
 const WFEID = WellFormedError.ID;
-const DOCTYPE_END = 'DOCTYPE_END';
+const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
 const DOCTYPE_END_XTOKEN = 'DOCTYPE_END_XTOKEN';
 
-class DocTypeEnd extends base.XToken {
-   constructor(pToken?: DocTypeEndPToken) {
-      super(DOCTYPE_END_XTOKEN, pToken);
+type PreToken = { docTypeStartPToken: DocTypeStartPToken, [ other: string ]: any };
+
+class DocTypeEndPToken {
+   public readonly type: typeof DOCTYPE_END_PTOKEN = DOCTYPE_END_PTOKEN;
+   public readonly docTypeStartPToken: DocTypeStartPToken;
+   public readonly closeSubset?: SToken;
+   public readonly closeSubsetSpace?: SToken;
+   public readonly close?: SToken;
+
+   constructor(basePToken: DocTypeEndPToken | PreToken) {
+      Object.assign(this, basePToken);
+
+      this.docTypeStartPToken = basePToken.docTypeStartPToken; // Make sure type system knows we always assign open
+      this.type = DOCTYPE_END_PTOKEN;
+   }
+
+   checkWellFormed(ec: ErrorCollector, entityMetaData: EntityMetaData) {
+      return checkWellFormed(this, ec, entityMetaData);
+   }
+
+   toXToken() {
+      return pTokenToXToken(this);
+   }
+
+   toSTokenArray() {
+      return sTokensFromPToken(this);
    }
 }
 
-class DocTypeEndPToken extends base.PToken {
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
-   constructor(props?: Object) {
-      super(DOCTYPE_END, props);
-   }
+class DocTypeEndXToken {
+   public readonly type: typeof DOCTYPE_END_XTOKEN = DOCTYPE_END_XTOKEN;
+   public pToken?: DocTypeEndPToken;
 
-   getSTokenArray() {
-      const results = super.getSTokenArray();
-
-      results.pushSTokens(this.closeInternalSubset,
-         this.postCloseInternalSubsetSpace,
-         this.close);
-
-      return results;
+   constructor(pToken?: DocTypeEndPToken) {
+      this.pToken = pToken;
    }
 }
 
 /**********************************************************************\
- parse() extracts ]> from the end of a DOCTYPE statement.
+ parseDocTypeEnd() extracts ]> from the end of a DOCTYPE statement.
 
  This assumes that the next character in the source is a ].
 
@@ -55,15 +69,17 @@ class DocTypeEndPToken extends base.PToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parse(source: STokenSource, deliverPToken: (result: DocTypeEndPToken) => void) {
-   const pToken = new DocTypeEndPToken();
+function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken, deliverPToken: (result: DocTypeEndPToken) => void) {
+   const pToken: PreToken = {
+      docTypeStartPToken: docTypeStart,
+   };
 
-   source.extractToObject('match', ']', pToken, 'closeInternalSubset');
-   source.extractToObjectNoParams('space', pToken, 'postCloseInternalSubsetSpace');
+   source.extractToObject('match', ']', pToken, 'closeSubset');
+   source.extractToObjectNoParams('space', pToken, 'closeSubsetSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;
-      deliverPToken(pToken);
+      deliverPToken(new DocTypeEndPToken(pToken));
    });
 }
 
@@ -71,19 +87,16 @@ function parse(source: STokenSource, deliverPToken: (result: DocTypeEndPToken) =
  checkWellFormed() does check on validity
 \**********************************************************************/
 
-// eslint-disable-next-line no-unused-vars
-function checkWellFormed(pToken: DocTypeEndPToken, docTypeStartPToken: DocTypeStartPToken, ec: ErrorCollector, emd: EntityMetaData) {
-   ec.setPos(pToken.closeInternalSubset);
+function checkWellFormed(pToken: DocTypeEndPToken, ec: ErrorCollector, emd: EntityMetaData) { // eslint-disable-line no-unused-vars
+   ec.setPos(pToken.closeSubset);
 
-   if (!docTypeStartPToken || !docTypeStartPToken.startInternalSubset) {
-      ec.check(pToken.closeInternalSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
+   if (!pToken.docTypeStartPToken || !pToken.docTypeStartPToken.openSubset) {
+      ec.check(pToken.closeSubset, WFEID.DOCTYPE_INVALID_SUBSET_CLOSE);
    }
 
    // If there is no close, and no closeInternalSubset, this won't get a very good position.
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.DOCTYPE_NO_CLOSE);
-
-   return ec;
 }
 
 /**********************************************************************\
@@ -91,18 +104,30 @@ function checkWellFormed(pToken: DocTypeEndPToken, docTypeStartPToken: DocTypeSt
 \**********************************************************************/
 
 function pTokenToXToken(pToken: DocTypeEndPToken) {
-   return new DocTypeEnd(pToken);
+   return new DocTypeEndXToken(pToken);
+}
+
+/**********************************************************************\
+ sTokensFromPToken() Returns the ordered array of the component STokens
+\**********************************************************************/
+
+function sTokensFromPToken(pToken: DocTypeEndPToken): Array<SToken> {
+   const builder = new STokenArrayBuilder();
+
+   builder.add(
+      pToken.closeSubset,
+      pToken.closeSubsetSpace,
+      pToken.close);
+
+      return builder.sTokenArray;
 }
 
 export {
-   DOCTYPE_END as PTYPE,
-   DOCTYPE_END_XTOKEN as XTYPE,
-   DocTypeEnd as XToken,
-   DocTypeEndPToken as PToken,
-   parse,
-   checkWellFormed,
-   pTokenToXToken,
+   DOCTYPE_END_PTOKEN,
+   DOCTYPE_END_XTOKEN,
 
    DocTypeEndPToken,
-   DocTypeEnd as DocTypeEndXToken,
+   DocTypeEndXToken,
+
+   parseDocTypeEnd,
 };
