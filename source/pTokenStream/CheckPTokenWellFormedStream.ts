@@ -61,12 +61,7 @@ type Token = {
 };
 
 type EntitiesInfo = {
-   [name: string]: EntityInfo;
-}
-
-type EntityInfo = {
-   token: Token;
-   isInternal: boolean;
+   [name: string]: boolean;
 }
 
 const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
@@ -261,28 +256,14 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             const info = pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ? this.generalEntityDecl : this.paramEntityDecl;
             const name = strOrBlank(pToken.name);
 
-            if (!info[name]) {
-               info[name] = {
-                  token: pToken,
-                  isInternal: true,
-               };
-            }
-            break;
-         case GENERAL_ENTITY_START_PTOKEN:
-            // if (this._state !== CheckWellFormedState.IN_CONTENT) {
-            //    errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
-            // }
-            const genEntityRef = (pToken as GeneralEntityStartPToken).referencePToken;
-
-            this.checkGeneralEntityDeclaration(genEntityRef);
-            // genEntityRef.checkWellFormed(errorCollector, this.emd);
+            info[name] = true;
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
-            this.checkGeneralEntityDeclaration(pToken as GeneralEntityReferencePToken);
+            this.checkDecl(pToken as GeneralEntityReferencePToken, this.generalEntityDecl);
             (pToken as GeneralEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
@@ -317,10 +298,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       errorCollector.getErrors().forEach(error => this.push(error));
 
       this.push(pToken);
-   }
-
-   private checkGeneralEntityDeclaration(pToken: GeneralEntityReferencePToken) {
-      this.checkDecl(pToken, this.generalEntityDecl);
    }
 
    private checkDecl(pToken: Token, info: EntitiesInfo) {

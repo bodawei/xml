@@ -47,9 +47,7 @@ class PTokenFromLiteralStream extends stream.Transform {
 
          if (sToken.str !== '&') {
             parseText(this.sTokenSource, this.terminators, (pToken) => {
-               if (pToken) {
-                  this.push(pToken);
-               }
+               this.push(pToken || null);
             });
             return;
          }

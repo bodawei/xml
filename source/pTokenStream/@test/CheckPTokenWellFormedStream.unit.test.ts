@@ -34,7 +34,7 @@ import {
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
 import { ElementDeclarationPToken } from 'source/token/elementDeclaration';
 import { SToken } from 'sToken';
-import { gatherStream } from 'source/expand/@test/utils';
+import { expectNoErrorsOrWarnings } from 'source/expand/@test/utils';
 
 type Token = { type: string, [other: string]: any };
 type TokenArray = Array<Token>;
@@ -627,9 +627,9 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       beforeEach(() => {
          pToken = new GeneralEntityReferencePToken({
-            open: makeSToken('&'),
-            name: makeSToken('fred'),
-            close: makeSToken(';'),
+            open: SToken.fromString('&'),
+            name: SToken.fromString('fred'),
+            close: SToken.fromString(';'),
          });
       });
 
@@ -661,78 +661,41 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_NO_DECLARATION);
          });
 
-      });
+         it('reports no errors if there was a declaration', (done) => {
+            (checker as any)._state = 'IN_DTD';
 
-   });
+            checker.write(new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('ENTITY'),
+               name: SToken.fromString('fred'),
+               nameSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+               close: SToken.fromString('>'),
+            }));
+            checker.write(new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({
+                  open: SToken.fromString('<!'),
+                  declType: SToken.fromString('DOCTYPE'),
+                  name: SToken.fromString('foo'),
+                  openSubset: SToken.fromString('['),
+               }),
+               closeSubset: SToken.fromString(']'),
+               close: SToken.fromString('>'),
+            }));
+            checker.write(new ElementStartPToken({
+               open: SToken.fromString('<'),
+               name: SToken.fromString('fred'),
+               close: SToken.fromString('>'),
+            }));
+            checker.write(pToken);
+            checker.end();
 
-   describe('general entity start', () => {
-      let pToken: GeneralEntityStartPToken;
-      let declaration: GeneralEntityDeclarationPToken;
-      let refPToken: GeneralEntityReferencePToken;
-
-      function expectStream(validator: CheckPTokenWellFormedStream, expected: any, done: () => void) {
-         gatherStream(validator, (tokens) => {
-            let arrayExpected = [];
-
-            if (!Array.isArray(expected)) {
-               arrayExpected = [ expected ];
-            }
-
-            for (const expectedVal of arrayExpected) {
-               (expect(tokens) as any).toHaveError(expectedVal); // typeHack
-            }
-         }, done);
-      }
-
-      function expectNoErrors(validator: CheckPTokenWellFormedStream, done: () => void) {
-         gatherStream(validator, (tokens) => {
-            (expect(tokens) as any).toBeErrorFree(); // typeHack
-         }, done);
-      }
-
-      beforeEach(() => {
-         declaration = new GeneralEntityDeclarationPToken({
-            open: SToken.fromString('<!'),
-            name: SToken.fromString('lt'),
-            externalId: {},
+            expectNoErrorsOrWarnings(checker, done);
          });
-         refPToken = new GeneralEntityReferencePToken({
-            open: SToken.fromString('&'),
-            name: SToken.fromString('lt'),
-            close: SToken.fromString(';'),
-         });
-         pToken = new GeneralEntityStartPToken(refPToken);
+
       });
-
-      // it('calls GeneralEntityReferencePToken.checkWellFormed() when encountering an entity start', () => {
-      //    const cwfSpy = spyOn(refPToken, 'checkWellFormed');
-      //    checker.write(metaData);
-      //    checker.write(pToken);
-
-      //    const args = cwfSpy.calls.argsFor(0);
-      //    expect(args[0]).toBeInstanceOf(ErrorCollector);
-      //    expect(args[1]).toEqual(metaData);
-      // });
-
-      // describe('state checking', () => {
-
-      //    it('reports an error if not IN_CONTENT', () => {
-      //       (checker as any)._state = 'IN_DTD';
-      //       const checkerPushSpy = spyOn(checker, 'push');
-      //       checker.write(pToken);
-
-      //       expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
-      //    });
-
-      //    it('reports an error if there was no declaration', () => {
-      //       (checker as any)._state = 'IN_CONTENT';
-      //       const checkerPushSpy = spyOn(checker, 'push');
-      //       checker.write(pToken);
-
-      //       expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_NO_DECLARATION);
-      //    });
-
-      // });
 
    });
 

@@ -40,7 +40,15 @@ class EntityMetaData {
    constructor(entityKind: EntityKind = EntityKind.DOCUMENT, xmlVersion: XmlVersion = 1.0, xmlRevision?: XmlRevision, location: EntityLocation = new EntityLocation()) {
       this.kind = entityKind;
       this.location = location;
-      this.setVersion(xmlVersion);
+
+      if (xmlVersion === 1.0) {
+         this.ver = 1.0;
+         this.setRev(DEFAULT_1DOT0_REVISION);
+      } else {
+         this.ver = 1.1;
+         this.setRev(DEFAULT_1DOT1_REVISION);
+      }
+
       this.setRev(xmlRevision || (this.isVersion1dot0 ? DEFAULT_1DOT0_REVISION : DEFAULT_1DOT1_REVISION));
    }
 
@@ -58,28 +66,6 @@ class EntityMetaData {
 
    get isExternalSubsetKind(): boolean {
       return this.kind === EntityKind.EXTERNALSUBSET;
-   }
-
-   /**********************************************************************\
-    version: When setting the version, make sure it is a legal value, and
-    reset the revision to the last revision for that version.
-
-    Note that this does not change the revision is the version is not
-    changing.
-   \**********************************************************************/
-
-   private setVersion(newValue: XmlVersion) {
-      if (newValue === this.ver) {
-         return;
-      }
-
-      if (newValue === 1.0) {
-         this.ver = 1.0;
-         this.setRev(DEFAULT_1DOT0_REVISION);
-      } else {
-         this.ver = 1.1;
-         this.setRev(DEFAULT_1DOT1_REVISION);
-      }
    }
 
    get version(): XmlVersion {

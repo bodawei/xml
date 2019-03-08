@@ -22,6 +22,7 @@ import {
    parseParameterEntityReference,
    parseSpace,
    ELEMENT_START_PTOKEN,
+   CharDataPToken,
 } from 'token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 
@@ -140,20 +141,13 @@ class PTokenStream extends stream.Readable {
                break;
             case ']':
                if (this.waitingForInternalClose) {
-                  this._parseClose(deliverParse);
                   this.waitingForInternalClose = false;
+                  this._parseClose(deliverParse);
                } else {
                   parseCharData(this._sTokenSource, [], (charPToken) => {
-                     if (charPToken && charPToken.text) {
-                        deliverParse(charPToken);
-                     } else {
-                        this._sTokenSource.extract('match', ']]>', (sToken) => {
-                           deliverParse({
-                              type: 'CHARDATA',
-                              text: sToken,
-                           });
-                        });
-                     }
+                     // We were looking for ]]> But I don't understand why. Indeed this
+                     // whole section needs some documentation
+                     deliverParse(charPToken);
                   });
                }
                break;

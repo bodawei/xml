@@ -2,7 +2,7 @@
 /* eslint-env jasmine */
 
 import { Range, EntityLocation } from 'basic';
-import { SToken } from 'sToken';
+import { SToken, STokenSource } from 'sToken';
 import { MockSTokenSource } from 'sToken-test';
 
 import * as tokenStuff from 'token';
@@ -81,6 +81,22 @@ describe('PTokenFromLiteralStream (unit)', () => {
             parseSpy.calls.argsFor(0)[2]('x');
 
             expect(pushSpy).toHaveBeenCalledWith('x');
+         });
+
+         it('pushes null in the extremely unlikely chance that somehow we peek a character and then can not read it', () => {
+            const mockSource = new MockSTokenSource([
+               [ 'x', 'peekChar' ],
+            ]);
+            const pTokenStream = new PTokenFromLiteralStream(mockSource, { peRef: true });
+            const parseSpy = spyOn(tokenStuff, 'parseText').and.callFake((source: STokenSource, term: Array<string>, cb: (x?: any) => any ) => {
+               cb();
+            });
+            const pushSpy = spyOn(pTokenStream, 'push');
+
+            pTokenStream.read();
+            mockSource.respondInAsyncTime();
+
+            expect(pushSpy).toHaveBeenCalledWith(null);
          });
 
          it('calls charRef.parse if &# is found', () => {

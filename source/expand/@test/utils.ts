@@ -25,6 +25,22 @@ function gatherStream(stream: stream.Transform, expect: (results: PTokenArray) =
    });
 }
 
+function expectNoErrorsOrWarnings(validator: stream.Transform, done: () => void) {
+   gatherStream(validator, (tokens: PTokenArray) => {
+      (expect(tokens) as any).toBeErrorAndWarningFree(); // typeHack
+      done();
+   }, done);
+}
+
+// function expectNoErrors(validator: stream.Transform, done: () => void) {
+//    gatherStream(validator, (tokens: PTokenArray) => {
+//       (expect(tokens) as any).toBeErrorFree(); // typeHack
+//       done();
+//    }, done);
+// }
+
 export {
    gatherStream,
+   expectNoErrorsOrWarnings,
+   // expectNoErrors,
 };
