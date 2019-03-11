@@ -5,7 +5,7 @@ import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from './bridge/instruction';
-import { checkWellFormedText } from './common/misc';
+import { checkCharWellFormed } from './common/misc';
 import { EntityInstructionParam, parseEntityInstruction, sTokensFromPToken } from './common/entityInstruction';
 
 /**********************************************************************\
@@ -94,7 +94,7 @@ function checkWellFormed(pToken: TextDeclarationPToken, ec: ErrorCollector, enti
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.TEXTDECL_NO_TARGET);
-   checkWellFormedText(pToken.target, ec, entityMetaData);
+   checkCharWellFormed(pToken.target, ec, entityMetaData);
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.TEXTDECL_NO_SPACE_AFTER_TARGET);
@@ -126,7 +126,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkWellFormedText(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, entityMetaData);
             ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.TEXTDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
@@ -137,7 +137,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkWellFormedText(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, entityMetaData);
             ec.check(!valueText.match(ENCODING_REGEXP), WFEID.TEXTDECL_ENCODING_INVALID, [ valueText ]);
             break;
       }
@@ -157,10 +157,10 @@ function pTokenToXToken(pToken: TextDeclarationPToken) {
       const value = strOrBlank(param.value);
 
       switch (name.toLowerCase()) {
-         case 'version': 
+         case 'version':
             version = value === '1.1' ? 1.1 : 1.0;
             break;
-         case 'encoding': 
+         case 'encoding':
             encoding = value;
             break;
       }
@@ -171,7 +171,7 @@ function pTokenToXToken(pToken: TextDeclarationPToken) {
 
 
 
-export {   
+export {
    TEXTDECL_PTOKEN,
    TEXTDECL_XTOKEN,
    TextDeclarationPToken,

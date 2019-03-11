@@ -65,7 +65,7 @@ describe('cdata (integration)', () => {
          });
       });
 
-      it('reports an error a bad character is in the text (checks misc.checkWellFormedText())', (done) => {
+      it('reports an error a bad character is in the text (checks misc.checkCharWellFormed())', (done) => {
          source.addText('[bad\u0000&]]>');
          source.endText();
 

@@ -3,6 +3,7 @@
 import { EntityMetaData } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
+import { checkName } from './common/misc';
 
 const GENERAL_ENTITY_REFERENCE_PTOKEN = 'GENERAL_ENTITY_REFERENCE_PTOKEN';
 const GENERAL_ENTITY_REFERENCE_XTOKEN = 'GENERAL_ENTITY_REFERENCE_XTOKEN';
@@ -100,6 +101,10 @@ function checkWellFormed(pToken: GeneralEntityReferencePToken, ec: ErrorCollecto
 
    ec.setPos(pToken.name);
    ec.check(!pToken.name, WFEID.REFERENCE_NO_NAME);
+
+   if (pToken.name) {
+      checkName(pToken.name, ec, entityMetaData, WFEID.REFERENCE_NAME_INVALID);
+   }
 
    ec.setPos(pToken.nameSpace);
    ec.check(pToken.nameSpace, WFEID.REFERENCE_XTRA_TRAILING_SPACE, [ entityName ]);

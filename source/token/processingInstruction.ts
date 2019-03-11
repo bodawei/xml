@@ -5,7 +5,7 @@ import { ErrorCollector, WellFormedError, XmlWarning } from 'error';
 import { strOrBlank, SToken, STokenSource, STokenArrayBuilder } from 'sToken';
 
 import {
-   checkWellFormedText,
+   checkCharWellFormed,
    checkWellFormedNameRecommendation,
 } from './common/misc';
 import { InstructionStart } from './bridge/instruction';
@@ -109,15 +109,16 @@ function checkWellFormed(pToken: ProcessingInstructionPToken, ec: ErrorCollector
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.PI_NO_TARGET);
-   checkWellFormedText(pToken.target, ec, entityMetaData);
+   checkCharWellFormed(pToken.target, ec, entityMetaData);
    ec.check(hasXml, WFEID.PI_TARGET_HAS_XML, [ targetName ]);
    checkWellFormedNameRecommendation(pToken.target, ec, entityMetaData, 'PI',
       XmlWarning.ID.PI_TARGET_XMLDASH_RESERVED, XmlWarning.ID.PI_TARGET_XML_RESERVED);
- 
+
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.PI_NO_SPACE_AFTER_TARGET, [ targetName ]);
 
    ec.setPos(pToken.instruction);
+   checkCharWellFormed(pToken.instruction, ec, entityMetaData);
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.PI_NO_CLOSE, [ targetName ]);
 }

@@ -129,7 +129,7 @@ function checkWellFormed(pToken: CommentPToken, ec: ErrorCollector, entityMetaDa
       const isDoubleHyphenPiece = textSToken.str === '--';
 
       ec.setPos(textSToken);
-      misc.checkWellFormedText(textSToken, ec, entityMetaData);
+      misc.checkCharWellFormed(textSToken, ec, entityMetaData);
 
       if (isDoubleHyphenPiece) {
          ec.report(WFEID.COMMENT_DOUBLE_HYPHEN, undefined, textSToken);

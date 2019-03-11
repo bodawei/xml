@@ -157,7 +157,7 @@ function checkWellFormed(pToken: GeneralEntityDeclarationPToken | ParameterEntit
             [ enNameText, pToken.nData.str ]);
          ec.setPos(pToken.nDataName);
          ec.check(!pToken.nDataName, WFEID.ENTITYDECL_NDATA_NO_NAME, [ enNameText ]);
-         misc.checkWellFormedText(pToken.nDataName, ec, entityMetaData);
+         misc.checkCharWellFormed(pToken.nDataName, ec, entityMetaData);
       }
    } else if (pToken.value) {
       literal.checkWellFormed(pToken as any, ec, entityMetaData, WFEID.NOUN_ENTITYVALUE); // typeHack

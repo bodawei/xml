@@ -182,10 +182,10 @@ describe('literalValue (unit)', () => {
 
          valuePToken = [ new TextPToken({ text: SToken.fromString('xxx') }) ];
 
-         miscCheckWellFormedSpy = spyOn(misc, 'checkWellFormedText');
+         miscCheckWellFormedSpy = spyOn(misc, 'checkCharWellFormed');
       });
 
-      it('calls misc.checkWellFormedText() to check the value', () => {
+      it('calls misc.checkCharWellFormed() to check the value', () => {
          literalValue.checkWellFormed(valuePToken, mockErrorCollector, emd);
 
          expect(miscCheckWellFormedSpy.calls.argsFor(0)[0]).toEqual(SToken.fromString('xxx'));

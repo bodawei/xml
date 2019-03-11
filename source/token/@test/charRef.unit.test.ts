@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
+import * as basic from 'basic';
 import { MockErrorCollector } from'error-test';
 import { SToken } from 'sToken';
 import { makeSTokenMaker, MockSTokenSource } from 'sToken-test';
@@ -104,6 +105,29 @@ describe('charRef (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
+
+         spyOn(basic, 'isChar');
+      });
+
+      it('reports an error if the character is not a legal Char', () => {
+         (charRefPToken as any).charCode = 0;
+
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(basic.isChar).toHaveBeenCalledWith('\u0000', 1.0);
+      });
+
+      it('reports an error if the character is not a valid Char', () => {
+         (charRefPToken as any).charCode = 0xFFFF;
+
+         charRefPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(mockErrorCollector).toReportError({
+            id: WellFormedError.ID.CHARREF_INVALID_CHAR,
+            params: [ '65535' ],
+            position: charRefPToken.digits,
+            lastPosition: undefined,
+         });
       });
 
       it('reports an error if there is a space after the open', () => {

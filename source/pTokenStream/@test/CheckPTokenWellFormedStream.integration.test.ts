@@ -105,9 +105,9 @@ describe('CheckPTokenWellFormedStream (integration)', () => {
          ), done);
    });
 
-   it('reports an error when the element start is after the end', (done) => {
+   it('reports an error when the element start is after the end (§2.1 production [1])', (done) => {
       expectInputToProduce('<?xml version="1.0"?><one></one><two>',
-         new WellFormedError(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT,
+         new WellFormedError(WellFormedError.ID.ELEMENT_NO_MULTIPLE,
             [ 'two' ],
             new Offset(new EntityLocation(), 32, 0, 32),
             new Offset(new EntityLocation(), 32, 0, 32)

@@ -208,7 +208,7 @@ describe('misc', () => {
 
    });
 
-   describe('checkWellFormedText()', () => {
+   describe('checkCharWellFormed()', () => {
       let mockErrorCollector: MockErrorCollector;
 
       beforeEach(() => {
@@ -216,13 +216,13 @@ describe('misc', () => {
       });
 
       it('adds no errors if an SToken is not passed in', () => {
-         misc.checkWellFormedText(undefined as any, mockErrorCollector, new EntityMetaData());
+         misc.checkCharWellFormed(undefined as any, mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
 
       it('reports no errors if the SToken has no bad errors', () => {
-         misc.checkWellFormedText(makeSToken('foo'), mockErrorCollector, new EntityMetaData());
+         misc.checkCharWellFormed(makeSToken('foo'), mockErrorCollector, new EntityMetaData());
 
          expect(mockErrorCollector.errors).toEqual([]);
       });
@@ -230,7 +230,7 @@ describe('misc', () => {
       it('reports an error if the SToken has bad characters', () => {
          const sToken = makeSToken('b\u0001x\u0000x\uFDD1x\uFDD2xx');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData());
 
          expect(mockErrorCollector).toReportError({
@@ -243,7 +243,7 @@ describe('misc', () => {
       it('reports an error if the 1.1 SToken has bad characters that are only bad in version 1.1', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
 
          expect(mockErrorCollector).toReportError({
@@ -256,7 +256,7 @@ describe('misc', () => {
       it('reports no error if the 1.0 SToken has bad characters that are only bad in version 1.1', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
 
          expect(mockErrorCollector.errors.length).toEqual(1);
@@ -266,7 +266,7 @@ describe('misc', () => {
       it('reports a warning if the SToken has discouraged characters', () => {
          const sToken = makeSToken('b\u0001x\u0000x\uFDD1x\uFDD2xx');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData());
 
          expect(mockErrorCollector).toReportWarning({
@@ -279,7 +279,7 @@ describe('misc', () => {
       it('reports a warning if the 1.0/1 SToken has chars that are only discouraged in version 1.0/>2', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
@@ -288,7 +288,7 @@ describe('misc', () => {
       it('reports a warning if the 1.0/2 SToken has chars that are only discouraged in version 1.0/>2', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 2));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
@@ -297,7 +297,7 @@ describe('misc', () => {
       it('reports no warning if the 1.0/3 SToken has chars that are only discouraged in version 1.0/5', () => {
          const sToken = makeSToken('bad\uFDEF');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 3));
 
          expect(mockErrorCollector.errors.length).toEqual(0);
@@ -306,7 +306,7 @@ describe('misc', () => {
       it('reports a warning if the 1.0/5 SToken has chars that are only discouraged in version 1.0/5', () => {
          const sToken = makeSToken('bad\uFDEF');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
 
          expect(mockErrorCollector).toReportWarning({
@@ -319,7 +319,7 @@ describe('misc', () => {
       it('reports a warning if the 1.0 SToken has chars that are only discouraged in version 1.0', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
 
          expect(mockErrorCollector).toReportWarning({
@@ -332,7 +332,7 @@ describe('misc', () => {
       it('reports a warning if the 1.1 SToken has chars that are only discouraged in version 1.0', () => {
          const sToken = makeSToken('bad\u007F');
 
-         misc.checkWellFormedText(sToken, mockErrorCollector,
+         misc.checkCharWellFormed(sToken, mockErrorCollector,
             new EntityMetaData(EntityKind.DOCUMENT, 1.1, 2));
 
          expect(mockErrorCollector.errors.length).toEqual(1);

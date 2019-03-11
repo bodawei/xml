@@ -7,6 +7,8 @@ import { MockSTokenSource } from 'sToken-test';
 import { WellFormedError } from 'error';
 import { SToken } from 'sToken';
 
+import * as misc from '../common/misc';
+
 import {
    ParameterEntityReferencePToken,
    ParameterEntityReferenceXToken,
@@ -87,6 +89,14 @@ describe('parameterEntityReference (unit)', () => {
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
+         spyOn(misc, 'checkName');
+      });
+
+      it('checks that the name is a valid name', () => {
+
+         pePToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(misc.checkName).toHaveBeenCalledWith(pePToken.name, mockErrorCollector, emd, WellFormedError.ID.PEREF_NAME_INVALID);
       });
 
       it('reports an error if there is a space after the opening %', () => {

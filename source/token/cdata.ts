@@ -103,7 +103,6 @@ function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData
       const upperType = typeText.toLocaleUpperCase();
 
       ec.check(upperType !== 'CDATA', WFEID.CDATA_UNKNOWN, [ typeText ]);
-      misc.checkWellFormedText(pToken.sectionType, ec, entityMetaData);
       ec.check(typeText !== upperType, WFEID.CDATA_INVALID_CASE, [ upperType, typeText ]);
    } else {
       ec.report(WFEID.CDATA_NO_TYPE);
@@ -117,7 +116,7 @@ function checkWellFormed(pToken: CdataPToken, ec: ErrorCollector, entityMetaData
    ec.check(!pToken.bracket, WFEID.CDATA_NO_SECOND_BRACKET, [ typeText ]);
 
    ec.setPos(pToken.text);
-   misc.checkWellFormedText(pToken.text, ec, entityMetaData);
+   misc.checkCharWellFormed(pToken.text, ec, entityMetaData);
 
    ec.setPos(pToken.close);
    ec.check(!pToken.close, WFEID.CDATA_NO_CLOSE);

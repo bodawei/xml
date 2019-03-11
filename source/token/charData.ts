@@ -80,7 +80,7 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
 
 function checkWellFormed(pToken: CharDataPToken, ec: ErrorCollector, entityMetaData: EntityMetaData) {
    ec.setPos(pToken.text);
-   misc.checkWellFormedText(pToken.text, ec, entityMetaData);
+   misc.checkCharWellFormed(pToken.text, ec, entityMetaData);
 }
 
 /**********************************************************************\

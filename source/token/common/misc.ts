@@ -169,11 +169,14 @@ function checkWellFormedNameRecommendation(nameSToken: SToken | void, ec: ErrorC
 }
 
 /**********************************************************************\
- checkWellFormedText() does a check whether the text in a particular
+ checkCharWellFormed() does a check whether the text in a particular
  SToken matches the requirments for text.
+
+
+ TEMP: This is actually validating that the text is all §2.2's Char with no RestrictedChar's
 \**********************************************************************/
 
-function checkWellFormedText(sToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData) {
+function checkCharWellFormed(sToken: SToken | void, ec: ErrorCollector, entityMd: EntityMetaData) {
    if (!sToken) {
       return;
    }
@@ -231,13 +234,13 @@ const misc = {
    checkName,
    checkNMToken,
    checkWellFormedNameRecommendation,
-   checkWellFormedText,
+   checkCharWellFormed,
 };
 
 export {
    checkName,
    checkNMToken,
    checkWellFormedNameRecommendation,
-   checkWellFormedText,
+   checkCharWellFormed,
 };
 export default misc;

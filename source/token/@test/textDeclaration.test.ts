@@ -90,31 +90,31 @@ describe('textDeclaration (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
       });
 
-      it('calls misc.checkWellFormedText() on the target value', () => {
+      it('calls misc.checkCharWellFormed() on the target value', () => {
          textDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(textDeclPToken.target, mockErrorCollector, emd);
       });
 
-      it('calls misc.checkWellFormedText() on the version value', () => {
+      it('calls misc.checkCharWellFormed() on the version value', () => {
          (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
          textDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, emd);
       });
 
-      it('calls misc.checkWellFormedText() on the encoding value', () => {
+      it('calls misc.checkCharWellFormed() on the encoding value', () => {
          (textDeclPToken.params[0].name as any) = SToken.fromString('encoding');
          (textDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
          textDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(textDeclPToken.params[0].value, mockErrorCollector, emd);
       });
 
@@ -250,9 +250,9 @@ describe('textDeclaration (unit)', () => {
                }],
                close: SToken.fromString('?>'),
             });
-   
+
             textDeclPToken.checkWellFormed(mockErrorCollector, emd);
-   
+
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_VERSION_INVALID_ORDER,
                params: undefined,
@@ -275,9 +275,9 @@ describe('textDeclaration (unit)', () => {
                }],
                close: SToken.fromString('?>'),
             });
-   
+
             textDeclPToken.checkWellFormed(mockErrorCollector, emd);
-   
+
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.TEXTDECL_VERSION_INVALD,
                params: [ '1.2' ],
@@ -309,7 +309,7 @@ describe('textDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                textDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
                expect(mockErrorCollector).toReportError({

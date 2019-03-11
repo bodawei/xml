@@ -79,7 +79,7 @@ describe('charData', () => {
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
       });
 
       it('asks the checks the text is well formed', () => {
@@ -87,7 +87,7 @@ describe('charData', () => {
 
          charDataPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(charDataPToken.text, mockErrorCollector, emd);
       });
 
    });

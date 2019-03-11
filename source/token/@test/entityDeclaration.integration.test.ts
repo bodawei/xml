@@ -208,7 +208,7 @@ describe('entityDeclaration (integration)', () => {
          });
       });
 
-      it('reports an error when NDATA value has a bad char (check misc.checkWellFormedText())', (done) => {
+      it('reports an error when NDATA value has a bad char (check misc.checkCharWellFormed())', (done) => {
          source.addText('entityName SYSTEM "sys.xml" NDATA bad\u0000>');
          parseEntityDeclaration(source, declarationPToken, (result) => {
             const ec = new ErrorCollector(declarationPToken.open, WellFormedError);

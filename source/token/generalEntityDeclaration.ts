@@ -25,7 +25,7 @@ import { assignUnassigned, checkWellFormed } from './common/entity';
 const GENERAL_ENTITY_DECLARATION_PTOKEN = 'GENERAL_ENTITY_DECLARATION_PTOKEN';
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 
-type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type ExpandedLiteralValuePToken = Array<TextPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;  // @@ why are these PTokens?  And where did the text come from, and has it been scanned for chars?
 
 class GeneralEntityDeclarationXToken {
    public readonly type: string = GENERAL_ENTITY_DECLARATION_XTOKEN;

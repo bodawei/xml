@@ -194,12 +194,25 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                this._elementNameStack.push(nameText);
             }
 
-            if (this._state === CheckWellFormedState.PROLOG_PREDOCTYPE || this._state === CheckWellFormedState.PROLOG) {
-               this._state = CheckWellFormedState.IN_CONTENT;
-            } else if (this._state === CheckWellFormedState.IN_DTD) {
-               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ]);
-            } else if (this._state !== CheckWellFormedState.IN_CONTENT) {
-               errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ]);
+            switch (this._state) {
+               case CheckWellFormedState.START:
+                  errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DOC_CONTEXT, [ nameText ]);
+                  break;
+               case CheckWellFormedState.PROLOG_PREDOCTYPE:
+               case CheckWellFormedState.PROLOG:
+                  this._state = CheckWellFormedState.IN_CONTENT;
+                  break;
+               case CheckWellFormedState.IN_DTD:
+                  errorCollector.report(WellFormedError.ID.ELEMENT_INVALID_DTD_CONTEXT, [ nameText ]);
+                  break;
+               case CheckWellFormedState.IN_CONTENT:
+                  // All good
+                  break;
+               case CheckWellFormedState.AFTER_CONTENT:
+                  // §2.1 Production [1] says that there may only be one element at the top-level
+                  //      of the document
+                  errorCollector.report(WellFormedError.ID.ELEMENT_NO_MULTIPLE, [ nameText ]);
+                  break;
             }
 
             // Well-formedness Constraint: §3.1: No External Entity References

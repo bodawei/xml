@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
-import { EntityMetaData } from 'basic';
+import { EntityMetaData, isChar } from 'basic';
 import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource, STokenArrayBuilder } from '../sToken';
 
@@ -114,6 +114,12 @@ function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaDa
 
    ec.setPos(pToken.digits);
    ec.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
+
+   if (pToken.charCode !== undefined) {
+      const char = String.fromCharCode(pToken.charCode);
+
+      ec.check(!isChar(char, entityMetaData.version), WFEID.CHARREF_INVALID_CHAR, [ pToken.charCode.toString() ]);
+   }
 
    ec.setPos(pToken.digitsSpace);
    ec.check(pToken.digitsSpace, WFEID.CHARREF_XTRA_POST_DIGITS_SPACE);

@@ -208,7 +208,7 @@ describe('attribute (unit)', () => {
          previousSpace = makeToken(' ');
          mockErrorCollector = new MockErrorCollector();
          spyOn(misc, 'checkName');
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
          spyOn(misc, 'checkWellFormedNameRecommendation');
          litCheck = spyOn(literal, 'checkWellFormed');
          spyOn(langAttribute, 'checkXmlLangWellFormed');

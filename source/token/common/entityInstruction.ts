@@ -115,7 +115,7 @@ function addParam(source: STokenSource, attrs: Array<EntityInstructionParam>, na
       name: name,
    };
    attrs.push(attr);
-   
+
    source.extractToObject('word', DECL_NAME_TERMINATORS, attr, 'name');
    source.extractToObjectNoParams('space', attr, 'nameSpace');
    source.extractToObject('match', '=', attr, 'equal');
@@ -135,7 +135,7 @@ function addParam(source: STokenSource, attrs: Array<EntityInstructionParam>, na
             delete (attr as any).value;
          }
       }
-   
+
       getNextParam(source, attrs, paramNames, deliverPToken);
    });
 }
@@ -163,7 +163,7 @@ function sTokensFromPToken(pToken: EntityInstruction): Array<SToken> {
          param.closeQuote,
          param.valueSpace);
    }
-   
+
    builder.add(pToken.close);
 
    return builder.sTokenArray;

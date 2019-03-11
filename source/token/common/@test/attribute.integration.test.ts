@@ -156,7 +156,7 @@ describe('attribute (integration)', () => {
          });
       });
 
-      it('asks misc.checkWellFormedText() to complain if the value has an illegal value', (done) => {
+      it('asks misc.checkCharWellFormed() to complain if the value has an illegal value', (done) => {
          source.addText('name="v\u0000alue">');
          source.endText();
 

@@ -77,14 +77,20 @@ describe('processingInstruction (unit)', () => {
          emd = new EntityMetaData();
          piPToken = new ProcessingInstructionPToken(protoPToken);
 
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
          spyOn(misc, 'checkWellFormedNameRecommendation');
       });
 
-      it('calls misc.checkWellFormedText()', () => {
+      it('calls misc.checkCharWellFormed() on the target', () => {
          piPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(piPToken.target, mockErrorCollector, emd);
+      });
+
+      it('calls misc.checkCharWellFormed() on the instruction data', () => {
+         piPToken.checkWellFormed(mockErrorCollector, emd);
+
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(piPToken.instruction, mockErrorCollector, emd);
       });
 
       it('calls misc.checkWellFormedNameRecommendation()', () => {

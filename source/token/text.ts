@@ -1,8 +1,5 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
-import base from './base';
-import { EntityMetaData } from 'basic';
-import { ErrorCollector, WellFormedError } from 'error';
 import { SToken, STokenSource, strOrBlank, STokenArrayBuilder } from 'sToken';
 
 type DeliverPToken = (token: TextPToken|void) => void;

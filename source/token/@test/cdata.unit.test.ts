@@ -77,20 +77,13 @@ describe('cdata (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
       });
 
       it('checks the text is well formed', () => {
          cDataPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(cDataPToken.text, mockErrorCollector, emd);
-      });
-
-      it('calls misc.checkWellFormedText() on the type', () => {
-         cDataPToken.checkWellFormed(mockErrorCollector, emd);
-
-         expect(misc.checkWellFormedText)
-            .toHaveBeenCalledWith(cDataPToken.sectionType, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(cDataPToken.text, mockErrorCollector, emd);
       });
 
       it('reports an error if there is no section type provided', () => {

@@ -86,7 +86,7 @@ describe('literalValue (integration)', () => {
 
    describe('checkWellFormed()', () => {
 
-      it('reports an error if the value has a bad character (misc.checkWellFormedText())', (done) => {
+      it('reports an error if the value has a bad character (misc.checkCharWellFormed())', (done) => {
          source.addText('b\u0000d"');
          source.endText();
          literalValue.parse(source, ['"'], (pToken) => {

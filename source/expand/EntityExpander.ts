@@ -241,6 +241,8 @@ class EntityExpander {
    }
 
    public expandToken(pToken: Token, expanded: TokenHandled) {
+         //  Need documentation to explain the process of this expansion.  In particular, as we process entities, we create TextPTokens, and do we actually validate that their characters are correct?
+
       switch (pToken.type) {
          case XMLDECL_PTOKEN:
             this.handleXmlDeclaration(pToken as XmlDeclarationPToken, expanded);

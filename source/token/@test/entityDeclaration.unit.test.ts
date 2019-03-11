@@ -990,7 +990,7 @@ describe('entityDeclaration (unit)', () => {
    //       spyOn(declaration, 'checkWellFormed');
    //       spyOn(misc, 'checkName');
    //       spyOn(misc, 'checkWellFormedNameRecommendation');
-   //       spyOn(misc, 'checkWellFormedText');
+   //       spyOn(misc, 'checkCharWellFormed');
    //       spyOn(externalId, 'checkWellFormed');
    //       spyOn(literal, 'checkWellFormed');
    //    });
@@ -1117,7 +1117,7 @@ describe('entityDeclaration (unit)', () => {
    //       });
    //    });
 
-   //    it('calls checkWellFormedText() to check on the ndata value', () => {
+   //    it('calls checkCharWellFormed() to check on the ndata value', () => {
    //       pToken.externalId = { externalId: true };
    //       pToken.nData = expectedSToken('NDATA');
    //       pToken.nDataName = expectedSToken('foo');
@@ -1125,7 +1125,7 @@ describe('entityDeclaration (unit)', () => {
 
    //       entityDeclaration.checkWellFormed(new GeneralEntityDeclarationPToken(pToken), mockErrorCollector, emd);
 
-   //       expect(misc.checkWellFormedText).toHaveBeenCalledWith(pToken.nDataName,
+   //       expect(misc.checkCharWellFormed).toHaveBeenCalledWith(pToken.nDataName,
    //          mockErrorCollector, emd);
    //    });
 

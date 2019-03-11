@@ -239,7 +239,7 @@ describe('externalId (integration)', () => {
          source = new STokenSource(defaultExtractors, emd);
       });
 
-      it('reports an error when the SYSTEM is missing a quote (check literal.checkWellFormedText())', (done) => {
+      it('reports an error when the SYSTEM is missing a quote (check literal.checkCharWellFormed())', (done) => {
          source.addText('SYSTEM "bad');
          source.endText();
          externalId.parse(source, [], (result) => {

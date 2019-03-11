@@ -159,19 +159,19 @@ describe('comment (unit)', () => {
 
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
          emd = new EntityMetaData();
       });
 
-      it('asks the misc.checkWellFormedText() to validate the text', () => {
+      it('asks the misc.checkCharWellFormed() to validate the text', () => {
          (commentPToken.text as any).pop();
          (commentPToken.text as any).push(commentPToken.open);  // just need another token here
          (commentPToken.text as any).push(expectedSToken('commentText'));
          commentPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(commentPToken.text[0], mockErrorCollector, emd);
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(commentPToken.text[1], mockErrorCollector, emd);
       });
 

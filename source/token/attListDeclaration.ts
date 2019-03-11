@@ -351,6 +351,8 @@ function checkWellFormed(pToken: AttListPToken | void, ec: ErrorCollector, entit
       return;
    }
 
+   // When you rework this, make sure you're doing all the text checking correctly.
+
    declaration.checkWellFormed(pToken, ec, entityMetaData);
 
    const elNameText = strOrBlank(pToken.elementName);

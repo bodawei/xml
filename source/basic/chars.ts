@@ -86,8 +86,55 @@ function isNmToken(candidate: string, version: XMLVersion = 1.0, revision: XMLRe
    return !!regEx.exec(candidate);
 }
 
+
+/**********************************************************************\
+ SYNTAX
+   §2.2
+      1.0/*
+         [2] Char ::= [#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+      1.1/*
+         [2] Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+
+   Note:
+      - This doesn't currently capture. 0xD800-0xDFFF In JavaScript
+        encoding, any two of these adjacent are legal, since JavaScript
+        seems to represent strings essentially as UTF-16. However, an
+        odd number is going to be bad.
+\**********************************************************************/
+
+const NOT_CHAR10 = /[\u0000\u0001-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g;
+const NOT_CHAR11 = /[\u0000\uFFFE\uFFFF]/g;
+
+function isChar(char: string, version: XMLVersion = 1.0): boolean {
+   const regEx = (version === 1.1) ? NOT_CHAR11 : NOT_CHAR10;
+
+   return !regEx.exec(char);
+}
+
+
+/**********************************************************************\
+ SYNTAX
+   §2.2
+      1.0/*
+         n/a
+      1.1/*
+         [2a] RestrictedChar ::= [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+\**********************************************************************/
+
+const RESTRICTED_CHAR11 = /[\u0001-\u0008\u000B\u000C\u000E-\u001F\u007F-\u0084\u0086-\u009F]/g;
+
+function isRestrictedChar(char: string, version: XMLVersion = 1.0): boolean {
+   if (version === 1) {
+      return false;
+   }
+
+   return !!RESTRICTED_CHAR11.exec(char);
+}
+
 export {
    isName,
    isNmToken,
    isSpace,
+   isChar,
+   isRestrictedChar,
 };

@@ -37,7 +37,7 @@ describe('xmlDeclaration (unit)', () => {
          openSpace: undefined,
          target: xmlDeclPToken.target,
          targetSpace: xmlDeclPToken.targetSpace,
-      };         
+      };
 });
 
    describe('parseXmlDeclaration()', () => {
@@ -90,41 +90,41 @@ describe('xmlDeclaration (unit)', () => {
       beforeEach(() => {
          mockErrorCollector = new MockErrorCollector();
          emd = new EntityMetaData();
-         spyOn(misc, 'checkWellFormedText');
+         spyOn(misc, 'checkCharWellFormed');
       });
 
-      it('calls misc.checkWellFormedText() on the target value', () => {
+      it('calls misc.checkCharWellFormed() on the target value', () => {
          xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText).toHaveBeenCalledWith(xmlDeclPToken.target, mockErrorCollector, emd);
+         expect(misc.checkCharWellFormed).toHaveBeenCalledWith(xmlDeclPToken.target, mockErrorCollector, emd);
       });
 
-      it('calls misc.checkWellFormedText() on the version value', () => {
+      it('calls misc.checkCharWellFormed() on the version value', () => {
          (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
          xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
       });
 
-      it('calls misc.checkWellFormedText() on the encoding value', () => {
+      it('calls misc.checkCharWellFormed() on the encoding value', () => {
          (xmlDeclPToken.params[0].name as any) = SToken.fromString('encoding');
          (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
          xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
       });
 
-      it('calls misc.checkWellFormedText() on the standalone value', () => {
+      it('calls misc.checkCharWellFormed() on the standalone value', () => {
          (xmlDeclPToken.params[0].name as any) = SToken.fromString('standalone');
          (xmlDeclPToken.params[0].value as any) = SToken.fromString('\u0001');
 
          xmlDeclPToken.checkWellFormed(mockErrorCollector, emd);
 
-         expect(misc.checkWellFormedText)
+         expect(misc.checkCharWellFormed)
             .toHaveBeenCalledWith(xmlDeclPToken.params[0].value, mockErrorCollector, emd);
       });
 
@@ -264,9 +264,9 @@ describe('xmlDeclaration (unit)', () => {
                }],
                close: SToken.fromString('?>'),
             });
-   
+
             xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
-   
+
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALID_ORDER,
                params: undefined,
@@ -289,9 +289,9 @@ describe('xmlDeclaration (unit)', () => {
                }],
                close: SToken.fromString('?>'),
             });
-   
+
             xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
-   
+
             expect(mockErrorCollector).toReportError({
                id: WellFormedError.ID.XMLDECL_VERSION_INVALD,
                params: [ '1.2' ],
@@ -323,9 +323,9 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
-   
+
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_ENCODING_INVALID_ORDER,
                   params: undefined,
@@ -354,7 +354,7 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
 
                expect(mockErrorCollector).toReportError({
@@ -389,9 +389,9 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
-   
+
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_STANDALONE_INVALID_ORDER,
                   params: undefined,
@@ -420,7 +420,7 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
 
                expect(mockErrorCollector).toReportError({
@@ -451,7 +451,7 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData(EntityKind.EXTERNAL));
 
                expect(mockErrorCollector).toReportError({
@@ -480,9 +480,9 @@ describe('xmlDeclaration (unit)', () => {
                   }],
                   close: SToken.fromString('?>'),
                });
-      
+
                xmlDeclPToken.checkWellFormed(mockErrorCollector, new EntityMetaData());
-   
+
                expect(mockErrorCollector).toReportError({
                   id: WellFormedError.ID.XMLDECL_PARAM_UNKNOWN,
                   params: [ 'bogus' ],

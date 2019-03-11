@@ -85,8 +85,12 @@ It is notable that we will check the value when doing pToken checkWellFormed() c
    * EntityEnd
    * <internal subset>?
 
+## Processing Instructions
+* In 1.1/*, Production [16] says that the Processing instruction's instruction data is any Char (with no ?>). Yet, this slightly contradicts production [1] which indicates that there may be no RestrictedChars in the entire document. This goes with the assumption that there are no restricted chars allowed in PI's.
+
 ## Comments
 * Spec says "for interoperability, -- may not occur in a comment, which would imply to me that one can do this, but it should generate some kind of warning.  However, the syntax simply doesn't allow this, making it a well-formed error.
+* In 1.1/*, Production [16] says that the comnent's data is any Char (with no -). Yet, this slightly contradicts production [1] which indicates that there may be no RestrictedChars in the entire document. This goes with the assumption that there are no restricted chars allowed in comments.
 
 ## Names
 The syntactic construct, Name, is used for the identifiers for elements, attributes, entities notations, and processing instruction targets.
@@ -427,3 +431,6 @@ Another way to think of this:
 
 # Misc
 Note that §2.4 in 1.0/1 said that you could have a & or < in the literal text of an internal entity declaration. This seems beyond reasonable, as & is explicitly diallowed in an entity value (because it introduces a reference).  interestingly, < is not disallowed, but it will always be interpreted as an error or as markup in the end.
+
+# Implementation
+* This doesn't scan all input to make sure it matches Char.  We check individual pieces. Often that is done indirectly.  Consider a nelement tag `<foo bar="baz"/>`. The `<`, ` `, `=`, and `/>` all are intrinsically good for just having been matched. `foo` and `bar` are checked to make sure they're legal names, and so are implicitily good.  We would only scan `baz`.

@@ -5,7 +5,7 @@ import { WellFormedError, ErrorCollector } from 'error';
 import { strOrBlank, SToken, STokenSource } from 'sToken';
 
 import { InstructionStart } from './bridge/instruction';
-import { checkWellFormedText } from './common/misc';
+import { checkCharWellFormed } from './common/misc';
 import { sTokensFromPToken, EntityInstructionParam, parseEntityInstruction } from './common/entityInstruction';
 
 /**********************************************************************\
@@ -96,7 +96,7 @@ function checkWellFormed(pToken: XmlDeclarationPToken, ec: ErrorCollector, entit
 
    ec.setPos(pToken.target);
    ec.check(!pToken.target, WFEID.XMLDECL_NO_TARGET);
-   checkWellFormedText(pToken.target, ec, entityMetaData);
+   checkCharWellFormed(pToken.target, ec, entityMetaData);
 
    ec.setPos(pToken.targetSpace);
    ec.check(!pToken.targetSpace, WFEID.XMLDECL_NO_SPACE_AFTER_TARGET);
@@ -135,7 +135,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkWellFormedText(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, entityMetaData);
             ec.check(valueText !== '1.1' && valueText !== '1.0', WFEID.XMLDECL_VERSION_INVALD, [ valueText ]);
             break;
          case 'encoding':
@@ -147,7 +147,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkWellFormedText(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, entityMetaData);
             ec.check(!valueText.match(ENCODING_REGEXP), WFEID.XMLDECL_ENCODING_INVALID, [ valueText ]);
             break;
          case 'standalone':
@@ -160,7 +160,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             ec.setPos(param.equalSpace);
             ec.setPos(param.openQuote);
             ec.setPos(value);
-            checkWellFormedText(value, ec, entityMetaData);
+            checkCharWellFormed(value, ec, entityMetaData);
             ec.check(lcValue !== 'no' && lcValue !== 'yes', WFEID.XMLDECL_STANDALONE_INVALID, [ valueText ]);
             ec.check(valueText !== lcValue, WFEID.XMLDECL_STANDALONE_INVALID_CASE, [ lcValue, valueText ]);
             break;
@@ -187,13 +187,13 @@ function pTokenToXToken(pToken: XmlDeclarationPToken) {
       const value = strOrBlank(param.value);
 
       switch (name.toLowerCase()) {
-         case 'version': 
+         case 'version':
             version = value === '1.1' ? 1.1 : 1.0;
             break;
-         case 'encoding': 
+         case 'encoding':
             encoding = value;
             break;
-         case 'standalone': 
+         case 'standalone':
             standalone = value.toLowerCase() === 'yes' ? true : false;
             break;
       }
@@ -202,7 +202,7 @@ function pTokenToXToken(pToken: XmlDeclarationPToken) {
    return new XmlDeclarationXToken(version, encoding, standalone, pToken);
 }
 
-export {   
+export {
    XMLDECL_PTOKEN,
    XMLDECL_XTOKEN,
    XmlDeclarationPToken,

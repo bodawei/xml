@@ -20,7 +20,7 @@ describe('xmlDeclaration (integration)', () => {
             openSpace: undefined,
             target: SToken.fromString('xml'),
             targetSpace: SToken.fromString(' '),
-         };         
+         };
       });
    });
 
@@ -53,13 +53,13 @@ describe('xmlDeclaration (integration)', () => {
    describe('checkWellFormed()', () => {
       let emd: EntityMetaData;
       let source: STokenSource;
-   
+
       beforeEach(() => {
          emd = new EntityMetaData();
          source = new STokenSource(defaultExtractors, emd);
       });
 
-      it('reports an error when the target text is malformed (check misc.checkWellFormedText())', (done) => {
+      it('reports an error when the target text is malformed (check misc.checkCharWellFormed())', (done) => {
          source.addText('version "1.0" encoding="usascii"?>');
          start.target = SToken.fromString('\u0001xml');
 
@@ -73,7 +73,7 @@ describe('xmlDeclaration (integration)', () => {
          });
       });
 
-      it('reports an error when the param value is malformed (check misc.checkWellFormedText())', (done) => {
+      it('reports an error when the param value is malformed (check misc.checkCharWellFormed())', (done) => {
          source.addText('version="\u00011.0" encoding="usascii"?>');
 
          parseXmlDeclaration(source, start, (result) => {
