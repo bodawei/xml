@@ -65,6 +65,19 @@ class XmlDeclarationPToken {
    toSTokenArray(): Array<SToken> {
       return sTokensFromPToken(this);
    }
+
+   isStandalone(): boolean {
+      for (const param of this.params) {
+         const name = strOrBlank(param.name);
+         const value = strOrBlank(param.value);
+
+         if (name.toLowerCase() == 'standalone') {
+            return value.toLowerCase() === 'yes';
+         }
+      }
+
+      return false;
+   }
 }
 
 /**********************************************************************\
@@ -152,7 +165,6 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
             break;
          case 'standalone':
             foundStandalone = true;
-            ec.report(WFEID.TEXTDECL_XTRA_STANDALONE);
             ec.check(!foundVersion, WFEID.XMLDECL_STANDALONE_INVALID_ORDER);
 
             ec.setPos(param.nameSpace);
@@ -180,7 +192,7 @@ function checkParameters(params: ReadonlyArray<EntityInstructionParam>, ec: Erro
 function pTokenToXToken(pToken: XmlDeclarationPToken) {
    let version: XmlVersion = 1.0;
    let encoding: string = DEFAULT_ENCODING;
-   let standalone: boolean = false;
+   let standalone: boolean = pToken.isStandalone();
 
    for (const param of pToken.params) {
       const name = strOrBlank(param.name);

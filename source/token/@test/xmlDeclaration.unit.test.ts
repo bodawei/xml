@@ -651,4 +651,60 @@ describe('xmlDeclaration (unit)', () => {
 
    });
 
+   describe('pToken.isStandalone()', () => {
+
+      it('returns false if there is no standalone property', () => {
+         expect(xmlDeclPToken.isStandalone()).toEqual(false);
+      });
+
+      it('returns true if there is a standalone property set to yes', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            params: [{
+               name: SToken.fromString('standalone'),
+               nameSpace: undefined,
+               equal: SToken.fromString('='),
+               equalSpace: undefined,
+               value: SToken.fromString('yes'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         expect(xmlDeclPToken.isStandalone()).toEqual(true);
+      });
+
+      it('returns false if there is a standalone property set to no', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            params: [{
+               name: SToken.fromString('standalone'),
+               nameSpace: undefined,
+               equal: SToken.fromString('='),
+               equalSpace: undefined,
+               value: SToken.fromString('no'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         expect(xmlDeclPToken.isStandalone()).toEqual(false);
+      });
+
+      it('returns true if there is a standalone property and value are all the wrong case', () => {
+         xmlDeclPToken = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            params: [{
+               name: SToken.fromString('StAndAlOne'),
+               nameSpace: undefined,
+               equal: SToken.fromString('='),
+               equalSpace: undefined,
+               value: SToken.fromString('YeS'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+
+         expect(xmlDeclPToken.isStandalone()).toEqual(true);
+      });
+
+   });
+
 });

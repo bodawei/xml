@@ -90,7 +90,7 @@ function toBeErrorFree() {
          if (!error!) {
             message = `Expected to find one or more XmlErrors.`;
          } else {
-            message = `Expected to find no XmlErrors, but found ${(error! as any).message}.`; // typeHack
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${(error! as any).id})`; // typeHack
          }
 
          return {
@@ -116,7 +116,7 @@ function toBeErrorAndWarningFree() {
          if (!error!) {
             message = `Expected to find one or more XmlErrors.`;
          } else {
-            message = `Expected to find no XmlErrors, but found ${(error! as any).message}.`; // typeHack
+            message = `Expected to find no XmlErrors, but found ${(error! as any).message}. (${(error! as any).id})`; // typeHack
          }
 
          return {

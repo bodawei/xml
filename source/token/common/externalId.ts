@@ -242,7 +242,7 @@ function checkWellFormed(pTokenPart: ExternalId | void, ec: ErrorCollector, enti
          }
          const match = PUBID_CHARS.exec((pTokenPart.public.value[0] as any).str); //typeHack
          ec.check(!match || match[0] !== (pTokenPart.public.value[0] as any).str, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-                  [ (pTokenPart.public.value[0] as any).str[match![0].length] ]); //typeHack
+            [ (pTokenPart.public.value[0] as any).str[match![0].length] ]); //typeHack
       });
    }
 

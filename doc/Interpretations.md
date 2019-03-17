@@ -237,6 +237,12 @@ Spec is a little inconsistent about these:
 
 - §4.6 says that "If the entities `lt` or `amp` are declared, they must be declared as internal entities whose replacement text is...".  In all the handling for §2.9 and §5, it seems that if a declaration isn't referenced, it doesn't matter if it is invalid.  This processor takes the same stance with the predefined entities.  If they are not correctly declared, but are not referenced, this will ignore those declarations.
 
+- §4.1.0's "Well-formedness constraint: Entity Declared" is a nightmare to read in any version of the spec. As far as I can determine, the second paragraph is essentially re-expressing part of what the first paragraph says. Oddly, it seems to imply that a non-validating processor should not report a well-formedness error if a general entity reference is found and the document has no DTD.  This seems to contradict the first paragraph.  This first paragraph seems to make more sense, an so this goes with that. (put more clearly, I don't see why a non-validating processor that finds a document with no DTD at all shouldn't report entity references as problems)
+
+- Another subtle detail here.  This reports an error if there is a General entity reference in a default value of an ATTLIST in the internal subset (and there is no declaration for that ref), as long as there were no parameter entity references before the attlist (there may be some after).  It is debatable whether this is the correct pedantic interpretation of the §4.1.0 Entity Declared well-formedness constraint. (this goes with that because at the point of processing the ATTLIST, there's no way to know if there are perefs after it)
+
+- Flipping the coin the other way, this opts to go with the pedantic interpretation that if there's an external subset, and the ATTLIST (in the internal subset) has a reference in a default value with no declaration, it will not report an error. This isn't quite right, as the presence or absence of an external subset should have no effect on the ATTLIST in the internal subset, but this is what the spec says. (and this is knowable at the point of parsing the ATTLIST)
+
 ## Parameter Entities
 - Can appear in an entity value literal
 - Can't appear in any other literal
@@ -248,6 +254,7 @@ Spec is a little inconsistent about these:
    - in an element declaration, there are constraints about what can be in the replacement text, including that it not be only whitespace, not end with | , and must be properly balanced among the ()'s.
    - you might expect the same balanced constraint among the enumeration or notation value in an ATTLIST declaration, but nothing says that
 - can appear in a conditional section, but evidently only at X `<![X[...` and replacement text must be one of two values
+- One of the slight brain-twisters about XML is that we can not do well formed checks on parameter entity references. Put another way, if there is a parameter entity reference but no related entity declaration, there will never be a well formedness error. Technically, §4.1.0 doesn't specify that an a well formedness error. But, closely related, well formeness needs to be able to be evaluated by a non-validating processor, and such a processor is (minimally) ignorant about parameter entities and their references.  As such, this only turns up in the validity pass.
 
 ## Standalone
 We assume that a document like the following is correct, as far as standalone processing goes. Which is to say, the non-validating processor wont' read the parameter entity, but will recognize that the reference to it is ok.

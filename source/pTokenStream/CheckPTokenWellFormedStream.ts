@@ -45,6 +45,7 @@ import {
    ParameterEntityDeclarationPToken,
    ElementEmptyPToken,
    ElementStartPToken,
+   XmlDeclarationPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
 import { AttributePToken } from 'source/token/common/attribute';
@@ -76,6 +77,15 @@ type ParameterEntitiesInfo = {
 
 const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
 
+/*
+ * IMPORTANT detail: This processes a stream of PTokens.  Those may or may not have gone through an
+ * entity expanding process, and if they have, it may or may not have been a validating process.
+ * Thus, this will get data in one of three forms:
+ *  - raw parsing of the document entity
+ *  - parsing of the document entity with non-validating (that is, from the internal subset) entity expansion
+ *  - parsing of the document entity with fully expanded ("validating") entity expansion.
+ */
+
 // This right now only validates the base document.
 class CheckPTokenWellFormedStream extends stream.Transform {
    private emd: EntityMetaData;
@@ -84,6 +94,10 @@ class CheckPTokenWellFormedStream extends stream.Transform {
    private _startDocType?: DocTypeStartPToken;
    private generalEntityDecl: GeneralEntitiesInfo = {};
    private paramEntityDecl: ParameterEntitiesInfo = {};
+   private isStandalone: boolean = false;
+   private hasNoDTD: boolean = true;
+   private hasExternalDTD: boolean = false;
+   private paramEntiyRefCount: number = 0;
 
    constructor() {
       super({
@@ -118,11 +132,62 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             this.emd = pToken as EntityMetaData; // typehack
             break;
 
+         case XMLDECL_PTOKEN:
+            const xmlDecl = pToken as XmlDeclarationPToken;
+
+            // §2.8
+            if (this._state !== CheckWellFormedState.START || this.emd.kind !== EntityKind.DOCUMENT) {
+               errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
+            } else {
+               this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
+            }
+
+            this.isStandalone = xmlDecl.isStandalone();  // Related to §4.1.0 Entiy Declared
+            xmlDecl.checkWellFormed(errorCollector, this.emd);
+            break;
+         case DOCTYPE_START_PTOKEN:
+            const startDocType: DocTypeStartPToken = pToken as DocTypeStartPToken;
+
+            switch (this._state) {
+               case CheckWellFormedState.PROLOG_PREDOCTYPE:
+                  if (startDocType.openSubset) {
+                     this._state = CheckWellFormedState.IN_DTD;
+                     this.hasNoDTD = false;  // Related to §4.1.0 Entity Declared
+                  } else {
+                     this.hasNoDTD = !startDocType.externalId;  // Related to §4.1.0 Entity Declared
+                  }
+                  this.hasExternalDTD = !!startDocType.externalId;
+                  break;
+               default:
+                  this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
+                  errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
+            }
+
+            this._startDocType = startDocType;
+            startDocType.checkWellFormed(errorCollector, this.emd);
+            break;
+         case DOCTYPE_END_PTOKEN:
+            if (this._state !== CheckWellFormedState.PROLOG_PREDOCTYPE && this._state !== CheckWellFormedState.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
+            } else {
+               this._state = CheckWellFormedState.PROLOG;
+            }
+
+            if (this._startDocType) {
+               const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
+               (pToken as any).checkWellFormed(specialErrorCollector, this.emd);
+               delete this._startDocType;
+               specialErrorCollector.getErrors().forEach(error => this.push(error));
+            } else {
+               (pToken as any).checkWellFormed(errorCollector, this.emd);
+            }
+            break;
          case attListDeclaration.PTYPE:
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ATTLISTDECL_INVALID_CONTEXT);
             }
 
+            this.scanAttributeValues((pToken as any).attDefs, errorCollector);   // §4.1.0 Well-formedness constraint: Entity Declared
             attListDeclaration.checkWellFormed(pToken as any, errorCollector, this.emd); //typehack
             break;
          case CDATA_PTOKEN:
@@ -152,15 +217,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             }
             (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
             break;
-         case XMLDECL_PTOKEN:
-            // §2.8
-            if (this._state !== CheckWellFormedState.START || this.emd.kind !== EntityKind.DOCUMENT) {
-               errorCollector.report(WellFormedError.ID.XMLDECL_INVALID_CONTEXT);
-            } else {
-               this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
-            }
-            (pToken as any).checkWellFormed(errorCollector, this.emd);
-            break;
          case TEXTDECL_PTOKEN:
             // §4.3.1
             if (this._state !== CheckWellFormedState.START || this.emd.kind === EntityKind.DOCUMENT) {
@@ -169,36 +225,6 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
             }
             (pToken as any).checkWellFormed(errorCollector, this.emd);
-            break;
-         case DOCTYPE_START_PTOKEN:
-            switch (this._state) {
-               case CheckWellFormedState.PROLOG_PREDOCTYPE:
-                  if ((pToken as DocTypeStartPToken).openSubset) {
-                     this._state = CheckWellFormedState.IN_DTD;
-                  }
-                  break;
-               default:
-                  this._state = CheckWellFormedState.PROLOG_PREDOCTYPE;
-                  errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
-            }
-            this._startDocType = pToken as DocTypeStartPToken; // typeHack
-            this._startDocType.checkWellFormed(errorCollector, this.emd);
-            break;
-         case DOCTYPE_END_PTOKEN:
-            if (this._state !== CheckWellFormedState.PROLOG_PREDOCTYPE && this._state !== CheckWellFormedState.IN_DTD) {
-               errorCollector.report(WellFormedError.ID.DOCTYPE_INVALID_DOC_CONTEXT);
-            } else {
-               this._state = CheckWellFormedState.PROLOG;
-            }
-
-            if (this._startDocType) {
-               const specialErrorCollector = new ErrorCollector(this._startDocType.open, WellFormedError);
-               (pToken as any).checkWellFormed(specialErrorCollector, this.emd);
-               delete this._startDocType;
-               specialErrorCollector.getErrors().forEach(error => this.push(error));
-            } else {
-               (pToken as any).checkWellFormed(errorCollector, this.emd);
-            }
             break;
          case ELEMENT_START_PTOKEN:
          case ELEMENT_EMPTY_PTOKEN:
@@ -242,7 +268,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             // }
 
             (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
-            this.scanAttributeValues(pToken as any, errorCollector);
+            this.scanAttributeValues((pToken as any).attributes, errorCollector);
             break;
          case ELEMENT_END_PTOKEN:
             const endNameText = strOrBlank(pToken.name);
@@ -278,6 +304,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
             const name = strOrBlank(pToken.name);
+
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
@@ -313,7 +340,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE);
             }
 
-            this.checkDecl(pToken, this.generalEntityDecl);
+            this.checkGeneralEntityDeclared(pToken, this.generalEntityDecl, errorCollector);
             genEntityRef.checkWellFormed(errorCollector, this.emd); // typeHack
             break;
          case PARAMETER_ENTITY_START_PTOKEN:
@@ -324,8 +351,13 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
+
+            // §4.1.0: We do no well formedness checks on whether the entity was declared.
+
+            this.paramEntiyRefCount ++; // Related to §4.1.0 Entity declared
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+            const paramEntityRef: ParameterEntityReferencePToken = pToken as ParameterEntityReferencePToken;
             /*
              * §4.1.0: Well-Formedness Constraint: In DTD
              *     Parameter-entity references may only appear in the DTD.
@@ -334,8 +366,11 @@ class CheckPTokenWellFormedStream extends stream.Transform {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
 
-            this.checkDecl(pToken, this.paramEntityDecl);
-            (pToken as ParameterEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
+            this.paramEntiyRefCount ++; // Related to §4.1.0 Entity declared
+
+            // §4.1.0: We do no well-formedness checks on whether the entity was declared.
+
+            paramEntityRef.checkWellFormed(errorCollector, this.emd);
             break;
          case NOTATION_DECLARATION_PTOKEN:
             if (this._state !== CheckWellFormedState.IN_DTD) {
@@ -363,40 +398,78 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       this.push(pToken);
    }
 
-   private checkDecl(pToken: Token, info: ParameterEntitiesInfo | GeneralEntitiesInfo) {
+   private checkGeneralEntityDeclared(pToken: Token, info: GeneralEntitiesInfo, ec: ErrorCollector) {
       const name = strOrBlank(pToken.name);
+      const declarationExists = !!info[name];
+      const isPredefinedEntity = PROTECTED_ENTITIES.indexOf(name) !== -1;
 
-      if (!info[name] && PROTECTED_ENTITIES.indexOf(name) === -1) {
-         // @@ this is not fully correct. Further, we keep doing this checking about validation mode
-         // and so on in various places. Might be good to wrap that all up in a state object.
-
-         // From 4.1 well formedness constraint: entity declared
-         // For a document without any DTD, an entity reference must be to one of amp, lt, gt, apos or quote
-         // For a document with only an internal DTD subset with no param entity references
-         //    (presumably even those in entity values, though that is irrelevant here) the name must must reference a declaration.
-         // For a document that is standalone = yes, name must again match a declaration
-         // This means one with a DTD, or an external DTD, or param references, it need not match a declaration (though validity will catch those)
-         // This has nothing to do with validating or not, interestingly.
-         // however,  parameter entity reference will stop all further processing if this is non-validating
-
-         const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
-            [ name ], pToken.open, pToken.open);
-         this.push(error);
+      /*
+       * §4.1.0: Well-formedness constraint: Entity Declared
+       *    In a document without any DTD, a document with only an internal DTD subset which
+       *    contains no parameter entity references, or a document with " standalone='yes' ",
+       *    for an entity reference that does not occur within the external subset or a
+       *    parameter entity, the Name given in the entity reference must match that in
+       *    an entity declaration that does not occur within the external subset or
+       *    a parameter entity, except that well-formed documents need not declare any of
+       *    the following entities: amp, lt, gt, apos, quot.  The declaration of a general
+       *    entity must precede any reference to it which appears in a default value in
+       *    an attribute-list declaration.
+       *    Note that non-validating processors are not obligated to read and process
+       *    entity declarations occurring in parameter entities or in the external subset;
+       *    for such documents, the rule that an entity must be declared is a well-formedness
+       *    constraint only if standalone='yes'.
+       *
+       * Translation:
+       *    If all entity declarations are visibile to a non-validating processor (that is,
+       *    there is no dtd, an internal dtd with nothing hidden in parameter entities,
+       *    or standalone=yes (which might have an external subset or parm entities, but
+       *    we are told they have nothing of significance)), then we can be confident
+       *    that we know all the possible entity declarations. As such, if we find an
+       *    entity reference, and there is no declaration for it, it is an error.
+       *
+       *    Or, closer to what this actually does: If we have any reason to believe we
+       *    don't have access to all the possible declarations, then don't report an error.
+       *
+       *    Let's look at the cases this can't address:
+       *    - If there is a DTD, and some of it is external, we may or may not have
+       *      a declaration in that external DTD subset. So, if we find a reference,
+       *      and we are not doing a full validation pass, we won't have read in the
+       *      external subset, and so won't know if the reference is correct.
+       *    - If there is a DTD, but only internal, and there are parameter entity
+       *      references in that internal subset (outside of markup!), those parameter
+       *      entity values may contain other entity declarations. Similarly, then,
+       *      if we are not doing a full validation process, then we won't expand
+       *      those entities and so won't discover the declarations. Thus, when we
+       *      find a general entity reference, and find no declaration, we don't
+       *      know if it is because the declaration doesn't exist or we didn't read it.
+       *    - As far as I can tell, with standalone=yes, we may in fact have external
+       *      entities and subsets, but we're assured that things in there do not
+       *      affect most of how the document is presented. So, there may be external
+       *      entities that have general entity references in them, but we have no
+       *      way (or need) to determine if they have corresponding declarations if
+       *      we are not doing a validation process.
+       *    If we ARE doing a full validation process, of course, then we can
+       *    always determine whether any reference has a declaration, but when there
+       *    is no declaration, then it is a validation error, and not a well-formedness
+       *    error.
+       */
+      if (!declarationExists && !isPredefinedEntity &&
+         (this.hasNoDTD || this.isStandalone || (!this.hasExternalDTD && this.paramEntiyRefCount === 0))) {
+         ec.report(WellFormedError.ID.REFERENCE_NO_DECLARATION, [ name ]);
       }
    }
 
    /*
     * Do any well formed checks on the contents of an attribute value.
     */
-   private scanAttributeValues(pToken: ElementStartPToken | ElementEmptyPToken, ec: ErrorCollector) {
-      const attributes: Array<AttributePToken> = pToken.attributes;
-
+   private scanAttributeValues(attributes: Array<AttributePToken> , ec: ErrorCollector) {
       for (const att of attributes) {
          for (const val of att.value) {
             let name: SToken | void;
 
             if (val.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
                name = val.name;
+               this.checkGeneralEntityDeclared(val, this.generalEntityDecl, ec); // §4.1.0
             } else if (val.type === GENERAL_ENTITY_START_PTOKEN) {
                name = val.referencePToken.name;
             }

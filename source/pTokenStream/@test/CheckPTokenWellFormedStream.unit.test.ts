@@ -30,6 +30,7 @@ import {
    ELEMENT_EMPTY_PTOKEN,
    ElementEmptyPToken,
    ParameterEntityStartPToken,
+   TextPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
@@ -37,6 +38,7 @@ import { ElementDeclarationPToken } from 'source/token/elementDeclaration';
 import { SToken } from 'sToken';
 import { expectNoErrorsOrWarnings, expectError } from 'source/expand/@test/utils';
 import { AttributePToken } from 'source/token/common/attribute';
+import { AttListPToken } from 'source/token/attListDeclaration';
 
 type Token = { type: string, [other: string]: any };
 type TokenArray = Array<Token>;
@@ -80,6 +82,190 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          expect(args[0]).toEqual(pToken);
          expect(args[1]).toBeInstanceOf(ErrorCollector);
          expect(args[2]).toEqual(metaData);
+      });
+
+      describe('attribute definitions', () => {
+         let docTypeStart: DocTypeStartPToken;
+         let docTypeEnd: DocTypeEndPToken;
+         let xmlDecl: XmlDeclarationPToken ;
+         let geRef: GeneralEntityReferencePToken;
+         let ge: GeneralEntityDeclarationPToken;
+
+         beforeEach(() => {
+            geRef = new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('ge'),
+               close: SToken.fromString(';'),
+            });
+            pToken = new AttListPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('ATTLIST'),
+               declTypeSpace: SToken.fromString(' '),
+               elementName: SToken.fromString('root'),
+               postElementNameSpace: SToken.fromString(' '),
+               attDefs: [{
+                  name: SToken.fromString('att1'),
+                  postNameSpace: SToken.fromString(' '),
+                  type: SToken.fromString('CDATA'),
+                  postTypeSpace: SToken.fromString(' '),
+                  openQuote: SToken.fromString('"'),
+                  value: [geRef],
+                  closeQuote: SToken.fromString('"'),
+               }],
+               close: SToken.fromString('>'),
+            });
+            ge = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('ENTITY'),
+               name: SToken.fromString('ge'),
+               nameSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+               close: SToken.fromString('>'),
+            });
+            docTypeStart = new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('DOCTYPE'),
+               name: SToken.fromString('root'),
+               openSubset: SToken.fromString('['),
+            });
+            docTypeEnd = new DocTypeEndPToken({
+               docTypeStartPToken: docTypeStart,
+               closeSubset: SToken.fromString(']'),
+               close: SToken.fromString('>'),
+            });
+            xmlDecl = new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               target: SToken.fromString('xml'),
+               targetSpace: SToken.fromString(' '),
+               params: [{
+                  name: SToken.fromString('version'),
+                  value: SToken.fromString('1.0'),
+               }],
+               close: SToken.fromString('?>'),
+            });
+         });
+
+         it('reports an error if there is a reference in the default value to an unparsed entity in an attribute value (§4.1.0)', (done) => {
+            const declaration = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('unp'),
+               nDataName: SToken.fromString('image/jpeg'),
+               close: SToken.fromString('>'),
+            });
+            const unparsedReference = new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('unp'),
+            });
+            const attribute: AttributePToken = {
+               name: SToken.fromString('foo'),
+               value: [unparsedReference],
+            };
+            pToken.attDefs = [attribute];
+
+            checker.write(metaData);
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(declaration);
+            checker.write(docTypeEnd);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE, [], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports no errors if there was a declaration before the attlist (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(ge);
+            checker.write(pToken);
+            checker.write(docTypeEnd);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
+         it('reports an error if there was a declaration after the attlist (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(pToken);
+            checker.write(ge);
+            checker.write(docTypeEnd);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, ['ge'], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports an error if there was not a declaration at all (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(pToken);
+            checker.write(docTypeEnd);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, ['ge'], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports no error if there is only an internal DTD that has perefs before the ATTLIST and there is no declaration for the ref (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('pe'),
+               close: SToken.fromString(';'),
+            }));
+            checker.write(pToken);
+            checker.write(docTypeEnd);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
+         it('reports an error if there is only an internal DTD that has perefs AFTER the ATTLIST and there is no declaration for the ref (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(pToken);
+            checker.write(new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('pe'),
+               close: SToken.fromString(';'),
+            }));
+            checker.write(docTypeEnd);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, ['ge'], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports error if there was no declaration but there was an external subset (logically wrong, but matches the spec) (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('DOCTYPE'),
+               declTypeSpace: SToken.fromString(' '),
+               name: SToken.fromString('foo'),
+               externalId: {
+                  idType: SToken.fromString('SYSTEM'),
+                  postIdTypeSpace: SToken.fromString(' '),
+                  system: {
+                     openQuote: SToken.fromString('"'),
+                     value: [ new TextPToken({ text: SToken.fromString('http://somewhere.com') }) ],
+                     closeQuote: SToken.fromString('"'),
+                  },
+               },
+               openSubset: SToken.fromString('['),
+            }));
+            checker.write(pToken);
+            checker.write(docTypeEnd);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
       });
 
       describe('state checking', () => {
@@ -374,6 +560,9 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    describe('elementStart', () => {
       let pToken: ElementStartPToken;
       let cwfSpy: jasmine.Spy;
+      let docTypeStart: DocTypeStartPToken;
+      let docTypeEnd: DocTypeEndPToken;
+      let xmlDecl: XmlDeclarationPToken ;
 
       beforeEach(() => {
          pToken = new ElementStartPToken({
@@ -401,30 +590,137 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          expect(args[1]).toEqual(metaData);
       });
 
-      it('reports an error if there is a reference to an unparsed entity in an attribute value (§4.1.0)', (done) => {
-         const declaration = new GeneralEntityDeclarationPToken({
-            open: SToken.fromString('<!'),
-            name: SToken.fromString('unp'),
-            nDataName: SToken.fromString('image/jpeg'),
-            close: SToken.fromString('>'),
-         });
-         const unparsedReference = new GeneralEntityReferencePToken({
-            open: SToken.fromString('&'),
-            name: SToken.fromString('unp'),
-         });
-         const attribute: AttributePToken = {
-            name: SToken.fromString('foo'),
-            value: [unparsedReference],
-         };
-         pToken.attributes.push(attribute);
+      describe('attributes', () => {
+         let docTypeStart: DocTypeStartPToken;
+         let docTypeEnd: DocTypeEndPToken;
+         let xmlDecl: XmlDeclarationPToken ;
+         let geRef: GeneralEntityReferencePToken;
+         let ge: GeneralEntityDeclarationPToken;
 
-         checker.write(metaData);
-         checker.write(declaration);
-         checker.write(pToken);
-         checker.end();
+         beforeEach(() => {
+            geRef = new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('ge'),
+               close: SToken.fromString(';'),
+            });
+            pToken = new ElementStartPToken({
+               open: SToken.fromString('<'),
+               name: SToken.fromString('root'),
+               nameSpace: SToken.fromString(' '),
+               attributes: [{
+                  name: SToken.fromString('att1'),
+                  equal: SToken.fromString('='),
+                  openQuote: SToken.fromString('"'),
+                  value: [geRef],
+                  closeQuote: SToken.fromString('"'),
+               }],
+               close: SToken.fromString('>'),
+            });
+            ge = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('ENTITY'),
+               name: SToken.fromString('ge'),
+               nameSpace: SToken.fromString(' '),
+               openQuote: SToken.fromString('"'),
+               value: [],
+               closeQuote: SToken.fromString('"'),
+               close: SToken.fromString('>'),
+            });
+            docTypeStart = new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('DOCTYPE'),
+               name: SToken.fromString('root'),
+               openSubset: SToken.fromString('['),
+            });
+            docTypeEnd = new DocTypeEndPToken({
+               docTypeStartPToken: docTypeStart,
+               closeSubset: SToken.fromString(']'),
+               close: SToken.fromString('>'),
+            });
+            xmlDecl = new XmlDeclarationPToken({
+               open: SToken.fromString('<?'),
+               target: SToken.fromString('xml'),
+               targetSpace: SToken.fromString(' '),
+               params: [{
+                  name: SToken.fromString('version'),
+                  value: SToken.fromString('1.0'),
+               }],
+               close: SToken.fromString('?>'),
+            });
+         });
 
-         const expected = new WellFormedError(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE, [], pToken.open, pToken.open);
-         expectError(checker, expected, done);
+         it('reports an error if there is a reference to an unparsed entity in an attribute value (§4.1.0)', (done) => {
+            const declaration = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('unp'),
+               nDataName: SToken.fromString('image/jpeg'),
+               close: SToken.fromString('>'),
+            });
+            const unparsedReference = new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('unp'),
+            });
+            const attribute: AttributePToken = {
+               name: SToken.fromString('foo'),
+               value: [unparsedReference],
+            };
+            pToken.attributes.push(attribute);
+
+            checker.write(metaData);
+            checker.write(declaration);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE, [], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports no errors if there was a declaration (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(ge);
+            checker.write(docTypeEnd);
+            checker.write(pToken);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
+         it('reports an error if there was not a declaration (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(docTypeStart);
+            checker.write(docTypeEnd);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, ['ge'], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports no error if there was no declaration but there was an external subset (§4.1.0)', (done) => {
+            checker.write(xmlDecl);
+            checker.write(new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               declType: SToken.fromString('DOCTYPE'),
+               declTypeSpace: SToken.fromString(' '),
+               name: SToken.fromString('foo'),
+               externalId: {
+                  idType: SToken.fromString('SYSTEM'),
+                  postIdTypeSpace: SToken.fromString(' '),
+                  system: {
+                     openQuote: SToken.fromString('"'),
+                     value: [ new TextPToken({ text: SToken.fromString('http://somewhere.com') }) ],
+                     closeQuote: SToken.fromString('"'),
+                  },
+               },
+            }));
+               checker.write(docTypeEnd);
+            checker.write(pToken);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
+         });
+
       });
 
       describe('state checking', () => {
@@ -653,12 +949,43 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
    describe('general entity reference', () => {
       let pToken: GeneralEntityReferencePToken;
+      let docTypeStart: DocTypeStartPToken;
+      let docTypeEnd: DocTypeEndPToken;
+      let elementStart: ElementStartPToken;
+      let xmlDecl: XmlDeclarationPToken ;
 
       beforeEach(() => {
          pToken = new GeneralEntityReferencePToken({
             open: SToken.fromString('&'),
             name: SToken.fromString('fred'),
             close: SToken.fromString(';'),
+         });
+
+         docTypeStart = new DocTypeStartPToken({
+            open: SToken.fromString('<!'),
+            declType: SToken.fromString('DOCTYPE'),
+            name: SToken.fromString('foo'),
+            openSubset: SToken.fromString('['),
+         });
+         docTypeEnd = new DocTypeEndPToken({
+            docTypeStartPToken: docTypeStart,
+            closeSubset: SToken.fromString(']'),
+            close: SToken.fromString('>'),
+         });
+         xmlDecl = new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               value: SToken.fromString('1.0'),
+            }],
+            close: SToken.fromString('?>'),
+         });
+         elementStart = new ElementStartPToken({
+            open: SToken.fromString('<'),
+            name: SToken.fromString('fred'),
+            close: SToken.fromString('>'),
          });
       });
 
@@ -672,14 +999,160 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          expect(args[1]).toEqual(metaData);
       });
 
+      it('reports no errors if there was a declaration (§4.1.0)', (done) => {
+         checker.write(xmlDecl);
+         checker.write(docTypeStart);
+         checker.write(new GeneralEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            declType: SToken.fromString('ENTITY'),
+            name: SToken.fromString('fred'),
+            nameSpace: SToken.fromString(' '),
+            openQuote: SToken.fromString('"'),
+            value: [],
+            closeQuote: SToken.fromString('"'),
+            close: SToken.fromString('>'),
+         }));
+         checker.write(docTypeEnd);
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         expectNoErrorsOrWarnings(checker, done);
+      });
+
+      it('reports an error if there was no DTD and there is no declaration (§4.1.0)', (done) => {
+         const docTypeStartPToken = new DocTypeStartPToken({
+            open: SToken.fromString('<!'),
+            declType: SToken.fromString('DOCTYPE'),
+            name: SToken.fromString('foo'),
+         });
+
+         checker.write(xmlDecl);
+         checker.write(docTypeStartPToken);
+         checker.write(new DocTypeEndPToken({
+            docTypeStartPToken,
+            close: SToken.fromString('>'),
+         }));
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, [ 'fred' ], pToken.open, pToken.open);
+         expectError(checker, expected, done);
+      });
+
+      it('reports an error if there is only an internal DTD (that has no perefs) and there is no declaration for the ref (§4.1.0)', (done) => {
+         checker.write(xmlDecl);
+         checker.write(docTypeStart);
+         checker.write(docTypeEnd);
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, [ 'fred' ], pToken.open, pToken.open);
+         expectError(checker, expected, done);
+      });
+
+      it('reports no error if there is only an internal DTD (that has no perefs) and there is no declaration for the ref, but it is to one of the special entities (§4.1.0)', (done) => {
+         pToken = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('quot'),
+            close: SToken.fromString(';'),
+         });
+         checker.write(xmlDecl);
+         checker.write(docTypeStart);
+         checker.write(docTypeEnd);
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         expectNoErrorsOrWarnings(checker, done);
+      });
+
+      it('reports no error if there is an extneral DTD and there is no declaration for the ref (§4.1.0)', (done) => {
+         checker.write(xmlDecl);
+         checker.write(new DocTypeStartPToken({
+            open: SToken.fromString('<!'),
+            declType: SToken.fromString('DOCTYPE'),
+            declTypeSpace: SToken.fromString(' '),
+            name: SToken.fromString('foo'),
+            externalId: {
+               idType: SToken.fromString('SYSTEM'),
+               postIdTypeSpace: SToken.fromString(' '),
+               system: {
+                  openQuote: SToken.fromString('"'),
+                  value: [ new TextPToken({ text: SToken.fromString('http://somewhere.com') }) ],
+                  closeQuote: SToken.fromString('"'),
+               },
+            },
+         }));
+         checker.write(docTypeEnd);
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         expectNoErrorsOrWarnings(checker, done);
+      });
+
+      it('reports no error if there is only an internal DTD that has perefs and there is no declaration for the ref (§4.1.0)', (done) => {
+         checker.write(xmlDecl);
+         checker.write(docTypeStart);
+         checker.write(new ParameterEntityReferencePToken({
+            open: SToken.fromString('%'),
+            name: SToken.fromString('pe'),
+            close: SToken.fromString(';'),
+         }));
+         checker.write(docTypeEnd);
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         expectNoErrorsOrWarnings(checker, done);
+      });
+
+      it('reports an error if standalone is yes and no declaration found (§4.1.0)', (done) => {
+         const docTypeStartPToken = new DocTypeStartPToken({
+            open: SToken.fromString('<!'),
+            declType: SToken.fromString('DOCTYPE'),
+            name: SToken.fromString('foo'),
+         });
+
+         checker.write(new XmlDeclarationPToken({
+            open: SToken.fromString('<?'),
+            target: SToken.fromString('xml'),
+            targetSpace: SToken.fromString(' '),
+            params: [{
+               name: SToken.fromString('version'),
+               value: SToken.fromString('1.0'),
+            }, {
+               name: SToken.fromString('standalone'),
+               value: SToken.fromString('yes'),
+            }],
+            close: SToken.fromString('?>'),
+         }));
+         checker.write(docTypeStartPToken);
+         checker.write(new DocTypeEndPToken({
+            docTypeStartPToken,
+            close: SToken.fromString('>'),
+         }));
+         checker.write(elementStart);
+         checker.write(pToken);
+         checker.end();
+
+         const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, [ 'fred' ], pToken.open, pToken.open);
+         expectError(checker, expected, done);
+      });
+
       describe('state checking', () => {
 
-         it('reports an error if not IN_CONTENT', () => {
+         it('reports an error if not IN_CONTENT', (done) => {
             (checker as any)._state = 'IN_DTD';
-            const checkerPushSpy = spyOn(checker, 'push');
-            checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT, [], pToken.open, pToken.open);
+            expectError(checker, expected, done);
          });
 
          it('reports an error if there was no declaration', (done) => {
@@ -709,56 +1182,24 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expectError(checker, expected, done);
          });
 
-         it('reports no errors if there was a declaration', (done) => {
-            (checker as any)._state = 'IN_DTD';
-
-            checker.write(new GeneralEntityDeclarationPToken({
-               open: SToken.fromString('<!'),
-               declType: SToken.fromString('ENTITY'),
-               name: SToken.fromString('fred'),
-               nameSpace: SToken.fromString(' '),
-               openQuote: SToken.fromString('"'),
-               value: [],
-               closeQuote: SToken.fromString('"'),
-               close: SToken.fromString('>'),
-            }));
-            checker.write(new DocTypeEndPToken({
-               docTypeStartPToken: new DocTypeStartPToken({
-                  open: SToken.fromString('<!'),
-                  declType: SToken.fromString('DOCTYPE'),
-                  name: SToken.fromString('foo'),
-                  openSubset: SToken.fromString('['),
-               }),
-               closeSubset: SToken.fromString(']'),
-               close: SToken.fromString('>'),
-            }));
-            checker.write(new ElementStartPToken({
-               open: SToken.fromString('<'),
-               name: SToken.fromString('fred'),
-               close: SToken.fromString('>'),
-            }));
-            checker.write(pToken);
-            checker.end();
-
-            expectNoErrorsOrWarnings(checker, done);
-         });
-
       });
 
    });
 
    describe('parameter entity reference', () => {
       let pToken: ParameterEntityReferencePToken;
-      let cwfSpy: jasmine.Spy;
 
       beforeEach(() => {
          pToken = new ParameterEntityReferencePToken({
-            open: makeSToken('%'),
+            open: SToken.fromString('%'),
+            name: SToken.fromString('foo'),
+            close: SToken.fromString(';'),
          });
-         cwfSpy = spyOn(pToken, 'checkWellFormed');
       });
 
       it('calls elementEnd.checkWellFormed() when encountering PEReference', () => {
+         const cwfSpy = spyOn(pToken, 'checkWellFormed');
+
          checker.write(metaData);
          checker.write(pToken);
 
@@ -769,20 +1210,23 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       describe('state checking', () => {
 
-         it('reports an error if not IN_DTD', () => {
+         it('reports an error if not IN_DTD', (done) => {
             (checker as any)._state = 'START';
-            const checkerPushSpy = spyOn(checker, 'push');
-            checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.PEREF_INVALID_CONTEXT);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.PEREF_INVALID_CONTEXT, [], pToken.open, pToken.open);
+            expectError(checker, expected, done);
          });
 
-         it('reports no error if IN_DTD', () => {
+         it('reports no error if IN_DTD', (done) => {
             (checker as any)._state = CheckWellFormedState.IN_DTD;
-            const checkerPushSpy = spyOn(checker, 'push');
-            checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(1)[0]).toEqual(pToken);
+            checker.write(pToken);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
          });
 
       });

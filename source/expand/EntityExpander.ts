@@ -654,7 +654,7 @@ class EntityExpander {
          const info = this.getGeneralEntityInfo(element);
 
          // Can not expand a reference that has no name, or an external entity
-         if (!info || !info.isInternal ) {
+         if (!info || !info.isInternal ) {   // For attlist, does the geref need to be internal?  See §4.1  And do we expand the 5 predefined ones?
             newValue.push(element);
             continue;
          }
@@ -662,6 +662,7 @@ class EntityExpander {
          newValue.push(new GeneralEntityStartPToken(element));
          // @@ this is not right.  Don't we actually need to parse this in case of char refs?
          // Also need to do 4.6 (see above for handling this in the body)
+         // §4.1 need to prevent recursion here.
          newValue = newValue.concat(info.token.value);
          newValue.push(new GeneralEntityEndPToken(element));
       }
@@ -670,6 +671,7 @@ class EntityExpander {
    }
 
    private expandEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
+      // Missing: §4.1 need to prefent recurion here.
       this.retrieveExternalParameterEntities(value, () => {
          let newValue: ExpandedLiteralValuePToken = [];
 
