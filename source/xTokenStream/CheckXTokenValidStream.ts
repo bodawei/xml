@@ -1428,7 +1428,7 @@ class CheckXTokenValidStream extends stream.Transform {
 
                // §3.3.1: Validity Constraint: Entity Name
                //    each Name must match the name of an unparsed entity declared in the DTD.
-               // (Also §4.4 row three of table)
+               // (Also §4.4 row three of table, and mentioned in §4.1.0 Well-formedness constraint: Parsed Entity)
                for (let index = 0; index < names.length; index++) {
                   const token = this.entityManager.getEntityToken(names[index])
 

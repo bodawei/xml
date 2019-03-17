@@ -32,6 +32,21 @@ function expectNoErrorsOrWarnings(validator: stream.Transform, done: () => void)
    }, done);
 }
 
+function expectError(validator: stream.Transform, expected: any, done: () => void) {
+   gatherStream(validator, (tokens) => {
+      let arrayExpected = [];
+
+      if (!Array.isArray(expected)) {
+         arrayExpected = [ expected ];
+      }
+
+      for (const expectedVal of arrayExpected) {
+         (expect(tokens) as any).toHaveError(expectedVal); // typeHack
+      }
+   }, done);
+}
+
+
 // function expectNoErrors(validator: stream.Transform, done: () => void) {
 //    gatherStream(validator, (tokens: PTokenArray) => {
 //       (expect(tokens) as any).toBeErrorFree(); // typeHack
@@ -42,5 +57,6 @@ function expectNoErrorsOrWarnings(validator: stream.Transform, done: () => void)
 export {
    gatherStream,
    expectNoErrorsOrWarnings,
+   expectError,
    // expectNoErrors,
 };

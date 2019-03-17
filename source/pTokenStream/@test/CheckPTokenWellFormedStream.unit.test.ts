@@ -29,12 +29,14 @@ import {
    ElementStartPToken,
    ELEMENT_EMPTY_PTOKEN,
    ElementEmptyPToken,
+   ParameterEntityStartPToken,
 } from 'token';
 
 import CheckPTokenWellFormedStream, { CheckWellFormedState } from '../CheckPTokenWellFormedStream';
 import { ElementDeclarationPToken } from 'source/token/elementDeclaration';
 import { SToken } from 'sToken';
-import { expectNoErrorsOrWarnings } from 'source/expand/@test/utils';
+import { expectNoErrorsOrWarnings, expectError } from 'source/expand/@test/utils';
+import { AttributePToken } from 'source/token/common/attribute';
 
 type Token = { type: string, [other: string]: any };
 type TokenArray = Array<Token>;
@@ -184,7 +186,8 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          pToken = new CharRefPToken({
             open: makeSToken('&#'),
             digits: makeSToken('234'),
-            close: makeSToken(';')
+            close: makeSToken(';'),
+            charCode: 234,
          });
       });
 
@@ -200,13 +203,13 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
 
       describe('state checking', () => {
 
-         it('reports no errors when in the content state', () => {
-            const checkerPushSpy = spyOn(checker, 'push');
+         it('reports no errors when in the content state', (done) => {
             (checker as any)._state = CheckWellFormedState.IN_CONTENT;
 
             checker.write(pToken);
+            checker.end();
 
-            expect(checkerPushSpy.calls.count()).toEqual(1);
+            expectNoErrorsOrWarnings(checker, done);
          });
 
          it('reports an error if not IN_CONTENT', () => {
@@ -369,12 +372,12 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
    });
 
    describe('elementStart', () => {
-      let pToken: Token;
+      let pToken: ElementStartPToken;
       let cwfSpy: jasmine.Spy;
 
       beforeEach(() => {
          pToken = new ElementStartPToken({
-            open: makeSToken('<'),
+            open: SToken.fromString('<'),
          });
          cwfSpy = spyOn(pToken, 'checkWellFormed');
       });
@@ -389,13 +392,39 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
       });
 
       it('calls elementStart.checkWellFormed() when encountering an empty element', () => {
-         pToken.type = ELEMENT_EMPTY_PTOKEN;
+         (pToken as any).type = ELEMENT_EMPTY_PTOKEN;
          checker.write(metaData);
          checker.write(pToken);
 
          const args = cwfSpy.calls.argsFor(0);
          expect(args[0]).toBeInstanceOf(ErrorCollector);
          expect(args[1]).toEqual(metaData);
+      });
+
+      it('reports an error if there is a reference to an unparsed entity in an attribute value (§4.1.0)', (done) => {
+         const declaration = new GeneralEntityDeclarationPToken({
+            open: SToken.fromString('<!'),
+            name: SToken.fromString('unp'),
+            nDataName: SToken.fromString('image/jpeg'),
+            close: SToken.fromString('>'),
+         });
+         const unparsedReference = new GeneralEntityReferencePToken({
+            open: SToken.fromString('&'),
+            name: SToken.fromString('unp'),
+         });
+         const attribute: AttributePToken = {
+            name: SToken.fromString('foo'),
+            value: [unparsedReference],
+         };
+         pToken.attributes.push(attribute);
+
+         checker.write(metaData);
+         checker.write(declaration);
+         checker.write(pToken);
+         checker.end();
+
+         const expected = new WellFormedError(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE, [], pToken.open, pToken.open);
+         expectError(checker, expected, done);
       });
 
       describe('state checking', () => {
@@ -447,7 +476,7 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
          });
 
          it('errors include the element name if present', () => {
-            pToken.name = makeSToken('bogusName');
+            (pToken as any).name = makeSToken('bogusName');
             (checker as any)._state = 'START';
             const checkerPushSpy = spyOn(checker, 'push');
             checker.write(pToken);
@@ -653,12 +682,31 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             expect(checkerPushSpy.calls.argsFor(1)[0].id).toEqual(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
          });
 
-         it('reports an error if there was no declaration', () => {
+         it('reports an error if there was no declaration', (done) => {
             (checker as any)._state = 'IN_CONTENT';
-            const checkerPushSpy = spyOn(checker, 'push');
-            checker.write(pToken);
 
-            expect(checkerPushSpy.calls.argsFor(0)[0].id).toEqual(WellFormedError.ID.REFERENCE_NO_DECLARATION);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION, ['fred'], pToken.open, pToken.open);
+            expectError(checker, expected, done);
+         });
+
+         it('reports an error if n unparsed entity reference is found in content (§4.1.0)', (done) => {
+            const declaration = new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('fred'),
+               nDataName: SToken.fromString('image/jpeg'),
+               close: SToken.fromString('>'),
+            });
+            (checker as any)._state = 'IN_CONTENT';
+
+            checker.write(declaration);
+            checker.write(pToken);
+            checker.end();
+
+            const expected = new WellFormedError(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE, [], pToken.open, pToken.open);
+            expectError(checker, expected, done);
          });
 
          it('reports no errors if there was a declaration', (done) => {
@@ -735,6 +783,35 @@ describe('CheckPTokenWellFormedStream (unit)', () => {
             checker.write(pToken);
 
             expect(checkerPushSpy.calls.argsFor(1)[0]).toEqual(pToken);
+         });
+
+      });
+
+   });
+
+   describe('parameter entity start', () => {
+      let pToken: ParameterEntityStartPToken;
+
+      beforeEach(() => {
+         pToken = new ParameterEntityStartPToken(new ParameterEntityReferencePToken({ open: SToken.fromString('<!') }));
+      });
+
+      describe('state checking', () => {
+
+         it('reports an error if not IN_DTD', (done) => {
+            (checker as any)._state = 'START';
+            checker.write(pToken);
+            checker.end();
+
+            expectError(checker, new WellFormedError(WellFormedError.ID.PEREF_INVALID_CONTEXT, [], pToken.referencePToken.open, pToken.referencePToken.open), done);
+         });
+
+         it('reports no error if IN_DTD', (done) => {
+            (checker as any)._state = CheckWellFormedState.IN_DTD;
+            checker.write(pToken);
+            checker.end();
+
+            expectNoErrorsOrWarnings(checker, done);
          });
 
       });

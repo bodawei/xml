@@ -88,6 +88,7 @@ describe('charRef (unit)', () => {
             digits: makeSToken('1f2'),
             digitsSpace: makeSToken(' '),
             close: makeSToken(';'),
+            charCode: 498,
          });
 
          parseCharRef(mockSource, openSToken, callback);

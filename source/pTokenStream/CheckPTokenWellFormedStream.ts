@@ -40,8 +40,14 @@ import {
    NotationDeclarationPToken,
    ProcessingInstructionPToken,
    SpacePToken,
+   PARAMETER_ENTITY_START_PTOKEN,
+   GeneralEntityDeclarationPToken,
+   ParameterEntityDeclarationPToken,
+   ElementEmptyPToken,
+   ElementStartPToken,
 } from '../token';
 import { DocTypeStartPToken } from '../token/docTypeStart';
+import { AttributePToken } from 'source/token/common/attribute';
 
 enum CheckWellFormedState {
    START = 'START',
@@ -60,8 +66,12 @@ type Token = {
    closeSubset?: SToken;
 };
 
-type EntitiesInfo = {
-   [name: string]: boolean;
+type GeneralEntitiesInfo = {
+   [name: string]: GeneralEntityDeclarationPToken;
+}
+
+type ParameterEntitiesInfo = {
+   [name: string]: ParameterEntityDeclarationPToken;
 }
 
 const PROTECTED_ENTITIES = [ 'amp', 'lt', 'gt', 'apos', 'quot' ];
@@ -72,8 +82,8 @@ class CheckPTokenWellFormedStream extends stream.Transform {
    private _state: CheckWellFormedState;
    private _elementNameStack: Array<string>;
    private _startDocType?: DocTypeStartPToken;
-   private generalEntityDecl: EntitiesInfo = {};
-   private paramEntityDecl: EntitiesInfo = {};
+   private generalEntityDecl: GeneralEntitiesInfo = {};
+   private paramEntityDecl: ParameterEntitiesInfo = {};
 
    constructor() {
       super({
@@ -90,8 +100,14 @@ class CheckPTokenWellFormedStream extends stream.Transform {
    }
 
    _checkForErrors(pToken: Token) {
-      const startContext = pToken.open || pToken.text ||
-         (this._startDocType ? this._startDocType.open : pToken.closeSubset); // eh?  And what if there is no close?
+      let startContext = pToken.open || pToken.text;
+
+      if (pToken.type === DOCTYPE_END_PTOKEN) {
+         startContext = pToken.closeSubset; // eh?  And what if there is no close?
+      } else if (pToken.type === PARAMETER_ENTITY_START_PTOKEN) {
+         startContext = (pToken as any).referencePToken.open; // typeHack
+      }
+
       let errorCollector = new ErrorCollector(startContext as SToken, WellFormedError); //typehack
 
       switch (pToken.type) {
@@ -226,6 +242,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             // }
 
             (pToken as any).checkWellFormed(errorCollector, this.emd); //typehack
+            this.scanAttributeValues(pToken as any, errorCollector);
             break;
          case ELEMENT_END_PTOKEN:
             const endNameText = strOrBlank(pToken.name);
@@ -260,26 +277,59 @@ class CheckPTokenWellFormedStream extends stream.Transform {
             break;
          case GENERAL_ENTITY_DECLARATION_PTOKEN:
          case PARAMETER_ENTITY_DECLARATION_PTOKEN:
+            const name = strOrBlank(pToken.name);
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.ENTITYDECL_INVALID_CONTEXT);
             }
 
-            (pToken as any).checkWellFormed(errorCollector, this.emd); // typeHack
+            if (pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN) {
+               const genEntityDecl = pToken as GeneralEntityDeclarationPToken;
 
-            const info = pToken.type === GENERAL_ENTITY_DECLARATION_PTOKEN ? this.generalEntityDecl : this.paramEntityDecl;
-            const name = strOrBlank(pToken.name);
+               genEntityDecl.checkWellFormed(errorCollector, this.emd);
+               this.generalEntityDecl[name] = genEntityDecl;
+            } else {
+               const paramEntityDecl = pToken as ParameterEntityDeclarationPToken;
 
-            info[name] = true;
+               paramEntityDecl.checkWellFormed(errorCollector, this.emd);
+               this.paramEntityDecl[name] = paramEntityDecl;
+            }
             break;
          case GENERAL_ENTITY_REFERENCE_PTOKEN:
+            const genEntityRef: GeneralEntityReferencePToken = pToken as GeneralEntityReferencePToken;
+            const genEntityName = strOrBlank(genEntityRef.name);
+            const genEntityDecl = this.generalEntityDecl[genEntityName];
+
             if (this._state !== CheckWellFormedState.IN_CONTENT) {
                errorCollector.report(WellFormedError.ID.REFERENCE_INVALID_DOC_CONTEXT);
             }
 
-            this.checkDecl(pToken as GeneralEntityReferencePToken, this.generalEntityDecl);
-            (pToken as GeneralEntityReferencePToken).checkWellFormed(errorCollector, this.emd); // typeHack
+            /*
+             * §4.1.0: Well-Formedness Constraint: Parsed Entity
+             *     An entity reference must not contain the name of an unparsed entity.
+             *     Unparsed entities may be referred to only in attribute values
+             *     declared to be of type ENTITY or ENTITIES.
+             */
+            if (genEntityDecl && genEntityDecl.nDataName) {
+               errorCollector.report(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE);
+            }
+
+            this.checkDecl(pToken, this.generalEntityDecl);
+            genEntityRef.checkWellFormed(errorCollector, this.emd); // typeHack
+            break;
+         case PARAMETER_ENTITY_START_PTOKEN:
+            /*
+             * §4.1.0: Well-Formedness Constraint: In DTD
+             *     Parameter-entity references may only appear in the DTD.
+             */
+            if (this._state !== CheckWellFormedState.IN_DTD) {
+               errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
+            }
             break;
          case PARAMETER_ENTITY_REFERENCE_PTOKEN:
+            /*
+             * §4.1.0: Well-Formedness Constraint: In DTD
+             *     Parameter-entity references may only appear in the DTD.
+             */
             if (this._state !== CheckWellFormedState.IN_DTD) {
                errorCollector.report(WellFormedError.ID.PEREF_INVALID_CONTEXT);
             }
@@ -313,7 +363,7 @@ class CheckPTokenWellFormedStream extends stream.Transform {
       this.push(pToken);
    }
 
-   private checkDecl(pToken: Token, info: EntitiesInfo) {
+   private checkDecl(pToken: Token, info: ParameterEntitiesInfo | GeneralEntitiesInfo) {
       const name = strOrBlank(pToken.name);
 
       if (!info[name] && PROTECTED_ENTITIES.indexOf(name) === -1) {
@@ -332,6 +382,37 @@ class CheckPTokenWellFormedStream extends stream.Transform {
          const error = new WellFormedError(WellFormedError.ID.REFERENCE_NO_DECLARATION,
             [ name ], pToken.open, pToken.open);
          this.push(error);
+      }
+   }
+
+   /*
+    * Do any well formed checks on the contents of an attribute value.
+    */
+   private scanAttributeValues(pToken: ElementStartPToken | ElementEmptyPToken, ec: ErrorCollector) {
+      const attributes: Array<AttributePToken> = pToken.attributes;
+
+      for (const att of attributes) {
+         for (const val of att.value) {
+            let name: SToken | void;
+
+            if (val.type === GENERAL_ENTITY_REFERENCE_PTOKEN) {
+               name = val.name;
+            } else if (val.type === GENERAL_ENTITY_START_PTOKEN) {
+               name = val.referencePToken.name;
+            }
+
+            const declaration = this.generalEntityDecl[strOrBlank(name)];
+
+            /*
+             * §4.1.0: Well-Formedness Constraint: Parsed Entity
+             *     An entity reference must not contain the name of an unparsed entity.
+             *     Unparsed entities may be referred to only in attribute values
+             *     declared to be of type ENTITY or ENTITIES.
+             */
+            if (declaration && declaration.nDataName) {
+               ec.report(WellFormedError.ID.REFERENCE_UNPARSED_NO_USE);
+            }
+         }
       }
    }
 }

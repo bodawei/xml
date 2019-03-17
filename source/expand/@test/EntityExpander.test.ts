@@ -1088,7 +1088,8 @@ describe('EntityExpander (unit)', () => {
                close: SToken.fromString(';'),
                openSpace: undefined,
          	   hexMarkerSpace: undefined,
-         	   digitsSpace: undefined,
+               digitsSpace: undefined,
+               charCode: 60,
             }));
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();
@@ -1126,7 +1127,8 @@ describe('EntityExpander (unit)', () => {
                close: SToken.fromString(';'),
                openSpace: undefined,
          	   hexMarkerSpace: undefined,
-         	   digitsSpace: undefined,
+               digitsSpace: undefined,
+               charCode: 38,
             }));
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
             done();

@@ -20,9 +20,10 @@ class CharRefPToken {
    public readonly digits?: SToken;
    public readonly digitsSpace?: SToken;
    public readonly close?: SToken;
-   public readonly charCode?: number;
+   public readonly charCode: number;
 
    constructor(basePToken: CharRefPToken | PreToken) {
+      this.charCode = 0;
       Object.assign(this, basePToken);
 
       this.type = CHARREF_PTOKEN;
@@ -85,8 +86,6 @@ function parseCharRef(source: STokenSource, openSToken: SToken, deliverPToken: D
       source.extract('match', ';', (closeSToken) => {
          if (pToken.digits) {
             pToken.charCode = hexMarker ? parseInt(pToken.digits.str, 16) : parseInt(pToken.digits.str, 10);
-         } else {
-            pToken.charCode = 0;
          }
          pToken.close = closeSToken;
 
@@ -115,6 +114,10 @@ function checkWellFormed(pToken: CharRefPToken, ec: ErrorCollector, entityMetaDa
    ec.setPos(pToken.digits);
    ec.check(!pToken.digits, WFEID.CHARREF_NO_DIGITS);
 
+   /*
+    * §4.1.0: Well-Formedness Constraint: Legal Character
+    *    Characters referred to using character references must match the production for Char.
+    */
    if (pToken.charCode !== undefined) {
       const char = String.fromCharCode(pToken.charCode);
 
