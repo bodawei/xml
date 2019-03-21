@@ -3811,6 +3811,47 @@ describe('CheckXTokenValidStream (unit)', () => {
                expectNoErrorsOrWarnings(validator, done);
             });
 
+            it('reports an error if a CDATA section found in 1.0/1 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 1));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new CdataXToken('test charData'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               const expected = new ValidityError(ValidityError.ID.MIXED_XTRA_MARKUP, [ 'one' ]);
+               expectStream(validator, expected, done);
+            });
+
+            it('reports no error if a CDATA section found in 1.0/5 (§3.0.0)', (done) => {
+               const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
+                  names: [{
+                     name: '#PCDATA',
+                     repeat: 'ONE'
+                  }],
+                  repeat: 'ONE',
+                  listType: 'CHOICE'
+               });
+
+               validator.write(new EntityMetaData(EntityKind.DOCUMENT, 1.0, 5));
+               validator.write(elementDecl);
+               validator.write(new ElementStartXToken('one', []));
+               validator.write(new CdataXToken('test charData'));
+               validator.write(new ElementEndXToken('one'));
+               validator.end();
+
+               expectNoErrorsOrWarnings(validator, done);
+            });
+
             it('reports no error if element, chardata, charRef, and CData are found in mixed content in 1.0/5 (§3.0.0)', (done) => {
                const elementDecl = new elementDeclaration.XToken('one', 'CHILDREN', {
                   names: [{

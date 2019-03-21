@@ -69,15 +69,11 @@ class GeneralEntityDeclarationPToken {
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
 
-   constructor(props?: Object | DeclarationStart) {
-      if (props) {
-         Object.assign(this, props);
-         this.open = (props as any).open;
-         this.value = (props as any).value || [];
-      } else {
-         this.open = SToken.fromString('x');
-         this.value = [];
-      }
+   constructor(props: Object | DeclarationStart) {
+      Object.assign(this, props);
+
+      this.open = (props as any).open;
+      this.value = (props as any).value || [];
       this.type = GENERAL_ENTITY_DECLARATION_PTOKEN;
    }
 
@@ -120,32 +116,24 @@ function pTokenToXToken(pToken: GeneralEntityDeclarationPToken) {
 
 function sTokensFromPToken(pToken: GeneralEntityDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
+   const literalSTokens = literal.getSTokens(pToken);
+   const externalIdSTokens = externalId.getSTokens(pToken.externalId);
 
    builder.add(pToken.open,
       pToken.openSpace,
       pToken.declType,
       pToken.declTypeSpace,
-      pToken.parameter,
       pToken.parameterSpace,
       pToken.name,
-      pToken.nameSpace);
+      pToken.nameSpace,
+      externalIdSTokens,
+      literalSTokens,
+      pToken.externalIdSpace,
+      pToken.entityValueSpace,
+      pToken.close,
+      );
 
-   // results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread // typeHack
-   // results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-
-      builder.add(pToken.externalIdSpace,
-         pToken.entityValueSpace,
-         pToken.nData,
-         pToken.nDataSpace,
-         pToken.nDataName,
-         pToken.nDataNameSpace,
-         pToken.close,
-         );
-
-
-// public readonly unassigned?: UnassignedArray;
-// public readonly extra?: UnassignedArray;
-// public readonly nextPropName?: string;
+      // Where to unassigned go?
 
    return builder.sTokenArray;
 }

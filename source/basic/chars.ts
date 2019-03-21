@@ -108,6 +108,7 @@ const NOT_CHAR11 = /[\u0000\uFFFE\uFFFF]/g;
 function isChar(char: string, version: XMLVersion = 1.0): boolean {
    const regEx = (version === 1.1) ? NOT_CHAR11 : NOT_CHAR10;
 
+   regEx.lastIndex = 0;
    return !regEx.exec(char);
 }
 
@@ -127,6 +128,8 @@ function isRestrictedChar(char: string, version: XMLVersion = 1.0): boolean {
    if (version === 1) {
       return false;
    }
+
+   RESTRICTED_CHAR11.lastIndex = 0;
 
    return !!RESTRICTED_CHAR11.exec(char);
 }

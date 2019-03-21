@@ -63,15 +63,11 @@ class ParameterEntityDeclarationPToken {
    public readonly extra?: UnassignedArray;
    public readonly nextPropName?: string;
 
-   constructor(props?: Object | DeclarationStart) {
-      if (props) {
-         Object.assign(this, props);
-         this.open = (props as any).open;
-         this.value = (props as any).value || [];
-      } else {
-         this.open = SToken.fromString('x');
-         this.value = [];
-      }
+   constructor(props: Object | DeclarationStart) {
+      Object.assign(this, props);
+
+      this.open = (props as any).open;
+      this.value = (props as any).value || [];
       this.type = PARAMETER_ENTITY_DECLARATION_PTOKEN;
    }
 
@@ -113,6 +109,8 @@ function pTokenToXToken(pToken: ParameterEntityDeclarationPToken) {
 
 function sTokensFromPToken(pToken: ParameterEntityDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
+   const literalSTokens = literal.getSTokens(pToken);
+   const externalIdSTokens = externalId.getSTokens(pToken.externalId);
 
    builder.add(pToken.open,
       pToken.openSpace,
@@ -121,20 +119,15 @@ function sTokensFromPToken(pToken: ParameterEntityDeclarationPToken): Array<STok
       pToken.parameter,
       pToken.parameterSpace,
       pToken.name,
-      pToken.nameSpace);
+      pToken.nameSpace,
+      externalIdSTokens,
+      literalSTokens,
+      pToken.externalIdSpace,
+      pToken.entityValueSpace,
+      pToken.close,
+      );
 
-   // results.pushSTokens.apply(results, literal.getSTokens(this as any)); // eslint-disable-line prefer-spread // typeHack
-   // results.pushSTokens.apply(results, externalId.getSTokens(this.externalId)); // eslint-disable-line prefer-spread
-
-      builder.add(pToken.externalIdSpace,
-         pToken.entityValueSpace,
-         pToken.close,
-         );
-
-
-// public readonly unassigned?: UnassignedArray;
-// public readonly extra?: UnassignedArray;
-// public readonly nextPropName?: string;
+      // Where to unassigned go?
 
    return builder.sTokenArray;
 }

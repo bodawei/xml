@@ -180,7 +180,7 @@ function checkWellFormed(pToken: ElementStartPToken | ElementEmptyPToken, ec: Er
 
    ec.setPos(pToken.nameSpace);
 
-   const attribs = pToken.attributes || [];
+   const attribs = pToken.attributes;
    attribute.checkWellFormed(attribs, ec, entityMetaData, pToken.nameSpace, WFEID.NOUN_ATTRIBUTE);
 
    ec.setPos(pToken.close);

@@ -1,4 +1,4 @@
-/* Copyright ® 2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
 import { PTokenStream } from "pTokenStream";

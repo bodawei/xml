@@ -481,6 +481,14 @@ class CheckXTokenValidStream extends stream.Transform {
 
          const currentState = declInfo.graph.states[context.stateId];
 
+         if (xToken.type === SPACE_XTOKEN) {
+            if (isNoSpaceAtEndsVersion && context.atElementContentStart) {
+               this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
+            }
+         } else {
+            context.atElementContentStart = false;
+         }
+
          switch (xToken.type) {
             case ELEMENT_START_XTOKEN:
             case ELEMENT_EMPTY_XTOKEN:
@@ -527,10 +535,6 @@ class CheckXTokenValidStream extends stream.Transform {
                if (this.standalone && declInfo.externallyDeclared) {
                   this.pushValidityError(ValidityError.ID.CHILDREN_SPACE_EXTERNAL_DECLARED, [ declInfo.token.name ], sToken);
                }
-
-               if (isNoSpaceAtEndsVersion && context.atElementContentStart) {
-                  this.pushValidityError(ValidityError.ID.CHILDREN_XTRA_SPACE, [], sToken);
-               }
                break;
             case PROCESSING_INSTRUCTION_XTOKEN:
                const piInEntity = context.elementContentEntityRefStack.length > 0;
@@ -550,7 +554,7 @@ class CheckXTokenValidStream extends stream.Transform {
          }
 
          // Keep track of the last thing we saw here, except for entity start and end markers, which are not "real".
-         if (xToken.type === GENERAL_ENTITY_START_XTOKEN || xToken.type === GENERAL_ENTITY_END_XTOKEN) {
+         if (xToken.type !== GENERAL_ENTITY_START_XTOKEN && xToken.type !== GENERAL_ENTITY_END_XTOKEN) {
             context.lastElementContentValue = xToken.type;
          }
       }

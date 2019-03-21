@@ -1,6 +1,6 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
-import { isName, isNmToken, isSpace } from '../chars';
+import { isName, isNmToken, isSpace, isChar, isRestrictedChar } from '../chars';
 
 type Data = Array<{
    description: string,
@@ -335,6 +335,76 @@ describe('util', () => {
       ] as Data).forEach((data) => {
          it(data.description, () => {
             expect(isSpace(data.text, data.version)).toEqual(data.result);
+         });
+      });
+
+   });
+
+   describe('isChar()', () => {
+      ([
+         {
+            description: 'null is not a Char in 1.0/*',
+            text: '\u0000',
+            version: 1.0,
+            revision: 1,
+            result: false,
+         }, {
+            description: 'null is not a Char in 1.1/*',
+            text: '\u0000',
+            version: 1.1,
+            revision: 1,
+            result: false,
+         }, {
+            description: 'control characters are not Chars in 1.0/*',
+            text: '\u0001',
+            version: 1.0,
+            revision: 1,
+            result: false,
+         }, {
+            description: 'control characters are Chars in 1.1/*',
+            text: '\u0001',
+            version: 1.1,
+            revision: 1,
+            result: true,
+         }, {
+            description: 'defaults to 1.0/* if no version specified',
+            text: '\u0001',
+            version: undefined,
+            revision: 1,
+            result: false,
+         },
+      ] as Data).forEach((data) => {
+         it(data.description, () => {
+            expect(isChar(data.text, data.version)).toEqual(data.result);
+         });
+      });
+
+   });
+
+   describe('isRestrictedChar()', () => {
+      ([
+         {
+            description: 'control characters are not restricted characters in 1.0/*',
+            text: '\u0008',
+            version: 1.0,
+            revision: 1,
+            result: false,
+         }, {
+            description: 'control characters are restricted characters in 1.1/*',
+            text: '\u0008',
+            version: 1.1,
+            revision: 1,
+            result: true,
+         }, {
+            description: 'defaults to 1.0/* if no version specified',
+            text: '\u0008',
+            version: undefined,
+            revision: 1,
+            result: false,
+         },
+      ] as Data).forEach((data) => {
+         it(data.description, () => {
+            expect(isRestrictedChar(data.text, data.version)).toEqual(data.result);
          });
       });
 

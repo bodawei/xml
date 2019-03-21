@@ -20,22 +20,6 @@ function pushIfNotVoid(this: STokenArray, ...items: Array<SToken|void>) {
    }
 }
 
-class BaseXToken {
-   public readonly type: string;
-   public pToken?: BaseParsedToken;
-
-   constructor(type: string, pToken?: BaseParsedToken) {
-      // if (typeof type !== 'string') {
-      //    pToken = type;
-      //    type = undefined;
-      // }
-
-      this.type = type;
-      this.pToken = pToken;
-   }
-
-}
-
 class BaseParsedToken {
    [name: string]: any;
    public type: string;
@@ -64,7 +48,6 @@ class BaseParsedToken {
 }
 
 const base =  {
-   XToken: BaseXToken,
    PToken: BaseParsedToken,
 };
 
