@@ -2,6 +2,7 @@
 /* eslint-env jasmine */
 
 import { Token, EntityMetaData } from "basic";
+import { XmlWarning, WellFormedError } from "error";
 import { SToken, STokenSource } from "sToken";
 import {
    GeneralEntityReferencePToken,
@@ -49,12 +50,12 @@ import { DocTypeEndPToken } from "source/token/docTypeEnd";
 import { ELEMENT_DECLARATION_PTOKEN } from "source/token/elementDeclaration";
 import { isNullOrUndefined } from "util";
 import { CharDataPToken } from "source/token/charData";
-import { XmlWarning, WellFormedError } from "error";
+import { expectError } from "./utils";
 
 describe('EntityExpander (unit)', () => {
    const externalMap: { [publicName: string]: string} = {};
 
-   function makeContentHandler(sTokenSource: STokenSource, writeToken: ExpandToken, done: () => void) {
+   function processBody(sTokenSource: STokenSource, writeToken: ExpandToken, done: () => void) {
       const pTokenStream = new PTokenStream(sTokenSource);
 
       pTokenStream.on('data', (token: Token) => {
@@ -94,7 +95,7 @@ describe('EntityExpander (unit)', () => {
       const results: Array<Token> = [];
       const unsent = tokens.slice(0);
       const entityExpander = new EntityExpander(validate, pushToken, {
-         processBody: makeContentHandler,
+         processBody,
          processForEntityValue,
          retrieveExternalEntity,
       });
@@ -1591,6 +1592,32 @@ describe('EntityExpander (unit)', () => {
             expect(results[2].type).toEqual(CHARDATA_PTOKEN);
             expect((results[2] as any).text.str).toEqual('some value');
             expect(results[3].type).toEqual(GENERAL_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('reports an error if an entity is recursively referenced', (done) => {
+         externalMap.systemUrl = 'some value';
+         const input = [
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('one'),
+               value: [ new TextPToken({ text: SToken.fromString('&two; ') }) ],
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('two'),
+               value: [ new TextPToken({ text: SToken.fromString('&one; ') }) ],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('one'),
+            }),
+         ];
+
+
+         doExpand(true, input, (results) => {
+            expect((results[4] as any).id).toEqual(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
             done();
          });
       });

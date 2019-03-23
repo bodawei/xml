@@ -176,6 +176,26 @@ function isPredefined(pToken: GeneralEntityReferencePToken): boolean {
    return [ 'amp', 'lt', 'gt', 'apos', 'quot' ].indexOf(name) !== -1;
 }
 
+class ExpanderTraker {
+   private names: Array<string> = [];
+
+   public canExpand(name: string): boolean {
+      return this.names.indexOf(name) === -1;
+   }
+
+   public startExpanding(name: string): void {
+      this.names.push(name);
+   }
+
+   public stopExpanding(name: string) {
+      if (this.names[this.names.length -1] !== name) {
+         throw new Error('Tried to stop expanding something while it is not being expanded');
+      }
+
+      this.names.pop();
+   }
+}
+
 /**********************************************************************\
  An EntityExpander transforms a series of PTokens by expanding any
  general or parameter entity reference tokens encountered directly,
@@ -222,6 +242,7 @@ class EntityExpander {
    private deliverAToken: DeliverAToken;
    private processors: Processors;
    private docTypeStart?: DocTypeStartPToken;
+   private bodyExpansionTracker: ExpanderTraker = new ExpanderTraker();
 
    constructor(validating: boolean, handoffToken: DeliverAToken,  processors: Processors) {
       this.validationMode = validating ? ValidationMode.VALIDATING : ValidationMode.NON_VALIDATING;
@@ -521,13 +542,24 @@ class EntityExpander {
    private handleGeneralEntityReference(pToken: GeneralEntityReferencePToken, handled: TokenHandled) {
       const info = this.getGeneralEntityInfo(pToken);
       const isPredefinedRef = isPredefined(pToken);
+      const entityName = strOrBlank(pToken.name);
+      const canExpand = this.bodyExpansionTracker.canExpand(entityName);
       let count = 0;
+
+      /*
+       * §4.1.0: Well-Formedness Constraint: No Recursion
+       *     A parsed entity must not contain a recursive reference
+       *     to itself, either directly or indirectly.
+       */
+      if (!canExpand) {
+         this.error(WellFormedError.ID.REFERENCE_INVALID_RECURSION, [ entityName ], pToken.open);
+      }
 
       // Can not expand a reference that has no name
       // Can not expand a reference that we have no declaration for
       // §4.4 unparsed entities may not be referenced in content
       // §4.4 and §5.1 Do not include/expand if is external and we are not validating
-      if (!info || info.isUnparsed ||
+      if (!info || info.isUnparsed || !canExpand ||
          (!info.isInternal && this.validationMode !== ValidationMode.VALIDATING)) {
             this.deliverAToken(pToken);
             handled();
@@ -535,8 +567,12 @@ class EntityExpander {
       }
 
       this.deliverAToken(new GeneralEntityStartPToken(pToken));
+      this.bodyExpansionTracker.startExpanding(entityName)
 
-      const entityProcessed = () => this.expandToken(new GeneralEntityEndPToken(pToken), handled);
+      const entityProcessed = () => {
+         this.bodyExpansionTracker.stopExpanding(entityName);
+         this.expandToken(new GeneralEntityEndPToken(pToken), handled);
+      };
 
       this.processEntity(info.token, (subToken: PToken, subHandled: TokenHandled) => {
          if (subToken.type === 'ENTITY_META_DATA') {
@@ -561,7 +597,7 @@ class EntityExpander {
             const matches = this.matchReplacementText(pToken, subToken as any); // typeHack
 
             if (!matches || count > 0) {
-               this.error(WellFormedError.ID.PREDEFINED_INVALD, [ strOrBlank(pToken.name) ], pToken.open);
+               this.error(WellFormedError.ID.PREDEFINED_INVALD, [ entityName ], pToken.open);
             }
 
             count ++;
@@ -607,7 +643,9 @@ class EntityExpander {
     * this is doing non-validation
     */
    private handleParameterEntityReference(pToken: ParameterEntityReferencePToken, handled: TokenHandled) {
-      const info = pToken.name ? this.paramEntitiesByName[pToken.name.str] : undefined;
+      // §4.1.0 note: It is not possible to get recursively referenced PE Refs
+      const entityName = strOrBlank(pToken.name);
+      const info = this.paramEntitiesByName[entityName];
 
       // Always set this.  But only relevant for standalone.
       this.seenParamEntityRef = true;
@@ -623,7 +661,9 @@ class EntityExpander {
 
       this.deliverAToken(new ParameterEntityStartPToken(pToken));
 
-      const entityProcessed = () => this.expandToken(new ParameterEntityEndPToken(pToken), handled);
+      const entityProcessed = () => {
+         this.expandToken(new ParameterEntityEndPToken(pToken), handled);
+      };
 
       this.processEntity(info.token, (subToken: PToken, subHandled: TokenHandled) => {
          if (subToken.type === 'ENTITY_META_DATA') {
@@ -671,7 +711,6 @@ class EntityExpander {
    }
 
    private expandEntityValue(value: ExpandedLiteralValuePToken, valueProcessed: (newValue: ExpandedLiteralValuePToken) => void) {
-      // Missing: §4.1 need to prefent recurion here.
       this.retrieveExternalParameterEntities(value, () => {
          let newValue: ExpandedLiteralValuePToken = [];
 

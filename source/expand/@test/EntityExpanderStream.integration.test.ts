@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 /* eslint-env jasmine */
 
+import { EntityMetaData, EntityLocation, Offset } from "basic";
 import { PTokenStream } from "pTokenStream";
-import { EntityMetaData } from "basic";
 import { SToken } from "sToken";
 import {
    CHARDATA_PTOKEN,
@@ -26,9 +26,10 @@ import {
    GeneralEntityEndPToken,
 } from "token";
 import { EntityExpanderStream } from "../EntityExpanderStream";
-import { gatherStream } from "./utils";
+import { gatherStream, expectError } from "./utils";
 import { AttListPToken } from "source/token/attListDeclaration";
 import { CharRefPToken } from "source/token/charRef";
+import { WellFormedError } from "error";
 
 describe('EntityExpanderStream (integration)', () => {
    let pTokenStream: PTokenStream;
@@ -362,4 +363,20 @@ describe('EntityExpanderStream (integration)', () => {
       }, done);
    });
 
+   it('aborts on a recursive entity reference', (done) => {
+      pTokenStream.addText(`<?xml version="1.0"?>
+         <!DOCTYPE one [
+            <!ENTITY second "[&first;]">
+            <!ENTITY first "(&second;)">
+            <!ELEMENT one ANY>
+         ]>
+         <one>
+            &first;
+         </one>`);
+      pTokenStream.endText();
+
+      const expected = new WellFormedError(WellFormedError.ID.REFERENCE_INVALID_RECURSION, [ 'first' ],
+         new Offset(new EntityLocation(), 78, 2, 76), new Offset(new EntityLocation(), 77, 2, 75));
+      expectError(entityExpander, expected, done);
+   });
 });
