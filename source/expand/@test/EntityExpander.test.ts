@@ -1,7 +1,7 @@
-/* Copyright ® 2018 by David John Burrowes. All rights reserved. */
+/* Copyright ® 2018-2019 by David John Burrowes. All rights reserved. */
 /* eslint-env jasmine */
 
-import { Token, EntityMetaData } from "basic";
+import { Token, EntityLocation, EntityMetaData, Range } from "basic";
 import { XmlWarning, WellFormedError } from "error";
 import { SToken, STokenSource } from "sToken";
 import {
@@ -33,6 +33,11 @@ import {
    EXTERNAL_SUBSET_START_XTOKEN,
    EXTERNAL_SUBSET_END_XTOKEN,
    NOTATION_DECLARATION_PTOKEN,
+   InternalSubsetStartXToken,
+   InternalSubsetEndXToken,
+   ElementEndPToken,
+   TextDeclarationPToken,
+   TEXTDECL_PTOKEN,
 } from "token";
 import { ExpandedLiteralValuePToken } from "source/token/entityDeclaration"; // @@@ TEMP
 
@@ -1596,7 +1601,7 @@ describe('EntityExpander (unit)', () => {
          });
       });
 
-      it('reports an error if an entity is recursively referenced', (done) => {
+      it('reports an error if an entity is recursively referenced (§4.1)', (done) => {
          externalMap.systemUrl = 'some value';
          const input = [
             new GeneralEntityDeclarationPToken({
@@ -1618,6 +1623,48 @@ describe('EntityExpander (unit)', () => {
 
          doExpand(true, input, (results) => {
             expect((results[4] as any).id).toEqual(WellFormedError.ID.REFERENCE_INVALID_RECURSION);
+            done();
+         });
+      });
+
+      it('inserts the TextDecl into the output stream, if it is present in an external entity (§4.3.2)', (done) => {
+         externalMap.systemOuter = '<?xml version="1.1" encoding="usascii"?>Testing';
+         const input = [
+            new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('root'),
+            }),
+            new GeneralEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('outer'),
+               externalId: {
+                  system: {
+                     value: [
+                        new TextPToken({ text: SToken.fromString('systemOuter') }),
+                     ],
+                  }
+               },
+            }),
+            new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+               close: SToken.fromString('>'),
+            }),
+            new ElementStartPToken({
+               open: SToken.fromString('root'),
+               attributes: [],
+            }),
+            new GeneralEntityReferencePToken({
+               open: SToken.fromString('&'),
+               name: SToken.fromString('outer'),
+            }),
+            new ElementEndPToken({
+               open: SToken.fromString('root'),
+               attributes: [],
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[5].type).toEqual(TEXTDECL_PTOKEN);
             done();
          });
       });
@@ -1723,6 +1770,41 @@ describe('EntityExpander (unit)', () => {
             expect(results[1].type).toEqual(PARAMETER_ENTITY_START_PTOKEN);
             expect(results[2].type).toEqual(GENERAL_ENTITY_DECLARATION_PTOKEN);
             expect(results[3].type).toEqual(PARAMETER_ENTITY_END_PTOKEN);
+            done();
+         });
+      });
+
+      it('inserts the TextDecl into the output stream, if it is present in an external entity (§4.3.2)', (done) => {
+         externalMap.systemOuter = '<?xml version="1.1" encoding="usascii"?><!ENTITY nope "x">';
+         const input = [
+            new DocTypeStartPToken({
+               open: SToken.fromString('<!'),
+               name: SToken.fromString('root'),
+            }),
+            new ParameterEntityDeclarationPToken({
+               open: SToken.fromString('<!'),
+               parameter: SToken.fromString('%'),
+               name: SToken.fromString('outer'),
+               externalId: {
+                  system: {
+                     value: [
+                        new TextPToken({ text: SToken.fromString('systemOuter') }),
+                     ],
+                  }
+               },
+            }),
+            new ParameterEntityReferencePToken({
+               open: SToken.fromString('%'),
+               name: SToken.fromString('outer'),
+            }),
+            new DocTypeEndPToken({
+               docTypeStartPToken: new DocTypeStartPToken({ open: SToken.fromString('<!') }),
+               close: SToken.fromString('>'),
+            }),
+         ];
+
+         doExpand(true, input, (results) => {
+            expect(results[3].type).toEqual(TEXTDECL_PTOKEN);
             done();
          });
       });

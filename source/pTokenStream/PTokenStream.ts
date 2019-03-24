@@ -110,6 +110,8 @@ class PTokenStream extends stream.Readable {
    }
 
    _parseGeneral(deliverParse: DeliverPToken) {
+      this.emd = this._sTokenSource.metaData;
+
       if (this._inContent) {
          this._parseContent(deliverParse);
 
@@ -183,7 +185,7 @@ class PTokenStream extends stream.Readable {
                parseElementEnd(this._sTokenSource, markupStartSToken, deliverParse);
                break;
             case '<?':
-               parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
+            parseInstruction(this._sTokenSource, markupStartSToken, this.emd, deliverParse);
                break;
             case '<!--':
                parseComment(this._sTokenSource, markupStartSToken, deliverParse);

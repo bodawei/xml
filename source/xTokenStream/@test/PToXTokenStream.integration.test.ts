@@ -3,7 +3,6 @@
 
 import { EntityLocation, EntityMetaData, Range } from 'basic';
 import { SToken } from 'sToken';
-import { makeSTokenMaker } from 'sToken-test';
 import {
    declaration,
 
@@ -184,8 +183,7 @@ describe('PToXTokenStream (integration)', () => {
 
    it('tokenizes text', (done) => {
       const results: TokenArray = [];
-      const sTokenMaker = makeSTokenMaker();
-      tokenStream.write(new TextPToken({ text: sTokenMaker('foo') }));
+      tokenStream.write(new TextPToken({ text: SToken.fromString('foo') }));
       tokenStream.end();
       tokenStream.on('data', (xToken: Token) => results.push(xToken));
 
@@ -193,11 +191,6 @@ describe('PToXTokenStream (integration)', () => {
          expect((results[0] as TextXToken).text).toEqual('foo');
          done();
       });
-   });
-
-   it('tokenized an Xml Declaration', (done) => {
-      expectInputToProduce('<?xml version="1.0"?>', [
-         new XmlDeclarationXToken(1.0) ], done);
    });
 
    it('tokenized an Xml Declaration', (done) => {

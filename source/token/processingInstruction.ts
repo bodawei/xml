@@ -22,7 +22,6 @@ class ProcessingInstructionXToken {
    public readonly instruction: string;
    public readonly pToken?: ProcessingInstructionPToken;
 
-   /* istanbul ignore next */ // Istanbul is confused by node transpilation
    constructor(target: string, instruction: string, pToken?: ProcessingInstructionPToken) {
       this.target = target;
       this.instruction = instruction;

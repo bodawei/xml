@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2018 by David John Burrowes. All rights reserved. */
 
-import { Token, ENTITY_META_DATA } from 'basic';
+import { Token, ENTITY_META_DATA, EntityKind } from 'basic';
 import {
    CHARREF_PTOKEN,
    DOCTYPE_END_PTOKEN,
@@ -765,9 +765,10 @@ class EntityExpander {
             seekingCount ++;
 
             // typeHack
-            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData());
+            const sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
 
             this.processors.processForEntityValue(sTokenSource, (results: ExpandedLiteralValuePToken) => {
+               // Note: Could be getting a TextDecl here
                this.expandEntityValue(results, (newResult) => {
                   info.cache = newResult;
                   seekingCount --;
@@ -838,9 +839,10 @@ class EntityExpander {
                });
                sTokenSource.endText();
             } else {
-               sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData());
+               sTokenSource = this.processors.retrieveExternalEntity(info.token.externalId!, new EntityMetaData(EntityKind.EXTERNAL));
             }
 
+            // That could be gettting a textdecl, too
             unassigned.parseAllValues(sTokenSource, isElementDecl, (results?: UnassignedArray) => {
                info.unssignedCache = results;
                seekingCount --;
@@ -886,7 +888,7 @@ class EntityExpander {
    // then feed whatever into a STokenSource, a PTokenStream, and then into this, or another instance of this.
    private processEntity(entityDecl: GeneralEntityDeclarationPToken | ParameterEntityDeclarationPToken, expandToken: ExpandToken, entityProcessed: TokenHandled): void {
       if (entityDecl.externalId) {
-         const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, new EntityMetaData());
+         const sTokenSource = this.processors.retrieveExternalEntity(entityDecl.externalId, new EntityMetaData(EntityKind.EXTERNAL));
          this.processors.processBody(sTokenSource, expandToken, entityProcessed);
          return;
       }
