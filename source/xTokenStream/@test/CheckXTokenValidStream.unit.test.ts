@@ -41,6 +41,7 @@ import {
    GeneralEntityReferenceXToken,
    GeneralEntityReferencePToken,
    CharRefXToken,
+   ParameterEntityReferenceXToken,
 } from 'token';
 import { AttListXToken, AttListPToken } from '../../token/attListDeclaration';
 import { ElementDeclaration, ElementDeclarationPToken } from '../../token/elementDeclaration';
@@ -390,6 +391,21 @@ describe('CheckXTokenValidStream (unit)', () => {
             validator.end();
 
             expectNoErrorsOrWarnings(validator, done);
+         });
+
+         it('reports an error if an attribute value has a reference to an entity that has no declaration (§4.1)', (done) => {
+            const startToken = new ElementStartXToken('testEl', [{
+               name: 'anAttr',
+               value: [ new GeneralEntityReferenceXToken('undeclared') ],
+            }]);
+
+            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
+            validator.write(startToken);
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ELEMENTSTART_REFERENCE_UNDEFINED,
+               [ 'undeclared', 'anAttr', 'testEl' ]);
+            expectStream(validator, expected, done);
          });
 
          describe('normalization', () => {
@@ -2546,6 +2562,26 @@ describe('CheckXTokenValidStream (unit)', () => {
             expectStream(validator, expected, done);
          });
 
+         it('reports an error if an attribute default has no declaration for a reference (§4.1)', (done) => {
+            const elDecl1 = new elementDeclaration.XToken('testEl', 'ANY', undefined);
+            const attListDecl1 = new attListDeclaration.XToken('testEl', [{
+               name: 'textAttr',
+               type: 'CDATA',
+               value: [ new GeneralEntityReferenceXToken('foo') ],
+               defaultType: '',
+            }]);
+
+            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
+            validator.write(new InternalSubsetStartXToken());
+            validator.write(elDecl1);
+            validator.write(attListDecl1);
+            validator.write(new InternalSubsetEndXToken());
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.ATTLISTDECL_REFERENCE_UNDEFINED,
+               [ 'foo', 'textAttr', 'testEl' ]);
+            expectStream(validator, expected, done);
+         });
       });
 
       describe('ENTITY', () => {
@@ -3388,6 +3424,27 @@ describe('CheckXTokenValidStream (unit)', () => {
 
             expectNoErrorsOrWarnings(validator, done);
          });
+
+         it('reports an error if a general entity reference is found, but there is no declaration for it (§4.1)', (done) => {
+            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
+            validator.write(new GeneralEntityReferenceXToken('undeclared'));
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.GEREF_UNDEFINED,
+               [ 'undeclared' ]);
+            expectStream(validator, expected, done);
+         });
+
+         it('reports an error if a parameter entity reference is found, but there is no declaration for it (§4.1)', (done) => {
+            validator.write(new XmlDeclarationXToken(1.0, undefined, true));
+            validator.write(new ParameterEntityReferenceXToken('undeclared'));
+            validator.end();
+
+            const expected = new ValidityError(ValidityError.ID.PEREF_UNDEFINED,
+               [ 'undeclared' ]);
+            expectStream(validator, expected, done);
+         });
+
       });
 
       describe('Error tokens', () => {
@@ -3950,7 +4007,7 @@ describe('CheckXTokenValidStream (unit)', () => {
                [ whiteChars, 1.1, 2, false ],
                [ new SpaceXToken('  '), 1.0, 2, false ],
                [ new GeneralEntityReferenceXToken('x'), 1.0, 1, true ],
-               [ new GeneralEntityReferenceXToken('x'), 1.0, 3, false ],
+               // [ new GeneralEntityReferenceXToken('x'), 1.0, 3, false ],  Because of §4.1
                [ new GeneralEntityStartXToken('y'), 1.0, 1, true ],
                [ new GeneralEntityStartXToken('y'), 1.0, 3, false ],
                [ new GeneralEntityEndXToken('z'), 1.0, 1, true ],

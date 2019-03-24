@@ -627,6 +627,8 @@ class EntityExpander {
        * This treats the interoperability as a warning. If the entity is not
        * declared we substitute in a valid substitute.  If it is declared, we
        * check that it is indeed internal.
+       *
+       * Point 1 is repeated in §4.1 Validity Constraint: Entity Declared
        */
       if (!info && isPredefinedRef) {
          this.warn(XmlWarning.ID.PREDEFINED_UNDECLARED, [ name ], pToken.open);
